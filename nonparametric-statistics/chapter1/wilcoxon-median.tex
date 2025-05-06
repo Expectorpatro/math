@@ -1,0 +1,48 @@
+\section{Wilcoxon符号秩检验}
+
+\subsubsection{目的}
+给定某样本，检验给定值$M_0$与总体的中位数$M$之间的关系。
+\subsubsection{适用条件}
+总体分布是连续且对称的。连续是为了避免样本中出现重复值影响秩分配，对称则是秩推断成立的必要条件，见下文\ref{sec:符号秩检验要求总体对称的原因}。
+\subsubsection{符号秩的计算}
+设样本中每个单元的取值为$X_i$，$i=1,2,\dots,n$。
+\begin{enumerate}[leftmargin=*, labelindent=2em]
+	\item 对$i=1,2,\dots,n$，计算$d_i=|X_i-M_0|$。
+	\item 对$d_i$进行排序，找出它们的秩$R_i$。
+	\item 计算$W^+=\sum\limits_{i\in\{i:X_i-M_0>0\}}R_i,\;W^-=\sum\limits_{i\in\{i:X_i-M_0<0\}}R_i$。
+\end{enumerate}
+\subsubsection{原理}
+由于总体是对称的，那么对于任意一个元素，首先它出现在$M_0$两边的可能性是相等的，其次它出现在$M_0$两边对称位置的可能性是相等的\label{sec:符号秩检验要求总体对称的原因}，由此在零假设成立的条件下，$W^+$和$W^-$应相差不大，且二者满足关系：$W^+ + W^- = \frac{n(n+1)}{2}$，因此，当其中之一很小时，应怀疑零假设。若想对$p$值精确求解，见\info{在概率论里完善Wilcoxon秩统计量的分布相关理论，然后链接过来}。
+\subsubsection{零假设}
+$H_0: M = M_0$
+
+\begin{table}[htbp]
+	\centering
+	\begin{tabular}{ccc}
+		\toprule
+		备择假设 & 统计量$W$ & $p$值 \\
+		\midrule 
+		$H_1:M>M_0$ & $W^-$ & $P(W\leqslant w)$ \\
+		$H_1:M<M_0$ & $W^+$ & $P(W\leqslant w)$ \\
+		$H_1:M\ne M_0$ & \text{min}\{$W^-$,\;$W^+$\} & $2P(W\leqslant w)$ \\
+		\bottomrule 
+	\end{tabular}
+	\caption{Wilcoxon符号秩检验}
+\end{table}
+	
+\subsubsection{大样本近似}
+可求出Wilcoxon符号秩检验统计量的期望和方差分别为：
+\begin{equation}
+	E(W)=\frac{n(n+1)}{4}\qquad Var(W)=\frac{n(n+1)(2n+1)}{24}\notag
+\end{equation}
+\hspace{2em}当$n$较大时，由中心极限定理，可认为$Z\sim N(0,1)$，其中$Z=\dfrac{W-E(W)}{\sqrt{Var(W)}}$，由此可在求$p$值时近似计算标准正态分布的累积分布值。
+\subsubsection{打结}
+若数据中含有相同的数字，称之为打结的情况。结的个数为重复出现的数值的个数，结中数值的秩为它们升序排序后位置的平均值。如果结多了，大样本近似公式就不准，要进行修正，同时，如果数据中有结则必须使用大样本近似。修正后的公式为：
+\begin{equation}
+	Z=\frac{W-E(W)}{\sqrt{Var(W)-\frac{\sum_{i=1}^{g}(\tau_i^3-\tau_i)}{48}}}\sim N(0,1)\notag
+\end{equation}
+\hspace{2em}举例：对于数据$\{2,2,5,8,8.8,1,1,1,1\}$，一共有$3$个结，$\tau_1=2$（两个$2$），$\tau_2=3$（三个$8$），$\tau_3=4$（四个$1$）。称$\tau$为结统计量。
+\subsubsection{代码}
+\begin{minted}[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines, mathescape]{r}
+wilcox.test(x, alternative = c("two.sided", "less", "greater"), mu = M0, exact = NULL, correct = TRUE)
+\end{minted}

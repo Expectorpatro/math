@@ -1,0 +1,200 @@
+\section{线性规划}
+
+\subsection{线性规划的标准形}
+线性规划问题的数学模型有各种不同的形式，如：
+\begin{enumerate}
+	\item 最大化或最小化目标函数；
+	\item 约束条件有$\leqslant,\;\geqslant\;=$三种情况；
+	\item 决策变量一般有非负性要求，但有时又可能没有。
+\end{enumerate}
+为了以统一的方式求解线性规划问题，规定了一种线性规划的标准形式，非标准形可以转化为标准形。
+\begin{definition}
+	规定线性规划问题的\textbf{标准形式}为：
+	\begin{enumerate}
+		\item 最大化目标函数；
+		\item 约束条件为等式且右端常数项非负；
+		\item 决策变量非负。
+	\end{enumerate}
+	于是线性规划问题可以写为如下矩阵形式：
+	\begin{gather*}
+		\max z=C^TX \\
+		s.t.
+		\begin{cases}
+			AX=\beta \\
+			X\geqslant\mathbf{0}
+		\end{cases}
+	\end{gather*}
+	称$C=(c_1,c_2,\dots,c_n)$为\textbf{价值向量}，其中每个分量为\textbf{价值系数}，$\beta$为\textbf{资源向量}。系数矩阵$A\in M_{m\times n}(\mathbb{R})$行满秩，即$\operatorname{rank}(A)=m$。称$A$的秩$m$为LP问题的\textbf{阶数}，$A$的列数$n$为LP问题的\textbf{维数}。
+\end{definition}
+\begin{theorem}
+	每个线性规划问题都可以化成标准形式。
+\end{theorem}
+\begin{proof}
+	考虑每种不符合标准形式的情况：\par
+	\textbf{最小化目标函数：}若LP问题的目标函数为：
+	\begin{equation*}
+		\min z=C^TX
+	\end{equation*}
+	则可将其转化为：
+	\begin{equation*}
+		\max z'=-C^TX
+	\end{equation*}
+	显然转化前后的LP问题是等价的。\par
+	\textbf{约束条件右端常数项为负数：}若LP问题的约束条件为$Ax=\beta$和$\alpha^Tx=b<0$，则可将其转化为：
+	\begin{equation*}
+		\begin{pmatrix}
+			A \\
+			-\alpha^T
+		\end{pmatrix}
+		x
+		=
+		\begin{pmatrix}
+			\beta \\
+			-b
+		\end{pmatrix}
+	\end{equation*}
+	显然转化前后的LP问题是等价的。\par
+	\textbf{约束条件中含$\leqslant$：}若LP问题的约束条件为$Ax=\beta$和$\alpha^Tx\leqslant b$，则可将约束条件转化为：
+	\begin{gather*}
+		\begin{pmatrix}
+			A & \mathbf{0} \\
+			\alpha^T & 1
+		\end{pmatrix}
+		\begin{pmatrix}
+			x \\
+			y
+		\end{pmatrix}
+		=
+		\begin{pmatrix}
+			\beta \\
+			b
+		\end{pmatrix} \\
+		X'=(X,y)^T\geqslant\mathbf{0}
+	\end{gather*}
+	显然转化前后的LP问题是等价的。称新引入的变量$y$为\gls{SlackVariable}。\par
+	\textbf{约束条件中含$\geqslant$：}若LP问题的约束条件为$Ax=\beta$和$\alpha^Tx\geqslant b$，则可将约束条件转化为：
+	\begin{gather*}
+		\begin{pmatrix}
+			A & \mathbf{0} \\
+			\alpha^T & -1
+		\end{pmatrix}
+		\begin{pmatrix}
+			x \\
+			y
+		\end{pmatrix}
+		=
+		\begin{pmatrix}
+			\beta \\
+			b
+		\end{pmatrix} \\
+		X'=(X,y)^T\geqslant\mathbf{0}
+	\end{gather*}
+	显然转化前后的LP问题是等价的。称新引入的变量$y$为\gls{SurplusVariable}。\par
+	\textbf{决策变量中含负值变量：}若LP问题为：
+	\begin{gather*}
+		\max z=(C,c)^T(X,x)^T \\
+		s.t.
+		\begin{cases}
+			(A,\alpha)(X,x)^T=\beta \\
+			X\geqslant\mathbf{0} \\
+			x<0
+		\end{cases}
+	\end{gather*}
+	则作变换$x'=-x$，将该LP问题转化为：
+	\begin{gather*}
+		\max z=(C,-c)^T(X,x')^T \\
+		s.t.
+		\begin{cases}
+			(A,-\alpha)(X,x')^T=\beta \\
+			X'=(X,x')^T\geqslant\mathbf{0}
+		\end{cases}
+	\end{gather*}
+	显然转化前后的LP问题是等价的。\par
+	\textbf{决策变量中含自由变量\footnote{即对该变量的取值无任何要求。}：}若LP问题为：
+	\begin{gather*}
+		\max z=(C,c)^T(X,x)^T \\
+		s.t.
+		\begin{cases}
+			(A,\alpha)(X,x)^T=\beta \\
+			X\geqslant\mathbf{0}
+		\end{cases}
+	\end{gather*}
+	可引入新变量$x_1,x_2$，将该LP问题转化为：
+	\begin{gather*}
+		\max z=(C,c,-c)^T(X,x_1,x_2)^T \\
+		s.t.
+		\begin{cases}
+			(A,\alpha,-\alpha)(X,x_1,x_2)^T=\beta \\
+			X'=(X,x_1,x_2)^T\geqslant\mathbf{0}
+		\end{cases}
+	\end{gather*}
+	显然转化前后的LP问题是等价的。
+\end{proof}
+\subsubsection{标准形的基本解}
+\begin{definition}
+	对于标准形LP问题中约束条件的系数矩阵$A=(\seq{\alpha}{n})\in M_{m\times n}(\mathbb{R})$，称由其列向量组的一个基$\alpha_{i_1},\alpha_{i_2},\dots,\alpha_{i_m}$构成的矩阵$(\alpha_{i_1},\alpha_{i_2},\dots,\alpha_{i_m})$为该LP问题的一个\textbf{基矩阵}（简称\textbf{基}），其中的每一个向量$\alpha_{i_j},\;j=1,2,\dots,m$称为该LP问题的\textbf{基向量}，$A$中剩余的$n-m$个列向量$\alpha_{j_1},\alpha_{j_2},\dots,\alpha_{j_{n-m}}$称为\textbf{非基向量}。分别称基向量对应的变量和非基向量对应的变量为\textbf{基变量}、\textbf{非基变量}。分别称所有基变量构成的向量$(x_{i_1},x_{i_2},\dots,x_{i_m})$和非基变量构成的向量$(x_{j_1},x_{j_2},\dots,x_{j_{n-m}})$为\textbf{基变矢}、\textbf{非基变矢}。对系数矩阵$A$的列向量、决策变量$x$和资源向量$\beta=(b_1,b_2,\dots,b_n)^T$作顺序的重排，可以得到：
+	\begin{align*}
+		&\quad(\alpha_{i_1},\alpha_{i_2},\dots,\alpha_{i_m},\alpha_{j_1},\alpha_{j_2},\dots,\alpha_{j_{n-m}})(x_{i_1},x_{i_2},\dots,x_{i_m},x_{j_1},x_{j_2},\dots,x_{j_{n-m}})^T \\
+		&=(b_{i_1},b_{i_2},\dots,b_{i_m},b_{j_1},b_{j_2},\dots,b_{j_{n-m}})^T
+	\end{align*}
+	将该方程重新写作：
+	\begin{equation*}
+		(B,C)(X_1,X_2)^T=\beta'
+	\end{equation*}
+	其中$B$对应基矩阵，$C$对应非基向量构成的矩阵，$X_1$为基变矢，$X_2$为非基变矢。令$X_2=\mathbf{0}$，可得出方程的一个解：
+	\begin{equation*}
+		\begin{cases}
+			X_1=B^{-1}\beta' \\
+			X_2=\mathbf{0}
+		\end{cases}
+	\end{equation*}
+	称该解为约束方程组的一个关于基矩阵$B$的\textbf{基本解}，也称之为该标准形LP问题的一个基本解。若基本解中存在基变量值为$0$，则称之为\textbf{退化基本解}。若某个基本解达到标准形LP问题的最优解，则称之为\textbf{最优基本解}。称满足非负性约束$X\geqslant\mathbf{0}$的基本解为\gls{BasicFeasibleSolution}，若它是退化的，则称之为\textbf{退化基本可行解}。称基本可行解对应的基矩阵为\textbf{可行基}，称最优基本解对应的基矩阵为\textbf{最优基}。
+\end{definition}
+
+\subsection{线性规划解的性质}
+\begin{lemma}
+	对于$m$阶$n$维标准形LP问题，$A=(\seq{a}{n})$、$E$分别为其系数矩阵和可行域，则$x=(x_1,x_2,\dots,x_n)\in E$是基本可行解的充分必要条件为：对于$I=\{i:x_i>0,i=1,2,\dots,n\}$，由$a_i,\;i\in I$构成的向量组线性无关。
+\end{lemma}
+\begin{proof}
+	\textbf{必要性：}由基本可行解的定义直接得到。\par
+	\textbf{充分性：}
+\end{proof}
+
+\begin{property}
+	线性规划的解具有如下性质：
+	\begin{enumerate}
+		\item LP问题解的可行域是凸集；
+		\item LP问题的基本可行解与可行域的极点一一对应；
+		\item \textbf{线性规划基本定理}
+		\begin{itemize}
+			\item 若LP问题有可行解，则必有基本可行解；
+			\item 若LP问题有最优解，则必有最优基本解。
+		\end{itemize}
+		\item 若LP问题的可行域不是空集，则可行域至少有一个极点；
+		\item LP问题可行域的极点必为有限多个。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	设$m$阶$n$维LP问题如下：
+	\begin{gather*}
+		\max z=C^TX \\
+		s.t.
+		\begin{cases}
+			AX=\beta \\
+			X\geqslant\mathbf{0}
+		\end{cases}
+	\end{gather*}
+	其可行域为$E$，$A=(\seq{a}{n})\in M_{m\times n}(\mathbb{R}),\;x=(x_1,x_2,\dots,x_n)^T$。\par
+	(1)显然：
+	\begin{equation*}
+		E=\{x\in\mathbb{R}^{n}:Ax=\beta,x\geqslant\mathbf{0}\}
+	\end{equation*}
+	任取$x_1,x_2\in E$，则对任意的$0\leqslant\alpha\leqslant1$有：
+	\begin{gather*}
+		A[\alpha x_1+(1-\alpha)x_2]=\alpha Ax_1+(1-\alpha)Ax_2=\alpha\beta+(1-\alpha)\beta=\beta \\
+		\alpha x_1+(1-\alpha)x_2\geqslant0
+	\end{gather*}
+	所以$\alpha x_1+(1-\alpha)x_2\in E$，$E$是一个凸集。\par
+	(2)\textbf{基本可行解必是极点：}要证基本可行解$x$必是极点，即证$x$不能表示为$E$内不同的两点$x_1,x_2$的严格凸组合。假设$x$可以表示为$x_1,x_2$的严格凸组合，即存在$0<\alpha<1$，使得$x=\alpha x_1+(1-\alpha)x_2$。因为$x$是基本解，所以$x$的非基变量都为$0$，于是$x_1,x_2$对应部分也都为$0$。设$x$对应的基矩阵是$B$，则$x=B^{-1}\beta$，此时也必有$x_1=x_2=B^{-1}\beta$（考虑基本解的求解过程，$B$对应的非基变量全为$0$），于是$x=x_1=x_2$，所以$x$不可以表示为可行域内不同的两点的严格凸组合，矛盾，$x$是极点。\par
+	\textbf{极点必是基本可行解：}要证极点$x$必是基本可行解，即证存在基矩阵$B$使得$x=B^{-1}\beta$。由极点定义，$x$不能表示为$E$内不同的两点$x_1,x_2$的严格凸组合，即不存在$0<\alpha<1$和$E$内不同的两点$x_1,x_2$使得$x=\alpha x_1+(1-\alpha)x_2$，
+\end{proof}

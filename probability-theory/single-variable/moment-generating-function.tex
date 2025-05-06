@@ -1,0 +1,70 @@
+\section{矩母函数}
+
+\begin{definition}
+	设$X$是一个随机变量。称:
+	\begin{equation*}
+		M_X(t)=\operatorname{E}(e^{tX})
+	\end{equation*}
+	为$X$的\gls{m.g.f.}，其中$t\in\mathbb{R}$。
+\end{definition}
+\begin{definition}
+	设$\mathbf{X}$是一个$n$维随机向量。称:
+	\begin{equation*}
+		M_\mathbf{X}(t)=\operatorname{E}(e^{t^T\mathbf{X}})
+	\end{equation*}
+	为$\mathbf{X}$的矩母函数，其中$t\in\mathbb{R}^{n}$。
+\end{definition}
+\begin{property}\label{prop:m.g.f.}
+	设$\mathbf{X}$是一个$n$维随机向量，则其矩母函数$M_\mathbf{X}(t)$具有如下性质：
+	\begin{enumerate}
+		\item $M_\mathbf{X}(\mathbf{0})=1$；
+		\item $M_\mathbf{X}(t)\geqslant e^{t^T\mu}$，其中$\mu$是$\mathbf{X}$的均值向量；
+		\item 矩母函数与概率分布之间存在一个双射，即$M_\mathbf{X}(t)=M_\mathbf{Y}(t)$当且仅当$\mathbf{X}$与$\mathbf{Y}$具有相同的概率分布；
+		\item 设$m$维随机向量$\seq{\mathbf{X}}{n}$彼此独立，$\alpha_i$为常数，$\beta_i$为$m$维常数向量，则$\mathbf{Y}=\sum\limits_{i=1}^{n}(\alpha_i\mathbf{X}_i+\beta_i)$的特征函数为：
+		\begin{equation*}
+			M_\mathbf{Y}(t)=\prod_{i=1}^ne^{t^T\beta_i}M_{\mathbf{X}_i}(\alpha_it)
+		\end{equation*}
+		\item $M_X^{(n)}(0)=\mu_n$，其中$X$是一个随机变量，$\mu_n$是$X$的$n$阶原点矩；
+		\item $M_\mathbf{X}(t)$有如下幂级数展开：
+		\begin{equation*}
+			M_\mathbf{X}(t)=\sum_{(\seq{m}{n})\in\mathbb{N}^n}\mu_{\seq{m}{n}}\prod_{i=1}^{n}\frac{t_i^{m_i}}{m_i!}
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)$M_\mathbf{X}(\mathbf{0})=\operatorname{E}(e^0)=1$。\par
+	(2)由Jensen不等式直接可得。\info{Jensen不等式链接}\par
+	(3)\par
+	(4)由矩母函数定义可得：
+	\begin{equation*}
+		M_\mathbf{Y}(t)=\operatorname{E}(e^{t^T\mathbf{Y}})
+		=\operatorname{E}\left(\exp\left\{t^T\sum_{i=1}^{n}(\alpha_i\mathbf{X}_i+\beta_i)\right\}\right)=\operatorname{E}\left(\prod_{i=1}^{n}e^{\alpha_it^T\mathbf{X}_i}\right)\prod_{i=1}^ne^{t^T\beta_i}
+	\end{equation*}
+	因为$\mathbf{X}_i$互相独立，所以$\alpha_i\mathbf{X}_i$也相互独立，于是有：
+	\begin{equation*}
+		M_\mathbf{Y}(t)=\operatorname{E}\left(\prod_{i=1}^{n}e^{\alpha_it^T\mathbf{X}_i}\right)\prod_{i=1}^ne^{t^T\beta_i}=\prod_{i=1}^{n}\operatorname{E}\left(e^{\alpha_it^T\mathbf{X}_i}\right)\prod_{i=1}^ne^{t^T\beta_i}=\prod_{i=1}^ne^{t^T\beta_i}M_{\mathbf{X}_i}(\alpha_it)
+	\end{equation*}\par
+	(5)将$e^{tX}$展开为幂级数：
+	\begin{equation*}
+		M_X(t)=\operatorname{E}(e^{tX})=\operatorname{E}\left(\sum_{n=0}^{+\infty}\frac{t^nX^n}{n!}\right)
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		M_X^{(n)}(t)=\operatorname{E}\left(X^n+\sum_{m=n+1}^{+\infty}\frac{t^mX^m}{m!}\right)=\mu_n+\sum_{m=1}^{+\infty}\frac{t^m}{m!}\mu_m
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		M_X^{(n)}(0)=\operatorname{E}(X^n)=\mu_n
+	\end{equation*}\par
+	(6)由\info{期望的线性性质，Lebesgue积分}可得：
+	\begin{align*}
+		M_\mathbf{X}(t)&=\operatorname{E}(e^{t^T\mathbf{X}})
+		=\operatorname{E}\left(\exp\left\{\sum_{i=1}^{n}t_i\mathbf{X}_i\right\}\right)
+		=\operatorname{E}\left[\sum_{m=0}^{+\infty}\frac{1}{m!}\left(\sum_{i=1}^{n}t_i\mathbf{X}_i\right)^m\right] \\
+		&=\sum_{m=0}^{+\infty}\frac{1}{m!}\operatorname{E}\left[\left(\sum_{i=1}^{n}t_i\mathbf{X}_i\right)^m\right]
+		=\sum_{m=0}^{+\infty}\frac{1}{m!}\operatorname{E}\left(\sum_{\sum\limits_{i=1}^{n}m_i=m}\frac{m!}{m_1!m_2!\cdots m_n!}\prod_{i=1}^{n}(t_i\mathbf{X}_i)^{m_i}\right) \\
+		&=\sum_{m=0}^{+\infty}\frac{1}{m!}\sum_{\sum\limits_{i=1}^{n}m_i=m}\frac{m!}{m_1!m_2!\cdots m_n!}\operatorname{E}\left[\prod_{i=1}^{n}(t_i\mathbf{X}_i)^{m_i}\right] \\
+		&=\sum_{m=0}^{+\infty}\sum_{\sum\limits_{i=1}^{n}m_i=m}\frac{1}{m_1!m_2!\cdots m_n!}\operatorname{E}\left(\prod_{i=1}^{n}\mathbf{X}_i^{m_i}\right)\prod_{i=1}^{n}t_i^{m_i} \\
+		&=\sum_{(\seq{m}{n})\in\mathbb{N}^n}\mu_{\seq{m}{n}}\prod_{i=1}^{n}\frac{t_i^{m_i}}{m_i!}\qedhere
+	\end{align*}
+\end{proof}

@@ -1,0 +1,34 @@
+\section{Spearman秩关联检验}
+
+\subsubsection{原理}
+记$x_i$在$X$样本中的秩为$R_i$，$y_i$在$Y$样本中的秩为$S_i$，$d_i^2=(R_i-S_i)^2$，$\bar{R}=E(R)=\dfrac{1}{n}\sum_{i=1}^nR_i,\;bar{S}=E(S)=\dfrac{1}{n}\sum_{i=1}^nS_i$。\par
+显然，若很多$d_i^2$很大，那么两个变量之间可能是负相关；若很多$d_i^2$很小，那么两个变量之间可能是正相关。类似Pearson相关系数，定义以下Spearman检验统计量：
+\begin{equation}
+	r_s=\frac{\sum_{i=1}^n(R_i-\bar{R})(S_i-\bar{S})}{\sqrt{\sum_{i=1}^n(R_i-\bar{R})^2\sum_{i=1}^n(S_i-\bar{S})^2}}=1-\frac{6\sum_{i=1}^nd_i^2}{n(n^2-1)}\notag
+\end{equation}
+由Cauchy不等式，显然有$-1\leqslant r_s\leqslant1$。\par
+在样本不大且没有结的时候，可以使用精确检验：固定$R_i$从小到大，此时$S_i$的排序情况共有$n!$种可能，对每一种可能计算$r_s$，即可得到$r_s$的精确分布。
+\subsubsection{大样本的情况}
+大样本时没有近似分布，采用Monte Carlo模拟，固定随机数种子，随机抽取$m$个$S_i$可能的排序情况，对这$m$个情况计算$r_s$值，得到近似的分布。
+\subsubsection{打结}
+若$X$或$Y$样本中存在相同的数据，则称之为打结的情况。记$u_j,\;j=1,2,\dots,p$和$v_j,\;j=1,2,\dots,q$分别为$X$和$Y$样本中结统计量的值，记：
+\begin{equation}
+	U=\sum_{j=1}^p(u_j^3-u_j),\;V=\sum_{j=1}^q(v_j^3-v_j)\notag
+\end{equation}
+则此时修正过的Spearman检验统计量定义为：
+\begin{equation}
+	r_s=\frac{n(n^2-1)-6\sum_{i=1}^n(R_i-S_i)^2-6(U+V)}{\sqrt{\left[n(n^2-1)-12U \right]\left[n(n^2-1)-12V \right]}}\notag
+\end{equation}
+在样本量比较大时，有：
+\begin{equation}
+	Z=r_s\sqrt{n-1}\sim N(0,\;1)\notag
+\end{equation}
+有结的时候没有精确分布，只能使用上式的大样本近似。
+
+\subsubsection{代码}
+\begin{minted}[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines, mathescape]{r}
+cor.test(x, y,
+alternative = c("two.sided", "less", "greater"),
+method = "spearman"
+exact = NULL, continuity = FALSE) 
+\end{minted}

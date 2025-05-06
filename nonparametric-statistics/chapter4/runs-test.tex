@@ -1,0 +1,46 @@
+\section{游程检验}
+
+\subsubsection{目的}
+检验一组数据是否是随机出现的。
+\subsubsection{适用条件}
+数据的顺序有意义且是离散的，若不离散，可以中位数为间隔，利用符号函数将数据转换为二元数据。
+\subsubsection{游程的定义}
+游程是来自于同一总体的样本所构成的一个或一个以上相同符号连续出现的片段。例：对于数据
+\begin{equation}
+	0 0 0 0 1 1 0 1 1 1 0 0 0 \notag
+\end{equation}
+\hspace{2em}在这组数据中，一共有$5$个游程（$3$个$0$游程，$2$个$1$游程）。
+\subsubsection{游程数的分布}
+令$R$表示游程数，可以证明\info{有空证明}：
+\begin{gather}
+	P(R=2k)=\frac{2\binom{m-1}{k-1}\binom{n-1}{k-1}}{\binom{N}{n}}\notag\\
+	P(R=2k+1)=\frac{\binom{m-1}{k-1}\binom{n-1}{k}+\binom{m-1}{k}\binom{n-1}{k-1}}{\binom{N}{n}}\notag\\
+	E(R) = \frac{2mn}{m+1}+1\quad Var(R)=\dfrac{2mn(2mn-m-n)}{(m+n)^2(m+n-1)}\notag
+\end{gather}
+\subsubsection{游程检验原理}
+若数据是随机的，那么游程数不应过多也不应过少，若过多，则呈现出混合倾向，若过少，则呈现出聚集倾向。
+
+\begin{table}[htbp]
+	\centering
+	\begin{tabular}{ccc}
+		\toprule
+		备择假设 & 统计量$K$ & $p$值 \\
+		\midrule 
+		$H_1:\text{数据有聚集趋势}$ & $R$ & $P(K\leqslant k)$ \\
+		$H_1:\text{数据有混合趋势}$ & $R$ & $P(K\geqslant k)$ \\
+		$H_1:\text{数据有趋势}$ & $R$ & $2\min{P(K\leqslant k),\;P(K\geqslant k)}$ \\
+		\bottomrule 
+	\end{tabular}
+	\caption{随机性的游程检验}
+\end{table}
+\subsubsection{代码}
+\subsubsection{tseries包中的runs.test}
+需要注意，该函数只提供大样本近似，并且输入值必须转换为因子，同时，要去除经过符号函数转换后值为$0$的数据。
+\begin{minted}[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines, mathescape]{r}
+library(tseries)
+# median <- median(x)
+# x <- factor(sign(x[x != median]-median))
+runs.test(x, alternative = c("two.sided", "less", "greater"))
+\end{minted}
+\subsubsection{自编版}
+\inputminted[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines]{r}{nonparametric-statistics/chapter4/runs-test.R}

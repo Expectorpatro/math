@@ -1,0 +1,86 @@
+\section{矩估计}
+
+\subsection{矩法}
+\begin{definition}
+	设$\seq{X}{n}$是从总体$F$中抽取的简单样本，将：
+	\begin{equation*}
+		\mu_{nk}=\frac{1}{n}\sum_{i=1}^{n}X_i^k,\quad
+		\nu_{nk}=\frac{1}{n}\sum_{i=1}^{n}(X_i-\mu_{n1})^k
+	\end{equation*}
+	分别称为样本$k$阶原点矩和样本$k$阶中心矩。
+\end{definition}
+\begin{theorem}\label{theo:SampleMoment}
+	$\nu_{nk}$与原点矩$\mu_{nk}$之间存在如下关系：
+	\begin{equation*}
+		\nu_{nk}=\sum_{i=0}^{k}\binom{k}{i}\mu_{ni}(-\mu_{n1})^{k-i}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由样本中心矩的定义可得：
+	\begin{align*}
+		\nu_{nk}
+		&=\frac{1}{n}\sum_{i=1}^{n}(X_i-\mu_{n1})^k
+		=\frac{1}{n}\sum_{i=1}^{n}\sum_{j=0}^{k}\binom{k}{j}X_i^j(-\mu_{n1})^{k-j} \\
+		&=\sum_{j=0}^{k}\binom{k}{j}\frac{1}{n}\sum_{i=1}^{n}X_i^j(-\mu_{n1})^{k-j}
+		=\sum_{j=0}^{k}\binom{k}{j}\mu_{nj}(-\mu_{n1})^{k-j}\qedhere
+	\end{align*}
+\end{proof}
+\begin{definition}
+	设有总体分布族$\{F_\theta:\theta\in\Theta\}$，$g(\theta)$是定义在$\Theta$上的实值函数，它可以表示为总体分布的一些矩的函数，即：
+	\begin{equation*}
+		g(\theta)=f(\seq{\mu}{s},\seq{\nu}{t})
+	\end{equation*}
+	设$\mathbf{X}=(\seq{X}{n})$是从上述总体分布族中抽取的简单样本，将$f$中的总体矩用样本矩代替，得到：
+	\begin{equation*}
+		\delta(\mathbf{X})=f(\mu_{n1},\mu_{n2},\dots,\mu_{ns},\nu_{n1},\nu_{n2},\dots,\nu_{nt})
+	\end{equation*}
+	则$\delta(\mathbf{X})$成为$g(\theta)$的一个点估计，称$\delta(\mathbf{X})$为$g(\theta)$的\gls{MomentEstimation}，这种求矩估计量的方法称为\gls{MethodOfMoments}。
+\end{definition}
+
+\subsection{矩估计的性质}
+\begin{property}
+	矩估计具有如下性质：
+	\begin{enumerate}
+		\item 样本$k$阶原点矩$\mu_{nk}$是总体$k$阶原点矩$\mu_k$的无偏估计、强相合估计；
+		\item $k=1$时，样本$k$阶中心矩$\nu_{nk}$是总体$k$阶中心矩$\nu_k$的无偏估计，对$k\geqslant2$，$\nu_{nk}$不是$\nu_k$的无偏估计。$\nu_{nk}$是$\nu_k$的强相合估计；
+		\item 若待估量$g(\theta)$可以表示为一些总体原点矩的线性组合时，即：
+		\begin{equation*}
+			g(\theta)=\sum_{i=1}^{n}c_i\mu_{m_i},\;m_i\in\mathbb{N}^+
+		\end{equation*}
+		则其矩估计：
+		\begin{equation*}
+			\delta(\mathbf{X})=\sum_{i=1}^{n}c_i\mu_{nm_i},\;m_i\in\mathbb{N}^+
+		\end{equation*}
+		是$g(\theta)$的无偏估计；
+		\item 若待估量$g(\theta)$满足：
+		\begin{equation*}
+			g(\theta)=f(\seq{\mu}{s},\seq{\nu}{t})
+		\end{equation*}
+		其中$f$是一个连续函数，则：
+		\begin{equation*}
+			\delta(\mathbf{X})=f(\mu_{n1},\mu_{n2},\dots,\mu_{ns},\nu_{n1},\nu_{n2},\dots,\nu_{nt})
+		\end{equation*}
+		是$g(\theta)$的强相合估计；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由：
+	\begin{equation*}
+		\operatorname{E}(\mu_{nk})=\operatorname{E}\left[\frac{1}{n}\sum_{i=1}^{n}X_i^k\right]=\frac{1}{n}\sum_{i=1}^{n}\operatorname{E}(X_i^k)=\frac{1}{n}\sum_{i=1}^{n}\mu_k=\mu_k
+	\end{equation*}
+	可得无偏性。\par
+	由\cref{theo:StrongLawOfLargeNumbers}可得：
+	\begin{equation*}
+		\mu_{nk}=\frac{1}{n}\sum_{i=1}^{n}X_i^k\overset{\text{a.e.}}{\longrightarrow}\frac{1}{n}\sum_{i=1}^{n}E(X_i^k)=\mu_k
+	\end{equation*}\par
+	(2)\info{不无偏还未证明}由\cref{theo:Moment}可得：
+	\begin{equation*}
+		\nu_k=\sum_{i=0}^{k}\binom{k}{i}\mu_i(-\mu_1)^{k-i}=f(\seq{\mu}{k})
+	\end{equation*}
+	所以$\nu_k$是$\seq{\mu}{k}$的连续函数。由\info{多维情形下随机变量的连续映射定理}、(1)、\cref{theo:SampleMoment}可得：
+	\begin{equation*}
+		\nu_{nk}=f(\mu_{n1},\mu_{n2},\dots,\mu_{nk})\overset{\text{a.e.}}{\longrightarrow}f(\seq{\mu}{k})=\nu_{k}
+	\end{equation*}\par
+	(3)由(1)直接可得。\par
+	(4)由\info{多维情形下随机变量的连续映射定理}、(1)(2)直接可得。
+\end{proof}

@@ -1,0 +1,137 @@
+\section{随机效应下的两因子方差分析}
+仅讨论等重复、有交互作用情形。
+\begin{table}[H] 
+	\centering
+	\begin{tabularx}{\textwidth}
+		{c|>{\centering\arraybackslash}X>{\centering\arraybackslash}Xc>{\centering\arraybackslash}X}
+		\hline
+		\diagbox{因子$A$}{因子$B$} & $B_1$ & $B_2$ & $\cdots$ & $B_b$ \\ \hline
+		$A_1$ & 
+		$y_{111}, y_{112}, \dots, y_{11m}$ & 
+		$y_{121}, y_{122}, \dots, y_{12m}$ & 
+		$\cdots$ & 
+		$y_{1b1}, y_{1b2}, \dots, y_{1bm}$ \\ 
+		$A_2$ & 
+		$y_{211}, y_{212}, \dots, y_{21m}$ & 
+		$y_{221}, y_{222}, \dots, y_{22m}$ & 
+		$\cdots$ & 
+		$y_{2b1}, y_{2b2}, \dots, y_{2bm}$ \\
+		$\vdots$ & 
+		$\vdots$ & 
+		$\vdots$ & 
+		& 
+		$\vdots$ \\
+		$A_a$ & 
+		$y_{a11}, y_{a12}, \dots, y_{a1m}$ & 
+		$y_{a21}, y_{a22}, \dots, y_{a2m}$ & 
+		$\cdots$ & 
+		$y_{ab1}, y_{ab2}, \dots, y_{abm}$ \\ 
+		\hline
+	\end{tabularx}
+	\caption{等重复两因子试验数据表}
+\end{table}
+其中$y_{ijk}$表示在因子A的第$i$个水平$A_i$和因子B的第$j$个水平$B_j$下第$k$次重复试验的观察值。
+
+\subsection{统计模型}
+此时的统计模型为：
+\begin{equation*}\label{model:random-effect-two-way-anova}
+	\begin{cases}
+		y_{ijk}=\mu+\tau_i+\beta_j+(\tau\beta)_{ij}+\varepsilon_{ijk} \\
+		\text{诸}\varepsilon_{ijk}\quad\mathrm{i.i.d.~}N(0,\sigma^2) \\
+		\text{诸}\tau_i\quad\mathrm{i.i.d.~}N(0,\sigma_\tau^2) \\
+		\text{诸}\beta_j\quad\mathrm{i.i.d.~}N(0,\sigma_\beta^2) \\
+		\text{诸}(\tau\beta)_{ij}\quad\mathrm{i.i.d.~}N(0,\sigma_{\tau\beta}^2) \\
+		\text{诸}\varepsilon_{ijk}\text{、诸}\tau_i\text{、诸}\beta_j\text{、诸}(\tau\beta)_{ij}\text{相互独立} \\
+		i=1,2,\dots,a,\;j=1,2,\dots,b,\;k=1,2,\dots,m
+	\end{cases}
+\end{equation*}
+
+\subsection{统计假设}
+此时需要检验如下三个零假设：
+\begin{equation*}
+	\begin{cases}
+		H_{01}:\sigma_\tau^2=0, \\
+		H_{02}:\sigma_\beta^2=0 \\
+		H_{03}:\sigma_{\tau\beta}^2=0
+	\end{cases}
+\end{equation*}
+
+\subsection{方差分析}
+\subsubsection{偏差平方和的分解}
+由于与交互效应情况下五个平方和的定义完全相同，所以随机效应下偏差平方和分解公式与之前一模一样。
+\begin{gather*}
+	SST=SSA+SSB+SSAB+SSe \\
+	SSA=bm\sum_{i=1}^a(\bar{y}_{i..}-\bar{y}_{...})^2=bm\sum_{i=1}^a(\tau_i+\bar{\varepsilon}_{i..}-\bar{\varepsilon}_{...})^2 \\
+	SSB=am\sum_{j=1}^b(\bar{y}_{.j.}-\bar{y}_{...})^2=am\sum_{j=1}^b(\beta_j+\bar{\varepsilon}_{.j.}-\bar{\varepsilon}_{...})^2 \\
+	SSAB=m\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{ij.}-\bar{y}_{i..}-\bar{y}_{.j.}+\bar{y}_{...})^2=m\sum_{i=1}^a\sum_{j=1}^b\left[(\tau\beta)_{ij}+\bar{\varepsilon}_{ij.}-\bar{\varepsilon}_{i..}-\bar{\varepsilon}_{.j.}+3\bar{\varepsilon}_{...}\right]^2 \\
+	SSe=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^m(y_{ijk}-\bar{y}_{ij.})^2=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^m(\varepsilon_{ijk}-\bar{\varepsilon}_{ij.})^2
+\end{gather*}
+\subsubsection{各平方和的期望}
+这里直接列出各平方和的期望，证明是容易的。
+\begin{gather*}
+	E(SSA)=(a-1)\sigma^2+m(a-1)\sigma_{\tau\beta}^2+(a-1)bm\sigma_\tau^2  \\
+	E(SSB)=(b-1)\sigma^2+m(b-1)\sigma_{\tau\beta}^2+(b-1)am\sigma_{\beta}^2 \\
+	E(SSAB)=(a-1)(b-1)\sigma^2+m(a-1)(b-1)\sigma_{\tau\beta}^2 \\
+	E(SSe)=ab(m-1)\sigma^2
+\end{gather*}
+\subsubsection{统计量及其分布}
+称$\frac{SSA}{a-1}$为因子A的均方和，记为MSA；称$\frac{SSB}{b-1}$为因子B的均方和，记为MSB；称$\frac{SSAB}{(a-1)(b-1)}$为因子A与因子B的交互作用的均方和，记为MSAB；称$\frac{SSe}{ab(m-1)}$为误差均方和，记为MSe。\par
+由前述，MSe是$\sigma^2$的无偏估计。在$H_{01}$成立时，MSA是$\sigma^2+m\sigma_{\tau\beta}^2$的无偏估计；在$H_{02}$成立时，MSA是$\sigma^2+m\sigma_{\tau\beta}^2$的无偏估计；在$H_{03}$成立时，MSAB是$\sigma^2$的无偏估计。如果MSA与MSAB比值很大，则有理由怀疑$H_01$；如果MSB与MSAB比值很大，则有理由怀疑$H_02$；如果MSAB与MSe比值很大，则有理由怀疑$H_03$。由此构建统计量：
+\begin{gather*}
+	F_A=\frac{MSA}{MSAB}=\frac{\frac{SSA}{a-1}}{\frac{SSAB}{(a-1)(b-1)}} \\
+	F_B=\frac{MSB}{MSAB}=\frac{\frac{SSB}{b-1}}{\frac{SSAB}{(a-1)(b-1)}} \\
+	F_{AB}=\frac{MSAB}{MSe}=\frac{\frac{SSAB}{(a-1)(b-1)}}{\frac{SSe}{ab(m-1)}}
+\end{gather*}
+在这些统计量的情况下，$H_{01},\;H_{02},\;H_{03}$的拒绝域是右向单尾的。\par
+由于在假设$H_{01},\;H_{02},\;H_{03}$成立时，随机效应模型与可加效应模型的观察值$y_{ijk}$的数据结构的形式完全一样，所以在随机效应模型中仍然有：
+\begin{gather*}
+	F_A\sim F(a-1,\;(a-1)(b-1)) \\
+	F_B\sim F(b-1,\;(a-1)(b-1)) \\
+	F_{AB}\sim F((a-1)(b-1),\;ab(m-1))
+\end{gather*}
+\subsubsection{拒绝域}
+综上所述，显著性水平为$\alpha$时的拒绝域为：
+\begin{gather*}
+	F_A>F_{1-\alpha}(a-1,\;(a-1)(b-1)) \\
+	F_B>F_{1-\alpha}(b-1,\;(a-1)(b-1)) \\
+	F_{AB}>F_{1-\alpha}((a-1)(b-1),\;ab(m-1))
+\end{gather*}
+
+\subsection{方差分析表}
+\begin{table}[H]
+	\centering
+	\begin{tabularx}{\textwidth}
+		{>{\centering\arraybackslash}c|*{5}{>{\centering\arraybackslash}X}}
+		\toprule
+		来源   &平方和&自由度&均方和             &F值  \\ 
+		\midrule
+		因子A&SSA&$f_A=a-1$ &$\frac{SSA}{a-1}$ &$F=\frac{MSA}{MSAB}$\\
+		因子B&SSB&$f_B=b-1$ &$\frac{SSB}{b-1}$ &$F=\frac{MSB}{MSAB}$\\
+		交互作用AB &SSAB &$f_{AB}=(a-1)(b-1)$ &$\frac{SSAB}{(a-1)(b-1)}$ &$F=\frac{MSAB}{MSe}$ \\
+		误差   &SSe  &$f_e=ab(m-1)$ &$\frac{SSe}{ab(m-1)}$ & \\
+		总     &SST  &$f_T=abm-1$ &                  & \\
+		\bottomrule
+	\end{tabularx}
+	\caption{等重复、有交互作用的随机效应下两因子试验方差分析表}
+\end{table}
+平方和公式可按下列公式计算：
+\begin{equation*}
+	\begin{cases}
+		SST=\sum\limits_{i=1}^a\sum\limits_{j=1}^b\sum\limits_{k=1}^my_{ijk}^2-\frac{y_{...}^2}{abm} \\
+		SSA=\sum\limits_{i=1}^a\frac{y_{i..}^2}{bm}-\frac{y_{...}^2}{abm} \\
+		SSB=\sum\limits_{j=1}^b\frac{y_{.j.}^2}{am}-\frac{y_{...}^2}{abm} \\
+		SSAB=\sum\limits_{i=1}^a\sum\limits_{j=1}^b\frac{y_{ij.}^2}{m}-\frac{y_{...}^2}{abm}-SSA-SSB \\
+		SSe=SST-SSA-SSB-SSAB
+	\end{cases}
+\end{equation*}
+
+\subsection{参数估计}
+我们此时关心方差分量的估计。
+\subsubsection{点估计}
+由SSA、SSB、SSAB、SSe期望的计算，可给出各方差分量的无偏点估计如下：
+\begin{gather*}
+	\hat{\sigma^2}=MSe \\
+	\hat{\sigma^2}_\tau=\frac{MSA-MSAB}{bm} \\
+	\hat{\sigma^2}_\beta=\frac{MSB-MSAB}{am} \\
+	\hat{\sigma^2}_{\tau\beta}=\frac{MSAB-MSe}{m}
+\end{gather*}

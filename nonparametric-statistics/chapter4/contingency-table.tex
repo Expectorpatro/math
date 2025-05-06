@@ -1,0 +1,58 @@
+\section{列联表独立性问题}
+
+检验列联表的行列变量之间是否是独立的。
+\subsubsection{假设}
+\begin{equation}
+	H_0:\text{行变量与列变量是独立的}\Leftrightarrow H_1:\text{行变量与列变量是相关的}\notag
+\end{equation}
+
+\subsection{Pearson近似检验}\label{method:PearsonChisqTest}
+\subsubsection{原理}
+假设行变量有$r$个取值，列变量有$c$个取值，列联表中频数记为$n_{ij},\;i=1,2,\dots,r,\;j=1,2,\dots,c$，行频数总和$n_{i\cdot}=\sum_jn_{ij}$，列频数总和$n_{\cdot j}=\sum_in_{ij}$，频数总和$n=\sum_{i,j}n_{ij}$，列联表中第$ij$个格子的理论频数为$E_{ij}$，行变量取第$i$个值的概率为$p_{i\cdot}$，列变量取第$j$个值的概率为$p_{\cdot j}$，一个观测值被分配到列联表中第$ij$个格子的理论概率为$p_{ij}$。\info{写完概率论把独立性链接到这里来}\par
+若行变量与列变量独立，由随机变量的独立性，有：
+\begin{equation}
+	p_{ij}=p_{i\cdot}p_{\cdot j},\;E_{ij}=p_{\cdot j}n_{i\cdot}\notag
+\end{equation}
+但由于$p_{\cdot j}$是理论值无法预知，用$\dfrac{n_{\cdot j}}{n}$来代替，那么$E_{ij}=\hat{p_{\cdot j}}n_{i\cdot}=\dfrac{n_{i\cdot}n_{\cdot j}}{n}$。由此构建以下Pearson$\chi^2$统计量：
+\begin{equation}
+	Q=\sum_{i=1}^r\sum_{j=1}^c\frac{(n_{ij}-E_{ij})^2}{E_{ij}}\notag
+\end{equation}
+\hspace{2em}如果零假设不成立，那么$n_{ij}$与$E_{ij}$的值相差就会比较大，统计量的值也会偏大。若统计量的值过大，则有里有怀疑零假设。由此可看出这里只考虑上侧的单侧检验问题。
+\subsubsection{大样本近似}
+在大样本的情况下，若零假设成立，有如下近似分布：
+\begin{equation}
+	Q\sim\chi^2_{(r-1)(c-1)}\notag
+\end{equation}
+
+\subsection{低维列联表的Fisher精确检验}
+假定五个边际频数都是固定的，在零假设成立的情况下，这个具体的列联表出现的条件概率（给定边际频数的情况下，因此是条件概率）只依赖于四个频数中的任意一个，且该概率满足超几何分布：
+\begin{equation}
+	P=\frac{\binom{n_{1\cdot}}{n_{11}}\binom{n_{2\cdot}}{n_{21}}}{\binom{n}{n_{\cdot 1}}}\notag
+\end{equation}
+
+\begin{table}[htbp]
+	\centering
+	\begin{tabular}{@{}lllll@{}}
+		\toprule
+		     & B1           & B2           & 总和      \\ 
+		\midrule
+		A1   & $n_{11}$       & $n_{12}$       & $n_{1\cdot}$\\
+		A2   & $n_{21}$       & $n_{22}$       & $n_{2\cdot}$\\
+		总和 & $n_{\cdot 1}$  & $n_{\cdot 2}$  & $n$          \\ 
+		\bottomrule
+	\end{tabular}
+	\caption{二维列联表}
+\end{table}
+
+若零假设成立，那么任何一个关于$n_{ij}$的尾概率$P(n_{ij}\leqslant a),\;P(n_{ij}\geqslant b),\;1-P(a<n_{ij}<b)$都不应该太小或太大。若尾概率太小或太大，则有理由怀疑零假设。由此可以看出这里其实是涉及备择假设的方向问题的，可以单侧也可以双侧。\info{有机会看看单侧的实际意义，不懂为什么会考虑单侧}\par
+\subsubsection{代码}
+\subsubsection{Pearson近似检验}
+直接将列联表矩阵输入以下函数即可。
+\begin{minted}[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines, mathescape]{r}
+chisq.test(x)
+\end{minted}
+\subsubsection{Fisher精确检验}
+直接将列联表矩阵输入以下函数即可。
+\begin{minted}[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines, mathescape]{r}
+fisher.test(x, alternative="two.sided")
+\end{minted}

@@ -1,0 +1,74 @@
+\section{外测度}
+\subsection{外测度的定义}
+\begin{definition}
+	设$E$为$\mathbb{R}^n$中的任一点集，$E$的Lebesgue\gls{EMeasure}定义为所有能够覆盖$E$的开区间列的体积总和的下确界。即：
+	\begin{equation}
+		m^*(E)=\inf_{E\subset\underset{i=1}{\overset{+\infty}{\cup}}I_i}\sum_{i=1}^{+\infty}|I_i|\notag
+	\end{equation}
+\end{definition}
+需要注意如下事项：
+\begin{enumerate}
+	\item 必须是无穷多个开区间的体积总和的下确界。如果将定义改为有限个：取$E$为$[0,1]$内的有理数集，若$E$被有限个开区间覆盖，即$E\subset\underset{i=1}{\overset{n}{\cup}}I_i$，那么$\underset{i=1}{\overset{n}{\cup}}I_i$一定覆盖$[0,1]$（反证法，有理数集的稠密性），即这种定义下$E$的外测度等于$1$。同理，$[0,1]$内无理数集的外测度也为$1$，由测度公理$(2)$，$[0,1]$的测度为$2$，而由测度公理$(3)$，$[0,1]$的测度应为$1$，矛盾。
+	\item 定义虽然是无穷多个开区间，但实际仍可以是有限的，因为可以取空集（就比如概率论可列可加性推有限可加性）。 
+	\item 体积总和可以是$+\infty$。
+\end{enumerate}
+\subsection{外测度的性质}
+\begin{property}
+	外测度有以下三条基本性质：
+	\begin{enumerate}
+		\item $m^*(E)\geqslant0$，等号成立当且仅当$E=\varnothing$。
+		\item 若$A\subset B$，则有$m^*(A)\leqslant m^*(B)$。
+		\item 	$m^*(\underset{i=1}{\overset{+\infty}{\cup}}A_i)\leqslant\sum\limits_{i=1}^{+\infty}m^*(A_i)$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)显然成立。\par
+	(2)对于满足条件$B\subset\underset{i=1}{\overset{+\infty}{\cup}}I_i$的任意开区间列$\{I_i,\;i\in\mathbb{N}^+\}$，必然有$A\subset\underset{i=1}{\overset{+\infty}{\cup}}I_i$，又因为$m^*(A)$是长度总和的下确界，那么就有：
+	\begin{equation}
+		m^*(A)\leqslant\sum_{i=1}^{+\infty}|I_i|\notag
+	\end{equation}
+	由下确界的保号性即可推得：
+	\begin{equation}
+		m^*(A)\leqslant\inf_{B\subset\underset{i=1}{\overset{+\infty}{\cup}}I_i}\sum_{i=1}^{+\infty}|I_i|=m^*(B)\notag
+	\end{equation}\par
+	(3)从单个$A_i$开始着手考虑。因为外测度是下确界，对任意$\varepsilon>0$和每个$A_n,n\in\mathbb{N}^+$，都存在一个开区间列$\{I_{ni},\;i\in\mathbb{N}^+\}$使\footnote{$\frac{\varepsilon}{2^n}$是一种为了在求和后得到$\varepsilon$的常用规范化取法，这是因为$\sum\limits_{n=1}^{+\infty}\frac{1}{2^n}=1$}：
+	\begin{equation}
+		\sum_{i=1}^{+\infty}|I_{ni}|<m^*(A_n)+\frac{\varepsilon}{2^n},\;A_n\subset\underset{i=1}{\overset{+\infty}{\cup}}I_{ni}\notag
+	\end{equation}
+	那么就有（第一个不等式是因为外测度是下确界，第二个不等式是上式的求和形式）：
+	\begin{equation}
+		m^*(\underset{i=1}{\overset{+\infty}{\cup}}A_i)\leqslant\sum_{n=1}^{+\infty}\sum_{i=1}^{+\infty}|I_{ni}|<\sum_{n=1}^{+\infty} m^*(A_n)+\varepsilon\notag
+	\end{equation}
+	由$\varepsilon$的任意性，有：
+	\begin{equation*}
+		m^*(\underset{i=1}{\overset{+\infty}{\cup}}A_i)\leqslant\sum_{n=1}^{+\infty}\sum_{i=1}^{+\infty}|I_{ni}|\leqslant\sum_{n=1}^{+\infty} m^*(A_n)\qedhere 
+	\end{equation*} 
+\end{proof}
+\subsection{区间的外测度}
+\begin{theorem}
+	区间的外测度就是区间的体积，即$m^*(I)=|I|$。
+\end{theorem}
+从直观上这一点很好理解，如果$m^*(I)>|I|$，则必然能找到一个体积总和更小的开区间列覆盖$I$；如果$m^*(I)<|I|$，则$I$必然没有被对应的开区间列全覆盖。
+\begin{proof}
+	(1)对任意区间$I$，必存在一个开区间$I'$使$I\subset I'$且$|I'|<|I|+\varepsilon$。那么就有（第一个不等式是因为外测度是下确界）：
+	\begin{equation}
+		m^*(I)\leqslant|I'|<|I|+\varepsilon\notag
+	\end{equation}
+	由$\varepsilon$的任意性，即有：
+	\begin{equation}
+		m^*(I)\leqslant|I|\notag
+	\end{equation}
+	(2)如果$m^*(I)<|I|$，由外测度定义，必存在一个开区间列$\{A_i\}$，使$I\subset\underset{i=1}{\overset{+\infty}{\cup}}A_i$且$\sum\limits_{i=1}^{+\infty}|A_i|<|I|$，而这是不可能的。
+\end{proof}
+
+
+
+
+
+
+
+
+
+
+
+

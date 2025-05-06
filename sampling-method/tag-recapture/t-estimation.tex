@@ -1,0 +1,83 @@
+\section{总体总量$t$的估计}
+
+\subsection{点估计}
+\begin{theorem}
+	标记重捕法中总体总量$\tau$的点估计如下：
+	\begin{equation*}
+		\hat{t}=\frac{y}{x}X 
+	\end{equation*}
+	它有如下性质：
+	\begin{equation*}
+		Var(\hat{t})=\frac{(yX)^2}{E^3(x)}\frac{(t-y)(t-X)}{t(t-1)},\quad
+		\widehat{Var}(\hat{t})=\frac{Xy(X-x)(y-x)}{x^3}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	在标记重捕法中，$x\sim H(y,X,t)$。因此可得：
+	\begin{equation*}
+		E(x)=\frac{yX}{t},\;
+		Var(x)=\frac{yX(t-y)(t-X)}{t^2(t-1)}
+	\end{equation*}
+	而：
+	\begin{equation*}
+		\hat{t}=yX\frac{1}{x}
+	\end{equation*}
+	所以由\cref{sec:deltamethod}：
+	\begin{align*}
+		Var(\hat{t})&=Var\left(yX\frac{1}{x}\right) \\
+		&=(yX)^2Var\left(\frac{1}{x}\right) \\
+		&\approx(yX)^2\left[\frac{-1}{E^2(x)}\right]^2Var(x) \\
+		&=\frac{(yX)^2}{E^4(x)}\frac{yX}{t}\frac{(t-y)(t-X)}{t(t-1)} \\
+		&=\frac{(yX)^2}{E^3(x)}\frac{(t-y)(t-X)}{t(t-1)}
+	\end{align*}
+	用$x$替代$E(x)$（相当于是一次简单随机抽样，利用无偏性
+	），然后考虑$t$较大时的近似，最后还剩一个$t$，用$\hat{t}$带入进行计算，即可得到：
+	\begin{align*}
+		\widehat{Var}(\hat{t})&=\frac{(yX)^2}{x^3}\frac{(t-y)(t-X)}{t(t-1)} \\
+		&\approx\frac{(yX)^2}{x^3}\frac{(t-y)(t-X)}{t^2} \\
+		&=\frac{(yX)^2}{x^3}\left(1-\frac{X}{t}\right)\left(1-\frac{y}{t}\right) \\
+		&\approx\frac{Xy(X-x)(y-x)}{x^3}\qedhere
+	\end{align*}
+\end{proof}
+\subsubsection{极端情况下的修正}
+在极端情况下，$x$可能为$0$或很小，那么$\widehat{Var}(\hat{t})$就会无限大，此时作如下修正（即不带入$\hat{t}$，而是代入$\tilde{t}$）：
+\begin{gather*}
+	\tilde{t}=\frac{(X+1)(y+1)}{x+1}-1 \\
+	\widehat{Var}(\tilde{t})=\frac{(X+1)(y+1)(y-x)(X-x)}{(x+1)^2(x+2)}
+\end{gather*}
+
+\subsection{区间估计}
+\subsubsection{正态近似求置信区间}
+由点估计方差公式，易得如下估计的总体总量地置信区间：
+\begin{equation*}
+	\hat{t}\pm u_{1-\frac{\alpha}{2}}\sqrt{\widehat{Var}(\hat{t})},\quad
+	\tilde{t}\pm u_{1-\frac{\alpha}{2}}\sqrt{\widehat{Var}(\tilde{t})}
+\end{equation*}
+\subsubsection{正态近似置信区间可能存在的问题}
+正态近似置信区间可能会存在：置信区间左端点小于两次捕捉到的总数的现象，这显然是不合理的。
+\subsubsection{Pearson$\chi^2$检验求置信区间}
+由标记重捕法使用条件，第一次被捕到和第二次被捕到这两件事情是独立的，由此可构建如下的列联表：
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{@{}lcc@{}}
+		\toprule
+		& 第二次捕获: 是 & 第二次捕获: 否 \\ 
+		\midrule
+		第一次捕获：是    & $a$           & $b$           \\
+		第一次捕获：否    & $c$           & $d$           \\ 
+		\bottomrule
+	\end{tabular}
+	\caption{标记重捕法的列联表示意图}
+\end{table}
+\par 在这个表里，$a,c,b$显然都是已知的，只有$d$是未知的。可以通过给$d$赋值的方式，去检验列联表行列变量之间是否独立（参考\cref{method:PearsonChisqTest}），选择合适的$d$值（即让独立性检验结果显著的$d$值）作为置信区间。
+\subsubsection{似然比检验}
+由样本可计算出$\hat{t}$，然后可以构建如下假设：
+\begin{equation*}
+	H_0:\theta=\hat{t}\quad H_1:\theta=\theta_A
+\end{equation*}
+进行似然比检验（参考\cref{method:LikelihoodTest}）。置信区间为拒绝零假设的$\theta_A$构成的区间，即比$\hat{t}$更适合作为模型参数的$\theta_A$构成置信区间。
+\subsubsection{bootstrap求置信区间}
+在第二个样本中进行bootstrap，有放回的抽取$y$个样本，计算每个样本对总体总量的估计值$\hat{t}$，重复$N$次。将$N$个$\hat{t}$从小到大排序，在此基础上取分位点即产生置信区间，
+\subsubsection{代码}
+以上四种方法的代码如下：
+\inputminted[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines]{r}{sampling-method/tag-recapture/tag-recapture.R}

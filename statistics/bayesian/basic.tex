@@ -1,0 +1,345 @@
+\section{Basics}
+
+\begin{definition}
+	A set $G$ of elements is called a group if it satisfies the following four conditions.
+	\begin{enumerate}
+		\item There is defined an operation, group multiplication, which with any two elements $a,b\in G$ associates an element $c$ of $G$. The element $c$ is called the product of $a$ and $b$ and is denoted $ab$;
+		\item Group multiplication obeys the associative law, which means $(ab)c=a(bc)$;
+		\item There exists an element $e\in G$, called the identity, such that $ae=ea=a,\;\forall\;a\in G$;
+		\item For each element $a\in G$, there exists an element $a^{-1}\in G$ which called its inverse, such that $aa^{-1}=a^{-1}a=e$.
+	\end{enumerate}
+\end{definition}
+
+\begin{definition}
+	A class $G$ of transformations is called a transformation group if it is closed under both composition and inversion.
+\end{definition}
+\begin{theorem}
+	A transformation group is a group.
+\end{theorem}
+
+\subsection{Group Family}
+\begin{definition}
+	A group family of distributions is a family obtained by subjecting a random vector with a fixed distribution to a transformation group.
+\end{definition}
+\begin{property}
+	A group family is independent of which of its members is takn as starting distribution.
+\end{property}
+\begin{proof}
+	Let \(\mathbf{X}\) denote an \(n\)-dimensional random vector characterized by a specific distribution \(F\). The group family \(G\) is formed by applying a transformation group \(T\) to \(\mathbf{X}\). Let \(\mathbf{Y}\) be an element of \(G\) that is distinct from \(\mathbf{X}\). The distribution \(F\) can be derived by applying the transformation \(T\) to \(\mathbf{Y}\). For any \(\mathbf{Z} \in G\), there exists a transformation \(\mathcal{T}_1 \in T\) such that \(\mathbf{X} = \mathcal{T}_1 \mathbf{Z}\). Given that \(\mathbf{Y} \in G\), there also exists a transformation \(\mathcal{T}_2 \in T\) such that \(\mathbf{Y} = \mathcal{T}_2 \mathbf{X}\). Consequently, we can express \(\mathbf{Y}\) as \(\mathbf{Y} = \mathcal{T}_2 \mathcal{T}_1 \mathbf{Z}\). Since \(T\) is a transformation group, it follows that \(\mathcal{T}_2 \mathcal{T}_1 \in T\). Therefore, the inverse \((\mathcal{T}_2 \mathcal{T}_1)^{-1} \in T\), which implies that \(\mathbf{Z} = (\mathcal{T}_2 \mathcal{T}_1)^{-1} \mathbf{Y} \in F\). This leads to the conclusion that \(G \subset F\). By a similar argument, one can establish that \(F \subset G\), thereby concluding that \(G = F\). This indicates that the family is invariant with respect to the choice of representative element.
+\end{proof}
+\begin{definition}[Location-scale families]
+	Let $\mathbf{X} = (\seq{\mathbf{X}}{n})$ be an $n$-dimensional random vector with a fixed joint distribution function $F$. We define the following families of distributions based on affine transformations of $\mathbf{X}$:
+	
+	\begin{itemize}
+		\item \textbf{Location family:}  
+		For any constant vector $a = (a_1, a_2, \dots, a_n) \in \mathbb{R}^n$, define a shifted random vector $\mathbf{Y} = \mathbf{X} + a$. The distribution function of $\mathbf{Y}$ is given by:
+		\[
+		P(\mathbf{Y}_1 \leqslant y_1, \mathbf{Y}_2 \leqslant y_2, \dots, \mathbf{Y}_n \leqslant y_n) = F(y_1 - a_1, y_2 - y_2, \dots, y_n - a_n)
+		\]
+		The collection of all such distributions for a fixed $F$ and varying $a$ is called a \emph{location family}.
+		
+		\item \textbf{Scale family:}  
+		For any constant vector $b = (b_1, b_2, \dots, b_n) \in \mathbb{R}^n$ with all $b_i > 0$, define the scaled random vector $\mathbf{Y} = b \otimes \mathbf{X}$ (element-wise multiplication). Then the distribution function of $\mathbf{Y}$ is:
+		\[
+		P(\mathbf{Y}_1 \leqslant y_1, \mathbf{Y}_2 \leqslant y_2, \dots, \mathbf{Y}_n \leqslant y_n) = F\left(\frac{y_1}{b_1}, \frac{y_2}{b_2}, \dots, \frac{y_n}{b_n}\right)
+		\]
+		The collection of such distributions for fixed $F$ and varying $b$ is called a \emph{scale family}.
+		
+		\item \textbf{Location-scale family:}  
+		When both a shift and scaling are applied simultaneously, we define the transformed vector as:
+		\[
+		\mathbf{Y} = a + b \otimes \mathbf{X}
+		\]
+		where $a \in \mathbb{R}^n$ is a location vector and $b \in \mathbb{R}^n$ is a scale vector with strictly positive entries. The resulting collection of distributions for all such transformations of a fixed $F$ forms a \emph{location-scale family}.
+	\end{itemize}
+\end{definition}
+
+\subsection{Exponential Families}
+\begin{definition}
+	A family $\{P_{\theta}\}$ of distributions is said to form an $n$-dimensional \emph{exponential family} if the distributions $P_{\theta}$ have densities of the form:
+	\begin{equation*}
+		p(x;\theta)=\exp\left[\sum_{i=1}^{n}\theta_iT_i(x)-f(\theta)\right]h(x)
+	\end{equation*}
+	with respect to some common measure $\mu$. In this context, $\theta_i$ belongs to the set of real numbers, $f$ and $T_i$ are functions that take real values, and $x$ is a point in the support of the density. 
+\end{definition}
+\begin{definition}
+	The set $\Xi$ of points $\theta$ for which holds that:
+	\begin{equation*}
+		\int_{}^{}\exp\left[\sum_{i=1}^{n}\theta_iT_i(x)\right]\dif\mu<+\infty
+	\end{equation*}
+	is called the \emph{natural parameter space} and $\theta$ is called the \emph{natural parameter}. In the function above, $h(x)$ is absorbed into $\mu(x)$.
+\end{definition}
+\begin{theorem}
+	$\Xi$ is convex.
+\end{theorem}
+\begin{proof}
+	Let $\theta,\vartheta$ be two different points in $\Xi$. For any $\alpha\in(0,1)$, it follows from \cref{ineq:holder-ineq-Lebesgue} that:
+	\begin{align*}
+		&\int_{}^{}\exp\left\{\sum_{i=1}^{n}[\alpha\theta_i+(1-\alpha)\vartheta_i]T_i(x)\right\}\dif\mu \\
+		=&\int_{}^{}\exp\left[\sum_{i=1}^{n}\alpha\theta_iT_i(x)\right]\exp\left[\sum_{i=1}^{n}(1-\alpha)\vartheta_iT_i(x)\right]\dif\mu \\
+		\leqslant&\left\{\int_{}^{}\exp\left[\sum_{i=1}^{n}\theta_iT_i(x)\right]\dif\mu\right\}^{\alpha}\left\{\int_{}^{}\exp\left[\sum_{i=1}^{n}\vartheta_iT_i(x)\right]\dif\mu\right\}^{1-\alpha}<+\infty\qedhere
+	\end{align*}
+\end{proof}
+\begin{definition}
+	When neither the $T_i$'s nor the $\theta_i$'s satisfy a linear constraint, the exponential family is said to be \emph{minimal}. If the $\theta$'s are related in a nonlinear way, it forms a \emph{curved exponential family}.
+\end{definition}
+%\begin{theorem}
+%	If an $n$-dimensional exponential family is full rank, $\Xi$ contains an $n$-dimensional rectangle. 
+%\end{theorem}
+\begin{theorem}\label{theo:ExponentialFamilyDiff}
+	For any intergrable function $f$ and any $\theta$ in the interior of $\Xi$, the intergral:
+	\begin{equation*}
+		\int_{}^{}f(x)\exp\left[\sum_{i=1}^{n}\theta_iT_i(x)\right]h(x)\dif\mu
+	\end{equation*}
+	is continuous and has derivatives of all orders with respect to the $\theta$'s, and these can be obtained by differentiating under the integral sign.
+\end{theorem}
+\begin{property}
+	The exponential families has the following properties:
+	\begin{enumerate}
+		\item Exponential families have natural conjugate priors;
+		\item $T_i(x)$'s are sufficient statistics for $\theta$;
+		\item $\operatorname{E}(T_i)=\dfrac{\partial f(\theta)}{\partial\theta_i},\;\operatorname{Cov}(T_i,T_j)=\dfrac{\partial^2f(\theta)}{\partial\theta_i\partial\theta_j}$;
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)The likelihood corresponding to a sequence $y = (\seq{y}{m})$ of i.i.d observations is:
+	\begin{equation*}
+		p(y|\theta)\propto\prod_{i=1}^{m}\exp\left[\sum_{j=1}^{n}\theta_jT_j(y_i)-f(\theta)\right]=\exp\left[\sum_{i=1}^{n}\theta_i\sum_{j=1}^{m}T_i(y_j)-mf(\theta)\right]
+	\end{equation*}
+	If $\theta$'s pdf is specified as:
+	\begin{equation*}
+		p(\theta)\propto\exp\left[\sum_{i=1}^{n}\theta_i\alpha_i-g(\theta)\right]
+	\end{equation*}
+	We have:
+	\begin{equation*}
+		p(\theta|y)\propto\exp\left\{\sum_{i=1}^{n}\theta_i\left[\sum_{j=1}^{m}T_i(y_j)+\alpha_i\right]-[mf(\theta)+g(\theta)]\right\}
+	\end{equation*}
+	which completes the proof.\par
+	(2)The conclusion can be obtained from \cref{theo:FactorizationTheorem}.\par
+	(3)Because:
+	\begin{equation*}
+		\int_{}^{}\exp\left[\sum_{i=1}^{n}\theta_iT_i(x)-f(\theta)\right]h(x)\dif\mu=1
+	\end{equation*}
+	From \cref{theo:ExponentialFamilyDiff}, we can derive:
+	\begin{gather*}
+		\frac{\partial}{\partial\theta_i}\int_{}^{}\exp\left[\sum_{i=1}^{n}\theta_iT_i(x)-f(\theta)\right]h(x)\dif\mu=0 \\
+		\int_{}^{}\left[T_i(x)-\frac{\partial f(\theta)}{\partial\theta_i}\right]\exp\left[\sum_{i=1}^{n}\theta_iT_i(x)-f(\theta)\right]h(x)\dif\mu=0 \\
+		\int_{}^{}T_i(x)\exp\left[\sum_{i=1}^{n}\theta_iT_i(x)-f(\theta)\right]h(x)\dif\mu=\frac{\partial f(\theta)}{\partial\theta_i}\int_{}^{}\exp\left[\sum_{i=1}^{n}\theta_iT_i(x)-f(\theta)\right]h(x)\dif\mu \\
+		\operatorname{E}(T_i)=\frac{\partial f(\theta)}{\partial\theta_i}
+	\end{gather*}\par
+	Taking the partial derivative with respect to $\theta_j$ of the above equation gives:
+	\begin{gather*}
+		\int_{}^{}T_i(x)\left[T_j(x)-\frac{\partial f(\theta)}{\partial\theta_j}\right]\exp\left[\sum_{i=1}^{n}\theta_iT_i(x)-f(\theta)\right]h(x)\dif\mu=\frac{\partial^2 f(\theta)}{\partial\theta_i\partial\theta_j} \\
+		\int_{}^{}T_i(x)T_j(x)p(x|\theta)\dif\mu-\int_{}^{}T_i(x)\frac{\partial f(\theta)}{\partial\theta_j}p(x|\theta)\dif\mu=\frac{\partial^2 f(\theta)}{\partial\theta_i\partial\theta_j} \\
+		\operatorname{E}(T_iT_j)-\frac{\partial f(\theta)}{\partial\theta_j}\operatorname{E}(T_i)=\frac{\partial^2 f(\theta)}{\partial\theta_i\partial\theta_j} \\
+		\operatorname{E}(T_iT_j)-\operatorname{E}(T_i)\operatorname{E}(T_j)=\frac{\partial^2 f(\theta)}{\partial\theta_i\partial\theta_j} \\
+		\operatorname{Cov}(T_i,T_j)=\frac{\partial^2 f(\theta)}{\partial\theta_i\partial\theta_j}
+	\end{gather*}
+\end{proof}
+
+
+\section{Bayesian}
+The process of Bayesian data analysis can be idealized by dividing it into the following three stes:
+\begin{enumerate}
+	\item Setting up a full probability model which means a joint probability distribution for all observable quantities in a problem.
+	\item  Conditioning on observed data: calculating and interpreting the appropriate posterior distribution——the conditional probability distribution of the unobserved
+\end{enumerate}
+
+\begin{theorem}\label{eq:Bayesian}
+	\info{链接全概率公式与条件概率，同时写完测度后重新定义}
+\end{theorem}
+
+\begin{definition}
+	The parameters associated with the prior distribution are termed hyperparameters.
+\end{definition}
+\begin{definition}
+	The highest posterior density region is defined as the set of values that encompasses $100(1-\alpha)\%$ of the posterior probability, characterized by the property that the density within this region is never less than that outside of it. \par
+	A central interval of posterior probability, within the context of a $100(1 - \alpha)\%$ interval, denotes the range of values that includes exactly $100(\alpha/2)\%$ of the posterior probability on each side.
+\end{definition}
+
+\subsection{Binomial Distribution}
+\begin{equation*}
+	p(y|\theta)=\operatorname{Binom}(y|n,\theta)=\binom{n}{y}\theta^y(1-\theta)^{n-y}
+\end{equation*}
+\begin{theorem}
+	When the prior distribution for the parameter $\theta$ is specified as uniform over the interval $[0,1]$, the resulting posterior distribution for the binomial model is characterized by a Beta distribution, specifically $\operatorname{Beta}(y+1, n-y+1)$. In this context, $y$ denotes the number of observed successes, while $n$ represents the total number of trials conducted. Letting $\tilde{y}$ represent the result of a new trial which is exchangeable with the first $n$, then:
+	\begin{equation*}
+		P(\tilde{y}=1| y)=\frac{y+1}{n+2}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	As \cref{eq:Bayesian} shows:
+	\begin{equation*}
+		p(\theta | y) = \frac{p(y | \theta) p(\theta)}{p(y)} \propto p(\theta) p(y | \theta) = p(y | \theta) = \binom{n}{y} \theta^y (1 - \theta)^{n - y} \propto \theta^y (1 - \theta)^{n - y}
+	\end{equation*}
+	Since the prior distribution $p(\theta)$ is uniform over $[0,1]$, we have $p(\theta) = 1$ for $\theta \in [0,1]$. Therefore, the posterior distribution is proportional to the likelihood:
+	\[
+	p(\theta | y) \propto \theta^y(1 - \theta)^{n - y}
+	\]
+	This is the kernel of a Beta distribution. The probability density function of the Beta distribution with parameters $\alpha$ and $\beta$ is given by:
+	\[
+	p(\theta ; \alpha, \beta) = \frac{1}{B(\alpha, \beta)} \theta^{\alpha - 1} (1 - \theta)^{\beta - 1}
+	\]
+	for $\theta \in [0,1]$, where $B(\alpha, \beta)$ is the Beta function, which acts as the normalization constant.
+	
+	Comparing this with the posterior kernel $\theta^y(1 - \theta)^{n - y}$, we identify $\alpha = y + 1$ and $\beta = n - y + 1$. Therefore, the posterior distribution of $\theta$ is:
+	\[
+	\theta | y \sim \operatorname{Beta}(y + 1, n - y + 1)
+	\]
+	
+	Now consider a new trial result $\tilde{y}$ that is exchangeable with the original $n$ trials. The predictive probability of success in the new trial is given by the expectation of $\theta$ under the posterior distribution:
+	\begin{align*}
+		P(\tilde{y} = 1 | y) &= \int_0^1 P(\tilde{y} = 1 | \theta, y)p(\theta | y)\dif\theta \\
+		&= \int_0^1 \theta p(\theta | y)\dif\theta = \operatorname{E}(\theta | y) = \frac{y + 1}{n + 2}
+	\end{align*}
+	which completes the proof.
+\end{proof}
+\begin{theorem}
+	The Beta distribution is the conjugate prior for the binomial likelihood. Specifically, if the prior distribution of the success probability $\theta$ is $\operatorname{Beta}(\alpha, \beta)$, and the data consist of $y$ successes in $n$ Bernoulli trials, then the posterior distribution of $\theta$ is $\operatorname{Beta}(\alpha + y, \beta + n - y)$.
+\end{theorem}
+\begin{proof}
+	Assume that the prior distribution of $\theta$ follows a Beta distribution with hyperparameters $\alpha$ and $\beta$, so that:
+	\[
+	p(\theta) \propto \theta^{\alpha - 1} (1 - \theta)^{\beta - 1}
+	\]
+	
+	The likelihood function for observing $y$ successes out of $n$ trials in a binomial experiment is:
+	\[
+	p(y | \theta) \propto \theta^y (1 - \theta)^{n - y}
+	\]
+	
+	Applying \cref{eq:Bayesian}, the posterior distribution is given by:
+	\begin{align*}
+		p(\theta | y) &\propto p(\theta)p(y | \theta) \\
+		&\propto \theta^{\alpha - 1} (1 - \theta)^{\beta - 1}\theta^y (1 - \theta)^{n - y}  \\
+		&\propto \theta^{\alpha + y - 1} (1 - \theta)^{\beta + n - y - 1}
+	\end{align*}
+	
+	This expression matches the kernel of a Beta distribution with updated parameters. Therefore, the posterior distribution is:
+	\[
+	\theta | y \sim \operatorname{Beta}(\alpha + y, \beta + n - y)
+	\]
+	This confirms that the Beta distribution is conjugate to the binomial likelihood, completing the proof.
+\end{proof}
+
+\subsection{Normal Distribution}
+\subsubsection{Known Variance}
+\begin{theorem}
+	When the variance is known, the normal distribution is the conjugate prior for the mean $\mu$ of a normal likelihood. Specifically, suppose there are $n$ i.i.d observations $y=(\seq{y}{n})$ and the likelihood is $y_i|\mu\sim\operatorname{N}(\mu,\sigma^2)$, where $\sigma^2$ is known. If the prior for $\mu$ is $\mu\sim\operatorname{N}(\nu,\tau^2)$, then the posterior distribution of $\mu$ is also normal:
+	\begin{equation*}
+		\mu|y\sim\operatorname{N}\left(\frac{n\tau^2\bar{y} + \sigma^2\nu}{n\tau^2 + \sigma^2}, \frac{\sigma^2\tau^2}{n\tau^2 + \sigma^2}\right)
+	\end{equation*}
+	where $\bar{y} = \dfrac{1}{n}\sum\limits_{i=1}^n y_i$ is the sample mean.
+\end{theorem}
+\begin{proof}
+	\begin{align*}
+		p(\mu|y)&\propto p(\mu)p(y|\mu)\propto
+		\exp\left\{-\frac{1}{2}\left[\frac{1}{\sigma^2}\sum_{i=1}^{n}(y_i-\mu)^2+\frac{(\mu-\nu)^2}{\tau^2}\right]\right\} \\
+		&\propto\exp\left\{-\frac{1}{2}\left[\frac{1}{\sigma^2}\sum_{i=1}^{n}(y_i^2-2y_i\mu+\mu^2)+\frac{(\mu-\nu)^2}{\tau^2}\right]\right\} \\
+		&\propto\exp\left\{-\frac{1}{2}\left[\frac{n\mu^2-2n\bar{y}\mu}{\sigma^2}+\frac{(\mu-\nu)^2}{\tau^2}\right]\right\} \\
+		&=\exp\left[-\frac{n\tau^2\mu^2-2n\tau^2\bar{y}\mu+\sigma^2(\mu^2-2\nu\mu+\nu^2)}{2\sigma^2\tau^2}\right] \\
+		&\propto\exp\left[-\frac{(n\tau^2+\sigma^2)\mu^2-2(n\tau^2\bar{y}+\sigma^2\nu)\mu}{2\sigma^2\tau^2}\right] \\
+		&=\exp\left[-\frac{\mu^2-2\dfrac{n\tau^2\bar{y}+\sigma^2\nu}{\sigma^2+\tau^2}\mu}{\dfrac{2\sigma^2\tau^2}{n\tau^2+\sigma^2}}\right] \\
+		&\propto\exp\left[-\frac{1}{2}\frac{\left(\mu-\dfrac{n\tau^2\bar{y}+\sigma^2\nu}{\sigma^2+\tau^2}\right)^2}{\dfrac{\sigma^2\tau^2}{n\tau^2+\sigma^2}}\right]\qedhere
+	\end{align*}
+\end{proof}
+\begin{theorem}
+	The posterior distribution of a future observation $\tilde{y}$ is:
+	\begin{equation*}
+		\tilde{y}|y\sim\operatorname{N}\left(\frac{n\tau^2\bar{y}+\sigma^2\nu}{n\tau^2+\sigma^2},\frac{\sigma^2\tau^2}{n\tau^2+\sigma^2}+\sigma^2\right)
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	Let:
+	\begin{equation*}
+		\mu_1=\frac{n\tau^2\bar{y}+\sigma^2\nu}{n\tau^2+\sigma^2},\;\sigma^2_1=\frac{\sigma^2\tau^2}{n\tau^2+\sigma^2}
+	\end{equation*}
+	Given that the value of $\tilde{y}$ is independent of $y$ when conditioned on $\mu$, we can express the conditional probability as follows:
+	\begin{align*}
+		p(\tilde{y}|y)
+		&=\int_{}p(\tilde{y}|\mu,y)p(\mu|y)\dif\mu=\int_{}p(\tilde{y}|\mu)p(\mu|y)\dif\mu \\
+		&\propto\int_{}\exp\left[-\frac{(\tilde{y}-\mu)^2}{2\sigma^2}\right]\exp\left[-\frac{(\mu-\mu_1)^2}{2\sigma_1^2}\right]\dif\mu	
+	\end{align*}
+	The above expression can be interpreted as the marginal density of the bivariate normal distribution $(\tilde{y}, \mu)$ with respect to $\tilde{y}$. According to \cref{cor:MultiNormalLinearTransform}(4), it follows that $\tilde{y}$ is normally distributed. Utilizing \info{重期望公式} and \cref{prop:Variance}, we derive the following results:
+	\begin{gather*}
+		\operatorname{E}(\tilde{y}|y)=\operatorname{E}[\operatorname{E}(\tilde{y}|\mu,y)|y]=\operatorname{E}[\operatorname{E}(\tilde{y}|\mu)|y]=\operatorname{E}(\mu|y)=\mu_1 \\
+		\begin{aligned}
+			\operatorname{Var}(\tilde{y}|y)&=\operatorname{E}[\operatorname{Var}(\tilde{y}|\theta,y)|y]+\operatorname{Var}[\operatorname{E}(\tilde{y}|\theta,y)|y]=\operatorname{E}[\operatorname{Var}(\tilde{y}|\theta)|y]+\operatorname{Var}[\operatorname{E}(\tilde{y}|\theta)|y] \\
+			&=\operatorname{E}(\sigma^2|y)+\operatorname{Var}(\mu|y)=\sigma_1^2+\sigma^2
+		\end{aligned}\qedhere
+	\end{gather*}
+\end{proof}
+\subsubsection{Known Mean}
+\begin{theorem}
+	When the mean is known, the inverse-gamma distribution is the conjugate prior for the variance $\sigma^2$ of a normal likelihood. Specifically, suppose there are $n$ i.i.d observations $y=(\seq{y}{n})$ and the likelihood is $y_i|\mu\sim\operatorname{N}(\mu,\sigma^2)$, where $\mu$ is known. If the prior for $\sigma^2$ is $\sigma^2\sim\operatorname{Inv-Gamma}(\alpha,\lambda)$, then the posterior distribution of $\sigma^2$ is:
+	\begin{equation*}
+		\sigma^2|y\sim\operatorname{Inv-Gamma}\left[\frac{n}{2}+\alpha,\lambda+\frac{1}{2}\sum_{i=1}^{n}(y_i-\mu)^2\right]
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	\begin{align*}
+		p(\sigma^2|y)&\propto p(\sigma^2)p(y|\sigma^2)
+		\propto(\sigma^2)^{-\alpha-1}\exp\left(-\frac{\lambda}{\sigma^2}\right)\sigma^{-n}\exp\left[-\frac{1}{2\sigma^2}\sum_{i=1}^{n}(y_i-\mu)^2\right] \\
+		&=(\sigma^2)^{-\frac{n}{2}-\alpha-1}\exp\left[-\frac{2\lambda+\sum\limits_{i=1}^{n}(y_i-\mu)^2}{2\sigma^2}\right]\qedhere
+	\end{align*}
+\end{proof}
+\subsection{Possion Model}
+\begin{theorem}
+	The gamma distribution is the conjugate prior for the possion likelihood. Specifically, suppose there are $n$ i.i.d observations $y=(\seq{y}{n})$ and the likelihood is $y_i|\lambda\sim\operatorname{Possion}(\lambda)$. If the prior for $\lambda$ is $\lambda\sim\operatorname{Gamma}(\alpha,\beta)$, then the posterior distribution of $\lambda$ is:
+	\begin{equation*}
+		\lambda|y\sim\operatorname{Gamma}\left(\alpha+n\bar{y},\beta+n\right)
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	$p(\lambda|y)\propto p(\lambda)p(y|\lambda)
+	\propto\lambda^{\alpha-1}e^{-\beta\lambda}\lambda^{n\bar{y}}e^{-n\lambda}=\lambda^{\alpha+n\bar{y}-1}e^{-(\beta+n)\lambda}$.
+\end{proof}
+
+\section{Prior Distribution}
+
+\subsection{Conjugate Prior Distribution}
+\begin{definition}
+	If $\mathcal{F}$ is a class of sampling distributions $p(y|\theta)$, and  $\mathcal{P}$ is a class of prior distributions for $\theta$, then the class $\mathcal{P}$ is conjugate for $\mathcal{F}$ if:
+	\begin{equation*}
+		\forall\;p(\cdot|\theta)\in\mathcal{F}\;and\;p(\cdot)\in\mathcal{P},\;p(\theta|y)\in\mathcal{P}
+	\end{equation*}
+	The set of all probability functions that share the same functional form as the likelihood is referred to as the natural conjugate prior families.
+\end{definition}
+
+\subsection{Noninformative Prior Distribution}
+\subsubsection{Jeffreys' Invariance Principle}
+The Jeffreys' invariance principle posits that the prior distribution should remain invariant when subjected to a transformation of the coordinate system for the parameter vector.
+\begin{definition}
+	In accordance with Jeffreys' invariance principle, the prior distribution for the parameter vector $\theta$ is proportional to $|\det[I(\theta)]|^{\frac{1}{2}}$.
+\end{definition}
+\subsubsection{Prior Distribution for the Location-Scale Family}
+\begin{theorem}
+	The location parameter can be conceptualized as the particular instantiation of the same parameter across various origins. Consequently, it is posited that the prior distribution of the location parameter ought not to be influenced by the selection of origin. In accordance with this principle, the prior distribution for the location parameter should be formulated as follows: 
+	\begin{equation*}
+		p(\theta)\propto1
+	\end{equation*}
+	Similarly, the scale parameter can be interpreted as the specific realization of the same parameter across different scales, so we believe that the prior distribution of the scale parameter should not depend on the choice of scale. In alignment with this principle, the prior distribution for the scale parameter should be articulated as follows:
+	\begin{equation*}
+		p(\theta)\propto\frac{1}{\theta}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	Initially, we will assume that $\theta$ serves as a location parameter. In accordance with the aforementioned principle, we can express the following relationship:
+	\begin{equation*}
+		p(\theta) = p(\theta + \alpha), \;\forall\; \alpha \in \mathbb{R}^{}
+	\end{equation*}
+	This implies that $p(\theta)$ must be a constant across the real line. 
+	
+	Next, we consider the case of a scale parameter, where we define $\tau = \dfrac{\theta}{\alpha}$, with $\alpha > 0$. Referring to \info{随机变量函数的分布}, we need to establish the following equation:
+	\begin{equation*}
+		p(\tau) = p(\alpha \tau) \left| \frac{\dif \theta}{\dif\tau} \right| = p(\alpha \tau) \alpha = p(\theta)
+	\end{equation*}
+	From this, we derive:
+	\begin{equation*}
+		\frac{p(\alpha \tau)}{p(\theta)} = \frac{1}{\alpha}
+	\end{equation*}
+	This leads us to conclude that:
+	\begin{equation*}
+		p(\theta) \propto \frac{1}{\theta}
+	\end{equation*}
+\end{proof}

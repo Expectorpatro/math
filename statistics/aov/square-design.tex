@@ -1,0 +1,182 @@
+\chapter{部分实施问题}
+前几节介绍的方法都要求每个水平组合至少做一次试验，如果考虑因子间的交互作用，对每个水平组合还要做重复试验。这就导致当因子数较多或者因子水平书较多时，试验总次数会非常多。这就提出了一个问题：如何做到只对全部水平组合的一部分做试验，也能比较因子的各水平对试验结果是否有显著差异、不同因子间是否有交互作用？这就是全因子试验的部分实施问题。
+
+\section{正交拉丁方设计}
+本节介绍一种在无交互效应、各因子水平数相等情况下的部分实施问题的解决方案。设每个因子有$n$个水平，一共有$k$个因子。
+\subsection*{原理}
+要使得在对任一因子的效应作比较时能够消除其它因子水平变动对数据的影响，就需要保证：在任一因子的任一水平下，其它因子的每个水平都重复相同次数。此时称这些因子彼此之间正交。
+\begin{definition}
+	由$p$个不同符号排成的$p$阶方阵中，如果每行的$p$个元素不同，每列的$p$个元素也不同，则称这个方阵为一个$p$阶拉丁方。如果两个$p$阶拉丁方重叠时，第一个拉丁方中的任一元素与第二个拉丁方中的每个元素都相遇且只相遇一次，则称这一对拉丁方相互正交。
+\end{definition}
+下面的第一个方阵就是一个$3$阶拉丁方，第二个矩阵表示一对正交拉丁方重叠。
+\begin{equation*}
+	\begin{aligned}
+		&\begin{pmatrix}
+			A & B & C \\
+			B & C & A \\
+			C & A & B
+		\end{pmatrix}
+		\quad &\quad
+		&\begin{pmatrix}
+			A\alpha & B\beta & C\gamma \\
+			B\gamma & C\alpha & A\beta \\
+			C\beta & A\gamma & B\alpha
+		\end{pmatrix}
+	\end{aligned}
+\end{equation*}
+我们可以发现，拉丁方中的元素作为某一个因子的不同水平时，互相正交的拉丁方满足因子间正交。由此产生了正交拉丁方设计。
+\begin{table}[H]
+	\centering
+	\begin{tabularx}{\textwidth}{c|>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X}
+		\hline
+		\diagbox{行因子}{列因子} & $C_1$ & $C_2$ & $\cdots$ & $C_n$ \\
+		\hline
+		$R_1$ & $\cdots$ & $\cdots$ & $\cdots$ & $\cdots$ \\
+		$R_2$ & $\cdots$ & $\cdots$ & $\cdots$ & $\cdots$ \\
+		$\vdots$ & $\vdots$ & $\vdots$ & $\vdots$ & $\vdots$ \\
+		$R_n$ & $\cdots$ & $\cdots$ & $\cdots$ & $\cdots$ \\
+		\hline
+	\end{tabularx}
+	\caption{$k$因子各$n$水平正交拉丁方设计表}
+\end{table}
+上表中$\cdots$部分表示$k-2$个互相正交的拉丁方重叠后矩阵位置上的对应元素。因为拉丁方之间是正交的，所以不同的拉丁因子之间是正交的，而每个拉丁因子与行因子、列因子也是正交的，列因子与行因子显然正交，所以该试验方案可以被用作$k$因子各$n$水平的研究，其中需要做$n^2$次试验，每一次试验使用到的因子水平即为上表每一个单元中的$k-2$个拉丁方因子水平与其行列因子水平的组合。\par
+三因子正交拉丁方设计又称拉丁方设计，四因子正交拉丁方设计又称希腊-拉丁方设计，涉及到四个以上因子的正交拉丁方设计称为超方设计。下对拉丁方设计与希腊-拉丁方设计做详细介绍。
+
+\subsection{拉丁方设计}
+拉丁方设计命名的由来是因为其中拉丁方的元素用拉丁字母来表示。
+\begin{table}[H]
+	\centering
+	\begin{tabularx}{\textwidth}{c|>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X}
+		\hline
+		\diagbox{\text{行因子}}{\text{列因子}} & $C_1$ & $C_2$ & $C_3$ \\ 
+		\hline
+		$R_1$ & $A$ & $B$ & $C$ \\ 
+		$R_2$ & $B$ & $C$ & $A$ \\ 
+		$R_3$ & $C$ & $A$ & $B$ \\ 
+		\hline
+	\end{tabularx}
+	\caption{拉丁方设计表}
+\end{table}
+\subsubsection{统计模型}
+\begin{equation*}
+	\begin{cases}
+		y_{ijk}=\mu+\alpha_i+\tau_j+\beta_k+\varepsilon_{ijk} \\
+		\text{诸}\varepsilon_{ijk}\quad\mathrm{i.i.d.~}N(0,\sigma^2) \\
+		s.t.\quad\sum\limits_{i=1}^p\alpha_i=0,\quad\sum\limits_{j=1}^p\tau_j=0,\quad\sum\limits_{k=1}^p\beta_k=0 \\
+		i=1,2,\dots,p,\;j=1,2,\dots,p,\;k=1,2,\dots,p
+	\end{cases}
+\end{equation*}
+其中$y_{ijk}$是在行因子第$i$个水平、列因子第$k$个水平和拉丁因子第$j$个水平下试验的观察值。$\mu$为一般平均，$\alpha_i$是行因子第$i$个水平的效应，$\tau_j$是拉丁因子第$j$个水平的效应，$\beta_k$是列因子第$k$个水平的效应。需要注意的是，因为拉丁方设计的缘故，三个下标之间不是独立的。
+\subsubsection{方差分析}
+\begin{equation*}
+	SST=SS_{\text{拉丁}}+SS_{\text{行}}+SS_{\text{列}}+SSe
+\end{equation*}
+\begin{table}[H] 
+	\centering
+	\begin{tabularx}{\textwidth}{c|>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X}
+		\toprule
+		来源   & 平方和 & 自由度 & 均方和 & $F$ 值 \\ 
+		\midrule
+		拉丁因子 & $SS_\text{拉丁}$ & $p-1$ & $MS_\text{拉丁}= \frac{SS_\text{拉丁}}{p-1}$ & $F = \frac{MS_\text{拉丁}}{MS_e}$ \\ 
+		行因子   & $SS_\text{行}$ & $p-1$ & $MS_\text{行} = \frac{SS_\text{行}}{p-1}$ & $F = \frac{MS_\text{行}}{MS_e}$ \\ 
+		列因子   & $SS_\text{列}$ & $p-1$ & $MS_\text{列}=\frac{SS_\text{列}}{p-1}$ & $F = \frac{MS_\text{列}}{MS_e}$ \\ 
+		误差     & $SS_e$ & $(p-2)(p-1)$ & $MS_e = \frac{SS_e}{(p-2)(p-1)}$ & \\ 
+		总和     & $SS_T$ & $p^2-1$ & & \\ 
+		\bottomrule
+	\end{tabularx}
+	\caption{拉丁方设计方差分析表}
+\end{table}
+其中：
+\begin{equation*}
+	\begin{cases}
+		SST=\sum\limits_{i=1}^p\sum\limits_{j=1}^p\sum\limits_{k=1}^py_{ijk}^2-\frac{y_{...}^2}{p^2} \\
+		SS_\text{行}=\sum\limits_{i=1}^p\frac{y_{i..}^2}{p}-\frac{y_{...}^2}{p^2} \\
+		SS_\text{列}=\sum\limits_{k=1}^p\frac{y_{..k}^2}{p}-\frac{y_{...}^2}{p^2} \\
+		SS_\text{拉丁}=\sum\limits_{j=1}^p\frac{y_{.j.}^2}{p}-\frac{y_{...}^2}{p^2} \\
+		SSe=SST-SS_\text{行}-SS_\text{列}-SS_\text{拉丁}
+	\end{cases}
+\end{equation*}
+\subsubsection{多重比较问题}
+此时的Duncan多重比较过程需要注意：
+\begin{equation*}
+	R_p>r_{1-\alpha}(p,f)\sqrt{\frac{MSe}{p}}
+\end{equation*}
+
+\subsection{希腊拉丁方设计}
+希腊-拉丁方设计命名的由来是因为其中拉丁方的元素分别用拉丁字母和希腊字母来表示。
+\begin{table}[H]
+	\centering
+	\begin{tabularx}{\textwidth}{c|>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X}
+		\hline
+		\diagbox{\text{行因子}}{\text{列因子}} & $C_1$ & $C_2$ & $C_3$ \\  
+		\hline
+		$R_1$ & $A\alpha$ & $B\beta$ & $C\gamma$ \\ 
+		$R_2$ & $B\gamma$ & $C\alpha$ & $A\beta$ \\ 
+		$R_3$ & $C\beta$ & $A\gamma$ & $B\alpha$ \\ 
+		\hline
+	\end{tabularx}
+	\caption{希腊-拉丁方设计表}
+\end{table}
+\subsubsection{统计模型}
+\begin{equation*}
+	\begin{cases}
+		y_{ijkl}=\mu+\alpha_i+\tau_j+\phi_k+\beta_l+\varepsilon_{ijk} \\
+		\text{诸}\varepsilon_{ijkl}\quad\mathrm{i.i.d.~}N(0,\sigma^2) \\
+		s.t.\quad\sum\limits_{i=1}^p\alpha_i=0,\quad\sum\limits_{j=1}^p\tau_j=0,\quad\sum\limits_{k=1}^p\pi_k=0,\quad\sum\limits_{l=1}^p\beta_l=0 \\
+		i=1,2,\dots,p,\;j=1,2,\dots,p,\;k=1,2,\dots,p,\;l=1,2,\dots,p
+	\end{cases}
+\end{equation*}
+其中$y_{ijkl}$是在行因子第$i$个水平、列因子第$l$个水平、拉丁因子第$j$个水平和希腊因子第$k$个水平下试验的观察值。$\mu$为一般平均，$\alpha_i$是行因子第$i$个水平的效应，$\tau_j$是拉丁因子第$j$个水平的效应，$\phi_k$是希腊因子第$k$个水平的效应，$\beta_l$是列因子第$l$个水平的效应。需要注意的是，因为希腊-拉丁方设计的缘故，四个下标之间不是独立的。
+\subsubsection{方差分析}
+\begin{equation*}
+	SST=SS_{\text{拉丁}}+SS_{\text{希腊}}+SS_{\text{行}}+SS_{\text{列}}+SSe
+\end{equation*}
+\begin{table}[H] 
+	\centering
+	\begin{tabularx}{\textwidth}{c|>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X}
+		\toprule
+		来源   & 平方和 & 自由度 & 均方和 & $F$ 值 \\ 
+		\midrule
+		拉丁因子 & $SS_\text{拉丁}$ & $p-1$ & $MS_\text{拉丁}= \frac{SS_\text{拉丁}}{p-1}$ & $F = \frac{MS_\text{拉丁}}{MS_e}$ \\ 
+		希腊因子 & $SS_\text{希腊}$ & $p-1$ & $MS_\text{希腊}= \frac{SS_\text{希腊}}{p-1}$ & $F = \frac{MS_\text{希腊}}{MS_e}$ \\ 
+		行因子   & $SS_\text{行}$ & $p-1$ & $MS_\text{行} = \frac{SS_\text{行}}{p-1}$ & $F = \frac{MS_\text{行}}{MS_e}$ \\ 
+		列因子   & $SS_\text{列}$ & $p-1$ & $MS_\text{列}=\frac{SS_\text{列}}{p-1}$ & $F = \frac{MS_\text{列}}{MS_e}$ \\ 
+		误差     & $SS_e$ & $(p-3)(p-1)$ & $MS_e = \frac{SS_e}{(p-3)(p-1)}$ & \\ 
+		总和     & $SS_T$ & $p^2-1$ & & \\ 
+		\bottomrule
+	\end{tabularx}
+	\caption{拉丁方设计方差分析表}
+\end{table}
+其中：
+\begin{equation*}
+	\begin{cases}
+		SST=\sum\limits_{i=1}^p\sum\limits_{j=1}^p\sum\limits_{k=1}^p\sum\limits_{l=1}^py_{ijkl}^2-\frac{y_{....}^2}{p^2} \\
+		SS_\text{行}=\sum\limits_{i=1}^p\frac{y_{i...}^2}{p}-\frac{y_{....}^2}{p^2} \\
+		SS_\text{列}=\sum\limits_{k=1}^p\frac{y_{...l}^2}{p}-\frac{y_{....}^2}{p^2} \\
+		SS_\text{拉丁}=\sum\limits_{j=1}^p\frac{y_{.j..}^2}{p}-\frac{y_{....}^2}{p^2} \\
+		SS_\text{希腊}=\sum\limits_{k=1}^p\frac{y_{..k.}^2}{p}-\frac{y_{....}^2}{p^2} \\
+		SSe=SST-SS_\text{行}-SS_\text{列}-SS_\text{拉丁}-SS_\text{希腊}
+	\end{cases}
+\end{equation*}
+\subsubsection{多重比较问题}
+此时的Duncan多重比较过程需要注意：
+\begin{equation*}
+	R_p>r_{1-\alpha}(p,f)\sqrt{\frac{MSe}{p}}
+\end{equation*}
+
+\section{正交表设计}
+设一个试验问题有$k$个因子，每个因子有$n$个水平（分别称为$0$水平，$1$水平，……，$n-1$水平），全部水平组合有$n^k$个。本节简要讨论当$n$为素数时，用$n$水平正交表实现它的部分实施的方法。
+\begin{theorem}
+	当$n$为素数时，存在$n-1$个相互正交的$n$阶拉丁方。
+\end{theorem}
+由上述组合数学中的定理，$n^k$设计中任意两个因子的交互作用，例如$AB$，都快可以被分解为$n-1$个分量，即$AB$分量、$A^2B$分量，……，$A^{n-1}B$分量，两因子交互作用的自由度为$(n-1)^2$，每个分量的自由度为$n-1$
+\begin{definition}
+	如果一个矩阵满足下述条件：
+	\begin{enumerate}
+		\item 任意一列中不同数字的重复数相等。
+		\item 任意两列同行数字构成若干数对，每个数对的重复数也相等。
+	\end{enumerate}
+	则称其为一个正交表，记为$L_r(n^c)$，其中$L$为正交表符号，$r$表示正交表行数，$c$表示正交表列数，$n$表示正交表中不同数字的个数。
+\end{definition}
+任意两列的交互作用列是表中另外一列，列名相乘时用指数法则模2取余。交互效应列的数字由主效应列相乘得到。
+同行主效应列构成的数组代表一个试验点，也代表着因子的主效应的估计量的对比的代数符号。

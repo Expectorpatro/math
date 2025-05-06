@@ -1,0 +1,59 @@
+\section{Brown-Mood中位数检验}
+
+\subsubsection{目的}
+检验两个样本X和Y的中位数$M_X,\;M_Y$是否相同。
+\subsubsection{原理}
+记样本X与Y分别为$X_1,X_2,\dots,X_m,\;Y_1,Y_2,\dots,Y_n$。
+将两样本混合求得混合后的中位数$M_{XY}$。若两样本中位数相同，则混合后的中位数应也等于二者的中位数，那么两个样本中大于$M_{XY}$的单元的个数应该大致一样。可构建如下表格：
+
+\begin{table}[htbp]
+	\centering
+	\begin{tabular}{cccc}
+		\toprule 
+		 & X样本 & Y样本 & 总和 \\
+		\midrule 
+		单元大于$M_{XY}$的个数 & a & b & p \\
+		单元小于$M_{XY}$的个数 & c & d & q \\
+		总和                  & m & n & N \\
+		\bottomrule 
+	\end{tabular}
+	\caption{$2*2$列联表矩阵}
+\end{table}
+
+令A表示表中a背后的随机变量，在m、n、p固定的情况下，A服从超几何分布H$(p,m,N)$（在四个边际和中任意三个固定的情况下，都有$2*2$列联表中的一个值其背后的随机变量服从超几何分布），有如下概率：
+\begin{equation}
+	P(A=k)=\frac{\binom{m}{k}\binom{n}{p-k}}{\binom{N}{p}}\notag
+\end{equation}
+\hspace{2em}若A过大或过小，考虑到此时p是固定的，那么X样本中大于$M_{XY}$单元的个数离Y样本中大于$M_{XY}$单元的个数就会很远，就应怀疑零假设。
+\subsubsection{零假设}
+$H_0:M_X=M_Y$
+
+\begin{table}[htbp]
+	\centering
+	\begin{tabular}{cc}
+		\toprule
+		备择假设 & $p$值 \\
+		\midrule 
+		$H_1:M_X>M_Y$ & $P(A\geqslant a)$ \\
+		$H_1:M_X<M_Y$ & $P(A\leqslant a)$ \\
+		$H_1:M_X\ne M_Y$ & 2\text{min}\{$P(A\geqslant a)$,\;$P(A\leqslant a)$\} \\
+		\bottomrule 
+	\end{tabular}
+	\caption{对$H_0:M_X=M_Y$的检验}
+\end{table}
+
+\subsubsection{大样本近似}
+由超几何分布的期望与方差，在大样本情况下可认为有如下关系：
+\begin{equation}
+	Z=\frac{A - \frac{pm}{N}}{\sqrt{\frac{pm(N-p)(N-m)}{N^3}}} \sim N(0,1)\notag
+\end{equation}
+\hspace{2em}对于双边假设检验，在大样本情况下，可选取检验统计量与$p$值如下：
+\begin{equation}
+	K=\frac{(2a-m)^2(m+n)}{mn}\sim\chi^2(1),\;
+	p=P(K\geqslant k)\notag
+\end{equation}
+\subsubsection{注意事项}
+若有和$M_{XY}$值相同的单元，可将其去除，也可将其归于任何一类使得检验变得保守一点。
+\subsubsection{代码}
+以下代码需要输入x满足一定的格式：数据是两列，第一列为观测值，第二列用$1,2$来表示其属于X或Y样本，1表示属于X样本。以下代码也提供了样本中有和$M_{XY}$值相同的单元情况下的处理方案，omit表示去除与$M_{XY}$值相同的单元，less表示将其归于小于$M_{XY}$值的一类，greater表示将其归于大于$M_{XY}$值值的一类。
+\inputminted[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines]{r}{nonparametric-statistics/chapter2/brown-mood.R}

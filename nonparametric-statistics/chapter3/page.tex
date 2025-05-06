@@ -1,0 +1,41 @@
+\section{Page检验}
+
+\subsubsection{目的}
+检验水平的位置参数是否呈现出上升趋势，若想检验是否呈现出下降趋势，改变水平顺序就行了。
+\subsubsection{适用条件}
+各水平间并不独立（因为还有区组的影响），采用完全区组设计，水平之间分布是相似的，离散型数据与连续型数据都可以。
+\subsubsection{假设}
+假设$k$个水平有分布函数$F_i(x)=F(x-\theta_i),\;i=1,2,\dots,k$，则检验假设可写为：
+\begin{equation}
+	H_0:\theta_1=\theta_2=\cdots=\theta_n\Leftrightarrow
+	H_1:\theta_1\leqslant\theta_2\leqslant\cdots\leqslant\theta_n\notag
+\end{equation}
+\subsubsection{原理}
+假设有$k$个水平、$b$个区组。\par
+因为各区组之间是有影响的，无法把各响应值混在一起排序。选择在各个区组内计算所有响应值的秩，$R_{ij}$表示在第$j$个区组中水平$i$的秩，$R_i=\sum\limits_{j=1}^bR_{ij},\;i=1,2,\dots,k$，定义如下Page统计量：
+\begin{equation}
+	L=\sum_{i=1}^kiR_i\notag
+\end{equation}
+如果备择假设是正确的，那么对$R_i$进行加权求和可以对统计量起到一个放大的作用，那么$L$就会很大。因此在$L$比较大的时候，有理由怀疑零假设。由此可看出这里只考虑上侧的单侧检验问题。\par
+若想求精确检验的结果，需要满足数据中没有结（即每个区组中都没有相同的数值），然后对每一种秩分配情况计算$L$的值（秩的大小关系便反映了数据之间的大小关系），即可得到$L$的精确分布。
+\subsubsection{大样本近似}
+在大样本的情况下（$b\to+\infty$），有如下正态近似：
+\begin{gather*}
+	Z=\frac{L-\mu_L}{\sigma_L}\sim N(0,\;1) \\
+	\mu_L=\frac{bk(k+1)^2}{4},\;\sigma_L^2=\frac{b(k^3-k)^2}{144(k-1)}
+\end{gather*}
+\subsubsection{打结}
+若存在打结的情况，需要对正态近似的$\sigma_L^2$作如下修正（其中$\tau_{ij}$表示第$j$个区组的第$i$个结统计量）：
+\begin{equation}
+	\sigma_L^2=k(k^2-1)\frac{bk(k^2-1)-\sum_i\sum_j(\tau_{ij}^3-\tau_{ij})}{144(k-1)}\notag
+\end{equation}
+\subsubsection{对区组、水平进行重复时的page检验}
+在区组和水平之间不存在交互作用，并且所有$(i,\;j)$位置的重复数都相同时（假设都是$n$），有如下正态近似（也考虑了到打结的修正）：
+\begin{gather*}
+	Z=\frac{L-\mu_L}{\sigma_L}\sim N(0,\;1) \\
+	\mu_L=\frac{nbk(k+1)(nk+1)}{4} \\
+	\sigma_L^2=nk(k^2-1)\frac{nbk(n^2k^2-1)-\sum_i\sum_j(\tau_{ij}^3-\tau_{ij})}{144(nk-1)}
+\end{gather*}
+\subsubsection{代码}
+以下是自编代码，提供重复、精确计算、大样本近似、连续性修正与打结校正功能。当对区组与水平进行重复时，x必须是一个数据框，每一列是一次重复的结果，也必须传入factor与block，此时只提供大样本近似。当不进行重复时，x可以是一个三列的数据框，第一列表示response值，第二列表示factor，第三列表示block。请注意，检验顺序与输入的factor顺序是一致的，建议对照二维表\textbf{逐行}输入（行是水平，检验顺序即为行的顺序，列是区组）。如果出现打结的情况，结统计量按照计算公式进行计算，$L$统计量的秩部分取结的平均秩（例：数据为1、1、3、4，有重复值1，则秩为1.5、1.5、3、4）。
+\inputminted[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines]{r}{nonparametric-statistics/chapter3/page.R}

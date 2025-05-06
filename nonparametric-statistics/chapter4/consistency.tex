@@ -1,0 +1,33 @@
+\section{分类评分结果一致性判断}
+
+\subsection{Cohen's Kappa系数}
+\info{根本没懂原理}
+\subsubsection{评判标准}
+\begin{enumerate}
+	\item $<0.4$ 一致性很差
+	\item $0.4-0.6$ 中度一致
+	\item $0.6-0.8$ 具有较高的一致性
+	\item $>0.8$ 具有极高的一致性
+\end{enumerate}
+
+\subsubsection{代码}
+\begin{minted}[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines, mathescape]{r}
+library(psych)
+cohen.kappa(x)
+\end{minted}
+
+\subsection{Kendall协同系数检验}
+\subsubsection{目的}
+检验$b$次对$k$个个体的评估是随机的（不相关的）还是一致的。
+\subsubsection{适用条件}
+完全区组设计，离散型数据（打分，排序），主观性的数据一般使用Kendall检验。
+\subsubsection{假设}
+\begin{equation}
+	H_0:\text{这些评估是不相关的或是随机的},\;H_1:\text{这些评估是一致的}\notag
+\end{equation}
+\subsubsection{原理}
+这里其实是把$b$个评估者看作是区组，把被评分的个体看作了水平。所有的计算和Friedman秩和检验一样（参考第\pageref{sec:friedman检验原理}页），只是Kendall协同系数$W$要在Friedman统计量$Q$的基础上再除$b(k-1)$（大样本近似与打结的情况都可参考Friedman秩和检验）\info{查资料看Kendall的打结是否和Friedman一致}。\par
+为什么这么做呢？我们想看的是对个体的评估是否是随机的，那么如果是随机的，各个体获得的评分总秩和应该是较相近的。其实还是看各水平之间是否有差异，但并不是它们本身的差异，而是在被评估者打分以后，在打分上是否呈现出各水平的差异。其实我们在这里是默认个体之间是有差异的，如果评估结果有差异那么就不随机，评估结果没有差异那就是随机的评估。
+\subsubsection{代码}
+以下是自编代码，提供精确计算、大样本近似、连续性修正与打结校正功能。x可以是一个三列的数据框，第一列表示response值，第二列表示factor，第三列表示block。x也可以是一个向量，表示response，此时必须传入factor和block。
+\inputminted[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines]{r}{nonparametric-statistics/chapter4/kendall.R}

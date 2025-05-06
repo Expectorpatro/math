@@ -1,0 +1,160 @@
+\section{二次型}
+
+\begin{definition}
+	$\mathbf{X}$是一个$n$维随机向量，$A=(a_{ij})$为$n$阶非随机实对称阵，则随机变量：
+	\begin{equation*}
+		\mathbf{X}^TA\mathbf{X}=\sum_{i=1}^{n}\sum_{j=1}^{n}a_{ij}\mathbf{X}_i\mathbf{X}_j
+	\end{equation*}
+	称为$\mathbf{X}$的二次型。
+\end{definition}
+\subsubsection{随机变量二次型的均值}
+\begin{theorem}\label{theo:ERVQuadraticForm}
+	$\mathbf{X}$是一个$n$维随机向量，$\operatorname{E}(\mathbf{X})=\mu,\;\operatorname{Cov}(\mathbf{X})=\Sigma$，则：
+	\begin{equation*}
+		\operatorname{E}(\mathbf{X}^TA\mathbf{X})=\mu^TA\mu+\operatorname{tr}(A\Sigma)
+	\end{equation*}	
+\end{theorem}
+\begin{proof}
+	\begin{align*}
+		\operatorname{E}(\mathbf{X}^TA\mathbf{X})
+		&=\operatorname{E}[(\mathbf{X}-\mu+\mu)^TA(\mathbf{X}-\mu+\mu)] \\
+		&=\operatorname{E}[(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)]+\operatorname{E}[(\mathbf{X}-\mu)^TA\mu]+\operatorname{E}[\mu^TA(\mathbf{X}-\mu)]+\operatorname{E}(\mu^TA\mu) \\
+		&=\operatorname{E}\{\operatorname{tr}[(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)]\}+\mu^TA\mu \\
+		&=\operatorname{E}\{\operatorname{tr}[A(\mathbf{X}-\mu)(\mathbf{X}-\mu)^T]\}+\mu^TA\mu \\
+		&=\operatorname{tr}\operatorname{E}[A(\mathbf{X}-\mu)(\mathbf{X}-\mu)^T]+\mu^TA\mu \\
+		&=\operatorname{tr}\{A\operatorname{E}[(\mathbf{X}-\mu)(\mathbf{X}-\mu)^T]\}+\mu^TA\mu \\
+		&=\operatorname{tr}(A\Sigma)+\mu^TA\mu
+	\end{align*}
+	第二行到第三行利用到了$\operatorname{E}(\mathbf{X})=\mu$以及$(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)=\operatorname{tr}[(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)]$，后式成立是因为$(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)$是一个标量，标量的迹自然等于自身。第三行到第四行使用到了\cref{prop:Trace}(3)。
+\end{proof}
+\subsubsection{独立随机变量二次型的方差}
+\begin{theorem}\label{theo:VRVQuadraticForm}
+	设随机变量$X_i,\;i=1,2,\dots,n$相互独立，$\operatorname{E}(X_i)=\mu_i,\;\operatorname{Var}(X_i)=\sigma^2,\;\nu_k^{(i)}=\operatorname{E}[(X_i-\mu_i)^k]$，$\mathbf{X}=(\seq{X}{n})^T,\;\mu=(\seq{\mu}{n})^T$，$A=(a_{ij})$为$n$阶非随机实对称阵，$a=(a_{11},a_{22},\dots,a_{nn})^T$，$b=(\nu_3^{(1)}a_{11},\nu_3^{(2)}a_{22},\dots,\nu_3^{(n)}a_{nn})^T$，则：
+	\begin{equation*}
+		\operatorname{Var}(\mathbf{X}^TA\mathbf{X})=\sum_{i=1}^{n}a_{ii}^2\nu_4^{(i)}+\sigma^4[2\operatorname{tr}(A^2)-3a^Ta]+4\sigma^2\mu^TA^2\mu+4\mu^TAb
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由\cref{prop:Variance}(1)可得：
+	\begin{equation*}
+		\operatorname{Var}(\mathbf{X}^TA\mathbf{X})=\operatorname{E}[(\mathbf{X}^TA\mathbf{X})^2]-[\operatorname{E}(\mathbf{X}^TA\mathbf{X})]^2 
+	\end{equation*}
+	由题设可知：
+	\begin{equation*}
+		\operatorname{E}(\mathbf{X})=\mu,\;\operatorname{Var}(\mathbf{X})=\sigma^2I
+	\end{equation*}
+	根据\cref{theo:ERVQuadraticForm}可得：
+	\begin{align*}
+		[\operatorname{E}(\mathbf{X}^TA\mathbf{X})]^2&=[\operatorname{tr}(A\sigma^2I)+\mu^TA\mu]^2=[\sigma^2\operatorname{tr}(A)+\mu^TA\mu]^2 \\
+		&=\sigma^4[\operatorname{tr}(A)]^2+2\sigma^2\operatorname{tr}(A)\mu^TA\mu+(\mu^TA\mu)^2
+	\end{align*}
+	同时：
+	\begin{align*}
+		(\mathbf{X}^TA\mathbf{X})^2
+		&=[(\mathbf{X}-\mu+\mu)^TA(\mathbf{X}-\mu+\mu)]^2 \\
+		&=[(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)+2\mu^TA(\mathbf{X}-\mu)+\mu^TA\mu]^2 \\
+		&=[(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)]^2+4[\mu^TA(\mathbf{X}-\mu)]^2+(\mu^TA\mu)^2 \\
+		&\quad+4(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)\mu^TA(\mathbf{X}-\mu)+2(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)\mu^TA\mu \\
+		&\quad+4\mu^TA(\mathbf{X}-\mu)\mu^TA\mu
+	\end{align*}
+	令$\mathbf{Y}=\mathbf{X}-\mu$，则有$\operatorname{E}(\mathbf{Y})=\mathbf{0}$，再由\cref{theo:ERVQuadraticForm}可得：
+	\begin{align*}
+		\operatorname{E}[(\mathbf{X}^TA\mathbf{X})^2]
+		&=\operatorname{E}[(\mathbf{Y}^TA\mathbf{Y})^2]+4\operatorname{E}[(\mu^TA\mathbf{Y})^2]+(\mu^TA\mu)^2 \\
+		&\quad+4\operatorname{E}(\mathbf{Y}^TA\mathbf{Y}\mu^TA\mathbf{Y})+2\mu^TA\mu\sigma^2\operatorname{tr}(A)
+	\end{align*}
+	考虑：
+	\begin{align*}
+		\operatorname{E}[(\mathbf{Y}^TA\mathbf{Y})^2]
+		&=\operatorname{E}\left(\sum_{i=1}^{n}\sum_{j=1}^{n}\sum_{k=1}^{n}\sum_{l=1}^{n}a_{ij}a_{kl}\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l\right) \\
+		&=\sum_{i=1}^{n}\sum_{j=1}^{n}\sum_{k=1}^{n}\sum_{l=1}^{n}a_{ij}a_{kl}\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l)
+	\end{align*}
+	作分类讨论：
+	\begin{enumerate}
+		\item $i,j,k,l$互不相同，则$\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l)=E(\mathbf{Y}_i)E(\mathbf{Y}_j)E(\mathbf{Y}_k)E(\mathbf{Y}_l)=0$；
+		\item $i,j,k,l$中存在某两个值相同：
+		\begin{itemize}
+			\item 此时另外两个不同，则$\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l)=0$；
+			\item 此时另外两个也相同（即$i=j,k=l$或$i=k,j=l$或$i=l,j=k$），则$\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l)=\sigma^4$。
+		\end{itemize}
+		\item $i,j,k,l$中存在某三个值相同，则$\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l)=0$；
+		\item $i,j,k,l$相同，则$\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l)=\nu_4^{(i)}$。
+	\end{enumerate}
+	于是：
+	\begin{align*}
+		\operatorname{E}[(\mathbf{Y}^TA\mathbf{Y})^2]
+		&=\sum_{i=1}^{n}\sum_{j=1}^{n}\sum_{k=1}^{n}\sum_{l=1}^{n}a_{ij}a_{kl}\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l) \\
+		&=\sum_{i=1}^{n}a_{ii}^2\nu_4^{(i)}+\sigma^4\left(\sum_{i\ne k}a_{ii}a_{kk}+\sum_{i\ne j}a_{ij}^2+\sum_{i\ne j}a_{ij}a_{ji}\right) \\
+		&=\sum_{i=1}^{n}a_{ii}^2\nu_4^{(i)}+\sigma^4\left(\sum_{i\ne k}a_{ii}a_{kk}+2\sum_{i\ne j}a_{ij}^2\right)
+	\end{align*}
+	因为：
+	\begin{gather*}
+		\sum_{i\ne k}a_{ii}a_{kk}=[\operatorname{tr}(A)]^2-a^Ta \\
+		\sum_{i\ne j}a_{ij}^2=\operatorname{tr}(AA^T)-a^Ta=\operatorname{tr}(A^2)-a^Ta
+	\end{gather*}
+	所以：
+	\begin{equation*}
+		\operatorname{E}[(\mathbf{Y}^TA\mathbf{Y})^2]=\sum_{i=1}^{n}a_{ii}^2\nu_4^{(i)}+\sigma^4\{[\operatorname{tr}(A)]^2+2\operatorname{tr}(A^2)-3a^Ta\}
+	\end{equation*}
+	由\cref{theo:ERVQuadraticForm}和\cref{prop:Trace}(3)可得：
+	\begin{align*}
+		\operatorname{E}[(\mu^TA\mathbf{Y})^2]
+		&=\operatorname{E}(\mu^TA\mathbf{Y}\mu^TA\mathbf{Y})
+		=\operatorname{E}(\mathbf{Y}^TA\mu\mu^TA\mathbf{Y})
+		=\operatorname{tr}(A\mu\mu^TA\sigma^2I) \\
+		&=\sigma^2\operatorname{tr}(A\mu\mu^TA)
+		=\sigma^2\operatorname{tr}(\mu^TA^2\mu)
+		=\sigma^2\mu^TA^2\mu
+	\end{align*}
+	注意到：
+	\begin{align*}
+		\operatorname{E}(\mathbf{Y}^TA\mathbf{Y}\mu^TA\mathbf{Y})
+		&=\operatorname{E}\left(\sum_{i=1}^{n}\sum_{j=1}^{n}a_{ij}\mathbf{Y}_i\mathbf{Y}_j\sum_{k=1}^{n}\sum_{l=1}^{n}a_{kl}\mu_k\mathbf{Y}_l\right) \\
+		&=\operatorname{E}\left(\sum_{i=1}^{n}\sum_{j=1}^{n}\sum_{k=1}^{n}\sum_{l=1}^{n}a_{ij}a_{kl}\mu_k\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_l\right) \\
+		&=\sum_{i=1}^{n}\sum_{j=1}^{n}\sum_{k=1}^{n}\sum_{l=1}^{n}a_{ij}a_{kl}\mu_k\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_l)
+	\end{align*}
+	和之前的讨论类似，可以得到：
+	\begin{equation*}
+		\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_l)=
+		\begin{cases}
+			\nu_3^{(i)},\;&i=j=l \\
+			0,\;&\text{其他情况}
+		\end{cases}
+	\end{equation*}
+	于是有：
+	\begin{equation*}
+		\operatorname{E}(\mathbf{Y}^TA\mathbf{Y}\mu^TA\mathbf{Y})
+		=\sum_{i=1}^{n}\sum_{k=1}^{n}a_{ii}\nu_3^{(i)}a_{ki}\mu_k
+	\end{equation*}
+	令$b=(\nu_3^{(1)}a_{11},\nu_3^{(2)}a_{22},\dots,\nu_3^{(n)}a_{nn})^T$，则：
+	\begin{equation*}
+		\operatorname{E}(\mathbf{Y}^TA\mathbf{Y}\mu^TA\mathbf{Y})
+		=\sum_{i=1}^{n}\sum_{k=1}^{n}a_{ii}\nu_3^{(i)}a_{ki}\mu_k=\mu^TAb
+	\end{equation*}
+	将以上求得的期望值全部代入，即可得到：
+	\begin{align*}
+		\operatorname{E}[(\mathbf{X}^TA\mathbf{X})^2]
+		&=\operatorname{E}[(\mathbf{Y}^TA\mathbf{Y})^2]+4\operatorname{E}[(\mu^TA\mathbf{Y})^2]+(\mu^TA\mu)^2 \\
+		&\quad+4\operatorname{E}(\mathbf{Y}^TA\mathbf{Y}\mu^TA\mathbf{Y})+2\mu^TA\mu\sigma^2\operatorname{tr}(A) \\
+		&=\sum_{i=1}^{n}a_{ii}^2\nu_4^{(i)}+\sigma^4\{[\operatorname{tr}(A)]^2+2\operatorname{tr}(A^2)-3a^Ta\} \\
+		&\quad+4\sigma^2\mu^TA^2\mu+(\mu^TA\mu)^2+4\mu^TAb+2\mu^TA\mu\sigma^2\operatorname{tr}(A)
+	\end{align*}
+	于是：
+	\begin{align*}
+		\operatorname{Var}(\mathbf{X}^TA\mathbf{X})
+		&=\operatorname{E}[(\mathbf{X}^TA\mathbf{X})^2]-[\operatorname{E}(\mathbf{X}^TA\mathbf{X})]^2 \\
+		&=\sum_{i=1}^{n}a_{ii}^2\nu_4^{(i)}+\sigma^4\{[\operatorname{tr}(A)]^2+2\operatorname{tr}(A^2)-3a^Ta\} \\
+		&\quad+4\sigma^2\mu^TA^2\mu+(\mu^TA\mu)^2+4\mu^TAb+2\mu^TA\mu\sigma^2\operatorname{tr}(A) \\
+		&\quad-\sigma^4[\operatorname{tr}(A)]^2-2\sigma^2\operatorname{tr}(A)\mu^TA\mu-(\mu^TA\mu)^2 \\
+		&=\sum_{i=1}^{n}a_{ii}^2\nu_4^{(i)}+\sigma^4[2\operatorname{tr}(A^2)-3a^Ta]+4\sigma^2\mu^TA^2\mu+4\mu^TAb\qedhere
+	\end{align*}
+\end{proof}
+
+
+
+
+
+
+
+
+

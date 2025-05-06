@@ -1,0 +1,107 @@
+\section{二阶抽样}
+整群抽样抽到群则群中所有单元进入样本，二阶抽样需要继续对每个群进行第二次抽样，抽中则进入样本，即我们只在选中的psu中选择一部分ssu。
+\subsubsection{符号说明}
+\begin{table}[H]
+	\centering
+	\setlength{\tabcolsep}{25pt} % 调整列之间的间距，默认值为6pt
+	\begin{tabular}{ccc}
+		\toprule
+		符号    &  & 说明 \\
+		\midrule
+		$N$ & & 总群数 \\
+		$n$ & & 抽样群数 \\
+		$J$ & & 每个群中分层的层数 \\
+		$M_{ij}$ & & 抽出的第$i$个群第$j$个层个体的总数 \\
+		$m_{ij}$ & & 从抽出的第$i$个群第$j$个层抽出来的样本单元总数 \\
+		$M_{i}$ & & 抽出的第$i$个群个体的总数 \\
+		$M$ & & 个体总数 \\
+		$Y_{ijk}$ & &第$i$个群第$j$个层的第$k$个个体的值 \\
+		$y_{ijk}$ & &抽出的第$i$个群第$j$个层的第$k$个样本的值 \\
+		$\bar{y}_{ij}$ & & 第$i$个群第$j$个层样本的均值 \\
+		$\mu_{ij}$ & & 第$i$个群第$j$个层的均值 \\
+		$\tau_i$ & & 第$i$个群的总体总量 \\
+		$t_i$ & & 入样的第$i$个群的总体总量 \\
+		$\tau$ & & 总体总量 \\
+		$\sigma_{ij}^2$ & & 第$i$个群第$j$个层的方差 \\
+		$p_{ij}$ & & 第$i$个群第$j$个层的流行率 \\
+		$p_i$ & & 第$i$个群的流行率 \\
+		$p$ & & 总流行率 \\
+		$Z_i$ & & 表示第$i$个群是否被抽中的示性变量 \\
+		\bottomrule
+	\end{tabular}
+	\caption{符号说明表}
+\end{table}
+
+\subsection{总量的估计}
+可得到如下关于总量的估计：
+\begin{gather*}
+	\hat{t_i}=\sum_{j=1}^{J}\frac{M_{ij}}{m_{ij}}\sum_{k=1}^{m_{ij}}y_{ijk} \\
+	\hat{\tau}=\frac{N}{n}\sum_{i=1}^{n}\hat{t_i}=\frac{N}{n}\sum_{i=1}^{n}\sum_{j=1}^{J}\frac{M_{ij}}{m_{ij}}\sum_{k=1}^{m_{ij}}y_{ijk} \\
+	E(\hat{t_i})=t_i,\;E(\hat{\tau})=\tau \\
+	Var(\hat{\tau})=\frac{N^2}{n}\left(1-\frac{n}{N}\right)\frac{1}{N-1}\sum_{i=1}^{N}\left(\tau_i-\frac{\tau}{N}\right)^2+\frac{N}{n}\sum_{i=1}^{N}\sum_{j=1}^{J}\frac{M_{ij}^2}{m_{ij}}\left(1-\frac{m_{ij}}{M_{ij}}\right)\left(\frac{1}{M_{ij}-1}\right)\sum_{k=1}^{M_{ij}}\left(Y_{ijk}-\mu_{ij}\right)^2 \\
+	\widehat{Var}(\hat{\tau})=\frac{N^2}{n}\left(1-\frac{n}{N}\right)\frac{1}{n-1}\sum_{i=1}^{n}\left(\hat{t_i}-\frac{\hat{\tau}}{N}\right)^2+\frac{N}{n}\sum_{i=1}^{n}\sum_{j=1}^{J}\frac{M_{ij}^2}{m_{ij}}\left(1-\frac{m_{ij}}{M_{ij}}\right)\left(\frac{1}{m_{ij}-1}\right)\sum_{k=1}^{m_{ij}}\left(y_{ijk}-\bar{y}_{ij}\right)^2 
+\end{gather*}
+\subsubsection{无偏性的证明}
+由分层随机抽样总体总量估计量的无偏性，可以得到此时$\hat{\tau_i}$的无偏性，进而可以证明$\hat{\tau}$是无偏的：
+\begin{align*}
+	E(\hat{\tau})
+	&=E[E(\hat{\tau}|\overrightarrow{Z})]
+	=E\left[E\left(\frac{N}{n}\sum_{i=1}^{n}\hat{t_i}|\overrightarrow{Z}\right)\right]
+	=E\left[E\left(\frac{N}{n}\sum_{i=1}^{N}Z_i\hat{\tau_i}\right)\right] \\ 
+	&=E\left[\sum_{i=1}^{N}\frac{N}{n}Z_iE(\hat{\tau_i})\right]
+	=E\left[\sum_{i=1}^{N}\frac{N}{n}Z_i\tau_i\right]
+	=\sum_{i=1}^{N}\frac{N}{n}\tau_iE(Z_i)
+	=\sum_{i=1}^{N}\frac{N}{n}\tau_i\frac{n}{N}
+	=\sum_{i=1}^{N}\tau_i=\tau
+\end{align*}
+\subsubsection{方差公式的证明}
+由方差的分解，可以得到：
+\begin{equation*}
+	Var(\hat{\tau})=Var[E(\hat{\tau}|\overrightarrow{Z})]+E[Var(\hat{\tau}|\overrightarrow{Z})] 
+\end{equation*}
+由SRS的结论，可以得到：
+\begin{gather*}
+	Var[E(\hat{\tau}|\overrightarrow{Z})]=Var\left[E\left(\sum_{i=1}^{N}\frac{N}{n}Z_i\hat{\tau_i}|\overrightarrow{Z}\right)\right]=Var\left(\sum_{i=1}^{N}\frac{N}{n}Z_i\tau_i\right)=N^2\left(1-\frac{n}{N}\right)\frac{\sigma_\tau^2}{n}\\
+	\sigma_\tau^2=\frac{1}{N-1}\sum_{i=1}^{N}\left(\tau_i-\frac{\tau}{N}\right)^2
+\end{gather*}
+由方差的分解，可以得到：
+\begin{equation*}
+	E[Var(\hat{\tau}|\overrightarrow{Z})]
+	=E\left\{E(\hat{\tau}^2|\overrightarrow{Z})-
+	 E^2[\hat{\tau}|\overrightarrow{Z}]\right\}
+\end{equation*}
+而：
+\begin{align*}
+	E[\hat{\tau}^2|\overrightarrow{Z}]-E[\hat{\tau}|\overrightarrow{Z}]^2
+	&=E\left[\left(\sum_{i=1}^{N}\frac{N}{n}Z_i\hat{\tau_i}\right)^2\right]-\left(\sum_{i=1}^{N}\frac{N}{n}Z_i\tau_i\right)^2 \\
+	&=E\left(\sum_{i=1}^{N}\frac{N^2}{n^2}Z_i^2\hat{\tau_i}^2+\sum_{i=1}^{N}\sum_{j\ne i}\frac{N^2}{n^2}Z_iZ_j\hat{\tau_i}\hat{\tau_j}\right) \\
+	&\quad-\left(\sum_{i=1}^{N}\frac{N^2}{n^2}Z_i^2\tau_i^2+\sum_{i=1}^{N}\sum_{j\ne i}\frac{N^2}{n^2}Z_iZ_j\tau_i\tau_j\right) \\
+	&=\frac{N^2}{n^2}\left(\sum_{i=1}^{N}Z_i^2E(\hat{\tau_i}^2)+\sum_{i=1}^{N}\sum_{j\ne i}Z_iZ_jE(\hat{\tau_i}\hat{\tau_j})-\sum_{i=1}^{N}Z_i^2\tau_i^2-\sum_{i=1}^{N}\sum_{j\ne i}Z_iZ_j\tau_i\tau_j\right) \\
+	&=\frac{N^2}{n^2}\left[\sum_{i=1}^{N}Z_i^2E^2(\hat{\tau_i})+\sum_{i=1}^{N}Z_i^2Var(\hat{\tau_i})+\sum_{i=1}^{N}\sum_{j\ne i}Z_iZ_jE(\hat{\tau_i})E(\hat{\tau_j})\right.\\
+	&\quad\left.-\sum_{i=1}^{N}Z_i^2\tau_i^2-\sum_{i=1}^{N}\sum_{j\ne i}Z_iZ_j\tau_i\tau_j\right] \\
+	&=\frac{N^2}{n^2}\sum_{i=1}^{N}Z_i^2Var(\hat{\tau_i})
+\end{align*}
+由$Z_i$的性质可得：
+\begin{equation*}
+	E[Var(\hat{\tau}|\overrightarrow{Z})]=E\left(\frac{N^2}{n^2}\sum_{i=1}^{N}Z_i^2Var(\hat{\tau_i})\right)=\frac{N^2}{n^2}\sum_{i=1}^{N}E(Z_i^2)Var(\hat{\tau_i})=\frac{N}{n}\sum_{i=1}^{N}Var(\hat{\tau_i})
+\end{equation*}
+由分层随机抽样层内方差的公式：
+\begin{gather*}
+	E[Var(\hat{\tau}|\overrightarrow{Z})]=\frac{N}{n}\sum_{i=1}^{N}\sum_{j=1}^{J}\frac{M_{ij}^2}{m_{ij}}\left(1-\frac{m_{ij}}{M_{ij}}\right)\sigma_{ij}^2 \\
+	\sigma_{ij}^2=\left(\frac{1}{M_{ij}-1}\right)\sum_{k=1}^{M_{ij}}\left(y_{ijk}-\mu_{ij}\right)^2
+\end{gather*}
+所以：
+\begin{equation*}
+	Var(\hat{\tau})=\frac{N^2}{n}\left(1-\frac{n}{N}\right)\frac{1}{N-1}\sum_{i=1}^{N}\left(\tau_i-\frac{\tau}{N}\right)^2+\frac{N}{n}\sum_{i=1}^{N}\sum_{j=1}^{J}\frac{M_{ij}^2}{m_{ij}}\left(1-\frac{m_{ij}}{M_{ij}}\right)\left(\frac{1}{M_{ij}-1}\right)\sum_{k=1}^{M_{ij}}\left(Y_{ijk}-\mu_{ij}\right)^2
+\end{equation*}
+
+\subsection{流行率问题}
+关于流行率问题，有如下结论：
+\begin{gather*}
+	\hat{p}_i=\frac{\hat{t_i}}{M_i} \\
+	\hat{p}=\frac{\hat{\tau}}{M}=\frac{N}{nM}\sum_{i=1}^{n}\sum_{j=1}^{J}\frac{M_{ij}}{m_{ij}}\sum_{k=1}^{m_{ij}}y_{ijk} \\
+	Var(\hat{\tau})=\frac{N^2}{n}\left(1-\frac{n}{N}\right)\frac{1}{N-1}\sum_{i=1}^{N}\left(\tau_i-\frac{\tau}{N}\right)^2+\frac{N}{n}\sum_{i=1}^{N}\sum_{j=1}^{J}\frac{M_{ij}^2}{m_{ij}}\left(1-\frac{m_{ij}}{M_{ij}}\right)\frac{M_{ij}p_{ij}(1-p_{ij})}{M_{ij}-1} \\
+	\widehat{Var}(\hat{\tau})=\frac{N^2}{n}\left(1-\frac{n}{N}\right)\frac{1}{n-1}\sum_{i=1}^{n}\left(\hat{t_i}-\frac{\hat{\tau}}{N}\right)^2+\frac{N}{n}\sum_{i=1}^{n}\sum_{j=1}^{J}\frac{M_{ij}^2}{m_{ij}-1}\left(1-\frac{m_{ij}}{M_{ij}}\right)\hat{p}_{ij}(1-\hat{p}_{ij}) 
+\end{gather*}
+由$\hat{\tau_i}$和$\hat{\tau}$的无偏性，显然$\hat{p}_i$和$\hat{p}$也是无偏估计。由一般情况下$Var(\hat{\tau})$的计算公式，也容易得到流行率问题下$Var(\hat{\tau})$的计算公式。
+

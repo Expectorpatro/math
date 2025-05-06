@@ -1,0 +1,59 @@
+\section{Kendall$\;\tau$关联检验}
+
+\subsubsection{协同}
+对于样本$X_i,Y_i,\;i=1,2,\dots,n$，从中任取两对作积$(X_i-X_j)(Y_i-Y_j)$，若乘积大于0，则称对子$(X_i,\;Y_i)$和$(X_j,\;Y_j)$是协同的(concordant)，它们具有相同的倾向，若乘积小于0，则称对子是不协同的(disconcordant)，它们有相反的倾向。令：
+\begin{equation}
+	\Psi(X_i,X_j,Y_i,Y_j)=
+	\begin{cases}
+		1,\quad(X_i-X_j)(Y_i-Y_j)>0 \\
+		0,\quad(X_i-X_j)(Y_i-Y_j)=0 \\
+		-1,\;(X_i-X_j)(Y_i-Y_j)<0 
+	\end{cases}\notag
+\end{equation}
+\subsubsection{原理}
+定义Kendall$\;\tau$相关系数为：
+\begin{equation}
+	\tau_a=\frac{2}{n(n-1)}\sum_{1\leqslant i<j\leqslant n}\Psi(X_i,X_j,Y_i,Y_j)=\frac{K}{\binom{n}{2}}=\frac{n_c-n_d}{\binom{n}{2}}\notag
+\end{equation}
+其中$n_c$表示协同的对子的数目，而$n_d$表示不协同的对子的数目。\par
+由定义可以看出，$\tau_a$取值在$-1\sim 1$之间，$\tau_a$越大，协同的对子数目越多，两个变量越有可能正相关；$\tau_a$越小，不协同的对子数目越多，两个变量越有可能负相关。\par
+在计算时，可以把成对数据$(X_i,\;Y_i)$按第一个变量从小到大排序，然后就可以只用$Y_i$的大小关系或者秩来计算$n_c$和$n_d$了。\par
+在样本量不太大并且没有结的时候，可以按如下方法求精确检验结果：把成对数据$(X_i,\;Y_i)$按第一个变量从小到大排序，此时$Y_i$的排序情况共有$n!$种可能，对每一种可能计算$\tau_a$，即可得到$\tau_a$的精确分布。
+\subsubsection{大样本近似}
+在零假设成立的情况下，当$n\rightarrow +\infty$时，有如下近似分布：
+\begin{equation}
+	Z=K\sqrt{\frac{18}{n(n-1)(2n+5)}}\sim N(0,\;1)\notag
+\end{equation}
+\subsubsection{打结}
+若$X$或$Y$样本中存在相同的数据，则称之为打结的情况。记$u_i,\;i=1,2,\dots,p$和$v_i,\;i=1,2,\dots,q$分别为$X$和$Y$样本中结统计量的值，此时有如下修正后的检验统计量：
+\begin{equation}
+	\tau_b=\frac{n_c-n_d}{\sqrt{\left[\frac{n(n-1)}{2}-\sum_iu_i(u_i-1)/2\right]\left[\frac{n(n-1)}{2}-\sum_iv_i(v_i-1)/2\right]}}\notag
+\end{equation}
+有结的时候没有精确分布，只能使用下式的大样本近似：
+\begin{gather*}
+Z=\frac{n_c-n_d}{\sqrt{\left[n(n-1)(2n+5)-t_u-t_v\right]/18+t_1+t_2}}\sim N(0,\;1) \\
+t_u=\sum_iu_i(u_i-1)(2u_i+5) \\
+t_v=\sum_iv_i(v_i-1)(2v_i+5) \\
+t_1=\frac{1}{2n(n-1)}\sum_iu_i(u_i-1)\sum_jv_j(v_j-1) \\
+t_2=\frac{1}{9n(n-1)(n-2)}\sum_iu_i(u_i-1)(u_i-2)\sum_jv_j(v_j-1)(v_j-2)
+\end{gather*}
+\subsubsection{有序分类变量情况下的$\tau_c$}
+假设$X$和$Y$是有序分类变量，分别由$r$个和$c$个有序水平，将观测数据的频数放入一个列联表中，令$n_ij,\;i=1,2,\dots,r,\;j=1,2,\dots,c$为列联表中的对应元素，则Kendall's$\;\tau_c$的定义和其渐进均方差为：
+\begin{gather*}
+	\tau_c=\frac{2q(n_c-n_d)}{n^2(q-1)} \\
+	\text{ASE}=\frac{2q}{(q-1)n^2}\sqrt{\sum_{ij}n_{ij}(C_{ij}-D_{ij})^2-4(n_c-n_d)^2/n} \\
+	q=\text{min}(r,c) \\
+	C_{ij}=\sum_{i'>i}\sum_{j'>j}n_{i'j'}+\sum_{i'<i}\sum_{j'<j}n_{i'j'} \\
+	D_{ij}=\sum_{i'>i}\sum_{j'<j}n_{i'j'}+\sum_{i'<i}\sum_{j'>j}n_{i'j'}
+\end{gather*}
+其取值范围也在$-1\sim 1$之间，同时有如下大样本近似：
+\begin{equation}
+	\frac{\tau_c}{\text{ASE}}\sim N(0,\;1)\notag
+\end{equation}
+\subsubsection{代码}
+\begin{minted}[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines, mathescape]{r}
+cor.test(x, y,
+alternative = c("two.sided", "less", "greater"),
+method = "kendall"
+exact = NULL, continuity = FALSE) 
+\end{minted}

@@ -1,0 +1,206 @@
+\section{多重假设检验}
+当方差分析拒绝零假设，认为因子的不同水平对实验结果的影响有显著差异时，随之而来的问题就是到底哪几个因子之间是有显著差异的，此时就需要进行比较。但是如果对于每一对水平都使用通常的$t$检验的话，将大大提高整个检验问题犯第一类错误的概率（见\cref{reason for multi-comparison}）。本节先介绍一般的对比，再介绍等重复情况下的Duncan多重比较法与一般情形下的Scheffe多重比较法。
+
+\subsection{对比}
+\subsubsection{对比的定义}
+\begin{definition}
+	对比是指因子诸效应的一个线性组合：
+	\begin{equation*}
+		\begin{cases}
+			c=\sum\limits_{i=1}^ac_i\tau_i,\\
+			s.t.\quad\sum\limits_{i=1}^ac_i=0
+		\end{cases}
+	\end{equation*}
+	因为$\mu_i=\mu+\tau_i$，所以对比也可表示为：
+	\begin{equation*}
+		\begin{cases}
+			c=\sum\limits_{i=1}^ac_i\mu_i,\\
+			s.t.\quad\sum\limits_{i=1}^ac_i=0
+		\end{cases}
+	\end{equation*}
+	全体对比构成一个$a-1$维线性空间：
+	\begin{equation*}
+		\{\mathbf{c}=(c_1,c_2,\dots,c_a)':\sum_{i=1}^ac_i=0\}
+	\end{equation*}
+\end{definition}
+\subsubsection{目的}
+我们此时希望检验假设：
+\begin{equation*}
+	H_0:\sum_{i=1}^ac_i\mu_i=0,\quad s.t.\sum_{i=1}^ac_i=0
+\end{equation*}
+\subsubsection{假设的检验方法}
+由固定效应下的单因子方差分析的统计模型\cref{model:fixed-effect-one-way-anova}，可知：
+\begin{equation*}
+	\sum_{i=1}^ac_i\bar{y}_{i.}\sim N(\sum_{i=1}^ac_i\mu_i,\;\sum_{i=1}^a\frac{c_i^2\sigma^2}{n_i})
+\end{equation*}
+定义对比的平方和为：
+\begin{equation*}
+	SSc=\frac{\left(\sum\limits_{i=1}^ac_i\bar{y}_{i.}\right)^2}{\sum\limits_{i=1}^a\dfrac{c_i^2}{n_i}}
+\end{equation*}
+当$H_0$成立时，$\dfrac{SSc}{\sigma^2}$是一个标准正态变量的平方，也就是说它服从$\chi^2(1)$。\info{记得证明独立}
+所以，当$H_0$成立的时候，统计量
+\begin{equation*}
+	F=\frac{SSc}{MSe}\sim\text{F}(1,\;n-a)
+\end{equation*}
+MSe是$\sigma^2$的无偏估计，而当$H_0$成立时，SSc也是$\sigma^2$的无偏估计。如果F值很大，则有理由怀疑零假设（从$\left(\sum\limits_{i=1}^ac_i\bar{y}_{i.}\right)^2$较大这一点怀疑它的期望不为$0$）。所以$H_0$的拒绝域是右向单尾的，显著性水平为$\alpha$时的拒绝域为：
+\begin{equation*}
+	F=\frac{SSc}{MSe}>F_{1-\alpha}(1,\;n-a)
+\end{equation*}
+
+\subsection{正交对比}
+仅讨论等重复情况下对比系数向量标准化（即模长为$1$）的正交对比。
+\subsubsection{正交对比的定义}
+对比有一种特殊情况，即正交对比：
+\begin{definition}
+	$c=\sum\limits_{i=1}^ac_i\mu_i$和$d=\sum\limits_{i=1}^ad_i\mu_i$是两个对比。若：
+	\begin{equation*}
+		\sum_{i=1}^ac_id_i=0
+	\end{equation*}
+	则称这两个对比为正交对比。
+\end{definition}
+\subsubsection{目的}
+由对比空间的维数可知，线性无关的正交对比组最多有$a-1$个对比。而正交对比即是为了检验任意$a-1$个对比的值是否为$0$：
+\begin{gather*}
+	c^1=\sum_{i=1}^ac_{1,i}\mu_i \\
+	c^2=\sum_{i=1}^ac_{2,i}\mu_i \\
+	\cdots\cdots \\
+	c^{(a-1)}=\sum_{i=1}^ac_{a-1,i}\mu_i
+\end{gather*}
+\subsubsection{假设的检验方法}
+只需注意到此时：
+\begin{equation*}
+	SScj=\frac{\left(\sum\limits_{i=1}^ac_{j,i}\bar{y}_{i.}\right)^2}{\sum\limits_{i=1}^a\dfrac{c_{j,i}^2}{m}}=m\left(\sum\limits_{i=1}^ac_{j,i}\bar{y}_{i.}\right)^2
+\end{equation*}
+剩余步骤与对比一样。
+\subsubsection{正交对比与SSA的关系}
+上述对比的一个无偏估计为：
+\begin{gather*}
+	\hat{c}^1=\sum_{i=1}^ac_{1,i}\bar{y}_{i.} \\
+	\hat{c}^2=\sum_{i=1}^ac_{2,i}\bar{y}_{i.} \\
+	\cdots\cdots \\
+	\hat{c}^{(a-1)}=\sum_{i=1}^ac_{a-1,i}\bar{y}_{i.}
+\end{gather*}
+令：
+\begin{equation*}
+	\hat{c}^{a}=\sum_{i=1}^a\frac{1}{\sqrt{a}}\bar{y}_{i.}
+\end{equation*}
+需要注意这并不是一个对比。\par
+注意到：
+\begin{equation*}
+	(\hat{c}^1,\hat{c}^2,\dots,\hat{c}^a)'=A(\bar{y}_{1.},\bar{y}_{2.},\dots,\bar{y}_{a.})'
+\end{equation*}
+这之中的矩阵$A$是一个正交矩阵。所以：
+\begin{equation*}
+	(\hat{c}^1)^2+(\hat{c}^2)^2+\cdots+(\hat{c}^a)^2=\sum_{i=1}^a\bar{y}_{i.}^2
+\end{equation*}
+于是：
+\begin{align*}
+	(\hat{c}^1)^2+(\hat{c}^2)^2+\cdots+(\hat{c}^{a-1})^2
+	&=\sum_{i=1}^a\bar{y}_{i.}^2-\frac{1}{a}\left(\sum\limits_{i=1}^a\bar{y}_{i.}\right)^2 \\
+	&=\sum_{i=1}^a\left(\frac{y_{i.}}{m}\right)^2-\frac{1}{a}\left(\frac{\sum_{i=1}^am\bar{y}_{i.}}{m}\right)^2 \\
+	&=\sum_{i=1}^a\frac{y_{i.}^2}{m^2}-\frac{y_{..}^2}{am^2} \\
+	&=\frac{1}{m}SSA
+\end{align*}
+再由：
+\begin{equation*}
+	SScj=\frac{\left(\sum\limits_{i=1}^ac_{j,i}\bar{y}_{i.}\right)^2}{\sum\limits_{i=1}^a\dfrac{c_{j,i}^2}{m}}=\frac{(\hat{c}^j)^2}{\frac{1}{m}}=m(\hat{c}^j)^2
+\end{equation*}
+所以：
+\begin{equation*}
+	SSc1+SSc2+\cdots+SSc(a-1)=SSA
+\end{equation*}
+
+\subsection{Duncan多重比较法}
+在很多问题中，我们往往不知道要如何构造适当的对比，也有可能检验$a-1$个以上的比较，此时对比的相关方法就无法使用了。接下来介绍这种情况下的一种解决方案，即Duncan多重比较法，它只适用于等重复情况。
+\subsubsection{目的}
+检验$H_0:\mu_i=\mu_j,\;\forall\;i\ne j$。
+\subsubsection{$p$级极差的定义}
+\begin{definition}
+	将$a$个水平下观察值的平均值$\bar{y}_{1.},\bar{y}_{2.},\dots,\bar{y}_{a.}$从小到大排序。如果其中任意两个数在排序后中间还有$p-2,\;p\geqslant2$个数，那么这两个数的差称为$p$级极差，记为$R_p$。
+\end{definition}
+\subsubsection{统计量及其分布}
+设$f$为SSe的自由度，$m$为重复次数，则Duncan多重比较法的统计量为：
+\begin{equation*}
+	r(p,f)=\frac{R_p}{\sqrt{\dfrac{MSe}{m}}}
+\end{equation*}
+在$\mu_1=\mu_2=\cdots=\mu_a$即$\tau_1=\tau_2=\cdots=\tau_a$的情况下，$r(p,f)$与$\mu,\;\sigma^2$无关。
+\begin{proof}
+	将$r(p,f)$分子分母同除$\sigma$可得：
+	\begin{equation*}
+		r(p.f)=\frac{\dfrac{R_p}{\sigma/\sqrt{m}}}{\sqrt{\dfrac{MSe}{\sigma^2}}}
+	\end{equation*}
+	注意到分母：
+	\begin{equation*}
+		\frac{MSe}{\sigma^2}=\frac{1}{f}\frac{SSe}{\sigma^2}
+	\end{equation*}
+	是一个服从$\chi^2(f)$分布变量的$\dfrac{1}{f}$倍，其分布与$\mu,\;\sigma^2$无关。\par
+	在零假设成立的情况下：
+	\begin{equation*}
+		\frac{\bar{y}_{i.}-\mu}{\sigma/\sqrt{m}}\sim N(0,\;1)
+	\end{equation*}
+	这个分布与$\mu,\;\sigma^2$无关，所以分子：
+	\begin{equation*}
+		\frac{R_p}{\sigma/\sqrt{m}}=\max(\frac{\bar{y}_{1.}-\mu}{\sigma/\sqrt{m}},\dots,\frac{\bar{y}_{a.}-\mu}{\sigma/\sqrt{m}})-\min(\frac{\bar{y}_{1.}-\mu}{\sigma/\sqrt{m}},\dots,\frac{\bar{y}_{a.}-\mu}{\sigma/\sqrt{m}})
+	\end{equation*}
+	也与$\mu,\;\sigma^2$无关。\par
+	综上，此时$r(p,f)$与$\mu,\;\sigma^2$无关。
+\end{proof}
+\subsubsection{检验原理}
+当$\mu_i=\mu_j$不成立时，对应的$R_p$会较大。因此当$r(p,f)$较大时，有理由怀疑零假设。所以$H_0$的拒绝域是右向单尾的，显著性水平为$\alpha$时的拒绝域为：
+\begin{equation*}
+	r(p,f)>r_{1-\alpha}(p,f)
+\end{equation*}
+即：
+\begin{equation*}
+	R_p>r_{1-\alpha}(p,f)\sqrt{\frac{MSe}{m}}
+\end{equation*}
+\subsubsection{$r(p,f)$分布的Monte Carlo模拟}
+\begin{algorithm}
+	\caption{Duncan 多重比较法统计量分布的蒙特卡洛模拟}
+	\begin{algorithmic}[1]
+		\State \textbf{Input:} $m$, $a$, $p$, $f$, $N$ \Comment{组内重复次数、组数、极差的级数、SSe的自由度、模拟次数}
+		\State \textbf{Output:} $r(p,f)$的模拟分布
+		
+		\State 初始化模拟值存储向量：$List\gets\emptyset$
+		\For{$i \gets 1$ to $N$}
+		\State 生成$a$个随机数$x_i\sim N(0,1),\;i=1,2,\dots,a$
+		\State 计算$\frac{R_p}{\sigma/\sqrt{m}}$：
+		\begin{equation*}
+			\frac{R_p}{\sigma/\sqrt{m}}=\max\limits_{i=1,2,\dots,a}\{x_i\}-\min\limits_{i=1,2,\dots,a}\{x_i\}
+		\end{equation*}
+		\State 从$\chi^2(f)$中产生一个样本记为$\chi^2$
+		\State 计算$r(p,f)$：
+		\begin{equation*}
+			r(p,f)=\frac{\dfrac{R_p}{\sigma/\sqrt{m}}}{\sqrt{\chi^2/f}}
+		\end{equation*}
+		\State 将 $r(p,f)$加入$List$
+		\EndFor
+		\State 返回$List$
+	\end{algorithmic}
+\end{algorithm}
+\subsubsection{检验步骤}
+将$\bar{y}_{1.},\bar{y}_{2.},\dots,\bar{y}_{a.}$从小到大排序为$\bar{y}^1,\bar{y}^2,\dots,\bar{y}^a$。令：
+\begin{equation*}
+	r_{1-\alpha}(p,f)\sqrt{\frac{MSe}{m}}=R_p^*
+\end{equation*}
+按以下顺序进行比较：
+\begin{gather*}
+	\bar{y}^a-\bar{y}^1\text{与$R_a^*$进行比较} \\
+	\bar{y}^a-\bar{y}^2\text{与$R_{a-1}^*$进行比较} \\
+	\cdots\cdots \\
+	\bar{y}^a-\bar{y}^{a-1}\text{与$R_2^*$进行比较} \\
+	\bar{y}^{a-1}-\bar{y}^1\text{与$R_{a-1}^*$进行比较} \\
+	\bar{y}^{a-1}-\bar{y}^2\text{与$R_{a-2}^*$进行比较} \\
+	\cdots\cdots
+\end{gather*}
+直到全部$\binom{a}{2}$对水平均值比较完为止。
+
+\subsection{Scheffe多重比较法}
+Scheffe证明了，在固定效应下的单因子方差分析统计模型下（即\cref{model:fixed-effect-one-way-anova}），对显著性水平$\alpha$，一切对比$c$的值同时满足不等式：
+\begin{equation*}
+	|\hat{c}-c|=\left|\sum_{i=1}^ac_i\bar{y}_{i.}-c\right|\leqslant\sqrt{(a-1)F_{1-\alpha}(a-1,\;n-a)MSe\sum\limits_{i=1}^a\dfrac{c_i^2}{n_i}}
+\end{equation*}
+的概率等于$1-\alpha$。也就是说，$H_0:\sum\limits_{i=1}^ac_i\mu_i=0$的拒绝域都是：
+\begin{equation*}
+	|\hat{c}|>\sqrt{(a-1)F_{1-\alpha}(a-1,\;n-a)MSe\sum\limits_{i=1}^a\dfrac{c_i^2}{n_i}}
+\end{equation*}

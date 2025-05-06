@@ -1,0 +1,150 @@
+\section{任意项级数}
+
+本节讨论\gls{ArbitrarySeries}，即不对各项的正负性做出要求的级数。
+
+\subsection{条件收敛的判别}
+\subsubsection{Abel引理}
+\begin{lemma}
+	设$\alpha_i,\beta_i,\;i=1,2,\dots,p$是实数，且：
+	\begin{equation*}
+		B_k=\sum_{i=1}^k\beta_i,\;k=1,2,\dots,p
+	\end{equation*}
+	则有：
+	\begin{enumerate}
+		\item $\sum\limits_{i=1}^p\alpha_i\beta_i=\sum\limits_{i=1}^{p-1}(\alpha_i-\alpha_{i+1})B_i+\alpha_pB_p$
+		\item 如果$\{\alpha_i\}$单调，并且有：
+		\begin{equation*}
+			|B_k|\leqslant L,\;k=1,2,\dots,p
+		\end{equation*}
+		那么就有：
+		\begin{equation*}
+			\left|\sum_{i=1}^p\alpha_i\beta_i\right|\leqslant L\left(|\alpha_1|+2|\alpha_p|\right)
+		\end{equation*}
+	\end{enumerate}
+\end{lemma}
+(1)这个公式又称为\gls{AbelTrans}、\gls{SumByParts}。之所以被称之为分部求和公式，是因为它可以写为如下形式：
+\begin{equation*}
+	\sum_{i=1}^p\alpha_i\Delta B_i = \alpha_jB_j\Big|_{j=0}^p-\sum_{i=1}^{p-1}B_i\Delta\alpha_i
+\end{equation*}
+其中：
+\begin{gather*}
+	a_0=0,\quad B_0=0 \\
+	\Delta B_k=B_k-B_{k-1}=\beta_k,\quad k=1,2,\dots,p, \\
+	\Delta\alpha_i=\alpha_{i+1}-\alpha_i,\quad i=1,2,\dots,p-1
+\end{gather*}
+\begin{proof}
+	记$B_0=0$，于是有：\par
+	(1)
+	\begin{align*}
+		\sum_{i=1}^p\alpha_i\beta_i
+		&=\sum_{i=1}^p\alpha_i(B_i-B_{i-1}) \\
+		&=\sum_{i=1}^p\alpha_iB_i-\sum_{i=1}^p\alpha_iB_{i-1} \\
+		&=\sum_{i=1}^p\alpha_iB_i-\sum_{i=0}^{p-1}\alpha_{i+1}B_{i} \\
+		&=\sum_{i=1}^p\alpha_iB_i-\sum_{i=1}^{p-1}\alpha_{i+1}B_{i} \\
+		&=\sum_{i=1}^{p-1}(\alpha_i-\alpha_{i+1})B_i+\alpha_pB_p
+	\end{align*}\par
+	(2)下第三行到第四行利用了$\{\alpha_i\}$的单调性。
+	\begin{align*}
+		\left|\sum_{i=1}^p\alpha_i\beta_i\right|
+		&=\left|\sum_{i=1}^{p-1}(\alpha_i-\alpha_{i+1})B_i+\alpha_pB_p\right| \\
+		&\leqslant\sum_{i=1}^{p-1}|\alpha_i-\alpha_{i+1}|\;|B_i|+|\alpha_p|\;|B_p| \\
+		&\leqslant L\left(\sum_{i=1}^{p-1}|\alpha_i-\alpha_{i+1}|+|\alpha_p|\right) \\
+		&=L\left(|\alpha_1-\alpha_p|+|\alpha_p|\right) \\
+		&\leqslant L\left(|\alpha_1|+2|\alpha_p|\right)\qedhere
+	\end{align*}
+\end{proof}
+
+\subsubsection{Dirichlet判别法}
+\begin{theorem}
+	对于级数$\sum\limits_{n=1}^{+\infty}a_nb_n$，如果：
+	\begin{enumerate}
+		\item 序列$\{a_n\}$单调收敛于$0$；
+		\item 序列$\{\sum\limits_{i=1}^nb_i\}$有界；
+	\end{enumerate}
+	那么级数收敛。
+\end{theorem}
+\begin{proof}
+	我们来估计：
+	\begin{equation*}
+		\left|\sum_{i=n+1}^{n+p}a_ib_i\right|
+	\end{equation*}
+	令：
+	\begin{equation*}
+		B_k=\sum_{i=1}^{n+k}b_i
+	\end{equation*}
+	因为序列$\{\sum\limits_{i=1}^nb_i\}$有界，因此有：
+	\begin{equation*}
+		\left|\sum\limits_{i=1}^nb_i\right|\leqslant L,\;n\in\mathbb{N}^+
+	\end{equation*}
+	也就有：
+	\begin{equation*}
+		|B_k|=\left|\sum_{i=1}^{n+k}b_i-\sum_{i=1}^nb_i\right|\leqslant 2L
+	\end{equation*}
+	因为$\{\alpha_i\}$单调，于是：
+	\begin{equation*}
+		\left|\sum_{i=n+1}^{n+p}a_ib_i\right|\leqslant 2L(|\alpha_{n+1}|+2|\alpha_{n+p}|)
+	\end{equation*}
+	又因为$\{\alpha_i\}\rightarrow0$，显然对任意的$\varepsilon>0$，当$n$足够大时可以有：
+	\begin{equation*}
+		\left|\sum_{i=n+1}^{n+p}a_ib_i\right|<\varepsilon
+	\end{equation*}
+	由Cauchy收敛准则，级数$\sum\limits_{n=1}^{+\infty}a_nb_n$收敛。
+\end{proof}
+
+\subsubsection{Abel判别法}
+\begin{theorem}
+	对于级数$\sum\limits_{n=1}^{+\infty}a_nb_n$，如果：
+	\begin{enumerate}
+		\item 序列$\{a_n\}$单调有界；
+		\item 级数$\sum\limits_{n=1}^{+\infty}b_n$收敛；
+	\end{enumerate}
+	那么级数收敛。
+\end{theorem}
+\begin{proof}
+	因为$\{a_n\}$单调有界，由实数序列的单调收敛原理，可以设：
+	\begin{equation*}
+		\lim_{n\to+\infty}a_n=a
+	\end{equation*}
+	则序列$\{a_n-a\}$单调趋于$0$。又因级数$\sum\limits_{n=1}^{+\infty}b_n$收敛，所以序列$\{\sum\limits_{i=1}^nb_i\}$有界。由Dirichlet判别法，级数$\sum\limits_{n=1}^{+\infty}(a_n-a)b_n$收敛。又因为级数$\sum\limits_{n=1}^{+\infty}ab_n$收敛，而：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}a_nb_n=\sum_{n=1}^{+\infty}\left[(a_n-a)b_n+ab_n\right]=\sum_{n=1}^{+\infty}\left[(a_n-a)b_n\right]+\sum_{n=1}^{+\infty}ab_n
+	\end{equation*}
+	因此级数$\sum\limits_{n=1}^{+\infty}a_nb_n$收敛。
+\end{proof}
+
+\subsubsection{Leibniz判别法}
+\begin{theorem}
+	设序列$\{a_n\}$单调且收敛于$0$，则以下级数收敛：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}(-1)^{n-1}a_n
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	使用Dirichlet判别法可直接证得。
+\end{proof}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

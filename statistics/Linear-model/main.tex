@@ -1,0 +1,148 @@
+\chapter{线性模型}
+
+\begin{definition}\label{model:LinearModel}
+	\begin{equation*}
+		\begin{cases}
+			y=X\beta+\varepsilon \\
+			\operatorname{E}(\varepsilon)=\mathbf{0} \\
+			\operatorname{Cov}(\varepsilon)=\sigma^2I_n
+		\end{cases}
+	\end{equation*}
+	其中$y$为$n\times 1$观测向量，$X$为$n\times p$的设计矩阵，$\beta$为$p\times 1$的未知参数向量，$\varepsilon$为随机误差，$\sigma^2$为误差方差。
+\end{definition}
+\begin{definition}
+	称方程$X^TX\beta=X^Ty$为\textbf{正则方程}。
+\end{definition}
+\begin{theorem}
+	对于\cref{model:LinearModel}，$\hat{\beta}=(X^TX)^-X^Ty$是其唯一的最小二乘解。
+\end{theorem}
+\begin{proof}
+	注意到：
+	\begin{gather*}
+		\begin{aligned}
+			Q(\beta)&=||y-X\beta||^2=(y-X\beta)^T(y-X\beta) \\
+			&=y^Ty-y^TX\beta-\beta^TX^Ty-\beta^TX^TX\beta \\
+			&=y^Ty-2y^TX\beta-\beta^TX^TX\beta
+		\end{aligned}\\
+		\frac{\partial y^TX\beta}{\beta}=X^Ty,\quad
+		\frac{\partial \beta^TX^TX\beta}{\beta}=2X^TX\beta \\
+		\frac{\partial Q(\beta)}{\partial\beta}=2X^Ty-2X^TX\beta=0 \\
+		X^TX\beta=X^Ty
+	\end{gather*}
+	由\cref{theo:VectorSpaceAAAT}可知方程$X^TX\beta=X^Ty$是相容的，根据\cref{theo:InhomogeneousLinearEq'sGeneralSolution2}可知其通解为：
+	\begin{equation*}
+		\hat{\beta}=(X^TX)^-X^Ty
+	\end{equation*}
+	其中$(X^TX)^-$是$X^TX$的任意一个广义逆矩阵。\par
+	对任意的$\beta$，有：
+	\begin{align*}
+		Q(\beta)&=||y-X\beta||^2=||y-X\hat{\beta}+X\hat{\beta}-X\beta||^2=||y-X\hat{\beta}+X(\hat{\beta}-\beta)||^2 \\
+		&=||y-X\hat{\beta}||^2+||X(\hat{\beta}-\beta)||^2+2(y-X\hat{\beta})^TX(\hat{\beta}-\beta)
+	\end{align*}
+	注意到正则方程即为：
+	\begin{equation*}
+		X^T(y-X\beta)=\mathbf{0}
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		2(y-X\hat{\beta})^TX(\hat{\beta}-\beta)=2[X^T(y-X\hat{\beta})]^T(\hat{\beta}-\beta)=0
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		Q(\beta)=||y-X\hat{\beta}||^2+||X(\hat{\beta}-\beta)||^2
+	\end{equation*}
+	上第二项总是非负的，由范数的性质其为$0$当且仅当$X\hat{\beta}=X\beta$，即当且仅当$X^TX\beta=X^TX\hat{\beta}=X^Ty$，所以使$Q(\beta)$达到最小值的$\beta$必为正则方程的解$\hat{\beta}=(X^TX)^-X^Ty$。
+\end{proof}
+\begin{derivation}
+	若$\operatorname{rank}(X)=p$，则$X$的列向量组线性无关。考虑二次型$y^TX^TXy$，$y^TX^TXy=0\Leftrightarrow||Xy||=0\Leftrightarrow Xy=\mathbf{0}$，而$X$的列向量是线性无关的，所以不存在非零向量的$y$使得$Xy=\mathbf{0}$，于是$y^TX^TXy$是一个正定二次型，$X^TX$是一个正定矩阵。由\cref{theo:PositiveDefinite}(3)的第五点和\info{行列式等于特征值的积，行列式大于$0$矩阵可逆}可得$X^TX$可逆。此时$\hat{\beta}=(X^TX)^{-1}X^Ty$，称$\hat{\beta}$为$\beta$的\gls{LeastSquaresEstimate}。
+\end{derivation}
+\begin{definition}
+	若存在$n\times 1$向量$\alpha$使得$\operatorname{E}(\alpha^Ty)=c^T\beta$对一切的$\beta$成立，则称$c^T\beta$为\gls{EstimableFunction}。
+\end{definition}
+\begin{property}
+	对于\cref{model:LinearModel}，$c^T\beta$和$d^T\beta$是可估函数，$\hat{\beta}$是正则方程的解，则：
+	\begin{enumerate}
+		\item 使$c^T\beta$成为可估函数的全体向量$c$构成$\mathcal{M}(X^T)$；
+		\item 若$c_1^T\beta$和$c_2^T\beta$都是可估函数，则对任意常数$a_1,a_2$，$a_1c_1^T\beta+a_2c_2^T\beta$也是可估函数；
+		\item 线性无关的可估函数组最多有$\operatorname{rank}(X)$个可估函数；
+		\item $c^T\hat{\beta}$与$(X^TX)^-$的选择无关；
+		\item $c^T\hat{\beta}$为$c^T\beta$的无偏估计；
+		\item  $\operatorname{Var}(c^T\hat{\beta})=\sigma^2c^T(X^TX)^-c,\;\operatorname{Cov}(c^T\hat{\beta},d^T\hat{\beta})=\sigma^2c^T(X^TX)^-d$，且与$(X^TX)^-$的选择无关；
+		\item $c^T\hat{\beta}$是$c^T\beta$唯一的BLUE；
+		\item 设$\varphi_i=c_i^T\beta,\;i=1,2,\dots,k$都是可估函数，$\seq{\alpha}{k}\in\mathbb{R}^{}$，则$\varphi=\sum\limits_{i=1}^{k}\alpha_i\varphi_i$也是可估的，且$\hat{\varphi}=\sum\limits_{i=1}^{k}\alpha_ic_i^T\hat{\beta}$是$\varphi$的BLU估计。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)$\;c^T\beta$是可估函数$\Leftrightarrow$存在$n\times1$向量$\alpha$使得$\operatorname{E}(\alpha^Ty)=\alpha^T\operatorname{E}(y)=\alpha^TX\beta=c^T\beta$对一切的$\beta$成立$\Leftrightarrow c=X^T\alpha$。\par
+	(2)由(1)直接可得。\par
+	(3)由(1)和\info{转置秩不变}直接可得。\par
+	(4)因为$c^T\beta$可估，由(1)可知存在$n\times 1$向量$\alpha$使得$c=X^T\alpha$，于是：
+	\begin{equation*}
+		c^T\hat{\beta}=\alpha^TX(X^TX)^-X^Ty
+	\end{equation*}
+	由\cref{prop:A-}(4)即可得出结论。\par
+	(5)因为$c^T\beta$可估，由(1)可知存在$n\times 1$向量$\alpha$使得$c=X^T\alpha$，根据\cref{prop:A-}(5)可得：
+	\begin{equation*}
+		\operatorname{E}(c^T\hat{\beta})=\operatorname{E}[\alpha^TX(X^TX)^-X^Ty]=\alpha^TX(X^TX)^-X^TX\beta=\alpha^TX\beta=c^T\beta
+	\end{equation*}\par
+	(6)因为$c^T\beta,d^T\beta$是可估函数，所以存在$\alpha,\gamma$使得$c=X^T\alpha,d=X^T\gamma$。由\cref{prop:CovMat}(3)和\cref{prop:A-}(6)(5)可知：
+	\begin{align*}
+		\operatorname{Cov}(c^T\hat{\beta},d^T\hat{\beta})
+		&=\operatorname{Cov}[\alpha^TX(X^TX)^-X^Ty,\gamma^TX(X^TX)^-X^Ty] \\
+		&=\alpha^TX(X^TX)^-X^T\operatorname{Cov}(y)X[(X^TX)^-]^TX^T\gamma \\
+		&=\alpha^TX(X^TX)^-X^T\sigma^2I_nX(X^TX)^-X^T\gamma \\
+		&=\sigma^2\alpha^TX(X^TX)^-d \\
+		&=\sigma^2c^T(X^TX)^-d
+	\end{align*}
+	由\cref{prop:A-}(4)及上第三行可知$\operatorname{Cov}(c^T\hat{\beta},d^T\hat{\beta})$与$(X^TX)^-$的选择无关。\par
+	(7)无偏性由(5)可得，线性性由正则方程可知，下证方差最小。
+	设$a^Ty$为$c^T\beta$的任一无偏估计，由(1)的过程可知$c=X^Ta$。根据\cref{prop:A+}(3)和(6)可得：
+	\begin{align*}
+		\operatorname{Var}(a^Ty)-\operatorname{Var}(c^T\hat{\beta})&=\sigma^2[a^Ta-c^T(X^TX)^-c] \\
+		&=\sigma^2[a^T-c^T(X^TX)^-X^T][a-X(X^TX)^-c] \\
+		&=\sigma^2||a-X(X^TX)^-c||^2\geqslant0
+	\end{align*}
+	上式第一行到第二行是由于\cref{prop:A+}(3)：
+	\begin{align*}
+		&[a^T-c^T(X^TX)^-X^T][a-X(X^TX)^-c] \\
+		=&a^Ta-a^TX(X^TX)^-c-c^T(X^TX)^-X^Ta+c^T(X^TX)^-X^TX(X^TX)^-c \\
+		=&a^Ta-c^T(X^TX)^-c-a^TX(X^TX)^-c+a^TX(X^TX)^-X^TX(X^TX)^-c \\
+		=&a^Ta-c^T(X^TX)^-c-a^TX(X^TX)^-c+a^TX(X^TX)^-c \\
+		=&a^Ta-c^T(X^TX)^-c
+	\end{align*}
+	由范数的性质可知$\operatorname{Var}(a^Ty)=\operatorname{Var}(c^T\hat{\beta})$当且仅当$a=X(X^TX)^-c$，由\cref{prop:A+}(3)可知$a=X(X^TX)^-c\Leftrightarrow a^T=c^T(X^TX)^-X^T\Leftrightarrow a^Ty=c^T(X^TX)^-X^Ty=c^T\hat{\beta}$。\par
+	(8)因为$\seq{\varphi}{k}$都是可估函数，所以存在$\seq{b}{k}$使得$\operatorname{E}(b_i^Ty)=c_i^T\beta$，于是：
+	\begin{equation*}
+		\operatorname{E}\left(\sum_{i=1}^{k}\alpha_ib_i^Ty\right)=\sum_{i=1}^{k}\alpha_i\operatorname{E}(b_i^Ty)=\sum_{i=1}^{k}\alpha_ic_i^T\beta=\sum_{i=1}^{k}a_i\varphi_i=\varphi
+	\end{equation*}
+	所以取$\alpha=\sum\limits_{i=1}^{k}\alpha_ib_i$即可得到$\operatorname{E}(\alpha^Ty)=\varphi$，$\varphi$是可估的。\par
+	由(5)可得$c_i^T\hat{\beta}$是$c_i^T\beta$的无偏估计，所以：
+	\begin{equation*}
+		\operatorname{E}(\hat{\varphi})=\operatorname{E}\left(\sum_{i=1}^{k}\alpha_ic_i^T\hat{\beta}\right)=\sum_{i=1}^{k}\alpha_i\operatorname{E}(c_i^T\hat{\beta})=\sum_{i=1}^{k}\alpha_ic_i^T\beta=\varphi
+	\end{equation*}
+	即$\hat{\varphi}$是一个无偏估计。\par
+	令$c=\sum\limits_{i=1}^{k}\alpha_ic_i$，则$\varphi=c^T\beta$。设$\gamma^Ty$是$\varphi$的一个无偏估计，于是由(7)可得：
+	\begin{equation*}
+		\operatorname{Var}(\gamma^Ty)-\operatorname{Var}(c^T\hat{\beta})=\sigma^2||\gamma-X(X^TX)^-c||^2
+	\end{equation*}
+	上式等于$0\Leftrightarrow \gamma^Ty=c^T\hat{\beta}=\hat{\varphi}$，即$\hat{\varphi}$是唯一的BLUE。
+\end{proof}
+\begin{definition}
+	对于\cref{model:LinearModel}，若$c^T\beta$是可估函数，称$c^T\hat{\beta}$为$c^T\beta$的LS估计，其中$\hat{\beta}$为正则方程的解。
+\end{definition}
+\begin{definition}
+	称$\hat{e}=y-X\hat{\beta}$为\textbf{残差向量}。
+\end{definition}
+\begin{property}
+	对于\cref{model:LinearModel}，$\hat{\beta}$为正则方程的解，则残差向量$\hat{e}$满足$\operatorname{E}(\hat{e})=0,\;\operatorname{Cov}(\hat{e})=\sigma^2(I-P_X)$。
+\end{property}
+\begin{proof}
+	由\info{对称幂等阵}可知：
+	\begin{gather*}
+		\begin{aligned}
+			\operatorname{E}(\hat{e})&=\operatorname{E}(y-X\hat{\beta})=\operatorname{E}[I_ny-X(X^TX)^-X^Ty]=(I_n-P_X)\operatorname{E}(y) \\
+			&=(I_n-P_X)X\beta=(X-X)\beta=0
+		\end{aligned} \\
+		\operatorname{Cov}(\hat{e})=\operatorname{Cov}[(I_n-P_X)y]=(I_n-P_X)\operatorname{Cov}(y)(I_n-P_X)=\sigma^2(I_n-P_X)
+	\end{gather*}
+\end{proof}

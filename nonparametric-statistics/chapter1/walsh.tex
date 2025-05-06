@@ -1,0 +1,31 @@
+\section{中位数的点估计与置信区间}
+
+\subsubsection{适用条件}
+总体分布是连续且对称的。
+\subsubsection{中位数点估计公式}
+我们称$\{\frac{X_i+X_j}{2},\;i\leqslant j\}$为Walsh平均，然后使用Walsh平均的中位数估计总体的中位数，该统计量称为Hodges-Lehmann估计量（简称HT估计量）。
+\begin{equation}
+	\hat{\theta}=\text{median}\{\frac{X_i+X_j}{2},\;i\leqslant j\}\notag
+\end{equation}
+\subsubsection{中位数区间估计原理}
+注意到如下关系：
+\begin{equation}
+	W^+=\left|\{\frac{X_i+X_j}{2}>M_0,\;i\leqslant j\}\right|\notag
+\end{equation}
+\hspace{2em}该关系也有关于$W^-$的对称版本。对Walsh平均从小到大排序，记为\\$W_{(1)},W_{(2)},\dots,W_{(N)},N=\frac{n(n+1)}{2}$。因为想要取两个Walsh平均构成一个中位数的区间估计，那么就要去掉左端和右端部分的Walsh平均，而Walsh平均的个数是与符号秩统计量$W$是相关的，左端去掉的Walsh平均的个数可以看作$W^-$的实现值，右端去掉的Walsh平均的个数可以看作$W^+$的实现值，那么就给予了区间估计成立的概率值。\par
+因此，给出中位数$M$的$(1-\alpha)$置信区间为：
+\begin{gather}
+	(W_{k+1},W_{N-k}),\;
+	k\text{满足}P(W^-\leqslant k)\leqslant\frac{\alpha}{2}\text{与}P(W^-\leqslant k+1)>\frac{\alpha}{2}\notag
+\end{gather}
+\hspace{2em}注意到上式利用了$W^-$与$W^+$的对称性。\par
+在大样本下，可以近似得到：
+\begin{equation}
+	k\approx\frac{n(n+1)}{4}-Z_{\frac{\alpha}{2}}\sqrt{\frac{n(n+1)(2n+1)}{24}}\notag
+\end{equation}
+\subsubsection{为什么要用Walsh平均}
+Walsh平均可以增大样本数量，如果就用原样本去估计置信区间，在样本数较小的情况下，置信区间会变得很大，不够精确。
+\subsubsection{代码}
+\begin{minted}[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines, mathescape]{r}
+wilcox.test(x, exact = NULL, correct = TRUE, conf.int = FALSE, conf.level = 0.95))
+\end{minted}

@@ -1,0 +1,582 @@
+\section{Hilbert空间}
+\begin{definition}
+	设$X$是一个内积空间（可参考\cref{def:InProductSpace}），在其上可定义如下范数：
+	\begin{equation*}
+		||x||=\sqrt{(x,x)}
+	\end{equation*}
+	那么$X$成为赋范线性空间。若$X$是完备的，则称其为\gls{HilbertSpace}。若$X$不完备，则称其为\gls{PreHilbertSpace}。
+\end{definition}
+下证这个定义满足范数的定义：
+\begin{proof}
+	(1)非负性和(2)数乘可分别由内积的定义(3)和(1)立刻得出。\par
+	(3)三角不等式：由内积形式的Cauchy-Schwarz不等式（即\cref{ineq:cauchy-schiwarz-inner-product}），可得：
+	\begin{align*}
+		||x+y||^2&=|(x+y,x+y)| \\
+		&=|(x,x+y)+(y,x+y)| \\
+		&\leqslant|(x,x+y)|+|(y,x+y)| \\
+		&\leqslant\sqrt{(x,x)(x+y,x+y)}+\sqrt{(y,y)(x+y,x+y)} \\
+		&=\sqrt{||x||^2||x+y||^2}+\sqrt{||y||^2||x+y||^2} \\
+		&=||x||\;||x+y||+||y||\;||x+y||
+	\end{align*}
+	两边除$||x+y||$，即有：
+	\begin{equation*}
+		||x+y||\leqslant||x||+||y|| \qedhere
+	\end{equation*}
+\end{proof}
+\subsubsection{内积是连续函数}
+设$\{x_n\},\{y_n\}$是内积空间$X$中的点列，且分别依范数收敛于$x,y\in X$，注意到：
+\begin{align*}
+	|(x_n,y_n)-(x,y)|&=|(x_n,y_n)-(x_n,y)+(x_n,y)-(x,y)| \\
+	&=|(x_n,y_n-y)+(x_n-x,y)| \\
+	&\leqslant|(x_n,y_n-y)|+|(x_n-x,y)| \\
+	&\leqslant||x_n||\;||y_n-y||+||x_n-x||\;||y|| 
+\end{align*}
+由$\{x_n\}$收敛，可得到$||x_n||$有界。于是上式极限为$0$，即内积是连续函数。
+
+\subsection{内积与范数的关系}
+\subsubsection{极化恒等式}
+如下公式反映了内积和范数之间的关系，被称为\gls{PolarizationIdentity}。第一个公式针对于实内积空间，第二个针对于复内积空间。 
+\begin{gather*}
+	(x,y)=\frac{1}{4}(||x+y||^2-||x-y||^2) \\
+	(x,y)=\frac{1}{4}(||x+y||^2-||x-y||^2+i||x+iy||^2-i||x-iy||^2)
+\end{gather*}
+\begin{proof}
+	(1)从右式开始推：
+	\begin{align*}
+		\frac{1}{4}(||x+y||^2-||x-y||^2)
+		&=\frac{1}{4}[(x+y,x+y)-(x-y,x-y)] \\
+		&=\frac{1}{4}[(x,x)+(x,y)+(y,x)+(y,y)-(x,x)-(x,-y)-(-y,x)-(-y,-y)] \\
+		&=\frac{1}{4}[(x,x)+(x,y)+(x,y)+(y,y)-(x,x)+(x,y)+(x,y)-(y,y)] \\
+		&=\frac{1}{4}[(x,y)+(x,y)+(x,y)+(x,y)] \\
+		&=(x,y)
+	\end{align*}\par
+	(2)注意此时：
+	\begin{align*}
+		(x+y,x+y)
+		&=(x,x+y)+(y,x+y) \\
+		&=\overline{(x+y,x)}+\overline{(x+y,y)} \\
+		&=\overline{(x,x)+(y,x)}+\overline{(x,y)+(y,y)} \\
+		&=(x,x)+\overline{(y,x)}+\overline{(x,y)}+(y,y) \\
+		&=(x,x)+(x,y)+(y,x)+(y,y)
+	\end{align*}
+	上式第三行到第四行使用了$\overline{a+b}=\overline{a}+\overline{b}$。接下来同样从右式开始推：
+	\begin{align*}
+		&\quad\;\frac{1}{4}(||x+y||^2-||x-y||^2+i||x+iy||^2-i||x-iy||^2) \\
+		&=\frac{1}{4}[(x+y,x+y)-(x-y,x-y)+i(x+iy,x+iy)-i(x-iy,x-iy)] \\
+		&=\frac{1}{4}[(x,x)+(x,y)+(y,x)+(y,y)-(x,x)-(x,-y)-(-y,x)-(-y,-y)]+ \\
+		&\quad\;\frac{1}{4}i[(x,x)+(x,iy)+(iy,x)+(iy,iy)-(x,x)-(x,-iy)-(-iy,x)-(-iy,-iy)] \\
+		&=\frac{1}{4}[2(x,y)+2(y,x)+2i(x,iy)+2i(iy,x)] \\
+		&=\frac{1}{4}[2(x,y)+2(y,x)+2(x,y)-2(y,x)] \\
+		&=(x,y)\qedhere
+	\end{align*}
+\end{proof}
+\subsubsection{中线公式}
+\begin{lemma}\label{lemma:continuous+additive=homogeneous}
+	设$f(x)$是定义在$\mathbb{R}$上的连续实值函数，且对任意的$a_1,a_2\in\mathbb{R}$，有：
+	\begin{equation*}
+		f(a_1+a_2)=f(a_1)+f(a_2)
+	\end{equation*}
+	则对任意的$a\in\mathbb{R}$，有：
+	\begin{equation*}
+		f(a)=af(1)
+	\end{equation*}
+\end{lemma}
+\begin{proof}
+	由条件，对任意的$n\in\mathbb{N}^+$、有：
+	\begin{equation*}
+		f(1)=f\left(n\frac{1}{n}\right)=nf\left(\frac{1}{n}\right)
+	\end{equation*}
+	于是对任意的$\frac{n}{m}\in\mathbb{Q^+}$，有：
+	\begin{equation*}
+		f\left(\frac{n}{m}\right)=nf\left(\frac{1}{m}\right)=\frac{n}{m}f(1)
+	\end{equation*}
+	又因：
+	\begin{gather*}
+		f(0)=f(2\times0)=2f(0),f(0)=0 \\
+		f(0)=f(a-a)=f(a)+f(-a)=0,f(a)=-f(a) \\
+	\end{gather*}
+	于是对任意的$\frac{n}{m}\in\mathbb{Q^+}$，有：
+	\begin{equation*}
+		f(-\frac{n}{m})=-\frac{n}{m}f(1)
+	\end{equation*}
+	综上对任意的$x\in\mathbb{Q}$成立。对任意的$x\in\mathbb{R}\backslash\mathbb{Q},\;\exists\;\{x_n\}\in\mathbb{Q},\;\{x_n\}\rightarrow x$，由$f$的连续性，即有：
+	\begin{equation*}
+		f(x)=\lim_{n\to+\infty}f(x_n)=\lim_{n\to+\infty}x_nf(1)=xf(1)
+	\end{equation*}
+	所以对任意的$x\in\mathbb{R}$成立。
+\end{proof}
+\begin{theorem}[中线公式]
+	设$X$是内积空间，则对任意的$x,y\in X$，由$X$的内积导出的范数$||\cdot||$满足：
+	\begin{equation*}
+		||x+y||^2+||x-y||^2=2||x||^2+2||y||^2
+	\end{equation*}
+	该公式被称为中线公式。反之，如果$X$是赋范线性空间，$X$的范数满足上式，则可以在$X$中定义内积$(\cdot,\cdot)$使$X$成为内积空间，且其范数就是由内积$(\cdot,\cdot)$导出的。
+\end{theorem}
+\begin{proof}
+	(1)先证明内积导出的范数满足上述公式：
+	\begin{align*}
+		||x+y||^2+||x-y||^2&=(x+y,x+y)+(x-y,x-y) \\
+		&=(x,x)+(x,y)+(y,x)+(y,y)+(x,x)-(x,y)-(y,x)+(y,y) \\
+		&=2(x,x)+2(y,y) \\
+		&=2||x||^2+2||y||^2
+	\end{align*}\par
+	(2)反之，利用极化恒等式来定义内积，接下来需要证明该定义满足内积的三个条件。\par
+	\info{有空证明}
+\end{proof}
+
+\subsection{Hilbert空间中的正交系}
+\begin{definition}
+	$X$是一个内积空间，$x,y\in X$，$M,N\subset X$。若$(x,y)=0$，则称$x$与$y$\gls{Orthogonal}，记为$x\perp y$。若$x$与$M$中任一元素正交，则称$x$与$M$正交，记为$x\perp M$。若$\forall\;x\in M$以及$\forall\;y\in N$有$x\perp y$，则称$M$与$N$正交，记为$M\perp N$。称$\{x\in X:x\perp M\}$为$M$的\gls{OrthogonalComplement}，记为$M^{\perp}$。
+\end{definition}
+\subsubsection{内积空间中的勾股定理}
+\begin{theorem}
+	$X$是一个内积空间，其中的元素$x_1,x_2,\dots,x_n$互相正交。记$x=\sum\limits_{i=1}^nx_i$，则有：
+	\begin{equation*}
+		||x||^2=\sum_{i=1}^{n}||x_i||^2
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由内积的线性运算性质，可以得到：
+	\begin{equation*}
+		||x||^2
+		=\left\|\sum_{i=1}^nx_i\right\|^2
+		=\left(\sum_{i=1}^nx_i,\sum_{i=1}^nx_i\right)
+		=\sum_{i=1}^{n}(x_i,x_i)
+		=\sum_{i=1}^{n}||x_i||^2\qedhere
+	\end{equation*}
+\end{proof}
+\begin{theorem}
+	$X$是一个内积空间。如果$x\in X$与$X$中的一个稠密子集$E$正交，则$x=\mathbf{0}$。
+\end{theorem}
+\begin{proof}
+	因为$E$在$X$中稠密，所以存在$\{x_n\}\in E$使得$\{x_n\}\to x$。由内积的连续性：
+	\begin{equation*}
+		(x,x)=\left(x,\lim_{n\to\infty}x_n\right)=\lim_{n\to\infty}(x,x_n)=0
+	\end{equation*}
+	由内积的定义即可得到$x=\mathbf{0}$。
+\end{proof}
+\begin{theorem}
+	$X$是一个内积空间，$E\subset X$。$E^{\perp}$是$X$的闭子空间。
+\end{theorem}
+\begin{proof}
+	设$\alpha,\beta$为$X$对应数域中的两个数，$\forall\;x,y\in E^{\perp}$，则对任意的$z\in E$有：
+	\begin{equation*}
+		(\alpha x+\beta y,z)=\alpha(x,z)+\beta(y,z)=0
+	\end{equation*}
+	所以$\alpha x+\beta y\in E^{\perp}$，故$E^{\perp}$是$X$的子空间。\par
+	任取$x\in\overline{E^{\perp}}$，则存在$E^{\perp}$中的点列$\{x_n\}\to x$。任取$y\in E$，由内积的连续性可以得到：
+	\begin{equation*}
+		(x,y)=\left(\lim_{n\to+\infty}x_n,y\right)=\lim_{n\to+\infty}(x_n,y)=0
+	\end{equation*}
+	所以$x\perp E$，即$x\in E^{\perp}$。由$x$的任意性，$E^{\perp}$是闭集。\par
+	综上，$E^{\perp}$是$X$的闭子空间。
+\end{proof}
+
+\begin{definition}
+	$X$是一个内积空间，$E\subset M$，$x\in X$。如果$\exists\;y\in E$使得：
+	\begin{equation*}
+		||x-y||=\inf_{z\in E}||x-z||
+	\end{equation*}
+	则称$y$是$x$在$M$中的一个\gls{BestApproximationElement}。
+\end{definition}
+\begin{definition}
+	$X$是一个内积空间，$E\subset M$。若对任意的$x,y\in E$，$\dfrac{x+y}{2}\in E$，则称$E$为\gls{ConvexSet}。若$E$还是一个闭集，则称$E$为\gls{ConvexClosedSet}。
+\end{definition}
+\begin{theorem}
+	$X$是一个Hilbert空间，$E$是$X$中的凸闭集。对任意的$x\in X$在$E$中存在唯一的最佳逼近元。
+\end{theorem}
+\begin{proof}
+	任取$x\in X$，记：
+	\begin{equation*}
+		\inf_{z\in E}||x-z||=a
+	\end{equation*}
+	\hspace{2em}存在性：由下确界的定义，可从$E$中得到一个点列$\{y_n\}$满足：
+	\begin{equation*}
+		\lim_{n\to+\infty}||x-y_n||=a
+	\end{equation*}
+	下证$\{y_n\}$是一个Cauchy点列。令$n>m$，由中线公式可得到：
+	\begin{align*}
+		||y_n-y_m||^2
+		&=||y_n-x+x-y_m||^2 \\
+		&=2||y_n-x||^2+2||x-y_m||^2-||2x-y_m-y_n||^2 \\
+		&=2||y_n-x||^2+2||x-y_m||^2-4\left\|x-\frac{y_m+y_n}{2}\right\|^2
+	\end{align*}
+	因为$E$是$X$中的闭凸集，$y_m,y_n\in E$，所以$\frac{y_m+y_n}{2}\in E$，进而有：
+	\begin{equation*}
+		\left\|x-\frac{y_m+y_n}{2}\right\|^2\geqslant a^2
+	\end{equation*}
+	又因$n,m\to+\infty$时，有：
+	\begin{equation*}
+		||y_n-x||^2\to a^2,\;||x-y_m||^2\to a^2
+	\end{equation*}
+	由上述：
+	\begin{align*}
+		\lim_{m\to+\infty}||y_n-y_m||^2
+		&\leqslant\lim_{m\to+\infty}\left(2||y_n-x||^2+2||x-y_m||^2-4a^2\right) \\
+		&=\lim_{m\to+\infty}2||y_n-x||^2+\lim_{m\to+\infty}2||x-y_m||^2-4a^2=2a^2+2a^2-4a^2=0
+	\end{align*}
+	故$\{y_n\}$是Cauchy点列。因为$X$是完备的，所以$\{y_n\}\to y\in X$。又因$E$是闭集，所以$y\in E$。由范数的连续性：
+	\begin{equation*}
+		||x-y||=\left\|x-\lim_{n\to+\infty}y_n\right\|=\lim_{n\to+\infty}||x-y_n||=a
+	\end{equation*}
+	所以$y$是$x$在$E$中的最佳逼近元。\par
+	唯一性：假设$x$在$E$中存在另一最佳逼近元$y'$，由中线公式：
+	\begin{align*}
+		||y-y'||^2
+		&=||y-x+x-y'||^2 \\
+		&=2||y-x||^2+2||x-y'||^2-4\left\|x-\frac{y+y'}{2}\right\|^2 \\
+		&\leqslant0
+	\end{align*}
+	所以$||y-y'||=0$。由范数的性质，$y=y'$。
+\end{proof}
+\begin{theorem}
+	$X$是一个Hilbert空间，$E$是$X$中的闭子空间。对任意的$x\in X$，存在下述唯一的正交分解：
+	\begin{equation*}
+		x=y+z,\quad y\in E,\;z\in E^{\perp}
+	\end{equation*}
+	称$y$为$x$在$E$中的\gls{OrthogonalProjection}。
+\end{theorem}
+\begin{proof}
+	存在性：因为$E$是$X$中的闭子空间，所以$E$是一个凸闭集，$x$在$E$中存在唯一的最佳逼近元$y$，记$||x-y||=a$。因为$y\in E$，所以对任一实（或复）数$\lambda$以及$\forall\;u\in E$，有$y+\lambda u\in E$，故：
+	\begin{align*}
+		a^2
+		&\leqslant||x-(y+\lambda u)||^2 \\
+		&=\Bigl(x-(y+\lambda u),x-(y+\lambda u)\Bigr) \\
+		&=\Bigl((x-y)-\lambda u,(x-y)-\lambda u\Bigr) \\
+		&=||x-y||^2-\overline{\lambda}(x-y,u)-\lambda(u,x-y)+|\lambda|^2||u||^2
+	\end{align*}
+	取$\lambda=\frac{(x-y,u)}{||u||^2}$，上式即可化为：
+	\begin{equation*}
+		a^2\leqslant a^2-\frac{|(x-y,u)|^2}{||u||^2}-\frac{|(x-y,u)|^2}{||u||^2}+\frac{|(x-y,u)|^2}{||u||^4}||u||^2=a^2-\frac{|(x-y,u)|^2}{||u||^2}
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		|(x-y,u)|^2\leqslant0
+	\end{equation*}
+	因此$(x-y,u)=0$。由$u$的任意性，$(x-y)\perp E$。令$z=x-y$，即有：
+	\begin{equation*}
+		x=y+z,\quad y\in E,\;z\in E^{\perp}
+	\end{equation*}
+	\hspace{3em}唯一性：假设此时存在另一分解$x=y'+z',\;y'\in E,z'\in E^{\perp}$，则$y+z=y'+z'$，也即$y-y'=z'-z$。因为$(y-y')\in E$，$(z'-z)\in E^{\perp}$，所以$(y-y')=(z'-z)\in E\cap E^{\perp}=\{\mathbf{0}\}$，故$y=y',\;z=z'$。
+\end{proof}
+\begin{definition}
+	设$\{e_n\}$为内积空间$X$中的元素系，且满足：
+	\begin{equation*}
+		(e_m,e_n)=
+		\begin{cases}
+			0,&m\ne n \\
+			1,&m=n
+		\end{cases}
+	\end{equation*}
+	则称$\{e_n\}$是$X$中的一个\gls{OrthogonalSystem}。对任意的$x\in X$，称$c_n=(x,e_n)$为$x$关于$\{e_n\}$的第$n$个\gls{FourierCoefficient}，称$\{(x,e_n)\}$为$x$关于$\{e_n\}$的\gls{SetOfFourierCoefficients}。
+\end{definition}
+\begin{theorem}
+	$X$是一个内积空间，$\{e_1,e_2,\dots,e_n\}$是$X$中的一个规范正交系，$E=\operatorname{span}\{e_1,e_2,\dots,e_n\}$。对任意的$x\in X$，$x$在$E$上的正交投影为：
+	\begin{equation*}
+		y=\sum_{i=1}^{n}(x,e_i)e_i
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	$E$显然是一个闭集，又因为$E$是一个子空间，所以对任意的$x\in X$，有唯一的正交分解：
+	\begin{equation*}
+		x=y+z,\quad y\in E,\;z\in E^{\perp}
+	\end{equation*}
+	因为$y\in E$，所以：
+	\begin{equation*}
+		y=\sum_{i=1}^{n}\alpha_ie_i
+	\end{equation*}
+	由规范正交系的定义可以得到：
+	\begin{equation*}
+		y=\sum_{i=1}^{n}(y,e_i)e_i=\sum_{i=1}^{n}(x,e_i)e_i-\sum_{i=1}^{n}(z,e_i)e_i=\sum_{i=1}^{n}(x,e_i)e_i\qedhere
+	\end{equation*}
+\end{proof}
+\begin{theorem}[Bessel inequality]
+	$X$是一个Hilbert空间，$\{e_n\}$是$X$中的一个规范正交系。对任意的$x\in X$，有：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}|(x,e_n)|^2\leqslant||x||^2
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	$x$在$\operatorname{span}\{e_1,e_2,\dots,e_n\}$中存在正交投影$y$满足：
+	\begin{equation*}
+		y=\sum_{i=1}^{n}(x,e_i)e_i
+	\end{equation*}
+	由内积空间的勾股定理，$||y||\leqslant||x||$，故：
+	\begin{align*}
+		||y||^2
+		&=\left\|\sum_{i=1}^{n}(x,e_i)e_i\right\|^2 \\
+		&=\left(\sum_{i=1}^{n}(x,e_i)e_i,\sum_{i=1}^{n}(x,e_i)e_i\right) \\
+		&=\sum_{i=1}^n\Bigl((x,e_i)e_i,(x,e_i)e_i\Bigr) \\
+		&=\sum_{i=1}^n|(x,e_i)|^2(e_i,e_i) \\
+		&=\sum_{i=1}^n|(x,e_i)|^2\leqslant||x||
+	\end{align*}
+	由极限的不等式性，令$n\to+\infty$即可得到结果。
+\end{proof}
+\begin{theorem}[Parseval's identity]\label{theo:Parseval's identity}
+	$X$是一个Hilbert空间，$\{e_n\}$是$X$中的一个规范正交系，数列$\{c_n\}\in l^2$。存在唯一的$x\in X$，使得$\{c_n\}$是$x$关于$\{e_n\}$的Fourier系数集，且等式：
+	\begin{equation*}
+		||x||^2=\sum_{n=1}^{+\infty}|c_n|^2
+	\end{equation*}
+	成立，该等式称为Parseval's identity。
+\end{theorem}
+\begin{proof}
+	\textbf{(1)存在性：}构建点列$\left\{x_n=\sum\limits_{i=1}^{n}c_ie_i\right\}$，设$m>n$，则有：
+	\begin{equation*}
+		||x_m-x_n||^2=\left\|\sum_{i=n+1}^{m}c_ie_i\right\|^2=\left(\sum_{i=n+1}^{m}c_ie_i,\sum_{i=n+1}^{m}c_ie_i\right)=\sum_{i=n+1}^{m}|c_i|^2(e_i,e_i)=\sum_{i=n+1}^{m}|c_i|^2
+	\end{equation*}
+	因为数列$\{c_n\}\in l^2$，所以$\sum\limits_{i=1}^{+\infty}|c_i|^2$收敛，故当$m,n\to+\infty$时，$||x_m-x_n||^2\to0$，因此$\{x_n\}$是$X$中的Cauchy点列。又因为$X$完备，所以$\{x_n\}\to x\in X$。\par
+	由内积的连续性，对任意的$i_0\in\mathbb{N}^+$，有：
+	\begin{equation*}
+		(x,e_{i_0})=\left(\lim_{n\to+\infty}x_n,e_{i_0}\right)=\lim_{n\to+\infty}(x_n,e_{i_0})
+	\end{equation*}
+	由$\{x_n\}$的定义可知，当$n\geqslant i_0$时，$(x_n,e_{i_0})=c_{i_0}$，所以：
+	\begin{equation*}
+		(x,e_{i_0})=c_{i_0}
+	\end{equation*}
+	将上述等式中的$i_0$换成$n$，即有$(x,e_n)=c_n$，所以$\{c_n\}$是$x$关于$\{e_n\}$的Fourier系数集。又因为：
+	\begin{equation*}
+		||x_n||^2=\left\|\sum_{i=1}^{n}c_ie_i\right\|^2=\left(\sum_{i=1}^{n}c_ie_i,\sum_{i=1}^{n}c_ie_i\right)=\sum_{i=1}^{n}|c_i|^2(e_i,e_i)=\sum_{i=1}^{n}|c_i|^2
+	\end{equation*}
+	利用范数的连续性即可得到：
+	\begin{gather*}
+		\lim_{n\to\infty}||x_n||^2=\lim_{n\to\infty}\sum_{i=1}^{n}|c_i|^2 \\
+		||x||^2=\sum_{i=1}^{+\infty}|c_i|^2
+	\end{gather*}\par
+	\textbf{(2)唯一性：}由\cref{corollary:Parseval's identity Uniqueness}给出。
+\end{proof}
+\begin{definition}
+	$X$是一个内积空间，$\{e_n\}$是$X$中的一个规范正交系。如果对任意的$x\in X$，Parseval's identity：
+	\begin{equation*}
+		||x||^2=\sum_{n=1}^{+\infty}|(x,e_n)|^2
+	\end{equation*}
+	恒成立，则称$\{e_n\}$是完备的。
+\end{definition}
+\begin{definition}
+	$X$是一个内积空间，$\{e_n\}$是$X$中的一个规范正交系。如果对任意的$x\in X$，由$(x,e_n)=0,\;\forall\;n\in\mathbb{N}^+$可推出$x=\mathbf{0}$，则称$\{e_n\}$是\gls{Compeletely}。
+\end{definition}
+\begin{theorem}
+	$X$是一个内积空间，$\{e_n\}$是$X$中的一个规范正交系。则下列性质等价：
+	\begin{enumerate}
+		\item $\{e_n\}$是完备的。
+		\item 对任意的$x\in X$，有：
+		\begin{equation*}
+			x=\sum_{n=1}^{+\infty}(x,e_n)e_n
+		\end{equation*}
+		\item 对任意的$x,y\in X$，有：
+		\begin{equation*}
+			(x,y)=\sum_{n=1}^{+\infty}(x,e_n)\overline{(y,e_n)}
+		\end{equation*}
+		且上式右端级数绝对收敛。
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	我们按照$1\Rightarrow2\Rightarrow3\Rightarrow1$的顺序来证明等价性。\par
+	(1)设$x\in X$，则对任意的$n\in\mathbb{N}^+$，有：
+	\begin{align*}
+		\left\|x-\sum_{i=1}^{n}(x,e_i)e_i\right\|
+		&=\left(x-\sum_{i=1}^{n}(x,e_i)e_i,x-\sum_{i=1}^{n}(x,e_i)e_i\right) \\
+		&=\left(x,x-\sum_{i=1}^{n}(x,e_i)e_i\right)-\left(\sum_{i=1}^{n}(x,e_i)e_i,x-\sum_{i=1}^{n}(x,e_i)e_i\right) \\
+		&=\overline{\left(x-\sum_{i=1}^{n}(x,e_i)e_i,x\right)}-\sum_{i=1}^{n}\Bigl((x,e_i)e_i,x-\sum_{j=1}^{n}(x,e_i)e_i\Bigr) \\
+		&=\overline{(x,x)-\sum_{i=1}^n\Bigl((x,e_i)e_i,x\Bigr)}-\sum_{i=1}^{n}\overline{\Bigl(x-\sum_{j=1}^{n}(x,e_i)e_i,(x,e_i)e_i\Bigr)} \\
+		&=(x,x)-\sum_{i=1}^{n}\overline{\Bigl((x,e_i)e_i,x\Bigr)}-\sum_{i=1}^{n}\overline{\Bigl(x,(x,e_i)e_i\Bigr)}+\sum_{i=1}^{n}\overline{\Bigl((x,e_i)e_i,(x,e_i)e_i\Bigr)} \\
+		&=(x,x)-\sum_{i=1}^{n}\Bigl(x,(x,e_i)e_i\Bigr)-\sum_{i=1}^{n}\Bigl((x,e_i)e_i,x\Bigr)+\sum_{i=1}^{n}\Bigl((x,e_i)e_i,(x,e_i)e_i\Bigr) \\
+		&=(x,x)-\sum_{i=1}^{n}\overline{(x,e_i)}(x,e_i)-\sum_{i=1}^{n}(x,e_i)(e_i,x)+\sum_{i=1}^{n}(x,e_i)\overline{(x,e_i)} \\
+		&=||x||^2-\sum_{i=1}^{n}\overline{(x,e_i)}(x,e_i)-\sum_{i=1}^{n}(x,e_i)\overline{(x,e_i)}+\sum_{i=1}^{n}(x,e_i)\overline{(x,e_i)} \\
+		&=||x||^2-\sum_{i=1}^{n}\overline{(x,e_i)}(x,e_i) \\
+		&=||x||^2-\sum_{i=1}^{n}|(x,e_i)|^2
+	\end{align*}
+	因为$\{e_n\}$是完备的，所以Parseval's identity成立，于是有：
+	\begin{equation*}
+		\lim_{n\to+\infty}\left\|x-\sum_{i=1}^{n}(x,e_i)e_i\right\|=\lim_{n\to+\infty}\left[||x||^2-\sum_{i=1}^{n}|(x,e_i)|^2\right]=0
+	\end{equation*}
+	即：
+	\begin{equation*}
+		x=\sum_{n=1}^{+\infty}(x,e_n)e_n
+	\end{equation*}\par
+	(2)任取$x,y\in X$，取点列$\{x_n\},\{y_n\}$使得：
+	\begin{equation*}
+		x_n=\sum_{i=1}^{n}(x,e_i)e_i,\;y_n=\sum_{i=1}^{n}(y,e_i)e_i
+	\end{equation*}
+	显然$\{x_n\}\to x,\;\{y_n\}\to y$。因为：
+	\begin{align*}
+		(x_n,y_n)
+		&=\left(\sum_{i=1}^{n}(x,e_i)e_i,\sum_{i=1}^{n}(y,e_i)e_i\right) \\
+		&=\sum_{i=1}^{n}(x,e_i)\left(e_i,\sum_{j=1}^{n}(y,e_j)e_j\right) \\
+		&=\sum_{i=1}^{n}(x,e_i)\sum_{j=1}^{n}\overline{(y,e_j)}(e_i,e_j) \\
+		&=\sum_{i=1}^{n}(x,e_i)\overline{(y,e_i)}
+	\end{align*}
+	由内积的连续性可得：
+	\begin{equation*}
+		(x,y)=\lim_{n\to+\infty}(x_n,y_n)=\lim_{n\to+\infty}\left[\sum_{i=1}^{n}(x,e_i)\overline{(y,e_i)}\right]=\sum_{n=1}^{+\infty}(x,e_n)\overline{(y,e_n)}
+	\end{equation*}
+	\info{需要证明绝对收敛}
+	(3)取$y=x$即有：
+	\begin{equation*}
+		||x||^2=(x,x)=\sum_{n=1}^{+\infty}(x,e_n)\overline{(x,e_n)}=\sum_{n=1}^{+\infty}|(x,e_n)|^2\qedhere
+	\end{equation*}
+\end{proof}
+\begin{theorem}
+	如果$X$是一个Hilbert空间，则$\{e_n\}$是完全的与上述三个命题也等价。
+\end{theorem}
+\begin{proof}
+	我们设这个命题为$4$，接下来来证明$3\Rightarrow4\Rightarrow1$。\par
+	(1)因为对任意的$x\in X$，有$(x,e_n)=0$，所以对任意的$y\in X$，有：
+	\begin{equation*}
+		(x,y)=\sum_{n=1}^{+\infty}(x,e_n)\overline{(y,e_n)}=0
+	\end{equation*}
+	所以$x=\mathbf{0}$。即由$(x,e_n)=0,\;\forall\;n\in\mathbb{N}^+$能推得$x=\mathbf{0}$，所以$\{e_n\}$是完全的。\par
+	(2)任取$x\in X$。由Bessel inequality，$\{(x,e_n)\}\in l^2$。因为$X$是一个Hilbert空间，由Parseval's identity，存在$y\in X$，使得$\{(x,e_n)\}$是$y$关于$\{e_n\}$的Fourier系数集，且：
+	\begin{equation*}
+		||y||^2=\sum_{n=1}^{+\infty}|(x,e_n)|^2
+	\end{equation*}
+	而$\{(x,e_n)\}$也是$x$关于$\{e_n\}$的Fourier系数集，所以$x-y$关于$\{e_n\}$的Fourier系数满足$(x,e_n)-(x,e_n)=0$。因为$\{e_n\}$是完全的，所以$x-y=\mathbf{0}$，即$x=y$，于是：
+	\begin{equation*}
+		||x||^2=\sum_{n=1}^{+\infty}|(x,e_n)|^2\qedhere
+	\end{equation*}
+\end{proof}
+\begin{corollary}
+	设内积空间$X$中存在完备的规范正交系，则$X$可分。
+\end{corollary}
+\begin{proof}
+	设$\{e_n\}$是$X$中完备的规范正交系，则对任意的$x\in X$，有：
+	\begin{equation*}
+		x=\sum_{n=1}^{+\infty}(x,e_n)e_n
+	\end{equation*}
+	所以由$\{e_n\}$张成的子空间在$X$中稠密，所以$\{e_n\}$以有理数为系数的所有可能的线性组合构成的集在$X$中也稠密，且可列，于是$X$可分。
+\end{proof}
+\begin{corollary}\label{corollary:Parseval's identity Uniqueness}
+	\cref{theo:Parseval's identity}中使得Parseval's identity成立的元素是唯一的。
+\end{corollary}
+\begin{proof}
+	设$X$是一个Hilbert空间，$\{c_n\}\in l^2$，$\{e_n\}$是$X$中的一个规范正交系，$x,x'\in X$且有：
+	\begin{equation*}
+		||x||^2=||x'||^2=\sum_{n=1}^{+\infty}|c_n|^2
+	\end{equation*}
+	\info{需要证明}
+\end{proof}
+\subsubsection{Schmidt正交化}
+\begin{theorem}[Schmidt正交化]
+	设$E=\{x_n\}$是内积空间$X$中的一个可列子集，则由$E$必可作出一个规范正交系$\{e_n\}$，使得$E$张成的子空间与$\{e_n\}$张成的子空间相同。
+\end{theorem}
+\begin{proof}
+	取$y_1\ne\mathbf{0}$且$y_1\in E$，令：
+	\begin{equation*}
+		e_1=\frac{y_1}{||y_1||}
+	\end{equation*}
+	则$||e_1||=1$。取$y_2\in E$与$e_1$线性无关，令：
+	\begin{equation*}
+		h_2=y_2-(y_2,e_1)e_1
+	\end{equation*}
+	则$h_2\ne\mathbf{0}$，否则的话就有$y_2=(y_2,e_1)e_1$，即$y_2$与$e_1$线性相关，与$y_2$的取法矛盾。因为$(y_2,e_1)e_1$是$y_2$在$e_1$上的正交投影，所以$h_2=y_2-(y_2,e_1)e_1\perp e_1$。令：
+	\begin{equation*}
+		e_2=\frac{h_2}{||h_2||}
+	\end{equation*}
+	则$||e_2||=1,\;e_2\perp e_1$。取$y_3$与$e_1,e_2$线性无关，令：
+	\begin{equation*}
+		h_3=y_3-(y_3,e_1)e_1-(y_3,e_2)e_2
+	\end{equation*}
+	与前面相似，$h_3\ne\mathbf{0}$。因为$(y_3,e_1)e_1-(y_3,e_2)e_2$是$y_3$在$\operatorname{span}\{e_1,e_2\}$上的正交投影，所以$h_3\perp e_j,\;j=1,2$。令：
+	\begin{equation*}
+		e_3=\frac{h_3}{||h_3||}
+	\end{equation*}
+	则$||e_3||=1,\;e_i\perp e_j,\;i=1,2,3,\;j=1,2,3,\;i\ne j$。\par
+	重复上述步骤，假设已作好相互正交且范数为$1$的元素$e_1,,e_2,\dots,e_{n}$。取$y_{n+1}\in E$与$e_1,,e_2,\dots,e_{n}$线性无关，令：
+	\begin{equation*}
+		h_{n+1}=y_{n+1}-\sum_{i=1}^{n}(y_{n+1},e_i)e_i
+	\end{equation*}
+	则$h_{n+1}\ne\mathbf{0}$，且有$h_{n+1}\perp e_i,\;i=1,2,\dots,n$。再令：
+	\begin{equation*}
+		e_{n+1}=\frac{h_{n+1}}{||h_{n+1}||}
+	\end{equation*}
+	于是得到$n+1$个相互正交且范数均为$1$的元素$e_1,e_2,\dots,e_{n+1}$。由归纳法，可以得到最多含可列个元素的规范正交系$\{e_n\}$。\par
+	接下来证明$\{x_n\}$张成的子空间$L$与$\{e_n\}$张成的子空间$L'$相同。\par
+	从$e_n,h_n$的取法可以看出，$e_n$可以由$x_1,x_2,\dots,x_{n-1}$线性表出，由归纳法可得出$L'\subset L$。反之，仍由$e_n,h_n$的取法可以看出，$x_n$可由$e_1,e_2,\dots,e_n$线性表出，由归纳法可得出$L\subset L'$。于是$L=L'$。
+\end{proof}
+\begin{theorem}
+	可分的内积空间$X$必存在完备的规范正交系。
+\end{theorem}
+\begin{proof}
+	因为$X$可分，所以$X$中有可列的稠密子集$\{x_n\}$。由Schmidt正交化定理，利用$\{x_n\}$可以建立规范正交系$\{e_n\}$，且$\{x_n\}$与$\{e_n\}$张成的子空间相同。因为$\{x_n\}$在$X$中稠密，所以任取$y\in X$，存在$\{x_n\}$中的点列$\{y_n\}$使得$\{y_n\}\to y$。因为$x_n$可由$\{e_n\}$线性表出，所以$\{y_n\}$可由$\{e_n\}$线性表出，于是$\{y_n\}\subset\operatorname{span}\{e_n,\;n\in\mathbb{N}^+\}$。把$y_n$用$\{e_n\}$线性表出，就可以得到：
+	\begin{equation*}
+		y_k=\sum_{n=1}^{+\infty}(y_k,e_n)e_n,\;k\in\mathbb{N}^+
+	\end{equation*}
+	因为：
+	\begin{align*}
+		\left\|y-\sum_{n=1}^{+\infty}(y,e_n)e_n\right\|
+		&\leqslant||y-y_k||+\left\|y_k-\sum_{n=1}^{+\infty}(y,e_n)e_n\right\| \\
+		&=||y-y_k||+\left\|\sum_{n=1}^{+\infty}(y_k,e_n)e_n-\sum_{n=1}^{+\infty}(y,e_n)e_n\right\| \\
+		&=||y-y_k||+\left\|\sum_{n=1}^{+\infty}(y_k-y,e_n)e_n\right\|
+	\end{align*}
+	又：
+	\begin{align*}
+		\left\|\sum_{n=1}^{+\infty}(y_k-y,e_n)e_n\right\|
+		&=\sqrt{\left(\sum_{n=1}^{+\infty}(y_k-y,e_n)e_n,\sum_{n=1}^{+\infty}(y_k-y,e_n)e_n\right)} \\
+		&=\sqrt{\sum_{n=1}^{+\infty}(y_k-y,e_n)\overline{(y_k-y,e_n)}}  
+		\\
+		&=\sqrt{\sum_{n=1}^{+\infty}|(y_k-y,e_n)|^2}
+	\end{align*}
+	由Bessel inequality可得：
+	\begin{equation*}
+		\left\|\sum_{n=1}^{+\infty}(y_k-y,e_n)e_n\right\|
+		=\sqrt{\sum_{n=1}^{+\infty}|(y_k-y,e_n)|^2}
+		\leqslant||y_k-y||
+	\end{equation*}
+	于是有：
+	\begin{equation*}
+		\left\|y-\sum_{n=1}^{+\infty}(y,e_n)e_n\right\|
+		\leqslant2||y-y_k||\to0\quad(k\to+\infty)
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\left\|y-\sum_{n=1}^{+\infty}(y,e_n)e_n\right\|=0w
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		y=\sum_{n=1}^{+\infty}(y,e_n)e_n
+	\end{equation*}
+	由$y$的任意性，$\{e_n\}$是完备的。
+\end{proof}
+\subsubsection{可分Hilbert空间的同构性}
+\begin{theorem}
+	实（或复）可分Hilbert空间与实（或复）$l^2$空间等距同构，所以所有实（或复）可分Hilbert空间彼此等距同构。
+\end{theorem}
+\begin{proof}
+	设$X$为实（或复）可分Hilbert空间，$\{e_n\}$是$X$中的一个完备规范正交系。任取$x\in X$，$\{c_n\}$是$x$关于$\{e_n\}$的Fourier系数集。作$X$到$l^2$中的映射：
+	\begin{equation*}
+		T:Tx=\{c_n\}
+	\end{equation*}\par
+	(1)由Parseval's identity，$T$是一个双射。\par
+	(2)任取$x,y\in X$，$\alpha,\beta$为$X$对应数域中的两个数，则：
+	\begin{equation*}
+		T(\alpha x+\beta y)=\{(\alpha x+\beta y,e_n)\}=\{\alpha(x,e_n)+\beta(y,e_n)\}=\alpha Tx+\beta Ty
+	\end{equation*}\par
+	综上两点，$T$是$X$到$l^2$中的同构映射。\par
+	任取$x,y\in X$，由$\{e_n\}$的完备性可得：
+	\begin{align*}
+		||x-y||^2
+		&=\left(\sum_{n=1}^{+\infty}(x-y,e_n)e_n,\sum_{n=1}^{+\infty}(x-y,e_n)e_n\right) \\
+		&=\sum_{n=1}^{+\infty}(x-y,e_n)\overline{(x-y,e_n)} \\
+		&=\sum_{n=1}^{+\infty}|(x-y,e_n)|^2 \\
+		&=||Tx-Ty||^2
+	\end{align*}
+	所以$||x-y||=||Tx-Ty||$，即$X$与$l^2$空间等距。\par
+	综上，$X$与$l^2$等距同构。由$X$的任意性以及等距同构的传递性，所有实（或复）可分Hilbert空间彼此等距同构。
+\end{proof}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,37 @@
+\section{Friedman秩和检验}
+
+\subsubsection{适用条件}
+各水平间并不独立（因为还有区组的影响），采用完全区组设计，水平之间分布是相似的，连续型与离散型数据都可以。
+\subsubsection{假设}
+假设$k$个水平有分布函数$F_i(x)=F(x-\theta_i),\;i=1,2,\dots,k$，则检验假设可写为：
+\begin{equation}
+	H_0:\theta_1=\theta_2=\cdots=\theta_n\Leftrightarrow
+	H_1:\text{至少有一个等号不成立}\notag
+\end{equation}
+\subsubsection{原理}
+假设有$k$个水平、$b$个区组。\label{sec:friedman检验原理}\par
+因为各区组之间是有影响的，无法把各响应值混在一起排序。选择在各个区组内计算所有响应值的秩，$R_{ij}$表示在第$j$个区组中水平$i$的秩，$R_i=\sum\limits_{j=1}^bR_{ij},\;i=1,2,\dots,k$，定义如下Friedman统计量:
+\begin{equation}
+	Q=\frac{12}{bk(k+1)}\sum_{i=1}^k(R_i-\frac{b(k+1)}{2})^2=\frac{12}{bk(k+1)}\sum_{i=1}^kR_i^2-3b(k+1)\notag
+\end{equation}
+\hspace{2em}易证$\frac{b(k+1)}{2}=\bar{R_i}$（只需注意此时秩是针对区组内而言）。在零假设成立的情况下，各水平之间的秩和与均值相比不应相差过大，也就是$Q$值不应太大，若$Q$值过大，则有理由怀疑零假设。由此可看出这里只考虑上侧的单侧检验问题。
+\subsubsection{大样本近似}
+在大样本的情况下（$b\to+\infty$），若零假设成立，有如下近似分布：
+\begin{equation}
+	Q\sim\chi^2_{(k-1)}\notag
+\end{equation}
+\subsubsection{打结}
+在某个区组存在结的时候，利用下式进行修正（其中$\tau_{ij}$表示第$j$个区组的第$i$个结统计量）：
+\begin{equation}
+	Q_C=\frac{Q}{1-C},\;C=\frac{\sum\limits_{i,\;j}(\tau_{ij}^3-\tau_{ij})}{bk(k^2-1)}\notag
+\end{equation}
+\subsubsection{成对数据的比较}
+类似于邓肯多重比较法，有时需要比较某两个水平之间是否存在差异，那么在大样本的情况下，如果零假设为：$i$水平与$j$水平之间没有差异，那么如果下式成立（其中$\alpha$是检验的显著性水平）：
+\begin{gather*}
+	\left|R_i-R_j>Z_{\frac{\alpha^*}{2}}\sqrt{b(k+1)k/6}\right| \\
+	\alpha^*=\frac{\alpha}{k(k-1)/2}
+\end{gather*}
+则可拒绝零假设。可以看出这是一个很保守的检验，$\alpha^*$其实是做了多重假设检验的校正。\info{记得以后要写多重假设检验的校正问题}
+\subsubsection{代码}
+以下是自编代码，提供精确计算、大样本近似、连续性修正与打结校正功能。x可以是一个三列的数据框，第一列表示response值，第二列表示factor，第三列表示block。x也可以是一个向量，表示response，此时必须传入factor和block。
+\inputminted[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines]{r}{nonparametric-statistics/chapter3/friedman-test.R}

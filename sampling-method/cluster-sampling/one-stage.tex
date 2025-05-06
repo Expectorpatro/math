@@ -1,0 +1,67 @@
+\section{一阶整群抽样}
+由一阶整群抽样的定义，选中某个psu后该psu中的所有ssu进入样本。
+\subsubsection{符号说明}
+\begin{table}[H]
+	\centering
+	\setlength{\tabcolsep}{25pt} % 调整列之间的间距，默认值为6pt
+	\renewcommand{\arraystretch}{1.5}
+	\begin{tabular}{cc}
+		\toprule
+		符号    & 说明 \\
+		\midrule
+		$N$ & 总群数 \\
+		$n$ & 抽样群数 \\
+		$M_i$ & 第$i$个psu中的ssu个数 \\
+		$M=\sum_{i=1}^{N}M_i$ & ssu的总数 \\
+		$y_{ij}$ & 第$i$个psu中第$j$个样本单元的数值\\
+		$\mu_i=\sum_{j=1}^{M_i}\frac{y_{ij}}{M_i}$ & 第$i$个psu中的均值 \\
+		$\mu=\sum_{i=1}^{N}\sum_{j=1}^{M_i}\frac{y_{ij}}{M}$ & 总体均值 \\
+		$\tau_i=\sum_{j=1}^{M_i}y_{ij}$ & 第$i$个psu中的总量 \\
+		$t_i=\sum_{j=1}^{M_i}y_{ij}$ & 入样的第$i$个psu中的总量 \\
+		$\tau=\sum_{i=1}^{N}\tau_i$ & 总体总量 \\
+		$\sigma_i^2=\sum_{j=1}^{M_i}\frac{(y_{ij}-\mu_{i})^2}{M_i-1}$ & 第$i$个psu中的方差 \\
+		$\sigma_{psu}^2=\frac{1}{N-1}\sum_{i=1}^N\left(\tau_i-\frac{\tau}{N}\right)^2$ & psu间的方差 \\
+		$\sigma_M^2=\frac{1}{N-1}\sum_{i=1}^{N}\left(M_i-\frac{M}{N}\right)^2$ & psu间ssu个数的方差 \\
+		$\sigma^2=\sum_{i=1}^N\sum_{j=1}^{M_i}\frac{(y_{ij}-\mu)^2}{M-1}$ & 总体方差 \\
+		$R=\dfrac{\sum_{i=1}^{N}(M_i-\frac{M}{N})(\tau_i-\frac{\tau}{N})}{(N-1)\sigma_{M}\sigma_{psu}}$ & $M_i$与$\tau_i$的回归系数 \\
+		\bottomrule
+	\end{tabular}
+	\caption{符号说明表}
+\end{table}
+一阶整群抽样的相关参数有两种估计方式，分别为无偏估计与比例估计。虽然无偏估计具有无偏性，但经过模拟研究，当群内总体总量与群内个体数量成正比时，比例估计的方差会比无偏估计小很多，此时应选择比例估计量对参数进行估计。
+
+\subsection{参数的无偏估计}
+\subsubsection{总体总量的估计}
+可给出如下关于总体总量的估计：
+\begin{gather*}
+	\hat{\tau}=\frac{N}{n}\sum_{i=1}^nt_i=\sum_{i=1}^{n}\sum_{j=1}^{M_i}w_{ij}y_{ij} \\
+	Var(\hat{\tau})=N^2\left(1-\frac{n}{N}\right)\frac{\sigma_{psu}^2}{n}=N(N-n)\frac{\sigma_{psu}^2}{n} \\
+	\widehat{Var}(\hat{\tau})=N^2\left(1-\frac{n}{N}\right)\frac{s_{psu}^2}{n}=N(N-n)\frac{s_{psu}^2}{n} \\
+	s_{psu}^2=\frac{1}{n-1}\sum_{i=1}^n\left(t_i-\frac{\hat{\tau}}{N}\right)^2
+\end{gather*}
+\subsubsection{总体均值的估计}
+可给出如下关于总体均值的估计：
+\begin{gather*}
+	\hat{\mu}=\frac{\hat{\tau}}{M} \\
+	Var(\hat{\mu})=Var\left(\frac{\hat{\tau}}{M^2}\right)=\frac{N^2}{M^2}\left(1-\frac{n}{N}\right)\frac{\sigma_{psu}^2}{n} \\
+	\widehat{Var}(\hat{\mu})=\widehat{Var}\left(\frac{\hat{\tau}}{M^2}\right)=\frac{N^2}{M^2}\left(1-\frac{n}{N}\right)\frac{s_{psu}^2}{n} \\
+\end{gather*}
+
+\subsection{参数的比例估计}
+由：
+\begin{equation*}
+	\mu=\frac{1}{M}\sum_{i=1}^{N}\sum_{j=1}^{M_i}y_{ij}=\frac{\sum\limits_{i=1}^{N}\tau_i}{\sum\limits_{i=1}^{N}M_i}=\frac{\tau}{M}
+\end{equation*}
+可设：
+\begin{equation*}
+	\mu=\frac{\tau}{M}=B
+\end{equation*}
+将$\tau_i$看作样本单元值，将$M_i$看作辅助变量，可得到如下关于参数的比例估计：
+\begin{gather*}
+	\hat{B}=\hat{\mu}_r=\frac{\hat{\tau}}{\hat{M}}=\frac{\frac{N}{n}\sum_{i=1}^nt_i}{\frac{N}{n}\sum_{i=1}^nM_i}=\frac{\sum_{i=1}^{n}t_i}{\sum_{i=1}^{n}M_i} \\
+	Var(\hat{B})=\frac{1}{M^2}Var(\hat{\tau}_r)\approx\left(1-\frac{n}{N}\right)\frac{\sigma_{psu}^2-2BR\sigma_{M}\sigma_{psu}+B^2\sigma_{M}^2}{n(\dfrac{M}{N})^2} \\
+	\widehat{Var}(\hat{B})\approx\left(1-\frac{n}{N}\right)\frac{s_{psu}^2-2\hat{B}\hat{R}s_{psu}s_M+\hat{B}^2s_M^2}{n(\dfrac{\sum_{i=1}^{n}M_i}{n})^2} \\
+	\widehat{Var}_1(\hat{\mu}_r)=\frac{1}{M^2}N\left(N-n\right)\frac{s_e^2}{n} \\
+	\widehat{Var}_1(\hat{\tau}_r)=N\left(N-n\right)\frac{s_e^2}{n} \\
+	s_e^2=\frac{1}{n-1}\sum_{i=1}^{n}\left(t_i-\hat{B}M_i\right)^2
+\end{gather*}

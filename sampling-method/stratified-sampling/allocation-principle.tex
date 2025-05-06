@@ -1,0 +1,135 @@
+\section{分配原则}
+
+分层随机抽样要考虑两个问题：
+\begin{enumerate}
+	\item 如何定义层？
+	\item 每个层里面样本量是多少？
+\end{enumerate}
+
+\subsection{比例分配}
+\gls{PropAllocation}是指在分层抽样中令$\pi_{hj}=\frac{n}{N}=\frac{n_h}{N_h},\;h=1,2,\dots,H,\;j=1,2,\dots,N_h$。这种分配方式不会出现极端情况，即样本几乎都出自某一层的现象。
+\subsubsection{比例分配与SRS的比较}
+可以注意到此时所有单元的入样概率都一样。\par
+由总体均值、总体总量估计量的计算公式可知：比例分配与SRS对于总体均值、总体总量估计的期望是一样的，即估计量的期望是一样的。但是两种方式对于总体均值、总体总量估计的方差不一样。在$n$相同的情况下，$Var(\tilde{\mu}_{str}),\;Var(\tilde{\tau}_{str})$通常比$Var(\hat{\mu}_{srs}),\;Var(\hat{\tau}_{str})$小。
+\begin{proof}
+	从方差分析\info{回头补方差分析}的角度去分析。因为两种估计方式中总体总量的估计都是总体均值估计的$N$倍，所以只需证明总体均值的情况即可。\par
+	由$\dfrac{n_h}{N_h}=\dfrac{n}{N}$可得：
+	\begin{equation*}
+		Var(\tilde{\tau}_{str})
+		=\sum_{h=1}^HN_h^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h} =\sum_{h=1}^HN_h\left(1-\frac{n}{N}\right)\frac{N}{n}\sigma_h^2 =\left(1-\frac{n}{N}\right)\frac{N}{n}\sum_{h=1}^HN_h\sigma_h^2
+	\end{equation*}
+	从理论角度看待SSe，即计算总体而非样本的SSe，可得到：
+	\begin{equation*}
+		SSe=\sum_{h=1}^H\sum_{j=1}^{N_h}(Y_{hj}-\mu_h)^2=\sum_{h=1}^H(N_h-1)\sigma_h^2
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		Var(\tilde{\tau}_{str})=\left(1-\frac{n}{N}\right)\frac{N}{n}\sum_{h=1}^HN_h\sigma_h^2=\left(1-\frac{n}{N}\right)\frac{N}{n}\left(SSe+\sum_{h=1}^H\sigma_h^2\right)
+	\end{equation*}
+	而：
+	\begin{align*}
+		Var(\hat{\tau}_{srs})
+		&=N^2\left(1-\frac{n}{N}\right)\frac{\sigma^2}{n} \\
+		&=\frac{N^2}{n}\left(1-\frac{n}{N}\right)\frac{SST}{N-1} \\
+		&=\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)(SSA+SSe) \\
+		&=\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)SSA+\left(1-\frac{n}{N}\right)\frac{N}{n}\left(\frac{N}{N-1}SSe\right) \\
+		&=\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)SSA+\left(1-\frac{n}{N}\right)\frac{N}{n}\left(SSe+\frac{1}{N-1}SSe\right) \\
+		&=\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)SSA+\left(1-\frac{n}{N}\right)\frac{N}{n}\left(SSe+\sum_{h=1}^H\frac{N_h-1}{N-1}\sigma_h^2\right) \\
+		&=\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)SSA+\left(1-\frac{n}{N}\right)\frac{N}{n}\left[SSe+\sum_{h=1}^H\left(\frac{N-1}{N-1}-\frac{N-N_h}{N-1}\right)\sigma_h^2\right] \\
+		&=\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)SSA+\left(1-\frac{n}{N}\right)\frac{N}{n}\left(SSe+\sum_{h=1}^H\sigma_h^2\right)+\left(1-\frac{n}{N}\right)\frac{N}{n}\left[\sum_{h=1}^H\left(-\frac{N-N_h}{N-1}\right)\sigma_h^2\right] \\
+		&=Var(\tilde{\tau}_{str})+\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)\left[SSA-\sum_{h=1}^H\left(1-\frac{N_h}{N}\right)\sigma_h^2\right]
+	\end{align*}
+	由上式可以看出，如果比例分配估计量的方差比SRS估计量的方差大，则需要：
+	\begin{equation*}
+		SSA<\sum_{h=1}^H\left(1-\frac{N_h}{N}\right)\sigma_h^2
+	\end{equation*}
+	而这种情况在实践中几乎见不到。
+\end{proof}
+从以上推导中也可以看出，组间差异越大，即SSA越大，比例分配估计量的方差比SRS估计量的方差小得越多，也即精确得更多。而如果每一个层中的方差很大，即$\sigma_h^2$很大，有可能会使比例分配估计量的方差大于SRS估计量的方差，所以在选择分层的时候，要使层内差异小。综上，层间差异大、层内差异小时，比例分配下的分层随机抽样比SRS效果更好。
+
+\subsection{最优分配}
+在考虑分配方式的时候有如下三点主要因素：
+\begin{enumerate}
+	\item 每层中的个体总数$N_h$。
+	\item 层内差异$\sigma_h^2$。
+	\item 在每个层内抽样的平均成本$c_h$。
+\end{enumerate}
+显然，比例分配没有考虑第二点和第三点。
+\subsubsection{成本一致最小化方差}
+当不同层之间抽样成本一致的时候，可以最小化估计量方差。可以将问题转化为：
+\begin{gather*}
+	\min f(\overrightarrow{n})=Var(\hat{\tau}_{str})=\sum_{h=1}^HN_h^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h} \\
+	s.t.\quad\sum_{h=1}^Hn_h=n
+\end{gather*}
+可得\gls{OptimalAllocation}方案为：
+\begin{equation*}
+	n_k=\frac{nN_k\sigma_k}{\sum\limits_{h=1}^HN_h\sigma_h},\quad k=1,2,\dots,H
+\end{equation*}
+\begin{proof}
+	使用Lagrange乘子法求解。引入Lagrange乘子$\lambda$即有：
+	\begin{gather*}
+		f(\overrightarrow{n})=\sum_{h=1}^HN_h^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h} \\
+		g(\overrightarrow{n})=\sum_{h=1}^Hn_h-n \\
+		h(\overrightarrow{n})=f(\overrightarrow{n})+\lambda g(\overrightarrow{n})
+	\end{gather*}
+	对$f$求偏导可得：
+	\begin{align*}
+		\frac{\partial f}{\partial n_h}&
+		=-\frac{N_h^2\sigma_h^2}{N_hn_h}-\left(1-\frac{n_h}{N_h}\right)\frac{N_k^2\sigma_h^2}{n_k^2} \\
+		&=-\frac{N_h\sigma_h^2}{n_h}-\frac{N_h^2\sigma_h^2}{n_h^2}+\frac{N_h\sigma_h^2}{n_h} \\
+		&=-\frac{N_h^2\sigma_h^2}{n_h^2}
+	\end{align*}
+	所以：
+	\begin{gather*}
+		\nabla f(\overrightarrow{n})=(-\frac{N_1^2\sigma_1^2}{n_1^2},-\frac{N_2^2\sigma_2^2}{n_2^2},\dots,-\frac{N_H^2\sigma_H^2}{n_H^2}) \\
+		\nabla g(\overrightarrow{n})=(1,1,\dots,1)
+	\end{gather*}
+	当$f$取最小值时有：
+	\begin{gather*}
+		\frac{\partial h(\overrightarrow{n})}{\partial \overrightarrow{n}}=(-\frac{N_1^2\sigma_1^2}{n_1^2}+\lambda,-\frac{N_2^2\sigma_2^2}{n_2^2}+\lambda,\dots,-\frac{N_H^2\sigma_H^2}{n_H^2}+\lambda)=(0,0,\dots,0) \\
+		\sum_{h=1}^Hn_h=n
+	\end{gather*}
+	解得：
+	\begin{equation*}
+		n_h=\frac{N_h\sigma_h}{\sqrt{\lambda}},\quad h=1,2,\dots,H
+	\end{equation*}
+	此时：
+	\begin{equation*}
+		n=\sum_{h=1}^Hn_h=\frac{\sum\limits_{h=1}^HN_h\sigma_h}{\sqrt{\lambda}}
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\sqrt{\lambda}=\frac{\sum\limits_{h=1}^HN_h\sigma_h}{n}
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		n_k=\frac{nN_k\sigma_k}{\sum\limits_{h=1}^HN_h\sigma_h},\quad k=1,2,\dots,H\qedhere
+	\end{equation*}
+\end{proof}
+\subsubsection{成本不一致最小化方差}
+如果不同层之间抽样成本不一致，且总抽样成本为：
+\begin{equation*}
+	c=c_0+\sum_{h=1}^Hc_hn_h
+\end{equation*}
+可以将问题转化为：
+\begin{gather*}
+	\min f(\overrightarrow{n})=Var(\hat{\tau}_{str})=\sum_{h=1}^HN_h^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h} \\
+	s.t.\quad c-c_0-\sum_{h=1}^Hc_hn_h=0
+\end{gather*}
+则最佳分配方案为：
+\begin{equation*}
+	n_k=\frac{(c-c_0)N_k\sigma_k}{\sum\limits_{h=1}^HN_h\sigma_h\sqrt{c_h}}\frac{1}{\sqrt{c_k}},\quad k=1,2,\dots,H
+\end{equation*}
+从上式中可看出，需要在个数多或方差大得层中分配更多的个体（方差大需要更多的个体来获得有代表性的样本），在成本高的层中分配较少的个体。
+\subsubsection{固定方差最小化成本}
+如果不同层之间抽样成本不一致，且总抽样成本为：
+\begin{equation*}
+	c=c_0+\sum_{h=1}^Hc_hn_h
+\end{equation*}
+此时如果固定方差最小化成本，则最佳分配方案为：
+\begin{equation*}
+	n_k=n\frac{\frac{N_k\sigma_k}{\sqrt{c_k}}}{\sum\limits_{h=1}^H\frac{N_h\sigma_h}{\sqrt{c_h}}},\quad k=1,2,\dots,H
+\end{equation*}
+若计算出来$n_k>N_k$，则令$n_k=N_k$。
+
+

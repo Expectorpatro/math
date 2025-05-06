@@ -1,0 +1,76 @@
+\chapter{分层抽样}
+分层抽样与分类型辅助变量息息相关。其核心为：\par
+把目标群体分为$H$个\gls{Stratum}。亚群体之间不重叠，它们构成整个群体（每个个体属于且只属于某个亚群体）。在每个亚群体中通过概率抽样的方法进行独立抽样，然后汇集信息进行群体估计。
+
+当亚群体内的个体值趋于一致时，分层抽样有意义。
+
+\subsubsection{为什么要使用分层抽样}
+分层抽样相比于SRS具有如下优势：
+\begin{enumerate}
+	\item 分层抽样可以避免因为不同类型的样本对研究结果会产生显著差异从而导致的严重样本选择偏倚。
+	\item 分层抽样过程有可能更易于管理，同时可以降低成本。
+	\item 分层抽样不仅可以估计群体的特征，还可以估计亚群体特征。
+	\item 样本数相同的情况下，分层抽样通常比SRS更加精确。当亚群体内的个体值趋于一致时，该结论尤其正确。
+\end{enumerate}
+
+\subsubsection{分层随机抽样基本设置}
+\begin{enumerate}
+	\item 必须知道每个$N_h,\;h=1,2,\dots,H$。
+	\item 在每一个层里面独立地使用SRS。
+\end{enumerate}
+
+\begin{table}[h]
+	\centering
+	\setlength{\tabcolsep}{25pt} % 调整列之间的间距，默认值为6pt
+	\renewcommand{\arraystretch}{1.5}
+	\begin{tabular}{cc}
+		\toprule
+		公式      & 含义 \\
+		\midrule
+		$\tau_h=\sum_{j=1}^{N_h}Y_{hj}$ & 第$h$层的总量 \\
+		$\tau=\sum_{h=1}^H\tau_{h}$	& 总体总量 \\
+		$\mu_h=\frac{\sum_{j=1}^{N_h}Y_{hj}}{N_h}$                 
+		& 第$h$层的均值 \\
+		$\mu=\frac{\sum_{h=1}^H\sum_{j=1}^{N_h}Y_{hj}}{N}$           
+		& 总体均值 \\
+		$\sigma^2_h=\frac{\sum_{j=1}^{N_h}\left(Y_{hj}-\mu_h\right)^2}{N_h-1}$                       & 第$h$层的方差 \\
+		$\sigma^2=\frac{\sum_{h=1}^H\sum_{j=1}^{N_h}\left(Y_{hj}-\mu\right)^2}{N-1}$                 & 总体方差 \\
+		\bottomrule
+	\end{tabular}
+	\caption{分层抽样部分计算公式}
+\end{table}
+
+\input{sampling-method/stratified-sampling/estimation.tex}
+
+\section{估计方法思考}
+在分层抽样中，如果使用如下公式估计$\mu$：
+\begin{equation*}
+	\tilde{\mu}_{str}=\frac{\sum\limits_{h=1}^H\sum\limits_{j=1}^{n_h}y_{hj}}{n}
+\end{equation*}
+\subsubsection{均值}
+讨论阳性率问题。\par
+该方法的总体均值为：
+\begin{align*}
+	E(\tilde{\mu}_{str})
+	&=E\left(\frac{\sum\limits_{h=1}^H\sum\limits_{j=1}^{n_h}y_{hj}}{n}\right) \\
+	&=\frac{1}{n}\sum_{h=1}^HE\left(\sum_{j=1}^{N_h}Y_{hj}Z_{hj}\right) \\
+	&=\frac{1}{n}\sum_{h=1}^H\sum_{j=1}^{N_h}Y_{hj}E(Z_{hj}) \\
+	&=\frac{1}{n}\sum_{h=1}^HE(Z_{hj})\sum_{j=1}^{N_h}Y_{hj} \\
+	&=\frac{1}{n}\sum_{h=1}^H\frac{n_h}{N_h}N_hp_h \\
+	&=\frac{1}{n}\sum_{h=1}^Hn_hp_h
+\end{align*}
+而真实的总体均值为：
+\begin{equation*}
+	\mu=\frac{\tau}{N}=\frac{1}{N}\sum_{h=1}^HN_hp_h
+\end{equation*}
+如果想要无偏，则显然需要满足：
+\begin{equation*}
+	\frac{n_h}{N_h}=\frac{n}{N}
+\end{equation*}
+
+\input{sampling-method/stratified-sampling/allocation-principle.tex}
+\input{sampling-method/stratified-sampling/poststratification.tex}
+\input{sampling-method/stratified-sampling/sample_size.tex}
+
+
+

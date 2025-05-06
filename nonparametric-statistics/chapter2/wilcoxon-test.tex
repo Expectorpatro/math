@@ -1,0 +1,55 @@
+\section{Wilcoxon秩和检验}
+
+\subsubsection{目的}
+检验两个样本X和Y的中位数$M_X,\;M_Y$是否相同。
+\subsubsection{适用条件}
+需要两总体的分布有类似形状，但并不需要对称。
+\subsubsection{Wilcoxon秩和统计量}
+记样本X与Y分别为$X_1,X_2,\dots,X_m,\;Y_1,Y_2,\dots,Y_n$。把两个样本混合起来并从小到大排序，令$R_{X_i}$和$R_{Y_j}$分别表示单元$X_i$、单元$Y_i$在混合样本中的秩，则称
+\begin{equation}
+	W_X=\sum_{i=1}^mR_{X_i},\;W_Y=\sum_{j=1}^nR_{Y_j}\notag
+\end{equation}
+为Wilcoxon秩和统计量。\par
+在零假设下，令$R_i$表示Y中第i个样本在混合后的秩，可得如下性质：
+\begin{gather}
+	P(R_i=k)\frac{1}{N},\;k=1,2,\dots,N;\;i=1,2,\dots,n;\notag\\
+	P(R_i=k,\;R_j=l)=
+	\begin{cases}
+		\frac{1}{N(N-1)} & k\ne l;\\
+		0                & k=l.
+	\end{cases}\notag\\
+	E(R_i)=\frac{N+1}{2},\;Var(R_i)=\frac{N^2-1}{12},\;Cov(R_i,\;R_j)=-\frac{N+1}{12}(i\ne j)\notag\\
+	E(W_Y)=\frac{n(N+1)}{2},\;Var(W_Y)=\frac{mn(N+1)}{12}\notag
+\end{gather}
+\subsubsection{原理}
+若零假设成立，在两总体分布有类似形状时$W_X$与$W_Y$应比较接近，当其中之一很大或很小时，应怀疑零假设。
+\subsubsection{零假设}
+$H_0:M_X=M_Y$
+
+\begin{table}[htbp]
+	\centering
+	\begin{tabular}{ccc}
+		\toprule
+		备择假设 & 统计量$K$ & $p$值 \\
+		\midrule 
+		$H_1:M_X>M_Y$ & $W_Y$ & $P(K\leqslant k)$ \\
+		$H_1:M_X<M_Y$ & $W_X$ & $P(K\leqslant k)$ \\
+		$H_1:M_X\ne M_Y$ & \text{min}\{$W_X$,\;$W_Y$\} & $2P(K\leqslant k)$ \\
+		\bottomrule 
+	\end{tabular}
+	\caption{Wilcoxon秩和检验}
+\end{table}
+
+\subsubsection{大样本近似}
+由$W_Y$的期望与方差，在大样本下可认为：
+\begin{equation}
+	Z=\frac{W_Y-E(W_Y)}{\sqrt{Var(W_Y)}}\sim N(0,1)
+\end{equation}
+若存在打结的情况，只能使用大样本近似，且应对正态近似公式进行修正（其中$\tau$为结统计量）：
+\begin{equation}
+	Z=\frac{W_Y-E(W_Y)}{\sqrt{Var(W_Y)-\frac{mn(\sum_{i=1}^g\tau_i^3-\sum_{i=1}^g\tau_i)}{12(m+n)(m+n-1)}}}\sim N(0,1)
+\end{equation}
+\subsubsection{代码}
+\begin{minted}[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines, mathescape]{r}
+wilcox.test(x, y, alternative = c("two.sided", "less", "greater"), exact = NULL, correct = TRUE)
+\end{minted}
