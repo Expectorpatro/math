@@ -1,0 +1,192 @@
+\section{特征函数}
+
+
+\begin{definition}
+	设$X$是一个随机变量。称:
+	\begin{equation*}
+		\varphi_X(t)=\operatorname{E}(e^{itX})
+	\end{equation*}
+	为$X$的\gls{c.f.}，其中$t\in\mathbb{R}$。
+\end{definition}
+\begin{definition}
+	设$\mathbf{X}$是一个$n$维随机向量。称:
+	\begin{equation*}
+		\varphi_\mathbf{X}(t)=\operatorname{E}(e^{it^T\mathbf{X}})
+	\end{equation*}
+	为$\mathbf{X}$的特征函数，其中$t\in\mathbb{R}^{n}$。
+\end{definition}
+\begin{definition}
+	设$\mathbf{X}$是一个$m\times n$随机矩阵。称:
+	\begin{equation*}
+		\varphi_\mathbf{X}(t)=\operatorname{E}\Bigl[\exp\Bigl(i\operatorname{tr}(t^T\mathbf{X})\Bigr)\Bigr]
+	\end{equation*}
+	为$\mathbf{X}$的特征函数，其中$t\in M_{m\times n}(\mathbb{R})$。
+\end{definition}
+\begin{property}\label{prop:CharacteristicFunction}
+	设$X,Y,\seq{X}{n}$是随机变量，$\seq{\alpha}{n},\;\beta_1,\beta_2,\dots,\beta_n$为常数，则：
+	\begin{enumerate}
+		\item $X$的特征函数$\varphi_X(t)$存在；
+		\item $|\varphi_X(t)|\leqslant\varphi_X(0)=1$；
+		\item $\varphi_X(-t)=\overline{\varphi_X(t)}$；
+		\item 若$\seq{X}{n}$相互独立，则$Y=\sum\limits_{k=1}^n(\alpha_kX_k+\beta_k)$的特征函数为：
+		\begin{equation*}
+			\varphi_{Y}(t)=\prod_{k=1}^ne^{it\beta_k}\varphi_{X_k}(\alpha_kt)
+		\end{equation*}
+		\item $\seq{X}{n}$相互独立的充分必要条件为：
+		\begin{equation*}
+			\varphi_{X_1,\dots,X_n}(t_1,t_2,\dots,t_n)=\prod_{i=1}^n\varphi_{X_i}(t_i)
+		\end{equation*}
+		\item 特征函数与概率分布之间存在一个双射，即$\varphi_X(t)=\varphi_Y(t)$当且仅当$X$与$Y$具有相同的概率分布。
+		\item 若$\operatorname{E}(X^n)$存在，则$\varphi_X^{(n)}(t)$存在，且对$1\leqslant k\leqslant n$有：
+		\begin{equation*}
+			\operatorname{E}(X^k)=i^{-k}\varphi_X^{(k)}(0)
+		\end{equation*}
+		特别的：
+		\begin{equation*}
+			\operatorname{E}(X)=-i\varphi_X'(0),\;
+			\operatorname{Var}(X)=-\varphi_X''(0)+[\varphi_X'(0)]^2
+		\end{equation*}
+		\item 若$\varphi_X(t)$在$t=0$处最高有$n$阶导数，如果$n$为奇数，则$X$具有所有不超过$n-1$阶的原点矩；若$n$为偶数，则$X$具有所有不超过$n$阶的原点矩；
+		\item $\varphi_X(t)$在$\mathbb{R}$上一致连续；
+		\item $\varphi_X(t)$是半正定的，即对任意的$n\in\mathbb{N}^+$及任意的$t=(t_1,t_2,\dots,t_n)^T\in\mathbb{R}^{n}$和任意的$c=(c_1,c_2,\dots,c_n)^T\in\mathbb{C}^{n}$，令$A=[\varphi_X(t_i-t_j)]\in M_{n}(\mathbb{C})$，则有：
+		\begin{equation*}
+			c^TA\overline{c}=\sum_{i=1}^{n}\sum_{j=1}^{n}c_i\overline{c_j}\varphi_X(t_i-t_j)\geqslant0
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)因为：
+	\begin{equation*}
+		e^{itX}=\cos(tX)+i\sin(tX)
+	\end{equation*}
+	所以$|e^{itX}|=1$，于是：\info{链接Lebesgue积分性质}
+	\begin{equation*}
+		\Bigl|\operatorname{E}(e^{itX})\Bigr|=\Bigl|\int_{-\infty}^{+\infty}e^{itx}p(x)\dif x\Bigr|\leqslant\int_{-\infty}^{+\infty}|e^{itx}|p(x)\dif x=\int_{-\infty}^{+\infty}p(x)\dif x=1
+	\end{equation*}
+	所以$\varphi_X(t)$存在。\par
+	(2)可以发现：
+	\begin{equation*}
+		\varphi_X(0)=\int_{-\infty}^{+\infty}p(x)\dif x=1
+	\end{equation*}
+	再由(1)的证明过程即可得出结论。\par
+	(3)因为：
+	\begin{equation*}
+		\varphi_X(t)=\operatorname{E}(e^{itX})=\operatorname{E}[\cos(tX)+i\sin(tX)]=\operatorname{E}[\cos(tX)]+i\operatorname{E}[\sin(tX)]
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\overline{\varphi_X(t)}=\operatorname{E}[\cos(tX)]-i\operatorname{E}[\sin(tX)]=\operatorname{E}[\cos(-tX)]+i\operatorname{E}[\sin(-tX)]=\varphi_X(-t)
+	\end{equation*}\par
+	(4)因为$X_k$相互独立，所以$e^{it(\alpha_kX_k+\beta_k)}$之间也相互独立，$k=1,2,\dots,n$，于是有：
+	\begin{align*}
+		\varphi_Y(t)
+		&=\operatorname{E}\left[\exp\left(it\sum_{k=1}^{n}(\alpha_kX_k+\beta_k)\right)\right]
+		=\operatorname{E}\left(\prod_{k=1}^ne^{it(\alpha_kX_k+\beta_k)}\right) \\
+		&=\prod_{k=1}^n\operatorname{E}[e^{it(\alpha_kX_k+\beta_k)}]
+		=\prod_{k=1}^ne^{it\beta_k}\operatorname{E}(e^{it\alpha_kX_k})
+		=\prod_{k=1}^ne^{it\beta_k}\varphi_{X_k}(\alpha_kt)
+	\end{align*}\par
+	(5)\textbf{必要性：}因为$X_k$相互独立，所以$e^{it_kX_k}$相互独立，$k=1,2,\dots,n$。由随机向量特征函数的定义可得：
+	\begin{align*}
+		\varphi_{X_1,\dots,X_n}(t_1,t_2,\dots,t_n)
+		&=\operatorname{E}\left[\exp\left(i\sum_{k=1}^{n}t_kX_k\right)\right]
+		=\operatorname{E}\left(\prod_{k=1}^ne^{it_kX_k}\right) \\
+		&=\prod_{k=1}^n\operatorname{E}(e^{it_kX_k})
+		=\prod_{k=1}^n\varphi_{X_k}(t_k)
+	\end{align*}
+	\textbf{充分性：}因为：
+	\begin{gather*}
+		\begin{aligned}
+			\varphi_{X_1,\dots,X_n}(t_1,t_2,\dots,t_n)
+			&=\operatorname{E}\left[\exp\left(i\sum_{k=1}^{n}t_kX_k\right)\right] \\
+			&=\int_{-\infty}^{+\infty}\cdots\int_{-\infty}^{+\infty}\exp\left(i\sum_{k=1}^{n}t_kx_k\right)p(x_1,\dots,x_n)\dif x_1\cdots\dif x_n
+		\end{aligned} \\
+		\begin{aligned}
+			\prod_{i=1}^n\varphi_{X_i}(t_i)
+			&=\prod_{k=1}^n\operatorname{E}(e^{it_kX_k}) \\
+			&=\prod_{k=1}^n\int_{-\infty}^{+\infty}e^{it_kx_k}p(x_k)\dif x_k \\
+			&=\int_{-\infty}^{+\infty}\cdots\int_{-\infty}^{+\infty}\exp\left(i\sum_{k=1}^{n}t_kx_k\right)p(x_1)p(x_2)\cdots p(x_n)\dif x_1\dif x_2\cdots\dif x_n
+		\end{aligned}
+	\end{gather*}
+	若两式相等，则有：
+	\begin{equation*}
+		p(x_1,x_2,\dots,x_n)=p(x_1)p(x_2)\cdots p(x_n)
+	\end{equation*}
+	由\info{链接独立性条件}可得$X_k,\;k=1,2,\dots,n$相互独立。\par
+	(6)\par
+	(7)因为$\operatorname{E}(X^n)$存在，所以：
+	\begin{equation*}
+		\int_{-\infty}^{+\infty}|x|^np(x)\dif x<+\infty
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\left|\int_{-\infty}^{+\infty}i^nx^ne^{itx}p(x)\dif x\right|\leqslant\int_{-\infty}^{+\infty}|x|^np(x)\dif x<+\infty
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\varphi_X^{(n)}(t)=\int_{-\infty}^{+\infty}i^nx^ne^{itx}p(x)\dif x
+	\end{equation*}
+	存在。由\cref{theo:LowerRawMoment}可知对$1\leqslant k\leqslant n$有$\operatorname{E}(X^k)$存在，于是：
+	\begin{equation*}
+		\varphi_X^{(k)}(0)=\int_{-\infty}^{+\infty}i^kx^kp(x)\dif x=i^k\int_{-\infty}^{+\infty}x^kp(x)\dif x=i^k\operatorname{E}(X^k)
+	\end{equation*}
+	也存在。\par
+	(8)注意到：
+	\begin{equation*}
+		\varphi_X^{(n)}(t)=\int_{-\infty}^{+\infty}i^nx^ne^{itx}p(x)\dif x
+	\end{equation*}
+	因为$\varphi_X(t)$在$t=0$处最高具有$n$阶导数，于是：
+	\begin{equation*}
+		|\varphi_X^{(n)}(0)|=\left|\int_{-\infty}^{+\infty}i^nx^np(x)\dif x\right|=\left|\int_{-\infty}^{+\infty}x^{n}p(x)\dif x\right|<+\infty
+	\end{equation*}
+	当$n=2k+1,\;k\in\mathbb{N}$时，有：
+	\begin{equation*}
+		\int_{-\infty}^{+\infty}|x|^{n}p(x)\dif x>|\varphi_X^{(n)}(0)|=\Bigl|\int_{-\infty}^{+\infty}x^np(x)\dif x\Bigr|
+	\end{equation*}
+	所以$\operatorname{E}(X^n)$不一定存在。\info{需要证明对小于的都存在}
+	当$n=2k,\;k\in\mathbb{N}^+$时，有：
+	\begin{equation*}
+		|\varphi_X^{(n)}(0)|=\left|\int_{-\infty}^{+\infty}x^{n}p(x)\dif x\right|=\int_{-\infty}^{+\infty}|x|^np(x)\dif x<+\infty
+	\end{equation*}
+	存在，于是$\operatorname{E}(X^n)$存在。由\cref{theo:LowerRawMoment}可知，此时$X$具有所有不超过$n$阶的原点矩。\par
+	(9)对任意的$t,h\in \mathbb{R}$和$a>0$，有：
+	\begin{align*}
+		|\varphi(t+h)-\varphi(t)|
+		&=\left|\int_{-\infty}^{+\infty}[e^{i(t+h)x}-e^{itx}]p(x)\dif x\right| \\
+		&=\left|\int_{-\infty}^{+\infty}(e^{ihx}-1)e^{itx}p(x)\dif x\right| \\
+		&\leqslant\int_{-\infty}^{+\infty}|(e^{ihx}-1)e^{itx}|p(x)\dif x \\
+		&=\int_{-\infty}^{+\infty}|e^{ihx}-1||e^{itx}|p(x)\dif x \\
+		&=\int_{-\infty}^{+\infty}|e^{ihx}-1|p(x)\dif x \\
+		&=\int_{-a}^{a}|e^{ihx}-1|p(x)\dif x+\int_{|x|\geqslant a}|e^{ihx}-1|p(x)\dif x \\
+		&\leqslant\int_{-a}^{a}|e^{ihx}-1|p(x)\dif x+\int_{|x|\geqslant a}(|e^{ihx}|+1)p(x)\dif x \\
+		&=\int_{-a}^{a}|e^{ihx}-1|p(x)\dif x+2\int_{|x|\geqslant a}p(x)\dif x
+	\end{align*}
+	对于任意的$\varepsilon>0$，可以先选定一个充分大的$a$，使得：
+	\begin{equation*}
+		2\int_{|x|\geqslant a}p(x)\dif x<\frac{\varepsilon}{2}
+	\end{equation*}
+	对任意的$x\in[-a,a]$，只要取$\delta=\dfrac{\varepsilon}{2a}$，则当$|h|<\delta$时，就有：
+	\begin{align*}
+		|e^{ihx}-1|
+		&=\Bigl|e^{ihx}-e^{i\frac{hx}{2}}e^{i\frac{-hx}{2}}\Bigr|=\Bigl|e^{i\frac{hx}{2}}(e^{i\frac{hx}{2}}-e^{i\frac{-hx}{2}})\Bigr| \\
+		&=\Bigl|e^{i\frac{hx}{2}}\Bigr|\;\Bigl|e^{i\frac{hx}{2}}-e^{i\frac{-hx}{2}}\Bigr| \\
+		&=\Bigl|e^{i\frac{hx}{2}}-e^{i\frac{-hx}{2}}\Bigr| \\
+		&=\Bigl|\cos\frac{hx}{2}+i\sin\frac{hx}{2}-\cos\frac{-hx}{2}-i\sin\frac{-hx}{2}\Bigr| \\
+		&=\Bigl|2i\sin\frac{hx}{2}\Bigr|
+		=2\Bigl|\sin\frac{hx}{2}\Bigr|\leqslant2\Bigl|\frac{hx}{2}\Bigr|\leqslant ha<\frac{\varepsilon}{2}
+	\end{align*}
+	于是对任意的$t\in\mathbb{R}$，有：
+	\begin{equation*}
+		|\varphi(t+h)-\varphi(t)|<\int_{-a}^{a}\frac{\varepsilon}{2}p(x)\dif x+2\int_{|x|\geqslant a}p(x)\dif x<\frac{\varepsilon}{2}\int_{-\infty}^{+\infty}p(x)\dif x+\frac{\varepsilon}{2}=\varepsilon
+	\end{equation*}
+	即$\varphi_X(t)$在$\mathbb{R}$上一致连续。\par
+	(10)显然：
+	\begin{align*}
+		\sum_{i=1}^{n}\sum_{j=1}^{n}c_i\overline{c}_j\varphi_X(t_i-t_j)
+		&=\sum_{k=1}^{n}\sum_{j=1}^{n}c_k\overline{c}_j\int_{-\infty}^{+\infty}e^{i(t_k-t_j)x}p(x)\dif x \\
+		&=\int_{-\infty}^{+\infty}\sum_{k=1}^{n}\sum_{j=1}^{n}c_k\overline{c}_je^{i(t_k-t_j)x}p(x)\dif x \\
+		&=\int_{-\infty}^{+\infty}\left(\sum_{k=1}^{n}c_ke^{it_kx}\right)\left(\sum_{j=1}^{n}\overline{c}_je^{-it_jx}\right)p(x) \dif x \\
+		&=\int_{-\infty}^{+\infty}\left(\sum_{k=1}^{n}c_ke^{it_kx}\right)\left(\sum_{j=1}^{n}\overline{c_ke^{it_kx}}\right)p(x) \dif x \\
+		&=\int_{-\infty}^{+\infty}\Bigl|\sum_{k=1}^{n}c_ke^{it_kx}\Bigr|^2p(x) \dif x\qedhere
+	\end{align*}
+\end{proof}

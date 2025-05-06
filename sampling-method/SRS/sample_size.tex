@@ -1,0 +1,43 @@
+\section{样本容量的选择}
+抽样分布的方差决定置信区间的长度，样本容量增大的时候抽样分布的方差减小，置信区间变窄。
+\subsubsection{注意事项}
+通过控制总体均值的置信区间长度去选择样本容量而不从总体总量来考虑，因为总体总量的方差计算中还会涉及到$N^2$，这对于无穷总体是无法进行计算的。无穷总体时忽略被FPC。
+\subsubsection{误差幅度MOE}
+置信区间的半径称之为\gls{MOE}。
+
+\subsection{总体均值样本容量公式}
+\begin{theorem}
+	待估参数为总体均值时有如下样本容量公式：
+	\begin{equation}
+		n_{\text{SRS}}=\frac{1}{\frac{d^2}{u^2\sigma^2}+\frac{1}{N}},\quad n_{\text{SRSWR}}=\frac{u^2\sigma^2}{d^2}\notag
+	\end{equation}
+	其中$u$为求解区间估计过程中选择的正态分布分位数。\par
+	上式中二者有关系（又称为两步法）：
+	\begin{equation}
+		\frac{1}{n_{\text{SRS}}}=\frac{1}{n_{\text{SRSWR}}}+\frac{1}{N}\notag
+	\end{equation}
+\end{theorem}
+公式涉及到总体方差真实值$\sigma^2$，解决方案：
+\begin{enumerate}
+	\item 使用历史数据的样本方差代替$\sigma^2$。
+	\item 由正态分布的性质，在$\mu\pm2\sigma$范围内应包含了$97.7\%$的样本，因此，我们使用样本的极差来近似$4\sigma$：用样本极差除4替代$\sigma$。但是这个时候又涉及到极差从何而来的问题，因为是先确定样本容量再去做抽样，没有样本怎么来的极差呢？查阅资料得到样本的大致分布范围。
+\end{enumerate}
+
+\subsection{总体阳性率样本容量公式}
+\begin{theorem}
+	待估参数为总体阳性率时有如下样本容量公式：
+	\begin{equation}
+		n_{SRS}=\frac{Np(1-p)}{\frac{d^2}{u^2}(N-1)+p(1-p)},\quad n_{\text{SRSWR}}=\frac{u^2p(1-p)}{d^2}\notag
+	\end{equation}
+	其中$u$为求解区间估计过程中选择的正态分布分位数。
+\end{theorem}
+但这里需要注意，阳性率问题两步法不能用，与理论公式不等。\par
+公式涉及到阳性率的真实值$p$，解决方法：
+\begin{enumerate}
+	\item 有根据的推测，使用历史数据来替代真实阳性率。
+	\item 取$p=0.5$，最大化样本容量，进行保守估计。
+	\item 如果获取额外样本的代价大于开始一次抽样的代价（也就意味着最大化样本容量带来的代价大于去做一次抽样来估计一下真实值的代价），那在没有历史数据的情况下可以自己去抽样。
+\end{enumerate}
+\subsubsection{阳性率问题下理论公式难以推导的情况}
+蒙特卡罗，代码如下：
+\inputminted[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines]{r}{sampling-method/SRS/sample_size_p.R}

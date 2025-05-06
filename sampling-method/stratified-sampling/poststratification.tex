@@ -1,0 +1,68 @@
+\section{后分层}
+当使用了SRS后发现获取的样本比较极端时（比如研究人群体重，获得的样本中$90\%$都是男性），此时使用\gls{Poststratification}，即先进行SRS，然后将获得的样本分层。
+
+\subsection{参数估计}
+\subsubsection{总体均值$\mu$的估计}
+\begin{gather*}
+	\hat{\mu}_{poststr}=\sum_{h=1}^H\frac{N_h}{N}\bar{y}_h \\
+	Var(\hat{\mu}_{poststr})=E[Var(\hat{\mu}_{str}\arrowvert\overrightarrow{n})]\approx\left(1-\frac{n}{N}\right)\frac{1}{n}\sum_{h=1}^H\frac{N_h}{N}\sigma_h^2+\left(\frac{N-n}{N-1}\right)\frac{1}{n^2}\sum_{h=1}^H\left(1-\frac{N_h}{N}\right)\sigma_h^2
+\end{gather*}
+下证明：(1)后分层估计量$\hat{\mu}_{poststr}$是无偏估计；(2)如上后分层方差公式正确。
+\begin{proof}
+	(1)后分层估计量的计算公式本质和分层随机抽样一样，因此是无偏的。\par
+	(2)由方差分解公式：
+	\begin{equation*}
+		Var(\hat{\mu}_{poststr})=Var(E[\hat{\mu}_{str}\arrowvert\overrightarrow{n}])+E[Var(\hat{\mu}_{str}\arrowvert\overrightarrow{n})]
+	\end{equation*}
+	而：
+	\begin{align*}
+		E[\hat{\mu}_{str}\arrowvert\overrightarrow{n}]
+		&=E\left(\sum_{h=1}^H\sum_{j=1}^{N_h}\frac{Y_{hj}Z_{hj}}{n}\right) \\
+		&=\sum_{h=1}^H\sum_{j=1}^{N_h}\frac{Y_{hj}}{n}E(Z_{hj}) \\
+		&=\sum_{h=1}^H\sum_{j=1}^{N_h}\frac{Y_{hj}n_h}{nN_h} \\
+		&=\sum_{h=1}^H\frac{n_h}{n}\sum_{j=1}^{N_h}\frac{Y_{hj}}{N_h} \\
+		&=\sum_{h=1}^H\frac{n_h}{n}\mu_h \\
+	\end{align*}
+	可以看出上式是一个定值，所以：
+	\begin{equation*}
+		Var(E[\hat{\mu}_{str}\arrowvert\overrightarrow{n}])=0
+	\end{equation*}
+	于是：
+	\begin{align*}
+		Var(\hat{\mu}_{poststr})
+		&=E[Var(\hat{\mu}_{str}\arrowvert\overrightarrow{n})] \\
+		&=E\left[\sum_{h=1}^H\left(\frac{N_h}{N}\right)^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h}\right] \\
+		&=\sum_{h=1}^H\left(\frac{N_h}{N}\right)^2\sigma_h^2\left[E\left(\frac{1}{n_h}\right)-\frac{1}{N_h}\right] \\
+	\end{align*}
+	由\cref{sec:deltamethod}，利用泰勒展开，令$E(n_h)=\mu$，即有：
+	\begin{align*}
+		E\left(\frac{1}{n_h}\right)
+		&\approx E\left[\frac{1}{\mu}-\frac{1}{\mu^2}(n_h-\mu)+\frac{2}{\mu^3}\frac{(n_h-\mu)^2}{2!}\right] \\
+		&=\frac{1}{\mu}+\frac{1}{\mu^3}Var(n_h)
+	\end{align*}
+	由后分层原理，显然可以得到：
+	\begin{gather*}
+		n_h\sim \text{Hyper}(n,N_h,N) \\
+		E(n_h)=\frac{nN_h}{N},\;Var(n_h)=\frac{nN_h(N-n)(N-N_h)}{N^2(N-1)}
+	\end{gather*}
+	于是：
+	\begin{equation*}
+		E\left(\frac{1}{n_h}\right)=\frac{N}{nN_h}+\left(\frac{N}{nN_h}\right)^2\left(1-\frac{N_h}{N}\right)\frac{N-n}{N-1}
+	\end{equation*}
+	将上式代入$Var(\hat{\mu}_{poststr})$即可得到：
+	\begin{equation*}
+		Var(\hat{\mu}_{poststr})\approx\left(1-\frac{n}{N}\right)\frac{1}{n}\sum_{h=1}^H\frac{N_h}{N}\sigma_h^2+\left(\frac{N-n}{N-1}\right)\frac{1}{n^2}\sum_{h=1}^H\left(1-\frac{N_h}{N}\right)\sigma_h^2\qedhere
+	\end{equation*}
+\end{proof}
+
+
+
+
+
+
+
+
+
+
+
+

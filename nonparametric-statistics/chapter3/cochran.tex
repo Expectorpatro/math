@@ -1,0 +1,30 @@
+\section{Cochran检验}
+
+\subsubsection{目的}
+检验完全区组设计、二元响应情况下，各水平之间是否存在差异。
+\subsubsection{适用条件}
+完全区组设计，二元响应。
+\subsubsection{假设}
+假设$k$个水平有分布函数$F_i(x)=F(x-\theta_i),\;i=1,2,\dots,k$，则检验假设可写为：
+\begin{equation}
+	H_0:\theta_1=\theta_2=\cdots=\theta_n\Leftrightarrow
+	H_1:\text{至少有一个等号不成立}\notag
+\end{equation}
+\subsubsection{原理}
+假设有$k$个水平、$b$个区组。\par
+令$L_j$表示第$j$个区组中为$1$的数目的总和，$N_i$表示第$i$个水平中为$1$的数目的总和，即$L_j=\sum\limits_{i=1}^kx_{ij},\;j=1,2,\;b,\;N_i=\sum\limits_{j=1}^bx_{ij},\;i=1,2,\;k$。\par
+在零假设成立的情况下，各水平之间无差异，那么对于每个$j$而言，$L_j$个$1$在
+所有水平中出现的概率是相同的，这个概率依赖于具体的$L_j$。由此定义如下Cochran统计量：
+\begin{equation}
+	Q=\frac{k(k-1)\sum\limits_{i=1}^k(N_i-\bar{N})^2}{kN-\sum\limits_{j=1}^bL_j^2}=\frac{k(k-1)\sum\limits_{i=1}^kN_i^2-(k-1)N^2}{kN-\sum\limits_{j=1}^bL_j^2}\notag
+\end{equation}
+其中$\bar{N}=\dfrac{1}{k}\sum\limits_{i=1}^kN_i,\;N=\sum\limits_{i=1}^kN_i$。易证，若$L_j=0$或$L_j=k$，那么这个区组的数据可以删除，对$Q$值没有影响（与前面的原理是相合的）。\par
+若想进行精确检验\info{需要找论文，Patil(1975)，同时需要看统计量的推导过程，为什么单侧检验}
+\subsubsection{大样本近似}
+在大样本的情况下（$b\to+\infty$），若零假设成立，有如下近似分布：
+\begin{equation}
+	Q\sim\chi^2_{(k-1)}\notag
+\end{equation}
+\subsubsection{代码}
+\info{现在只提供了大样本近似，回头看完论文和原理记得补}以下是自编代码，需要传入一个数据框，行为水平列为区组。提供大样本近似与连续性修正。
+\inputminted[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines]{r}{nonparametric-statistics/chapter3/cochran.R}

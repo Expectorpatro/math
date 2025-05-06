@@ -1,0 +1,652 @@
+\section{积分论}
+
+\subsection{非负简单函数的积分}
+\begin{definition}
+	设$\varphi(x)$为测度空间$(X,\mathscr{F},\mu)$上的一个非负简单函数，即$X$可表示为有限个互不相交的集合$E_1,E_2,\dots,E_n\in \mathscr{F}$的并，且在$E_i(i=1,2,\dots,n)$上$\varphi(x)=c_i\geqslant0$，即：
+	\begin{equation*}
+		\varphi(x)=\sum_{i=1}^{n}c_iI_{E_i}(x)
+	\end{equation*}
+	其中$I_{E_i}(x)$为表示$x$是否在$E_i$中的示性函数。对于任意的$A\in \mathscr{F}$，将$\varphi(x)$在$A$上的积分定义为：
+	\begin{equation*}
+		\int_{A}\varphi(x)\dif\mu=\sum_{i=1}^{n}c_i\mu(A\cap E_i)
+	\end{equation*}
+\end{definition}
+\begin{property}\label{prop:NonnegativeSimpleIntegral}
+	设$\varphi(x),\;\psi(x)$为测度空间$(X,\mathscr{F},\mu)$上的非负简单函数，可分别表示为：
+	\begin{equation*}
+		\varphi(x)=\sum_{i=1}^{m}c_iI_{E_i}(x),\quad
+		\psi(x)=\sum_{j=1}^{n}d_jI_{F_j}(x)
+	\end{equation*}
+	则：
+	\begin{enumerate}
+		\item $\varphi(x)$的所有表达式在任意的$A\in \mathscr{F}$上的积分值相同；
+		\item 对于任意的$A\in \mathscr{F}$，有：
+		\begin{equation*}
+			\int_{A}^{}\varphi(x)\dif \mu\geqslant0
+		\end{equation*}
+		\item 若$A\in \mathscr{F}$且$\mu(A)=0$，则有：
+		\begin{equation*}
+			\int_{A}^{}\varphi(x)\dif\mu=0
+		\end{equation*}
+		\item 设$A,B\in \mathscr{F}$且$A\cap B=\varnothing$，则：
+		\begin{equation*}
+			\int_{A\cup B}\varphi(x)\dif\mu=\int_{A}\varphi(x)\dif\mu+\int_{B}\varphi(x)\dif\mu
+		\end{equation*}
+		\item 对任意的$A\in \mathscr{F}$和$\alpha,\beta\in \mathbb{R}^{}$且$\alpha,\beta\geqslant0$：
+		\begin{equation*}
+			\int_{A}\left[\alpha\varphi(x)+\beta\psi(x)\right]\dif\mu
+			=\alpha\int_{A}\varphi(x)\dif\mu+\beta\int_{A}\psi(x)\dif\mu
+		\end{equation*}
+		\item 取$A\in \mathscr{F}$，若对任意的$x\in A$有$\varphi(x)\geqslant \psi(x)$，则有：
+		\begin{equation*}
+			\int_{A}^{}\varphi(x)\dif\mu\geqslant\int_{A}^{}\psi(x)\dif\mu
+		\end{equation*}
+		\item 设$\{A_n\}\subset\mathscr{F}$，$A_n\uparrow E\in \mathscr{F}$，则：
+		\begin{equation*}
+			\lim_{n\to+\infty}\left[\int_{A_n}\varphi(x)\dif\mu\right]=\int_{E}\varphi(x)\dif\mu
+		\end{equation*}
+		\item 取$A\in \mathscr{F}$，若非负简单函数列$\varphi_n(x)\uparrow$且对任意的$x\in A$有$\lim\limits_{n\to+\infty}\varphi_n(x)\geqslant \psi(x)$，则有：
+		\begin{equation*}
+			\lim_{n\to+\infty}\left[\int_{A}^{}\varphi_n(x)\dif\mu\right]\geqslant\int_{A}^{}\psi(x)\dif\mu
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由\cref{prop:SimpleFunction}(3)，将$\varphi(x)$表示为：
+	\begin{equation*}
+		\varphi(x)=\sum_{k=1}^{p}a_kI_{\{f=a_k\}}(x)
+	\end{equation*}
+	其中$\{a_k:k=1,2,\dots,p\}$为$\varphi(x)$的值域，所以$p\leqslant m$。对任意的$i$和$k$，显然有：
+	\begin{equation*}
+		E_i\subset\{f=a_k\}\quad\text{或}\quad E_i\cap\{f=a_k\}=\varnothing
+	\end{equation*}
+	当$E_i\subset\{f=a_k\}$时有$c_i=a_k$。由测度的有限可加性可得：
+	\begin{align*}
+		\sum_{i=1}^{m}c_i\mu(A\cap E_i)
+		&=\sum_{i=1}^{m}c_i\mu[(A\cap E_i)\cap X]
+		=\sum_{i=1}^{m}c_i\mu\left[(A\cap E_i)\cap\left(\underset{k=1}{\overset{p}{\cup}}A_k\right)\right] \\
+		&=\sum_{i=1}^{m}c_i\mu\left[\underset{k=1}{\overset{p}{\cup}}(A\cap E_i\cap A_k)\right]
+		=\sum_{i=1}^{m}c_i\sum_{k=1}^{p}\mu(A\cap E_i\cap A_k) \\
+		&=\sum_{i=1}^{m}\sum_{E_i\subset\{f=a_k\}}^{}c_i\mu(A\cap E_i\cap A_k)
+		=\sum_{i=1}^{m}\sum_{E_i\subset\{f=a_k\}}^{}a_k\mu(A\cap E_i\cap A_k) \\
+		&=\sum_{i=1}^{m}\sum_{k=1}^{p}a_k\mu(A\cap E_i\cap A_k)
+		=\sum_{k=1}^{p}\sum_{i=1}^{m}a_k\mu(A\cap A_k\cap E_i) \\
+		&=\sum_{k=1}^{p}a_k\sum_{i=1}^{m}\mu(A\cap A_k\cap E_i)
+		=\sum_{k=1}^{p}a_k\mu\left[\underset{i=1}{\overset{m}{\cup}}(A\cap A_k\cap E_i)\right] \\
+		&=\sum_{k=1}^{p}a_k\mu\left[(A\cap A_k)\cap\left(\underset{i=1}{\overset{m}{\cup}}E_i\right)\right]
+		=\sum_{k=1}^{p}a_k\mu[(A\cap A_k)\cap X] \\
+		&=\sum_{k=1}^{p}a_k\mu(A\cap A_k)
+	\end{align*}\par
+	(2)由非负简单函数积分的定义和测度的非负性直接可得。\par
+	(3)由非负简单函数积分的定义和测度的非负性以及半环上测度的单调性（\cref{theo:MeasureOfSemiring}）直接可得。\par
+	(4)由非负简单函数积分的定义、测度的有限可加性可得：
+	\begin{align*}
+		\int_{A\cup B}\varphi(x)\dif\mu
+		&=\sum_{i=1}^{n}c_i\mu[(A\cup B)\cap E_i]
+		=\sum_{i=1}^{n}c_i\mu[(A\cap E_i)\cup(B\cap E_i)] \\
+		&=\sum_{i=1}^{n}c_i[\mu(A\cap E_i)+\mu(B\cap E_i)]
+		=\sum_{i=1}^{n}c_i\mu(A\cap E_i)+\sum_{i=1}^{n}\mu(B\cap E_i) \\
+		&=\int_{A}\varphi(x)\dif\mu+\int_{B}\varphi(x)\dif\mu
+	\end{align*}\par
+	(5)由\cref{prop:SimpleFunction}(2)可得$\alpha\varphi(x)+\beta\psi(x)$也是非负简单函数。由非负简单函数积分的定义和测度的有限可加性可得：
+	\begin{align*}
+		\int_{A}[\alpha\varphi(x)+\beta\psi(x)]\dif\mu
+		&=\sum_{i=1}^{m}\sum_{j=1}^{n}(\alpha c_i+\beta d_j)\mu[A\cap (E_i\cap F_j)] \\
+		&=\sum_{i=1}^{m}\alpha c_i\left[\sum_{j=1}^{n}\mu(A\cap E_i\cap F_j)\right]+\sum_{j=1}^{n}\beta d_j\left[\sum_{i=1}^{m}\mu(A\cap E_i\cap F_j)\right] \\
+		&=\sum_{i=1}^{m}\alpha c_i\mu(A\cap E_i)+\sum_{j=1}^{n}\beta d_j\mu(A\cap F_j) \\ 
+		&=\alpha\sum_{i=1}^{m}c_i\mu(A\cap E_i)+\beta\sum_{j=1}^{n}d_j\mu(A\cap F_j) \\
+		&=\alpha\int_{A}\varphi(x)\dif\mu+\beta\int_{A}\psi(x)\dif\mu
+	\end{align*}\par
+	(6)因为$\varphi(x),\psi(x)$是非负简单函数，由\cref{prop:SimpleFunction}(2)可知$\varphi(x)-\psi(x)$也是非负简单函数。根据(5)(2)可得：
+	\begin{align*}
+		\int_{A}^{}\varphi(x)\dif\mu&=\int_{A}^{}[\psi(x)+\varphi(x)-\psi(x)]\dif\mu=\int_{A}^{}\psi(x)\dif\mu+\int_{A}^{}[\varphi(x)-\psi(x)]\dif\mu \\
+		&\geqslant\int_{A}^{}\psi(x)\dif\mu
+	\end{align*}\par
+	(7)由非负简单函数积分的定义、极限的线性性和半环上测度的下连续性（\cref{theo:MeasureOfSemiring}）可得：
+	\begin{equation*}
+		\lim_{n\to+\infty}\left[\int_{A_n}\varphi(x)\dif\mu\right]
+		=\lim_{n\to+\infty}\left[\sum_{i=1}^{m}c_i\mu(A_n\cap E_i)\right]
+		=\sum_{i=1}^{m}c_i\mu(E\cap E_i)
+		=\int_{E}\varphi(x)\dif\mu
+	\end{equation*}\par
+	(8)对任意的$\alpha\in(0,1)$，记$A_n(\alpha)=\{\varphi_n\geqslant\alpha\psi\}\cap  A$。由\cref{prop:SimpleFunction}(1)可知$\{\varphi_n\},\psi(x)$是可测函数，根据\cref{theo:MeasurableFunctionOperate}(1)可得$\alpha\psi(x)$也是可测函数。由\cref{cor:f<g<=g=g}可知$A_n(\alpha)\in \mathscr{F}$。设$\varphi_n(x)$可表示为：
+	\begin{equation*}
+		\varphi_n(x)=\sum_{k=1}^{p_n}a_{nk}I_{E_{nk}}
+	\end{equation*}
+	其中$\{E_{nk}\}$是$X$的有限可测分割。因为：
+	\begin{equation*}
+		\varphi_nI_{A_n(\alpha)}=\sum_{k=1}^{p_n}a_{nk}I_{E_{nk}\cap A_n(\alpha)},\;E_{nk}\cap A_n(\alpha)\in \mathscr{F}
+	\end{equation*}
+	所以$\varphi_nI_{A_n(\alpha)}$也是一个非负简单函数。同理，$\psi I_{A_n(\alpha)}$也是一个非负简单函数。因为$\varphi\geqslant\varphi_nI_{A_n(\alpha)}\geqslant\alpha\psi I_{A_n(\alpha)}$，由(6)和(5)可得：
+	\begin{align*}
+		\int_{A}^{}\varphi_n(x)\dif\mu
+		&\geqslant\int_{A}^{}\varphi_n(x)I_{A_n(\alpha)}\dif\mu\geqslant\int_{A}\alpha\psi(x)I_{A_n(\alpha)}\dif\mu \\
+		&=\alpha\int_{A}^{}\psi(x)I_{A_n(\alpha)}\dif\mu
+		=\alpha\sum_{j=1}^{n}d_j\mu[A\cap F_j\cap A_n(\alpha)]
+	\end{align*}
+	因为$\varphi_n\uparrow$且$\lim\limits_{n\to+\infty}\varphi_n(x)\geqslant\psi(x)$对任意$x\in A$成立，所以$A_n(\alpha)\uparrow A$，即$A\cap F_j\cap A_n(\alpha)\uparrow A\cap F_j$。由极限的不等式性、线性性和半环上测度的下连续性（\cref{theo:MeasureOfSemiring}）可得：
+	\begin{align*}
+		\lim_{n\to+\infty}\left[\int_{A}^{}\varphi_n(x)\dif\mu\right]&\geqslant\alpha\sum_{j=1}^{n}d_j\lim_{n\to+\infty}\mu[A\cap F_j\cap A_n(\alpha)] \\
+		&=\alpha\sum_{j=1}^{n}d_j\mu(A\cap F_j)=\alpha\int_{A}^{}\psi(x)\dif\mu
+	\end{align*}
+	再取$\alpha\to 1$即可得到结论。注意上式两个$n$的区别，不想再去写另外的字母了，懒。同时需要注意这里必须要引入$\alpha$，否则等于的情况就可能不成立。
+\end{proof}
+
+\subsection{非负可测函数的积分}
+\begin{definition}
+	设$f(x)$是测度空间$(X,\mathscr{F},\mu)$上的一个非负可测函数，对于任意的$A\in \mathscr{F}$，将$f(x)$在$A$上的积分定义为：
+	\begin{equation*}
+		\int_{A}f(x)\dif x=\sup_{\varphi(x)}\left\{\int_{A}\varphi(x)\dif x:\varphi(x)\text{是非负简单函数，且}\;\forall\;x\in A,\;\varphi(x)\leqslant f(x)\right\}
+	\end{equation*}
+	若$\int_{A}f(x)\dif x<+\infty$，则称$f(x)$在$A$上可积。
+\end{definition}
+\begin{property}\label{prop:NonnegativeMeasurablegIntegral}
+	设$f(x)$和$g(x)$为测度空间$(X,\mathscr{F},\mu)$上的非负可测函数，则：
+	\begin{enumerate}
+		\item 若$f(x)$是非负简单函数，则其在非负简单函数下定义的积分值与在非负可测函数下定义的积分值相同；
+		\item 对于任意的$A\in\mathscr{F}$，$\int_{A}^{}f(x)\dif\mu\geqslant0$；
+		\item 若$\mu(A)=0$且$A\in \mathscr{F}$，则$\int_{A}^{}f(x)\dif\mu=0$；
+		\item 对于任意的$A\in \mathscr{F}$，若$\{f_n\}$是非负简单函数列且$f_n\uparrow f$，则：
+		\begin{align*}
+			\int_{A}^{}f(x)\dif\mu
+			&=\lim_{n\to+\infty}\left[\int_{A}^{}f_n(x)\dif\mu\right] \\
+			&=\lim_{n\to+\infty}\left\{\sum_{j=0}^{n2^n-1}\frac{j}{2^n}\mu\left[\left\{\frac{j}{2^n}\leqslant f<\frac{j+1}{2^n}\right\}\cap A\right]+n\mu[\{f\geqslant n\}\cap A]\right\}
+		\end{align*}
+		\item 设$A,B\in \mathscr{F}$且$A\cap B=\varnothing$，则：
+		\begin{equation*}
+			\int_{A\cup B}f(x)\dif\mu=\int_{A}f(x)\dif\mu+\int_{B}f(x)\dif\mu
+		\end{equation*}
+		\item 对任意的$A\in\mathscr{F}$，任取$\alpha,\beta\in\mathbb{R}$，有\info{条件还需要再考虑}：
+		\begin{equation*}
+			\int_{A}^{}[\alpha f(x)+\beta g(x)]\dif\mu=\alpha\int_{A}^{}f(x)\dif\mu+\beta\int_{A}^{}g(x)\dif\mu
+		\end{equation*}
+		\item 若$f(x)\leqslant g(x)\;$a.e.于$A\in \mathscr{F}$，则$\int_{A}f(x)\dif\mu\leqslant\int_{A}g(x)\dif\mu$；
+		\item 若$f(x)=g(x)\;$a.e.于$A\in \mathscr{F}$，则$\int_{A}f(x)\dif\mu=\int_{A}g(x)\dif\mu$；
+		\item 取$A\in \mathscr{F}$，若$\int_{A}f(x)\dif x<+\infty$，则$f(x)$有限a.e.于$A$；
+		\item 取$A\in \mathscr{F}$，$\int_{A}f(x)\dif\mu=0$的充分必要条件为$f(x)=0\;$a.e.于$A$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由非负可测函数积分的定义和\cref{prop:NonnegativeSimpleIntegral}(6)直接可得。\par
+	(2)由非负可测函数积分的定义和\cref{prop:NonnegativeSimpleIntegral}(2)直接可得。\par
+	(3)由非负可测函数积分的定义和\cref{prop:NonnegativeSimpleIntegral}(3)直接可得。\par
+	(4)由非负可测函数积分的定义和所给条件可知对任意的$n\in\mathbb{N}^+$有：
+	\begin{equation*}
+		\int_{A}^{}f_n(x)\dif\mu\leqslant\int_{A}^{}f(x)\dif\mu
+	\end{equation*}
+	由极限的不等式性可得：
+	\begin{equation*}
+		\lim_{n\to+\infty}\left[\int_{A}^{}f_n(x)\dif\mu\right]\leqslant\int_{A}^{}f(x)\dif\mu
+	\end{equation*}
+	对任意满足$\varphi\leqslant f$的非负简单函数$\varphi(x)$，有：
+	\begin{equation*}
+		\lim_{n\to+\infty}f_n=f\geqslant\varphi
+	\end{equation*}
+	于是由\cref{prop:NonnegativeSimpleIntegral}(8)可得：
+	\begin{equation*}
+		\lim_{n\to+\infty}\left[\int_{A}^{}f_n(x)\dif\mu\right]\geqslant\int_{A}^{}\varphi(x)\dif\mu
+	\end{equation*}
+	由上确界的不等式性可得：
+	\begin{equation*}
+		\lim_{n\to+\infty}\left[\int_{A}^{}f_n(x)\dif\mu\right]\geqslant\int_{A}^{}f(x)\dif\mu
+	\end{equation*}
+	于是就有：
+	\begin{equation*}
+		\lim_{n\to+\infty}\left[\int_{A}^{}f_n(x)\dif\mu\right]=\int_{A}^{}f(x)\dif\mu
+	\end{equation*}
+	由\cref{theo:MeasurableFunctionSimpleFunction}(1)可得到积分值的具体表示。\par
+	(5)设$\varphi(x)$是$A\cup B$上任一满足$\varphi\leqslant f$的非负简单函数，于是由\cref{prop:NonnegativeSimpleIntegral}(4)可得：
+	\begin{equation*}
+		\int_{A\cup B}\varphi(x)\dif x=\int_{A}\varphi(x)\dif x+\int_{B}\varphi(x)\dif x\leqslant\int_{A}f(x)\dif x+\int_{B}f(x)\dif x
+	\end{equation*}
+	由上确界的不等式性可得：
+	\begin{equation*}
+		\int_{A\cup B}f(x)\dif x\leqslant\int_{A}f(x)\dif x+\int_{B}f(x)\dif x
+	\end{equation*}
+	另一方面：
+	\begin{equation*}
+		\int_{A\cup B}f(x)\dif x\geqslant\int_{A\cup B}\varphi(x)\dif x=\int_{A}\varphi(x)\dif x+\int_{B}\varphi(x)\dif x
+	\end{equation*}
+	由上确界的不等式性又可得：
+	\begin{equation*}
+		\int_{A\cup B}f(x)\dif x\geqslant\int_{A}f(x)\dif x+\int_{B}f(x)\dif x
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\int_{A\cup B}f(x)\dif x=\int_{A}f(x)\dif x+\int_{B}f(x)\dif x
+	\end{equation*}\par
+	(6)取非负简单函数列$\{f_n\},\{g_n\}$满足$f_n\uparrow f,g_n\uparrow g$，由极限的线性性质可得：
+	\begin{equation*}
+		\lim_{n\to+\infty}(\alpha f_n+\beta g_n)=\alpha\lim_{n\to+\infty}f_n+\beta\lim_{n\to+\infty}g_n=\alpha f+\beta g
+	\end{equation*}
+	于是$\alpha f_n+\beta g_n\uparrow\alpha f+\beta g$。由(2)、极限的线性性质和\cref{prop:NonnegativeSimpleIntegral}(5)可得：
+	\begin{align*}
+		\int_{A}^{}[\alpha f(x)+\beta g(x)]\dif\mu
+		&=\lim_{n\to+\infty}\left\{\int_{A}^{}[\alpha f_n(x)+\beta g_n(x)]\dif\mu\right\} \\
+		&=\lim_{n\to+\infty}\left[\alpha\int_{A}^{}f_n(x)\dif\mu+\beta\int_{A}^{}g_n(x)\dif\mu\right] \\
+		&=\alpha\lim_{n\to+\infty}\left[\int_{A}^{}f_n(x)\dif\mu\right]+\beta\lim_{n\to+\infty}\left[\int_{A}^{}g_n(x)\dif\mu\right] \\
+		&=\alpha\int_{A}^{}f(x)\dif\mu+\beta\int_{A}^{}g(x)\dif\mu
+	\end{align*}\par
+	(7)令$A_1=\{f\leqslant g\},\;A_2=\{f>g\}$，因为$f,g$都是非负简单函数，由\cref{prop:SimpleFunction}(1)可知$f,g$都可测，所以根据\cref{cor:f<g<=g=g}可得$A_1,A_2\in \mathscr{F}$，同时有：
+	\begin{equation*}
+		A_1\cap A_2=\varnothing,\;A_1\cup A_2=A,\;\mu(A_2)=0
+	\end{equation*}
+	由(4)(3)可得：
+	\begin{gather*}
+		\int_{A}f(x)\dif\mu=\int_{A_1\cup A_2}f(x)\dif\mu=\int_{A_1}f(x)\dif\mu+\int_{A_2}f(x)\dif\mu=\int_{A_1}f(x)\dif\mu \\
+		\int_{A}g(x)\dif\mu=\int_{A_1\cup A_2}g(x)\dif\mu=\int_{A_1}g(x)\dif\mu+\int_{A_2}g(x)\dif\mu=\int_{A_1}g(x)\dif\mu
+	\end{gather*}
+	对于满足$\varphi\leqslant f$的非负简单函数$\varphi(x)$，必然也有$\varphi\leqslant g$，于是由非负可测函数积分的定义可得：
+	\begin{equation*}
+		\int_{A_1}f(x)\dif\mu\leqslant\int_{A_1}g(x)\dif\mu
+	\end{equation*}
+	也即：
+	\begin{equation*}
+		\int_{A}f(x)\dif\mu\leqslant\int_{A}g(x)\dif\mu
+	\end{equation*}\par
+	(8)由(7)立即可得。\par
+	(9)令$A_\infty=\{f=+\infty\}$。对任意的$n\in\mathbb{N}^+$，令：
+	\begin{equation*}
+		\varphi_n(x)=
+		\begin{cases}
+			n,&x\in A_\infty \\
+			0,&x\in A\backslash A_\infty
+		\end{cases}
+	\end{equation*}
+	因为$f$是可测函数，由\cref{theo:MeasurableFunction}可得$A_\infty\in \mathscr{F}$，因此$\varphi_n(x)$是非负简单函数。由非负可测函数积分的定义可得：
+	\begin{equation*}
+		\int_{A}f(x)\dif\mu\geqslant\int_{A}\varphi_n(x)\dif\mu=n\mu(A_\infty)\geqslant0
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\forall\;n\in\mathbb{N}^+,\;0\leqslant \mu(A_\infty)\leqslant\frac{1}{n}\int_{A}f(x)\dif\mu
+	\end{equation*}
+	因为$\int_{A}f(x)\dif\mu<+\infty$，所以$\mu(A_\infty)=0$，即$f(x)$有限a.e.于$A$。\par
+	(10)必要性：对任意的$n\in\mathbb{N}^+$，令：
+	\begin{equation*}
+		A_n=\left\{f\geqslant\frac{1}{n}\right\},\quad
+		\varphi_n(x)=
+		\begin{cases}
+			\frac{1}{n},&x\in A_n \\
+			0,&x\in A\backslash A_n
+		\end{cases}
+	\end{equation*}
+	因为$f$是可测函数，所以$A_n\in \mathscr{F}$，因此$\varphi_n(x)$是非负简单函数。于是：
+	\begin{equation*}
+		0=\int_{A}f(x)\dif x\geqslant\int_{A}\varphi_n(x)\dif x=\frac{1}{n}\mu(A_n)\geqslant0
+	\end{equation*}
+	所以对任意的$n\in\mathbb{N}^+,\;\mu(A_n)=0$。因为：
+	\begin{equation*}
+		\{f>0\}=\underset{n=1}{\overset{+\infty}{\cup}}A_n
+	\end{equation*}
+	由半环上测度的次可列可加性（\cref{theo:MeasureOfSemiring}）以及测度的非负性可得$\mu(f>0)=0$，即$f(x)=0\;$a.e.于$A$。\par
+	充分性：函数$g(x)=0,\;\forall\;x\in A$的积分为$0$，由(7)立即可证得充分性。
+\end{proof}
+
+\subsection{一般可测函数的积分}
+\begin{definition}
+	设$f(x)$是测度空间$(X,\mathscr{F},\mu)$上的可测函数，$A\in \mathscr{F}$。若$\int_{A}f^+(x)\dif\mu$和$\int_{A}f^-(x)\dif\mu$中至少一个有限，则称$f(x)$在$A$上\textbf{积分存在}，将$f(x)$在$A$上的积分定义为：
+	\begin{equation*}
+		\int_{A}f(x)\dif\mu=\int_{A}f^+(x)\dif\mu-\int_{A}f^-(x)\dif\mu
+	\end{equation*}
+	若$\int_{A}f^+(x)\dif\mu$和$\int_{A}f^-(x)\dif\mu$都有限，则称$f(x)$在$A$上\textbf{可积}。
+\end{definition}
+\begin{property}\label{prop:MeasurableIntegral}
+	设$f(x)$和$g(x)$为测度空间$(X,\mathscr{F},\mu)$上的可测函数，则：
+	\begin{enumerate}
+		\item 若$A\in \mathscr{F},\;\mu(A)=0$，则$A$上的任何实值函数$f(x)$都在$A$上可积，并且有$\int_{A}f(x)\dif\mu=0$；
+		\item 若$f$在$A\in \mathscr{F}$上积分存在，则$|\int_{A}^{}f(x)\dif\mu|\leqslant\int_{A}^{}|f(x)|\dif\mu$；
+		\item 若$f$在$A\in \mathscr{F}$上积分存在（可积），则$f$在$A$的满足$B\in\mathscr{F}$的子集$B$上也积分存在（可积）；
+		\item $f$在$A\in \mathscr{F}$上可积的充分必要条件为$|f|$可积；
+		\item 若$f$在$A\in\mathscr{F}$上可积，则$|f|<+\infty\;$a.e.于$A$；
+		\item 若$f,g$在$A\in \mathscr{F}$上积分存在，对$\alpha,\beta\in\mathbb{R}^{}$，$\int_{A}^{}\alpha f(x)\dif\mu+\int_{A}^{}\beta g(x)\dif\mu$有意义，则$\alpha f+\beta g$有定义a.e.于$A$，其积分存在且：
+		\begin{equation*}
+			\int_{A}^{}[\alpha f(x)+\beta g(x)]\dif\mu=\alpha\int_{A}^{}f(x)\dif\mu+\beta\int_{A}^{}g(x)\dif\mu
+		\end{equation*}
+		\item 若$f,g$在$A\in\mathscr{F}$上积分存在且$f\leqslant g\;$a.e.于$A$，则：
+		\begin{equation*}
+			\int_{A}^{}f(x)\dif\mu\leqslant\int_{A}^{}g(x)\dif\mu
+		\end{equation*}
+		\item 若$f,g$在$A\in\mathscr{F}$上积分存在且$f=g\;$a.e.于$A$，则：
+		\begin{equation*}
+			\int_{A}^{}f(x)\dif\mu=\int_{A}^{}g(x)\dif\mu
+		\end{equation*}
+		\item 若$f=0\;$a.e.于$A\in \mathscr{F}$，则$\int_{A}^{}f(x)\dif\mu=0$；若$\int_{A}^{}f(x)\dif\mu=0$且$f\geqslant0\;$a.e.于$A$，则$f=0\;$a.e.于$A$；
+		\item $f,g$都是$X$上的可积函数且对任意的$A\in \mathscr{F}$有$\int_{A}^{}f(x)\dif\mu\leqslant\int_{A}^{}g(x)\dif\mu$，则$f\leqslant g\;$a.e.于$X$；
+		\item $f,g$都是$X$上的可积函数且对任意的$A\in \mathscr{F}$有$\int_{A}^{}f(x)\dif\mu=\int_{A}^{}g(x)\dif\mu$，则$f=g\;$a.e.于$X$；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)任选$A$上的一个实值函数$f(x)$。因为$A$是一个非空零测集，由\cref{prop:NonnegativeMeasurablegIntegral}(3)可知：
+	\begin{equation*}
+		\int_{A}f^+(x)\dif\mu=\int_{A}f^-(x)\dif\mu=0
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\int_{A}f(x)\dif\mu=\int_{A}f^+(x)\dif\mu-\int_{A}f^-(x)\dif\mu=0
+	\end{equation*}\par
+	(2)由\cref{prop:NonnegativeMeasurablegIntegral}(6)(2)、绝对值的三角不等式可得：
+	\begin{align*}
+		\left|\int_{A}f(x)\dif\mu\right|
+		&=\left|\int_{A}[f^+(x)-f^-(x)]\dif\mu\right|
+		=\left|\int_{A}f^+(x)\dif\mu-\int_{A}f^-(x)\dif\mu\right| \\
+		&\leqslant\int_{A}f^+(x)\dif\mu+\int_{A}f^-(x)\dif\mu=\int_{A}[f^+(x)+f^-(x)]\dif\mu \\
+		&=\int_{A}|f(x)|\dif\mu
+	\end{align*}\par
+	(3)任取$B\subset A$且$B\in \mathscr{F}$。因为$f(x)$在$A$上积分存在，所以$\int_{A}f^+(x)\dif\mu$和$\int_{A}f^-(x)\dif\mu$至少有一个有限。设$\int_{A}f^+(x)\dif x$有限，另一种情况可对称讨论。由\cref{prop:NonnegativeMeasurablegIntegral}(5)(2)可得：
+	\begin{equation*}
+		+\infty>\int_{A}f^+(x)\dif\mu=\int_{B}f^+(x)\dif x+\int_{A\backslash B}f^+(x)\dif\mu\geqslant\int_{B}f^+(x)\dif\mu
+	\end{equation*}
+	故$f(x)$在$B$上积分存在。由$B$的任意性，命题成立。\par
+	(4)由\cref{prop:NonnegativeMeasurablegIntegral}(6)可得：
+	\begin{align*}
+		f\text{可积}&\Leftrightarrow\int_{A}f^+(x)\dif\mu,\int_{A}f^-(x)\dif\mu\in\mathbb{R}^{} \\
+		&\Leftrightarrow\int_{A}f^+(x)\dif\mu+\int_{A}f^-(x)\dif\mu\in\mathbb{R}^{} \\
+		&\Leftrightarrow\int_{A}[f^+(x)+f^-(x)]\dif\mu=\int_{A}|f(x)|\dif\mu\in\mathbb{R}^{}
+	\end{align*}\par
+	(5)因为$f$是一个可测函数，由\cref{theo:Measurablef^+f^-}可知$f^+,f^-$也是可测函数。由\cref{theo:MeasurableFunction}可得$\{f^+=+\infty\},\{f^-=+\infty\}\in \mathscr{F}$。因为$f$可积，所以：
+	\begin{equation*}
+		\int_{A}f^+(x)\dif\mu,\int_{A}f^-(x)\dif\mu<+\infty
+	\end{equation*}
+	由\cref{prop:NonnegativeMeasurablegIntegral}(9)可得$\mu[\{f^+=+\infty\}\cap A]=\mu[\{f^-=+\infty\}\cap A]=0$，于是由测度的有限可加性可得：
+	\begin{align*}
+		\mu(\{|f|=+\infty\}\cap A)&=\mu\Bigl\{[\{f^-=+\infty\}\cap A]\cup[\{f^+=+\infty\}\cap A]\Bigr\} \\
+		&=\mu[\{f^-=+\infty\}\cap A]+\mu[\{f^+=+\infty\}\cap A]=0
+	\end{align*}
+	即$|f|<+\infty\;$a.e.于$A$。\par
+	(6)\par
+	(7)因为$f\leqslant g\;$a.e.于$A$，所以$f^+\leqslant g^+\;$a.e.于$A$，$f^-\geqslant g^-\;$a.e.于$A$。由\cref{prop:NonnegativeMeasurablegIntegral}(7)可得：
+	\begin{equation*}
+		\int_{A}f(x)\dif\mu=\int_{A}f^+(x)\dif\mu-\int_{A}f^-(x)\dif\mu\leqslant\int_{A}g^+(x)\dif\mu-\int_{A}g^-(x)\dif\mu=\int_{A}g(x)\dif\mu
+	\end{equation*}
+	\par
+	(8)由(7)立即可得。\par
+	(9)第一个结论由\cref{prop:NonnegativeMeasurablegIntegral}(10)显然成立，下证第二个结论。若此时不满足$f=0\;$a.e.于$A$，则$\mu(\{f>0\}\cap A)>0$，于是：
+	\begin{equation*}
+		\mu\left[\left(\underset{n=1}{\overset{+\infty}{\cup}}\left\{f>\frac{1}{n}\right\}\right)\cap A\right]>0
+	\end{equation*}
+	考虑集合序列：
+	\begin{equation*}
+		A_n=\left(\underset{i=1}{\overset{n}{\cup}}\left\{f>\frac{1}{i}\right\}\right)\cap A=\left\{f>\frac{1}{n}\right\}\cap A,\quad\forall\;n\in\mathbb{N}^+
+	\end{equation*}
+	显然$\{A_n\}$是一个单调递增序列，且由$\sigma$域的定义以及\cref{theo:MeasurableFunction}可得$A_n\in\mathscr{F}$对任意的$n\in\mathbb{N}^+$成立。于是：
+	\begin{equation*}
+		\lim_{n\to+\infty}A_n=\underset{n=1}{\overset{+\infty}{\cup}}A_n=\left(\underset{n=1}{\overset{+\infty}{\cup}}\left\{f>\frac{1}{n}\right\}\right)\cap A\in\mathscr{F}
+	\end{equation*}
+	由半环上测度的下连续性（\cref{theo:MeasureOfSemiring}）可得：
+	\begin{equation*}
+		\lim_{n\to+\infty}\mu(A_n)=\mu\left(\lim_{n\to+\infty}A_n\right)>0
+	\end{equation*}
+	由极限的性质可知存在$N\in\mathbb{N}^+$使得$\mu(A_N)>0$，即$\mu\left(\left\{f>\frac{1}{N}\right\}\cap A\right)>0$。依次根据(8)和\cref{prop:NonnegativeMeasurablegIntegral}(6)、非负简单函数积分的定义、\cref{prop:NonnegativeMeasurablegIntegral}(7)、非负简单函数积分的定义可得：
+	\begin{align*}
+		\int_{A}f(x)\dif\mu&=\int_{A}f(x)I_{\{f\geqslant0\}}\dif\mu=\int_{A}f(x)(I_{\{f>0\}}+I_{\{f=0\}})\dif\mu \\
+		&=\int_{A}f(x)I_{\{f>0\}}\dif\mu+\int_{A}f(x)I_{\{f=0\}}\dif\mu=\int_{A}f(x)I_{\{f>0\}}\dif\mu \\
+		&\geqslant\int_{A}f(x)I_{A_N}\dif\mu\geqslant\int_{A}\frac{1}{N}I_{A_N}\dif\mu=\frac{\mu(A_N)}{N}>0
+	\end{align*}
+	矛盾。\par
+	(10)取$\{f>g\}$，因为$f,g$都是可测函数，由\cref{cor:f<g<=g=g}可知$\{f>g\}\in \mathscr{F}$。根据(3)可知：
+	\begin{equation*}
+		\int_{\{f>g\}}f(x)\dif\mu,\int_{\{f>g\}}g(x)\dif\mu\in\mathbb{R}^{}
+	\end{equation*}
+	于是由条件和(6)有：
+	\begin{equation*}
+		\int_{\{f>g\}}f(x)\dif\mu-\int_{\{f>g\}}g(x)\dif\mu=\int_{\{f>g\}}[f(x)-g(x)]\dif\mu\leqslant0
+	\end{equation*}
+	因为$f>g$，由(7)可得：
+	\begin{equation*}
+		\int_{\{f>g\}}[f(x)-g(x)]\dif\mu\geqslant0
+	\end{equation*}
+	所以有：
+	\begin{equation*}
+		\int_{\{f>g\}}[f(x)-g(x)]\dif\mu=0
+	\end{equation*}
+	因为$f>g$在$\{f>g\}$上恒成立，由(9)可得$f-g=0\;$a.e.于$\{f>g\}$，所以$\mu(\{f>g\})=0$，即$f\leqslant g\;$a.e.于$X$。\par
+	(11)由(10)立即可得。
+\end{proof}
+\begin{theorem}[积分的绝对连续性]
+	设$f(x)$是测度空间$(X,\mathscr{F},\mu)$上的可积函数，对于任意的$\varepsilon>0$，$\exists\delta>0$，使得对于任意的$A\subset\mathscr{F}$，只要$\mu(A)<\delta$，就有：
+	\begin{equation*}
+		\int_{A}|f(x)|\dif\mu<\varepsilon
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由$f$可积和\cref{prop:MeasurableIntegral}(4)可知$|f|$可积。由\cref{prop:NonnegativeMeasurablegIntegral}可知存在非负简单函数列$\{f_n\}$满足$f_n\uparrow |f|$且：
+	\begin{equation*}
+		\int_{A}|f(x)|\dif\mu=\lim_{n\to+\infty}\left[\int_{A}f_n(x)\dif\mu\right]
+	\end{equation*}
+	所以对于任意的$\varepsilon>0$，存在$N\in\mathbb{N}^+$使得：
+	\begin{equation*}
+		\int_{A}|f(x)|\dif\mu<\frac{\varepsilon}{2}+\int_{A}f_N(x)\dif\mu
+	\end{equation*}
+	取$f_N$在$A$上的最大值$M$，由非负简单函数积分的定义可得：
+	\begin{equation*}
+		\int_{A}|f(x)|\dif\mu<\frac{\varepsilon}{2}+M\mu(A)
+	\end{equation*}
+	所以对于这个$\varepsilon$而言，只要取$\delta<\dfrac{\varepsilon}{2M}$即可。
+\end{proof}
+\begin{note}
+	以上定理之所以被称之为绝对连续性，是因为该定理表明，如果将集合看作自变量，用差集的测度定义集合之间的距离，固定的函数$f$在该集合上的积分为因变量，则这个从自变量到因变量的函数$g$一定是绝对连续的。
+\end{note}
+\begin{theorem}[Levi theorem]\label{theo:LeviTheorem}
+	设$f(x),\{f_n\}$是测度空间$(X,\mathscr{F},\mu)$上的可测函数。若$f,\{f_n\}\;$a.e.非负于$A\in\mathscr{F}$且$f_n\uparrow f\;$a.e.，$f,\{f_n\}$在$A$上的积分都存在，则：
+	\begin{equation*}
+		\int_{A}f_n(x)\dif\mu\uparrow\int_{A}f(x)\dif\mu
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由\cref{prop:MeasurableIntegral}(8)，可仅对$f,\{f_n\}$是非负可测函数且$f_n\uparrow f$讨论。对每个$n\in\mathbb{N}^+$作非负简单函数列$\{f_{nm}\}$使得当$m\to+\infty$时有$f_{nm}\uparrow f_n$，令$g_k(x)=\max\limits_{1\leqslant n\leqslant k}f_{nk}(x)$。\par
+	\textbf{(1)$\;g_k$是非负简单函数：}
+\end{proof}
+\begin{theorem}
+	设$f(x)$是测度空间$(X,\mathscr{F},\mu)$上的可测函数。若$f$在任意的$A\in\mathscr{F}$上的积分都存在，则对任一可列可测分割$\{A_n\}$有：
+	\begin{equation*}
+		\int_{X}f(x)\dif\mu=\sum_{n=1}^{+\infty}\int_{A_n}f(x)\dif\mu
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	构造函数列：
+	\begin{equation*}
+		f_n(x)=f(x)I_{\underset{i=1}{\overset{n}{\cup}}A_i}
+	\end{equation*}
+	则有：
+	\begin{equation*}
+		f_n^+\uparrow f^+,\;f_n^-\uparrow f^-
+	\end{equation*}
+	由\cref{theo:IMeasurable}和\cref{theo:MeasurableFunctionOperate}(2)可知$f_n$是可测函数，于是由\cref{theo:Measurablef^+f^-}可得$f_n^+,f_n^-$是非负可测函数。根据\cref{theo:LeviTheorem}可知：
+	\begin{equation*}
+		\int_{X}f_n^+(x)\dif\mu\uparrow\int_{X}f^+(x)\dif\mu,\quad\int_{X}f_n^-(x)\dif\mu\uparrow\int_{X}f^-(x)\dif\mu
+	\end{equation*}
+	而由\cref{prop:NonnegativeMeasurablegIntegral}(5)(10)可得：
+	\begin{gather*}
+		\begin{aligned}
+			\int_{X}f_n^+(x)\dif\mu
+			&=\int_{\underset{i=1}{\overset{n}{\cup}}A_n}f_n^+(x)\dif\mu+\int_{X\backslash\underset{i=1}{\overset{n}{\cup}}A_n}f_n^+(x)\dif\mu \\
+			&=\int_{\underset{i=1}{\overset{n}{\cup}}A_n}f^+(x)\dif\mu
+			=\sum_{i=1}^{n}\int_{A_i}f^+(x)\dif\mu
+		\end{aligned} \\
+		\begin{aligned}
+			\int_{X}f_n^-(x)\dif\mu
+			&=\int_{\underset{i=1}{\overset{n}{\cup}}A_n}f_n^-(x)\dif\mu+\int_{X\backslash\underset{i=1}{\overset{n}{\cup}}A_n}f_n^-(x)\dif\mu \\
+			&=\int_{\underset{i=1}{\overset{n}{\cup}}A_n}f^-(x)\dif\mu
+			=\sum_{i=1}^{n}\int_{A_i}f^-(x)\dif\mu
+		\end{aligned} 
+	\end{gather*}
+	于是由极限的线性性质可得：
+	\begin{align*}
+		\int_{X}f(x)\dif\mu&=\int_{X}f^+(x)\dif\mu-\int_{X}f^-(x)\dif\mu \\
+		&=\lim_{n\to+\infty}\left[\int_{X}f_n^+(x)\dif\mu\right]-\lim_{n\to+\infty}\left[\int_{X}f_n^-(x)\dif\mu\right] \\
+		&=\lim_{n\to+\infty}\left\{\sum_{i=1}^{n}\left[\int_{A_i}f^+(x)\dif\mu\right]\right\}-\lim_{n\to+\infty}\left\{\sum_{i=1}^{n}\left[\int_{A_i}f^-(x)\dif\mu\right]\right\} \\
+		&=\lim_{n\to+\infty}\left\{\sum_{i=1}^{n}\left[\int_{A_i}f^+(x)\dif\mu-\int_{A_i}f^-(x)\dif\mu\right]\right\} \\
+		&=\lim_{n\to+\infty}\left\{\sum_{i=1}^{n}\left[\int_{A_i}f(x)\dif\mu\right]\right\}=\sum_{n=1}^{+\infty}\left[\int_{A_n}f(x)\dif\mu\right]\qedhere
+	\end{align*}
+\end{proof}
+\begin{theorem}[Fatou Lemma]\label{theo:FatouLemma}
+	设$\{f_n\}$是测度空间$(X,\mathscr{F},\mu)$上的可测函数列，$A\in\mathscr{F}$，$\{f_n\}$在$A$上a.e.非负，则：
+	\begin{equation*}
+		\int_{A}\left[\varliminf_{n\to+\infty}f_n(x)\right]\dif\mu\leqslant\varliminf_{n\to+\infty}\left[\int_{A}f_n(x)\dif\mu\right]
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	令$g_k(x)=\inf\limits_{n\geqslant k}f_n(x)$，则$g_k\uparrow\varliminf\limits_{n\to+\infty}f_n$。因为$\{f_n\}$是可测函数列，由\cref{theo:MeasurableFunctionSeqMeasurable}可知$\{g_k\}$也是可测函数列。因为$\{f_n\}$在$A$上a.e.非负，根据半环上测度的次可列可加性、单调性（\cref{theo:MeasureOfSemiring}）和测度的非负性可得：
+	\begin{equation*}
+		\mu\left[\underset{n=1}{\overset{+\infty}{\cup}}(\{f_n<0\}\cap A)\right]\leqslant\sum_{n=1}^{+\infty}\mu(\{f_n<0\}\cap A)=0
+	\end{equation*}
+	所以$\{g_k\}\;$非负a.e.于$A$，于是$\varliminf\limits_{n\to+\infty}f_n\;$非负a.e.于$A$。由\cref{theo:MeasurableFunctionSeqMeasurable}可知$\varliminf\limits_{n\to+\infty}f_n$是可测函数，所以由\cref{theo:LeviTheorem}可得：
+	\begin{align*}
+		\int_{A}\left[\varliminf_{n\to+\infty}f_n(x)\right]\dif\mu=\int_{A}\left[\lim_{k\to+\infty}g_k(x)\right]\dif\mu=\lim_{k\to+\infty}\left[\int_{A}g_k(x)\dif\mu\right]
+	\end{align*}
+	因为：
+	\begin{equation*}
+		g_k(x)\leqslant f_n(x),\;\forall\;n\geqslant k
+	\end{equation*}
+	由\cref{prop:MeasurableIntegral}(7)可得：
+	\begin{equation*}
+		\int_{A}g_k(x)\dif\mu\leqslant\int_{A}f_n(x)\dif\mu,\;\forall\;n\geqslant k
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\int_{A}g_k(x)\dif\mu\leqslant\inf_{n\geqslant k}\left[\int_{A}f_n(x)\dif\mu\right]
+	\end{equation*}
+	由极限的不等式性可得：
+	\begin{equation*}
+		\lim_{k\to+\infty}\left[\int_{A}g_k(x)\dif\mu\right]\leqslant\lim_{k\to+\infty}\left\{\inf_{n\geqslant k}\left[\int_{A}f_n(x)\dif\mu\right]\right\}=\varliminf_{n\to+\infty}\left[\int_{A}f_n(x)\dif\mu\right]
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\int_{A}\left[\varliminf_{n\to+\infty}f_n(x)\right]\dif\mu\leqslant\varliminf_{n\to+\infty}\left[\int_{A}f_n(x)\dif\mu\right]\qedhere
+	\end{equation*}
+\end{proof}
+\begin{corollary}\label{cor:FatouLemma}
+	设$\{f_n\}$是测度空间$(X,\mathscr{F},\mu)$上的可测函数列，$A\in\mathscr{F}$。
+	\begin{enumerate}
+		\item 若存在上述测度空间上的在$A$上可积的函数$g$使得$f_n\geqslant g\;$a.e.于$A$对任意的$n\in\mathbb{N}^+$成立，则$\varliminf\limits_{n\to+\infty}f_n(x)$的积分存在且：
+		\begin{equation*}
+			\int_{A}\left[\varliminf_{n\to+\infty}f_n(x)\right]\dif\mu\leqslant\varliminf_{n\to+\infty}\left[\int_{A}f_n(x)\dif\mu\right]
+		\end{equation*}
+		\item 若存在上述测度空间上的在$A$上可积的函数$g$使得$f_n\leqslant g\;$a.e.于$A$对任意的$n\in\mathbb{N}^+$成立，则$\varlimsup\limits_{n\to+\infty}f_n(x)$的积分存在且：
+		\begin{equation*}
+			\int_{A}\left[\varlimsup_{n\to+\infty}f_n(x)\right]\dif\mu\geqslant\varlimsup_{n\to+\infty}\left[\int_{A}f_n(x)\dif\mu\right]
+		\end{equation*}
+	\end{enumerate}
+\end{corollary}
+\begin{proof}
+	(1)构造a.e.非负的可测函数列$\{h_n=f_n-g\}$（\cref{theo:MeasurableFunctionOperate}(1)），由\cref{prop:MeasurableIntegral}(8)可将$\{h_n\}$就看做非负可测函数。根据下极限的性质、\cref{prop:NonnegativeMeasurablegIntegral}(6)和\cref{theo:FatouLemma}可得：
+	\begin{equation*}
+		\int_{A}\left[\varliminf_{n\to+\infty}h_n(x)\right]\dif\mu\leqslant\varliminf_{n\to+\infty}\left[\int_{A}h_n(x)\dif\mu\right]
+	\end{equation*}
+	由下极限的性质：
+	\begin{equation*}
+		\varliminf_{n\to+\infty}f_n(x)=\varliminf_{n\to+\infty}[h_n(x)+g(x)]=\varliminf_{n\to+\infty}h_n(x)+g(x)
+	\end{equation*}
+	同时由\cref{theo:MeasurableFunctionSeqMeasurable}可得$\varliminf\limits_{n\to+\infty}h_n(x)$是一个非负可测函数。因为$g(x)$可积，由\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{equation*}
+		\int_{A}\left[\varliminf_{n\to+\infty}f_n(x)\right]\dif\mu=\int_{A}\left[\varliminf_{n\to+\infty}h_n(x)+g(x)\right]\dif\mu=\int_{A}\left[\varliminf_{n\to+\infty}h_n(x)\right]\dif\mu+\int_{A}g(x)\dif\mu
+	\end{equation*}
+	同理可得：
+	\begin{align*}
+		\varliminf_{n\to+\infty}\left[\int_{A}f(x)\dif\mu\right]&=\varliminf_{n\to+\infty}\left\{\int_{A}[h_n(x)+g(x)]\dif\mu\right\} \\
+		&=\varliminf_{n\to+\infty}\left[\int_{A}h_n(x)\dif\mu+\int_{A}g(x)\dif\mu\right] \\
+		&=\varliminf_{n\to+\infty}\left[\int_{A}h_n(x)\dif\mu\right]+\int_{A}g(x)\dif\mu
+	\end{align*}
+	于是：
+	\begin{gather*}
+		\int_{A}\left[\varliminf_{n\to+\infty}h_n(x)\right]\dif\mu+\int_{A}g(x)\dif\mu\leqslant\varliminf_{n\to+\infty}\left[\int_{A}h_n(x)\dif\mu\right]+\int_{A}g(x)\dif\mu \\
+		\int_{A}\left[\varliminf_{n\to+\infty}f_n(x)\right]\dif\mu\leqslant\varliminf_{n\to+\infty}\left[\int_{A}f_n(x)\dif\mu\right]
+	\end{gather*}\par
+	(2)构造a.e.非负的可测函数列$\{h_n=g-f_n\}$，与(1)的证明类似。
+\end{proof}
+\begin{theorem}[Lebesgue控制收敛定理]\label{theo:DominatedConvergenceTheorem}
+	设$\{f_n\}$是测度空间$(X,\mathscr{F},\mu)$上的可测函数列。若存在$A$上的非负可积函数$g$使得对任意的$n\in\mathbb{N}^+$有$|f_n|\leqslant g\;$a.e.于$A\in\mathscr{F}$，则$f_n\overset{\text{a.e.}}{\longrightarrow}f$或$f_n\overset{\mu}{\longrightarrow}f$蕴含：
+	\begin{equation*}
+		\lim_{n\to+\infty}\left[\int_{A}f_n(x)\dif\mu\right]=\int_{A}f(x)\dif\mu
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	\textbf{(1)$\;\text{a.e.}$}由\cref{prop:MeasurableIntegral}(8)、极限与上下极限的关系、\cref{cor:FatouLemma}(1)、上下极限的性质和\cref{cor:FatouLemma}(2)可得：
+	\begin{align*}
+		\int_{A}f(x)\dif\mu&=\int_{A}\left[\lim_{n\to+\infty}f_n(x)\right]\dif\mu=\int_{A}\left[\varliminf_{n\to+\infty}f_n(x)\right]\dif\mu \\
+		&\leqslant\varliminf_{n\to+\infty}\left[\int_{A}f_n(x)\dif\mu\right]\leqslant\varlimsup_{n\to+\infty}\left[\int_{A}f_n(x)\dif\mu\right] \\
+		&\leqslant\int_{A}\left[\varlimsup_{n\to+\infty}f_n(x)\right]\dif\mu=\int_{A}\left[\lim_{n\to+\infty}f_n(x)\right]\dif\mu \\
+		&=\int_{A}f(x)\dif\mu
+	\end{align*}
+	于是有：
+	\begin{equation*}
+		\varliminf_{n\to+\infty}\left[\int_{A}f_n(x)\dif\mu\right]=\varlimsup_{n\to+\infty}\left[\int_{A}f_n(x)\dif\mu\right]=\int_{A}f(x)\dif\mu
+	\end{equation*}
+	由极限与上下极限的关系可得：
+	\begin{equation*}
+		\lim_{n\to+\infty}\left[\int_{A}f_n(x)\dif\mu\right]=\int_{A}f(x)\dif\mu
+	\end{equation*}\par
+	\textbf{(2)$\;\mu$}由\cref{theo:a.e.a.u.mu.d}(3)(1)和(1)立即可得。
+\end{proof}
+\begin{corollary}[Lebesgue有界收敛定理]
+	设$\{f_n\}$和$f$是测度空间$(X,\mathscr{F},\mu)$上的可测函数，$A\in\mathscr{F}$且$\mu(A)<+\infty$。若存在$M>0$使得对任意的$n\in\mathbb{N}^+$有$|f_n|\leqslant M\;$a.e.于$A$，则$f_n\overset{\text{a.e.}}{\longrightarrow}f$或$f_n\overset{\mu}{\longrightarrow}f$蕴含：
+	\begin{equation*}
+		\lim_{n\to+\infty}\left[\int_{A}f(x)\dif\mu\right]=\int_{A}f(x)\dif\mu
+	\end{equation*}
+\end{corollary}
+\begin{proof}
+	令$g\equiv M$，于是$g$在$A$上可积。由\cref{theo:DominatedConvergenceTheorem}直接可得结论。
+\end{proof}
+\begin{theorem}
+	设$f$是由测度空间$(X,\mathscr{F},\mu)$到可测空间$(Y,\mathscr{C})$上的可测映射，对于任意的$A\in\mathscr{C}$，令$\nu(A)=\mu[f^{-1}(A)]$。
+	\begin{enumerate}
+		\item $(Y,\mathscr{C},\nu)$是一个测度空间；
+		\item 对$(Y,\mathscr{C},\nu)$上的任何可测函数$g$和任意$B\in\mathscr{C}$，只要
+		\begin{equation*}
+			\int_Bg(y)\dif\nu,\quad\int_{f^{-1}(B)}g\circ f\dif\mu
+		\end{equation*}
+		之一有意义，则二者一定相等。
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)因为$\mu$是测度，所以$\mu$具有非负性，从而$\nu$也是一个非负集函数。由\cref{theo:PropertyOfPreimage}(1)和$\mu(\varnothing)=0$可知$\nu(\varnothing)=0$。任取$\mathscr{C}$中互不相交的集合序列$\{A_n\}$且满足$\underset{n=1}{\overset{+\infty}{\cup}}A_n\in\mathscr{C}$，由\cref{theo:PropertyOfPreimage}(4)可知：
+	\begin{equation*}
+		\nu\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)=\mu\left[f^{-1}\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)\right]=\mu\left[\underset{n=1}{\overset{+\infty}{\cup}}f^{-1}(A_n)\right]
+	\end{equation*}
+	因为$f$是一个映射，$\{A_n\}$互不相交，所以$\{f^{-1}(A_n)\}$也互不相交。由测度的可列可加性：
+	\begin{equation*}
+		\nu\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)=\sum_{n=1}^{+\infty}\mu[f^{-1}(A_n)]=\sum_{n=1}^{+\infty}\nu(A_n)
+	\end{equation*}
+	所以$\nu$是可测空间$(Y,\mathscr{C})$上的一个测度，即$(Y,\mathscr{C},\nu)$是一个测度空间。\par
+	(2)\textbf{非负简单函数：}取$(Y,\mathscr{C},\nu)$上的非负简单函数$g$：
+	\begin{equation*}
+		g(y)=\sum_{i=1}^{n}a_iI_{A_i}(y),\quad a_i\geqslant0,\;A_i\in\mathscr{C},\;i=1,2,\dots,n,\;\underset{i=1}{\overset{n}{\cup}}A_i=Y
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\int_{B}g(y)\dif\nu=\sum_{i=1}^{n}a_i\nu(A_i\cap B)=\sum_{i=1}^{n}a_i\mu[f^{-1}(A_i\cap B)]
+	\end{equation*}
+	由\cref{theo:PropertyOfPreimage}(4)可得：
+	\begin{align*}
+		\int_{f^{-1}(B)}g\circ f\dif\mu&=\int_{f^{-1}(B)}g[f(x)]\dif\mu=\int_{f^{-1}(B)}\sum_{i=1}^{n}a_iI_{A_i}[f(x)]\dif\mu \\
+		&=\sum_{i=1}^{n}a_i\int_{f^{-1}(B)}I_{A_i}[f(x)]\dif\mu=\sum_{i=1}^{n}a_i\int_{f^{-1}(B)}I_{f^{-1}(A_i)}\dif\mu \\
+		&=\sum_{i=1}^{n}a_i\mu[f^{-1}(A_i)\cap f^{-1}(B)]=\sum_{i=1}^{n}a_i\mu[f^{-1}(A_i\cap B)]
+	\end{align*}
+	即：
+	\begin{equation*}
+		\int_{B}g(y)\dif\nu=\int_{f^{-1}(B)}g\circ f\dif\mu
+	\end{equation*}\par
+	\textbf{非负可测函数：}取$(Y,\mathscr{C},\nu)$上的非负可测函数$g$，由\cref{theo:MeasurableFunctionSimpleFunction}(1)可知存在非负简单函数列$\{g_n\}$使得$g_n\uparrow g$。由非负简单函数时的情形我们得到：
+	\begin{equation*}
+		g_n\circ f=g_n[f(x)]=\sum_{i=1}^{j_n}a_{ni}I_{A_{ni}}[f(x)]=\sum_{i=1}^{j_n}a_{ni}I_{f^{-1}(A_{ni})},\quad\underset{i=1}{\overset{j_n}{\cup}}A_{ni}=Y
+	\end{equation*}
+	其中$a_{ni}>0,\;A_{ni}\in\mathscr{C}$。由可测函数的定义，$f^{-1}(A_{ni})\in\mathscr{F}$，所以$g_n\circ f$也是一个非负简单函数。因为$g_n\uparrow g$，所以有$g_n\circ f\uparrow g\circ f$，由\cref{theo:LeviTheorem}和非负简单函数时的结论可得：
+	\begin{align*}
+		\int_{B}g(y)\dif\nu&=\int_{B}\left[\lim_{n\to+\infty}g_n(y)\right]\dif\nu
+		=\lim_{n\to+\infty}\left[\int_{B}g_n(y)\dif\nu\right] \\
+		&=\lim_{n\to+\infty}\left[\int_{f^{-1}(B)}g_n\circ f\dif\mu\right]
+		=\int_{f^{-1}(B)}\left[\lim_{n\to+\infty}g_n\circ f\right]\dif\mu \\
+		&=\int_{f^{-1}(B)}g\circ f\dif\mu
+	\end{align*}\par
+	\textbf{一般可测函数：}取$(Y,\mathscr{C},\nu)$上的一般可测函数$g$，由非负可测函数时的情形可得：
+	\begin{align*}
+		\int_{B}g(y)\dif\nu&=\int_{B}g^+(y)\dif\nu-\int_{B}g^-(y)\dif\nu \\
+		&=\int_{f^{-1}(B)}g^+\circ f\dif\mu-\int_{f^{-1}(B)}g^-\circ f\dif\mu \\
+		&=\int_{f^{-1}(B)}(g\circ f)^+\dif\mu-\int_{f^{-1}(B)}(g\circ f)^-dif\mu \\
+		&=\int_{f^{-1}(B)}g\circ f\dif\mu\qedhere
+	\end{align*}
+\end{proof}
+\begin{note}
+	以上定理是积分的变量替换定理，和Riemann积分中的换元积分法是一样的。若对$g(x)$的直接积分不太好求，可以将$g(x)$变为$g[f(x)]$来求积分。
+\end{note}

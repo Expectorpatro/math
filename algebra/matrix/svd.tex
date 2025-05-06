@@ -1,0 +1,68 @@
+\section{矩阵的分解}
+
+\subsection{SVD分解}
+\begin{theorem}\label{theo:AATPositiveSemidefinite}
+	设$A\in M_{m\times n}(\mathbb{C})$，则$AA^H,A^HA$是半正定矩阵。
+\end{theorem}
+\begin{proof}
+	设$\lambda_i,\;i=1,2,\dots,n$是矩阵$A^HA$的特征值，$\xi_i$是对应的特征向量，则：
+	\begin{align*}
+		A^HA\xi_i=\lambda_i\xi_i\rightarrow
+		\xi_i^HA^HA\xi_i=\lambda_i\xi_i^H\xi_i\rightarrow
+		||A\xi_i||^2=\lambda_i||\xi_i||^2
+	\end{align*}
+	由于左式非负，所以右式非负，而$||\xi_i||^2$非负，因此$\lambda_i$非负，由\cref{theo:PositiveSemidefinite}(3)的第五条可知$AA^T$是半正定矩阵。
+\end{proof}
+\begin{theorem}\label{theo:SVD}
+	设$A\in M_{m\times n}(\mathbb{C})$，$\operatorname{rank}(A)=r$，则存在两个正交矩阵$P\in M_{m}(\mathbb{C}),\;Q\in M_{n}(\mathbb{C})$使得：
+	\begin{equation*}
+		A=P
+		\begin{pmatrix}
+			\varLambda & \mathbf{0} \\
+			\mathbf{0} & \mathbf{0}
+		\end{pmatrix}Q^H
+	\end{equation*}
+	其中$\varLambda=\operatorname{diag}\{\lambda_1,\lambda_2,\dots,\lambda_r\}$，$\lambda_i>0$，$\lambda_i^2$为$A^HA$的正特征值。
+\end{theorem}
+\begin{proof}
+	由\cref{theo:RankAAHA}可知$\operatorname{rank}(A^HA)=\operatorname{rank}(A)$。于是$A^HA$确实有$r$个正特征值。因为$A^HA$是一个Hermitian矩阵，由\cref{prop:HermitianMatEigen}可知存在正交矩阵$Q\in M_{n}(\mathbb{C})$使得：
+	\begin{equation*}
+		Q^HA^HAQ=
+		\begin{pmatrix}
+			\varLambda^2 & \mathbf{0} \\
+			\mathbf{0} & \mathbf{0}
+		\end{pmatrix}
+	\end{equation*}
+	记$B=AQ$，则：
+	\begin{equation*}
+		B^HB=
+		\begin{pmatrix}
+			\varLambda^2 & \mathbf{0} \\
+			\mathbf{0} & \mathbf{0}
+		\end{pmatrix}
+	\end{equation*}
+	这表明$B$的列向量相互正交，且前$r$个列向量的长度分别为$\lambda_1,\lambda_2,\dots,\lambda_r$，后$n-r$个列向量为零向量，于是存在一个正交矩阵$P\in M_{m}(\mathbb{C})$使得：
+	\begin{equation*}
+		B=P
+		\begin{pmatrix}
+			\varLambda & \mathbf{0} \\
+			\mathbf{0} & \mathbf{0}
+		\end{pmatrix}
+	\end{equation*}
+	因为$B=AQ$，所以：
+	\begin{equation*}
+		A=P
+		\begin{pmatrix}
+			\varLambda & \mathbf{0} \\
+			\mathbf{0} & \mathbf{0}
+		\end{pmatrix}Q^{-1}
+		=P
+		\begin{pmatrix}
+			\varLambda & \mathbf{0} \\
+			\mathbf{0} & \mathbf{0}
+		\end{pmatrix}Q^H\qedhere
+	\end{equation*}
+\end{proof}
+\begin{definition}
+	设$A\in M_{m\times n}(\mathbb{C})$，$\operatorname{rank}(A)=r$，$A^HA$的正特征值为$\lambda_i,\;i=1,2,\dots,r$，称$\delta_i=\sqrt{\lambda_i}$为矩阵$A$的\gls{SingularValue}。
+\end{definition}

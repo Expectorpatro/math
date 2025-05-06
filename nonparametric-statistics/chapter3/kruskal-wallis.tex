@@ -1,0 +1,35 @@
+\section{Kruskal-Wallis检验}
+
+\subsubsection{适用条件}
+各响应值在水平间和水平内是独立的，水平之间分布是相似的，数据是连续型的。
+\subsubsection{假设}
+假设$k$个水平有分布函数$F_i(x)=F(x-\theta_i),\;i=1,2,\dots,k$，则检验假设可写为：
+\begin{equation}
+	H_0:\theta_1=\theta_2=\cdots=\theta_n\Leftrightarrow
+	H_1:\text{至少有一个等号不成立}\notag
+\end{equation}
+\subsubsection{原理}
+将所有水平的响应值混合后排序，得到每一个响应值对应于所有数据的秩，类似于方差分析中MSA的构成，若水平间的秩和差异大，则应怀疑零假设。由此构建以下Kruskal-Wallis统计量（其中$\bar{R_i}$表示第$i$个水平秩的平均值，$\bar{R}$表示所有响应值秩的平均值）：
+\begin{equation}
+	H=\frac{12}{N(N+1)}\sum_{i=1}^kn_i(\bar{R_i}-\bar{R})^2=\frac{12}{N(N+1)}\sum_{i=1}^k\frac{R_i^2}{n_i}-3(N+1)\notag
+\end{equation}
+\hspace{2em}如果备择假设成立，那么统计量的值应该是偏大的，因此只考虑上侧的单侧检验问题。\par
+若想求精确结果，需要满足数据中不存在结（即数据中不存在相同的数值），对每种秩分配计算对应的$H$值，便能得到此时统计量$H$的分布。\par
+\subsubsection{大样本近似}
+在大样本的情况下，若零假设成立，有如下近似分布：
+\begin{equation}
+	H\sim\chi^2_{(k-1)}\notag
+\end{equation}
+\subsubsection{打结}
+若存在打结的情况，将H作以下修正，然后利用大样本近似公式进行计算：
+\begin{equation}
+	H_C=\frac{H}{1-\sum\limits_{i=1}^g(\tau_i^3-\tau_i)/(N^3-N)}\notag
+\end{equation}
+\subsubsection{代码}
+这是R语言stats包中的函数，只提供大样本近似，并且不包含连续性修正。x表示各水平的response值，g对应于factor标签。也可以只传入x，此时x需要是一个包含所有水平响应值的列表，各水平之间分隔开。
+\begin{minted}[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines, mathescape]{r}
+kruskal.test(x, g)
+\end{minted}
+\hspace{2em}以下是自编代码，x表示各水平的response值，y对应于factor标签。也可以只传入x，此时x需要是一个数据框，第一列是response值，第二列是factor标签。提供精确检验、大样本近似、连续性修正与打结校正功能。精确检验需要gtools包，同时测试了一下一个水平8个数据一共24个数据permutation就要占到14个G的内存以上，慎用精确检验。
+\inputminted[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines]{r}{nonparametric-statistics/chapter3/kruskal-wallis.R}
+

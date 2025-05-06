@@ -1,0 +1,186 @@
+\section{交互效应下的两因子方差分析}
+仅讨论等重复情形。
+\begin{table}[H] 
+	\centering
+	\begin{tabularx}{\textwidth}
+		{c|>{\centering\arraybackslash}X>{\centering\arraybackslash}Xc>{\centering\arraybackslash}X}
+		\hline
+		\diagbox{因子$A$}{因子$B$} & $B_1$ & $B_2$ & $\cdots$ & $B_b$ \\ \hline
+		$A_1$ & 
+		$y_{111}, y_{112}, \dots, y_{11m}$ & 
+		$y_{121}, y_{122}, \dots, y_{12m}$ & 
+		$\cdots$ & 
+		$y_{1b1}, y_{1b2}, \dots, y_{1bm}$ \\ 
+		$A_2$ & 
+		$y_{211}, y_{212}, \dots, y_{21m}$ & 
+		$y_{221}, y_{222}, \dots, y_{22m}$ & 
+		$\cdots$ & 
+		$y_{2b1}, y_{2b2}, \dots, y_{2bm}$ \\
+		$\vdots$ & 
+		$\vdots$ & 
+		$\vdots$ & 
+		& 
+		$\vdots$ \\
+		$A_a$ & 
+		$y_{a11}, y_{a12}, \dots, y_{a1m}$ & 
+		$y_{a21}, y_{a22}, \dots, y_{a2m}$ & 
+		$\cdots$ & 
+		$y_{ab1}, y_{ab2}, \dots, y_{abm}$ \\ 
+		\hline
+	\end{tabularx}
+	\caption{等重复两因子试验数据表}
+\end{table}
+其中$y_{ijk}$表示在因子A的第$i$个水平$A_i$和因子B的第$j$个水平$B_j$下第$k$次重复试验的观察值。
+
+\subsection{统计模型}
+由可加效应下的两因子方差分析模型（见\cref{model:additive-effect-two-way-anova}），如果：
+\begin{equation*}
+	\mu_{ij}\ne \mu+\tau_i+\beta_j
+\end{equation*}
+则记：
+\begin{equation*}
+	(\tau\beta)_{ij}=\mu_{ij}-(\mu+\tau_i+\beta_j),\quad i=1,2,\dots,a,\;j=1,2,\dots,b
+\end{equation*}
+称$(\tau\beta)_{ij}$为因子A的水平$A_i$和因子B的水平$B_j$的交互效应。它表示两个因子的主效应之外，由于水平搭配而引起的新的效应。所有交互效应的全体称为交互作用，记为AB或A$\times$B。交互效应应满足如下条件：
+\begin{gather*}
+	\sum_{j=1}^b(\tau\beta)_{ij}=0,\quad i=1,2,\dots,a \\
+	\sum_{i=1}^a(\tau\beta)_{ij}=0,\quad j=1,2,\dots,b
+\end{gather*}
+此时的统计模型即为：
+\begin{equation*}\label{model:interaction-effect-two-way-anova}
+	\begin{cases}
+		y_{ijk}=\mu+\tau_i+\beta_j+(\tau\beta)_{ij}+\varepsilon_{ijk} \\
+		\text{诸}\varepsilon_{ijk}\quad\mathrm{i.i.d.~}N(0,\sigma^2) \\
+		s.t.\quad\sum\limits_{i=1}^a\tau_i=0,\quad\sum\limits_{j=1}^b\beta_j=0 \\
+		\qquad\;\;\sum\limits_{j=1}^b(\tau\beta)_{ij}=0,\quad 	\sum\limits_{i=1}^a(\tau\beta)_{ij}=0 \\
+		i=1,2,\dots,a,\;j=1,2,\dots,b,\;k=1,2,\dots,m
+	\end{cases}
+\end{equation*}
+
+\subsection{统计假设}
+交互效应下的两因子方差分析需要检验如下三个零假设：
+\begin{equation*}
+	\begin{cases}
+		H_{01}:\tau_1=\tau_2=\cdots=\tau_a=0, \\
+		H_{02}:\beta_1=\beta_2=\cdots=\beta_b=0 \\
+		H_{03}:(\tau\beta)_{ij}=0,\;\forall\;i,j
+	\end{cases}
+\end{equation*}
+
+\subsection{偏差平方和的分解}
+记：
+\begin{gather*}
+	y_{...}=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^my_{ijk},\quad
+	\bar{y}_{...}=\frac{y_{...}}{abm} \\
+	y_{i..}=\sum_{j=1}^b\sum_{k=1}^my_{ijk},\quad
+	\bar{y}_{i..}=\frac{y_{i..}}{bm},\quad i=1,2,\dots,a \\
+	y_{.j.}=\sum_{i=1}^a\sum_{k=1}^my_{ijk},\quad
+	\bar{y}_{.j.}=\frac{y_{.j.}}{am},\quad j=1,2,\dots,b \\
+	y_{ij.}=\sum_{k=1}^my_{ijk},\quad
+	\bar{y}_{ij.}=\frac{y_{ij.}}{m}
+\end{gather*}
+全部数据之间的差异可用下述总偏差平方和表示：
+\begin{equation*}
+	SST=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\bar{y}_{..})^2
+\end{equation*}
+引起数据$y_{ij}$之间差异的原因有四点：
+\begin{enumerate}
+	\item 因子A的$a$个水平对试验结果的影响不同。
+	\item 因子B的$b$个水平对试验结果的影响不同。
+	\item 因子A和因子B的交互作用。
+	\item 试验具有误差。
+\end{enumerate}
+为了区分并比较这四个原因对数据的影响，需要对SST进行分解：
+\begin{align*}
+	SST
+	&=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^m(y_{ijk}-\bar{y}_{...})^2 \\
+	&=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^m\left[(\bar{y}_{i..}-\bar{y}_{...})+(\bar{y}_{.j.}-\bar{y}_{...})+(\bar{y}_{ij.}-\bar{y}_{i..}-\bar{y}_{.j.}+\bar{y}_{...})+(y_{ijk}-\bar{y}_{ij.})\right]^2 \\
+	&=bm\sum_{i=1}^a(\bar{y}_{i..}-\bar{y}_{...})^2+am\sum_{j=1}^b(\bar{y}_{.j.}-\bar{y}_{...})^2+m\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{ij.}-\bar{y}_{i..}-\bar{y}_{.j.}+\bar{y}_{...})^2+\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^m(y_{ijk}-\bar{y}_{ij.})^2
+\end{align*}
+仿照单因子方差分析、可加效应下的两因子方差分析的做法，仍可以分别定义：
+\begin{gather*}
+	SSA=bm\sum_{i=1}^a(\bar{y}_{i..}-\bar{y}_{...})^2=bm\sum_{i=1}^a(\tau_i+\bar{\varepsilon}_{i..}-\bar{\varepsilon}_{...})^2 \\
+	SSB=am\sum_{j=1}^b(\bar{y}_{.j.}-\bar{y}_{...})^2=am\sum_{j=1}^b(\beta_j+\bar{\varepsilon}_{.j.}-\bar{\varepsilon}_{...})^2 \\
+	SSAB=m\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{ij.}-\bar{y}_{i..}-\bar{y}_{.j.}+\bar{y}_{...})^2=m\sum_{i=1}^a\sum_{j=1}^b\left[(\tau\beta)_{ij}+\bar{\varepsilon}_{ij.}-\bar{\varepsilon}_{i..}-\bar{\varepsilon}_{.j.}+3\bar{\varepsilon}_{...}\right]^2 \\
+	SSe=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^m(y_{ijk}-\bar{y}_{ij.})^2=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^m(\varepsilon_{ijk}-\bar{\varepsilon}_{ij.})^2
+\end{gather*}
+分别称如上公式为：因子A的偏差平方和、因子B的偏差平方和、因子A与因子B的交互作用的偏差平方和、误差平方和。
+\subsubsection{总偏差平方和分解公式}
+综上，总偏差平方和有如下分解公式：
+\begin{equation*}
+	SST=SSA+SSB++SSAB+SSe
+\end{equation*}
+
+\subsection{检验统计量}
+仿照单因子方差分析、可加效应下的两因子方差分析的做法，仍可以求得有关$\varepsilon$的一系列结论，以及各偏差平方和的期望。这里直接列出结论：
+\begin{gather*}
+	E(SSA)=(a-1)\sigma^2+bm\sum_{i=1}^a\tau_i^2 \\
+	E(SSB)=(b-1)\sigma^2+am\sum_{j=1}^b\beta_j^2 \\
+	E(SSAB)=(a-1)(b-1)\sigma^2+m\sum_{i=1}^a\sum_{j=1}^b(\tau\beta)_{ij}^2 \\
+	E(SSe)=ab(m-1)\sigma^2
+\end{gather*}
+称$\frac{SSA}{a-1}$为因子A的均方和，记为MSA；称$\frac{SSB}{b-1}$为因子B的均方和，记为MSB；称$\frac{SSAB}{(a-1)(b-1)}$为因子A与因子B的交互作用的均方和，记为MSAB；称$\frac{SSe}{ab(m-1)}$为误差均方和，记为MSe。\par
+由前述，MSe是$\sigma^2$的无偏估计，而当零假设成立时，MSA、MSB、MSAB也是$\sigma^2$的一个无偏估计。如果MSA、MSB、MSAB与MSe比值很大，即MSA、MSB、MSAB比MSe大很多（$b\sum\limits_{i=1}^a\tau_i^2,\;a\sum\limits_{j=1}^b\beta_j^2,\;m\sum\limits_{i=1}^a\sum\limits_{j=1}^b(\tau\beta)_{ij}^2$很大），我们就有理由怀疑零假设。由此构建统计量：
+\begin{gather*}
+	F_A=\frac{MSA}{MSe}=\frac{\frac{SSA}{a-1}}{\frac{SSe}{ab(m-1)}} \\
+	F_B=\frac{MSB}{MSe}=\frac{\frac{SSB}{b-1}}{\frac{SSe}{ab(m-1)}} \\
+	F_{AB}=\frac{MSAB}{MSe}=\frac{\frac{SSAB}{(a-1)(b-1)}}{\frac{SSe}{ab(m-1)}}
+\end{gather*}
+在这些统计量的情况下，$H_{01},\;H_{02},\;H_{03}$的拒绝域是右向单尾的。下求统计量的分布。
+
+\subsection{统计量的分布}
+上述统计量服从如下分布：
+\begin{gather*}
+	F_A\sim F(a-1,\;ab(m-1)) \\
+	F_B\sim F(b-1,\;ab(m-1)) \\
+	F_{AB}\sim F((a-1)(b-1),\;ab(m-1))
+\end{gather*}
+所以$H_{01},\;H_{02}$在显著性水平为$\alpha$时的拒绝域为：
+\begin{gather*}
+	F_A>F_{1-\alpha}(a-1,\;ab(m-1)) \\
+	F_B>F_{1-\alpha}(b-1,\;ab(m-1)) \\
+	F_{AB}>F_{1-\alpha}((a-1)(b-1),\;ab(m-1))
+\end{gather*}
+
+\subsection{方差分析表}
+\begin{table}[H]
+	\centering
+	\begin{tabularx}{\textwidth}
+		{>{\centering\arraybackslash}c|*{5}{>{\centering\arraybackslash}X}}
+		\toprule
+		来源   &平方和&自由度&均方和             &F值  \\ 
+		\midrule
+		因子A&SSA&$f_A=a-1$ &$\frac{SSA}{a-1}$ &$F=\frac{MSA}{MSe}$\\
+		因子B&SSB&$f_B=b-1$ &$\frac{SSB}{b-1}$ &$F=\frac{MSB}{MSe}$\\
+		交互作用AB &SSAB &$f_{AB}=(a-1)(b-1)$ &$\frac{SSAB}{(a-1)(b-1)}$ &$F=\frac{MSAB}{MSe}$ \\
+		误差   &SSe  &$f_e=ab(m-1)$ &$\frac{SSe}{ab(m-1)}$ & \\
+		总     &SST  &$f_T=abm-1$ &                  & \\
+		\bottomrule
+	\end{tabularx}
+	\caption{等重复交互效应下两因子试验方差分析表}
+\end{table}
+平方和公式可按下列公式计算：
+\begin{equation*}
+	\begin{cases}
+		SST=\sum\limits_{i=1}^a\sum\limits_{j=1}^b\sum\limits_{k=1}^my_{ijk}^2-\frac{y_{...}^2}{abm} \\
+		SSA=\sum\limits_{i=1}^a\frac{y_{i..}^2}{bm}-\frac{y_{...}^2}{abm} \\
+		SSB=\sum\limits_{j=1}^b\frac{y_{.j.}^2}{am}-\frac{y_{...}^2}{abm} \\
+		SSAB=\sum\limits_{i=1}^a\sum\limits_{j=1}^b\frac{y_{ij.}^2}{m}-\frac{y_{...}^2}{abm}-SSA-SSB \\
+		SSe=SST-SSA-SSB-SSAB
+	\end{cases}
+\end{equation*}
+
+\subsection{参数估计}
+交互效应下的两因子方差分析有五类参数：$\mu$，诸$\tau_i$，诸$\beta_j$，诸$(\tau\beta)_{ij}$和$\sigma^2$。下讨论这五类参数的点估计问题。
+\subsubsection{点估计}
+参数的点估计如下：
+\begin{gather*}
+	\hat{\sigma^2}=MSe \\
+	\hat{\mu}=\bar{y}_{...} \\
+	\hat{\tau}_i=\bar{y}_{i..}-\bar{y}_{...},\quad
+	\hat{\beta}_j=\bar{y}_{.j.}-\bar{y}_{...} \\
+	\widehat{(\tau\beta)}_{ij}=\bar{y}_{ij.}-\bar{y}_{i..}-\bar{y}_{.j.}+\bar{y}_{...} \\
+	i=1,2,\dots,a,\;j=1,2,\dots,b
+\end{gather*}
+证明过程与之前类似。
+

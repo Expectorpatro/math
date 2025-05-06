@@ -1,0 +1,132 @@
+\section{随机效应下的单因子方差分析}
+\begin{table}[ht]
+	\centering
+	\begin{tabularx}{\textwidth}
+		{>{\centering\arraybackslash}c|*{4}{>{\centering\arraybackslash}X}}
+		\hline
+		水平   & \multicolumn{4}{c}{观测值} \\ 
+		\hline
+		$A_1$    & $y_{11}$ & $y_{12}$  & $\cdots$  & $y_{1n_1}$ \\
+		$A_2$    & $y_{21}$ & $y_{22}$  & $\cdots$  & $y_{2n_2}$ \\
+		$\vdots$ & $\vdots$ & $\vdots$  &           & $\vdots$   \\
+		$A_a$    & $y_{a1}$ & $y_{a2}$  & $\cdots$  & $y_{an_a}$ 
+		\\
+		\hline
+	\end{tabularx}
+	\caption{随机效应下的单因子试验数据}
+\end{table}
+其中$y_{ij}$表示在第$i$个水平$A_i$下第$j$次重复试验的观察值。记$n=\sum\limits_{i=1}^{a}n_i$。
+
+\subsection{统计模型}
+随机效应下的单因子方差分析统计模型为：
+\begin{equation*}\label{model:random-effect-one-way-anova}
+	\begin{cases}
+		y_{ij}=\mu+\tau_i+\varepsilon_{ij} \\
+		\text{诸}\tau_i\quad\mathrm{i.i.d.~}N(0,\sigma_\tau^2) \\
+		\text{诸}\varepsilon_{ij}\quad\mathrm{i.i.d.~}N(0,\sigma^2) \\
+		\text{诸}\varepsilon_{ij}\text{、诸}\tau_i\text{相互独立}
+	\end{cases}
+	\qquad i=1,2,\cdots,a,\;j=1,2,\cdots,n_i
+\end{equation*}
+称$\mu$为一般平均（这里表示因子对数据的一般影响），$\tau_i$为因子A的第$i$个水品的随机效应。
+
+\subsection{统计假设}
+随机效应下单因素方差分析检验的统计假设为：
+\begin{equation*}
+	\begin{cases}
+		H_0:\sigma_\tau^2=0 \\
+		H_1:\sigma_\tau^2>0
+	\end{cases}
+\end{equation*}
+需要注意的是，此时拒绝零假设意味着因子的全部水平（不论是否参与过试验）之间有显著差异。
+
+\subsection{方差分析}
+\subsubsection{偏差平方和的分解}
+由于与固定效应情况下三个平方和的定义完全相同，所以随机效应下偏差平方和分解公式与之前一模一样。
+\begin{gather*}
+	SST=SSA+SSe \\
+	SSA=\sum_{i=1}^an_i(\bar{y}_{i.}-\bar{y}_{..})^2 \\
+	SSe=\sum_{i=1}^a\sum_{j=1}^{n_i}(y_{ij}-\bar{y}_{i.})^2=\sum_{i=1}^a\sum_{j=1}^{n_i}(\varepsilon_{ij}-\bar{\varepsilon}_{i.})^2
+\end{gather*}
+\subsubsection{各平方和的期望}
+先计算SSA与SSe的期望。
+\begin{equation*}
+	E(SSe)=(n-a)\sigma^2,\;E(SSA)=\left(n-\frac{\sum\limits_{i=1}^an_i^2}{n}\right)\sigma_\tau^2+(a-1)\sigma^2
+\end{equation*}
+\begin{proof}
+	(1)因为数据结构的形式完全一样，所以SSe的期望与固定效应情形下的一模一样。\par
+	(2)注意到$\tau_i$的形式发生变化，$E(SSA)$需要重新求解。
+	\begin{align*}
+		\bar{y}_{i.}-\bar{y}_{..}
+		&=\mu+\tau_i+\bar{\varepsilon}_{i.}-\frac{1}{n}\sum_{k=1}^a\sum_{j=1}^{n_k}(\mu+\tau_k+\varepsilon_{kj}) \\
+		&=\mu+\tau_i+\bar{\varepsilon}_{i.}-\frac{1}{n}\left(n\mu+\sum_{k=1}^an_k\tau_k+\varepsilon_{..}\right) \\
+		&=\tau_i-\frac{\sum\limits_{k=1}^an_k\tau_k}{n}+\bar{\varepsilon}_{i.}-\bar{\varepsilon}_{..}
+	\end{align*}
+	\begin{align*}
+		E(SSA)
+		&=E\left[\sum_{i=1}^an_i\left(\tau_i-\frac{\sum\limits_{k=1}^an_k\tau_k}{n}+\bar{\varepsilon}_{i.}-\bar{\varepsilon}_{..}\right)^2\right] \\
+		&=E\left\{\sum_{i=1}^an_i\left[\tau_i^2+\left(\frac{\sum\limits_{k=1}^an_k\tau_k}{n}\right)^2+\bar{\varepsilon}_{i.}^2+\bar{\varepsilon}_{..}^2-2\tau_i\frac{\sum\limits_{k=1}^an_k\tau_k}{n}+2\tau_i\bar{\varepsilon}_{i.}-2\tau_i\bar{\varepsilon}_{..}-2\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..}\right]\right\} \\
+		&=\sum_{i=1}^an_iE(\tau_i^2)+\sum_{i=1}^an_iE(\bar{\varepsilon}_{i.}^2)+\sum_{i=1}^an_iE(\bar{\varepsilon}_{..}^2)-2\sum_{i=1}^an_iE(\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..})-\frac{\sum\limits_{i=1}^an_i^2E(\tau_i^2)}{n} \\
+		&=\sum_{i=1}^an_i\sigma_\tau^2+\sum_{i=1}^an_i\frac{\sigma^2}{n_i}+\sum_{i=1}^an_i\frac{\sigma^2}{n}-2\sum_{i=1}^an_i\frac{\sigma^2}{n}-\frac{\sum\limits_{i=1}^an_i^2\sigma_\tau^2}{n} \\
+		&=\left(n-\frac{\sum_{i=1}^an_i^2}{n}\right)\sigma_\tau^2+(a-1)\sigma^2\qedhere
+	\end{align*}
+\end{proof}
+\subsubsection{统计量及其分布}
+称$\frac{SSA}{a-1}$为因子A的均方和，记为MSA；称$\frac{SSe}{n-a}$为误差均方和，记为MSe。\par
+由前述，MSe是$\sigma^2$的无偏估计，而当零假设成立时，MSA也是$\sigma^2$的一个无偏估计。如果二者比值很大，即MSA比MSe大很多（$\left(\frac{n^2-\sum_{i=1}^an_i^2}{n(a-1)}\right)\sigma_\tau^2$很大），我们就有理由怀疑零假设。由此构建统计量：
+\begin{equation*}
+	F=\frac{MSA}{MSe}=\frac{\frac{SSA}{a-1}}{\frac{SSe}{n-a}}
+\end{equation*}
+在该统计量的情况下，$H_0$的拒绝域是右向单尾的。\par
+由于在假设$H_0$成立时，随机效应模型与固定效应模型的观察值$y_{ij}$的数据结构的形式完全一样，所以在随机效应模型中仍然有：
+\begin{equation*}
+	F\sim F(a-1,\;n-a)
+\end{equation*}
+\subsubsection{拒绝域}
+综上所述，显著性水平为$\alpha$时的拒绝域为：
+\begin{equation*}
+	F>F_{1-\alpha}(a-1,\;n-a)
+\end{equation*}
+
+\subsection{方差分析表}
+\begin{table}[H]
+	\centering
+	\begin{tabularx}{\textwidth}
+		{>{\centering\arraybackslash}c|*{5}{>{\centering\arraybackslash}X}}
+		\toprule
+		来源   &平方和&自由度&均方和             &F值  \\ 
+		\midrule
+		因子A&SSA&$f_A=a-1$ &$\frac{SSA}{a-1}$ &$F=\frac{MSA}{MSe}$\\
+		误差   &SSe  &$f_e=n-a$ &$\frac{SSe}{n-a}$ & \\
+		总     &SST  &$f_T=n-1$ &                  & \\
+		\bottomrule
+	\end{tabularx}
+	\caption{随机效应下单因子试验方差分析表}
+\end{table}
+平方和公式可按下列公式计算：
+\begin{equation*}
+	\begin{cases}
+		SST=\sum\limits_{i=1}^a\sum\limits_{j=1}^{n_i}y_{ij}^2-\frac{y_{..}^2}{n} \\
+		SSA=\sum\limits_{i=1}^a\frac{y_{i.}^2}{n_i}-\frac{y_{..}^2}{n} \\
+		SSe=SST-SSA
+	\end{cases}
+\end{equation*}
+
+\subsection{参数估计}
+我们此时关心方差分量的估计。
+\subsubsection{点估计}
+由SSA、SSe期望的计算，可给出各方差分量的无偏点估计如下：
+\begin{gather*}
+	\hat{\sigma^2}=MSe \\
+	\hat{\sigma^2}_\tau=\frac{n(a-1)(MSA-MSe)}{n^2-\sum\limits_{i=1}^an_i^2}
+\end{gather*}
+这里需要注意的是，$\hat{\sigma^2}_\tau$有可能小于$0$，这是由估计方法决定的。
+\subsubsection{区间估计}
+考虑$\sigma^2$的区间估计。因为：
+\begin{equation*}
+	\frac{SSe}{\sigma^2}\sim\chi^2(n-a)
+\end{equation*}
+所以显著性水平为$\alpha$时，$\sigma^2$的置信区间为：
+\begin{equation*}
+	\left(\frac{SSe}{\chi_{\alpha/2}^2(n-a)},\;\frac{SSe}{\chi_{1-\alpha/2}^2(n-a)}\right)
+\end{equation*}

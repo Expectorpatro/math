@@ -1,0 +1,210 @@
+\section{有界线性算子空间}
+
+\subsection{有界线性算子空间的范数}
+\begin{theorem}
+	设$X$和$Y$都是赋范线性空间，用$\mathscr{B}(X,Y)$表示$X$到$Y$上的所有有界线性算子构成的空间\footnote{若不作特殊说明，有界线性算子的定义域均假定为$X$。}。在$\mathscr{B}(X,Y)$中定义线性运算如下：
+	\begin{gather*}
+		(T_1+T_2)x=T_1x+T_2x \\
+		(\alpha T)x=\alpha Tx
+	\end{gather*}
+	其中$T,T_1,T_2\in\mathscr{B}(X,Y)$，$\alpha$是一个数。$\mathscr{B}(X,Y)$在该线性运算下构成一个线性空间。定义$\mathscr{B}(X,Y)$中的范数如下：
+	\begin{equation*}
+		\forall\;T\in\mathscr{B}(X,Y),\;||T||=\sup_{\{x\in X:x\ne\mathbf{0}\}}\frac{||Tx||}{||x||}
+	\end{equation*}
+	则$\mathscr{B}(X,Y)$构成一个赋范线性空间。
+\end{theorem}
+\begin{proof}
+	\info{有时间证明线性空间。}(1)非负性和(2)数乘是显然的。\par
+	(3)三角不等式：
+	\begin{align*}
+		||T_1+T_2||
+		&=\sup_{\{x\in X:x\ne\mathbf{0}\}}\frac{||(T_1+T_2)x||}{||x||} \\
+		&\leqslant\sup_{\{x\in X:x\ne\mathbf{0}\}}\frac{||T_1x||+||T_2x||}{||x||} \\
+		&\leqslant\sup_{\{x\in X:x\ne\mathbf{0}\}}\frac{||T_1x||}{||x||}+
+		\sup_{\{x\in X:x\ne\mathbf{0}\}}\frac{||T_2x||}{||x||} \\
+		&=||T_1||+||T_2||\qedhere  
+	\end{align*}
+\end{proof}
+如上定义的范数公式有如下性质：
+\begin{theorem}
+	(1)\;$\forall\;x\in X,\;||Tx||\leqslant||T||\;||x||$。
+	(2)\;$||T||=\underset{\{x\in X:||x||\leqslant1\}}{\sup}||Tx||=\underset{\{x\in X:||x||=1\}}{\sup}||Tx||$。
+\end{theorem}
+证明是显然的，(1)中只需再验证$X$中的零元，(2)可由范数定义中的数乘与线性算子的数乘直接推出。
+
+\subsection{有界线性算子空间中的依算子范数收敛}
+\begin{definition}
+	设$\{T_n\}\in\mathscr{B}$。若$\{T_n\}$依$\mathscr{B}$中的范数收敛于$T\in\mathscr{B}$，即：
+	\begin{equation*}
+		\lim_{n\to+\infty}||T_n-T||=0
+	\end{equation*}
+	则称$\{T_n\}$依算子范数收敛于$T$或$\{T_n\}$依一致算子拓扑收敛于$T$。
+\end{definition}
+\subsubsection{依算子范数收敛与一致收敛的等价性}
+\begin{theorem}
+	设$\{T_n\}\in\mathscr{B}(X,Y)$。$\{T_n\}$依一致算子拓扑收敛于$T\in\mathscr{B}(X,Y)$的充分必要条件为$\{T_n\}$在$X$中的任意有界集上一致收敛于$T$。
+\end{theorem}
+\begin{proof}
+	(1)必要性：任取$A\subset X$为有界集。由$A$的有界性：
+	\begin{equation*}
+		\exists\;K>0,\;\forall\;x\in A,\;||x||\leqslant K
+	\end{equation*}
+	因此：
+	\begin{equation*}
+		||T_nx-Tx||=||(T_n-T)x||\leqslant||T_n-T||\;||x||\leqslant K||T_n-T||
+	\end{equation*}
+	由$\lim\limits_{n\to+\infty}||T_n-T||=0$可得：
+	\begin{equation*}
+		\forall\;\varepsilon>0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n>N,\;||T_n-T||<\frac{\varepsilon}{K}
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\forall\;\varepsilon>0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n>N,\;\forall\;x\in A,\;||T_nx-Tx||<\varepsilon
+	\end{equation*}\par
+	(2)充分性：在$X$中取单位球面$S=\{x\in X:||x||=1\}$。显然$S$是一个有界集，由一致收敛可得：
+	\begin{equation*}
+		\forall\;\varepsilon>0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n>N,\;\forall\;x\in X,\;||T_nx-Tx||<\varepsilon
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\forall\;\varepsilon>0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n>N,\;||T_n-T||=\sup_{x\in X,||x||=1}||T_nx-Tx||\leqslant\varepsilon
+	\end{equation*}
+	即$\{T_n\}$依算子范数收敛到$T$。
+\end{proof}
+由以上定理，$\{T_n\}$依算子收敛于$T$又称为$\{T_n\}$依一致算子拓扑收敛于$T$。
+
+\subsection{有界线性算子空间中的强收敛}
+\begin{definition}
+	设$\{T_n\}\in\mathscr{B}(X,Y)$。若：
+	\begin{equation*}
+		\forall\;x\in X,\;\lim_{n\to+\infty}||T_nx-Tx||=0
+	\end{equation*}
+	则称$\{T_n\}$\gls{StrongConvergence}到$T$或依强算子拓扑收敛于$T$。
+\end{definition}
+
+\subsection{有界线性算子空间的完备性}
+\begin{theorem}
+	若$Y$是Banach空间，则$\mathscr{B}(X,Y)$也是Banach空间。
+\end{theorem}
+\begin{proof}
+	设$\{T_n\}$是$\mathscr{B}(X,Y)$中的一个Cauchy点列，那么：
+	\begin{equation*}
+		\forall\;\varepsilon>0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m>N,\;m>n,\;||T_m-T_n||<\varepsilon
+	\end{equation*}	
+	此时有：
+	\begin{equation*}
+		\forall\;x\in X,\;||T_mx-T_nx||\leqslant||T_m-T_n||\;||x||<\varepsilon||x||
+	\end{equation*}
+	因此$\{T_nx\}$（$x$为定值）是$Y$中的Cauchy点列。因为$Y$完备，所以$\{T_nx\}$在$Y$中收敛于一个元素，记为$y$，即：
+	\begin{equation*}
+		\lim_{n\to+\infty}T_nx=y
+	\end{equation*}
+	定义算子$T:Tx=y$，即：
+	\begin{equation*}
+		Tx=\lim_{n\to+\infty}T_nx=y
+	\end{equation*}
+	下证明$T$是定义在$X$上而值域包含在$Y$中的有界线性算子，且是$\{T_n\}$依一致算子拓扑收敛的极限。其中$T$定义域与值域是显然的。\par
+	设$x_1,x_2\in X$，可得（第一行到第二行利用了$T_n$的可加性，第二行到第三行利用了范数极限的可加运算）：
+	\begin{align*}
+		T(x_1+x_2)&=\lim_{n\to+\infty}T_n(x_1+x_2) \\
+		&=\lim_{n\to+\infty}(T_nx_1+T_nx_2) \\
+		&=\lim_{n\to+\infty}T_nx_1+\lim_{n\to+\infty}T_nx_2 \\
+		&=Tx_1+Tx_2
+	\end{align*}
+	可加性得证。设$x_3\in X$，$\alpha$是一个数，可得（第二步到第三步利用了$T_n$的齐次性，第三步到第四步利用了范数极限的数乘运算）：
+	\begin{equation*}
+		T(\alpha x_3)=\lim_{n\to+\infty}T_n(\alpha x_3)=\lim_{n\to+\infty}\alpha T_nx_3=\alpha\lim_{n\to+\infty}T_nx_3=\alpha Tx_3
+	\end{equation*}
+	齐次性得证。综上，$T$是线性算子。\par
+	注意到：
+	\begin{equation*}
+		|\;||T_n||-||T_m||\;|\leqslant||T_n-T_m||\to0
+	\end{equation*}
+	所以$\{||T_n||\}$是Cauchy序列。因此$\{||T_n||\}$有界，即：
+	\begin{equation*}
+		\exists\;M>0,\;\forall\;n\in\mathbb{N}^+,\;||T_n||\leqslant M
+	\end{equation*}
+	由范数的连续性：
+	\begin{equation*}
+		||Tx||=||\lim_{n\to+\infty}T_nx||\leqslant\lim_{n\to+\infty}||T_n||\;||x||\leqslant M||x||
+	\end{equation*}
+	有界性得证。\par
+	因为：
+	\begin{equation*}
+		\forall\;\varepsilon>0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m>N,\;m>n,\;\forall\;x\in X,\;||T_mx-T_nx||<\varepsilon||x||
+	\end{equation*}	
+	在上式中取$m\to+\infty$，可得（第一步到第二步利用范数的连续性，第三步到第四步利用$\mathscr{B}(X,Y)$中线性运算的定义，注意到此时已经证得$T\in\mathscr{B}(X,Y)$）：
+	\begin{align*}
+		\lim_{m\to+\infty}||T_mx-T_nx||=||\lim_{m\to+\infty}T_mx-T_nx||=||Tx-T_nx||=||(T-T_n)x||\leqslant\varepsilon\;||x||
+	\end{align*}
+	此时即有：
+	\begin{equation*}
+		\forall\;x\in X,\;\frac{||(T-T_n)x||}{||x||}\leqslant\varepsilon
+	\end{equation*}
+	也即$||T-T_n||\to0$。依一致算子拓扑收敛得证。\par
+	综上，$\mathscr{B}(X,Y)$是Banach空间。
+\end{proof}
+
+\subsection{有界线性算子的乘法}
+\begin{definition}
+	设$X,Y,Z$都是赋范线性空间。对$T_1\in\mathscr{B}(X,Y)$，$T_2\in\mathscr{B}(Y,Z)$，定义$T_1$与$T_2$的\gls{ProductOfOperators}$T_2T_1$如下：
+	\begin{equation*}
+		\forall\;x\in X,\;(T_2T_1)x=T_2(T_1x)
+	\end{equation*}	
+	$T^n$表示$n$个$T$相乘，$T^0$表示单位算子$I$。
+\end{definition}
+\subsubsection{算子乘法的性质}
+\begin{property}
+	设$X,Y,Z,K$都是赋范线性空间。
+	\begin{enumerate}
+		\item 结合律：
+		\begin{equation*}
+			(T_3T_2)T_1=T_3(T_2T_1),\;(\alpha T_2)T_1=\alpha T_2T_1,\;
+			T_2(\alpha T_1)=\alpha(T_2T_1)
+		\end{equation*}
+		这里$T_1\in\mathscr{B}(X,Y),\;T_2\in\mathscr{B}_(Y,Z),\;T_3\in\mathscr{B}(Z,K)$。
+		\item 分配律：
+		\begin{equation*}
+			T_3(T_1+T_2)=T_3T_1+T_3T_2,\;(T_2+T_3)T_1=T_2T_1+T_3T_1
+		\end{equation*}
+		第一个式子中$T_1,T_2\in\mathscr{B}(X,Y),\;T_3\in\mathscr{B}(Y,Z)$。\\
+		第二个式子中$T_3,T_2\in\mathscr{B}(Y,Z),\;T_1\in\mathscr{B}(X,Y)$。
+		\item 当$T_1\in\mathscr{B}(X,Y),\;T_2\in\mathscr{B}(Y,Z)$时，$T_2T_1\in\mathscr{B}(X,Z)$，且有$||T_2T_1||\leqslant||T_2||\;||T_1||$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	只证(3)。(1)(2)证了没多大意思。对任意的$x\in X$，有：
+	\begin{equation*}
+		||T_2T_1x||=||T_2(T_1)x||\leqslant||T_2||\;||T_1x||\leqslant||T_2||\;||T_1||\;||x||
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\frac{||T_2T_1x||}{||x||}\leqslant||T_2||\;||T_1||
+	\end{equation*}
+	由上确界的不等式性可得：
+	\begin{equation*}
+		||T_2T_1||\leqslant||T_2||\;||T_1||\qedhere
+	\end{equation*}
+\end{proof}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

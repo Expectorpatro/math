@@ -1,0 +1,58 @@
+\section{成对数据差异性检验}
+
+\paragraph{目的}
+检验成对数据间是否有显著差异。
+\paragraph{适用条件}
+\begin{enumerate}
+	\item 每一对数据来自可比较的对象。
+	\item 每一对数据彼此之间是独立的。。
+\end{enumerate}
+
+\subsection{连续型数据}
+\subsubsection{原理}
+记两组观测值分别为$\seq{X}{n},\;Y_1,Y_2,\dots,Y_n$。对应元素作差，则检验退化为单样本中位数检验。令$M_D$表示$X_i-Y_i$的中位数，则有以下检验类型:
+
+\begin{table}[htbp]
+	\centering
+	\begin{tabular}{cc}
+		\toprule
+		零假设 & 备择假设 \\
+		\midrule 
+		$H_0:M_D=M_0$ & $H_0:M_D>M_0$ \\
+		$H_0:M_D=M_0$ & $H_0:M_D<M_0$ \\
+		$H_0:M_D=M_0$ & $H_0:M_D\ne M_0$ \\
+		\bottomrule 
+	\end{tabular}
+	\caption{检验类型}
+\end{table}
+
+\subsubsection{代码}
+下述sign.test的代码参考第\pageref{sec:sign.test.code}页。mu值的都是想要检验的二者之间的差异值，wilcox.test可以给出一定置信度下二者差异值的点估计与区间估计。
+\begin{minted}[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines, mathescape]{r}
+sign.test(x-y, mu, 0.5, exact = FALSE, alternative = c("two.sided", "less", "greater"), )
+wilcox.test(x, y, alternative = c("two.sided", "less", "greater"), mu = 0, paired = TRUE, exact = NULL, correct = TRUE, conf.int = FALSE, conf.level = 0.95)
+\end{minted}
+
+\subsection{01型数据的McNemar检验}
+\subsubsection{假设}
+$H_0:\text{无显著差异};\;H_1:\text{有显著差异}$
+\subsubsection{原理}
+记两组观测值分别为$\seq{X}{n},\;Y_1,Y_2,\dots,Y_n$。记：
+\begin{equation}
+	n_X=\left|\{i:X_i=1,\;Y_i=0\}\right|,\;
+	n_Y=\left|\{i:Y_i=1,\;X_i=0\}\right|\notag
+\end{equation}
+\hspace{2em}McNemar检验统计量为：
+\begin{equation}
+	K=\frac{(n_X-n_Y)^2}{n_X+n_Y}\notag
+\end{equation}
+\hspace{2em}在零假设成立的条件下该统计量近似服从$\chi^2(1)$，而在大样本的情况下，它的平方根近似服从标准正态分布。如果有差异，那么统计量的值应该是偏大的，因此只考虑上侧的单侧检验问题，有如下$p$值：
+\begin{equation}
+	p=F_{\chi^2}(K\geqslant k)\notag
+\end{equation}
+
+\subsubsection{代码}
+\info{没搞懂这里的连续性修正是个什么情况}
+\begin{minted}[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines, mathescape]{r}
+mcnemar(x, y, correct=TRUE)
+\end{minted}

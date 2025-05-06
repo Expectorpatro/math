@@ -1,0 +1,353 @@
+\section{可加效应下的两因子方差分析}
+可加效应模型一般不必进行重复实验，每个水平组合下只做一次实验就够了。
+\begin{table}[H] 
+	\centering
+	\begin{tabularx}{\textwidth}
+		{c|>{\centering\arraybackslash}X>{\centering\arraybackslash}Xc>{\centering\arraybackslash}X}
+		\hline
+		\diagbox{因子A}{因子B} & $B_1$ & $B_2$ & $\cdots$ & $B_b$ \\ \hline
+		$A_1$ & $y_{11}$ & $y_{12}$ & $\cdots$ & $y_{1b}$ \\ 
+		$A_2$ & $y_{21}$ & $y_{22}$ & $\cdots$ & $y_{2b}$ \\
+		$\vdots$ & $\vdots$ & $\vdots$ & & $\vdots$ \\
+		$A_a$ & $y_{a1}$ & $y_{a2}$ & $\cdots$ & $y_{ab}$ \\ 
+		\hline
+	\end{tabularx}
+	\caption{无重复两因子试验数据表}
+\end{table}
+其中$y_{ij}$表示在因子A的第$i$个水平$A_i$和因子B的第$j$个水平$B_j$下试验的观察值。记$n=ab$。
+
+\subsection{统计模型}
+假设一个数据$y$由两部分组成：
+\begin{enumerate}
+	\item 因子组合$(A_i,B_j)$的影响部分$\mu_{ij}$，随因子水平组合的变化而变化。
+	\item 试验的随机误差$\varepsilon$，假设所有随机误差来自同一个正态总体$ N(0,\sigma^2)$。
+\end{enumerate}
+则统计模型可写作：
+\begin{equation*}
+	\begin{cases}
+		y_{ij}=\mu_{ij}+\varepsilon_{ij} \\
+		\text{诸}\varepsilon_{ij}\quad\mathrm{i.i.d.~}N(0,\sigma^2) \\
+		i=1,2,\dots,a,\;j=1,2,\dots,b
+	\end{cases}
+\end{equation*}
+还可将统计模型写成意义更清晰的形式，记：
+\begin{gather*}
+	\mu=\frac{1}{ab}\sum_{i=1}^a\sum_{j=1}^b\mu_{ij} \\
+	\bar{\mu}_{i.}=\sum_{j=1}^b\mu_{ij},\quad\tau_i=\bar{\mu}_{i.}-\mu,\quad i=1,2,\dots,a \\
+	\bar{\mu}_{.j}=\sum_{i=1}^a\mu_{ij},\quad\beta_j=\bar{\mu}_{.j}-\mu,\quad j=1,2,\dots,b \\
+\end{gather*}
+称$\mu$为一般平均，表示$ab$个总体的均值的平均值。称$\tau_i$为因子A第$i$个水平$A_i$的主效应。称$\beta_j$为因子B第$j$个水平$B_j$的主效应。那么统计模型即可改写为：
+\begin{equation*}\label{model:additive-effect-two-way-anova}
+	\begin{cases}
+		y_{ij}=\mu+\tau_i+\beta_j+\varepsilon_{ij} \\
+		\text{诸}\varepsilon_{ij}\quad\mathrm{i.i.d.~}N(0,\sigma^2) \\
+		s.t.\quad\sum\limits_{i=1}^a\tau_i=0,\quad\sum\limits_{j=1}^b\beta_j=0 \\
+		i=1,2,\dots,a,\;j=1,2,\dots,b
+	\end{cases}
+\end{equation*}
+
+\subsection{统计假设}
+可加效应下的两因子方差分析需要检验如下两个零假设：
+\begin{equation*}
+	\begin{cases}
+		H_{01}:\tau_1=\tau_2=\cdots=\tau_a=0, \\
+		H_{02}:\beta_1=\beta_2=\cdots=\beta_b=0
+	\end{cases}
+\end{equation*}
+
+\subsection{偏差平方和的分解}
+记：
+\begin{gather*}
+	y_{..}=\sum_{i=1}^a\sum_{j=1}^by_{ij},\quad
+	\bar{y}_{..}=\frac{y_{..}}{ab} \\
+	y_{i.}=\sum_{j=1}^by_{ij},\quad
+	\bar{y}_{i.}=\frac{y_{i.}}{b},\quad i=1,2,\dots,a \\
+	y_{.j}=\sum_{i=1}^ay_{ij},\quad
+	\bar{y}_{.j}=\frac{y_{.j}}{a},\quad j=1,2,\dots,b 
+\end{gather*}
+全部数据之间的差异可用下述总偏差平方和表示：
+\begin{equation*}
+	SST=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\bar{y}_{..})^2
+\end{equation*}
+引起数据$y_{ij}$之间差异的原因有三点：
+\begin{enumerate}
+	\item 因子A的$a$个水平对试验结果的影响不同。
+	\item 因子B的$b$个水平对试验结果的影响不同。
+	\item 试验具有误差。
+\end{enumerate}
+为了区分并比较这三个原因对数据的影响，需要对SST进行分解：
+\begin{align*}
+	SST
+	&=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\bar{y}_{..})^2 \\
+	&=\sum_{i=1}^a\sum_{j=1}^b\left[(\bar{y}_{i.}-\bar{y}_{..})+(\bar{y}_{.j}-\bar{y}_{..})+(y_{ij}-\bar{y}_{i.}-\bar{y}_{.j}+\bar{y}_{..})\right]^2 \\
+	&=\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{i.}-\bar{y}_{..})^2+\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{.j}-\bar{y}_{..})^2+\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\bar{y}_{i.}-\bar{y}_{.j}+\bar{y}_{..})^2 \\
+	&\quad+2\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{i.}-\bar{y}_{..})(\bar{y}_{.j}-\bar{y}_{..}) \\
+	&\quad+2\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{i.}-\bar{y}_{..})(y_{ij}-\bar{y}_{i.}-\bar{y}_{.j}+\bar{y}_{..}) \\
+	&\quad+2\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{.j}-\bar{y}_{..})(y_{ij}-\bar{y}_{i.}-\bar{y}_{.j}+\bar{y}_{..})
+\end{align*}
+由定义可发现上式后三项为$0$（第三项需要注意交换求和顺序）。
+\subsubsection{SSe}
+记：
+\begin{gather*}
+	SSe=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\bar{y}_{i.}-\bar{y}_{.j}+\bar{y}_{..})^2 \\
+	\varepsilon_{..}=\sum_{i=1}^a\sum_{j=1}^b\varepsilon_{ij},\quad
+	\bar{\varepsilon}_{..}=\frac{\varepsilon_{..}}{ab} \\
+	\varepsilon_{i.}=\sum_{j=1}^b\varepsilon_{ij},\quad
+	\bar{\varepsilon}_{i.}=\frac{1}{b}\sum_{j=1}^b\varepsilon_{ij},\quad i=1,2,\dots,a \\
+	\varepsilon_{.j}=\sum_{i=1}^a\varepsilon_{ij},\quad
+	\bar{\varepsilon}_{.j}=\frac{1}{a}\sum_{i=1}^a\varepsilon_{ij},\quad j=1,2,\dots,b \\
+	\bar{\tau}=\frac{1}{a}\sum_{i=1}^a\tau_i=0,\quad
+	\bar{\beta}=\frac{1}{b}\sum_{j=1}^b\beta_j=0
+\end{gather*}
+则有：
+\begin{align*}
+	SSe
+	&=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\bar{y}_{i.}-\bar{y}_{.j}+\bar{y}_{..})^2 \\
+	&=\sum_{i=1}^a\sum_{j=1}^b(\mu+\tau_i+\beta_j+\varepsilon_{ij}-\mu-\tau_i-\bar{\beta}-\bar{\varepsilon}_{i.}-\mu-\bar{\tau}-\beta_j-\bar{\varepsilon}_{.j}+\mu+\bar{\tau}+\bar{\beta}+\bar{\varepsilon}_{..})^2 \\
+	&=\sum_{i=1}^a\sum_{j=1}^b(\varepsilon_{ij}-\bar{\varepsilon}_{i.}-\bar{\varepsilon}_{.j}+\bar{\varepsilon}_{..})^2
+\end{align*}
+因为该项完全是由误差引起的，所以称之为误差平方和。
+\subsubsection{SSA}
+记：
+\begin{equation*}
+	SSA=\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{i.}-\bar{y}_{..})^2=b\sum_{i=1}^a(\bar{y}_{i.}-\bar{y}_{..})^2
+\end{equation*}
+可以发现：
+\begin{align*}
+	SSA&=b\sum_{i=1}^a(\bar{y}_{i.}-\bar{y}_{..})^2 \\
+	&=b\sum_{i=1}^a(\mu+\tau_i+\bar{\beta}+\bar{\varepsilon}_{i.}-\mu-\bar{\tau}-\bar{\beta}-\bar{\varepsilon}_{..})^2 \\
+	&=b\sum_{i=1}^a(\tau_i+\bar{\varepsilon}_{i.}-\bar{\varepsilon}_{..})^2
+\end{align*}
+其中的随机误差都是平均过的，期望值不变而且方差缩小了。所以这个平方和虽然受到水平变动和随机误差两方面的影响，但是当因子A的不同水平对试验结果有显著差异的时候，它主要受到因子A水平变动的影响。所以称该平方和为因子A的平方和。
+
+\subsubsection{SSB}
+记：
+\begin{equation*}
+	SSB=\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{.j}-\bar{y}_{..})^2=a\sum_{j=1}^b(\bar{y}_{.j}-\bar{y}_{..})^2
+\end{equation*}
+可以发现：
+\begin{align*}
+	SSB&=a\sum_{j=1}^b(\bar{y}_{.j}-\bar{y}_{..})^2 \\
+	&=a\sum_{j=1}^b(\mu+\bar{\tau}+\beta_j+\bar{\varepsilon}_{.j}-\mu-\bar{\tau}-\bar{\beta}-\bar{\varepsilon}_{..})^2 \\
+	&=a\sum_{j=1}^b(\beta_j+\bar{\varepsilon}_{.j}-\bar{\varepsilon}_{..})^2
+\end{align*}
+其中的随机误差都是平均过的，期望值不变而且方差缩小了。所以这个平方和虽然受到水平变动和随机误差两方面的影响，但是当因子B的不同水平对试验结果有显著差异的时候，它主要受到因子B水平变动的影响。所以称该平方和为因子B的平方和。\par
+\subsubsection{总偏差平方和分解公式}
+综上，总偏差平方和有如下分解公式：
+\begin{equation*}
+	SST=SSA+SSB+SSe
+\end{equation*}
+
+\subsection{检验统计量}
+\subsubsection{关于$\varepsilon$的一些结论}
+下给出关于$\varepsilon$的一些结论：
+\begin{gather*}
+	\bar{\varepsilon}_{i.}\sim N(0,\frac{\sigma^2}{b}),\quad\bar{\varepsilon}_{.j}\sim
+	N(0,\frac{\sigma^2}{a}),\quad\bar{\varepsilon}_{..}\sim N(0,\frac{\sigma^2}{ab}) \\
+	E(\varepsilon_{ij}^2)=\sigma^2,\quad
+	E(\bar{\varepsilon}_{i.}^2)=\frac{\sigma^2}{b},\quad
+	E(\bar{\varepsilon}_{.j}^2)=\frac{\sigma^2}{a},\quad
+	E(\bar{\varepsilon}_{..}^2)=\frac{\sigma^2}{ab} \\
+	E(\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..})=\frac{\sigma^2}{ab},\quad
+	E(\varepsilon_{.j}\bar{\varepsilon}_{..})=\frac{\sigma^2}{ab}
+\end{gather*}
+\begin{proof}
+	正态分布的三个结论可直接由独立正态随机变量的线性运算求得。
+	\begin{align*}
+		E(\bar{\varepsilon}_{ij}^2)&=Var(\bar{\varepsilon}_{ij})+[E(\bar{\varepsilon}_{ij})]^2=\sigma^2 \\
+		E(\bar{\varepsilon}_{i.}^2)&=Var(\bar{\varepsilon}_{i.})+[E(\bar{\varepsilon}_{i.})]^2=\frac{\sigma^2}{b} \\
+		E(\bar{\varepsilon}_{.j}^2)&=Var(\bar{\varepsilon}_{.j})+[E(\bar{\varepsilon}_{.j})]^2=\frac{\sigma^2}{a} \\
+		E(\bar{\varepsilon}_{..}^2)&=Var(\bar{\varepsilon}_{..})+[E(\bar{\varepsilon}_{..})]^2=\frac{\sigma^2}{ab}
+	\end{align*}
+	下求$E(\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..})$：
+	\begin{align*}
+		E(\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..})
+		&=E\left[\left(\frac{1}{b}\sum_{j=1}^b\varepsilon_{ij}\right)\left(\frac{1}{ab}\sum_{i=1}^a\sum_{j=1}^b\varepsilon_{ij}\right)\right] \\
+		&=\frac{1}{ab^2}E\left(\sum_{j=1}^b\varepsilon_{ij}^2\right) \\
+		&=\frac{1}{ab^2}\sum_{j=1}^bE(\varepsilon_{ij}^2) \\
+		&=\frac{\sigma^2}{ab}
+	\end{align*}
+	下求$E(\varepsilon_{.j}\bar{\varepsilon}_{..})$：
+	\begin{align*}
+		E(\varepsilon_{.j}\bar{\varepsilon}_{..})
+		&=E\left[\left(\frac{1}{a}\sum_{i=1}^a\varepsilon_{ij}\right)\left(\frac{1}{ab}\sum_{i=1}^a\sum_{j=1}^b\varepsilon_{ij}\right)\right] \\
+		&=\frac{1}{a^2b}E\left(\sum_{i=1}^a\varepsilon_{ij}^2\right) \\
+		&=\frac{1}{ab^2}\sum_{i=1}^aE(\varepsilon_{ij}^2) \\
+		&=\frac{\sigma^2}{ab}\qedhere
+	\end{align*}
+\end{proof}
+\subsubsection{SSA的期望}
+下求SSA的期望：
+\begin{align*}
+	E(SSA)
+	&=E\left[b\sum_{i=1}^a(\tau_i+\bar{\varepsilon}_{i.}-\bar{\varepsilon}_{..})^2\right] \\
+	&=E\left[b\sum_{i=1}^a(\tau_i^2+\bar{\varepsilon}_{i.}^2+\bar{\varepsilon}_{..}^2+2\tau_i\bar{\varepsilon}_{i.}-2\tau_i\bar{\varepsilon}_{..}-2\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..})\right] \\
+	&=b\sum_{i=1}^a\tau_i^2+b\sum_{i=1}^aE(\bar{\varepsilon}_{i.}^2)+b\sum_{i=1}^aE(\bar{\varepsilon}_{..}^2)-\frac{2b}{ab^2}\sum_{i=1}^a\sum_{j=1}^bE(\varepsilon_{ij}^2) \\
+	&=b\sum_{i=1}^a\tau_i^2+ba\frac{\sigma^2}{b}+ab\frac{\sigma^2}{ab}-\frac{2b}{ab^2}ab\sigma^2 \\
+	&=b\sum_{i=1}^a\tau_i^2+(a-1)\sigma^2
+\end{align*}
+\subsubsection{SSB的期望}
+下求SSB的期望：
+\begin{align*}
+	E(SSB)
+	&=E\left[a\sum_{j=1}^b(\beta_j+\bar{\varepsilon}_{.j}-\bar{\varepsilon}_{..})^2\right] \\
+	&=E\left[a\sum_{j=1}^b(\beta_j^2+\bar{\varepsilon}_{.j}^2+\bar{\varepsilon}_{..}^2+2\beta_j\bar{\varepsilon}_{.j}-2\beta_j\bar{\varepsilon}_{..}-2\bar{\varepsilon}_{.j}\bar{\varepsilon}_{..})\right] \\
+	&=a\sum_{j=1}^b\beta_j^2+a\sum_{j=1}^bE(\bar{\varepsilon}_{.j}^2)+a\sum_{j=1}^bE(\bar{\varepsilon}_{..}^2)-\frac{2a}{a^2b}\sum_{i=1}^a\sum_{j=1}^bE(\varepsilon_{ij}^2) \\
+	&=a\sum_{j=1}^b\beta_j^2+ab\frac{\sigma^2}{a}+ab\frac{\sigma^2}{ab}-\frac{2a}{a^2b}ab\sigma^2 \\
+	&=a\sum_{j=1}^b\beta_j^2+(b-1)\sigma^2
+\end{align*}
+\subsubsection{SSe的期望}
+下求SSe的期望（把均值展开，利用独立性就可以得到结果）：
+\begin{align*}
+	E(SSe)
+	&=E\left[\sum_{i=1}^a\sum_{j=1}^b(\varepsilon_{ij}-\bar{\varepsilon}_{i.}-\bar{\varepsilon}_{.j}+\bar{\varepsilon}_{..})^2\right] \\
+	&=E\left[\sum_{i=1}^a\sum_{j=1}^b(\varepsilon_{ij}^2+\bar{\varepsilon}_{i.}^2+\bar{\varepsilon}_{.j}^2+\bar{\varepsilon}_{..}^2
+	-2\varepsilon_{ij}\bar{\varepsilon}_{i.}-2\varepsilon_{ij}\bar{\varepsilon}_{.j}+2\varepsilon_{ij}\bar{\varepsilon}_{..}
+	+2\bar{\varepsilon}_{i.}\bar{\varepsilon}_{.j}-2\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..}-2\bar{\varepsilon}_{.j}\bar{\varepsilon}_{..})\right] \\
+	&=(a-1)(b-1)\sigma^2
+\end{align*}
+\subsubsection{构建统计量}
+称$\frac{SSA}{a-1}$为因子A的均方和，记为MSA；称$\frac{SSB}{b-1}$为因子B的均方和，记为MSB；称$\frac{SSe}{(a-1)(b-1)}$为误差均方和，记为MSe。\par
+由前述，MSe是$\sigma^2$的无偏估计，而当零假设成立时，MSA和MSB也是$\sigma^2$的一个无偏估计。如果MSA、MSB与MSe比值很大，即MSA、MSB比MSe大很多（$b\sum\limits_{i=1}^a\tau_i^2,\;a\sum\limits_{j=1}^b\beta_j^2$很大），我们就有理由怀疑零假设。。由此构建统计量：
+\begin{gather*}
+	F_A=\frac{MSA}{MSe}=\frac{\frac{SSA}{a-1}}{\frac{SSe}{(a-1)(b-1)}} \\
+	F_B=\frac{MSB}{MSe}=\frac{\frac{SSB}{b-1}}{\frac{SSe}{(a-1)(b-1)}} 	
+\end{gather*}
+在这些统计量的情况下，$H_{01},\;H_{02}$的拒绝域是右向单尾的。下求统计量的分布。
+
+\subsection{统计量的分布}
+上述统计量服从如下分布：
+\begin{gather*}
+	F_A\sim F(a-1,\;(a-1)(b-1)) \\
+	F_B\sim F(b-1,\;(a-1)(b-1))
+\end{gather*}
+所以$H_{01},\;H_{02}$在显著性水平为$\alpha$时的拒绝域为：
+\begin{gather*}
+	F_A>F_{1-\alpha}(a-1,\;(a-1)(b-1)) \\
+	F_B>F_{1-\alpha}(b-1,\;(a-1)(b-1))
+\end{gather*}
+
+\subsection{方差分析表}
+\begin{table}[H]
+	\centering
+	\begin{tabularx}{\textwidth}
+		{>{\centering\arraybackslash}c|*{5}{>{\centering\arraybackslash}X}}
+		\toprule
+		来源   &平方和&自由度&均方和             &F值  \\ 
+		\midrule
+		因子A&SSA&$f_A=a-1$ &$\frac{SSA}{a-1}$ &$F=\frac{MSA}{MSe}$\\
+		因子B&SSB&$f_B=b-1$ &$\frac{SSB}{b-1}$ &$F=\frac{MSB}{MSe}$\\
+		误差   &SSe  &$f_e=(a-1)(b-1)$ &$\frac{SSe}{(a-1)(b-1)}$ & \\
+		总     &SST  &$f_T=ab-1$ &                  & \\
+		\bottomrule
+	\end{tabularx}
+	\caption{无重复可加效应下两因子试验方差分析表}
+\end{table}
+平方和公式可按下列公式计算：
+\begin{equation*}
+	\begin{cases}
+		SST=\sum\limits_{i=1}^a\sum\limits_{j=1}^by_{ij}^2-\frac{y_{..}^2}{ab} \\
+		SSA=\sum\limits_{i=1}^a\frac{y_{i.}^2}{b}-\frac{y_{..}^2}{ab} \\
+		SSB=\sum\limits_{j=1}^b\frac{y_{.j}^2}{a}-\frac{y_{..}^2}{ab} \\
+		SSe=SST-SSA-SSB
+	\end{cases}
+\end{equation*}
+
+\subsection{参数估计}
+可加效应下的两因子方差分析有四类参数：$\mu$，诸$\tau_i$，诸$\beta_j$和$\sigma^2$。下讨论这四类参数的点估计问题。
+\subsubsection{点估计}
+参数的点估计如下：
+\begin{gather*}
+	\hat{\sigma^2}=MSe \\
+	\hat{\mu}=\bar{y}_{..} \\
+	\hat{\tau}_i=\bar{y}_{i.}-\bar{y}_{..},\;i=1,2,\dots,a \\
+	\hat{\beta}_j=\bar{y}_{.j}-\bar{y}_{..},\;j=1,2,\dots,b
+\end{gather*}
+其中$\hat{\mu},\;\hat{\tau}_i,\;\hat{\beta}_j$是使用最小二乘估计得到的。
+\begin{proof}
+	分别用$\hat{\mu},\;\hat{\tau}_i,\;\hat{\beta}_j$表示$\mu$，诸$\tau_i$和诸$\beta_j$的估计，用$\hat{y}_{ij}=\hat{\mu}+\hat{\tau}_i+\hat{\beta}_j$表示$y_{ij}$的估计，$i=1,2,\dots,a,\;j=1,2,\dots,b$。损失函数为：
+	\begin{equation*}
+		L=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\hat{y}_{ij})^2=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\hat{\mu}-\hat{\tau}_i-\hat{\beta}_j)^2
+	\end{equation*}
+	最小二乘解需要满足：
+	\begin{equation*}
+		\begin{cases}
+			\vspace{2ex}
+			\dfrac{\partial L}{\partial\hat{\mu}}=0, \\
+			\vspace{2ex}
+			\dfrac{\partial L}{\partial\hat{\tau}_i}=0,\quad 
+			i=1,2,\dots,a \\
+			\vspace{2ex}
+			\dfrac{\partial L}{\partial\hat{\beta}_j}=0,\quad
+			j=1,2,\dots,b \\
+			\vspace{2ex}
+			\sum\limits_{i=1}^a\hat{\tau}_i=0 \\
+			\vspace{2ex}
+			\sum\limits_{j=1}^b\hat{\beta}_j=0
+		\end{cases}
+	\end{equation*}
+	上式即可解出结果。
+\end{proof}
+
+\subsection{多重比较问题}
+如果此时某因子显著，则需要对它的各水平均值采用Duncan多重比较法去判断哪些水平之间存在显著差异。此时的水平均值即为在另一因子各水平下的均值。
+
+\subsection{等重复试验情形}
+\subsubsection{等重复试验下的方差分析表}
+\begin{table}[H]
+	\centering
+	\begin{tabularx}{\textwidth}
+		{>{\centering\arraybackslash}c|*{5}{>{\centering\arraybackslash}X}}
+		\toprule
+		来源   &平方和&自由度&均方和             &F值  \\ 
+		\midrule
+		因子A&SSA&$f_A=a-1$ &$\frac{SSA}{a-1}$ &$F=\frac{MSA}{MSe}$\\
+		因子B&SSB&$f_B=b-1$ &$\frac{SSB}{b-1}$ &$F=\frac{MSB}{MSe}$\\
+		误差   &SSe  &$f_e=abm-a-b+1$ &$\frac{SSe}{f_e}$ & \\
+		总     &SST  &$f_T=abm-1$ &                  & \\
+		\bottomrule
+	\end{tabularx}
+	\caption{可加效应下两因子等重复试验方差分析表}
+\end{table}
+其中$m$为重复实验次数。平方和公式可按下列公式计算：
+\begin{equation*}
+	\begin{cases}
+		SST=\sum\limits_{i=1}^a\sum\limits_{j=1}^b\sum\limits_{k=1}^my_{ijk}^2-\frac{y_{...}^2}{abm} \\
+		SSA=\sum\limits_{i=1}^a\frac{y_{i..}^2}{bm}-\frac{y_{...}^2}{abm} \\
+		SSB=\sum\limits_{j=1}^b\frac{y_{.j.}^2}{am}-\frac{y_{..}^2}{abm} \\
+		SSe=SST-SSA-SSB
+	\end{cases}
+\end{equation*}
+其中：
+\begin{gather*}
+	y_{...}=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^my_{ijk} \\
+	y_{i..}=\sum_{j=1}^b\sum_{k=1}^my_{ijk},\quad i=1,2,\dots,a \\
+	y_{.j.}=\sum_{i=1}^a\sum_{k=1}^my_{ijk},\quad j=1,2,\dots,b
+\end{gather*}
+\subsubsection{参数估计}
+参数的点估计如下：
+\begin{gather*}
+	\hat{\mu}=\bar{y}_{...} \\
+	\hat{\tau}_i=\bar{y}_{i..}-\bar{y}_{...},\;i=1,2,\dots,a \\
+	\hat{\beta}_j=\bar{y}_{.j.}-\bar{y}_{...},\;j=1,2,\dots,b
+\end{gather*}
+\subsubsection{多重比较问题}
+此时的Duncan多重比较过程与无重复试验的情况完全一样，只是需要注意：
+\begin{gather*}
+	A:R_p>r_{1-\alpha}(p,f)\sqrt{\frac{MSe}{bm}} \\
+	B:R_p>r_{1-\alpha}(p,f)\sqrt{\frac{MSe}{am}}
+\end{gather*}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

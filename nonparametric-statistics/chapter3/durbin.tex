@@ -1,0 +1,31 @@
+\section{Durbin检验}
+
+\subsubsection{适用条件}
+不完全区组设计，水平之间分布是相似的，数据是连续型的。
+\subsubsection{假设}
+假设$k$个水平有分布函数$F_i(x)=F(x-\theta_i),\;i=1,2,\dots,k$，则检验假设可写为：
+\begin{equation}
+	H_0:\theta_1=\theta_2=\cdots=\theta_n\Leftrightarrow
+	H_1:\text{至少有一个等号不成立}\notag
+\end{equation}
+\subsubsection{原理}
+假设有$k$个水平、$b$个区组，每个区组中含$t$个处理，每个处理出现在$r$个区组中\info{有机会看看这里平衡与不平衡的不完全区组设计有没有什么区别}。\par
+因为各区组之间是有影响的，无法把各响应值混在一起排序。选择在各个区组内计算所有响应值的秩，$R_{ij}$表示在第$j$个区组中水平$i$的秩，$R_i=\sum\limits_{j}R_{ij},\;i=1,2,\dots,k$，定义如下Durbin统计量:
+\begin{equation}
+	D=\frac{12(k-1)}{rk(t^2-1)}\sum_{i=1}^k(R_i-\frac{r(t+1)}{2})^2=\frac{12(k-1)}{rk(t^2-1)}\sum_{i=1}^kR_i^2-\frac{3r(k-1)(t+1)}{t-1}\notag
+\end{equation}
+\hspace{2em}在零假设成立的情况下，各水平之间的秩和与均值相比不应相差过大，也就是$D$值不应太大，若$D$值过大，则有理由怀疑零假设。由此可看出这里只考虑上侧的单侧检验问题。同时，可以看出Durbin统计量在完全区组设计($t=k,\;r=b$)的时候和Friedman统计量是完全一样的。
+\subsubsection{大样本近似}
+在大样本的情况下（$r\to+\infty$），若零假设成立，有如下近似分布：
+\begin{equation}
+	D\sim\chi^2_{(k-1)}\notag
+\end{equation}
+在某个区组存在结的时候，利用下式进行修正（其中$\tau_{ij}$表示第$j$个区组的第$i$个结统计量）：
+\begin{gather*}
+	D_C=\frac{(k-1)\sum_{i=1}^k(R_i-\frac{r(t+1)}{2})^2}{A-C} \\
+	A=\sum_i\sum_jR_{ij}^2,\;C=\frac{bt(t+1)^2}{4}
+\end{gather*}
+
+\subsubsection{代码}
+以下是自编代码，会检查输入的数据是否满足不完全区组设计的平衡性。\info{代码现在是只考虑平衡的}提供精确计算、大样本近似、连续性修正与打结校正功能。x可以是一个三列的数据框，第一列表示response值，第二列表示factor，第三列表示block。x也可以是一个向量，表示response，此时必须传入factor和block。
+\inputminted[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines]{r}{nonparametric-statistics/chapter3/durbin.R}

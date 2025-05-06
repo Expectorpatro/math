@@ -1,0 +1,35 @@
+\section{Jonckheere-Terpstra检验}
+
+\subsubsection{目的}
+检验水平的位置参数是否呈现出上升趋势，若想检验是否呈现出下降趋势，改变水平顺序就行了。
+\subsubsection{适用条件}
+各响应值在水平间和水平内是独立的，水平之间分布是相似的，数据是连续型的。这里与Kruskal-Wallis检验的条件是一样的。
+\subsubsection{假设}
+假设$k$个水平有分布函数$F_i(x)=F(x-\theta_i),\;i=1,2,\dots,k$，则检验假设可写为：
+\begin{equation}
+	H_0:\theta_1=\theta_2=\cdots=\theta_n\Leftrightarrow
+	H_1:\theta_1\leqslant\theta_2\leqslant\cdots\leqslant\theta_n\notag
+\end{equation}
+\subsubsection{原理}
+假设一共有$k$个水平，每个水平中有$n_i$个响应值($i=1,2,\dots,k$)，响应值用$X_{ij}$表示($i=1,2,\dots,k,\;j=1,2,\dots,n_i$)，由此构建以下JT统计量(J)：
+\begin{gather*}
+	U_{ij}=\left|X_{ia}<X_{jb},\;a=1,2,\dots,n_i,\;b=1,2,\dots,n_j\right| \\
+	J=\sum_{i<j}U_{ij}
+\end{gather*}
+\hspace{2em}在备择假设成立的情况下，某个水平中的观测值会比后面水平中的观测值小，水平间的$U_{ij}$会比较大，$J$也会比较大。因此在$J$比较大的时候，有理由怀疑零假设。由此可看出这里只考虑上侧的单侧检验问题。\par
+若想求精确检验的结果，需要满足数据中没有结（即所有数据中没有相同的数值），然后对每一种秩分配情况计算$J$的值（秩的大小关系便反映了数据之间的大小关系），即可得到$J$的精确分布。
+\subsubsection{大样本近似}
+在$\min\limits_in_i\to+\infty$时，有以下近似公式：
+\begin{equation}
+	Z=\frac{J-(N^2-\sum\limits_{i=1}^k)/4}{\sqrt{[N^2(2N+3)-\sum\limits_{i=1}^kn_i^2(2n_i+3)]/72}}\sim N(0,\;1)\notag
+\end{equation}
+\subsubsection{打结}
+当数据中存在相同数值时，要进行修正：
+\begin{gather*}
+	U_{ij}=\left|X_{ia}<X_{jb},\;a=1,2,\dots,n_i,\;b=1,2,\dots,n_j\right|+ \\
+	\frac{1}{2}\left|X_{ia}=X_{jb},\;a=1,2,\dots,n_i,\;b=1,2,\dots,n_j\right| \\
+	J=\sum_{i<j}U_{ij}
+\end{gather*}
+\subsubsection{代码}
+x表示各水平的response值，y对应于factor标签。也可以只传入x，此时x需要是一个数据框，第一列是response值，第二列是factor标签。提供精确检验、大样本近似、连续性修正与打结校正功能。精确检验需要gtools包，同时测试了一下一个水平8个数据一共24个数据permutation就要占到14个G的内存以上，慎用精确检验。
+\inputminted[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines]{r}{nonparametric-statistics/chapter3/jt.R}

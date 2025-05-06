@@ -1,0 +1,67 @@
+\section{参数估计}
+
+\subsection{亚群体特征的估计}
+因为分层随机抽样在亚群体中为简单随机抽样，由简单随机抽样的估计公式即有如下公式：
+\begin{gather*}
+	\hat{\mu}_h=\frac{1}{n_h}\sum_{j=1}^{n_h}y_{hj} \\
+	\hat{\tau}_h=\frac{N_h}{n_h}\sum_{j=1}^{n_h}y_{hj}=N_h\hat{\mu}_h \\
+	\hat{\sigma^2_h}=s^2_h=\frac{1}{n_h-1}\sum_{j=1}^{n_h}\left(y_{hj}-\hat{\mu}_h\right)^2
+\end{gather*}
+
+\subsection{总体总量$\hat{\tau}$的估计}
+\subsubsection{计算公式}
+\begin{equation*}
+	\hat{\tau}_{str}=\sum_{h=1}^H\hat{\tau}_h=\sum_{h=1}^HN_h\bar{y}_h
+\end{equation*}
+\subsubsection{抽样权重形式}
+\begin{equation*}
+	\hat{\tau}_{str}=\sum_{h=1}^HN_h\bar{y}_h=\sum_{h=1}^H\frac{N_h}{n_h}\sum_{j=1}^{n_h}y_{hj}=\sum_{h=1}^H\sum_{j=1}^{n_h}\frac{N_h}{n_h}y_{hj}=\sum_{h=1}^H\sum_{j=1}^{n_h}w_{hj}y_{hj}
+\end{equation*}
+
+\subsection{总体均值$\hat{\mu}$的估计}
+\subsubsection{计算公式}
+\begin{equation*}
+	\hat{\mu}_{str}=\frac{\hat{\tau}_{str}}{N}=\frac{1}{N}\sum_{h=1}^HN_h\bar{y}_h
+\end{equation*}
+\subsubsection{抽样权重形式}
+只需注意到$N=\sum\limits_{h=1}^H\sum\limits_{j=1}^{n_h}w_{hj}$：
+\begin{equation*}
+	\hat{\mu}_{str}=\frac{\sum\limits_{h=1}^H\sum\limits_{j=1}^{n_h}w_{hj}y_{hj}}{\sum\limits_{h=1}^H\sum\limits_{j=1}^{n_h}w_{hj}}
+\end{equation*}
+
+\subsection{估计的性质}
+\subsubsection{无偏性}
+无偏性是显然的：在每一层里面使用的是简单随机抽样，而简单随机抽样的估计量是无偏的，总和也自然是无偏的。
+\subsubsection{方差}
+由各层样本之间的独立性以及每层中的抽样实际是SRS，立即可得如下分层随机抽样估计量的方差公式：
+\begin{gather*}
+	Var(\hat{\tau}_{str})=\sum_{h=1}^HN_h^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h} \\
+	\widehat{Var}(\hat{\tau}_{str})=\sum_{h=1}^HN_h^2\left(1-\frac{n_h}{N_h}\right)\frac{s_h^2}{n_h} \\
+	Var(\hat{\mu}_{str})=\sum_{h=1}^H\left(\frac{N_h}{N}\right)^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h} \\
+	\widehat{Var}(\hat{\mu}_{str})=\sum_{h=1}^H\left(\frac{N_h}{N}\right)^2\left(1-\frac{n_h}{N_h}\right)\frac{s_h^2}{n_h}
+\end{gather*}
+其中：
+\begin{gather*}
+	\sigma_h^2=\frac{1}{N_h-1}\sum_{j=1}^{N_h}\left(Y_{hj}-\mu_h\right)^2 \\
+	s_h^2=\frac{1}{N_h-1}\sum_{j=1}^{n_h}\left(y_{hj}-\bar{y}_h\right)^2 \\
+\end{gather*}
+
+\subsubsection{置信区间}
+\begin{equation*}
+	\hat{\mu}_{str}\pm u_{1-\frac{\alpha}{2}}\sqrt{\widehat{Var}(\hat{\mu}_{str})},\;\hat{\tau}_{str}\pm u_{1-\frac{\alpha}{2}}\sqrt{\widehat{Var})(\hat{\tau}_{str})}
+\end{equation*}
+\subsubsection{自由度问题}
+当使用$t$置信区间的时候，如果各层之间方差是齐的，那么自由度即为$n-H$。如果方差不齐，则使用Satterwaithe approximation来估计自由度：
+\begin{equation*}
+	Dof=\left(\sum_{h=1}^Ha_hs_h^2\right)^2\div\sum_{h=1}^H\frac{(a_hs_h^2)^2}{(n_h-1)}
+\end{equation*}
+其中：
+\begin{equation*}
+	a_h=\frac{N_h(N_h-n_h)}{n_h}
+\end{equation*}
+
+\subsection{群体比例问题}
+\begin{gather*}
+	\hat{p}_{str}=\sum_{h=1}^H\frac{N_h}{N}\hat{p}_h \\
+	\widehat{Var}(\hat{p}_{str})=\sum_{h=1}^H\left(\frac{N_h}{N}\right)^2\left(1-\frac{n_h}{N_h}\right)\frac{\hat{p}_h(1-\hat{p}_h)}{n-1}
+\end{gather*}

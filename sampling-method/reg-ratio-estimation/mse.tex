@@ -1,0 +1,61 @@
+\section{均方误差}
+
+\subsection{回归估计量的均方误差}
+\begin{theorem}
+	回归估计量的均方误差为：
+	\begin{align*}
+		MSE(\hat{\mu}_{Y_{reg}})&= 
+		E\left\lbrace\big[\bar{y}+\hat{B}_1(\mu_X-\bar{x})-\mu_Y\big]^2\right\rbrace  \\
+		&\approx Var(\bar{d}) \\
+		&=\left(1-\frac{n}{N}\right)\frac{\sigma_d^2}{n}
+	\end{align*}
+	其中：
+	\begin{gather*}
+		d_i=y_i-\big[\mu_Y+B_1(x_i-\mu_X)\big] \\
+		\sigma_d^2=\frac{1}{N-1}\sum_{i=1}^N[y_i-\mu_Y-B_1(x_i-\mu_X)]^2=(1-R^2)\sigma_Y^2
+	\end{gather*}
+\end{theorem}
+\begin{proof}
+	下求$E(d)$：
+	\begin{equation*}
+		E(d)=\frac{1}{N}\left[\sum_{i=1}^Ny_i-N\mu_Y-B_1\sum_{i=1}^Nx_i+B_1N\mu_X\right]=0
+	\end{equation*}
+	因此：
+	\begin{align*}
+		\sigma_d^2&=\frac{1}{N-1}\sum_{i=1}^N\big[y_i-\mu_Y-B_1(x_i-\mu_X)\big]^2 \\
+		&=\frac{1}{N-1}\left[\sum_{i=1}^N(y_i-\mu_Y)^2+\sum_{i=1}^NB_1^2(x_i-\mu_X)^2-\sum_{i=1}^N2B_i(y_i-\mu_Y)(x_i-\mu_X)\right] \\
+		&=\sigma_Y^2+B_1^2\sigma_X^2-2B_1R\sigma_X\sigma_Y
+	\end{align*}
+	而：
+	\begin{equation*}
+		B_1=\frac{\sigma_YR}{\sigma_X}
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\sigma_d^2
+		=\sigma_Y^2+B_1^2\sigma_X^2-2B_1R\sigma_X\sigma_Y 
+		=\sigma_Y^2+\frac{\sigma_Y^2R^2}{\sigma_X^2}\sigma_X^2-2\frac{\sigma_YR}{\sigma_X}R\sigma_X\sigma_Y
+		=\sigma_Y^2-R^2\sigma_Y^2
+		=(1-R^2)\sigma_Y^2\qedhere
+	\end{equation*}
+\end{proof}
+由此，在以下情况$MSE(\hat{\mu}_{Y_{reg}})$较小：
+\begin{enumerate}
+	\item $n$较大。
+	\item $\frac{n}{N}$较大。
+	\item $\sigma_Y$较小。
+	\item $R$接近$\pm 1$。
+\end{enumerate}
+
+
+\subsection{比例估计量的均方误差}
+\begin{theorem}
+	比例估计量的均方误差为：
+	\begin{align*}
+		MSE(\hat{\mu}_{Yr})&\approx E\left[(\bar{y}-B\bar{x})^2\right] \\
+		&=\left(1-\frac{n}{N}\right)\frac{\sigma_Y^2-2BR\sigma_X\sigma_Y+B^2\sigma_X^2}{n} \\
+		&\approx Var(\hat{\mu}_{Yr})
+	\end{align*}
+\end{theorem}
+证明过程可见David and Sukhatme, 1974。
+

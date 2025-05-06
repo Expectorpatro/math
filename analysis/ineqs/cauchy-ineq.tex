@@ -1,0 +1,83 @@
+\section{Cauchy不等式}
+
+\subsection{实数域上的Cauchy不等式}
+\begin{theorem}
+	若$a_i,b_i\in\mathbb{R},i=1,2,\dots,n$，则有如下不等式：
+	\begin{inequality*}\label{ineq:cauchy-ineq-R}
+		\left(\sum_{i=1}^na_ib_i\right)^2\leqslant\sum_{i=1}^na_i^2\cdot\sum_{i=1}^nb_i^2
+	\end{inequality*}
+\end{theorem}
+\begin{proof}
+	取$\lambda\in\mathbb{R}$：
+	\begin{equation*}
+		0\leqslant\sum_{i=1}^n\left(a_i+\lambda b_i\right)^2=
+		\sum_{i=1}^na_i^2+2\lambda\sum_{i=1}^na_ib_i+\lambda^2\sum_{i=1}^nb_i^2
+	\end{equation*}
+	将$\lambda$看作自变量，$a_i,b_i$为常数。由判别式可得：
+	\begin{equation*}
+		4\left(\sum_{i=1}^na_ib_i\right)^2\leqslant4\sum_{i=1}^na_i^2\cdot\sum_{i=1}^nb_i^2\qedhere
+	\end{equation*}
+\end{proof}
+
+\subsection{复数域上的Cauchy不等式}
+\begin{theorem}
+	若$a_i,b_i\in\mathbb{C},i=1,2,\dots,n$，则有如下不等式：
+	\begin{inequality*}\label{ineq:cauchy-ineq-C}
+		\left(\sum_{i=1}^n|a_ib_i|\right)^2\leqslant\sum_{i=1}^n|a_i|^2\cdot\sum_{i=1}^n|b_i|^2
+	\end{inequality*}
+\end{theorem}
+\begin{proof}
+	由复数模的性质可得到
+	\begin{equation*}
+		|a_ib_i|=|a_i||b_i|
+	\end{equation*}
+	然后使用实数域上的Cauchy不等式即可立即得到结果。
+\end{proof}
+
+\subsection{内积导出的Cauchy-Schiwarz不等式}
+\begin{theorem}
+	设$X$是一个实或复内积空间，$x,y\in X$，则有如下不等式：
+	\begin{inequality*}\label{ineq:cauchy-schiwarz-inner-product}
+		|(x,y)|^2\leqslant(x,x)(y,y)
+	\end{inequality*}
+\end{theorem}
+下给出复数域内的证明，实数域的证明显然类似。
+\begin{proof}
+	设$x,y\in X$。对任意的$\lambda\in\mathbb{C}$，有：
+	\begin{equation*}
+		(x+\lambda y,x+\lambda y)\geqslant 0
+	\end{equation*}
+	即：
+	\begin{equation*}
+		(x,x)+\overline{\lambda}(x,y)+\lambda(y,x)+|\lambda|^2(y,y)\geqslant 0
+	\end{equation*}
+	令$\lambda=-\frac{(x,y)}{(y,y)}$，得到：
+	\begin{gather*}
+		(x,x)-2\frac{|(x,y)|^2}{(y,y)}+\frac{|(x,y)|^2}{(y,y)^2}(y,y)\geqslant0 \\
+		|(x,y)|^2\leqslant(x,x)(y,y)\qedhere
+	\end{gather*}
+\end{proof}
+
+\subsection{期望形式的Cauchy-Schiwarz不等式}
+\begin{theorem}
+	设$\operatorname{E}(X^2)<+\infty,\;\operatorname{E}(Y^2)<+\infty$，则有：
+	\begin{inequality*}\label{ineq:cauchy-schiwarz-expectations}
+		|\operatorname{E}(XY)|\leqslant\sqrt{\operatorname{E}(X^2)\operatorname{E}(Y^2)}
+	\end{inequality*}
+	等号成立的充要条件为存在不全为$0$的常数$a,b$使得$aX+bY=0\;$a.s.成立。
+\end{theorem}
+\begin{proof}
+	对任意的常数$a,b$，由\cref{prop:NonnegativeMeasurablegIntegral}(2)(6)可知二次型：
+	\begin{equation*}
+		\operatorname{E}[(aX+bY)^2]=a^2\operatorname{E}(X^2)+2ab\operatorname{E}(XY)+b^2\operatorname{E}(Y^2)=(a,b)\Sigma(a,b)^T\geqslant0
+	\end{equation*}
+	其中：
+	\begin{equation*}
+		\Sigma=
+		\begin{pmatrix}
+			\operatorname{E}(X^2) & \operatorname{E}(XY) \\
+			\operatorname{E}(XY) & \operatorname{E}(Y^2)
+		\end{pmatrix}
+	\end{equation*}
+	所以$\Sigma$是一个半正定矩阵，由\cref{theo:PositiveSemidefinite}第三条的(6)可知$|\Sigma|\geqslant0$，即$|\operatorname{E}(XY)|\leqslant\sqrt{\operatorname{E}(X^2)\operatorname{E}(Y^2)}$。等号成立当且仅当$\Sigma$退化，当且仅当有不全为$0$的常数$a,b$使得$\operatorname{E}[(aX+bY)^2]=0$（$\Sigma$退化时列向量线性相关，存在不全为$0$的$a,b$使得$\Sigma(a,b)^T=\mathbf{0}$，即$(a,b)\Sigma(a,b)^T=0$；当存在不全为$0$的$a,b$使得$\operatorname{E}[(aX+bY)^2]=0$时，$(a,b)\Sigma(a,b)^T=0$，\info{需要证明此时一定退化}），由\cref{prop:NonnegativeMeasurablegIntegral}(10)可知此时当且仅当有不全为$0$的常数$a,b$使得$aX+bY=0\;$a.s.。
+\end{proof}
