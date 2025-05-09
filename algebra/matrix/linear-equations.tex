@@ -18,7 +18,7 @@
 	\[
 	Ax=b
 	\]
-	其中，
+	其中：
 	\[
 	A =
 	\begin{pmatrix}
@@ -38,7 +38,7 @@
 	\]
 \end{definition}
 \begin{definition}
-	给定线性方程组$Ax=b$，称如下矩阵
+	给定线性方程组$Ax=b$，称如下矩阵：
 	\[
 	\begin{pmatrix}
 		a_{11} & a_{12} & \dots & a_{1n} & b_1 \\
@@ -130,9 +130,92 @@
 	%		\ENDIF
 	%	\end{algorithmic}
 %\end{algorithm}
-\begin{theorem}
-	数域$K$上线性方程组$Ax=b$有解的充分必要条件为$\operatorname{rank}(A)=\operatorname{rank}([A|b])$。
+\subsection{初等方法}
+\begin{theorem}\label{theo:SolutionOfSLE1}
+	数域$K$上的$n$元线性方程组的解的情况只有三种可能：
+	\begin{enumerate}
+		\item \textbf{无解：}增广矩阵化成的阶梯形方程出现$0=d$且$d\ne0$；
+		\item 有解：
+		\begin{enumerate}
+			\item \textbf{唯一解：}阶梯形矩阵的非零行数$r$等于未知量个数$n$；
+			\item \textbf{无穷多解：}阶梯形矩阵的非零行数$r$小于未知量个数$n$；
+		\end{enumerate}
+	\end{enumerate}
+	这导致：
+	\begin{enumerate}
+		\item 数域$K$上$n$元齐次线性方程组有非零解的充分必要条件为：系数矩阵经过初等行变换化成的阶梯形矩阵中非零行数$r<n$；
+		\item 数域$K$上$n$元齐次线性方程组的方程数$m$若小于未知量数$n$，则一定有非零解。
+	\end{enumerate}
+\end{theorem}
+\subsection{秩与子空间}
+\begin{theorem}\label{theo:SolutionOfSLE2}
+	数域$K$上$n$元线性方程组$Ax=b$（即$\sum\limits_{i=1}^{n}\alpha_ix_i=b$，其中$\alpha_i$为$A$的列向量）有解的充分必要条件为：
+	\begin{enumerate}
+		\item $b\in<\seq{\alpha}{n}>$；
+		\item $\operatorname{rank}(A)=\operatorname{rank}([A|b])$；
+	\end{enumerate}
+	进一步可得唯一解与无穷多解的判别方法：
+	\begin{enumerate}
+		\item \textbf{唯一解：}$\operatorname{rank}(A)=n$；
+		\item \textbf{无穷多解：}$\operatorname{rank}(A)<n$。
+	\end{enumerate}
+	这导致齐次线性方程组有非零解的充分必要条件为$\operatorname{rank}(A)<n$。
 \end{theorem}
 \begin{proof}
-	
+	(1)显然。\par
+	(2)由\cref{prop:SpanSubspace}(4)可得$Ax=b$有解$\Leftrightarrow b\in<\seq{\alpha}{n}>\Leftrightarrow<\seq{\alpha}{n},\beta>=<\seq{\alpha}{n}>\Leftrightarrow\dim<\seq{\alpha}{n},\beta>=\dim<\seq{\alpha}{n}>\Leftrightarrow\operatorname{rank}(A)=\operatorname{rank}([A|b])$。\par
+	(3)若$\operatorname{rank}(A)=n$，则阶梯形矩阵的非零行数$r=n$，由\cref{theo:SolutionOfSLE1}可得此时有唯一解。\par
+	(4)与(3)类似。
+\end{proof}
+\subsection{解的结构}
+\subsubsection{齐次线性方程组}
+\begin{property}\label{prop:HomogeneousSLESolution}
+	数域$K$上$n$元齐次线性方程组$Ax=\mathbf{0}$的解具有如下性质：
+	\begin{enumerate}
+		\item 若$\alpha,\beta$是解，对任意的$c_1,c_2\in K$，$k_1\alpha+k_2\beta$也是解；
+		\item 解空间$W$构成$K^n$的一个子空间；
+		\item 解空间$W$满足$\dim(W)=n-\operatorname{rank}(A)$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)$A(k_1\alpha+k_2\beta)=k_1A\alpha+k_2A\beta=\mathbf{0}$。\par
+	(2)由(1)立即可得。\par
+	(3)设$A$的列向量组为$\seq{\alpha}{n}$，$A$的行数为$m$。定义线性映射$\mathcal{T}:\alpha\longrightarrow A\alpha$，则$\mathcal{T}$是$K^n$到$\mathbb{K}^{m}$的一个线性映射。于是有：
+	\begin{gather*}
+		\operatorname{Ker}(\mathcal{T})=\{\alpha\in K^n:\mathcal{T}\alpha=\mathbf{0}\}=\{\alpha\in K^n:A\alpha=\mathbf{0}\}=W \\
+		\operatorname{Im}(\mathcal{T})=\{A\alpha:\alpha\in K^n\}=<\seq{\alpha}{n}>
+	\end{gather*}
+	所以由\cref{prop:SpanSubspace}(4)可得：
+	\begin{gather*}
+		\dim(\operatorname{Ker}\mathcal{T})=\dim(W) \\
+		\operatorname{rank}(A)=\operatorname{rank}\{\seq{\alpha}{n}\}=\dim<\seq{\alpha}{n}>=\dim(\operatorname{Im}\mathcal{T})
+	\end{gather*}
+	由\cref{prop:LinearMapping}(10)即可得到：
+	\begin{equation*}
+		\dim(K^n)=\dim(\operatorname{Ker}\mathcal{T})+\dim(\operatorname{Im}\mathcal{T})=\dim(W)+\operatorname{rank}(A)
+	\end{equation*}
+	即$n=\dim(W)+\operatorname{rank}(A)$。
+\end{proof}
+\begin{definition}
+	设数域$K$上$n$元齐次线性方程组$Ax=\mathbf{0}$有非零解，称它的解空间$W$的一组基为\gls{FundamentalSolutionSet}。
+\end{definition}
+\subsubsection{非齐次线性方程组}
+\begin{property}\label{prop:InhomogeneousSLESolution}
+	数域$K$上$n$数域$K$上$n$元非齐次线性方程组$Ax=b$的解具有如下性质：
+	\begin{enumerate}
+		\item 若$\alpha,\beta$是解，则$\alpha-\beta$为$Ax=\mathbf{0}$的解；
+		\item 设$W$为$Ax=\mathbf{0}$的解空间，若$\alpha$是$Ax=b$的解，则对任意的$\beta\in W$，$\alpha+\beta$也是$Ax=b$的解；
+		\item 设$W$为$Ax=\mathbf{0}$的解空间，则$Ax=b$的解集$U$可以表示为：
+		\begin{equation*}
+			U=\{\alpha+\beta:\beta\in W\}
+		\end{equation*}
+		其中$\alpha$为$Ax=b$的任意一个解；
+		\item $Ax=b$的解唯一当且仅当$Ax=\mathbf{0}$的解空间为零空间。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)$A(\alpha-\beta)=A\alpha-A\beta=b-b=\mathbf{0}$。\par
+	(2)$A(\alpha+\beta)=A\alpha+A\beta=b+\mathbf{0}=b$。\par
+	(3)由(1)(2)可得。\par
+	(4)由(3)立即可得。
 \end{proof}
