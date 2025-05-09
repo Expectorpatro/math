@@ -73,6 +73,10 @@ git rm --cached
 git commit -m
 ```
 
+git remote add origin git@github.com:yourname/myproject.git
+git push -u origin main
+
+
 查看历史提交情况
 
 ```git
@@ -179,7 +183,7 @@ git remote -v
 ```git
 git remote add 远程仓库指定的本地别名 远程仓库地址
 ```
-
+git remote add origin git@github.com:yourname/myproject.git git push -u origin main
 
 
 在push的时候github会调用本地的ssh去寻找密钥（公私钥是ssh这个程序进行管理），只检查你本地是否拥有仓库协作者所有公钥对应的任一私钥，即git没有绑定账号，一个账号多个公私钥也没有必要，只要ssh在本地默认的ssh公私钥存储文件夹内找到对应的私钥，就可以push。邀请协作者后，github会进行记录，记录下他账号内的所有公钥，包含在这个仓库内，任意一台设备对该仓库进行push都会检查该设备是否具有对应的私钥
