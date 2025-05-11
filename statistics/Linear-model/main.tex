@@ -1,6 +1,8 @@
 \chapter{线性模型}
 
+\section{一般线性模型}
 \begin{definition}\label{model:LinearModel}
+	称以下模型为\gls{LinearModel}：
 	\begin{equation*}
 		\begin{cases}
 			y=X\beta+\varepsilon \\
@@ -8,10 +10,10 @@
 			\operatorname{Cov}(\varepsilon)=\sigma^2I_n
 		\end{cases}
 	\end{equation*}
-	其中$y$为$n\times 1$观测向量，$X$为$n\times p$的设计矩阵，$\beta$为$p\times 1$的未知参数向量，$\varepsilon$为随机误差，$\sigma^2$为误差方差。
+	其中$y$为$n\times 1$观测向量，$X$为$n\times p$设计矩阵，$\beta$为$p\times 1$未知参数向量，$\varepsilon$为随机误差，$\sigma^2$为误差方差。
 \end{definition}
 \begin{definition}
-	称方程$X^TX\beta=X^Ty$为\textbf{正则方程}。
+	称方程$X^TX\beta=X^Ty$为\gls{NormalEquation}。
 \end{definition}
 \begin{theorem}
 	对于\cref{model:LinearModel}，$\hat{\beta}=(X^TX)^-X^Ty$是其唯一的最小二乘解。
@@ -56,10 +58,12 @@
 \begin{derivation}
 	若$\operatorname{rank}(X)=p$，则$X$的列向量组线性无关。考虑二次型$y^TX^TXy$，$y^TX^TXy=0\Leftrightarrow||Xy||=0\Leftrightarrow Xy=\mathbf{0}$，而$X$的列向量是线性无关的，所以不存在非零向量的$y$使得$Xy=\mathbf{0}$，于是$y^TX^TXy$是一个正定二次型，$X^TX$是一个正定矩阵。由\cref{theo:PositiveDefinite}(3)的第五点和\info{行列式等于特征值的积，行列式大于$0$矩阵可逆}可得$X^TX$可逆。此时$\hat{\beta}=(X^TX)^{-1}X^Ty$，称$\hat{\beta}$为$\beta$的\gls{LeastSquaresEstimate}。
 \end{derivation}
+\subsection{参数估计}
+\subsubsection{回归系数}
 \begin{definition}
 	若存在$n\times 1$向量$\alpha$使得$\operatorname{E}(\alpha^Ty)=c^T\beta$对一切的$\beta$成立，则称$c^T\beta$为\gls{EstimableFunction}。
 \end{definition}
-\begin{property}
+\begin{property}\label{prop:EstimableFunction}
 	对于\cref{model:LinearModel}，$c^T\beta$和$d^T\beta$是可估函数，$\hat{\beta}$是正则方程的解，则：
 	\begin{enumerate}
 		\item 使$c^T\beta$成为可估函数的全体向量$c$构成$\mathcal{M}(X^T)$；
@@ -69,45 +73,43 @@
 		\item $c^T\hat{\beta}$为$c^T\beta$的无偏估计；
 		\item  $\operatorname{Var}(c^T\hat{\beta})=\sigma^2c^T(X^TX)^-c,\;\operatorname{Cov}(c^T\hat{\beta},d^T\hat{\beta})=\sigma^2c^T(X^TX)^-d$，且与$(X^TX)^-$的选择无关；
 		\item $c^T\hat{\beta}$是$c^T\beta$唯一的BLUE；
-		\item 设$\varphi_i=c_i^T\beta,\;i=1,2,\dots,k$都是可估函数，$\seq{\alpha}{k}\in\mathbb{R}^{}$，则$\varphi=\sum\limits_{i=1}^{k}\alpha_i\varphi_i$也是可估的，且$\hat{\varphi}=\sum\limits_{i=1}^{k}\alpha_ic_i^T\hat{\beta}$是$\varphi$的BLU估计。
+		\item 设$\varphi_i=c_i^T\beta,\;i=1,2,\dots,k$都是可估函数，$\seq{\alpha}{k}\in\mathbb{R}^{}$，则$\varphi=\sum\limits_{i=1}^{k}\alpha_i\varphi_i$也是可估的，且$\hat{\varphi}=\sum\limits_{i=1}^{k}\alpha_ic_i^T\hat{\beta}$是$\varphi$的BLUE。
 	\end{enumerate}
 \end{property}
 \begin{proof}
 	(1)$\;c^T\beta$是可估函数$\Leftrightarrow$存在$n\times1$向量$\alpha$使得$\operatorname{E}(\alpha^Ty)=\alpha^T\operatorname{E}(y)=\alpha^TX\beta=c^T\beta$对一切的$\beta$成立$\Leftrightarrow c=X^T\alpha$。\par
 	(2)由(1)直接可得。\par
-	(3)由(1)和\info{转置秩不变}直接可得。\par
+	(3)由(1)直接可得。\par
 	(4)因为$c^T\beta$可估，由(1)可知存在$n\times 1$向量$\alpha$使得$c=X^T\alpha$，于是：
 	\begin{equation*}
 		c^T\hat{\beta}=\alpha^TX(X^TX)^-X^Ty
 	\end{equation*}
 	由\cref{prop:A-}(4)即可得出结论。\par
-	(5)因为$c^T\beta$可估，由(1)可知存在$n\times 1$向量$\alpha$使得$c=X^T\alpha$，根据\cref{prop:A-}(5)可得：
+	(5)因为$c^T\beta$可估，由(1)可知存在$n\times 1$向量$\alpha$使得$c=X^T\alpha$，根据\cref{prop:A-}(7)可得：
 	\begin{equation*}
-		\operatorname{E}(c^T\hat{\beta})=\operatorname{E}[\alpha^TX(X^TX)^-X^Ty]=\alpha^TX(X^TX)^-X^TX\beta=\alpha^TX\beta=c^T\beta
+		\operatorname{E}(c^T\hat{\beta})=\operatorname{E}[c^T(X^TX)^-X^Ty]=c^T(X^TX)^-X^TX\beta=c^T\beta
 	\end{equation*}\par
-	(6)因为$c^T\beta,d^T\beta$是可估函数，所以存在$\alpha,\gamma$使得$c=X^T\alpha,d=X^T\gamma$。由\cref{prop:CovMat}(3)和\cref{prop:A-}(6)(5)可知：
+	(6)因为$c^T\beta,d^T\beta$是可估函数，由(1)可知存在$\alpha,\gamma$使得$c=X^T\alpha,d=X^T\gamma$。由\cref{prop:CovMat}(3)和\cref{prop:A-}(6)(7)可知：
 	\begin{align*}
 		\operatorname{Cov}(c^T\hat{\beta},d^T\hat{\beta})
-		&=\operatorname{Cov}[\alpha^TX(X^TX)^-X^Ty,\gamma^TX(X^TX)^-X^Ty] \\
-		&=\alpha^TX(X^TX)^-X^T\operatorname{Cov}(y)X[(X^TX)^-]^TX^T\gamma \\
-		&=\alpha^TX(X^TX)^-X^T\sigma^2I_nX(X^TX)^-X^T\gamma \\
-		&=\sigma^2\alpha^TX(X^TX)^-d \\
+		&=\operatorname{Cov}[c^T(X^TX)^-X^Ty,d^T(X^TX)^-X^Ty] \\
+		&=c^T(X^TX)^-X^T\operatorname{Cov}(y)X[(X^TX)^-]^Td \\
+		&=c^T(X^TX)^-X^T\sigma^2I_nX(X^TX)^-d \\
 		&=\sigma^2c^T(X^TX)^-d
 	\end{align*}
-	由\cref{prop:A-}(4)及上第三行可知$\operatorname{Cov}(c^T\hat{\beta},d^T\hat{\beta})$与$(X^TX)^-$的选择无关。\par
+	在上第三行中把$c^T,d$展开为$\alpha^TX,X^T\gamma$，由\cref{prop:A-}(4)即可知$\operatorname{Cov}(c^T\hat{\beta},d^T\hat{\beta})$与$(X^TX)^-$的选择无关。\par
 	(7)无偏性由(5)可得，线性性由正则方程可知，下证方差最小。
-	设$a^Ty$为$c^T\beta$的任一无偏估计，由(1)的过程可知$c=X^Ta$。根据\cref{prop:A+}(3)和(6)可得：
+	设$a^Ty$为$c^T\beta$的任一无偏估计，由(1)的过程可知$c=X^Ta$。根据\cref{prop:A-}(6)和(6)可得：
 	\begin{align*}
 		\operatorname{Var}(a^Ty)-\operatorname{Var}(c^T\hat{\beta})&=\sigma^2[a^Ta-c^T(X^TX)^-c] \\
 		&=\sigma^2[a^T-c^T(X^TX)^-X^T][a-X(X^TX)^-c] \\
 		&=\sigma^2||a-X(X^TX)^-c||^2\geqslant0
 	\end{align*}
-	上式第一行到第二行是由于\cref{prop:A+}(3)：
+	上式第一行到第二行是由于\cref{prop:A-}(7)：
 	\begin{align*}
 		&[a^T-c^T(X^TX)^-X^T][a-X(X^TX)^-c] \\
 		=&a^Ta-a^TX(X^TX)^-c-c^T(X^TX)^-X^Ta+c^T(X^TX)^-X^TX(X^TX)^-c \\
-		=&a^Ta-c^T(X^TX)^-c-a^TX(X^TX)^-c+a^TX(X^TX)^-X^TX(X^TX)^-c \\
-		=&a^Ta-c^T(X^TX)^-c-a^TX(X^TX)^-c+a^TX(X^TX)^-c \\
+		=&a^Ta-c^T(X^TX)^-c-c^T(X^TX)^-c+c^T(X^TX)^-c \\
 		=&a^Ta-c^T(X^TX)^-c
 	\end{align*}
 	由范数的性质可知$\operatorname{Var}(a^Ty)=\operatorname{Var}(c^T\hat{\beta})$当且仅当$a=X(X^TX)^-c$，由\cref{prop:A+}(3)可知$a=X(X^TX)^-c\Leftrightarrow a^T=c^T(X^TX)^-X^T\Leftrightarrow a^Ty=c^T(X^TX)^-X^Ty=c^T\hat{\beta}$。\par
@@ -130,19 +132,506 @@
 \begin{definition}
 	对于\cref{model:LinearModel}，若$c^T\beta$是可估函数，称$c^T\hat{\beta}$为$c^T\beta$的LS估计，其中$\hat{\beta}$为正则方程的解。
 \end{definition}
+\subsubsection{残差}
 \begin{definition}
-	称$\hat{e}=y-X\hat{\beta}$为\textbf{残差向量}。
+	称$\hat{e}=y-X\hat{\beta}$为\gls{ResidualVector}，称$\hat{e}^T\hat{e}$为\gls{SSE}，记为SSE。
 \end{definition}
-\begin{property}
-	对于\cref{model:LinearModel}，$\hat{\beta}$为正则方程的解，则残差向量$\hat{e}$满足$\operatorname{E}(\hat{e})=0,\;\operatorname{Cov}(\hat{e})=\sigma^2(I-P_X)$。
+\begin{property}\label{prop:ehat}
+	对于\cref{model:LinearModel}，$\hat{\beta}$为正则方程的解，则残差向量$\hat{e}$满足：
+	\begin{enumerate}
+		\item $\operatorname{E}(\hat{e})=0,\;\operatorname{Cov}(\hat{e})=\sigma^2(I-P_X)$；
+		\item $SSE=y^T(I_n-P_X)y$。
+	\end{enumerate}
 \end{property}
 \begin{proof}
-	由\info{对称幂等阵}可知：
+	(1)由\cref{prop:OrthogonalProjectionMat}(2)可知向$\mathcal{M}(X)$的正交投影阵$P_X=X(X^TX)^-X^T$，根据\cref{prop:OrthogonalProjectionMat}(4)可知$I_n-P_X$是对称幂等阵，所以由\cref{prop:CovMat}(3)可得：
 	\begin{gather*}
 		\begin{aligned}
 			\operatorname{E}(\hat{e})&=\operatorname{E}(y-X\hat{\beta})=\operatorname{E}[I_ny-X(X^TX)^-X^Ty]=(I_n-P_X)\operatorname{E}(y) \\
 			&=(I_n-P_X)X\beta=(X-X)\beta=0
 		\end{aligned} \\
-		\operatorname{Cov}(\hat{e})=\operatorname{Cov}[(I_n-P_X)y]=(I_n-P_X)\operatorname{Cov}(y)(I_n-P_X)=\sigma^2(I_n-P_X)
-	\end{gather*}
+		\begin{aligned}
+			\operatorname{Cov}(\hat{e})&=\operatorname{Cov}[(I_n-P_X)y]=(I_n-P_X)\operatorname{Cov}(y)(I_n-P_X)^T \\
+			&=(I_n-P_X)\operatorname{Cov}(y)(I_n-P_X)=\sigma^2(I_n-P_X)
+		\end{aligned}
+	\end{gather*}\par
+	(2)由(1)的证明过程可知：
+	\begin{equation*}
+		\hat{e}=(I_n-P_X)y
+	\end{equation*}
+	且$I_n-P_X$是一个对称幂等阵，于是：
+	\begin{equation*}
+		\hat{e}^T\hat{e}=y^T(I_n-P_X)^T(I_n-P_X)y=y^T(I_n-P_X)(I_n-P_X)y=y^T(I_n-P_X)y\qedhere
+	\end{equation*}
 \end{proof}
+\subsubsection{误差方差}
+\begin{theorem}\label{theo:VarianceOfErrorTerm}
+	对于\cref{model:LinearModel}，$\hat{\beta}$为正则方程的解，$\operatorname{rank}(X)=r$，则：
+	\begin{equation*}
+		\hat{\sigma}^2=\frac{SSE}{n-r}
+	\end{equation*}
+	是$\sigma^2$的无偏估计。
+\end{theorem}
+\begin{proof}
+注意到$(I_n-P_X)X=X-X=\mathbf{0}$，由\cref{prop:ehat}(2)和\cref{theo:ERVQuadraticForm}可得：
+	\begin{align*}
+		\operatorname{E}(SSE)&=\operatorname{E}[y^T(I_n-P_X)y] =\beta^TX^T(I_n-P_X)X\beta+\operatorname{tr}[(I_n-P_X)\sigma^2I_n] \\
+		&=\sigma^2\operatorname{tr}(I_n-P_X)
+	\end{align*}
+	由\cref{prop:OrthogonalProjectionMat}(4)、\cref{prop:IdempotentMat}(2)(3)和\cref{prop:OrthogonalProjectionMat}(1)可得：
+	\begin{equation*}
+		\operatorname{tr}(I_n-P_X)=\operatorname{rank}(I_n-P_X)=n-\operatorname{rank}(P_X)=n-\operatorname{rank}(X)=n-r
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\operatorname{E}\left(\frac{SSE}{n-r}\right)=\sigma^2\qedhere
+	\end{equation*}
+\end{proof}
+\begin{definition}
+	称$\hat{\sigma}^2$为$\sigma^2$的LS估计。
+\end{definition}
+
+\subsection{约束最小二乘估计}
+\begin{theorem}\label{theo:ConstraintLinearModel}
+	对于\cref{model:LinearModel}，假设：
+	\begin{equation*}
+		A\beta=b,\quad A\in M_{k\times p}(K),\quad\operatorname{rank}(A)=k,\quad\mathcal{M}(A^T)\subseteq\mathcal{M}(X^T)
+	\end{equation*}
+	且$A\beta=b$相容，则：
+	\begin{equation*}
+		\hat{\beta}_A=\hat{\beta}-(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
+	\end{equation*}
+	为$\beta$在约束$A\beta=b$下的约束LS解，$A\hat{\beta}_A$为$A\beta$的约束LSE。
+\end{theorem}
+\begin{proof}
+	使用Lagrange乘子法构造辅助函数（$\lambda$为Lagrange乘子，乘子前加上系数$2$是为了下面不出现分数，对结果没有影响）：
+	\begin{align*}
+		F(\beta,\lambda)&=||y-X\beta||^2+2\lambda^T(A\beta-b) \\
+		&=y^Ty-y^TX\beta-\beta^TX^Ty+\beta^TX^TX\beta+2\lambda^TA\beta-2\lambda^Tb
+	\end{align*}
+	于是：
+	\begin{equation*}
+		\frac{\partial F(\beta,\lambda)}{\partial\beta}=-2X^Ty+2X^TX\beta+2A^T\lambda
+	\end{equation*}
+	令上式为$0$，得到：
+	\begin{equation*}
+		X^TX\beta=X^Ty-A^T\lambda
+	\end{equation*}
+	于是约束下的解即为方程组：
+	\begin{equation*}
+		\begin{cases}
+			X^TX\beta=X^Ty-A^T\lambda \\
+			A\beta=b
+		\end{cases}
+	\end{equation*}
+	的解，将其记为$\hat{\beta}_A,\hat{\lambda}$。因为$\mathcal{M}(A^T)\subseteq\mathcal{M}(X^T)$，所以方程组是相容的。由\cref{theo:InhomogeneousLinearEq'sGeneralSolution2}可知：
+	\begin{equation*}
+		\hat{\beta}_A=(X^TX)^-X^Ty-(X^TX)^-A^T\hat{\lambda}=\hat{\beta}-(X^TX)^-A^T\hat{\lambda}
+	\end{equation*}
+	代入方程组的第二个方程可得：
+	\begin{equation*}
+		A\hat{\beta}-A(X^TX)^-A^T\hat{\lambda}=b
+	\end{equation*}
+	由\info{$A(X^TX)^-A^T$的可逆性}可知：
+	\begin{equation*}
+		\hat{\lambda}=[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\hat{\beta}_A=\hat{\beta}-(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
+	\end{equation*}
+	下证明这个解确实是最小二乘解。\par
+	做分解：
+	\begin{align*}
+		||y-X\beta||^2
+		&=||y-X\hat{\beta}+X(\hat{\beta}-\beta)||^2 \\
+		&=||y-X\hat{\beta}||^2+2(y-X\hat{\beta})^TX(\hat{\beta}-\beta)+(\hat{\beta}-\beta)^TX^TX(\hat{\beta}-\beta)
+	\end{align*}
+	由\cref{prop:A-}(5)(6)可得：
+	\begin{align*}
+		(y-X\hat{\beta})^TX(\hat{\beta}-\beta)&=y^TX(\hat{\beta}-\beta)-\hat{\beta}^TX^TX(\hat{\beta}-\beta) \\
+		&=y^TX(\hat{\beta}-\beta)-[(X^TX)^-Xy]^TX^TX(\hat{\beta}-\beta) \\
+		&=y^TX(\hat{\beta}-\beta)-y^TX^T(X^TX)^-X^TX(\hat{\beta}-\beta) \\
+		&=y^TX(\hat{\beta}-\beta)-y^TX^T(\hat{\beta}-\beta)=0
+	\end{align*}
+	于是：
+	\begin{align*}
+		||y-X\beta||^2
+		&=||y-X\hat{\beta}||^2+(\hat{\beta}-\beta)^TX^TX(\hat{\beta}-\beta) \\
+		&=||y-X\hat{\beta}||^2+(\hat{\beta}-\hat{\beta}_A+\hat{\beta}_A-\beta)^TX^TX(\hat{\beta}-\hat{\beta}_A+\hat{\beta}_A-\beta) \\
+		&=||y-X\hat{\beta}||^2+||X(\hat{\beta}-\hat{\beta}_A)||^2+||X(\hat{\beta}_A-\beta)||^2+2(\hat{\beta}-\hat{\beta}_A)^TX^TX(\hat{\beta}_A-\beta)
+	\end{align*}
+	由\cref{prop:A-}(6)(7)以及$\mathcal{M}(A^T)\subseteq\mathcal{M}(X^T)$可得：
+	\begin{align*}
+		(\hat{\beta}-\hat{\beta}_A)^TX^TX(\hat{\beta}_A-\beta)
+		&=[(X^TX)^-A^T\hat{\lambda}]^TX^TX(\beta_A-\beta)
+		=\hat{\lambda}^TA(X^TX)^-X^TX(\beta_A-\beta) \\
+		&=\hat{\lambda}^TA(\beta_A-\beta)
+		=\hat{\lambda}^T(A\beta_A-A\beta)=0
+	\end{align*}
+	所以：
+	\begin{equation*}
+		||y-X\beta||^2=||y-X\hat{\beta}||^2+||X(\hat{\beta}-\hat{\beta}_A)||^2+||X(\hat{\beta}_A-\beta)||^2
+	\end{equation*}
+	即对任意满足$A\beta=b$的$\beta$都有：
+	\begin{equation*}
+		||y-X\beta||^2\geqslant||y-X\hat{\beta}||^2+||X(\hat{\beta}-\hat{\beta}_A)||^2
+	\end{equation*}
+	等号成立当且仅当$\beta=\hat{\beta}_A$，于是$\hat{\beta}_A$是LSE。
+\end{proof}
+\subsubsection{误差方差}
+\begin{theorem}
+	在\cref{theo:ConstraintLinearModel}的假设下，在参数区域$A\beta=b$上，
+	\begin{equation*}
+		\hat{\sigma}_A^2=\frac{||y-X\hat{\beta}_A||^2}{n-r+k}=\frac{SSE_A}{n-r+k}
+	\end{equation*}
+	是$\sigma^2$的无偏估计。
+\end{theorem}
+\begin{proof}
+	由\cref{theo:ConstraintLinearModel}可知：
+	\begin{equation*}
+		\operatorname{E}(||y-X\hat{\beta}_A||^2)=\operatorname{E}(||y-X\hat{\beta}||^2+||X(\hat{\beta}-\hat{\beta}_A)||^2)=\operatorname{E}(||y-X\hat{\beta}||^2)+\operatorname{E}(||X(\hat{\beta}-\hat{\beta}_A)||^2)
+	\end{equation*}
+	根据\cref{theo:VarianceOfErrorTerm}可知：
+	\begin{equation*}
+		\operatorname{E}(||y-X\hat{\beta}||^2)=(n-r)\sigma^2
+	\end{equation*}
+	由\cref{prop:A-}(6)(7)、$\mathcal{M}(A^T)\subseteq\mathcal{M}(X^T)$
+	\begin{align*}
+		||X(\hat{\beta}-\hat{\beta}_A)||&=(\hat{\beta}-\hat{\beta}_A)^TX^TX(\hat{\beta}-\hat{\beta}_A) \\
+		&=\{(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)\}^T \\
+		&\quad\cdot X^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}A(X^TX)^- \\
+		&\quad\cdot X^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
+	\end{align*}
+	因为$\mathcal{M}(A^T)\subseteq\mathcal{M}(X^T)$，所以由\cref{prop:EstimableFunction}(1)可知$A\beta$的每一个元素都是可估函数，于是由\cref{theo:ERVQuadraticForm}和\cref{prop:EstimableFunction}(5)(6)可知：
+	\begin{align*}
+		\operatorname{E}(||X(\hat{\beta}-\hat{\beta}_A)||)
+		&=\operatorname{E}\{(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)\} \\
+		&=(A\beta-b)^T[A(X^TX)^-A^T]^{-1}(A\beta-b) \\
+		&\quad+\operatorname{tr}\{[A(X^TX)^-A^T]^{-1}\operatorname{Cov}(A\hat{\beta}-b)\} \\
+		&=\operatorname{tr}\{[A(X^TX)^-A^T]^{-1}\sigma^2A(X^TX)^-A^T\}=\sigma^2\operatorname{tr}(I_k)=k\sigma^2
+	\end{align*}
+	所以：
+	\begin{equation*}
+		\operatorname{E}(||y-X\hat{\beta}_A||^2)=(n-r+k)\sigma^2
+	\end{equation*}
+	即在参数区域$A\beta=b$上，
+	\begin{equation*}
+		\hat{\sigma}_A^2=\frac{||y-X\hat{\beta}_A||^2}{n-r+k}
+	\end{equation*}
+	是$\sigma^2$的无偏估计。
+\end{proof}
+
+\subsection{实际计算}
+\begin{theorem}
+	对于无约束条件以及约束$A\beta=\mathbf{0}$，有：
+	\begin{gather*}
+		SSE=||y-X\hat{\beta}||^2=y^Ty-\hat{\beta}^TX^Ty \\
+		SSE_A=||y-X\hat{\beta}_A||^2=y^Ty-\hat{\beta}_A^TX^Ty
+	\end{gather*}
+\end{theorem}
+\begin{proof}
+	由\cref{prop:A-}(5)可知：
+	\begin{align*}
+		SSE&=(y-X\hat{\beta})^T(y-X\hat{\beta})=y^Ty-y^TX\hat{\beta}-\hat{\beta}^TX^Ty+\hat{\beta}^TX^TX\hat{\beta} \\
+		&=y^Ty-2\hat{\beta}^TX^Ty+\hat{\beta}^TX^TX(X^TX)^-X^Ty=y^Ty-2\hat{\beta}^TX^Ty+\hat{\beta}^TX^Ty \\
+		&=y^Ty-\hat{\beta}^TX^Ty
+	\end{align*}
+	由\cref{theo:ConstraintLinearModel}可知：
+	\begin{equation*}
+		\begin{cases}
+			X^TX\hat{\beta}_A=X^Ty-A^T\hat{\lambda} \\
+			A\hat{\beta}_A=\mathbf{0}
+		\end{cases}
+	\end{equation*}
+	其中$\lambda$为Lagrange乘子，于是有：
+	\begin{align*}
+		SSE_A&=(y-X\hat{\beta}_A)^T(y-X\hat{\beta}_A)=y^Ty-y^TX\hat{\beta}_A-\hat{\beta}_A^TX^Ty+\hat{\beta}_A^TX^TX\hat{\beta}_A \\
+		&=y^Ty-\hat{\beta}_A^TX^Ty+\hat{\beta}_A^TX^TX\hat{\beta}_A-\hat{\beta}^TX^Ty=y^Ty-\hat{\beta}_A^TX^Ty+\hat{\beta}_A^T(X^TX\hat{\beta}_A-X^Ty) \\
+		&=y^Ty-\hat{\beta}_A^TX^Ty-\hat{\beta}_A^TA^T\hat{\lambda}=y^Ty-\hat{\beta}_A^TX^Ty\qedhere
+	\end{align*}
+\end{proof}
+\begin{definition}
+	称$\hat{\beta}^TX^Ty$为\gls{RSS}，记为$RSS(\beta)$。称$\hat{\beta}_A^TX^Ty$为约束条件$A\beta=\mathbf{0}$下的回归平方和，记为$RSS_A(\beta)$。
+\end{definition}
+\begin{note}
+	回归平方和表示了数据平方和$y^Ty$中能够由因变量$y$与自变量$\seq{X}{p}$的线性关系解释的部分。
+\end{note}
+
+\section{正态线性模型}
+\subsection{参数估计}
+\begin{definition}\label{model:NormalLinearModel}
+	称以下模型为\gls{NormalLinearModel}：
+	\begin{equation*}
+		\begin{cases}
+			y=X\beta+\varepsilon \\
+			\varepsilon\sim\operatorname{N}_n(\mathbf{0},\sigma^2I_n)
+		\end{cases}
+	\end{equation*}
+	其中$y$为$n\times 1$观测向量，$X$为$n\times p$设计矩阵，$\beta$为$p\times 1$未知参数向量，$\varepsilon$为随机误差，$\sigma^2$为误差方差。
+\end{definition}
+\begin{property}\label{prop:NormalLinearModel}
+	对于\cref{model:NormalLinearModel}，设$c^T\beta$为可估函数，则：
+	\begin{enumerate}
+		\item LS估计$c^T\hat{\beta}$是$c^T\beta$的MLE，$\tilde{\sigma}^2=\dfrac{n-r}{n}\hat{\sigma}^2$是$\sigma^2$的MLE。若模型在\cref{theo:ConstraintLinearModel}的约束下，则LS估计$c^T\hat{\beta}_A$是$c^T\beta$的MLE，$\tilde{\sigma}_A^2=\dfrac{n-r+k}{n}\hat{\sigma}_A^2$是$\sigma^2$的MLE；
+		\item $c^T\hat{\beta}\sim N[c^T\beta,\sigma^2c^T(X^TX)^-c]$，$\dfrac{(n-r)\hat{\sigma}^2}{\sigma^2}=\dfrac{SSE}{\sigma^2}\sim\chi_{n-r}^2$；
+		\item $c^T\hat{\beta}$与$\hat{\sigma}^2$相互独立；
+		\item $T_1=y^Ty,\;T_2=X^Ty$为完全充分统计量；
+		\item $c^T\hat{\beta}$是$c^T\beta$唯一的MVUE，$\hat{\sigma}^2$为$\sigma^2$唯一的MVUE。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)对于\cref{model:NormalLinearModel}，其似然函数为：
+	\begin{equation*}
+		L(\beta,\sigma^2)=\frac{1}{(2\pi)^{\frac{n}{2}}(\sigma^2)^\frac{n}{2}}\exp\left(-\frac{1}{2\sigma^2}||y-X\beta||^2\right)
+	\end{equation*}
+	于是对数似然函数为：
+	\begin{equation*}
+		\ln L(\beta,\sigma^2)=-\frac{n}{2}\ln(2\pi)-\frac{n}{2}\ln(\sigma^2)-\frac{1}{2\sigma^2}||y-X\beta||^2
+	\end{equation*}
+	固定$\sigma^2$时，由最小二乘法原理可知：
+	\begin{equation*}
+		||y-X\hat{\beta}||^2=\min||y-X\beta||^2
+	\end{equation*}
+	当$\beta=\hat{\beta}$时有：
+	\begin{equation*}
+		\ln L(\hat{\beta},\sigma^2)=-\frac{n}{2}\ln(2\pi)-\frac{n}{2}\ln(\sigma^2)-\frac{1}{2\sigma^2}||y-X\hat{\beta}||^2
+	\end{equation*}
+	由极值点的必要条件可知：
+	\begin{gather*}
+		\frac{\dif\ln L(\hat{\beta},\sigma^2)}{\dif \sigma^2}=-\frac{n}{2\sigma^2}+\frac{||y-X\hat{\beta}||^2}{2\sigma^4} \\
+		\tilde{\sigma}^2=\frac{1}{n}||y-X\hat{\beta}||^2
+	\end{gather*}
+	时对数似然函数取极值，注意到：
+	\begin{gather*}
+		\frac{\dif^2\ln L(\hat{\beta},\sigma^2)}{\dif (\sigma^2)^2}=\frac{n}{2\sigma^4}-\frac{||y-X\hat{\beta}||^2}{\sigma^6} \\
+		\begin{aligned}
+			\frac{\dif^2\ln L(\hat{\beta},\sigma^2)}{\dif (\sigma^2)^2}\Big|_{\sigma^2=\tilde{\sigma}^2}&=\frac{n^3}{2||y-X\hat{\beta}||^4}-\frac{||y-X\hat{\beta}||^2n^3}{||y-X\hat{\beta}||^6} \\
+			&=\frac{n^3}{2||y-X\hat{\beta}||^4}-\frac{n^3}{||y-X\hat{\beta}||^4}=-\frac{n^3}{2||y-X\hat{\beta}||^4}<0
+		\end{aligned}
+	\end{gather*}
+	于是此处取极大值。因为：
+	\begin{equation*}
+		\tilde{\sigma}^2=\frac{1}{n}||y-X\hat{\beta}||^2=\frac{n-r}{n}\hat{\sigma}^2
+	\end{equation*}
+	所以$\tilde{\sigma}^2$是$\sigma^2$的MLE。由上可知$\hat{\beta}$是$\beta$的MLE，根据\cref{prop:MLE}(1)可得$c^T\hat{\beta}$是$c^T\beta$的MLE。\par
+	约束条件下的情况与上述证明过程类似。\par
+	(2)因为$\varepsilon\sim\operatorname{N}_n(\mathbf{0},\sigma^2I_n)$，而$c^T\hat{\beta}=c^T(X^TX)^-X^Ty=c^T(X^TX)^-X^T(X\beta+\varepsilon)$。因为$c^T\beta$是可估函数，所以由\cref{prop:EstimableFunction}(1)可知存在$\alpha$使得$c=X^T\alpha$，根据\cref{prop:A-}(7)可知：
+	\begin{equation*}
+		c^T(X^TX)^-X^TX\beta=c^T\beta
+	\end{equation*}
+	由\cref{prop:A-}(6)(7)可知：
+	\begin{equation*}
+		c^T(X^TX)^-X^T[c^T(X^TX)^-X^T]^T=c^T(X^TX)^-X^TX(X^TX)^-c=c^T(X^TX)^-c
+	\end{equation*}
+	于是由\cref{theo:MultiNormalLinearTransform}可得：
+	\begin{equation*}
+		c^T\hat{\beta}\sim\operatorname{N}[c^T\beta,c^T(X^TX)^-c]
+	\end{equation*}\par
+	因为$(I_n-P_X)X=\mathbf{0}$，根据\cref{prop:OrthogonalProjectionMat}(4)可得$I_n-P_X$是对称阵，所以由\cref{prop:ehat}(2)可知：
+	\begin{align*}
+		\frac{n-r}{\sigma^2}\hat{\sigma}^2&=\frac{\hat{e}^T\hat{e}}{\sigma^2}=\frac{y^T(I_n-P_X)y}{\sigma^2} \\
+		&=\frac{(X\beta+\varepsilon)^T(I_n-P_X)(X\beta+\varepsilon)}{\sigma^2} \\
+		&=\frac{(X\beta+\varepsilon)^T(I_n-P_X)X\beta+(X\beta+\varepsilon)^T(I_n-P_X)\varepsilon}{\sigma^2} \\
+		&=\frac{(X\beta+\varepsilon)^T(I_n-P_X)\varepsilon}{\sigma^2}=\frac{\beta^TX^T(I_n-P_X)\varepsilon+\varepsilon^T(I_n-P_X)\varepsilon}{\sigma^2} \\
+		&=\frac{\beta^T[(I_n-P_X)^TX]^T\varepsilon+\varepsilon^T(I_n-P_X)\varepsilon}{\sigma^2}=\frac{\varepsilon^T(I_n-P_X)\varepsilon}{\sigma^2}
+	\end{align*}
+	因为$\varepsilon\sim\operatorname{N}_n(\mathbf{0},\sigma^2I_n)$，由\cref{theo:MatNormalLinearTransform}可知$\dfrac{\varepsilon}{\sigma}\sim\operatorname{N}_n(\mathbf{0},I_n)$。根据\cref{prop:OrthogonalProjectionMat}(4)可知$I_n-P_X$是对称幂等阵，由\cref{prop:IdempotentMat}(3)和\cref{prop:OrthogonalProjectionMat}(1)可得$\operatorname{rank}(I_n-P_X)=n-r$，于是根据\cref{theo:XAXChi2}可得：
+	\begin{equation*}
+		\frac{n-r}{\sigma^2}\hat{\sigma}^2=\frac{\varepsilon^T(I_n-P_X)\varepsilon}{\sigma^2}\sim\chi_{n-r}^2
+	\end{equation*}\par
+	(3)由\cref{prop:ehat}(2)可知：
+	\begin{equation*}
+		c^T\hat{\beta}=c^T(X^TX)^-X^Ty,\quad\hat{\sigma}^2=\frac{y^T(I_n-P_X)y}{n-r}
+	\end{equation*}
+	由\cref{prop:OrthogonalProjectionMat}(4)可知$I_n-P_X$为对称阵，所以$\dfrac{I_n-P_X}{n-r}$也是对称阵。因为：
+	\begin{align*}
+		c^T(X^TX)^-X^T\frac{I_n-P_X}{n-r}&=\frac{1}{n-r}c^T(X^TX)^-X^T(I_n-P_X) \\
+		&=\frac{1}{n-r}c^T(X^TX)^-[(I_n-P_X)X]^T=\mathbf{0}
+	\end{align*}
+	由\cref{theo:BXXAXIndependent}可知$c^T\hat{\beta}$与$\hat{\sigma}^2$独立。\par
+	(4)
+\end{proof}
+
+\subsection{假设检验}
+\begin{theorem}
+	对于\cref{model:NormalLinearModel}，假设：
+	\begin{equation*}
+		A\beta=b,\quad A\in M_{k\times p}(K),\quad\operatorname{rank}(A)=k,\quad\mathcal{M}(A^T)\subseteq\mathcal{M}(X^T)
+	\end{equation*}
+	且$A\beta=b$相容，则：
+	\begin{enumerate}
+		\item 似然比检验$H_0:A\beta=b,\;H_1:A\beta\ne b$的似然比为：
+		\begin{equation*}
+			\lambda(y)=\left(\frac{SSE_A}{SSE}\right)^\frac{n}{2}
+		\end{equation*}
+		\item $\dfrac{SSE_A-SSE}{\sigma^2}\sim\chi^2_{k,\alpha}$，其中：
+		\begin{equation*}
+			\alpha=\frac{(A\beta-b)^T[A(X^TX)^-A^T]^{-1}(A\beta-b)}{\sigma^2}
+		\end{equation*}
+		\item $SSE_A-SSE$与$SSE$相互独立；
+		\item 当$A\beta=b$为真时，
+		\begin{equation*}
+			F=\frac{(SSE_A-SSE)/k}{SSE/(n-r)}\sim F_{k,n-r}
+		\end{equation*}
+		且上式左侧为$\lambda(y)$的单调增函数；
+		\item 似然比检验$H_0:A\beta=b,\;H_1:A\beta\ne b$的拒绝域为$\{F:F>F_{k,n-r}(\alpha)\}$。
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由\cref{prop:NormalLinearModel}(1)可知：
+	\begin{gather*}
+		\begin{aligned}
+			\sup_{\beta,\sigma}L(\beta,\sigma^2;y)&=L(\hat{\beta},\tilde{\sigma}^2;y)=(2\pi)^{-\frac{n}{2}}(\tilde{\sigma}^2)^{-\frac{n}{2}}\exp\left(-\frac{||y-X\hat{\beta}||^2}{2\tilde{\sigma}^2}\right) \\
+			&=(2\pi)^{-\frac{n}{2}}\left(\frac{||y-X\hat{\beta}||^2}{n}\right)^{-\frac{n}{2}}\exp\left(-\frac{n||y-X\hat{\beta}||^2}{2||y-X\hat{\beta}||^2}\right) \\
+			&=(2\pi)^{-\frac{n}{2}}\left(\frac{||y-X\hat{\beta}||^2}{n}\right)^{-\frac{n}{2}}\exp\left(-\frac{n}{2}\right)=\left(\frac{2\pi e}{n}\right)^{-\frac{n}{2}}||y-X\hat{\beta}||^{-n}
+		\end{aligned} \\
+		\sup_{A\beta=b,\sigma^2}L(\beta,\sigma^2;y)=L(\hat{\beta}_A,\tilde{\sigma}_A^2;y)=\left(\frac{2\pi e}{n}\right)^{-\frac{n}{2}}||y-X\hat{\beta}_A||^{-n}
+	\end{gather*}
+	于是：
+	\begin{equation*}
+		\lambda(y)=\frac{L(\hat{\beta},\tilde{\sigma}^2;y)}{L(\hat{\beta}_A,\tilde{\sigma}_A^2;y)}=\left(\frac{SSE_A}{SSE}\right)^\frac{n}{2}
+	\end{equation*}\par
+	(2)根据\cref{prop:A-}(6)(7)和\cref{prop:OrthogonalProjectionMat}(4)以及$(I_n-P_X)X=\mathbf{0}$对$SSE_A$作分解：
+	\begin{align*}
+		SSE_A&=||y-X\hat{\beta}_A||^2=\Big\|y-X\{\hat{\beta}-(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)\}\Big\|^2 \\
+		&=\Big\|y-X\hat{\beta}+X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)\Big\|^2 \\
+		&=||y-X\hat{\beta}||^2+2(y-X\hat{\beta})^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&\quad+\{X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)\}^T \\
+		&\quad\cdot X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=||y-X\hat{\beta}||^2+2[y-X(X^TX)^-X^Ty]^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&\quad+(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^T \\
+		&\quad\cdot X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=||y-X\hat{\beta}||^2+2[(I_n-P_X)y]^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&\quad+(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=||y-X\hat{\beta}||^2+2y^T(I_n-P_X)X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&\quad+(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=||y-X\hat{\beta}||^2+(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
+	\end{align*}
+	所以有：
+	\begin{equation*}
+		SSE_A-SSE=(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
+	\end{equation*}
+	由\cref{prop:NormalLinearModel}(2)可知：
+	\begin{equation*}
+		A\hat{\beta}-b\sim\operatorname{N}_k[A\beta-b,\sigma^2A(X^TX)^-A^T]
+	\end{equation*}
+	根据\info{$A(X^TX)^-A^T$的正定性}可知$A(X^TX)^-A^T$存在平方根阵及平方根阵的逆矩阵，由\cref{cor:MultiNormalLinearTransform}(1)可知：
+	\begin{equation*}
+		\frac{[A(X^TX)^-A^T]^{-\frac{1}{2}}}{\sigma}(A\hat{\beta}-b)\sim\operatorname{N}_k\{[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\beta-b),I_n\}
+	\end{equation*}
+	于是由$\chi^2$分布的定义可得：
+	\begin{equation*}
+		\frac{SSE_A-SSE}{\sigma^2}=\frac{\{[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\hat{\beta}-b)\}^T[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\hat{\beta}-b)}{\sigma^2}\sim\chi_{k,\alpha}^2
+	\end{equation*}
+	其中：
+	\begin{align*}
+		\alpha&=\{[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\beta-b)\}^T[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\beta-b) \\
+		&=(A\beta-b)^T[A(X^TX)^-A^T]^{-1}(A\beta-b)
+	\end{align*}\par
+	(3)由\cref{prop:ehat}(2)可知$SSE=y^T(I_n-P_X)y$，由(2)的过程可得：
+	\begin{align*}
+		SSE_A-SSE&=(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=[A(X^TX)^-X^Ty-b]^T[A(X^TX)^-A^T]^{-1}[A(X^TX)^-X^Ty-b] \\
+		&=y^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^Ty \\
+		&\quad-2b^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^Ty+b^T[A(X^TX)^-A^T]^{-1}b
+	\end{align*}
+	因为$(I_n-P_X)X=\mathbf{0}$，由\cref{prop:OrthogonalProjectionMat}(4)可得：
+	\begin{gather*}
+		(I_n-P_X)X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^T=\mathbf{0} \\
+		\begin{aligned}
+			&2b^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^T(I_n-P_X) \\
+			=&2b^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-[(I_n-P_X)X]^T=\mathbf{0}
+		\end{aligned}
+	\end{gather*}
+	于是根据\cref{theo:BXXAXIndependent}和\cref{theo:XAXXBXIndependent}可知$SSE_A-SSE$与$SSE$独立。\par
+	(4)当$A\beta=b$为真时，由(2)可知$\dfrac{SSE_A-SSE}{\sigma^2}\sim\chi^2_{k}$。根据(3)和\cref{prop:NormalLinearModel}(2)可得：
+	\begin{equation*}
+		\frac{(SSE_A-SSE)/(k\sigma^2)}{SSE/[(n-r)\sigma^2]}=\frac{(SSE_A-SSE)/k}{SSE/(n-r)}\sim F_{k,n-r}\qedhere
+	\end{equation*}
+	由(1)可得：
+	\begin{equation*}
+		\frac{(SSE_A-SSE)/k}{SSE/(n-r)}=\frac{n-r}{k}[\lambda^{\frac{2}{n}}(y)-1]
+	\end{equation*}
+	所以它是$\lambda(y)$的单调增函数。\par
+	(5)由(1)(4)可立即得出。
+\end{proof}
+
+\subsection{置信域}
+\subsubsection{置信椭球}
+\begin{theorem}
+	对于\cref{model:NormalLinearModel}，若不能接受假设$A\beta=\mathbf{0}$，则$A\beta$置信度为$1-\alpha$的置信椭球为：
+	\begin{equation*}
+		\{A\beta:(A\beta-A\hat{\beta})^T[A(X^TX)^-A^T]^{-1}(A\beta-A\hat{\beta})\leqslant k\hat{\sigma}^2F_{k,n-r}(\alpha)\}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由\cref{prop:NormalLinearModel}(2)可知：
+	\begin{equation*}
+		A\hat{\beta}\sim\operatorname{N}[A\beta,\sigma^2A(X^TX)^-A^T]
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\frac{A\hat{\beta}-A\beta}{\sigma}\sim\operatorname{N}[\mathbf{0},A(X^TX)^-A^T]
+	\end{equation*}
+	因为：
+	\begin{equation*}
+		[A(X^TX)^-A^T]^{-1}A(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}=[A(X^TX)^-A^T]^{-1}
+	\end{equation*}
+	所以由\cref{cor:XAXChi2}可知：
+	\begin{equation*}
+		\frac{(A\hat{\beta}-A\beta)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-A\beta)}{\sigma^2}\sim\chi_{k}^2
+	\end{equation*}
+	根据\cref{prop:NormalLinearModel}(2)(3)可得：
+	\begin{align*}
+		&\frac{(A\hat{\beta}-A\beta)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-A\beta)}{k\sigma^2}\Big/\frac{(n-r)\hat{\sigma}^2}{(n-r)\sigma^2} \\
+		=&\frac{(A\hat{\beta}-A\beta)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-A\beta)}{k\hat{\sigma}^2}\sim F_{k,n-r}
+	\end{align*}
+	所以对任意的$0<\alpha<1$，有：
+	\begin{equation*}
+		P\left[\frac{(A\hat{\beta}-A\beta)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-A\beta)}{k\hat{\sigma}^2}\leqslant F_{k,n-r}(\alpha)\right]=1-\alpha
+	\end{equation*}
+	即$A\beta$置信度为$1-\alpha$的置信椭球为：
+	\begin{equation*}
+		\{A\beta:(A\beta-A\hat{\beta})^T[A(X^TX)^-A^T]^{-1}(A\beta-A\hat{\beta})\leqslant k\hat{\sigma}^2F_{k,n-r}(\alpha)\}\qedhere
+	\end{equation*}
+\end{proof}
+\begin{note}
+	这里其实是一个未知方差构造$F$分布的思想。
+\end{note}
+
+
+\section{误差协方差推广}
+在很多情况下线性模型误差的协方差矩阵都不是$\sigma^2I_n$的形式。
+\subsection{广义最小二乘估计}
+\begin{definition}\label{model:GeneralizedLinearModel}
+	称以下模型为\gls{GeneralizedLinearModel}：
+	\begin{equation*}
+		\begin{cases}
+			y=X\beta+\varepsilon \\
+			\operatorname{E}(\varepsilon)=\mathbf{0} \\
+			\operatorname{Cov}(\varepsilon)=\sigma^2\Sigma
+		\end{cases}
+	\end{equation*}
+	其中$y$为$n\times 1$观测向量，$X$为$n\times p$设计矩阵，$\beta$为$p\times 1$未知参数向量，$\varepsilon$为随机误差，$\sigma^2\Sigma$为误差协方差矩阵且$\Sigma>0$。
+\end{definition}
+\begin{derivation}
+	因为$\Sigma>0$，所以存在$\Sigma^{-\frac{1}{2}}$。令：
+	\begin{equation*}
+		y^*=\Sigma^{-\frac{1}{2}}y,\quad X^*=\Sigma^{-\frac{1}{2}}X,\quad\varepsilon^*=\Sigma^{-\frac{1}{2}}\varepsilon
+	\end{equation*}
+	由\cref{prop:CovMat}(3)可知\cref{model:GeneralizedLinearModel}可化作：
+	\begin{equation*}
+		\begin{cases}
+			y^*=X^*\beta+\varepsilon^* \\
+			\operatorname{E}(\varepsilon^*)=\mathbf{0} \\
+			\operatorname{Cov}(\varepsilon^*)=\sigma^2I_n
+		\end{cases}
+	\end{equation*}
+	于是我们可以将广义线性模型化作线性模型来处理，对于线性模型与正态线性模型的那些结论，广义线性模型也可类似得到。
+\end{derivation}
+
+\subsection{最小二乘统一理论}

@@ -367,10 +367,10 @@
 	\end{align*}
 \end{proof}
 \begin{theorem}\label{theo:XAXChi2}
-	设$\mathbf{X}\sim N_n(\boldsymbol{\mu},I_n)$，$A$是一个非随机实对称阵，则$\mathbf{X}^TA\mathbf{X}\sim\chi_{r,\boldsymbol{\mu}^TA\boldsymbol{\mu}}^2$的充分必要条件为$A$是一个幂等阵且$\operatorname{rank}(A)=r$。
+	设$\mathbf{X}\sim N_n(\boldsymbol{\mu},I_n)$，$A\in M_{n}(K)$是一个非随机实对称矩阵，则$\mathbf{X}^TA\mathbf{X}\sim\chi_{r,\boldsymbol{\mu}^TA\boldsymbol{\mu}}^2$的充分必要条件为$A$是一个幂等阵且$\operatorname{rank}(A)=r$。
 \end{theorem}
 \begin{proof}
-	\textbf{(1)充分性：}因为$A$是一个对称幂等阵，由\cref{prop:HermitianIdempotent}(1)可知$A$的特征值只能为$0$或$1$。根据\cref{prop:HermitianMatEigen}(3)可知存在正交矩阵$Q$使得：
+	\textbf{(1)充分性：}因为$A$是一个幂等阵，由\cref{prop:IdempotentMat}(1)可知$A$的特征值只能为$0$或$1$。根据\cref{prop:HermitianMatEigen}(3)可知存在正交矩阵$Q$使得：
 	\begin{equation*}
 		A=Q^{-1}
 		\begin{pmatrix}
@@ -451,7 +451,7 @@
 		\end{pmatrix}
 		=Q_1^TQ_1
 	\end{equation*}\par
-	\textbf{(2)必要性：}设$\operatorname{rank}(A)=t$。因为$A$是实对称阵，由\cref{prop:HermitianMatEigen}(3)可知存在正交阵$Q$使得：
+	\textbf{(2)必要性：}设$\operatorname{rank}(A)=t$。因为$A$是Hermitian矩阵，由\cref{prop:HermitianMatEigen}(3)可知存在正交阵$Q$使得：
 	\begin{equation*}
 		A=Q^{-1}
 		\begin{pmatrix}
@@ -469,19 +469,19 @@
 		\end{pmatrix}
 		Q\mathbf{X}
 	\end{equation*}
-	令$\mathbf{Y}=Q\mathbf{X}$，由\cref{cor:MultiNormalLinearTransform}(2)可知$\mathbf{Y}=(\seq{\mathbf{Y}}{n})\sim N_n(Q\boldsymbol{\mu},I_n)$，根据\cref{theo:IndependentCorrelationNormal}可得$\mathbf{Y}_i$之间彼此独立。令$c=Q\boldsymbol{\mu}=(\seq{c}{n})^T$，由\cref{cor:MultiNormalLinearTransform}(5)可知$\mathbf{Y}_i\sim N(c_i,1)$。而：
+	令$\mathbf{Y}=Q\mathbf{X}$，由\cref{cor:MultiNormalLinearTransform}(2)可知$\mathbf{Y}=(\seq{\mathbf{Y}}{n})\sim N_n(Q\boldsymbol{\mu},I_n)$，根据\cref{theo:IndependentCorrelationNormal}可得$\mathbf{Y}_j$之间彼此独立。令$c=Q\boldsymbol{\mu}=(\seq{c}{n})^T$，由\cref{cor:MultiNormalLinearTransform}(5)可知$\mathbf{Y}_j\sim N(c_j,1)$。而：
 	\begin{equation*}
 		\mathbf{X}^TA\mathbf{X}=\mathbf{Y}^T
 		\begin{pmatrix}
 			\varLambda & \mathbf{0} \\
 			\mathbf{0} & \mathbf{0}
-		\end{pmatrix}\mathbf{Y}=\sum_{i=1}^{t}\lambda_i\mathbf{Y}_i^2
+		\end{pmatrix}\mathbf{Y}=\sum_{j=1}^{t}\lambda_j\mathbf{Y}_j^2
 	\end{equation*}
 	由\cref{prop:CharacteristicFunction}(4)和\cref{prop:Chi2Distribution}(3)可知：
 	\begin{align*}
 		\varphi_{\mathbf{X}^TA\mathbf{X}}(t)
-		&=\prod_{i=1}^{t}\varphi_{\lambda_i\mathbf{Y}_i^2}(t)=\prod_{i=1}^t(1-2it)^{-\frac{1}{2}}\exp\left\{\frac{i\lambda_itc_i^2}{1-2i\lambda_it}\right\} \\
-		&=(1-2it)^{-\frac{t}{2}}\prod_{i=1}^t\exp\left\{\frac{i\lambda_itc_i^2}{1-2i\lambda_it}\right\}
+		&=\prod_{j=1}^{t}\varphi_{\lambda_j\mathbf{Y}_j^2}(t)=\prod_{j=1}^t(1-2it)^{-\frac{1}{2}}\exp\left\{\frac{i\lambda_jtc_j^2}{1-2i\lambda_jt}\right\} \\
+		&=(1-2it)^{-\frac{t}{2}}\prod_{j=1}^t\exp\left\{\frac{i\lambda_jtc_j^2}{1-2i\lambda_jt}\right\}
 	\end{align*}
 	因为$\mathbf{X}^TA\mathbf{X}\sim\chi_{r,\boldsymbol{\mu}^TA\boldsymbol{\mu}}^2$，所以：
 	\begin{equation*}
@@ -489,33 +489,33 @@
 	\end{equation*}
 	由\cref{prop:CharacteristicFunction}(6)可知：
 	\begin{equation*}
-		(1-2it)^{-\frac{t}{2}}\prod_{i=1}^t\exp\left\{\frac{i\lambda_itc_i^2}{1-2i\lambda_it}\right\}=(1-2it)^{-\frac{r}{2}}\exp\left\{\frac{it\boldsymbol{\mu}^TA\boldsymbol{\mu}}{1-2it}\right\}
+		(1-2it)^{-\frac{t}{2}}\prod_{j=1}^t\exp\left\{\frac{i\lambda_jtc_j^2}{1-2i\lambda_jt}\right\}=(1-2it)^{-\frac{r}{2}}\exp\left\{\frac{it\boldsymbol{\mu}^TA\boldsymbol{\mu}}{1-2it}\right\}
 	\end{equation*}
 	所以$t=r$，同时有：
 	\begin{equation*}
-		\sum_{i=1}^{t}\frac{i\lambda_itc_i^2}{1-2i\lambda_it}=\frac{it\boldsymbol{\mu}^TA\boldsymbol{\mu}}{1-2it}
+		\sum_{j=1}^{t}\frac{i\lambda_jtc_j^2}{1-2i\lambda_jt}=\frac{it\boldsymbol{\mu}^TA\boldsymbol{\mu}}{1-2it}
 	\end{equation*}
 	即：
 	\begin{gather*}
-		\sum_{i=1}^{t}\frac{i\lambda_itc_i^2}{1-2i\lambda_it}=\frac{1}{1-2it}it\boldsymbol{\mu}^TQ^T
+		\sum_{j=1}^{t}\frac{i\lambda_jtc_j^2}{1-2i\lambda_jt}=\frac{1}{1-2it}it\boldsymbol{\mu}^TQ^T
 		\begin{pmatrix}
 			\varLambda & \mathbf{0} \\
 			\mathbf{0} & \mathbf{0}
 		\end{pmatrix}
 		Q\boldsymbol{\mu} \\
-		\sum_{i=1}^{t}\frac{\lambda_ic_i^2}{1-2i\lambda_it}=\frac{1}{1-2it}c^T
+		\sum_{j=1}^{t}\frac{\lambda_jc_j^2}{1-2i\lambda_jt}=\frac{1}{1-2it}c^T
 		\begin{pmatrix}
 			\varLambda & \mathbf{0} \\
 			\mathbf{0} & \mathbf{0}
 		\end{pmatrix}
 		c \\
-		\sum_{i=1}^{t}\frac{\lambda_ic_i^2}{1-2i\lambda_it}=\frac{1}{1-2it}\sum_{i=1}^{t}\lambda_ic_i^2 \\
-		\frac{\lambda_ic_i^2}{1-2i\lambda_it}=\frac{\lambda_ic_i^2}{1-2it},\;i=1,2,\dots,t
+		\sum_{j=1}^{t}\frac{\lambda_jc_j^2}{1-2i\lambda_jt}=\frac{1}{1-2it}\sum_{j=1}^{t}\lambda_jc_j^2 \\
+		\frac{\lambda_jc_j^2}{1-2i\lambda_jt}=\frac{\lambda_jc_j^2}{1-2it},\;j=1,2,\dots,t
 	\end{gather*}
-	所以$\lambda_i=1$。
+	所以$\lambda_j=1$。
 \end{proof}
-\begin{corollary}
-	设$\mathbf{X}\sim N_n(\boldsymbol{\mu},\Sigma),\;\Sigma>0$，$A$是一个非随机实对称阵，则$\mathbf{X}^TA\mathbf{X}\sim\chi_{r,\boldsymbol{\mu}^TA\boldsymbol{\mu}}^2$的充分必要条件为$A\Sigma A=A,\;\operatorname{rank}(A)=r$。
+\begin{corollary}\label{cor:XAXChi2}
+	设$\mathbf{X}\sim N_n(\boldsymbol{\mu},\Sigma),\;\Sigma>0$，$A\in M_{n}(K)$是一个非随机实对称矩阵，则$\mathbf{X}^TA\mathbf{X}\sim\chi_{r,\boldsymbol{\mu}^TA\boldsymbol{\mu}}^2$的充分必要条件为$A\Sigma A=A,\;\operatorname{rank}(A)=r$。
 \end{corollary}
 \begin{proof}
 	因为$\Sigma>0$，所以存在$\Sigma^{-\frac{1}{2}}$。考虑随机向量$\mathbf{Y}=\Sigma^{-\frac{1}{2}}\mathbf{X}$，由\cref{theo:MultiNormalLinearTransform}可知$\mathbf{Y}\sim N_n(\Sigma^{-\frac{1}{2}}\boldsymbol{\mu},I_n)$。注意到：
@@ -556,19 +556,19 @@
 		A\Sigma A=A\qedhere
 	\end{align*}
 \end{proof}
-\begin{theorem}
-	设$\mathbf{X}\sim N_n(\boldsymbol{\mu},I_n)$，$A\in M_{n}(K)$是一个Hermitian矩阵，$B\in M_{m\times n}(K)$。若$BA=\mathbf{0}$，则$B\mathbf{X}$与$\mathbf{X}^TA\mathbf{X}$相互独立。
+\begin{theorem}\label{theo:BXXAXIndependent}
+	设$\mathbf{X}\sim N_n(\boldsymbol{\mu},I_n)$，$A\in M_{n}(K)$是一个实对称矩阵，$B\in M_{m\times n}(K)$。若$BA=\mathbf{0}$，则$B\mathbf{X}$与$\mathbf{X}^TA\mathbf{X}$相互独立。
 \end{theorem}
 \begin{proof}
-	因为$A$是一个Hermitian矩阵，由\cref{prop:HermitianMatEigen}(3)可知存在正交矩阵$Q$使得：
+	因为$A$是一个实对称矩阵，由\cref{prop:HermitianMatEigen}(3)可知存在正交矩阵$Q$使得：
 	\begin{equation*}
-		Q^HAQ=
+		Q^TAQ=
 		\begin{pmatrix}
 			\varLambda & \mathbf{0} \\
 			\mathbf{0} & \mathbf{0}
 		\end{pmatrix}
 	\end{equation*}
-	其中$\varLambda=\operatorname{diag}(\seq{\lambda}{r}),\;\lambda_i\ne0,\;i=1,2,\dots,r,\;\operatorname{rank}(A)=r$。因为$BA=\mathbf{0}$，所以有$BQQ^HAQ=BAQ=\mathbf{0}$，于是：
+	其中$\varLambda=\operatorname{diag}(\seq{\lambda}{r}),\;\lambda_i\ne0,\;i=1,2,\dots,r,\;\operatorname{rank}(A)=r$。因为$BA=\mathbf{0}$，所以有$BQQ^TAQ=BAQ=\mathbf{0}$，于是：
 	\begin{equation*}
 		BQ
 		\begin{pmatrix}
@@ -615,15 +615,15 @@
 	\end{equation*}
 	于是：
 	\begin{equation*}
-		B=CQ^H=
+		B=CQ^T=
 		\begin{pmatrix}
 			\mathbf{0} & C_1
 		\end{pmatrix}
 		\begin{pmatrix}
-			Q_1^H \\
-			Q_2^H
+			Q_1^T \\
+			Q_2^T
 		\end{pmatrix}
-		=C_1Q_2^H
+		=C_1Q_2^T
 	\end{equation*}
 	而：
 	\begin{equation*}
@@ -632,7 +632,7 @@
 			\varLambda & \mathbf{0} \\
 			\mathbf{0} & \mathbf{0}
 		\end{pmatrix}
-		Q^H
+		Q^T
 		=
 		\begin{pmatrix}
 			Q_1 & Q_2
@@ -642,12 +642,12 @@
 			\mathbf{0} & \mathbf{0}
 		\end{pmatrix}
 		\begin{pmatrix}
-			Q_1^H \\
-			Q_2^H
+			Q_1^T \\
+			Q_2^T
 		\end{pmatrix}
-		=Q_1\varLambda Q_1^H
+		=Q_1\varLambda Q_1^T
 	\end{equation*}
-	记$\mathbf{Y}=Q^H\mathbf{X}$，由\cref{cor:MultiNormalLinearTransform}(2)可得：
+	记$\mathbf{Y}=Q^T\mathbf{X}$，由\cref{cor:MultiNormalLinearTransform}(2)可得：
 	\begin{equation*}
 		\mathbf{Y}=
 		\begin{pmatrix}
@@ -656,15 +656,15 @@
 		\end{pmatrix}
 		=
 		\begin{pmatrix}
-			Q_1^H\mathbf{X} \\
-			Q_2^H\mathbf{X}
+			Q_1^T\mathbf{X} \\
+			Q_2^T\mathbf{X}
 		\end{pmatrix}
-		\sim N_n(Q^H\boldsymbol{\mu},\sigma^2I_n)
+		\sim N_n(Q^T\boldsymbol{\mu},\sigma^2I_n)
 	\end{equation*}
 	由\cref{theo:IndependentCorrelationNormal}可知$\mathbf{Y_1}$与$\mathbf{Y_2}$独立。因为：
 	\begin{gather*}
-		B\mathbf{X}=C_1Q_2^H\mathbf{X}=C_1\mathbf{Y_2} \\
-		\mathbf{X}^TA\mathbf{X}=\mathbf{X}^TQ_1\varLambda Q_1^H\mathbf{X}=\mathbf{Y_1}^T\varLambda\mathbf{Y_1}
+		B\mathbf{X}=C_1Q_2^T\mathbf{X}=C_1\mathbf{Y_2} \\
+		\mathbf{X}^TA\mathbf{X}=\mathbf{X}^TQ_1\varLambda Q_1^T\mathbf{X}=\mathbf{Y_1}^T\varLambda\mathbf{Y_1}
 	\end{gather*}
 	所以$B\mathbf{X}$与$\mathbf{X}^TA\mathbf{X}$独立。
 \end{proof}
@@ -674,7 +674,7 @@
 \begin{proof}
 	
 \end{proof}
-\begin{theorem}
+\begin{theorem}\label{theo:XAXXBXIndependent}
 	设$\mathbf{X}\sim N_n(\boldsymbol{\mu},I_n)$，$A,B$为$n$阶对称阵。若$AB=\mathbf{0}$，则$\mathbf{X}^TA\mathbf{X}$与$\mathbf{X}^TB\mathbf{X}$独立。
 \end{theorem}
 \begin{proof}
