@@ -1,17 +1,18 @@
 \section{似然比检验}
 \label{method:LikelihoodTest}
-\subsubsection{目的}
-有两个对未知分布$F$参数$\theta$的点估计$\theta_1$和$\theta_2$，需要去判断哪个估计更好。
+
 \subsubsection{假设}
 \begin{equation*}
-	H_0:\theta=\theta_1\quad H_1:\theta=\theta_2
+	H_0:\theta\in\Theta_1\quad H_1:\theta\notin\Theta_1
 \end{equation*}
 \subsubsection{原理}
-令$L$表示最大似然函数，则检验统计量为：
-\begin{equation*}
-	\lambda=\frac{L(X|\theta_1)}{L(X|\theta_2)}
-\end{equation*}
-如果$\lambda$偏小，则说明在$\theta_2$下样本出现的概率更大，那么就应该拒绝零假设。当样本量$n$足够大时，有：
-\begin{equation*}
-	-2\ln\lambda\sim\chi_p^2,\quad p=dim(\varTheta_0\cup\varTheta_1)-dim(\varTheta_0)
-\end{equation*}
+\begin{definition}
+	称：
+	\begin{equation*}
+		\lambda(y)=\frac{\sup\limits_{\theta\in\Theta}L(\theta;y)}{\sup\limits_{\theta\in\Theta_1}L(\theta;y)}
+	\end{equation*}
+	为\gls{LikelihoodRatio}，其中$L(\theta;y)$为似然函数。
+\end{definition}
+\begin{derivation}
+	若$\lambda(y)$较大，则说明$\theta\in\Theta_1$时出现数据$y$的可能性较小，于是拒绝域应形如$\{y:\lambda(y)\geqslant c\}$。可以寻找统计量$T(y)$，它是$\lambda(y)$的单调增函数，于是检验的拒绝域可取为$\{y:T(y)\geqslant c\}$。
+\end{derivation}
