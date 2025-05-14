@@ -562,7 +562,7 @@
 
 \subsection{置信域}
 \subsubsection{置信椭球}
-\begin{theorem}
+\begin{theorem}\label{theo:NormalLinearModelConfidenceEllipsoid}
 	对于\cref{model:NormalLinearModel}，若不能接受假设$A\beta=\mathbf{0}$，则$A\beta$置信度为$1-\alpha$的置信椭球为：
 	\begin{equation*}
 		\{A\beta:(A\beta-A\hat{\beta})^T[A(X^TX)^-A^T]^{-1}(A\beta-A\hat{\beta})\leqslant k\hat{\sigma}^2F_{k,n-r}(\alpha)\}
@@ -602,7 +602,47 @@
 \begin{note}
 	这里其实是一个未知方差构造$F$分布的思想。
 \end{note}
-
+\subsubsection{Scheffe置信区间}
+\begin{theorem}
+	对于\cref{model:NormalLinearModel}，对任何可估函数$l^T\beta$，其中$l\in\mathcal{M}(A^T)$且$l\ne\mathbf{0}$，其置信度为$1-\alpha$的同时置信区间为：
+	\begin{equation*}
+		l^T\hat{\beta}\pm[k\hat{\sigma}^2F_{k,n-r}(\alpha)l^T(X^TX)^-l]^{\frac{1}{2}}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由\cref{theo:NormalLinearModelConfidenceEllipsoid}、\info{$A(X^TX)^-A^T$的正定性}与\cref{ineq:cauchy-schiwarz-rayleigh}可知：
+	\begin{align*}
+		1-\alpha&=P\left[(A\beta-A\hat{\beta})^T[A(X^TX)^-A^T]^{-1}(A\beta-A\hat{\beta})\leqslant k\hat{\sigma}^2F_{k,n-r}(\alpha)\right] \\
+		&=P\left\{\sup_{b\ne\mathbf{0}}\frac{[(A\hat{\beta}-A\beta)^Tb]^2}{b^TA(X^TX)^-A^Tb}\leqslant k\hat{\sigma}^2F_{k,n-r}(\alpha)\right\} \\
+		&=P\left\{\frac{[(A\hat{\beta}-A\beta)^Tb]^2}{b^TA(X^TX)^-A^Tb}\leqslant k\hat{\sigma}^2F_{k,n-r}(\alpha),\;\text{对任意的}b\ne\mathbf{0}\right\} \\ 
+		&=P\left\{|(A\hat{\beta}-A\beta)^Tb|\leqslant [k\hat{\sigma}^2F_{k,n-r}(\alpha)b^TA(X^TX)^-A^Tb]^{\frac{1}{2}},\;\text{对任意的}b\ne\mathbf{0}\right\} \\
+		&=P\left\{|\hat{\beta}^TA^Tb-\beta^TA^Tb|\leqslant [k\hat{\sigma}^2F_{k,n-r}(\alpha)b^TA(X^TX)^-A^Tb]^{\frac{1}{2}},\;\text{对任意的}b\ne\mathbf{0}\right\}
+	\end{align*}
+	记$A^Tb=l$，因为$\mathcal{M}(A^T)\subseteq\mathcal{M}(X^T)$，由\cref{prop:EstimableFunction}(1)可知$l^T\beta$也是一个可估函数，于是有：
+	\begin{equation*}
+		1-\alpha=P\left\{|l^T\hat{\beta}-l^T\beta|\leqslant [k\hat{\sigma}^2F_{k,n-r}(\alpha)l^T(X^TX)^-l]^{\frac{1}{2}},\;\text{对任意的}l\in\mathcal{M}(A^T)\text{且}l\ne\mathbf{0}\right\}\qedhere
+	\end{equation*}
+\end{proof}
+\subsubsection{Bonferroni区间}
+\begin{theorem}
+	对于\cref{model:NormalLinearModel}，记$A$的行分别为$\seq{a^T}{k}$，则$a_
+	i^T\beta$置信度为$1-\alpha$的Bonferroni置信区间为：
+	\begin{equation*}
+		a_i^T\hat{\beta}\pm t_{n-r}\left(\frac{\alpha}{2k}\right)[\hat{\sigma}^2a_i^T(X^TX)^-a_i]^{\frac{1}{2}}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由\cref{theo:NormalLinearModelConfidenceEllipsoid}可得当$k=1$时有：
+	\begin{align*}
+		1-\alpha&=P\left\{(a_i^T\beta-a_i^T\hat{\beta})^T[a_i^T(X^TX)^-a_i]^{-1}(a_i^T\beta-a_i^T\hat{\beta})\leqslant\hat{\sigma}^2F_{1,n-r}(\alpha)\right\} \\
+		&=P\left\{(a_i^T\beta-a_i^T\hat{\beta})^2\leqslant\hat{\sigma}^2F_{1,n-r}(\alpha)[a_i^T(X^TX)^-a_i]\right\}
+	\end{align*}
+	由\cref{prop:FDistribution}(2)可知$F_{1,n-r}=t^2_{n-r}$，因为服从$t$分布的变量可取负值而服从$F$分布的变量只能为正值，所以上式把平方变成绝对值时应修改对应的$\alpha$为$\dfrac{a}{2}$，即此时：
+	\begin{equation*}
+		1-\alpha=P\left\{|a_i^T\beta-a_i^T\hat{\beta}|\leqslant t_{n-r}\left(\frac{\alpha}{2}\right)[\hat{\sigma}^2a_i^T(X^TX)^-a_i]^{\frac{1}{2}}\right\}
+	\end{equation*}
+	由Bonferroni校正法可得出结论。
+\end{proof}
 
 \section{误差协方差推广}
 在很多情况下线性模型误差的协方差矩阵都不是$\sigma^2I_n$的形式。

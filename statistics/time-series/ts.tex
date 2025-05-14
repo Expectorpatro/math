@@ -416,9 +416,9 @@ acf(x, lag=)
 \end{derivation}
 \subsubsection{常系数非齐次线性差分方程解的一般理论}
 \begin{theorem}\label{theo:GeneralSolutionNonhomogeneousLinearDifferenceEqConstantCoefficients}
-	设$\seq{\lambda}{s}$是$n$阶常系数齐次线性差分方程$L(x_m)=0$的特征方程$l(\lambda)=0$的互异根，其重数分别为$\seq{r}{s}$，$n$阶常系数非齐次线性差分方程$L(x_m)=f(m)$的一个特解为$\{\lambda^m\}$，则$L(x_m)=f(m)$的通解可以表示为：
+	设$\seq{\lambda}{s}$是$n$阶常系数齐次线性差分方程$L(x_m)=0$的特征方程$l(\lambda)=0$的互异根，其重数分别为$\seq{r}{s}$，$n$阶常系数非齐次线性差分方程$L(x_m)=f(m)$的一个特解为$\{y_m\}$，则$L(x_m)=f(m)$的通解可以表示为：
 	\begin{equation*}
-		x_m=\lambda^m+\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}c_{ij}m^{j}\lambda_i^m,\;\forall\;m\in\mathbb{Z}^{}
+		x_m=y_m+\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}c_{ij}m^{j}\lambda_i^m,\;\forall\;m\in\mathbb{Z}^{}
 	\end{equation*}
 	其中$c_{ij},\;i=1,2,\dots,s,\;j=0,1,\dots,r_i-1$为常数。
 \end{theorem}
@@ -426,21 +426,18 @@ acf(x, lag=)
 	由\cref{theo:GeneralSolutionNonhomogeneousLinearDifferenceEquation}和\cref{theo:GeneralSolutionHomogeneousLinearDifferenceEqConstantCoefficients}可直接得到。
 \end{proof}
 
-
+\section{ARIMA}
 \subsection{AR模型}
 \begin{definition}
 	如果$\{\varepsilon_t\}$是$\operatorname{WN}(0,\sigma^2)$，实数$\seq{a}{p}(a_p\ne0)$使得多项式$A(z)=0$的根都在单位圆外：
 	\begin{equation*}
-		A(z)=1-\sum_{i=1}^{p}a_iz^i\ne0,\;\forall\;|z|\leqslant1
+		A(z)=1-\sum_{i=1}^{p}a_iz^i\ne0,\quad\forall\;|z|\leqslant1
 	\end{equation*}
 	则称$p$阶常系数线性差分方程：
 	\begin{equation*}
 		X_t=\sum_{i=1}^{p}a_iX_{t-i}+\varepsilon_t
 	\end{equation*}
-	为$p$\textbf{阶自回归模型}，简记为$\operatorname{AR}(p)$模型。称满足$\operatorname{AR}(p)$模型的平稳时间序列$\{X_t\}$为\textbf{平稳解}或$\operatorname{AR}(p)$序列，称$\seq{a}{p}$为$\operatorname{AR}(p)$模型的\textbf{自回归系数}，多项式$A(z)=0$的根都在单位圆外这一条件被称为\textbf{稳定性条件}，分别称$A(z)$和$A(\mathcal{B})$为$\operatorname{AR}(p)$模型的\textbf{特征多项式}和\textbf{自回归系数多项式}。可以用$A(\mathcal{B})$将模型改写为：
-	\begin{equation*}
-		A(\mathcal{B})X_t=\varepsilon_t
-	\end{equation*}
+	为$p$\textbf{阶自回归模型}，简记为$\operatorname{AR}(p)$模型。称满足$\operatorname{AR}(p)$模型的平稳时间序列$\{X_t\}$为$\operatorname{AR}(p)$序列，称$\seq{a}{p}$为$\operatorname{AR}(p)$模型的\textbf{自回归系数}，多项式$A(z)=0$的根都在单位圆外这一条件被称为\textbf{稳定性条件}，分别称$A(z)$和$A(\mathcal{B})$为$\operatorname{AR}(p)$模型的\textbf{特征多项式}和\textbf{自回归系数多项式}。可以用$A(\mathcal{B})$将模型改写为$A(\mathcal{B})X_t=\varepsilon_t$。
 \end{definition}
 \begin{derivation}
 	$A(z)=0$的解为$p$阶常系数线性差分方程特征方程：
@@ -453,17 +450,189 @@ acf(x, lag=)
 	\end{equation*}
 	所以上述稳定性条件即为要求$p$阶常系数线性差分方程特征方程的根都在单位圆内。
 \end{derivation}
-\begin{theorem}
-	设$\operatorname{AR}(p)$模型的特征多项式$A(z)=0$有$s$个互异根$\seq{z}{s}$，根的重数分别为$\seq{r}{s}$，则：
+\begin{theorem}\label{theo:ARPSolution}
+	设$\operatorname{AR}(p)$模型的特征多项式$A(z)=0$有$s$个互异根$\seq{z}{s}$，根的重数分别为$\seq{r}{s}$，$1<\rho<\min\limits_i\{z_i\}$，则：
 	\begin{enumerate}
 		\item $\operatorname{AR}(p)$模型的唯一平稳解是：
 		\begin{equation*}
 			X_t=\sum_{i=0}^{+\infty}\psi_i\varepsilon_{t-i}
 		\end{equation*}
-		其中$\psi_j$满足：
+		其中$\psi_i$为$A^{-1}(z)$在$\{z:|z|\leqslant\rho\}$内展开的幂级数的系数，它具有递推公式：
 		\begin{equation*}
-			A^{-1}()
+			\psi_0=1,\quad\psi_j=\sum_{i=1}^{p}a_i\psi_{j-i},\;\forall\;j\geqslant1
 		\end{equation*}
+		\item $\operatorname{AR}(p)$模型的通解为：
+		\begin{equation*}
+			\sum_{i=0}^{+\infty}\psi_i\varepsilon_{t-i}+\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}c_{ij}t^{j}z_i^{-t}
+		\end{equation*}
+		其中$c_{ij}$为任意常数；
+		\item $\operatorname{AR}(p)$模型的任一解都以负指数阶的速度收敛到平稳解，$\min\limits_i{z_i}$越大，收敛越快；
 	\end{enumerate}
 \end{theorem}
+\begin{proof}
+	(1)由复变函数的知识，$A^{-1}(z)$在$\{z:|z|\leqslant\rho\}$内解析，即$A^{-1}(z)$有如下展开：
+	\begin{equation*}
+		A^{-1}(z)=\sum_{i=0}^{+\infty}\psi_iz^i,\quad|z|\leqslant\rho
+	\end{equation*}
+	且这个级数是绝对收敛的。由绝对收敛性可知$|\psi_iz^i|\to0$，即$\psi_i=o(\rho^{-i})$，所以$\{\psi_i\}\in l_1$，由\cref{theo:l1LinearlyStationarySeries}可知$\{X_t\}$是平稳序列。\par
+	令$a_0=-1$，对$k<0$定义$\psi_k=0$。注意到：
+	\begin{align*}
+		A(\mathcal{B})X_t&=\left(1-\sum_{i=1}^{p}a_i\mathcal{B}^i\right)X_t=\left(-a_0-\sum_{i=1}^{p}a_i\mathcal{B}^i\right)X_t=-\sum_{i=0}^{p}a_i\mathcal{B}^iX_t \\
+		&=-\sum_{i=0}^{p}a_iX_{t-i}=-\sum_{i=0}^{p}a_{i}\sum_{j=0}^{+\infty}\psi_j\varepsilon_{t-i-j}=-\sum_{j=0}^{+\infty}\sum_{i=0}^{p}a_i\psi_j\varepsilon_{t-i-j} \\
+		&=-\sum_{j=0}^{+\infty}\sum_{i=0}^{p}a_i\psi_{j-i}\varepsilon_{t-j}=-\sum_{j=0}^{+\infty}\left(\sum_{i=0}^{p}a_i\psi_{j-i}\right)\varepsilon_{t-j}
+	\end{align*}
+	因为$\{\psi_i\}\in l_1$，所以对$|z|\leqslant1$级数$\sum\limits_{j=0}^{+\infty}\psi_jz^j$是良定义的。由：
+	\begin{align*}
+		1&=A(z)A^{-1}(z)=\left(1-\sum_{i=1}^{p}a_iz^i\right)A^{-1}(z)=-\sum_{i=0}^{p}a_iz^i\sum_{j=0}^{+\infty}\psi_jz^j \\
+		&=-\sum_{i=0}^{p}\sum_{j=0}^{+\infty}a_iz^i\psi_jz^j=-\sum_{j=0}^{+\infty}\sum_{i=0}^{p}a_i\psi_jz^{i+j}=-\sum_{j=0}^{+\infty}\left(\sum_{i=0}^{p}a_i\psi_{j-i}\right)z^j
+	\end{align*}
+	对比系数可得（递推公式）：
+	\begin{equation*}
+		-\sum_{i=0}^{p}a_i\psi_{-i}=1,\quad-\sum_{i=0}^{p}a_i\psi_{j-i}=0,\;\forall\;j\geqslant1
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		A(\mathcal{B})X_t=-\sum_{j=0}^{+\infty}\left(\sum_{i=0}^{p}a_i\psi_{j-i}\right)\varepsilon_{t-j}=-\sum_{i=0}^{p}a_i\psi_{-i}\varepsilon_t-\sum_{j=1}^{+\infty}\left(\sum_{i=0}^{p}a_i\psi_{j-i}\right)\varepsilon_{t-j}=\varepsilon_t
+	\end{equation*}
+	所以$\{X_t\}$是解。\par
+	设还有另一平稳解$\{Y_t\}$，即$A(\mathcal{B})Y_t=\varepsilon_t$且$A^{-1}(\mathcal{B})$存在，则：
+	\begin{equation*}
+		Y_t=A^{-1}(\mathcal{B})\varepsilon_t=A^{-1}(\mathcal{B})A(\mathcal{B})X_t=X_t
+	\end{equation*}\par
+	综上，$\{X_t\}$是$\operatorname{AR}(p)$模型唯一的平稳解。\par
+	(2)由(1)、\cref{theo:GeneralSolutionNonhomogeneousLinearDifferenceEquation}与\cref{theo:GeneralSolutionHomogeneousLinearDifferenceEqConstantCoefficients}即可得通解为：
+	\begin{equation*}
+		X_t+\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}c_{ij}t^{j}z_i^t=\sum_{i=0}^{+\infty}\psi_i\varepsilon_{t-i}+\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}c_{ij}t^{j}z_i^{-t}
+	\end{equation*}\par
+	(3)由(1)(2)可得对于$\operatorname{AR}(p)$模型的任一解$\{Y_t\}$有：
+	\begin{equation*}
+		|X_t-Y_t|=\left|\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}c_{ij}t^{j}z_i^{-t}\right|\leqslant O\left[\left(\min_i\{z_i\}\right)^{-t}\right]\qedhere
+	\end{equation*}
+\end{proof}
+\begin{note}
+	上述定理给了我们一个产生$\operatorname{AR}(p)$序列的方式。先任意选择$p$个初始值，然后根据自回归系数产生序列$\{Y_t\}$。因为任意的$\{Y_t\}$都以负指数阶的速度收敛到平稳解，取一个较大的$m$然后令$X_t=Y_{m+t}$即可得到近似的$\operatorname{AR}(p)$序列$\{X_t\}$。
+\end{note}
+\begin{property}
+	$\operatorname{AR}(p)$序列$\{X_t\}$具有如下性质：
+	\begin{enumerate}
+		\item 对任意的$i\geqslant1$且$i\in\mathbb{N}^+$，$X_t$与$\varepsilon_{t+i}$不相关；
+		\item $\operatorname{Var}(X_t)=\sigma^2\sum\limits_{i=0}^{+\infty}\psi_i^2$；
+		\item (Yule-Walker方程)$\;\{X_t\}$的自协方差函数满足：
+		\begin{gather*}
+			\boldsymbol{\gamma}_n=\Gamma_n\alpha,\;
+			\gamma(0)=\boldsymbol{\gamma}_n^T\alpha+\sigma^2,\quad n\geqslant p \\
+			\boldsymbol{\gamma}_n=
+			\begin{pmatrix}
+				\gamma(1) \\
+				\gamma(2) \\
+				\vdots \\
+				\gamma(n)
+			\end{pmatrix},\;
+			\Gamma_n=
+			\begin{pmatrix}
+				\gamma(0) & \gamma(1) & \cdots & \gamma(n-1) \\
+				\gamma(1) & \gamma(0) & \cdots & \gamma(n-2) \\
+				\vdots & \vdots & \ddots & \vdots \\
+				\gamma(n-1) & \gamma(n-2) & \cdots & \gamma(0) \\
+			\end{pmatrix} \\
+			\alpha=(\seq{a}{p},0,0,\dots,0)^T
+		\end{gather*}
+		\item $\operatorname{AR}(p)$序列的自协方差函数和自相关函数满足和$\operatorname{AR}(p)$模型相对应的常系数齐次线性差分方程：
+		\begin{gather*}
+			\gamma(n)=a_1\gamma(n-1)+a_2\gamma(n-2)\cdots+a_p\gamma(n-p) \\
+			\rho(n)=a_1\rho(n-1)+a_2\rho(n-2)\cdots+a_p\rho(n-p)
+		\end{gather*}
+		\item $\{X_t\}$的自协方差函数与自相关函数具有拖尾性，即$\gamma(n)$和$\rho(n)$始终不为$0$，且二者的模随着$n$的增大呈指数衰减；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)因为$\operatorname{E}(\varepsilon_{t+i})=0$，由\cref{prop:NonnegativeMeasurablegIntegral}(9)可知$\varepsilon_{t+i}\;$a.e.有限，由\cref{theo:l1LinearlyStationarySeries}可知$X_t\;$a.e.有限，于是$X_t\varepsilon_{t+i}$良定义。根据\cref{prop:NonnegativeMeasurablegIntegral}(4)(6)可知：
+	\begin{align*}
+		\operatorname{E}\left(\sum_{j=0}^{+\infty}|\psi_j\varepsilon_{t-j}\varepsilon_{t+i}|\right)
+		&=\lim_{n\to+\infty}\operatorname{E}\left(\sum_{j=0}^{n}|\psi_j\varepsilon_{t-j}\varepsilon_{t+i}|\right)
+		=\lim_{n\to+\infty}\left[\sum_{j=0}^{n}\psi_j\operatorname{E}(|\varepsilon_{t-j}\varepsilon_{t+i}|)\right] \\
+		&=\sum_{j=0}^{+\infty}|\psi_j|\operatorname{E}(|\varepsilon_{t-j}\varepsilon_{t+i}|)
+	\end{align*}
+	由\cref{ineq:cauchy-schiwarz-expectations}可知：
+	\begin{equation*}
+		\operatorname{E}(|\varepsilon_{t-j}\varepsilon_{t+i}|)=\Big|\operatorname{E}(|\varepsilon_{t-j}\varepsilon_{t+i}|)\Big|\leqslant\sqrt{\operatorname{E}(\varepsilon_{t-j}^2)\operatorname{E}(\varepsilon_{t+i}^2)}=\sigma^2
+	\end{equation*}
+	因为$\{\psi_i\}\in l^2$，所以：
+	\begin{equation*}
+		\operatorname{E}\left(\sum_{j=0}^{+\infty}|\psi_j\varepsilon_{t-j}\varepsilon_{t+i}|\right)\leqslant\sigma^2\sum_{j=0}^{+\infty}|\psi_j|<+\infty
+	\end{equation*}
+	取控制函数$\sum\limits_{j=0}^{+\infty}|\psi_j\varepsilon_{t-j}\varepsilon_{t+i}|$，由\cref{theo:DominatedConvergenceTheorem}和\cref{prop:NonnegativeMeasurablegIntegral}(6)可得：
+	\begin{align*}
+		\operatorname{E}(X_t\varepsilon_{t+i})&=\operatorname{E}\left(\sum_{j=0}^{+\infty}\psi_j\varepsilon_{t-j}\varepsilon_{t+i}\right)=\operatorname{E}\left[\lim_{n\to+\infty}\left(\sum_{j=0}^{n}\psi_j\varepsilon_{t-j}\varepsilon_{t+i}\right)\right] \\
+		&=\lim_{n\to+\infty}\operatorname{E}\left(\sum_{j=0}^{n}\psi_j\varepsilon_{t-j}\varepsilon_{t+i}\right)=\lim_{n\to+\infty}\left[\sum_{j=0}^{n}\psi_j\operatorname{E}(\varepsilon_{t-j}\varepsilon_{t+i})\right]=0
+	\end{align*}\par
+	(2)由\cref{theo:ARPSolution}(1)立即可得。\par
+	(3)由$\operatorname{AR}(p)$模型的定义可得：
+	\begin{equation*}
+		\begin{pmatrix}
+			X_t \\
+			X_{t+1} \\
+			\vdots \\
+			X_{t+n-1}
+		\end{pmatrix}=
+		\begin{pmatrix}
+			X_{t-1} & X_{t-2} & \cdots & X_{t-n} \\
+			X_{t} & X_{t-1} & \cdots & X_{t-n+1} \\
+			\vdots & \vdots & \ddots & \vdots \\
+			X_{t+n-2} & X_{t+n-3} & \cdots & X_{t-1}
+		\end{pmatrix}\alpha+
+		\begin{pmatrix}
+			\varepsilon_t \\
+			\varepsilon_{t+1} \\
+			\vdots \\
+			\varepsilon_{t+n-1}
+		\end{pmatrix}
+	\end{equation*}
+	于是：
+	\begin{gather*}
+		X_{t-1}
+		\begin{pmatrix}
+			X_t \\
+			X_{t+1} \\
+			\vdots \\
+			X_{t+n-1}
+		\end{pmatrix}=X_{t-1}
+		\begin{pmatrix}
+			X_{t-1} & X_{t-2} & \cdots & X_{t-n} \\
+			X_{t} & X_{t-1} & \cdots & X_{t-n+1} \\
+			\vdots & \vdots & \ddots & \vdots \\
+			X_{t+n-2} & X_{t+n-3} & \cdots & X_{t-1}
+		\end{pmatrix}\alpha_n+X_{t-1}
+		\begin{pmatrix}
+			\varepsilon_t \\
+			\varepsilon_{t+1} \\
+			\vdots \\
+			\varepsilon_{t+n-1}
+		\end{pmatrix} \\
+		\boldsymbol{\gamma}_n=\Gamma_n\alpha,\quad n\geqslant p
+	\end{gather*}
+	第二行是对第一行取期望的结果。对于$\gamma(0)$，由(1)可得：
+	\begin{align*}
+		\gamma(0)&=\operatorname{E}(X_t^2)=\operatorname{E}\left(\sum_{i=1}^{p}a_iX_{t-i}+\varepsilon_t\right)^2=\operatorname{E}\left(\sum_{i=1}^{p}a_iX_{t-i}\right)^2+\operatorname{E}(\varepsilon_t)^2 \\
+		&=\alpha^T\Gamma_n\alpha+\sigma^2=\alpha^T\boldsymbol{\gamma}_n+\sigma^2,\quad n\geqslant p
+	\end{align*}\par
+	(4)由(3)和\cref{theo:RhotGamma0}立即可得。\par
+	(5)由\cref{theo:GeneralSolutionHomogeneousLinearDifferenceEqConstantCoefficients}和(4)可知$\gamma(n)$和$\rho(n)$的通解都具有如下形式：
+	\begin{equation*}
+		\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}c_{ij}n^{j}\lambda_i^n,\;\forall\;n\in\mathbb{N}
+	\end{equation*}
+	其中$\seq{\lambda}{s}$为对应常系数齐次线性差分方程的特征方程的根，$c_{ij}$为任意常数。若$c_{ij}$全为$0$，则$\gamma(0),\rho(0)$都为$0$，所以它们不可能全为$0$.由$\operatorname{AR}(p)$序列的定义，$|\lambda_i|<1$，因为$a_p\ne0$，所以$\lambda_i\ne0$，由此可得$\gamma(n)$和$\rho(n)$始终不为$0$。由指数函数与幂函数的收敛速度比较可知$\gamma(n)$和$\rho(n)$的模随着$n$的增大将以指数阶的速度减小。
+\end{proof}
 
+\subsection{MA模型}
+\begin{definition}
+	设$\{\varepsilon_t\}$是$\operatorname{WN}(0,\sigma^2)$，实数$\seq{b}{q}(b_q\ne0)$使得多项式$B(z)=0$的根都在单位圆内：
+	\begin{equation*}
+		B(z)=1+\sum_{i=1}^{q}b_iz^i\ne0,\quad\forall\;|z|<1
+	\end{equation*}
+	则称：
+	\begin{equation*}
+		X_t=\varepsilon_t+\sum_{i=1}^{q}b_i\varepsilon_{t-i},\quad t\in\mathbb{Z}
+	\end{equation*}
+	为\textbf{$q$阶滑动平均模型}，简记为$\operatorname{MA}(q)$模型。称满足$\operatorname{MA}(q)$模型的平稳时间序列$\{X_t\}$为$\operatorname{MA}(q)$序列。若$B(z)\ne0$对$|z|\leqslant1$成立，则称对应的$\operatorname{MA}(q)$模型为\textbf{可逆的$\operatorname{MA}(q)$模型}，相应的$\operatorname{MA}(q)$序列为\textbf{可逆的$\operatorname{MA}(q)$序列}。
+\end{definition}

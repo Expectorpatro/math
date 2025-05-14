@@ -9,9 +9,10 @@
 	\end{enumerate}
 	则称$\{X_t\}$是一个\gls{StationaryTimeSeries}。
 \end{definition}
-\subsection{自协方差函数}
+\subsection{平稳时间序列的性质}
+\subsubsection{自协方差函数}
 \begin{property}
-	自协方差函数具有如下基本性质：
+	平稳时间序列的自协方差函数具有如下基本性质：
 	\begin{enumerate}
 		\item \textbf{对称性：}$\forall\;n\in\mathbb{N},\;\gamma(n)=\gamma(-n)$；
 		\item \textbf{半正定性：}对任意的$n\in\mathbb{N}^+$，$n$阶自协方差矩阵：
@@ -52,54 +53,7 @@
 \begin{definition}
 	任何满足上述三个基本性质的实数序列都被称为\textbf{非负定序列}。
 \end{definition}
-\begin{definition}\label{def:RVLinearlyDependent}
-	对于随机变量$\seq{X}{n}$，若存在非零的$n$维实向量$\alpha=(\seq{a}{n})^T$使得：
-	\begin{equation*}
-		\operatorname{Var}\left[\sum_{i=1}^{n}a_i(X_i-\mu)\right]=0
-	\end{equation*}
-	则称$\seq{X}{n}$线性相关。
-\end{definition}
-\begin{lemma}\label{lem:aTaInvertible}
-	对称阵$A\in M_{n}(\mathbb{R})$退化的充分必要条件为存在$\mathbb{R}^{n}$中的非零向量$\alpha$使得$\alpha^TA\alpha=0$。
-\end{lemma}
-\begin{proof}
-	\textbf{(1)充分性：}由实对称矩阵的正交相似，有$Q^TAQ=B$，其中$Q$是正交矩阵，$B=\operatorname{diag}\{b_1,b_2,\dots,b_n\}$是主对角线上为$A$特征值的对角矩阵。假设此时$A$可逆，则它的所有特征值都不为$0$（否则就有$|A|=|Q^TBQ|=|Q^T|\;|B|\;|Q|=|B|=0$）。由题设存在非零向量$\alpha$使得$\alpha^TA\alpha=0$，因为$Q$是正交矩阵，所以$Q^{-1}$可逆，于是$Q^{-1}x=\mathbf{0}$只有零解，所以$Q^{-1}\alpha\ne\mathbf{0}$。设$Q^{-1}\alpha=\beta=(y_1,y_2,\dots,y_n)^T$，则有：
-	\begin{equation*}
-		\beta^TB\beta=\alpha^T(Q^{-1})^TBQ^{-1}\alpha=\alpha^T(Q^T)^{-1}BQ^{-1}\alpha=\alpha^TA\alpha=0
-	\end{equation*}
-	注意到：
-	\begin{equation*}
-		\beta^TB\beta=\sum_{i=1}^{n}b_iy_i^2
-	\end{equation*}
-	所以有：
-	\begin{equation*}
-		\sum_{i=1}^{n}b_iy_i^2=0
-	\end{equation*}
-	但是此时$b_i$都不是$0$，若上式成立需要$y_i$都为$0$，这就与$\beta\ne\mathbf{0}$矛盾，所以$A$退化。\par
-	\textbf{(2)必要性：}如果$A$退化，则存在非零向量$\alpha$使得$A\alpha=\mathbf{0}$，显然此时$\alpha^TA\alpha=0$。
-\end{proof}
-\begin{theorem}\label{theo:TSLinearlyIndependent}
-	$\{X_t\}$是一个平稳时间序列，$\Gamma_n$是$\{X_t\}$的$n$阶自协方差矩阵，则$\Gamma_n$退化的充要条件是对任意的$t\in\mathbb{N}$，$X_{t+1},X_{t+2},\dots,X_{t+n}$线性相关。
-\end{theorem}
-\begin{proof}
-	由\cref{lem:aTaInvertible}可知$\Gamma_n$退化的充要条件是存在非零的$n$维实向量$\alpha=(\seq{a}{n})^T$使得$\alpha^T\Gamma_n\alpha=0$，而：
-	\begin{align*}
-		\alpha^T\Gamma_n\alpha
-		&=\sum_{i=1}^{n}\sum_{j=1}^{n}a_ia_j\operatorname{E}[(X_i-\mu)(X_j-\mu)] \\
-		&=\sum_{i=1}^{n}\sum_{j=1}^{n}a_ia_j\operatorname{E}[(X_{t+i}-\mu)(X_{t+j}-\mu)] \\
-		&=\operatorname{E}\left[\sum_{i=1}^{n}a_i(X_{t+i}-\mu)\right]^2 \\
-		&=\operatorname{E}\left[\sum_{i=1}^{n}a_i(X_{t+i}-\mu)\right]^2+0 \\
-		&=\operatorname{E}\left[\sum_{i=1}^{n}a_i(X_{t+i}-\mu)\right]^2+\left\{\operatorname{E}\left[\sum_{i=1}^{n}a_i(X_{t+i}-\mu)\right]\right\}^2 \\
-		&=\operatorname{Var}\left[\sum_{i=1}^{n}a_i(X_{t+i}-\mu)\right]
-	\end{align*}
-	由随机变量线性相关的定义结论得证。
-\end{proof}
-\begin{theorem}
-	$\{X_t\}$是一个平稳时间序列，$\Gamma_n$是$\{X_t\}$的$n$阶自协方差矩阵。若$\Gamma_n$退化，只要$m>n$，则有$\Gamma_m$退化，也即若$X_{t+1},X_{t+2},\dots,X_{t+n}$线性相关，只要$m>n$，则有$X_{t+1},X_{t+2},\dots,X_{t+m}$线性相关。
-\end{theorem}
-\begin{proof}
-	由\cref{def:RVLinearlyDependent}与\cref{theo:TSLinearlyIndependent}可直接得出，只需在方差公式中取$a_{n+1}=a_{n+2}=\cdots=a_{m}=0$即可。
-\end{proof}
+\subsubsection{线性变换}
 \begin{theorem}
 	平稳时间序列$\{X_t\}$经过线性变换后得到的还是平稳时间序列。
 \end{theorem}
@@ -118,6 +72,7 @@
 		\operatorname{Cov}(Y_t,Y_s)=\operatorname{E}[(aX_t+b-a\mu-b)(aX_s+b-a\mu-b)]=a^2\gamma(t-s)
 	\end{equation*}
 \end{proof}
+\subsubsection{自相关函数}
 \begin{definition}
 	$\{X_t\}$是一个平稳时间序列，称平稳时间序列：
 	\begin{equation*}
@@ -125,7 +80,7 @@
 	\end{equation*}
 	为$\{X_t\}$的标准化序列。称$\{Y_t\}$的自协方差函数$\rho(t)$为$\{X_t\}$的\gls{AutocorrelationF}。因为自协方差函数都是非负定序列，所以$\rho(t)$也是非负定序列。
 \end{definition}
-\begin{theorem}
+\begin{theorem}\label{theo:RhotGamma0}
 	设$\{X_t\}$的自协方差函数为$\gamma(t)$，$\{Y_t\}$是$\{X_t\}$的标准化序列同时它的自协方差函数为$\rho(t)$，则：
 	\begin{equation*}
 		\rho(t)=\frac{\gamma(t)}{\gamma(0)},\;t\in\mathbb{N}
@@ -137,7 +92,7 @@
 		\rho(t)=\operatorname{E}[(Y_t-\mu_Y)(Y_0-\mu_Y)]=\operatorname{E}(Y_tY_0)=\operatorname{E}\left[\left(\frac{X_t-\mu}{\sqrt{\gamma(0)}}\right)\left(\frac{X_0-\mu}{\sqrt{\gamma(0)}}\right)\right]=\frac{\gamma(t)}{\gamma(0)}\qedhere
 	\end{equation*}
 \end{proof}
-
+\subsubsection{正交与不相关}
 \begin{definition}
 	设$\{X_t\}$和$\{Y_t\}$是平稳时间序列。
 	\begin{enumerate}
@@ -205,9 +160,54 @@
 		\gamma_Z(t)=\gamma_X(t)+\gamma_Y(t),\;t\in\mathbb{N}\qedhere
 	\end{equation*}
 \end{proof}
+\subsubsection{线性相关}
+\begin{definition}\label{def:RVLinearlyDependent}
+	对于随机变量$\seq{X}{n}$，若存在非零的$n$维实向量$\alpha=(\seq{a}{n})^T$使得：
+	\begin{equation*}
+		\operatorname{Var}\left[\sum_{i=1}^{n}a_i(X_i-\mu)\right]=0
+	\end{equation*}
+	则称$\seq{X}{n}$线性相关。
+\end{definition}
+\begin{lemma}\label{lem:aTaInvertible}
+	对称阵$A\in M_{n}(\mathbb{R})$退化的充分必要条件为存在$\mathbb{R}^{n}$中的非零向量$\alpha$使得$\alpha^TA\alpha=0$。
+\end{lemma}
+\begin{proof}
+	\textbf{(1)充分性：}由实对称矩阵的正交相似，有$Q^TAQ=B$，其中$Q$是正交矩阵，$B=\operatorname{diag}\{b_1,b_2,\dots,b_n\}$是主对角线上为$A$特征值的对角矩阵。假设此时$A$可逆，则它的所有特征值都不为$0$（否则就有$|A|=|Q^TBQ|=|Q^T|\;|B|\;|Q|=|B|=0$）。由题设存在非零向量$\alpha$使得$\alpha^TA\alpha=0$，因为$Q$是正交矩阵，所以$Q^{-1}$可逆，于是$Q^{-1}x=\mathbf{0}$只有零解，所以$Q^{-1}\alpha\ne\mathbf{0}$。设$Q^{-1}\alpha=\beta=(y_1,y_2,\dots,y_n)^T$，则有：
+	\begin{equation*}
+		\beta^TB\beta=\alpha^T(Q^{-1})^TBQ^{-1}\alpha=\alpha^T(Q^T)^{-1}BQ^{-1}\alpha=\alpha^TA\alpha=0
+	\end{equation*}
+	注意到：
+	\begin{equation*}
+		\beta^TB\beta=\sum_{i=1}^{n}b_iy_i^2
+	\end{equation*}
+	所以有：
+	\begin{equation*}
+		\sum_{i=1}^{n}b_iy_i^2=0
+	\end{equation*}
+	但是此时$b_i$都不是$0$，若上式成立需要$y_i$都为$0$，这就与$\beta\ne\mathbf{0}$矛盾，所以$A$退化。\par
+	\textbf{(2)必要性：}如果$A$退化，则存在非零向量$\alpha$使得$A\alpha=\mathbf{0}$，显然此时$\alpha^TA\alpha=0$。
+\end{proof}
+\begin{theorem}\label{theo:TSLinearlyIndependent}
+	$\{X_t\}$是一个平稳时间序列，$\Gamma_n$是$\{X_t\}$的$n$阶自协方差矩阵，则$\Gamma_n$退化的充要条件是对任意的$t\in\mathbb{N}$，$X_{t+1},X_{t+2},\dots,X_{t+n}$线性相关。
+\end{theorem}
+\begin{proof}
+	由\cref{lem:aTaInvertible}可知$\Gamma_n$退化的充要条件是存在非零的$n$维实向量$\alpha=(\seq{a}{n})^T$使得$\alpha^T\Gamma_n\alpha=0$，而：
+	\begin{align*}
+		\alpha^T\Gamma_n\alpha
+		&=\sum_{i=1}^{n}\sum_{j=1}^{n}a_ia_j\operatorname{E}[(X_i-\mu)(X_j-\mu)] =\sum_{i=1}^{n}\sum_{j=1}^{n}a_ia_j\operatorname{E}[(X_{t+i}-\mu)(X_{t+j}-\mu)] \\
+		&=\operatorname{E}\left[\sum_{i=1}^{n}a_i(X_{t+i}-\mu)\right]^2 =\operatorname{E}\left[\sum_{i=1}^{n}a_i(X_{t+i}-\mu)\right]^2+0 \\
+		&=\operatorname{E}\left[\sum_{i=1}^{n}a_i(X_{t+i}-\mu)\right]^2+\left\{\operatorname{E}\left[\sum_{i=1}^{n}a_i(X_{t+i}-\mu)\right]\right\}^2 =\operatorname{Var}\left[\sum_{i=1}^{n}a_i(X_{t+i}-\mu)\right]
+	\end{align*}
+	由随机变量线性相关的定义结论得证。
+\end{proof}
+\begin{theorem}
+	$\{X_t\}$是一个平稳时间序列，$\Gamma_n$是$\{X_t\}$的$n$阶自协方差矩阵。若$\Gamma_n$退化，只要$m>n$，则有$\Gamma_m$退化，也即若$X_{t+1},X_{t+2},\dots,X_{t+n}$线性相关，只要$m>n$，则有$X_{t+1},X_{t+2},\dots,X_{t+m}$线性相关。
+\end{theorem}
+\begin{proof}
+	由\cref{def:RVLinearlyDependent}与\cref{theo:TSLinearlyIndependent}可直接得出，只需在方差公式中取$a_{n+1}=a_{n+2}=\cdots=a_{m}=0$即可。
+\end{proof}
 
-
-\subsection{几类平稳序列}
+\subsection{线性平稳序列}
 \subsubsection{白噪声}
 \begin{definition}
 	设$\{\varepsilon_t\}$是一个平稳时间序列。如果对任何的$s,t\in\mathbb{N}$，有：
@@ -219,16 +219,7 @@
 			0, & t\ne s
 		\end{cases}
 	\end{equation*}
-	则称$\{\varepsilon_t\}$是\gls{WhiteNoise}，记作WN$(\mu,\sigma^2)$。当$\{\varepsilon_t\}$是独立序列时，称$\{\varepsilon_t\}$是\textbf{独立白噪声}；当$\mu=0$时，称$\{\varepsilon_t\}$是\textbf{零均值白噪声}；当$\mu=0,\;\sigma^2=1$时，称$\{\varepsilon_t\}$是\textbf{标准白噪声}；对于独立白噪声$\{\varepsilon_t\}$，当$\varepsilon_t$服从正态分布时，称$\{\varepsilon_t\}$是\textbf{正态白噪声}。
-\end{definition}
-
-\begin{definition}
-	$\{X_t\}$是一个平稳时间序列，$\gamma(t)$是$\{X_t\}$的自协方差函数。若对于任意的$k=0,1,2,\dots,q$有$\gamma(k)\ne0$，且对任意的$k>q$有$\gamma(k)=0$，则称$\{X_t\}$是$q$步相关的。
-\end{definition}
-
-\subsection{线性平稳序列与线性滤波}
-\begin{definition}
-	称由白噪声的线性组合构成的平稳序列为线性平稳序列。
+	则称$\{\varepsilon_t\}$是\gls{WhiteNoise}，记作WN$(\mu,\sigma^2)$。当$\{\varepsilon_t\}$是独立序列时，称$\{\varepsilon_t\}$是\textbf{独立白噪声}；当$\mu=0$时，称$\{\varepsilon_t\}$是\textbf{零均值白噪声}；当$\mu=0,\;\sigma^2=1$时，称$\{\varepsilon_t\}$是\textbf{标准白噪声}；当$\varepsilon_t$服从正态分布时，称$\{\varepsilon_t\}$是\textbf{正态白噪声}。
 \end{definition}
 \subsubsection{有限滑动平均}
 \begin{definition}
@@ -258,22 +249,14 @@
 	\begin{equation*}
 		\operatorname{E}(X_t)=\operatorname{E}\left(\sum_{i=0}^{q}a_i\varepsilon_{t-i}\right)=\sum_{i=0}^{q}a_i\operatorname{E}(\varepsilon_{t-i})=0,\;t\in\mathbb{Z}
 	\end{equation*}
-	对于$\{X_t\}$的自协方差函数有：
-	\begin{align*}
-		\gamma(n)
-		&=\operatorname{E}[(X_{t+n}-\mu)(X_t-\mu)] \\
-		&=\operatorname{E}(X_{t+n}X_t) \\
-		&=\operatorname{E}\left(\sum_{i=0}^{q}\sum_{j=0}^{q}a_ia_j\varepsilon_{t+n-i}\varepsilon_{t-j}\right) \\
-		&=\sum_{i=0}^{q}\sum_{j=0}^{q}a_ia_j\operatorname{E}(\varepsilon_{t+n-i}\varepsilon_{t-j})
-	\end{align*}
-	当$n>q$时，$t+n-i>t-j$恒成立，由白噪声的定义可得$\operatorname{E}(\varepsilon_{t+n-i}\varepsilon_{t-j})=0,\;\forall\;i,j=0,1,2,\dots,q$，于是$\gamma(n)=0$。当$0\leqslant n\leqslant q$时，有：
+	对于$\{X_t\}$的自协方差函数，当$n>q$时，$t+n-i>t-j$恒成立，由白噪声的定义可得$\operatorname{E}(\varepsilon_{t+n-i}\varepsilon_{t-j})=0,\;\forall\;i,j=0,1,2,\dots,q$，于是$\gamma(n)=0$。当$0\leqslant n\leqslant q$时，有：
 	\begin{align*}
 		\gamma(n)
 		&=\operatorname{E}(X_{t+n}X_t) \\
 		&=\operatorname{E}[(a_{n}\varepsilon_{t}+a_{n+1}\varepsilon_{t-1}+\cdots+a_{q}\varepsilon_{t+n-q})(a_0\varepsilon_t+a_1\varepsilon_{t-1}+\cdots+a_{q-n}\varepsilon_{t+n-q})] \\
 		&=\operatorname{E}(a_na_0\varepsilon_t^2+a_{n+1}a_1\varepsilon_{t-1}^2+\cdots+a_qa_{q-n}\varepsilon_{t+n-q}^2) \\
-		&=\sum_{i=0}^{q-n}a_ia_{i+n}\operatorname{E}(\varepsilon_{t-i}^2) \\
-		&=\sum_{i=0}^{q-n}a_ia_{i+n}\sigma^2
+		&=\sum_{i=0}^{q-n}a_ia_{i+n}\operatorname{E}(\varepsilon_{t-i}^2)
+		=\sum_{i=0}^{q-n}a_ia_{i+n}\sigma^2
 	\end{align*}
 	综上可得：
 	\begin{equation*}
@@ -281,7 +264,7 @@
 		\begin{cases}
 			\sigma^2\sum\limits_{i=0}^{q-n}a_ia_{i+n}, & 0\leqslant n\leqslant q \\
 			0, & n>q
-		\end{cases},\;n\in\mathbb{Z}\qedhere
+		\end{cases},\;n\in\mathbb{N}\qedhere
 	\end{equation*}
 \end{proof}
 \subsubsection{单边滑动平均}
@@ -294,41 +277,110 @@
 \end{definition}
 \subsubsection{无穷滑动平均}
 \begin{definition}
-	$\{\varepsilon_t\}=\{\varepsilon_t:t\in\mathbb{Z}\}$是$WN(0,\sigma^2)$，$\{a_n\}$绝对可和，即$\sum\limits_{i=-\infty}^{+\infty}|a_n|<+\infty$。称：
+	$\{\varepsilon_t\}=\{\varepsilon_t:t\in\mathbb{Z}\}$是$WN(0,\sigma^2)$，$\{a_n\}\in l^1$。称：
 	\begin{equation*}
 		X_t=\sum_{i=-\infty}^{+\infty}a_i\varepsilon_{t-i}
 	\end{equation*}
 	是白噪声$\{\varepsilon_t\}$的\gls{InfiniteMovingAverage}。
 \end{definition}
-\begin{theorem}
+\begin{theorem}\label{theo:l1LinearlyStationarySeries}
 	$\{\varepsilon_t\}=\{\varepsilon_t:t\in\mathbb{Z}\}$是$WN(0,\sigma^2)$，则该白噪声的无穷滑动平均：
 	\begin{equation*}
 		X_t=\sum_{i=-\infty}^{+\infty}a_i\varepsilon_{t-i}
 	\end{equation*}
-	构成的序列$\{X_t\}$具有如下均值与自协方差函数：
+	构成的序列$\{X_t\}$是平稳序列且具有如下均值与自协方差函数：
 	\begin{equation*}
 		\operatorname{E}(X_t)=0,\;\gamma(n)=\sigma^2\sum_{i=-\infty}^{+\infty}a_ia_{i+n}
 	\end{equation*}
 \end{theorem}
 \begin{proof}
-	
+	由\cref{prop:NonnegativeMeasurablegIntegral}(4)(6)可得：
+	\begin{align*}
+		\operatorname{E}\left(\sum_{i=-\infty}^{+\infty}|a_i\varepsilon_{t-i}|\right)&=\operatorname{E}\left[\lim_{n\to+\infty}\left(\sum_{i=-n}^{n}|a_i||\varepsilon_{t-i}|\right)\right]=\lim_{n\to+\infty}\operatorname{E}\left(\sum_{i=-n}^{n}|a_i||\varepsilon_{t-i}|\right) \\
+		&=\lim_{n\to+\infty}\left[\sum_{i=-n}^{n}|a_i|\operatorname{E}(|\varepsilon_{t-i})\right]=\sum_{i=-\infty}^{+\infty}|a_i|\operatorname{E}(|\varepsilon_{t-i})
+	\end{align*}
+	由\cref{ineq:cauchy-schiwarz-expectations}可得：
+	\begin{equation*}
+		\operatorname{E}(|\varepsilon_{t-i}|)=\Big|\operatorname{E}(|\varepsilon_{t-i}|\cdot1)\Big|\leqslant\sqrt{\operatorname{E}(\varepsilon_{t-i}^2)\operatorname{E}(1)}=\sigma
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\operatorname{E}\left(\sum_{i=-\infty}^{+\infty}|a_i\varepsilon_{t-i}|\right)=\sum_{i=-\infty}^{+\infty}|a_i|\operatorname{E}(|\varepsilon_{t-i}|)\leqslant\sigma\sum_{i=-\infty}^{+\infty}|a_i|<+\infty
+	\end{equation*}
+	由\cref{prop:NonnegativeMeasurablegIntegral}(9)可得对任意的$t\in\mathbb{Z}^{}$，$X_t\;$a.e.有限，即：
+	\begin{equation*}
+		X_t=\sum_{i=-\infty}^{+\infty}a_i\varepsilon_{t-i}
+	\end{equation*}
+	右式a.e.收敛。取控制函数$\sum\limits_{i=-\infty}^{+\infty}|a_i\varepsilon_{t-i}|$，由\cref{theo:DominatedConvergenceTheorem}和\cref{prop:MeasurableIntegral}(6)可得
+	\begin{equation*}
+		\operatorname{E}(X_t)=\operatorname{E}\left[\lim_{n\to+\infty}\left(\sum_{i=-n}^{n}a_i\varepsilon_{t-i}\right)\right]=\lim_{n\to+\infty}\left[\operatorname{E}\left(\sum_{i=-n}^{n}a_i\varepsilon_{t-i}\right)\right]=0
+	\end{equation*}\par
+	对$t,s\in\mathbb{Z}$定义：
+	\begin{equation*}
+		\varphi_n=\sum_{i=-n}^{n}a_i\varepsilon_{t-i},\quad\psi_n=\sum_{j=-n}^{n}a_j\varepsilon_{s-j}
+	\end{equation*}
+	则有$\varphi_n\psi_n\to X_tX_s$，因为对任意的$t,s\in\mathbb{Z}^{}$，$X_t\;$a.e.有限，所以$X_tX_s\;$a.e.有限。由\cref{prop:NonnegativeMeasurablegIntegral}(4)(6)可得：
+	\begin{align*}
+		\operatorname{E}\left(\sum_{i=-\infty}^{+\infty}\sum_{j=-\infty}^{+\infty}|a_ia_j\varepsilon_{t-i}\varepsilon_{s-j}|\right)=\sum_{i=-\infty}^{+\infty}\sum_{j=-\infty}^{+\infty}|a_ia_j|\operatorname{E}(|\varepsilon_{t-i}\varepsilon_{s-j}|)
+	\end{align*}
+	由\cref{ineq:cauchy-schiwarz-expectations}可得：
+	\begin{equation*}
+		\operatorname{E}(|\varepsilon_{t-i}\varepsilon_{s-j}|)=\Big|\operatorname{E}(|\varepsilon_{t-i}\varepsilon_{s-j}|)\Big|\leqslant\sqrt{\operatorname{E}(\varepsilon_{t-i}^2)\operatorname{E}(\varepsilon_{s-j}^2)}=\sigma^2
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\operatorname{E}\left(\sum_{i=-\infty}^{+\infty}\sum_{j=-\infty}^{+\infty}|a_ia_j\varepsilon_{t-i}\varepsilon_{s-j}|\right)\leqslant\sigma^2\sum_{i=-\infty}^{+\infty}\sum_{j=-\infty}^{+\infty}|a_ia_j|=\sigma^2\left(\sum_{i=-\infty}^{+\infty}|a_i|\right)^2<+\infty
+	\end{equation*}
+	取控制函数$\sum\limits_{i=-\infty}^{+\infty}\sum\limits_{j=-\infty}^{+\infty}|a_ia_j\varepsilon_{t-i}\varepsilon_{s-j}|$，由\cref{theo:DominatedConvergenceTheorem}和\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{align*}
+		\operatorname{Cov}(X_t,X_s)&=\operatorname{E}(X_tX_s)=\operatorname{E}\left(\lim_{n\to+\infty}\varphi_n\psi_n\right)=\lim_{n\to+\infty}\operatorname{E}(\varphi_n\psi_n) \\
+		&=\lim_{n\to+\infty}\operatorname{E}\left[\left(\sum_{i=-n}^{n}a_i\varepsilon_{t-i}\right)\left(\sum_{j=-n}^{n}a_j\varepsilon_{s-j}\right)\right] \\
+		&=\lim_{n\to+\infty}\operatorname{E}\left(\sum_{i=-n}^{n}\sum_{j=-n}^{n}a_ia_j\varepsilon_{t-i}\varepsilon_{s-j}\right) \\
+		&=\lim_{n\to+\infty}\left[\sum_{i=-n}^{n}\sum_{j=-n}^{n}a_ia_j\operatorname{E}(\varepsilon_{t-i}\varepsilon_{s-j})\right] \\
+		&=\sum_{i=-\infty}^{+\infty}a_ia_{i-(t-s)}\sigma^2=\sigma^2\sum_{i=-\infty}^{+\infty}a_ia_{i+(t-s)}
+	\end{align*}
+	上式最后一步是因为$t-i=s-j$时期望才不为$0$，并且$n$是逐渐变大趋于无穷，所以也不用考虑$n$为定值时$t,s$相差过大导致索引越界的问题。由协方差公式可以看出其只与$t-s$相关。\par
+	注意到：
+	\begin{equation*}
+		\operatorname{Var}(X_t)=\sigma^2\sum_{i=-\infty}^{+\infty}a_i^2
+	\end{equation*}
+	因为$l^1\subset l^2$，$\{a_n\}\in l^1$，所以上式也收敛。\par
+	综上，$\{X_t\}$是一个平稳序列。
 \end{proof}
 \subsubsection{线性平稳序列}
 \begin{definition}
-	$\{\varepsilon_t\}=\{\varepsilon_t:t\in\mathbb{Z}\}$是$WN(0,\sigma^2)$，$\{a_n\}$平方可和，即$\sum\limits_{i=-\infty}^{+\infty}a_n^2<+\infty$。称：
+	$\{\varepsilon_t\}=\{\varepsilon_t:t\in\mathbb{Z}\}$是$WN(0,\sigma^2)$，$\{a_n\}\in l^2$。称：
 	\begin{equation*}
-		X_t=\mu+\sum_{i=-\infty}^{+\infty}a_i\varepsilon_{t-i}
+		X_t=\sum_{i=-\infty}^{+\infty}a_i\varepsilon_{t-i}
 	\end{equation*}
 	构成的序列$\{X_t\}$为\gls{LinearlyStationarySeries}。
 \end{definition}
 \begin{theorem}
+	\label{theo:l2LinearlyStationarySeries}
 	线性平稳序列是平稳序列，且有：
 	\begin{equation*}
-		\operatorname{E}(X_t)=\mu,\;\gamma(n)=\sigma^2\sum_{i=-\infty}^{+\infty}a_ia_{i+n}
+		\operatorname{E}(X_t)=0,\;\gamma(n)=\sigma^2\sum_{i=-\infty}^{+\infty}a_ia_{i+n}
 	\end{equation*}
 \end{theorem}
 \begin{proof}
-	
+	在$L^2$空间中定义内积$(X,Y)=\operatorname{E}(XY)$，定义：
+	\begin{equation*}
+		\varphi_n=\sum_{i=-n}^{n}a_i\varepsilon_{t-i}
+	\end{equation*}
+	则对$m<n,\;n\to+\infty$有：
+	\begin{equation*}
+		||\varphi_n-\varphi_m||^2=\left\|\sum_{i=m+1}^{n}a_i\varepsilon_{t-i}+\sum_{i=-n}^{-m-1}a_i\varepsilon_{t-i}\right\|^2=\sigma^2\left(\sum_{i=m+1}^{n}a_i^2+\sum_{i=-n}^{-m-1}a_i^2\right)\to0
+	\end{equation*}
+	由\cref{theo:LpBanach}可知$X_t\in L_2$。由内积的连续性和\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{gather*}
+		\operatorname{E}(X_t)=(X_t,1)=\lim_{n\to+\infty}(\varphi_n,1)=\lim_{n\to+\infty}\operatorname{E}(\varphi_n)=0 \\
+		\begin{aligned}
+			\operatorname{Cov}(X_t,X_s)&=\operatorname{E}(X_tX_s)=\lim_{n\to+\infty}\left(\sum_{i=-n}^{n}a_i\varepsilon_{t-i},\sum_{i=-n}^{n}a_i\varepsilon_{s-i}\right) \\
+			&=\lim_{n\to+\infty}\operatorname{E}\left(\sum_{i=-n}^{n}a_i\varepsilon_{t-i}\sum_{j=-n}^{n}a_j\varepsilon_{s-j}\right)=\lim_{n\to+\infty}\operatorname{E}\left(\sum_{i=-n}^{n}\sum_{j=-n}^{n}a_ia_j\varepsilon_{t-i}\varepsilon_{s-j}\right) \\
+			&=\sigma^2\sum_{i=-\infty}^{+\infty}a_ia_{i+(t-s)}
+		\end{aligned}
+	\end{gather*}
+	上式倒数第二步到最后一步和\cref{theo:l1LinearlyStationarySeries}中是一样的，同时平稳性的分析也与之一样，故省略。
 \end{proof}
 \begin{theorem}
 	对于线性平稳序列的自协方差函数$\gamma(n)$，有：
@@ -340,14 +392,37 @@
 	由\cref{ineq:cauchy-ineq-R}可得：
 	\begin{align*}
 		|\gamma(n)|
-		&=\sigma^2\Bigl|\sum_{i=-\infty}^{+\infty}a_ia_{i+n}\Bigr| \\
-		&\leqslant\sigma^2\sum_{i=-\infty}^{+\infty}|a_ia_{i+n}| \\
-		&=\sigma^2\sum_{|i|\leqslant n}|a_i||a_{i+n}|+\sigma^2\sum_{|i|> n}|a_i||a_{i+n}| \\
-		&\leqslant\sigma^2\left(\sum_{|i|\leqslant n}a_i^2\sum_{|i|\leqslant n}a_{i+n}^2\right)^\frac{1}{2}+\sigma^2\left(\sum_{|i|>n}a_i^2\sum_{|i|>n}a_{i+n}^2\right)^\frac{1}{2} \\
-		&\leqslant\sigma^2\left(\sum_{i=-\infty}^{+\infty}a_i^2\sum_{|i|\leqslant n}a_{i+n}^2\right)^\frac{1}{2}+\sigma^2\left(\sum_{i=-\infty}^{+\infty}a_i^2\sum_{|i|>n}a_{i+n}^2\right)^\frac{1}{2}
+		&=\sigma^2\Bigl|\sum_{i=-\infty}^{+\infty}a_ia_{i+n}\Bigr| \leqslant\sigma^2\sum_{i=-\infty}^{+\infty}|a_ia_{i+n}| \\
+		&=\sigma^2\sum_{|i|\leqslant n/2}|a_i||a_{i+n}|+\sigma^2\sum_{|i|> n/2}|a_i||a_{i+n}| \\
+		&\leqslant\sigma^2\left(\sum_{|i|\leqslant n/2}a_i^2\sum_{|i|\leqslant n}a_{i+n}^2\right)^\frac{1}{2}+\sigma^2\left(\sum_{|i|>n/2}a_i^2\sum_{|i|>n}a_{i+n}^2\right)^\frac{1}{2} \\
+		&\leqslant\sigma^2\left(\sum_{i=-\infty}^{+\infty}a_i^2\sum_{|i|\leqslant n/2}a_{i+n}^2\right)^\frac{1}{2}+\sigma^2\left(\sum_{i=-\infty}^{+\infty}a_i^2\sum_{|i|>n/2}a_{i+n}^2\right)^\frac{1}{2}
 	\end{align*}
+	注意到$|i|\leqslant\dfrac{n}{2}$时$\dfrac{n}{2}\leqslant i+n\leqslant\dfrac{3n}{2}$，所以有：
+	\begin{equation*}
+		\sum_{|i|\leqslant n/2}a_{i+n}^2\leqslant\sum_{|i|>n/2}a_{i}^2
+	\end{equation*}
+	结合$\{a_n\}\in l^2$即可得：
+	\begin{equation*}
+		|\gamma(n)|\leqslant2\sigma^2\left(\sum_{i=-\infty}^{+\infty}a_i^2\sum_{|i|>n/2}a_{i}^2\right)^\frac{1}{2}=2\sigma^2\left(\sum_{i=-\infty}^{+\infty}a_i^2\right)^{\frac{1}{2}}\left(\sum_{|i|>n/2}^{}a_{i}^2\right)^{\frac{1}{2}}\to0\qedhere
+	\end{equation*}
 \end{proof}
 
+\subsection{平稳序列的谱密度}
+\begin{definition}
+	设平稳序列$\{X_t\}$的自协方差函数为$\gamma(n)$。
+	\begin{enumerate}
+		\item 若存在$[-\pi,\pi]$上单调不减且右连续的函数$F(\lambda)$使得：
+		\begin{equation*}
+			\gamma(n)=\int_{[-\pi,\pi]}e^{in\lambda}\dif F(\lambda),\quad F(-\pi)=0,\;k\in\mathbb{Z}^{}
+		\end{equation*}
+		则称$F(\lambda)$为$\{X_t\}$或$\{\gamma(n)\}$的\gls{SpectralDistributionFunction}，简称为\textbf{谱函数}；
+		\item 若存在$[-\pi,\pi]$上的非负函数$f(\lambda)$使得：
+		\begin{equation*}
+			\gamma(n)=\int_{[-\pi,\pi]}f(\lambda)e^{in\lambda}\dif\lambda,\quad n\in\mathbb{Z}^{}
+		\end{equation*}
+		则称$f(\lambda)$为$\{X_t\}$或$\{\gamma(n)\}$的\gls{SpectralDensityFunction}，简称为\textbf{谱密度}。
+	\end{enumerate}
+\end{definition}
 
 
 
