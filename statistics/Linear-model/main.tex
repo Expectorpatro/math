@@ -12,6 +12,16 @@
 	\end{equation*}
 	其中$y$为$n\times 1$观测向量，$X$为$n\times p$设计矩阵，$\beta$为$p\times 1$未知参数向量，$\varepsilon$为随机误差，$\sigma^2$为误差方差。
 \end{definition}
+%\begin{derivation}
+%	因为$\Sigma>0$，所以存在$\Sigma^{-\frac{1}{2}}$。令$y^*=\Sigma^{-\frac{1}{2}}y,\;X^*=\Sigma^{-\frac{1}{2}}\beta,\;\varepsilon^*=\Sigma^{-\frac{1}{2}}\varepsilon$，由\cref{prop:CovMat}(3)可知\cref{model:LinearModel}可化作：
+%	\begin{equation*}
+%		\begin{cases}
+%			y^*=X^*\beta+\varepsilon^* \\
+%			\operatorname{E}(\varepsilon^*)=\mathbf{0} \\
+%			\operatorname{Cov}(\varepsilon)=\sigma^2I_n
+%		\end{cases}
+%	\end{equation*}
+%\end{derivation}
 \begin{definition}
 	称方程$X^TX\beta=X^Ty$为\gls{NormalEquation}。
 \end{definition}
@@ -31,7 +41,7 @@
 		\frac{\partial Q(\beta)}{\partial\beta}=2X^Ty-2X^TX\beta=0 \\
 		X^TX\beta=X^Ty
 	\end{gather*}
-	由\cref{theo:VectorSpaceAAAT}可知方程$X^TX\beta=X^Ty$是相容的，根据\cref{theo:InhomogeneousLinearEq'sGeneralSolution2}可知其通解为：
+	由\cref{theo:VectorSpaceAAAT}和\cref{theo:SolutionOfSLE2}(1)可知方程$X^TX\beta=X^Ty$是相容的，根据\cref{theo:InhomogeneousLinearEq'sGeneralSolution2}可知其通解为：
 	\begin{equation*}
 		\hat{\beta}=(X^TX)^-X^Ty
 	\end{equation*}
@@ -56,7 +66,7 @@
 	上第二项总是非负的，由范数的性质其为$0$当且仅当$X\hat{\beta}=X\beta$，即当且仅当$X^TX\beta=X^TX\hat{\beta}=X^Ty$，所以使$Q(\beta)$达到最小值的$\beta$必为正则方程的解$\hat{\beta}=(X^TX)^-X^Ty$。
 \end{proof}
 \begin{derivation}
-	若$\operatorname{rank}(X)=p$，则$X$的列向量组线性无关。考虑二次型$y^TX^TXy$，$y^TX^TXy=0\Leftrightarrow||Xy||=0\Leftrightarrow Xy=\mathbf{0}$，而$X$的列向量是线性无关的，所以不存在非零向量的$y$使得$Xy=\mathbf{0}$，于是$y^TX^TXy$是一个正定二次型，$X^TX$是一个正定矩阵。由\cref{theo:PositiveDefinite}(3)的第五点和\info{行列式等于特征值的积，行列式大于$0$矩阵可逆}可得$X^TX$可逆。此时$\hat{\beta}=(X^TX)^{-1}X^Ty$，称$\hat{\beta}$为$\beta$的\gls{LeastSquaresEstimate}。
+	若$\operatorname{rank}(X)=p$，则$X$的列向量组线性无关。考虑二次型$y^TX^TXy$，$y^TX^TXy=0\Leftrightarrow||Xy||=0\Leftrightarrow Xy=\mathbf{0}$，而$X$的列向量是线性无关的，所以不存在非零向量的$y$使得$Xy=\mathbf{0}$，于是$y^TX^TXy$是一个正定二次型，$X^TX$是一个正定矩阵。由\cref{theo:PositiveDefinite}(3)的第五点和\info{行列式等于特征值的积，行列式大于$0$矩阵可逆}可得$X^TX$可逆。此时$\hat{\beta}=(X^TX)^{-1}X^Ty$，称$\hat{\beta}$为$\beta$的\gls{LSE}。
 \end{derivation}
 \subsection{参数估计}
 \subsubsection{回归系数}
@@ -130,7 +140,7 @@
 	上式等于$0\Leftrightarrow \gamma^Ty=c^T\hat{\beta}=\hat{\varphi}$，即$\hat{\varphi}$是唯一的BLUE。
 \end{proof}
 \begin{definition}
-	对于\cref{model:LinearModel}，若$c^T\beta$是可估函数，称$c^T\hat{\beta}$为$c^T\beta$的LS估计，其中$\hat{\beta}$为正则方程的解。
+	对于\cref{model:LinearModel}，若$c^T\beta$是可估函数，称$c^T\hat{\beta}$为$c^T\beta$的LSE，其中$\hat{\beta}$为正则方程的解。
 \end{definition}
 \subsubsection{残差}
 \begin{definition}
@@ -188,7 +198,7 @@
 	\end{equation*}
 \end{proof}
 \begin{definition}
-	称$\hat{\sigma}^2$为$\sigma^2$的LS估计。
+	称$\hat{\sigma}^2$为$\sigma^2$的LSE。
 \end{definition}
 
 \subsection{约束最小二乘估计}
@@ -290,7 +300,7 @@
 \begin{proof}
 	由\cref{theo:ConstraintLinearModel}可知：
 	\begin{equation*}
-		\operatorname{E}(||y-X\hat{\beta}_A||^2)=\operatorname{E}(||y-X\hat{\beta}||^2+||X(\hat{\beta}-\hat{\beta}_A)||^2)=\operatorname{E}(||y-X\hat{\beta}||^2)+\operatorname{E}(||X(\hat{\beta}-\hat{\beta}_A)||^2)
+		\operatorname{E}(||y-X\hat{\beta}_A||^2)=\operatorname{E}[||y-X\hat{\beta}||^2+||X(\hat{\beta}-\hat{\beta}_A)||^2]=\operatorname{E}(||y-X\hat{\beta}||^2)+\operatorname{E}[||X(\hat{\beta}-\hat{\beta}_A)||^2]
 	\end{equation*}
 	根据\cref{theo:VarianceOfErrorTerm}可知：
 	\begin{equation*}
@@ -360,6 +370,126 @@
 \begin{note}
 	回归平方和表示了数据平方和$y^Ty$中能够由因变量$y$与自变量$\seq{X}{p}$的线性关系解释的部分。
 \end{note}
+
+\subsection{预测}
+\label{def:LinearModelForcast}
+假设要预测$m$个点$x_{0i}=(x_{0i1},x_{0i2},\dots,x_{0ip}),\;i=1,2,\dots,m$，它们所对应的因变量为$y_{01},y_{02},\dots,y_{0m}$。已知$y_{0i}$和历史数据服从同一个线性模型，即：
+\begin{gather*}
+	y_0=X_0\beta+\varepsilon_0,\quad\operatorname{E}(\varepsilon_0)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon_0)=\sigma^2I_m \\
+	y_0=
+	\begin{pmatrix}
+		y_{01} \\
+		y_{02} \\
+		\vdots \\
+		y_{0m}
+	\end{pmatrix},\quad
+	X_0=
+	\begin{pmatrix}
+		x_{011} & x_{012} & \cdots & x_{01p} \\
+		x_{021} & x_{022} & \cdots & x_{02p} \\
+		\vdots & \vdots & \ddots & \vdots \\
+		x_{0m1} & x_{0m2} & \cdots & x_{0mp} 
+	\end{pmatrix},\quad
+	\varepsilon_0=
+	\begin{pmatrix}
+		\varepsilon_{01} \\
+		\varepsilon_{02} \\
+		\vdots \\
+		\varepsilon_{0m}
+	\end{pmatrix}
+\end{gather*}
+\textbf{假设$\mathcal{M}(X_0^T)\subseteq\mathcal{M}(X^T)$}。
+\subsubsection{被测量与历史数据无关}
+\begin{derivation}
+	此时使用$\operatorname{E}(y_0)=X_0\beta$的估计$X_0\hat{\beta}=X_0(X^TX)^-X^Ty$去进行预测。\par
+	由\cref{theo:VectorSpaceAAAT}可知$\mathcal{M}(X^T)=\mathcal{M}(X^TX)$，于是$\mathcal{M}(X_0^T)\subseteq\mathcal{M}(X^T)=\mathcal{M}(X^TX)$，由\cref{prop:A-}(3)可知$X_0(X^TX)^-X^Ty$与广义逆$(X^TX)^-$的选择无关。\par
+	因为$\mathcal{M}(X_0^T)\subseteq\mathcal{M}(X^T)$，所以$X_0\beta$是可估的，它具有可估函数的性质。但需注意，因为$y_0$也是一个随机变量，所以这里的无偏性指的是$\operatorname{E}(\hat{y}_0-y_0)=0$。
+\end{derivation}
+\subsubsection{被测量与历史数据相关}
+\begin{derivation}
+	在某些情况下，$y_0$和$y$确实具有一定的相关性，用$\operatorname{Cov}(\varepsilon,\varepsilon_0)=\sigma^2V^T$来度量它们之间的相关性，此时有：
+	\begin{equation*}
+		\operatorname{Cov}[(y,y_0)^T]=\operatorname{Cov}[(\varepsilon,\varepsilon_0)^T]=\sigma^2
+		\begin{pmatrix}
+			I_n & V^T \\
+			V & I_m 
+		\end{pmatrix}
+	\end{equation*}
+\end{derivation}
+\begin{definition}
+	记$\hat{y}=Cy$是$y$的一个线性无偏估计，称：
+	\begin{equation*}
+		\operatorname{PMSE}(\hat{y})=\operatorname{E}[(\hat{y}-y)^TA(\hat{y}-y)]
+	\end{equation*}
+	为\gls{PMSE}，其中$A>0$。
+\end{definition}
+\begin{theorem}\label{theo:PECorrelatedLinearModelForcast}
+	$y_0$在广义预测均方误差意义下的最优线性无偏估计为：
+	\begin{equation*}
+		\hat{y}_0=X_0\hat{\beta}+V(y-X\hat{\beta})
+	\end{equation*}
+	其中$\hat{\beta}$为正则方程的解。
+\end{theorem}
+\begin{proof}
+	令$\hat{y}_0=Cy$是一个无偏估计，由\cref{prop:MeasurableIntegral}(6)和\cref{prop:CovMat}(3)可得：
+	\begin{gather*}
+		\hat{y}_0-y_0=Cy-X_0\beta-\varepsilon_0=CX\beta+C\varepsilon-X_0\beta-\varepsilon_0=(CX-X_0)\beta+C\varepsilon-\varepsilon_0 \\
+		\operatorname{E}(\hat{y}_0-y_0)=(CX-X_0)\beta=\mathbf{0}\text{对一切$\beta$成立}\iff CX=X_0 \\
+		\begin{aligned}
+			\operatorname{Cov}(C\varepsilon-\varepsilon_0)&=\operatorname{E}[(C\varepsilon-\varepsilon_0)(C\varepsilon-\varepsilon_0)^T]=\operatorname{E}(C\varepsilon\varepsilon^TC^T-C\varepsilon\varepsilon_0^T-\varepsilon_0\varepsilon^TC^T+\varepsilon_0\varepsilon_0^T) \\
+			&=\operatorname{E}(C\varepsilon\varepsilon^TC^T)-\operatorname{E}(C\varepsilon\varepsilon_0^T)-\operatorname{E}(\varepsilon_0\varepsilon^TC^T)+\operatorname{E}(\varepsilon_0\varepsilon_0^T) \\
+			&=C\operatorname{E}(\varepsilon\varepsilon^T)C^T-\operatorname{Cov}(C\varepsilon,\varepsilon_0)-\operatorname{Cov}(\varepsilon_0,C\varepsilon)+\operatorname{Cov}(\varepsilon_0) \\
+			&=C\operatorname{Cov}(\varepsilon)C^T-2\operatorname{Cov}(C\varepsilon,\varepsilon_0)+\sigma^2I_m \\
+			&=\sigma^2CC^T-2C\operatorname{Cov}(\varepsilon,\varepsilon_0)+\sigma^2I_m \\
+			&=\sigma^2CC^T-2\sigma^2CV^T+\sigma^2I_m=\sigma^2(CC^T-2CV^T+I_m)
+		\end{aligned}
+	\end{gather*}
+	由\cref{theo:ERVQuadraticForm}和\cref{prop:Trace}(2)可得：
+	\begin{align*}
+		\operatorname{PMSE}(\hat{y}_0)&=\operatorname{E}[(\hat{y}_0-y)^TA(\hat{y}_0-y)] =\operatorname{E}[(C\varepsilon-\varepsilon_0)^TA(C\varepsilon-\varepsilon_0)] \\
+		&=\operatorname{tr}[A\sigma^2(CC^T-2CV^T+I_m)] =\sigma^2\operatorname{tr}[A(CC^T-2CV^T+I_m)]
+	\end{align*}
+	接下来的目标就是求解：
+	\begin{equation*}
+		\min_{C}\operatorname{PMSE}(\hat{y}_0),\quad\operatorname{s.t.}CX=X_0
+	\end{equation*}\par
+	使用Lagrange乘子法，构造辅助函数（不引入$X_0$是因为它是常数，对结果没影响）：
+	\begin{equation*}
+		F(C,\varLambda)=\sigma^2\operatorname{tr}[A(CC^T-2CV^T+I_m)]-2\operatorname{tr}(CX\varLambda)
+	\end{equation*}
+	其中$\varLambda$是Lagrange乘子。由矩阵求导和\cref{prop:Trace}(1)可得：
+	\begin{align*}
+		\frac{\partial\operatorname{PSME}(\hat{y}_0)}{\partial C}&=\sigma^2\frac{\partial\operatorname{tr}(ACC^T)}{\partial C}-2\sigma^2\frac{\partial\operatorname{tr}(ACV^T)}{\partial C}-2\frac{\partial\operatorname{tr}(CX\varLambda)}{\partial C} \\
+		&=\sigma^22AC-2\sigma^2AV-2\varLambda^TX^T
+	\end{align*}
+	令上式为$0$可得：
+	\begin{gather*}
+		\sigma^2AC=\sigma^2AV+\varLambda^TX^T \\
+		C=V+\frac{A^{-1}\varLambda^TX^T}{\sigma^2}
+	\end{gather*}
+	代入$CX=X_0$可得：
+	\begin{equation*}
+		VX+\frac{A^{-1}\varLambda^TX^TX}{\sigma^2}=X_0 \\
+		\varLambda^TX^TX=\sigma^2A(X_0-VX) \\
+		X^TX\varLambda=\sigma^2(X_0^T-X^TV^T)A^T
+	\end{equation*}
+	由\cref{theo:VectorSpaceAAAT}可知$\mathcal{M}(X^T)=\mathcal{M}(X^TX)$，而$\mathcal{M}(X_0^T)\subseteq\mathcal{M}(X^T)$，所以上式等式右边矩阵的每一列都在$\mathcal{M}(X^TX)$中，即方程组是相容的。由\cref{theo:InhomogeneousLinearEq'sGeneralSolution2}可得：
+	\begin{equation*}
+		\varLambda=\sigma^2(X^TX)^-(X_0^T-X^TV^T)A^T
+	\end{equation*}
+	于是由\cref{prop:A-}(6)可得：
+	\begin{align*}
+		C&=V+A^{-1}A(X_0-VX)(X^TX)^-X^T=V+(X_0-VX)(X^TX)^-X^T \\
+		&=X_0(X^TX)^-X^T+V[I_n-X(X^TX)^-X^T]
+	\end{align*}
+	由\cref{prop:A-}(3)(4)可知$C$是唯一的，与$(X^TX)^-$的选择无关。所以：
+	\begin{equation*}
+		\hat{y}_0=X_0(X^TX)^-X^Ty+V[I_n-X(X^TX)^-X^T]y=X_0\hat{\beta}+V(y-X\hat{\beta})
+	\end{equation*}
+	为$y_0$在广义预测均方误差意义下的最优线性无偏估计。
+\end{proof}
+
+
 
 \section{正态线性模型}
 \subsection{参数估计}
@@ -603,7 +733,7 @@
 	这里其实是一个未知方差构造$F$分布的思想。
 \end{note}
 \subsubsection{Scheffe置信区间}
-\begin{theorem}
+\begin{theorem}\label{theo:ScheffeCI}
 	对于\cref{model:NormalLinearModel}，对任何可估函数$l^T\beta$，其中$l\in\mathcal{M}(A^T)$且$l\ne\mathbf{0}$，其置信度为$1-\alpha$的同时置信区间为：
 	\begin{equation*}
 		l^T\hat{\beta}\pm[k\hat{\sigma}^2F_{k,n-r}(\alpha)l^T(X^TX)^-l]^{\frac{1}{2}}
@@ -623,8 +753,8 @@
 		1-\alpha=P\left\{|l^T\hat{\beta}-l^T\beta|\leqslant [k\hat{\sigma}^2F_{k,n-r}(\alpha)l^T(X^TX)^-l]^{\frac{1}{2}},\;\text{对任意的}l\in\mathcal{M}(A^T)\text{且}l\ne\mathbf{0}\right\}\qedhere
 	\end{equation*}
 \end{proof}
-\subsubsection{Bonferroni区间}
-\begin{theorem}
+\subsubsection{Bonferroni置信区间}
+\begin{theorem}\label{theo:BonferroniCI}
 	对于\cref{model:NormalLinearModel}，记$A$的行分别为$\seq{a^T}{k}$，则$a_
 	i^T\beta$置信度为$1-\alpha$的Bonferroni置信区间为：
 	\begin{equation*}
@@ -643,6 +773,102 @@
 	\end{equation*}
 	由Bonferroni校正法可得出结论。
 \end{proof}
+\subsubsection{比较}
+\begin{derivation}
+	Scheffe区间与Bonferroni区间哪个更好？由二者的公式可以看出只需选择：
+	\begin{equation*}
+		\min\left\{[k\hat{\sigma}^2F_{k,n-r}(\alpha)]^{\frac{1}{2}},\hat{\sigma}t_{n-r}\left(\frac{\alpha}{2k}\right)\right\}
+	\end{equation*}
+	对应的方法即能得到更短的置信区间。
+\end{derivation}
+
+\subsection{区间预测}
+\begin{theorem}
+	延续\cref{def:LinearModelForcast}处的定义，假设$\varepsilon\sim\operatorname{N}(0,\sigma^2I_n),\;\varepsilon_0\sim\operatorname{N}(0,\sigma^2I_m)$，且有
+	\begin{equation*}
+		\operatorname{Cov}[(y,y_0)^T]=\operatorname{Cov}[(\varepsilon,\varepsilon_0)^T]=\sigma^2
+		\begin{pmatrix}
+			I_n & V^T \\
+			V & I_m 
+		\end{pmatrix}
+	\end{equation*}
+	则$y_0^{(i)}$的Scheffe置信区间与Bonferroni置信区间分别为：
+	\begin{equation*}
+		\hat{y}_0^{(i)}\pm[m\hat{\sigma}^2F_{m,n-r}(\alpha)T_{ii}]^{\frac{1}{2}},\quad
+		\hat{y}_0^{(i)}\pm t_{n-r}\left(\frac{\alpha}{2m}\right)\hat{\sigma}(T_{ii})^{\frac{1}{2}}
+	\end{equation*}
+	其中$y_0^{(i)},\hat{y}_0^{(i)}$表示的是$y_0,\hat{y}_0$的第$i$个分量，$\hat{y}_0$由\cref{theo:PECorrelatedLinearModelForcast}给出，$T_{ii}$表示矩阵$T$的$i,i$元，$T=(X_0-VX)(X^TX)^-(X_0-VX)^T+I_m-VV^T$。
+\end{theorem}
+\begin{proof}
+	由\cref{theo:PECorrelatedLinearModelForcast}、\cref{theo:MultiNormalLinearTransform}、\cref{prop:CovMat}(3)(5)和\cref{prop:A-}(6)(7)(5)可得：
+	\begin{equation*}
+		\hat{y}_0=X_0\hat{\beta}+V(y-X\hat{\beta})\sim\operatorname{N}_m(X_0\beta,\sigma^2VV^T)
+	\end{equation*}
+	\begin{align*}
+		\operatorname{Cov}(\hat{y}_0)&=\operatorname{Cov}(Cy)=C\operatorname{Cov}(y)C^T=\sigma^2CC^T \\
+		&=\sigma^2[X_0(X^TX)^-X^T+V-VX(X^TX)^-X^T] \\
+		&\quad\cdot[X(X^TX)^-X_0^T+V^T-X(X^TX)^-X^TV^T] \\
+		&=\sigma^2[X_0(X^TX)^-X^TX(X^TX)^-X_0^T+X_0(X^TX)^-X^TV^T \\
+		&\quad-X_0(X^TX)^-X^TX(X^TX)^-X^TV^T+VX(X^TX)^-X_0^T \\
+		&\quad+VV^T-VX(X^TX)^-X^TV^T-VX(X^TX)^-X^TX(X^TX)^-X_0^T \\
+		&\quad-VX(X^TX)^-X^TV^T+VX(X^TX)^-X^TX(X^TX)^-X^TV^T] \\
+		&=\sigma^2[X_0(X^TX)^-X_0^T+X_0(X^TX)^-X^TV^T-X_0(X^TX)^-X^TV^T \\
+		&\quad+VX(X^TX)^-X_0^T+VV^T-VX(X^TX)^-X^TV^T \\
+		&\quad-VX(X^TX)^-X_0^T-VX(X^TX)^-X^TV^T+VX(X^TX)^-X^TV^T] \\
+		&=\sigma^2[X_0(X^TX)^-X_0^T+VV^T-VX(X^TX)^-X^TV^T]
+	\end{align*}
+	\begin{align*}
+		\operatorname{Cov}(\hat{y}_0,y_0)
+		&=\operatorname{Cov}[X_0\hat{\beta}+V(y-X\hat{\beta}),y_0]=\operatorname{Cov}[Vy+(X_0-VX)\hat{\beta},y_0] \\
+		&=V\operatorname{Cov}(y,y_0)+(X_0-VX)\operatorname{Cov}(\hat{\beta},y_0) \\
+		&=V\operatorname{Cov}(y,y_0)+(X_0-VX)\operatorname{Cov}[(X^TX)^-X^Ty,y_0] \\
+		&=V\operatorname{Cov}(y,y_0)+(X_0-VX)(X^TX)^-X^T\operatorname{Cov}\operatorname{Cov}(y,y_0) \\
+		&=[V+(X_0-VX)(X^TX)^-X^T]\operatorname{Cov}(y,y_0) \\
+		&=\sigma^2[V+(X_0-VX)(X^TX)^-X^T]V^T
+	\end{align*}
+	令$A=X_0(X^TX)^-X_0^T+VV^T-VX(X^TX)^-X^TV^T,\;B=[V+(X_0-VX)(X^TX)^-X^T]V^T$，所以：
+	\begin{equation*}
+		\begin{pmatrix}
+			\hat{y}_0 \\
+			y_0
+		\end{pmatrix}\sim\operatorname{N}_{m+n}\left[
+		\begin{pmatrix}
+			X_0\beta \\
+			X_0\beta
+		\end{pmatrix},\sigma^2
+		\begin{pmatrix}
+			A & B \\
+			B^T & I_m
+		\end{pmatrix}
+		\right]
+	\end{equation*}
+	由\cref{theo:MultiNormalLinearTransform}可知：
+	\begin{equation*}
+		\hat{y}_0-y_0=
+		(1,-1)
+		\begin{pmatrix}
+			\hat{y}_0 \\
+			y_0
+		\end{pmatrix}\sim\operatorname{N}_m\{
+		\mathbf{0},\sigma^2[(X_0-VX)(X^TX)^-(X_0-VX)+I_m-VV^T]\}
+	\end{equation*}\par
+	令$T=(X_0-VX)(X^TX)^-(X_0-VX)^T+I_m-VV^T$，仿照\cref{theo:NormalLinearModelConfidenceEllipsoid}中的推导能得到此时$\hat{y}_0-y_0$置信度为$1-\alpha$的置信椭球为：
+	\begin{equation*}
+		[\hat{y}_0-y_0:(\hat{y}_0-y_0)^T(T)^{-1}(\hat{y}_0-y_0)\leqslant m\hat{\sigma}^2F_{m,n-r}(\alpha)]
+	\end{equation*}
+	其中$T$的可逆性由\info{T的可逆性证明}保证。\par
+	由上述置信椭球，仿照\cref{theo:ScheffeCI}的推导，在其中取$b$为标准基向量即可得到$y_0^{(i)}$的Scheffe置信区间为：
+	\begin{equation*}
+		\hat{y}_0^{(i)}\pm[m\hat{\sigma}^2F_{m,n-r}(\alpha)T_{ii}]^{\frac{1}{2}}
+	\end{equation*}\par
+	同理可得到$y_0^{(i)}$的Bonferroni置信区间为：
+	\begin{equation*}
+		\hat{y}_0^{(i)}\pm t_{n-r}\left(\frac{\alpha}{2m}\right)\hat{\sigma}(T_{ii})^{\frac{1}{2}}\qedhere
+	\end{equation*}
+\end{proof}
+
+
+
 
 \section{误差协方差推广}
 在很多情况下线性模型误差的协方差矩阵都不是$\sigma^2I_n$的形式。
@@ -671,7 +897,10 @@
 			\operatorname{Cov}(\varepsilon^*)=\sigma^2I_n
 		\end{cases}
 	\end{equation*}
-	于是我们可以将广义线性模型化作线性模型来处理，对于线性模型与正态线性模型的那些结论，广义线性模型也可类似得到。
+	于是我们可以将广义线性模型化作线性模型来处理，由于可估函数的定义与协方差矩阵无关，所以对于线性模型与正态线性模型的那些结论，广义线性模型也可得到。
 \end{derivation}
 
 \subsection{最小二乘统一理论}
+
+
+\section{线性回归模型}

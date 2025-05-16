@@ -33,7 +33,7 @@
 \begin{property}\label{prop:Eigenvector}
 	$A\in M_{n}(K)$，其特征向量具有如下性质：
 	\begin{enumerate}
-		\item 设$\lambda$是$A$的一个特征值，则$A$属于$\lambda$的所有特征向量构成$K^n$的一个子空间。因此，把齐次线性方程组$(\lambda I-A)x=\mathbf{0}$的解空间称为$A$属于$\lambda$的\gls{Eigenspace}；
+		\item 设$\lambda$是$A$的一个特征值，则$A$属于$\lambda$的所有特征向量构成$K^n$的一个子空间。因此，把齐次线性方程组$(\lambda I-A)x=\mathbf{0}$的解空间称为$A$属于$\lambda$的\gls{Eigenspace}，记为$W_{\lambda}$；
 		\item $A$的属于不同特征值的特征向量是线性无关的。
 	\end{enumerate}
 \end{property}
@@ -189,15 +189,25 @@
 	如果$n$阶矩阵$A$能够相似于一个对角矩阵，那么称$A$\gls{Diagonalizable}。
 \end{definition}
 研究矩阵是否可对角化是为了计算矩阵的幂，因为对角矩阵的幂是很好计算的。
-\begin{theorem}[矩阵可对角化的第一个充分必要条件]\label{theo:DiagCondition1}
-	$A\in M_{n}(K)$可对角化的充分必要条件为：$A$有$n$个线性无关的特征向量$\seq{\alpha}{n}$，此时令$P=(\seq{\alpha}{n})$，则：
+\begin{theorem}\label{theo:DiagCondition}
+	$A\in M_{n}(K)$可对角化的充分必要条件为
+	\begin{enumerate}
+		\item $A$有$n$个线性无关的特征向量$\seq{\alpha}{n}$；
+		\item $A$的属于不同特征值的特征子空间的维数之和等于$n$；
+		\item $A$的特征多项式的全部复根都属于$K$，且$A$的每个特征值的几何重数等于它的代数重数；
+		\item 设$\seq{\lambda}{m}$是$A$全部的不同的特征值，则：
+		\begin{equation*}
+			K^n=W_{\lambda_1}\oplus W_{\lambda_2}\oplus\cdots\oplus W_{\lambda_m}
+		\end{equation*}
+	\end{enumerate}
+	此时令$P=(\seq{\alpha}{n})$，则：
 	\begin{equation*}
 		P^{-1}AP=\operatorname{diag}\{\seq{\lambda}{n}\}
 	\end{equation*}
-	其中$\lambda_i$是$\alpha_i$所属的特征值，$i=1,2,\dots,n$。上述对角矩阵称为$A$的\textbf{相似标准形}，除了主对角线上元素的排列次序外，$A$的相似标准形是唯一的。
+	其中$\lambda_i$是$\alpha_i$所属的特征值，$i=1,2,\dots,n$。上述对角矩阵称为$A$的\textbf{相似标准形}，除了主对角线上元素的排列次序外，$A$的相似标准形是唯一的；
 \end{theorem}
 \begin{proof}
-	显然：
+	(1)显然：
 	\begin{align*}
 		&A\text{与}\text{对角矩阵}D=\operatorname{diag}\{\seq{\lambda}{n}\}\text{相似},\;\text{其中}\lambda_i\in K,\;i=1,2,\dots,n \\
 		\iff&\text{如果存在可逆矩阵$P\in M_{n}(K)$，使得}P^{-1}AP=D \\
@@ -205,24 +215,11 @@
 		&\text{即}A(\seq{\alpha}{n})=(\seq{\alpha}{n})D \\
 		&\text{即}(A\alpha_1,A\alpha_2,\dots,A\alpha_n)=(\lambda_1\alpha_1,\lambda_2\alpha_2,\dots,\lambda_n\alpha_n) \\
 		\iff&K^{n}\text{中有$n$个线性无关的列向量}\seq{\alpha}{n}\text{使得}A\alpha_i=\lambda_i\alpha_i,\;i=1,2,\dots,n\qedhere
-	\end{align*}
-\end{proof}
-\begin{theorem}[矩阵可对角化的第二个充分必要条件]\label{theo:DiagCondition2}
-	$A\in M_{n}(K)$可对角化的充分必要条件是：$A$的属于不同特征值的特征子空间的维数之和等于$n$。
-\end{theorem}
-\begin{proof}
-	\textbf{(1)充分性：}由\cref{prop:Eigenvector}(2)和\cref{theo:DiagCondition1}的充分性可直接得出。\par
-	\textbf{(2)必要性：}设$A$的所有不同的特征值是$\seq{\lambda}{m}$，它们的几何重数分别为$r_1,r_2,\dots,r_m$。若此时$A$的属于不同特征值的特征子空间的维数之和不等于$n$，由\cref{theo:AlgebraicMultiplicityGeometricMultiplicity}可知此时$r_1+r_2+\cdots+r_m<n$，那么$A$没有$n$个线性无关的特征向量，由\cref{theo:DiagCondition1}的必要性可得$A$不可以对角化。
-\end{proof}
-\begin{corollary}
-	$A\in M_{n}(K)$如果有$n$个不同的特征值，那么$A$可对角化。
-\end{corollary}
-\begin{theorem}[矩阵可对角化的第三个充分必要条件]
-	$A\in M_{n}(K)$可对角化的充分必要条件是：$A$的特征多项式的全部复根都属于$K$，且$A$的每个特征值的几何重数等于它的代数重数。
-\end{theorem}
-\begin{proof}
-	\textbf{(1)充分性：}由\cref{theo:DiagCondition2}的充分性可直接得到。\par
-	\textbf{(2)必要性：}因为$A$可对角化，由可对角化的定义可知$A$相似于：
+	\end{align*}\par
+	(2)\textbf{充分性：}由\cref{prop:Eigenvector}(2)和(1)的充分性可直接得出。\par
+	\textbf{必要性：}设$A$的所有不同的特征值是$\seq{\lambda}{m}$，它们的几何重数分别为$r_1,r_2,\dots,r_m$。若此时$A$的属于不同特征值的特征子空间的维数之和不等于$n$，由\cref{theo:AlgebraicMultiplicityGeometricMultiplicity}可知此时$r_1+r_2+\cdots+r_m<n$，那么$A$没有$n$个线性无关的特征向量，由(1)的必要性可得$A$不可以对角化。\par
+	(3)\textbf{充分性：}由(2)的充分性可直接得到。\par
+	\textbf{必要性：}因为$A$可对角化，由可对角化的定义可知$A$相似于：
 	\begin{equation*}
 		\operatorname{diag}(\lambda_1,\cdots,\lambda_1,\dots,\lambda_m,\dots,\lambda_m)\in M_{n}(K)
 	\end{equation*}
@@ -230,7 +227,15 @@
 	\begin{equation*}
 		|\lambda I-A|=(\lambda-\lambda_1)^{r_1}(\lambda-\lambda_2)^{r_2}\cdots(\lambda-\lambda_m)^{r_m}
 	\end{equation*}
-	于是$A$的特征多项式的根为$\seq{\lambda}{m}$。因为$\operatorname{diag}(\lambda_1,\cdots,\lambda_1,\dots,\lambda_m,\dots,\lambda_m)\in M_{n}(K)$，所以$\seq{\lambda}{m}\in K$，于是$A$的特征多项式的全部根都属于$K$且每一个特征值的代数重数等于它的几何重数。
+	于是$A$的特征多项式的根为$\seq{\lambda}{m}$。因为$\operatorname{diag}(\lambda_1,\cdots,\lambda_1,\dots,\lambda_m,\dots,\lambda_m)\in M_{n}(K)$，所以$\seq{\lambda}{m}\in K$，于是$A$的特征多项式的全部根都属于$K$且每一个特征值的代数重数等于它的几何重数。\par
+	(4)由(2)、\cref{prop:Eigenvector}(2)、\cref{prop:nDimensionalLinearSpace}和\cref{theo:DirectSum}(5)可得：
+	\begin{align*}
+		A\text{可对角化}
+		\iff&\sum_{i=1}^{m}\dim(W_{\lambda_i})=n \\
+		\iff&W_{\lambda_i},i=1,2,\dots,m\text{的基合起来是$n$个线性无关的向量} \\
+		\iff&W_{\lambda_i},i=1,2,\dots,m\text{的基合起来是$K^n$的一组基} \\
+		\iff&K^n=W_{\lambda_1}\oplus W_{\lambda_2}\oplus\cdots\oplus W_{\lambda_m}\qedhere
+	\end{align*}
 \end{proof}
 
 \subsection{Hermitian矩阵的对角化}

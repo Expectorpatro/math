@@ -35,7 +35,7 @@
 	线性变换对其对应的矩阵保持加法、纯量乘法和乘法的运算。
 \end{theorem}
 \begin{proof}
-	设$X$分别为域$F$上的$n$维线性空间，$\sigma:\mathcal{T}\in\operatorname{Hom}(X)\longrightarrow\mathcal{T}$在$X$的一组基$\seq{\alpha}{m}$下的矩阵。加法和纯量乘法的结论由\cref{theo:LinearTransformationMatrix}可得。取$\mathcal{T}_1,\mathcal{T}_2\in\operatorname{Hom}(X),\;\sigma(\mathcal{T}_1)=A,\;\sigma(\mathcal{T}_2)=B$，由\cref{prop:LinearMapping}(4)可得：
+	设$X$分别为域$F$上的$n$维线性空间，$\sigma:\mathcal{T}\in\operatorname{Hom}(X)\longrightarrow\mathcal{T}$在$X$的一组基$\seq{\alpha}{m}$下的矩阵。加法和纯量乘法的结论由\cref{theo:LinearTransformationMatrix}可得。取$\mathcal{T}_1,\mathcal{T}_2\in\operatorname{Hom}(X),\;\sigma(\mathcal{T}_1)=A,\;\sigma(\mathcal{T}_2)=B$，于是有：
 	\begin{align*}
 		&[\seq{(\mathcal{T}_1\mathcal{T}_2)\alpha}{n}]
 		=[\mathcal{T}_1(\mathcal{T}_2\alpha_1),\mathcal{T}_1(\mathcal{T}_2\alpha_2),\dots,\mathcal{T}_1(\mathcal{T}_2\alpha_n)] \\
@@ -122,12 +122,13 @@
 		\mathcal{T}\xi=\lambda\xi\iff Ax=\lambda x\qedhere
 	\end{equation*}
 \end{proof}
-\begin{property}
+\begin{property}\label{prop:EigenvectorLinearlyTransformation}
 	设$X$是域$F$上的一个线性空间，$\mathcal{T}\in\operatorname{Hom}(X)$，$\lambda$是$\mathcal{T}$的一个特征值，则：
 	\begin{enumerate}
 		\item $\mathcal{T}$属于特征值$\lambda$的特征向量构成$X$的一个子空间，称该子空间为$\mathcal{T}$属于特征值$\lambda$的特征子空间，记为$X_{\lambda}$；
 		\item $X_{\lambda}=\operatorname{Ker}(\lambda\mathcal{I}-\mathcal{T})$；
-		\item 若$\dim(X)=n$，则$\dim(X_{\lambda})=n-\operatorname{rank}(\lambda\mathcal{I}-\mathcal{T})$。
+		\item 若$\dim(X)=n$，则$\dim(X_{\lambda})=n-\operatorname{rank}(\lambda\mathcal{I}-\mathcal{T})$；
+		\item $\mathcal{T}$属于不同特征值的特征向量是线性无关的。
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -139,40 +140,83 @@
 	(2)$\;\xi\in X_{\lambda}\iff\mathcal{T}\xi=\lambda\xi\iff(\mathcal{T}-\lambda\mathcal{I})\xi=\mathbf{0}\iff\xi\in\operatorname{Ker}(\lambda\mathcal{I}-\mathcal{T})$。\par
 	(3)由\cref{theo:IsomorphicDim}，设$\sigma$是$X$到$F^n$的同构映射，它将$X$中的元素映射到在基$\seq{\alpha}{n}$下的坐标，记$\mathcal{T}$在$\seq{\alpha}{n}$下的矩阵为$A$。由\cref{theo:LinearlyTransformationEigen}可知$\sigma(X_{\lambda})$等于齐次线性方程组$(\lambda I_n-A)x=\mathbf{0}$的解空间$W$，根据\cref{prop:HomogeneousSLESolution}(3)、\cref{prop:IsomorphicOfLinearSpace}(7)和\cref{theo:LinearTransformationMatrix}可得：
 	\begin{equation*}
-		\dim(X)=\dim[\sigma(X_\lambda)]=\dim(W)=n-\operatorname{rank}(\lambda I_n-A)=n-\operatorname{rank}(\lambda\mathcal{I}-\mathcal{T})\qedhere
-	\end{equation*}
+		\dim(X_{\lambda})=\dim[\sigma(X_\lambda)]=\dim(W)=n-\operatorname{rank}(\lambda I_n-A)=n-\operatorname{rank}(\lambda\mathcal{I}-\mathcal{T})
+	\end{equation*}\par
+	(4)设$\sigma$是$X$中的向量到它在基$\seq{\xi}{n}$下的坐标的同构映射。由\cref{prop:Eigenvector}(2)、\cref{theo:LinearlyTransformationEigen}和\cref{prop:IsomorphicOfLinearSpace}(4)立即可得。
 \end{proof}
 \begin{definition}
 	设$X$是域$F$上的一个线性空间，$\mathcal{T}\in\operatorname{Hom}(X)$，$\lambda$是$\mathcal{T}$的一个特征值，称$\lambda$作为$\mathcal{T}$的特征多项式的根的重数称为$\lambda$的代数重数，将$X_{\lambda}$的维数称为$\lambda$的几何重数。
 \end{definition}
 \subsubsection{线性变换的对角化}
 \begin{definition}
-	设$X$是域$F$上的一个$n$维线性空间，$\mathcal{T}\in\operatorname{Hom}(X)$，若$X$中存在一个基使得$\mathcal{T}$在这个基下的矩阵是对角矩阵，则称$\mathcal{T}$可对角化。
+	设$X$是域$F$上的一个$n$维线性空间，$\mathcal{T}\in\operatorname{Hom}(X)$，若$X$中存在一组基使得$\mathcal{T}$在这组基下的矩阵是对角矩阵，则称$\mathcal{T}$可对角化。
 \end{definition}
 \begin{theorem}
 	设$X$是域$F$上的一个$n$维线性空间，$\mathcal{T}\in\operatorname{Hom}(X)$，$\mathcal{T}$可对角化当且仅当：
 	\begin{enumerate}
+		\item $X$中存在一组基使得$\mathcal{T}$在这组基下的矩阵可对角化；
 		\item $\mathcal{T}$有$n$个线性无关的特征向量$\seq{\xi}{n}$；
 		\item $X$中存在由$\mathcal{T}$的特征向量构成的一组基；
 		\item $\mathcal{T}$属于不同特征值的特征子空间的维数之和为$n$；
 		\item $X$可表为$\mathcal{T}$属于不同特征值的特征子空间的直和；
 		\item $\mathcal{T}$的特征多项式在$F[\lambda]$中可分解为：
 		\begin{equation*}
-			(\lambda-\lambda_i)^{r_1}(\lambda-\lambda_2)^{r_2}\cdots(\lambda-\lambda_m)^{r_m}
+			(\lambda-\lambda_1)^{r_1}(\lambda-\lambda_2)^{r_2}\cdots(\lambda-\lambda_m)^{r_m}
 		\end{equation*}
+		其中$\seq{\lambda}{m}$两两不等且$\mathcal{T}$的每个特征值$\lambda_i$的几何重数等于它的代数重数，$i=1,2,\dots,m$。
 	\end{enumerate}
 	此时$(\seq{\mathcal{T}\xi}{n})=(\seq{\xi}{n})\operatorname{diag}\{\seq{\lambda}{n}\}$，$\lambda_i$为$\xi_i$所属的特征值，$A=\operatorname{diag}\{\seq{\lambda}{n}\}$被称为$\mathcal{T}$的\textbf{标准形}。除了主对角线上元素的排列顺序外，$A$是由$\mathcal{T}$唯一决定的。
 \end{theorem}
 \begin{proof}
-	(1)由$\mathcal{T}$可对角化的定义可得：
+	(1)必要性显然。设$\mathcal{T}$在基$\seq{\alpha}{n}$下的矩阵$A$可对角化，即存在可逆矩阵$P$与对角矩阵$\varLambda$使得$A=P\varLambda P^{-1}$，设$P$的列为$\seq{P}{n}$，于是有：
+	\begin{gather*}
+		(\seq{\mathcal{T}\alpha}{n})=(\seq{\alpha}{n})A \\
+		(\seq{\mathcal{T}\alpha}{n})=(\seq{\alpha}{n})P\varLambda P^{-1} \\
+		(\seq{\mathcal{T}\alpha}{n})P=(\seq{\alpha}{n})P\varLambda \\
+		\begin{aligned}
+			&[\seq{(\seq{\mathcal{T}\alpha}{n})P}{n}] \\
+			=&[\seq{(\seq{\alpha}{n})P}{n}]\varLambda
+		\end{aligned}\\
+		\begin{aligned}
+			&\{\mathcal{T}[(\seq{\alpha}{n})P_1],\mathcal{T}[(\seq{\alpha}{n})P_2],\dots,\mathcal{T}[(\seq{\alpha}{n})P_n]\} \\
+			=&[\seq{(\seq{\alpha}{n})P}{n}]\varLambda
+		\end{aligned}
+	\end{gather*}
+	由\cref{theo:BasisTransInvertibleMat}可知$\seq{(\seq{\alpha}{n})P}{n}$还是$X$的一组基，于是$\mathcal{T}$在这组基下的矩阵是对角矩阵$\varLambda$，$\mathcal{T}$可对角化，充分性得证。\par
+	(2)由$\mathcal{T}$可对角化的定义可得：
 	\begin{align*}
 		&\mathcal{T}\text{可对角化}\iff\mathcal{T}\text{在$X$的基}\seq{\xi}{n}\text{下的矩阵为}\operatorname{diag}\{\seq{\lambda}{n}\} \\
 		\iff&(\seq{\mathcal{T}\xi}{n})=(\seq{\xi}{n})\operatorname{diag}\{\seq{\lambda}{n}\} \\
 		\iff&(\seq{\mathcal{T}\xi}{n})=(\lambda_1\xi_1,\lambda_2\xi_2,\dots,\lambda_n\xi_n) \\
 		\iff&\mathcal{T}\xi_i=\lambda_i\xi_i\iff\mathcal{T}\text{有$n$个线性无关的特征向量}\seq{\xi}{n}
 	\end{align*}\par
-	(2)由(1)和\cref{prop:nDimensionalLinearSpace}(2)立即可得。\par
-	(3)
+	(3)由(2)和\cref{prop:nDimensionalLinearSpace}(2)立即可得。\par
+	(4)由(1)可得$\mathcal{T}$可对角化当且仅当存在$X$的一组基$\seq{\xi}{n}$使得$\mathcal{T}$在这组基下的矩阵$A$可对角化，设$\sigma$是$X$中的向量到它在基$\seq{\xi}{n}$下的坐标的同构映射。由\cref{theo:DiagCondition}(2)可知$A$的特征子空间维数之和为$n$，根据\cref{prop:IsomorphicOfLinearSpace}(7)可知$\mathcal{T}$属于不同特征值的特征子空间的维数之和为$n$。\par
+	(5)设$\mathcal{T}$全部的不同的特征值为$\seq{\lambda}{m}$。由(4)、\cref{prop:EigenvectorLinearlyTransformation}(4)和\cref{prop:nDimensionalLinearSpace}(2)可得：
+	\begin{align*}
+		\mathcal{T}\text{可对角化}
+		\iff&\sum_{i=1}^{m}\dim(X_{\lambda_i})=n \\
+		\iff&X_{\lambda_i},i=1,2,\dots,m\text{的基合起来是$n$个线性无关的向量} \\
+		\iff&X_{\lambda_i},i=1,2,\dots,m\text{的基合起来是$X$的一组基} \\
+		\iff&X=X_{\lambda_1}\oplus X_{\lambda_2}\oplus\cdots\oplus X_{\lambda_m}
+	\end{align*}\par
+	(6)由(1)和\cref{theo:DiagCondition}(3)立即可得。
+\end{proof}
+
+\subsection{不变子空间}
+\begin{definition}
+	设$X$是域$F$上的线性空间，$\mathcal{T}$是$X$上的一个线性变换，$E$是$X$的一个子空间。若对于任意的$\alpha\in E$都有$\mathcal{T}\alpha\in E$，则称$E$是$X$的一个\gls{InvariantSubspace}，简称为$\mathcal{T}$-子空间。
+\end{definition}
+\begin{property}
+	设$X$是域$F$上的线性空间，$\mathcal{T}$是$X$上的一个线性变换，则：
+	\begin{enumerate}
+		\item $X$、$X$的零子空间是$\mathcal{T}$-子空间，称二者为\textbf{平凡的}$\mathcal{T}$-子空间；
+		\item $\operatorname{Ker}(\mathcal{T}),\operatorname{Im}(\mathcal{T})$和$\mathcal{T}$的特征子空间是$\mathcal{T}$-子空间；
+		\item 
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)(2)显然
 \end{proof}
 
 
