@@ -12,16 +12,6 @@
 	\end{equation*}
 	其中$y$为$n\times 1$观测向量，$X$为$n\times p$设计矩阵，$\beta$为$p\times 1$未知参数向量，$\varepsilon$为随机误差，$\sigma^2$为误差方差。
 \end{definition}
-%\begin{derivation}
-%	因为$\Sigma>0$，所以存在$\Sigma^{-\frac{1}{2}}$。令$y^*=\Sigma^{-\frac{1}{2}}y,\;X^*=\Sigma^{-\frac{1}{2}}\beta,\;\varepsilon^*=\Sigma^{-\frac{1}{2}}\varepsilon$，由\cref{prop:CovMat}(3)可知\cref{model:LinearModel}可化作：
-%	\begin{equation*}
-%		\begin{cases}
-%			y^*=X^*\beta+\varepsilon^* \\
-%			\operatorname{E}(\varepsilon^*)=\mathbf{0} \\
-%			\operatorname{Cov}(\varepsilon)=\sigma^2I_n
-%		\end{cases}
-%	\end{equation*}
-%\end{derivation}
 \begin{definition}
 	称方程$X^TX\beta=X^Ty$为\gls{NormalEquation}。
 \end{definition}
@@ -868,8 +858,6 @@
 \end{proof}
 
 
-
-
 \section{误差协方差推广}
 在很多情况下线性模型误差的协方差矩阵都不是$\sigma^2I_n$的形式。
 \subsection{广义最小二乘估计}
@@ -904,3 +892,59 @@
 
 
 \section{线性回归模型}
+\begin{definition}\label{model:LinearRegressionModel}
+	设因变量$Y$和自变量$\seq{X}{p-1}$满足：
+	\begin{equation*}
+		Y=\beta_0+\beta_1X_1+\beta_2X_2+\cdots+\beta_{p-1}X_{p-1}+e
+	\end{equation*}
+	若对因变量$Y$和自变量$\seq{X}{p-1}$进行了$n$次观察，得到$n$组数据，它们满足：
+	\begin{equation*}
+		y_i=\beta_0+\beta_1x_{i1}+\beta_2x_{i2}+\cdots+\beta_{p-1}x_{ip-1}+\varepsilon_i,\quad i=1,2,\dots,n
+	\end{equation*}
+	记：
+	\begin{equation*}
+		y=
+		\begin{pmatrix}
+			y_1 \\
+			y_2 \\
+			\vdots \\
+			y_n
+		\end{pmatrix},\quad
+		X=
+		\begin{pmatrix}
+			1 & x_{11} & \cdots & x_{1p-1} \\
+			1 & x_{21} & \cdots & x_{2p-1} \\
+			\vdots & \vdots & \ddots & \vdots \\
+			1 & x_{n1} & \cdots & x_{np-1} \\
+		\end{pmatrix},\quad
+		\beta=
+		\begin{pmatrix}
+			\beta_0 \\
+			\beta_1 \\
+			\vdots \\
+			\beta_{p-1}
+		\end{pmatrix},\quad
+		\varepsilon=
+		\begin{pmatrix}
+			\varepsilon_1 \\
+			\varepsilon_2 \\
+			\vdots \\
+			\varepsilon_n
+		\end{pmatrix}
+	\end{equation*}
+	且假设$\operatorname{rank}(X)=p,\;\operatorname{E}(\varepsilon)=\mathbf{0},\;\operatorname{Cov}(\varepsilon)=\sigma^2I_n$，则得到\gls{LinearRegressionModel}：
+	\begin{equation*}
+		y=X\beta+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
+	\end{equation*}
+	称$\beta_0$为常数项，$\beta_I=(\seq{\beta}{p-1})^T$为回归系数。若记$X=(\mathbf{1}_n,\tilde{X})$，其中$\mathbf{1}_n$为由$n$个$1$构成的列向量，则线性回归模型可被改写为：
+	\begin{equation*}
+		y=\mathbf{1}_n\beta_0+\tilde{X}\beta_I+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
+	\end{equation*}
+\end{definition}
+\subsubsection{中心化与标准化处理}
+\begin{definition}
+	对于\cref{model:LinearRegressionModel}，记：
+	\begin{equation*}
+		\bar{x}_j=\frac{1}{n}\sum_{i=1}^{n}x_{ij},\quad s_j^2=\sum_{i=1}^{n}(x_{ij}-\bar{x}_j)^2
+	\end{equation*}
+\end{definition}

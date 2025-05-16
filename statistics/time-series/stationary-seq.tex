@@ -206,6 +206,25 @@
 \begin{proof}
 	由\cref{def:RVLinearlyDependent}与\cref{theo:TSLinearlyIndependent}可直接得出，只需在方差公式中取$a_{n+1}=a_{n+2}=\cdots=a_{m}=0$即可。
 \end{proof}
+\subsubsection{平稳序列的谱函数}
+\begin{definition}
+	设平稳序列$\{X_t\}$的自协方差函数为$\gamma(n)$。
+	\begin{enumerate}
+		\item 若存在$[-\pi,\pi]$上单调不减且右连续的函数$F(\lambda)$使得：
+		\begin{equation*}
+			\gamma(n)=\int_{[-\pi,\pi]}e^{in\lambda}\dif F(\lambda),\quad F(-\pi)=0,\;k\in\mathbb{Z}^{}
+		\end{equation*}
+		则称$F(\lambda)$为$\{X_t\}$或$\{\gamma(n)\}$的\gls{SpectralDistributionFunction}，简称为\textbf{谱函数}；
+		\item 若存在$[-\pi,\pi]$上的非负函数$f(\lambda)$使得：
+		\begin{equation*}
+			\gamma(n)=\int_{[-\pi,\pi]}f(\lambda)e^{in\lambda}\dif\lambda,\quad n\in\mathbb{Z}^{}
+		\end{equation*}
+		则称$f(\lambda)$为$\{X_t\}$或$\{\gamma(n)\}$的\gls{SpectralDensityFunction}，简称为\textbf{谱密度}。
+	\end{enumerate}
+\end{definition}
+\begin{theorem}[Herglotz theorem]
+	平稳序列的谱函数存在且唯一。
+\end{theorem}
 
 \subsection{线性平稳序列}
 \subsubsection{白噪声}
@@ -355,8 +374,8 @@
 	\end{equation*}
 	构成的序列$\{X_t\}$为\gls{LinearlyStationarySeries}。
 \end{definition}
-\begin{theorem}
-	\label{theo:l2LinearlyStationarySeries}
+一
+\begin{theorem}\label{theo:l2LinearlyStationarySeries}
 	线性平稳序列是平稳序列，且有：
 	\begin{equation*}
 		\operatorname{E}(X_t)=0,\;\gamma(n)=\sigma^2\sum_{i=-\infty}^{+\infty}a_ia_{i+n}
@@ -406,23 +425,71 @@
 		|\gamma(n)|\leqslant2\sigma^2\left(\sum_{i=-\infty}^{+\infty}a_i^2\sum_{|i|>n/2}a_{i}^2\right)^\frac{1}{2}=2\sigma^2\left(\sum_{i=-\infty}^{+\infty}a_i^2\right)^{\frac{1}{2}}\left(\sum_{|i|>n/2}^{}a_{i}^2\right)^{\frac{1}{2}}\to0\qedhere
 	\end{equation*}
 \end{proof}
+\begin{theorem}
+	线性平稳序列的谱密度为（$\{a_n\}$为实数列）：
+	\begin{equation*}
+		f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=-\infty}^{+\infty}a_je^{ij\lambda}\right|^2
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	设随机变量$Y$在$[-\pi,\pi]$上服从均匀分布，定义$\varepsilon_n=e^{inY},\;n\in\mathbb{Z}$，于是有：
+	\begin{gather*}
+		\begin{aligned}
+			\operatorname{E}(\varepsilon_n)&=\int_{[-\pi,\pi]}\frac{1}{2\pi}e^{iny}\dif y=\frac{e^{in\pi}-e^{-in\pi}}{2\pi in} \\
+			&=\frac{\cos(n\pi)+i\sin(n\pi)-\cos(-n\pi)-i\sin(-n\pi)}{2\pi in} \\
+			&=\frac{2i\sin(n\pi)}{2\pi in}=0,\quad n\ne0
+		\end{aligned} \\
+		\operatorname{E}(\varepsilon_n)=\int_{[-\pi,\pi]}\frac{1}{2\pi}\dif y=1,\quad n=0 \\
+		\begin{aligned}
+			\operatorname{E}(\varepsilon_n\overline{\varepsilon}_m)&=\operatorname{E}(e^{i(n-m)Y})=\int_{[-\pi,\pi]}\frac{1}{2\pi}e^{i(n-m)y}\dif y=\frac{e^{i(n-m)\pi}-e^{-i(n-m)\pi}}{2\pi i(n-m)} \\
+			&=\frac{\cos[(n-m)\pi]+i\sin[(n-m)\pi]-\cos[-(n-m)\pi]-i\sin[-(n-m)\pi]}{2\pi i(n-m)} \\
+			&=\frac{2i\sin[(n-m)\pi]}{2\pi i(n-m)}=0,\quad n\ne m
+		\end{aligned} \\
+		\operatorname{E}(\varepsilon_n\overline{\varepsilon}_m)=\operatorname{E}(e^{i(n-m)y})=\int_{[-\pi,\pi]}\frac{1}{2\pi}\dif y=1,\quad n=m
+	\end{gather*}
+	即：
+	\begin{equation*}
+		\operatorname{E}(\varepsilon_n)=\delta_n,\quad\operatorname{E}(\varepsilon_n\overline{\varepsilon}_m)=\delta_{n-m},\qquad n,m\in\mathbb{Z}^{}
+	\end{equation*}\par
+	令：
+	\begin{equation*}
+		Z_n=\sum_{j=-\infty}^{+\infty}a_j\varepsilon_{n-j}=\sum_{j=-\infty}^{+\infty}a_je^{i(n-j)Y},\quad n\in\mathbb{Z}^{}
+	\end{equation*}
+	由内积的连续性和\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{align*}
+		\operatorname{E}(Z_n)&=(Z_n,1)=\left(\sum_{j=-\infty}^{+\infty}a_j\varepsilon_{n-j},1\right)=\left[\lim_{k\to+\infty}\left(\sum_{j=k}^{-k}a_j\varepsilon_{n-j}\right),1\right] \\
+		&=\lim_{k\to+\infty}\left(\sum_{j=-k}^{k}a_j\varepsilon_{n-j},1\right)=\lim_{k\to+\infty}\operatorname{E}\left(\sum_{j=-k}^{k}a_j\varepsilon_{n-j}\right) \\
+		&=\lim_{k\to+\infty}\left[\sum_{j=-k}^{k}\operatorname{E}(a_j\varepsilon_{n-j})\right]=a_n
+	\end{align*}
+	\begin{align*}
+		\operatorname{E}(Z_n\overline{Z}_m)&=(Z_n,Z_m)=\left(\sum_{j=-\infty}^{+\infty}a_j\varepsilon_{n-j},\sum_{j=-\infty}^{+\infty}a_j\varepsilon_{m-j}\right) \\
+		&=\left[\lim_{k\to+\infty}\left(\sum_{j=-k}^{k}a_j\varepsilon_{n-j}\right),\lim_{k\to+\infty}\left(\sum_{j=-k}^{k}a_j\varepsilon_{m-j}\right)\right] \\
+		&=\lim_{k\to+\infty}\left(\sum_{j=-k}^{k}a_j\varepsilon_{n-j},\sum_{j=-k}^{k}a_j\varepsilon_{m-j}\right)=\lim_{k\to+\infty}\operatorname{E}\left(\sum_{j=-k}^{k}a_j\varepsilon_{n-j}\sum_{l=-k}^{k}a_l\varepsilon_{m-l}\right) \\
+		&=\lim_{k\to+\infty}\operatorname{E}\left(\sum_{j=-k}^{k}\sum_{l=-k}^{k}a_j\varepsilon_{n-j}a_l\varepsilon_{m-l}\right)=\sum_{j=-\infty}^{+\infty}a_ja_{j+(n-m)} 
+	\end{align*}
+	另一方面又有：
+	\begin{align*}
+		\operatorname{E}(Z_n\overline{Z}_m)&=\operatorname{E}\left[\left(\sum_{j=-\infty}^{+\infty}a_je^{i(n-j)Y}\right)\left(\sum_{k=-\infty}^{+\infty}a_ke^{-i(m-k)Y}\right)\right] \\
+		&=\frac{1}{2\pi}\int_{[-\pi,\pi]}\left(\sum_{j=-\infty}^{+\infty}a_je^{i(n-j)y}\right)\left(\sum_{k=-\infty}^{+\infty}a_ke^{-i(m-k)y}\right)\dif y \\
+		&=\frac{1}{2\pi}\int_{[-\pi,\pi]}\left(\sum_{j=-\infty}^{+\infty}a_je^{-ijy}\right)\left(\sum_{k=-\infty}^{+\infty}a_ke^{iky}\right)e^{i(n-m)y}\dif y \\
+		&\frac{1}{2\pi}=\int_{[-\pi,\pi]}\left|\sum_{j=-\infty}^{+\infty}a_je^{-ijy}\right|e^{i(n-m)y}\dif y
+	\end{align*}
+	所以有：
+	\begin{gather*}
+		\sum_{j=-\infty}^{+\infty}a_ja_{j+(n-m)}=\frac{1}{2\pi}\int_{[-\pi,\pi]}\left|\sum_{j=-\infty}^{+\infty}a_je^{-ijy}\right|e^{i(n-m)y}\dif y \\
+		\sigma^2\sum_{j=-\infty}^{+\infty}a_ja_{j+n}=\frac{\sigma^2}{2\pi}\int_{[-\pi,\pi]}\left|\sum_{j=-\infty}^{+\infty}a_je^{-ijy}\right|e^{iny}\dif y
+	\end{gather*}
+	由\cref{theo:l2LinearlyStationarySeries}可得：
+	\begin{equation*}
+		\gamma(n)=\frac{\sigma^2}{2\pi}\int_{[-\pi,\pi]}\left|\sum_{j=-\infty}^{+\infty}a_je^{-ijy}\right|e^{iny}\dif y
+	\end{equation*}
+	所以有：
+	\begin{equation*}
+		f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=-\infty}^{+\infty}a_je^{ij\lambda}\right|^2\qedhere
+	\end{equation*}
+\end{proof}
 
-\subsection{平稳序列的谱密度}
-\begin{definition}
-	设平稳序列$\{X_t\}$的自协方差函数为$\gamma(n)$。
-	\begin{enumerate}
-		\item 若存在$[-\pi,\pi]$上单调不减且右连续的函数$F(\lambda)$使得：
-		\begin{equation*}
-			\gamma(n)=\int_{[-\pi,\pi]}e^{in\lambda}\dif F(\lambda),\quad F(-\pi)=0,\;k\in\mathbb{Z}^{}
-		\end{equation*}
-		则称$F(\lambda)$为$\{X_t\}$或$\{\gamma(n)\}$的\gls{SpectralDistributionFunction}，简称为\textbf{谱函数}；
-		\item 若存在$[-\pi,\pi]$上的非负函数$f(\lambda)$使得：
-		\begin{equation*}
-			\gamma(n)=\int_{[-\pi,\pi]}f(\lambda)e^{in\lambda}\dif\lambda,\quad n\in\mathbb{Z}^{}
-		\end{equation*}
-		则称$f(\lambda)$为$\{X_t\}$或$\{\gamma(n)\}$的\gls{SpectralDensityFunction}，简称为\textbf{谱密度}。
-	\end{enumerate}
-\end{definition}
+
 
 
 
