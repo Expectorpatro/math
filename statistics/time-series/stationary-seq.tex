@@ -9,7 +9,141 @@
 	\end{enumerate}
 	则称$\{X_t\}$是一个\gls{StationaryTimeSeries}。
 \end{definition}
+
 \subsection{平稳时间序列的性质}
+\subsubsection{线性变换}
+\begin{theorem}
+	平稳时间序列$\{X_t\}$经过线性变换后得到的还是平稳时间序列。
+\end{theorem}
+\begin{proof}
+	只需证明$\{Y_t=aX_t+b:t\in\mathbb{N}\}$对任意的$a,b\in\mathbb{R}$是平稳时间序列。设$\operatorname{E}(X_t)=\mu$。\par
+	(1)对于线性变换后时间序列的期望，有：
+	\begin{equation*}
+		\operatorname{E}(Y_t)=\operatorname{E}(aX_t+b)=a\mu+b
+	\end{equation*}\par
+	(2)对于线性变换后时间序列的二阶原点矩，有：
+	\begin{equation*}
+		\operatorname{E}(Y_t^2)=\operatorname{Var}(Y_t)+[\operatorname{E}(Y_t)]^2=a^2\gamma(0)+(a\mu+b)^2<+\infty\qedhere
+	\end{equation*}\par
+	(3)对于线性变换后时间序列的协方差，有：
+	\begin{equation*}
+		\operatorname{Cov}(Y_t,Y_s)=\operatorname{E}[(aX_t+b-a\mu-b)(aX_s+b-a\mu-b)]=a^2\gamma(t-s)
+	\end{equation*}
+\end{proof}
+\subsubsection{平稳时间序列的谱函数}
+\begin{definition}
+	设平稳时间序列$\{X_t\}$的自协方差函数为$\gamma(n)$。
+	\begin{enumerate}
+		\item 若存在$[-\pi,\pi]$上单调不减且右连续的函数$F(\lambda)$使得：
+		\begin{equation*}
+			\gamma(n)=\int_{[-\pi,\pi]}e^{in\lambda}\dif F(\lambda),\quad F(-\pi)=0,\;k\in\mathbb{Z}^{}
+		\end{equation*}
+		则称$F(\lambda)$为$\{X_t\}$或$\{\gamma(n)\}$的\gls{SpectralDistributionFunction}，简称为\textbf{谱函数}；
+		\item 若存在$[-\pi,\pi]$上的非负函数$f(\lambda)$使得：
+		\begin{equation*}
+			\gamma(n)=\int_{[-\pi,\pi]}f(\lambda)e^{in\lambda}\dif\lambda,\quad n\in\mathbb{Z}^{}
+		\end{equation*}
+		则称$f(\lambda)$为$\{X_t\}$或$\{\gamma(n)\}$的\gls{SpectralDensityFunction}，简称为\textbf{谱密度}。
+	\end{enumerate}
+\end{definition}
+\begin{theorem}[Herglotz theorem]
+	平稳时间序列的谱函数存在且唯一。
+\end{theorem}
+\subsubsection{正交与不相关}
+\begin{definition}
+	设$\{X_t\}$和$\{Y_t\}$是平稳时间序列。
+	\begin{enumerate}
+		\item 若对任何的$s,t\in\mathbb{N}$，有$\operatorname{E}(X_tY_s)=0$，则称$\{X_t\}$和$\{Y_t\}$\textbf{正交}。
+		\item 若对任何的$s,t\in\mathbb{N}$，有$\operatorname{Cov}(X_t,Y_s)=0$，则称$\{X_t\}$和$\{Y_t\}$\textbf{不相关}。
+	\end{enumerate}
+\end{definition}
+\begin{theorem}\label{theo:StationarySeriesOrthogonalUncorrelated}
+	对于期望为$0$的平稳时间序列，正交性和不相关性等价。
+\end{theorem}
+\begin{proof}
+	若$\mu=0$，则：
+	\begin{equation*}
+		\operatorname{Cov}(X_t,X_s)=\operatorname{E}[(X_t-\mu)(X_s-\mu)]=\operatorname{E}(X_tX_s)\qedhere
+	\end{equation*}
+\end{proof}
+\begin{theorem}\label{theo:StationarySeriesSum}
+	设$\gamma_X(t)$和$\gamma_Y(t)$分别是平稳时间序列$\{X_t\}$和$\{Y_t\}$的自协方差函数。记$\mu_X=\operatorname{E}(X_t),\;\mu_Y=\operatorname{E}(Y_t)$，定义：
+	\begin{equation*}
+		Z_t=X_t+Y_t,\;t\in\mathbb{N}
+	\end{equation*}
+	则：
+	\begin{enumerate}
+		\item 若$\{X_t\}$和$\{Y_t\}$正交，则$\{Z_t\}$是平稳时间序列，有自协方差函数：
+		\begin{equation*}
+			\gamma_Z(t)=\gamma_X(t)+\gamma_Y(t)-2\mu_X\mu_Y,\;t\in\mathbb{N}
+		\end{equation*}
+		\item 若$\{X_t\}$和$\{Y_t\}$不相关，则$\{Z_t\}$是平稳时间序列，有自协方差函数：
+		\begin{equation*}
+			\gamma_Z(t)=\gamma_X(t)+\gamma_Y(t),\;t\in\mathbb{N}
+		\end{equation*}
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	因为对任意的$t\in\mathbb{N}$，有$(X_t+Y_t)^2\leqslant2X_t^2+2Y_t^2$，所以：
+	\begin{equation*}
+		\operatorname{E}(Z_t^2)\leqslant2\operatorname{E}(X_t^2)+2\operatorname{E}(Y_t^2)<+\infty
+	\end{equation*}\par
+	显然：
+	\begin{equation*}
+		\operatorname{E}(Z_t)=\operatorname{E}(X_t)+\operatorname{E}(Y_t)=\mu_X+\mu_Y
+	\end{equation*}
+	与$t$无关。因为：
+	\begin{align*}
+		\operatorname{Cov}(Z_t,Z_s)
+		&=\operatorname{Cov}(X_t+Y_t,X_s+Y_s) \\
+		&=\operatorname{Cov}(X_t,X_s)+\operatorname{Cov}(X_t,Y_s)+\operatorname{Cov}(Y_t,X_s)+\operatorname{Cov}(Y_t,Y_s)
+	\end{align*}\par
+	(1)由于$\{X_t\}$和$\{Y_t\}$正交，所以$\operatorname{E}(X_tY_s)=\operatorname{E}(X_sY_t)=0$，于是由\cref{prop:CovMat}(6)可得：
+	\begin{align*}
+		\operatorname{Cov}(Z_t,Z_s)
+		&=\gamma_X(t-s)+\gamma_Y(t-s)+\operatorname{E}(X_tY_s)-\operatorname{E}(X_t)\operatorname{E}(Y_s)+\operatorname{E}(X_sY_t)-\operatorname{E}(Y_t)\operatorname{E}(X_s) \\
+		&=\gamma_X(t-s)+\gamma_Y(t-s)-2\mu_X\mu_Y
+	\end{align*}
+	所以$\operatorname{Cov}(Z_t,Z_s)$只与$(t-s)$有关。综上，$\{Z_t\}$是平稳时间序列，且
+	\begin{equation*}
+		\gamma_Z(t)=\gamma_X(t)+\gamma_Y(t)-2\mu_X\mu_Y,\;t\in\mathbb{N}
+	\end{equation*}\par
+	(2)因为$\{X_t\}$和$\{Y_t\}$不相关，所以$\operatorname{Cov}(X_t,Y_s)=0=\operatorname{Cov}(Y_t,X_s)=0$，于是：
+	\begin{equation*}
+		\operatorname{Cov}(Z_t,Z_s)=\operatorname{Cov}(X_t,X_s)+\operatorname{Cov}(Y_t,Y_s)=\gamma_X(t-s)+\gamma_Y(t-s)
+	\end{equation*}
+	所以$\operatorname{Cov}(Z_t,Z_s)$只与$(t-s)$有关。综上，$\{Z_t\}$是平稳时间序列，且
+	\begin{equation*}
+		\gamma_Z(t)=\gamma_X(t)+\gamma_Y(t),\;t\in\mathbb{N}\qedhere
+	\end{equation*}
+\end{proof}
+\begin{theorem}
+	设$\{X_t\}$和$\{Y_t\}$是正交的平稳时间序列，且$\operatorname{E}(X_t)=\operatorname{E}(Y_t)=0$，$c$是常数，定义：
+	\begin{equation*}
+		Z_t=X_t+Y_t+c,\quad t\in\mathbb{Z}^{}
+	\end{equation*}
+	\begin{enumerate}
+		\item 如果$\{X_t\}$和$\{Y_t\}$分别有谱函数$F_X(\lambda)$和$F_Y(\lambda)$，则平稳时间序列$\{Z_t\}$有谱函数$F_Z(\lambda)=F_X(\lambda)+F_Y(\lambda)$；
+		\item 如果$\{X_t\}$和$\{Y_t\}$分别有谱密度$f_X(\lambda)$和$f_Y(\lambda)$，则平稳时间序列$\{Z_t\}$有谱密度$f_Z(\lambda)=f_X(\lambda)+f_Y(\lambda)$。
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	有\cref{theo:StationarySeriesOrthogonalUncorrelated}和\cref{theo:StationarySeriesSum}可知$\{Z_t\}$是平稳时间序列且有自协方差函数：
+	\begin{equation*}
+		\gamma_Z(n)=\gamma_X(n)+\gamma_Y(n)
+	\end{equation*}\par
+	(1)此时有：
+	\begin{align*}
+		\gamma_Z(n)&=\gamma_X(n)+\gamma_Y(n) \\
+		&=\int_{[-\pi,\pi]}e^{in\lambda}\dif F_X(\lambda)+\int_{[-\pi,\pi]}e^{in\lambda}\dif F_Y(\lambda) \\
+		&=\int_{[-\pi,\pi]}e^{in\lambda}\dif [F_X(\lambda)+F_Y(\lambda)]
+	\end{align*}\par
+	(2)此时有：
+	\begin{align*}						     \gamma_Z(n)&=\gamma_X(n)+\gamma_Y(n) \\
+		&=\int_{[-\pi,\pi]}f_X(\lambda)e^{in\lambda}\dif\lambda+\int_{[-\pi,\pi]}f_Y(\lambda)e^{in\lambda}\dif\lambda \\
+		&=\int_{[-\pi,\pi]}[f_X(\lambda)+f_Y(\lambda)]e^{in\lambda}\dif\lambda\qedhere
+	\end{align*}
+\end{proof}
 \subsubsection{自协方差函数}
 \begin{property}
 	平稳时间序列的自协方差函数具有如下基本性质：
@@ -53,24 +187,15 @@
 \begin{definition}
 	任何满足上述三个基本性质的实数序列都被称为\textbf{非负定序列}。
 \end{definition}
-\subsubsection{线性变换}
-\begin{theorem}
-	平稳时间序列$\{X_t\}$经过线性变换后得到的还是平稳时间序列。
+\begin{theorem}\label{theo:GammaPositiveDefinite}
+	设$\Gamma_n$是平稳时间序列$\{X_t\}$的$n$阶自协方差矩阵。
+	\begin{enumerate}
+		\item 如果$\{X_t\}$的谱密度$f(\lambda)$存在，则对任何的$n\geqslant1$，$\Gamma_n$正定；
+		\item 如果当$n\to+\infty$时有$\gamma(n)\to0$，则对任何的$n\geqslant1$，$\Gamma_n$正定。
+	\end{enumerate}
 \end{theorem}
 \begin{proof}
-	只需证明$\{Y_t=aX_t+b:t\in\mathbb{N}\}$对任意的$a,b\in\mathbb{R}$是平稳序列。设$\operatorname{E}(X_t)=\mu$。\par
-	(1)对于线性变换后时间序列的期望，有：
-	\begin{equation*}
-		\operatorname{E}(Y_t)=\operatorname{E}(aX_t+b)=a\mu+b
-	\end{equation*}\par
-	(2)对于线性变换后时间序列的二阶原点矩，有：
-	\begin{equation*}
-		\operatorname{E}(Y_t^2)=\operatorname{Var}(Y_t)+[\operatorname{E}(Y_t)]^2=a^2\gamma(0)+(a\mu+b)^2<+\infty\qedhere
-	\end{equation*}\par
-	(3)对于线性变换后时间序列的协方差，有：
-	\begin{equation*}
-		\operatorname{Cov}(Y_t,Y_s)=\operatorname{E}[(aX_t+b-a\mu-b)(aX_s+b-a\mu-b)]=a^2\gamma(t-s)
-	\end{equation*}
+	(1)任取$n$维实向量$\alpha=(\seq{a}{n})^T\ne\mathbf{0}$，
 \end{proof}
 \subsubsection{自相关函数}
 \begin{definition}
@@ -90,74 +215,6 @@
 	显然$\mu_Y=\operatorname{E}(Y_t)=0$，由自协方差函数的定义：
 	\begin{equation*}
 		\rho(t)=\operatorname{E}[(Y_t-\mu_Y)(Y_0-\mu_Y)]=\operatorname{E}(Y_tY_0)=\operatorname{E}\left[\left(\frac{X_t-\mu}{\sqrt{\gamma(0)}}\right)\left(\frac{X_0-\mu}{\sqrt{\gamma(0)}}\right)\right]=\frac{\gamma(t)}{\gamma(0)}\qedhere
-	\end{equation*}
-\end{proof}
-\subsubsection{正交与不相关}
-\begin{definition}
-	设$\{X_t\}$和$\{Y_t\}$是平稳时间序列。
-	\begin{enumerate}
-		\item 若对任何的$s,t\in\mathbb{N}$，有$\operatorname{E}(X_tY_s)=0$，则称$\{X_t\}$和$\{Y_t\}$\textbf{正交}。
-		\item 若对任何的$s,t\in\mathbb{N}$，有$\operatorname{Cov}(X_t,Y_s)=0$，则称$\{X_t\}$和$\{Y_t\}$\textbf{不相关}。
-	\end{enumerate}
-\end{definition}
-\begin{theorem}
-	对于期望为$0$的平稳时间序列，正交性和不相关性等价。
-\end{theorem}
-\begin{proof}
-	若$\mu=0$，则：
-	\begin{equation*}
-		\operatorname{Cov}(X_t,X_s)=\operatorname{E}[(X_t-\mu)(X_s-\mu)]=\operatorname{E}(X_tX_s)\qedhere
-	\end{equation*}
-\end{proof}
-\begin{theorem}
-	设$\gamma_X(t)$和$\gamma_Y(t)$分别是平稳时间序列$\{X_t\}$和$\{Y_t\}$的自协方差函数。记$\mu_X=\operatorname{E}(X_t),\;\mu_Y=\operatorname{E}(Y_t)$，定义：
-	\begin{equation*}
-		Z_t=X_t+Y_t,\;t\in\mathbb{N}
-	\end{equation*}
-	则：
-	\begin{enumerate}
-		\item 若$\{X_t\}$和$\{Y_t\}$正交，则$\{Z_t\}$是平稳时间序列，有自协方差函数：
-		\begin{equation*}
-			\gamma_Z(t)=\gamma_X(t)+\gamma_Y(t)-2\mu_X\mu_Y,\;t\in\mathbb{N}
-		\end{equation*}
-		\item 若$\{X_t\}$和$\{Y_t\}$不相关，则$\{Z_t\}$是平稳时间序列，有自协方差函数：
-		\begin{equation*}
-			\gamma_Z(t)=\gamma_X(t)+\gamma_Y(t),\;t\in\mathbb{N}
-		\end{equation*}
-	\end{enumerate}
-\end{theorem}
-\begin{proof}
-	因为对任意的$t\in\mathbb{N}$，有$(X_t+Y_t)^2\leqslant2X_t^2+2Y_t^2$，所以：
-	\begin{equation*}
-		\operatorname{E}(Z_t^2)\leqslant2\operatorname{E}(X_t^2)+2\operatorname{E}(Y_t^2)<+\infty
-	\end{equation*}\par
-	显然：
-	\begin{equation*}
-		\operatorname{E}(Z_t)=\operatorname{E}(X_t)+\operatorname{E}(Y_t)=\mu_X+\mu_Y
-	\end{equation*}
-	与$t$无关。因为：
-	\begin{align*}
-		\operatorname{Cov}(Z_t,Z_s)
-		&=\operatorname{Cov}(X_t+Y_t,X_s+Y_s) \\
-		&=\operatorname{Cov}(X_t,X_s)+\operatorname{Cov}(X_t,Y_s)+\operatorname{Cov}(Y_t,X_s)+\operatorname{Cov}(Y_t,Y_s)
-	\end{align*}\par
-	(1)由于$\{X_t\}$和$\{Y_t\}$正交，所以$\operatorname{E}(X_tY_s)=\operatorname{E}(X_sY_t)=0$，于是：
-	\begin{align*}
-		\operatorname{Cov}(Z_t,Z_s)
-		&=\gamma_X(t-s)+\gamma_Y(t-s)+\operatorname{E}(X_tY_s)-\operatorname{E}(X_t)\operatorname{E}(Y_s)+\operatorname{E}(X_sY_t)-\operatorname{E}(Y_t)\operatorname{E}(X_s) \\
-		&=\gamma_X(t-s)+\gamma_Y(t-s)-2\mu_X\mu_Y
-	\end{align*}
-	所以$\operatorname{Cov}(Z_t,Z_s)$只与$(t-s)$有关。综上，$\{Z_t\}$是平稳时间序列，且
-	\begin{equation*}
-		\gamma_Z(t)=\gamma_X(t)+\gamma_Y(t)-2\mu_X\mu_Y,\;t\in\mathbb{N}
-	\end{equation*}\par
-	(2)因为$\{X_t\}$和$\{Y_t\}$不相关，所以$\operatorname{Cov}(X_t,Y_s)=0=\operatorname{Cov}(Y_t,X_s)=0$，于是：
-	\begin{equation*}
-		\operatorname{Cov}(Z_t,Z_s)=\operatorname{Cov}(X_t,X_s)+\operatorname{Cov}(Y_t,Y_s)=\gamma_X(t-s)+\gamma_Y(t-s)
-	\end{equation*}
-	所以以$\operatorname{Cov}(Z_t,Z_s)$只与$(t-s)$有关。综上，$\{Z_t\}$是平稳时间序列，且
-	\begin{equation*}
-		\gamma_Z(t)=\gamma_X(t)+\gamma_Y(t),\;t\in\mathbb{N}\qedhere
 	\end{equation*}
 \end{proof}
 \subsubsection{线性相关}
@@ -206,25 +263,7 @@
 \begin{proof}
 	由\cref{def:RVLinearlyDependent}与\cref{theo:TSLinearlyIndependent}可直接得出，只需在方差公式中取$a_{n+1}=a_{n+2}=\cdots=a_{m}=0$即可。
 \end{proof}
-\subsubsection{平稳序列的谱函数}
-\begin{definition}
-	设平稳序列$\{X_t\}$的自协方差函数为$\gamma(n)$。
-	\begin{enumerate}
-		\item 若存在$[-\pi,\pi]$上单调不减且右连续的函数$F(\lambda)$使得：
-		\begin{equation*}
-			\gamma(n)=\int_{[-\pi,\pi]}e^{in\lambda}\dif F(\lambda),\quad F(-\pi)=0,\;k\in\mathbb{Z}^{}
-		\end{equation*}
-		则称$F(\lambda)$为$\{X_t\}$或$\{\gamma(n)\}$的\gls{SpectralDistributionFunction}，简称为\textbf{谱函数}；
-		\item 若存在$[-\pi,\pi]$上的非负函数$f(\lambda)$使得：
-		\begin{equation*}
-			\gamma(n)=\int_{[-\pi,\pi]}f(\lambda)e^{in\lambda}\dif\lambda,\quad n\in\mathbb{Z}^{}
-		\end{equation*}
-		则称$f(\lambda)$为$\{X_t\}$或$\{\gamma(n)\}$的\gls{SpectralDensityFunction}，简称为\textbf{谱密度}。
-	\end{enumerate}
-\end{definition}
-\begin{theorem}[Herglotz theorem]
-	平稳序列的谱函数存在且唯一。
-\end{theorem}
+
 
 \subsection{线性平稳序列}
 \subsubsection{白噪声}
@@ -248,7 +287,7 @@
 	\end{equation*}
 	是白噪声$\{\varepsilon_t\}$的\gls{FiniteMovingAverage}，其中$q\in\mathbb{N}$，$a_0,a_1,\dots,a_q$为常数。
 \end{definition}
-\begin{theorem}
+\begin{theorem}\label{theo:ECovFiniteMovingAverage}
 	$\{\varepsilon_t\}=\{\varepsilon_t:t\in\mathbb{Z}\}$是$WN(0,\sigma^2)$，则该白噪声的有限滑动平均：
 	\begin{equation*}
 		X_t=a_0\varepsilon_t+a_1\varepsilon_{t-1}+\cdots+a_q\varepsilon_{t-q}
@@ -375,14 +414,31 @@
 	构成的序列$\{X_t\}$为\gls{LinearlyStationarySeries}。
 \end{definition}
 一
-\begin{theorem}\label{theo:l2LinearlyStationarySeries}
-	线性平稳序列是平稳序列，且有：
+\begin{property}\label{prop:LinearlyStationarySeries}
+	$\{\varepsilon_t\}=\{\varepsilon_t:t\in\mathbb{Z}\}$是$WN(0,\sigma^2)$，$\{a_n\}\in l^2$。线性平稳序列：
 	\begin{equation*}
-		\operatorname{E}(X_t)=0,\;\gamma(n)=\sigma^2\sum_{i=-\infty}^{+\infty}a_ia_{i+n}
+		X_t=\sum_{i=-\infty}^{+\infty}a_i\varepsilon_{t-i}
 	\end{equation*}
-\end{theorem}
+	具有如下性质：
+	\begin{enumerate}
+		\item 线性平稳序列是平稳序列，且有：
+		\begin{equation*}
+			\operatorname{E}(X_t)=0,\;\gamma(n)=\sigma^2\sum_{i=-\infty}^{+\infty}a_ia_{i+n}
+		\end{equation*}
+		\item 对于自协方差函数$\gamma(n)$，有：
+		\begin{equation*}
+			\lim_{n\to\infty}\gamma(n)=0
+		\end{equation*}\par
+		\item 线性平稳序列的谱密度为（$\{a_n\}$为实数列）：
+		\begin{equation*}
+			f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=-\infty}^{+\infty}a_je^{ij\lambda}\right|^2,\quad\lambda\in[-\pi,\pi]
+		\end{equation*}
+		\item 自协方差矩阵$\Gamma_n$是正定矩阵；
+		\item $\{X_t\}$是严平稳遍历的；
+	\end{enumerate}
+\end{property}
 \begin{proof}
-	在$L^2$空间中定义内积$(X,Y)=\operatorname{E}(XY)$，定义：
+	(1)在$L^2$空间中定义内积$(X,Y)=\operatorname{E}(XY)$，定义：
 	\begin{equation*}
 		\varphi_n=\sum_{i=-n}^{n}a_i\varepsilon_{t-i}
 	\end{equation*}
@@ -399,16 +455,8 @@
 			&=\sigma^2\sum_{i=-\infty}^{+\infty}a_ia_{i+(t-s)}
 		\end{aligned}
 	\end{gather*}
-	上式倒数第二步到最后一步和\cref{theo:l1LinearlyStationarySeries}中是一样的，同时平稳性的分析也与之一样，故省略。
-\end{proof}
-\begin{theorem}
-	对于线性平稳序列的自协方差函数$\gamma(n)$，有：
-	\begin{equation*}
-		\lim_{n\to\infty}\gamma(n)=0
-	\end{equation*}
-\end{theorem}
-\begin{proof}
-	由\cref{ineq:cauchy-ineq-R}可得：
+	上式倒数第二步到最后一步和\cref{theo:l1LinearlyStationarySeries}中是一样的，同时平稳性的分析也与之一样，故省略。\par
+	(2)由\cref{ineq:cauchy-ineq-R}可得：
 	\begin{align*}
 		|\gamma(n)|
 		&=\sigma^2\Bigl|\sum_{i=-\infty}^{+\infty}a_ia_{i+n}\Bigr| \leqslant\sigma^2\sum_{i=-\infty}^{+\infty}|a_ia_{i+n}| \\
@@ -422,17 +470,9 @@
 	\end{equation*}
 	结合$\{a_n\}\in l^2$即可得：
 	\begin{equation*}
-		|\gamma(n)|\leqslant2\sigma^2\left(\sum_{i=-\infty}^{+\infty}a_i^2\sum_{|i|>n/2}a_{i}^2\right)^\frac{1}{2}=2\sigma^2\left(\sum_{i=-\infty}^{+\infty}a_i^2\right)^{\frac{1}{2}}\left(\sum_{|i|>n/2}^{}a_{i}^2\right)^{\frac{1}{2}}\to0\qedhere
-	\end{equation*}
-\end{proof}
-\begin{theorem}
-	线性平稳序列的谱密度为（$\{a_n\}$为实数列）：
-	\begin{equation*}
-		f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=-\infty}^{+\infty}a_je^{ij\lambda}\right|^2
-	\end{equation*}
-\end{theorem}
-\begin{proof}
-	设随机变量$Y$在$[-\pi,\pi]$上服从均匀分布，定义$\varepsilon_n=e^{inY},\;n\in\mathbb{Z}$，于是有：
+		|\gamma(n)|\leqslant2\sigma^2\left(\sum_{i=-\infty}^{+\infty}a_i^2\sum_{|i|>n/2}a_{i}^2\right)^\frac{1}{2}=2\sigma^2\left(\sum_{i=-\infty}^{+\infty}a_i^2\right)^{\frac{1}{2}}\left(\sum_{|i|>n/2}^{}a_{i}^2\right)^{\frac{1}{2}}\to0
+	\end{equation*}\par
+	(3)设随机变量$Y$在$[-\pi,\pi]$上服从均匀分布，定义$\varepsilon_n=e^{inY},\;n\in\mathbb{Z}$，于是有：
 	\begin{gather*}
 		\begin{aligned}
 			\operatorname{E}(\varepsilon_n)&=\int_{[-\pi,\pi]}\frac{1}{2\pi}e^{iny}\dif y=\frac{e^{in\pi}-e^{-in\pi}}{2\pi in} \\
@@ -472,21 +512,23 @@
 		\operatorname{E}(Z_n\overline{Z}_m)&=\operatorname{E}\left[\left(\sum_{j=-\infty}^{+\infty}a_je^{i(n-j)Y}\right)\left(\sum_{k=-\infty}^{+\infty}a_ke^{-i(m-k)Y}\right)\right] \\
 		&=\frac{1}{2\pi}\int_{[-\pi,\pi]}\left(\sum_{j=-\infty}^{+\infty}a_je^{i(n-j)y}\right)\left(\sum_{k=-\infty}^{+\infty}a_ke^{-i(m-k)y}\right)\dif y \\
 		&=\frac{1}{2\pi}\int_{[-\pi,\pi]}\left(\sum_{j=-\infty}^{+\infty}a_je^{-ijy}\right)\left(\sum_{k=-\infty}^{+\infty}a_ke^{iky}\right)e^{i(n-m)y}\dif y \\
-		&\frac{1}{2\pi}=\int_{[-\pi,\pi]}\left|\sum_{j=-\infty}^{+\infty}a_je^{-ijy}\right|e^{i(n-m)y}\dif y
+		&\frac{1}{2\pi}=\int_{[-\pi,\pi]}\left|\sum_{j=-\infty}^{+\infty}a_je^{-ijy}\right|^2e^{i(n-m)y}\dif y
 	\end{align*}
 	所以有：
 	\begin{gather*}
-		\sum_{j=-\infty}^{+\infty}a_ja_{j+(n-m)}=\frac{1}{2\pi}\int_{[-\pi,\pi]}\left|\sum_{j=-\infty}^{+\infty}a_je^{-ijy}\right|e^{i(n-m)y}\dif y \\
-		\sigma^2\sum_{j=-\infty}^{+\infty}a_ja_{j+n}=\frac{\sigma^2}{2\pi}\int_{[-\pi,\pi]}\left|\sum_{j=-\infty}^{+\infty}a_je^{-ijy}\right|e^{iny}\dif y
+		\sum_{j=-\infty}^{+\infty}a_ja_{j+(n-m)}=\frac{1}{2\pi}\int_{[-\pi,\pi]}\left|\sum_{j=-\infty}^{+\infty}a_je^{-ijy}\right|^2e^{i(n-m)y}\dif y \\
+		\sigma^2\sum_{j=-\infty}^{+\infty}a_ja_{j+n}=\frac{\sigma^2}{2\pi}\int_{[-\pi,\pi]}\left|\sum_{j=-\infty}^{+\infty}a_je^{-ijy}\right|^2e^{iny}\dif y
 	\end{gather*}
-	由\cref{theo:l2LinearlyStationarySeries}可得：
+	由(1)可得：
 	\begin{equation*}
-		\gamma(n)=\frac{\sigma^2}{2\pi}\int_{[-\pi,\pi]}\left|\sum_{j=-\infty}^{+\infty}a_je^{-ijy}\right|e^{iny}\dif y
+		\gamma(n)=\frac{\sigma^2}{2\pi}\int_{[-\pi,\pi]}\left|\sum_{j=-\infty}^{+\infty}a_je^{-ijy}\right|^2e^{iny}\dif y
 	\end{equation*}
 	所以有：
 	\begin{equation*}
-		f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=-\infty}^{+\infty}a_je^{ij\lambda}\right|^2\qedhere
-	\end{equation*}
+		f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=-\infty}^{+\infty}a_je^{-ij\lambda}\right|^2=\frac{\sigma^2}{2\pi}\left|\sum_{j=-\infty}^{+\infty}a_je^{ij\lambda}\right|^2
+	\end{equation*}\par
+	(4)由(3)和\cref{theo:GammaPositiveDefinite}立即可得。\par
+	(5)不予证明。
 \end{proof}
 
 
