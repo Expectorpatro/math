@@ -1,0 +1,89 @@
+\section{参数估计}
+
+\subsection{平稳序列的数学期望}
+\subsubsection{点估计}
+\begin{definition}
+	设$\seq{x}{n}$是平稳序列$\{X_t\}$的观测值，$\mu=\operatorname{E}(X_t)$的点估计定义为：
+	\begin{equation*}
+		\bar{x}_n=\frac{1}{n}\sum_{i=1}^{n}x_i
+	\end{equation*}
+\end{definition}
+\begin{theorem}
+	设平稳序列$\{X_t\}$有均值$\mu$和自协方差函数$\{\gamma(n)\}$，则：
+	\begin{enumerate}
+		\item $\bar{X}_n$是$\mu$的无偏估计；
+		\item 如果$\gamma(n)\to0$，则$\bar{X}_n$是$\mu$的相合估计；
+		\item 如果$\{X_t\}$是严平稳遍历序列，则$\bar{X}_n$是$\mu$的强相合估计。
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)显然。\par
+	(2)注意到：
+	\begin{align*}
+		\operatorname{E}[(\bar{X}_n-\mu)^2]&=\operatorname{E}\left[\left(\frac{1}{n}\sum_{i=1}^{n}X_i-\mu\right)^2\right]=\operatorname{E}\left\{\frac{1}{n^2}\left[\sum_{i=1}^{n}(X_i-\mu)\right]^2\right\} \\
+		&=\frac{1}{n^2}\operatorname{E}\left\{\left[\sum_{i=1}^{n}(X_i-\mu)\right]^2\right\}=\frac{1}{n^2}\sum_{i=1}^{n}\sum_{j=1}^{n}\gamma(j-i) \\
+		&=\frac{1}{n^2}\sum_{i=-n+1}^{n-1}(n-|i|)\gamma(i)\leqslant\frac{1}{n^2}\sum_{i=-n+1}^{n-1}(n-|i|)|\gamma(i)| \\
+		&\leqslant\frac{1}{n^2}\sum_{i=-n+1}^{n-1}n|\gamma(i)|\leqslant\frac{1}{n}\sum_{i=-n+1}^{n-1}|\gamma(i)| \\
+		&\leqslant\frac{1}{n}\sum_{i=-n}^{n}|\gamma(i)|
+	\end{align*}
+	由无穷小序列的平均值序列也是无穷小序列可得$\operatorname{E}[(\bar{X}_n-\mu)^2]\to0$，由\cref{ineq:Chebyshev}和(1)可知对任意的$\varepsilon>0$有：
+	\begin{equation*}
+		P(|\bar{X}_n-\mu|\geqslant\varepsilon)\leqslant\frac{\operatorname{Var}(\bar{X}_n)}{\varepsilon^2}=\frac{\operatorname{E}[(\bar{X}_n-\mu)^2]}{\varepsilon^2}\to0,\quad n\to+\infty
+	\end{equation*}
+	所以$\bar{X}_n\overset{P}{\longrightarrow}\mu$，即$\bar{X}_n$是$\mu$的相合估计。\par
+	(3)由遍历定理立即可得。\info{遍历定理}
+\end{proof}
+\begin{corollary}
+	对于线性平稳序列，$\bar{X}_n$是均值$\mu$的无偏估计、相合估计和强相合估计。
+\end{corollary}
+\begin{proof}
+	由\cref{prop:LinearlyStationarySeries}(1)(5)立即可得。
+\end{proof}
+\subsubsection{分布}
+\begin{theorem}
+	设$\{\varepsilon_t\}$是独立同分布的$\operatorname{WN}(0,\sigma^2)$，平稳序列$\{X_t\}$由：
+	\begin{equation*}
+		X_t=\mu+\sum_{i=-\infty}^{+\infty}\psi_i\varepsilon_{t-i}
+	\end{equation*}
+	定义。若$\{X_t\}$的谱密度：
+	\begin{equation*}
+		f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=-\infty}^{+\infty}\psi_je^{ij\lambda}\right|^2
+	\end{equation*}
+	在$\lambda=0$处连续且$f(0)\ne0$，则$\sqrt{n}(\bar{X}_n-\mu)$依分布收敛到$\operatorname{N}[0,2\pi f(0)]$。
+\end{theorem}
+\begin{corollary}
+	若$\{\psi_n\}\in l^1$，$\sum\limits_{i=-\infty}^{+\infty}\psi_i\ne0$，则$\sqrt{n}(\bar{X}_n-\mu)$依分布收敛到$\operatorname{N}[0,2\pi f(0)]$，其中：
+	\begin{equation*}
+		2\pi f(0)=\gamma(0)+2\sum_{i=1}^{+\infty}\gamma(i)
+	\end{equation*}
+\end{corollary}
+\subsection{平稳序列的自协方差}
+\begin{definition}
+	设$\seq{x}{n}$是平稳序列$\{X_t\}$的观测值，$\gamma(k)$的点估计有如下两种定义：
+	\begin{equation*}
+		\hat{\gamma}(k)=
+		\begin{cases}
+			\dfrac{1}{n}\sum\limits_{i=1}^{n-k}(x_i-\bar{x}_n)(x_{i+k}-\bar{x}_n) \\
+			\dfrac{1}{n-k}\sum\limits_{i=1}^{n-k}(x_i-\bar{x}_n)(x_{i+k}-\bar{x}_n)
+		\end{cases},\quad 0\leqslant k\leqslant n-1
+	\end{equation*}
+	而对于$-(n-1)\leqslant k<0$，定义$\hat{\gamma}(k)=\hat{\gamma}(-k)$。\par
+	定义$\{X_t\}$自相关函数$\rho(k)$的点估计为：
+	\begin{equation*}
+		\hat{\rho}(k)=\frac{\hat{\gamma}(k)}{\hat{\gamma}(0)}
+	\end{equation*}
+\end{definition}
+\begin{theorem}
+	对于平稳序列$\{X_t\}$自协方差函数$\gamma(k)$的两种点估计，有：
+	\begin{enumerate}
+		\item 若$\gamma(k)\to0$，则$\hat{\gamma}(k)$是$\gamma(k)$的渐进无偏估计，即：
+		\begin{equation*}
+			\lim_{n\to+\infty}\operatorname{E}[\hat{\gamma}(k)]=\gamma(k)
+		\end{equation*}
+		\item 若$\{X_t\}$是严平稳遍历序列，则$\hat{\gamma}(k)$和$\hat{\rho}(k)$分别为$\gamma(k)$和$\rho(k)$的强相合估计，即：
+		\begin{equation*}
+			\lim_{n\to+\infty}\hat{\gamma}(k)=\gamma(k),\;a.e.\quad
+			\lim_{n\to+\infty}\hat{\rho}(k)=\rho(k),\;a.e.
+		\end{equation*}
+	\end{enumerate}
+\end{theorem}

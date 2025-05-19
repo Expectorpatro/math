@@ -490,7 +490,8 @@
 		\begin{equation*}
 			f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=0}^{+\infty}\psi_je^{ij\lambda}\right|^2=\frac{\sigma^2}{2\pi|A(e^{i\lambda})|^2},\quad\lambda\in[-\pi,\pi]
 		\end{equation*}
-		\item $\{X_t\}$的自协方差矩阵为正定矩阵。
+		\item $\{X_t\}$的自协方差矩阵为正定矩阵；
+		\item $\{X_t\}$是最小序列；
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -635,6 +636,7 @@
 			f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=0}^{q}b_je^{ij\lambda}\right|^2=\frac{\sigma^2}{2\pi}|B(e^{i\lambda})|^2,\quad\lambda\in[-\pi,\pi]
 		\end{equation*}
 		\item $\{X_t\}$的自协方差矩阵为正定矩阵；
+		\item 若$\{X_t\}$可逆，则$\{X_t\}$是最小序列；若$\{X_t\}$不可逆，则$\{X_t\}$不是最小序列；
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -670,7 +672,8 @@
 	且这个级数式绝对收敛的。由绝对收敛性可知$|\psi_iz^i|\to0$，即$|\psi_i|=o(\rho^{-i})$，所以$\{\psi_i\}\in l^1$。在$A(\mathcal{B})X_t=B(\mathcal{B})\varepsilon_t$两边同乘$B^{-1}(\mathcal{B})$即可将模型改写为：
 	\begin{equation*}
 		\varepsilon_t=B^{-1}(\mathcal{B})A(\mathcal{B})=\sum_{i=0}^{+\infty}\varphi_iX_{t-i}
-	\end{equation*}
+	\end{equation*}\par
+	若不对$A(z)$的根与$B(z)$的根做任何限制，称差分方程$A(\mathcal{B})X_t=B(\mathcal{B})\varepsilon_t$为\textbf{广义的$\operatorname{ARMA}(p,q)$模型}。
 \end{definition}
 \begin{theorem}\label{theo:ARMAPQSolution}
 	在$\operatorname{ARMA}(p,q)$模型中，设$A(z)=0$有$s$个互异根$\seq{z}{s}$，根的重数分别为$\seq{r}{s}$，$1<\rho<\min\limits_i\{|z_i|\}$，则：
@@ -791,6 +794,57 @@
 	(6)由(5)和\cref{theo:GammaPositiveDefinite}立即可得。
 \end{proof}
 
+\subsection{ARIMA模型}
+\begin{definition}
+	设$\{\varepsilon_t\}$是$\operatorname{WN}(0,\sigma^2)$，实系数多项式$A(z)=0$和$B(z)=0$没有公共根且满足$b_0=1,\;a_pb_q\ne0$和：
+	\begin{equation*}
+		A(z)=1-\sum_{i=1}^{p}a_iz^i\ne0,\;|z|\leqslant1\quad B(z)=\sum_{i=0}^{q}b_iz^i\ne0,\;|z|<1
+	\end{equation*}
+	则称差分方程：
+	\begin{equation*}
+		A(\mathcal{B})(1-\mathcal{B})^dX_t=B(\mathcal{B})\varepsilon_t
+	\end{equation*}
+	为\textbf{ARIMA模型}，记为$\operatorname{ARMA}(p,d,q)$模型。若$Y_t=(1-\mathcal{B})^dX_t$是$\operatorname{ARMA}(p,q)$序列，则称$\{X_t\}$是\textbf{$\operatorname{ARIMA}(p,d,q)$序列}。
+\end{definition}
+\begin{theorem}
+	$\operatorname{ARIMA}(p,d,q)$模型的通解为：
+	\begin{equation*}
+		X_t=\sum_{i=0}^{d-1}c_it^{i}+\sum_{n_{d-1}=1}^{t}\cdots\sum_{n_1=1}^{n_2}\sum_{i=1}^{n_1}Y_i
+	\end{equation*}
+	其中$c_i$为随机变量。
+\end{theorem}
+\begin{proof}
+	当$k=1$时，给定初值$X_0$，有：
+	\begin{align*}
+		X_t=X_{t-1}+Y_t=X_{t-2}+Y_{t-1}+Y_t=\cdots=X_0+\sum_{i=1}^{t}Y_i=X_0t^0+\sum_{i=1}^{t}Y_i
+	\end{align*}
+	即$k=1$时结论成立。设$k=d-1$时结论成立，即：
+	\begin{equation*}
+		X_t=\sum_{i=1}^{d-2}c_it^{i}+\sum_{n_{d-2}=1}^{t}\cdots\sum_{n_1=1}^{n_2}\sum_{i=1}^{n_1}Y_i
+	\end{equation*}
+	则$k=d$时有：
+	\begin{equation*}
+		Y_t=(1-\mathcal{B})^dX_t=(1-\mathcal{B})^{d-1}(1-\mathcal{B})X_t
+	\end{equation*}
+	令$(1-\mathcal{B})X_t=X_t-X_{t-1}=Z_t$，由归纳假设可知：
+	\begin{equation*}
+		Z_t=\sum_{i=1}^{d-2}c_i't^{i}+\sum_{n_{d-2}=1}^{t}\cdots\sum_{n_1=1}^{n_2}\sum_{i=1}^{n_1}Y_i
+	\end{equation*}
+	所以：
+	\begin{align*}
+		X_t&=X_{t-1}+Z_t=X_{t-2}+Z_{t-1}+Z_t=X_0+\sum_{i=1}^{t}Z_i \\
+		&=X_0+\sum_{i=1}^{t}\left(\sum_{j=1}^{d-2}c_j'i^{j}+\sum_{n_{d-2}=1}^{i}\cdots\sum_{n_1=1}^{n_2}\sum_{j=1}^{n_1}Y_j\right) \\
+		&=X_0+\sum_{i=1}^{t}\sum_{j=1}^{d-2}c_j'i^{j}+\sum_{i=1}^{t}\sum_{n_{d-2}=1}^{i}\cdots\sum_{n_1=1}^{n_2}\sum_{j=1}^{n_1}Y_j \\
+		&=X_0+\sum_{j=1}^{d-2}\sum_{i=1}^{t}c_j'i^{j}+\sum_{n_{d-1}=1}^{t}\sum_{n_{d-2}=1}^{n_{d-1}}\cdots\sum_{n_1=1}^{n_2}\sum_{j=1}^{n_1}Y_j \\
+		&=X_0t^0+\sum_{i=1}^{d-1}C_it^i+\sum_{n_{d-1}=1}^{t}\sum_{n_{d-2}=1}^{n_{d-1}}\cdots\sum_{n_1=1}^{n_2}\sum_{j=1}^{n_1}Y_j \\
+		&=\sum_{i=0}^{d-1}C_it^{i}+\sum_{n_{d-1}=1}^{t}\cdots\sum_{n_1=1}^{n_2}\sum_{i=1}^{n_1}Y_i
+	\end{align*}
+	倒数第三行到倒数第二行使用了多项式的结论，其中$C_i$由$\{X_t\}$初始的$d$个值决定。
+\end{proof}
+\subsubsection{单位根模型}
+\begin{definition}
+	称$\operatorname{ARIMA}(p,1,q)$模型为\textbf{单位根模型}。
+\end{definition}
 
 
 
@@ -820,7 +874,7 @@ acf(x, lag=)
 	\begin{equation*}
 		\hat{\rho}_k\sim\operatorname{N}\left(0,\frac{1}{n}\right),\;\forall\;k\ne0
 	\end{equation*}
-	近似成立
+	近似成立。
 \end{theorem}
 
 \begin{derivation}
