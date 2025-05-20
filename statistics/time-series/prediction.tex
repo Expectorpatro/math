@@ -1,10 +1,199 @@
 \section{预测}
 
 \begin{definition}
-	设$Y$是方差有限的随机变量，$\mathbf{X}=(\seq{\mathbf{X}}{n})$是各分量方差有限的随机向量，$\operatorname{E}(Y)=b,\;\operatorname{E}(X)=\boldsymbol{\mu}$。若$\alpha\in\mathbb{R}^{n}$使得对任意的$\beta\in\mathbb{R}^{n}$都有：
+	设$Y$是方差有限的随机变量，$\mathbf{X}=(\seq{\mathbf{X}}{n})^T$是各分量方差有限的随机向量，$\operatorname{E}(Y)=b,\;\operatorname{E}(\mathbf{X})=\boldsymbol{\mu}$。若$\alpha\in\mathbb{R}^{n}$使得对任意的$\beta\in\mathbb{R}^{n}$都有：
 	\begin{equation*}
-		\operatorname{E}[Y-\alpha^T(\mathbf{X}-\boldsymbol{\mu})-b]^2\leqslant\operatorname{E}[Y-\beta^T(\mathbf{X}-\boldsymbol{\mu})-b]^2
+		\operatorname{E}\{[Y-\alpha^T(\mathbf{X}-\boldsymbol{\mu})-b]^2\}\leqslant\operatorname{E}\{[Y-\beta^T(\mathbf{X}-\boldsymbol{\mu})-b]^2\}
 	\end{equation*}
-	其中$\mathbf{X}=\seq{X}{n}$，则称$a^T(\mathbf{X}-\boldsymbol{\mu})+b$是用$\seq{X}{n}$对$Y$进行预测时的\textbf{最佳线性预测}，记为$L(Y|\mathbf{X})$
+	则称$a^T(\mathbf{X}-\boldsymbol{\mu})+b$是用$\mathbf{X}$对$Y$进行预测时的\textbf{最佳线性预测}，记为$L(Y|\mathbf{X})$。
 \end{definition}
-以下讨论将仅针对$b=0,\;\boldsymbol{\mu}=\mathbf{0}$时的情形。
+\begin{definition}
+	若$\operatorname{Cov}(\mathbf{X})$与$\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]$已知，称$\operatorname{Cov}(\mathbf{X})\alpha=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]$为\textbf{预测方程}。
+\end{definition}
+\begin{property}
+	设$Y$是方差有限的随机变量，$\mathbf{X}=(\seq{\mathbf{X}}{n})^T$是各分量方差有限的随机向量，$\operatorname{E}(Y)=b,\;\operatorname{E}(\mathbf{X})=\boldsymbol{\mu}$。用$\mathbf{X}$对$Y$进行预测时的最佳线性预测具有如下性质：
+	\begin{enumerate}
+		\item 若$\alpha\in\mathbb{R}^{n}$使得$\operatorname{Cov}(\mathbf{X})\alpha=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]$，则$L(Y|\mathbf{X})=\alpha^T(\mathbf{X}-\boldsymbol{\mu})+b$，且有：
+		\begin{equation*}
+			\operatorname{E}[L^2(Y|\mathbf{X})]=\operatorname{E}[(Y-b)^2]-\alpha^T\operatorname{Cov}(\mathbf{X})\alpha
+		\end{equation*}
+		\item 若$\operatorname{Cov}(\mathbf{X})$可逆，则$\alpha^{-1}=\operatorname{Cov}(\mathbf{X})^{-1}\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]$；
+		\item 若$\det[\operatorname{Cov}(\mathbf{X})]=0$，取正交矩阵$Q$使得：
+		\begin{equation*}
+			Q\operatorname{Cov}(\mathbf{X})Q^T=\operatorname{diag}\{\seq{\lambda}{r},0,0,\dots,0\},\quad\lambda_i>0,\;i=1,2,\dots,r
+		\end{equation*}
+		定义$\mathbf{Z}=Q(\mathbf{X}-\boldsymbol{\mu})=(\seq{\mathbf{Z}}{r},0,0,\dots,0)^T,\;\varepsilon=(\seq{\mathbf{Z}}{r})^T$，则$\operatorname{E}(\varepsilon\varepsilon^T)$正定，并且对$\alpha=[\operatorname{E}(\varepsilon\varepsilon^T)]^{-1}\operatorname{E}[\varepsilon(Y-b)]$，有$L(Y|\mathbf{X})=\alpha^T\varepsilon+b$；
+		\item 预测方程$\operatorname{Cov}(\mathbf{X})\alpha=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]$一定有解；
+		\item 预测方程$\operatorname{Cov}(\mathbf{X})\alpha=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]$的解可能不唯一，但$L(Y|\mathbf{X})$是在几乎处处的意义上唯一的，并且若一个随机变量几乎处处等于$L(Y|\mathbf{X})$，它也是一个最佳线性预测；
+		\item 若$\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]=\mathbf{0}$，则$L(Y|\mathbf{X})=b\;$a.e.；
+		\item 若$Y=a^T(\mathbf{X}-\boldsymbol{\mu})+b$，则$L(Y|\mathbf{X})=Y\;$a.e.；
+		\item
+		$a^T(\mathbf{X}-\boldsymbol{\mu})+b=L(Y|\mathbf{X})$的充分必要条件为：
+		\begin{equation*}
+			\operatorname{E}\{(\mathbf{X}-\boldsymbol{\mu})[Y-a^T(\mathbf{X}-\boldsymbol{\mu})-b]\}=\mathbf{0}
+		\end{equation*}
+		\item $L(\cdot|\mathbf{X})$是一个线性运算：
+		\begin{equation*}
+			L\left(\sum_{i=1}^{n}k_iY_i|\mathbf{X}\right)=\sum_{i=1}^{n}k_iL(Y_i|\mathbf{X})
+		\end{equation*}
+		\item 设$\mathbf{Z}=(\seq{\mathbf{Z}}{m})^T$，若$\operatorname{Cov}(\mathbf{X},\mathbf{Z})=\mathbf{0}$，则有$L(Y|\mathbf{X},\mathbf{Z})=L(Y|\mathbf{X})+L(Y|\mathbf{Z})$；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)对任意的$\beta\in\mathbb{R}^{n}$，由\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{align*}
+		&\operatorname{E}\{[Y-b-\beta^T(\mathbf{X}-\boldsymbol{\mu})]^2\} \\
+		=&\operatorname{E}\{[Y-b-\alpha^T(\mathbf{X}-\boldsymbol{\mu})+(\alpha^T-\beta^T)(\mathbf{X}-\boldsymbol{\mu})][Y-b-\alpha^T(\mathbf{X}-\boldsymbol{\mu})+(\alpha^T-\beta^T)(\mathbf{X}-\boldsymbol{\mu})]\} \\
+		=&\operatorname{E}\{(Y-b)^2-2[Y-b-\alpha^T(\mathbf{X}-\boldsymbol{\mu})](\alpha^T-\beta^T)(\mathbf{X}-\boldsymbol{\mu})+[(\alpha^T-\beta^T)(\mathbf{X}-\boldsymbol{\mu})]^2\} \\
+		=&\operatorname{E}[(Y-b)^2]+\operatorname{E}\{[(\alpha^T-\beta^T)(\mathbf{X}-\boldsymbol{\mu})]^2\}-2\operatorname{E}\{[Y-b-\alpha^T(\mathbf{X}-\boldsymbol{\mu})](\alpha^T-\beta^T)(\mathbf{X}-\boldsymbol{\mu})\} \\
+		=&\operatorname{E}[(Y-b)^2]+\operatorname{E}\{[(\alpha^T-\beta^T)(\mathbf{X}-\boldsymbol{\mu})]^2\}-2(\alpha^T-\beta^T)\operatorname{E}[(Y-b)(\mathbf{X}-\boldsymbol{\mu})-\alpha^T(\mathbf{X}-\boldsymbol{\mu})(\mathbf{X}-\boldsymbol{\mu})] \\
+		=&\operatorname{E}[(Y-b)^2]+\operatorname{E}\{[(\alpha^T-\beta^T)(\mathbf{X}-\boldsymbol{\mu})]^2\}-2(\alpha^T-\beta^T)\{\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]-\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(\mathbf{X}-\boldsymbol{\mu})^T\alpha]\} \\
+		=&\operatorname{E}[(Y-b)^2]+\operatorname{E}\{[(\alpha^T-\beta^T)(\mathbf{X}-\boldsymbol{\mu})]^2\}-2(\alpha^T-\beta^T)\{\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]-\operatorname{Cov}(\mathbf{X})\alpha\}
+	\end{align*}
+	因为$\operatorname{Cov}(\mathbf{X})=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]$，所以上式第三项为$0$，而前两项都是非负的，其中第二项为$0$当且仅当$\alpha=\beta$，由最佳线性预测的定义，$L(Y|\mathbf{X})=\alpha^T(\mathbf{X}-\boldsymbol{\mu})+b$。由\cref{prop:MeasurableIntegral}(6)和\cref{prop:CovMat}(3)可得：
+	\begin{align*}
+		&\operatorname{E}[L^2(Y|\mathbf{X})]=\operatorname{E}\{[Y-b-\alpha^T(\mathbf{X}-\boldsymbol{\mu})]^2\} \\
+		=&\operatorname{E}\{(Y-b)^2-2\alpha^T(\mathbf{X}-\boldsymbol{\mu})(Y-b)+\alpha^T(\mathbf{X}-\boldsymbol{\mu})\alpha^T(\mathbf{X}-\boldsymbol{\mu})\} \\
+		=&\operatorname{E}[(Y-b)^2]-2\alpha^T\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]+\operatorname{E}[\alpha^T(\mathbf{X}-\boldsymbol{\mu})(\mathbf{X}-\boldsymbol{\mu})\alpha] \\
+		=&\operatorname{E}[(Y-b)^2]-2\alpha^T\operatorname{Cov}(\mathbf{X})\alpha+\alpha^T\operatorname{Cov}(\mathbf{X})\alpha \\
+		=&\operatorname{E}[(Y-b)^2]-\alpha^T\operatorname{Cov}(\mathbf{X})\alpha
+	\end{align*}\par
+	(2)显然。\par
+	(3)由\cref{prop:CovMat}(2)可得$\operatorname{Cov}(\mathbf{X})$是一个半正定矩阵，根据\cref{prop:HermitianMatEigen}和\cref{theo:PositiveSemidefinite}(3)中的第五条可知存在正交矩阵$Q$使得：
+	\begin{equation*}
+		Q\operatorname{Cov}(\mathbf{X})Q^T=\operatorname{diag}\{\seq{\lambda}{r},0,0,\dots,0\},\quad\lambda_i>0,\;i=1,2,\dots,r
+	\end{equation*}
+	注意到：
+	\begin{equation*}
+		\operatorname{E}(\mathbf{Z})=\mathbf{0},\quad\operatorname{Cov}(\mathbf{Z})=\operatorname{E}(\mathbf{Z}\mathbf{Z}^T)=Q\operatorname{Cov}(\mathbf{X})Q^T=\operatorname{diag}\{\seq{\lambda}{r},0,0,\dots,0\}
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\operatorname{E}(\varepsilon\varepsilon^T)=\operatorname{Cov}(\varepsilon)=\operatorname{diag}\{\seq{\lambda}{r}\}
+	\end{equation*}
+	于是$\operatorname{E}(\varepsilon\varepsilon^T)$的特征值都大于$0$，由\cref{theo:PositiveDefinite}(3)中的第五条可知$\operatorname{E}(\varepsilon\varepsilon^T)$正定。取$\alpha=[\operatorname{E}(\varepsilon\varepsilon^T)]^{-1}\operatorname{E}[\varepsilon(Y-b)]$，则：
+	\begin{gather*}
+		\operatorname{E}(\varepsilon\varepsilon^T)\alpha=\operatorname{E}[\varepsilon(Y-b)] \\
+		\operatorname{diag}\{\seq{\lambda}{r}\}\alpha=\operatorname{E}[\varepsilon(Y-b)] \\
+		\operatorname{diag}\{\seq{\lambda}{r},0,0,\dots,0\}
+		\begin{pmatrix}
+			\alpha \\
+			\mathbf{0}	
+		\end{pmatrix}=\operatorname{E}[Z(Y-b)] \\
+		Q\operatorname{Cov}(\mathbf{X})Q^T
+		\begin{pmatrix}
+			\alpha \\
+			\mathbf{0}	
+		\end{pmatrix}=\operatorname{E}[Q(\mathbf{X}-\boldsymbol{\mu})(Y-b)] \\
+		\operatorname{Cov}(\mathbf{X})Q^T
+		\begin{pmatrix}
+			\alpha \\
+			\mathbf{0}	
+		\end{pmatrix}=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)] 
+	\end{gather*}
+	所以$Q^T
+	\begin{pmatrix}
+		\alpha \\
+		\mathbf{0}
+	\end{pmatrix}$满足预测方程，即：
+	\begin{equation*}
+		L(Y|\mathbf{X})=
+		\begin{pmatrix}
+			\alpha \\
+			\mathbf{0}
+		\end{pmatrix}^TQ(\mathbf{X}-\boldsymbol{\mu})+b=
+		\begin{pmatrix}
+		\alpha \\
+		\mathbf{0}
+		\end{pmatrix}^T\mathbf{Z}+b=\alpha^T\varepsilon+b
+	\end{equation*}\par
+	(4)由(2)(3)和\cref{prop:CovMat}(2)立即可得。\par
+	(5)由(1)的证明过程可知若$L(Y|\mathbf{X})=\alpha^T(\mathbf{X}-\boldsymbol{\mu})+b$是最佳线性预测，则对任意的$\beta\in\mathbb{R}^{n}$，有：
+	\begin{equation*}
+		\operatorname{E}\{[Y-b-\beta^T(\mathbf{X}-\boldsymbol{\mu})]^2\}=\operatorname{E}[(Y-b)^2]+\operatorname{E}\{[(\alpha^T-\beta^T)(\mathbf{X}-\boldsymbol{\mu})]^2\}
+	\end{equation*}
+	若$\beta^T(\mathbf{X}-\boldsymbol{\mu})+b$也是最佳线性预测，由定义即可得：
+	\begin{equation*}
+		\operatorname{E}\{[(\alpha^T-\beta^T)(\mathbf{X}-\boldsymbol{\mu})]^2\}=0
+	\end{equation*}
+	由\cref{prop:NonnegativeMearsurableIntegral}(10)可得此时$(\alpha^T-\beta^T)(\mathbf{X}-\boldsymbol{\mu})=\mathbf{0}\;$a.e.，即
+	\begin{equation*}
+		\alpha^T(\mathbf{X}-\boldsymbol{\mu})+b=\beta^T(\mathbf{X}-\boldsymbol{\mu})+b,\quad a.e.
+	\end{equation*}
+	反之若上式成立，则由\cref{prop:NonnegativeMearsurableIntegral}(10)可得此时上上式成立，根据定义即可得到$\beta^T(\mathbf{X}-\boldsymbol{\mu})+b$是最佳线性预测。\par
+	(6)此时预测方程有解$\alpha=\mathbf{0}$，由(1)(5)可知$L(Y|\mathbf{X})=b\;$a.e.。\par
+	(7)由最佳线性预测的定义和(5)立即可得。\par
+	(8)由\cref{prop:MearsurableIntegral}(6)可得：
+	\begin{align*}
+		\operatorname{E}\{(\mathbf{X}-\boldsymbol{\mu})[Y-a^T(\mathbf{X}-\boldsymbol{\mu})-b]\}&=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]-\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})a^T(\mathbf{X}-\boldsymbol{\mu}) \\
+		&=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]-\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(\mathbf{X}-\boldsymbol{\mu})^T\alpha] \\
+		&=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]-\operatorname{Cov}(\mathbf{X})\alpha=\mathbf{0}
+	\end{align*}
+	上式即$\operatorname{Cov}(\mathbf{X})\alpha=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]$，所以预测方程的解满足上式，由(4)(5)可立即得出结论。\par
+	(9)设$\operatorname{E}(Y_i)=b_i$，由(4)(1)可得$L(Y_i|\mathbf{X})=\alpha_i^T(\mathbf{X}-\boldsymbol{\mu})+b_i$，其中$\alpha_i$是用$\mathbf{X}$对$Y_i$进行预测时的最佳线性预测的预测方程的解，由\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{align*}
+		\operatorname{Cov}(\mathbf{X})\left(\sum_{i=1}^{n}k_i\alpha_i\right)&=\sum_{i=1}^{n}k_i\operatorname{Cov}(\mathbf{X})\alpha_i=\sum_{i=1}^{n}k_i\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y_i-b_i)] \\
+		&=\operatorname{E}\left\{(\mathbf{X}-\boldsymbol{\mu})\left[\sum_{i=1}^{n}k_i(Y_i-b_i)\right]\right\} =\operatorname{E}\left[(\mathbf{X}-\boldsymbol{\mu})\left(\sum_{i=1}^{n}k_iY_i-\sum_{i=1}^{n}b_i\right)\right]
+	\end{align*}
+	由(1)(5)可立即得出结论。\par
+	(10)设$\operatorname{E}(\mathbf{Z})=\boldsymbol{\nu},\;L(Y|\mathbf{X})=\alpha^T(\mathbf{X}-\boldsymbol{\mu})+b,\;L(Y|\mathbf{Z})=\beta^T(\mathbf{Z}-\boldsymbol{\nu})+b$，由(8)可得：
+	\begin{equation*}
+		\operatorname{E}\{(\mathbf{X}-\boldsymbol{\mu})[Y-\alpha^T(\mathbf{X}-\boldsymbol{\mu})-b]\}=\mathbf{0},\quad
+		\operatorname{E}\{(\mathbf{Z}-\boldsymbol{\nu})[Y-\beta^T(\mathbf{Z}-\boldsymbol{\nu})-b]\}=\mathbf{0}
+	\end{equation*}
+	由\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{align*}
+		&\operatorname{E}\left\{\left[
+		\begin{pmatrix}
+			\mathbf{X} \\
+			\mathbf{Z}
+		\end{pmatrix}-
+		\begin{pmatrix}
+			\boldsymbol{\mu} \\
+			\boldsymbol{\nu}
+		\end{pmatrix}
+		\right][Y-\alpha^T(\mathbf{X}-\boldsymbol{\mu})-b-\beta^T(\mathbf{Z}-\boldsymbol{\nu})-b]\right\} \\
+		&=\operatorname{E}\left[
+		\begin{pmatrix}
+			(\mathbf{X}-\boldsymbol{\mu})[Y-\alpha^T(\mathbf{X}-\boldsymbol{\mu})-b-\beta^T(\mathbf{Z}-\boldsymbol{\nu})-b] \\
+			(\mathbf{Z}-\boldsymbol{\nu})[Y-\alpha^T(\mathbf{X}-\boldsymbol{\mu})-b-\beta^T(\mathbf{Z}-\boldsymbol{\nu})-b]
+		\end{pmatrix}
+		\right] \\
+		&=\operatorname{E}\left[
+		\begin{pmatrix}
+			(\mathbf{X}-\boldsymbol{\mu})[Y-\alpha^T(\mathbf{X}-\boldsymbol{\mu})-b]-(\mathbf{X}-\boldsymbol{\mu})[\beta^T(\mathbf{Z}-\boldsymbol{\nu})-b] \\
+			(\mathbf{Z}-\boldsymbol{\nu})[Y-\beta^T(\mathbf{Z}-\boldsymbol{\nu})-b]-(\mathbf{Z}-\boldsymbol{\nu})[\alpha^T(\mathbf{X}-\boldsymbol{\mu})-b]
+		\end{pmatrix}
+		\right] \\
+		&=\operatorname{E}\left[
+		\begin{pmatrix}
+			(\mathbf{X}-\boldsymbol{\mu})[Y-\alpha^T(\mathbf{X}-\boldsymbol{\mu})-b] \\
+			(\mathbf{Z}-\boldsymbol{\nu})[Y-\beta^T(\mathbf{Z}-\boldsymbol{\nu})-b]
+		\end{pmatrix}
+		\right]+\operatorname{E}\left[
+		\begin{pmatrix}
+			-(\mathbf{X}-\boldsymbol{\mu})[\beta^T(\mathbf{Z}-\boldsymbol{\nu})-b] \\
+			-(\mathbf{Z}-\boldsymbol{\nu})[\alpha^T(\mathbf{X}-\boldsymbol{\mu})-b]
+		\end{pmatrix}
+		\right] \\
+		&=\operatorname{E}\left[
+		\begin{pmatrix}
+			-(\mathbf{X}-\boldsymbol{\mu})[\beta^T(\mathbf{Z}-\boldsymbol{\nu})]+b(\mathbf{X}-\boldsymbol{\mu}) \\
+			-(\mathbf{Z}-\boldsymbol{\nu})[\alpha^T(\mathbf{X}-\boldsymbol{\mu})]+b(\mathbf{X}-\boldsymbol{\mu})
+		\end{pmatrix}
+		\right] \\
+		&=-
+		\begin{pmatrix}
+			\operatorname{Cov}(\mathbf{X},\mathbf{Z})\beta \\
+			\operatorname{Cov}(\mathbf{Z},\mathbf{X})\alpha
+		\end{pmatrix}+
+		b
+		\operatorname{E}\left[
+		\begin{pmatrix}
+			\mathbf{X}-\boldsymbol{\mu} \\
+			\mathbf{Z}-\boldsymbol{\nu}
+		\end{pmatrix}
+		\right]=\mathbf{0}
+	\end{align*}
+	于是由(8)可得$L(Y|\mathbf{X},\mathbf{Z})=L(Y|\mathbf{X})+L(Y|\mathbf{Z})$。
+\end{proof}
