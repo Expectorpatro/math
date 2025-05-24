@@ -1,5 +1,6 @@
 \section{预测}
 
+\subsection{最佳线性预测}
 \begin{definition}
 	设$Y$是方差有限的随机变量，$\mathbf{X}=(\seq{\mathbf{X}}{n})^T$是各分量方差有限的随机向量，$\operatorname{E}(Y)=b,\;\operatorname{E}(\mathbf{X})=\boldsymbol{\mu}$。若$\alpha\in\mathbb{R}^{n}$使得对任意的$\beta\in\mathbb{R}^{n}$都有：
 	\begin{equation*}
@@ -10,12 +11,13 @@
 \begin{definition}
 	若$\operatorname{Cov}(\mathbf{X})$与$\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]$已知，称$\operatorname{Cov}(\mathbf{X})\alpha=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]$为\textbf{预测方程}。
 \end{definition}
-\begin{property}
+\begin{property}\label{prop:BestLinearForcast}
 	设$Y$是方差有限的随机变量，$\mathbf{X}=(\seq{\mathbf{X}}{n})^T$是各分量方差有限的随机向量，$\operatorname{E}(Y)=b,\;\operatorname{E}(\mathbf{X})=\boldsymbol{\mu}$。用$\mathbf{X}$对$Y$进行预测时的最佳线性预测具有如下性质：
 	\begin{enumerate}
+		\item 最佳线性预测是无偏预测，它的含义是$\operatorname{E}[L(Y|\mathbf{X})]=\operatorname{E}(Y)$；
 		\item 若$\alpha\in\mathbb{R}^{n}$使得$\operatorname{Cov}(\mathbf{X})\alpha=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]$，则$L(Y|\mathbf{X})=\alpha^T(\mathbf{X}-\boldsymbol{\mu})+b$，且有：
 		\begin{equation*}
-			\operatorname{E}[L^2(Y|\mathbf{X})]=\operatorname{E}[(Y-b)^2]-\alpha^T\operatorname{Cov}(\mathbf{X})\alpha
+			\operatorname{E}\{[Y-L(Y|\mathbf{X})]^2\}=\operatorname{E}[(Y-b)^2]-\alpha^T\operatorname{Cov}(\mathbf{X})\alpha=\operatorname{Var}(Y)-\alpha^T\operatorname{Cov}(\mathbf{X})\alpha
 		\end{equation*}
 		\item 若$\operatorname{Cov}(\mathbf{X})$可逆，则$\alpha^{-1}=\operatorname{Cov}(\mathbf{X})^{-1}\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]$；
 		\item 若$\det[\operatorname{Cov}(\mathbf{X})]=0$，取正交矩阵$Q$使得：
@@ -37,10 +39,19 @@
 			L\left(\sum_{i=1}^{n}k_iY_i|\mathbf{X}\right)=\sum_{i=1}^{n}k_iL(Y_i|\mathbf{X})
 		\end{equation*}
 		\item 设$\mathbf{Z}=(\seq{\mathbf{Z}}{m})^T$，若$\operatorname{Cov}(\mathbf{X},\mathbf{Z})=\mathbf{0}$，则有$L(Y|\mathbf{X},\mathbf{Z})=L(Y|\mathbf{X})+L(Y|\mathbf{Z})$；
+		\item 设$\hat{Y}=L(Y|\mathbf{X}),\;\tilde{Y}=L(Y|\seq{\mathbf{X}}{n-1})$，则：
+		\begin{equation*}
+			L(\hat{Y}|\seq{\mathbf{X}}{n-1})=\tilde{Y},\quad\operatorname{E}[(Y-\hat{Y})^2]\leqslant\operatorname{E}[(Y-\tilde{Y})^2]
+		\end{equation*}
+		\item 设$\mathbf{X}=\seq{\mathbf{Z}}{m}$，若存在矩阵$A,B$使得$\mathbf{X}=A\mathbf{Z},\;\mathbf{Z}=B\mathbf{X}$，则$L(Y|\mathbf{X})=L(Y|\mathbf{Z})$。
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)对任意的$\beta\in\mathbb{R}^{n}$，由\cref{prop:MeasurableIntegral}(6)可得：
+	(1)设$L(Y|\mathbf{X})=\alpha^T(\mathbf{X}-\boldsymbol{\mu})+b$，则：
+	\begin{equation*}
+		\operatorname{E}[L(Y|\mathbf{X})]=\operatorname{E}[\alpha^T(\mathbf{X}-\boldsymbol{\mu})+b]=\alpha^T\operatorname{E}(\mathbf{X}-\boldsymbol{\mu})+b=b=\operatorname{E}(Y)
+	\end{equation*}\par
+	(2)对任意的$\beta\in\mathbb{R}^{n}$，由\cref{prop:MeasurableIntegral}(6)可得：
 	\begin{align*}
 		&\operatorname{E}\{[Y-b-\beta^T(\mathbf{X}-\boldsymbol{\mu})]^2\} \\
 		=&\operatorname{E}\{[Y-b-\alpha^T(\mathbf{X}-\boldsymbol{\mu})+(\alpha^T-\beta^T)(\mathbf{X}-\boldsymbol{\mu})][Y-b-\alpha^T(\mathbf{X}-\boldsymbol{\mu})+(\alpha^T-\beta^T)(\mathbf{X}-\boldsymbol{\mu})]\} \\
@@ -52,14 +63,14 @@
 	\end{align*}
 	因为$\operatorname{Cov}(\mathbf{X})=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]$，所以上式第三项为$0$，而前两项都是非负的，其中第二项为$0$当且仅当$\alpha=\beta$，由最佳线性预测的定义，$L(Y|\mathbf{X})=\alpha^T(\mathbf{X}-\boldsymbol{\mu})+b$。由\cref{prop:MeasurableIntegral}(6)和\cref{prop:CovMat}(3)可得：
 	\begin{align*}
-		&\operatorname{E}[L^2(Y|\mathbf{X})]=\operatorname{E}\{[Y-b-\alpha^T(\mathbf{X}-\boldsymbol{\mu})]^2\} \\
+		&\operatorname{E}\{[Y-L(Y|\mathbf{X})]^2\}=\operatorname{E}\{[Y-b-\alpha^T(\mathbf{X}-\boldsymbol{\mu})]^2\} \\
 		=&\operatorname{E}\{(Y-b)^2-2\alpha^T(\mathbf{X}-\boldsymbol{\mu})(Y-b)+\alpha^T(\mathbf{X}-\boldsymbol{\mu})\alpha^T(\mathbf{X}-\boldsymbol{\mu})\} \\
 		=&\operatorname{E}[(Y-b)^2]-2\alpha^T\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]+\operatorname{E}[\alpha^T(\mathbf{X}-\boldsymbol{\mu})(\mathbf{X}-\boldsymbol{\mu})\alpha] \\
 		=&\operatorname{E}[(Y-b)^2]-2\alpha^T\operatorname{Cov}(\mathbf{X})\alpha+\alpha^T\operatorname{Cov}(\mathbf{X})\alpha \\
-		=&\operatorname{E}[(Y-b)^2]-\alpha^T\operatorname{Cov}(\mathbf{X})\alpha
+		=&\operatorname{E}[(Y-b)^2]-\alpha^T\operatorname{Cov}(\mathbf{X})\alpha=\operatorname{Var}(Y)-\alpha^T\operatorname{Cov}(\mathbf{X})\alpha
 	\end{align*}\par
-	(2)显然。\par
-	(3)由\cref{prop:CovMat}(2)可得$\operatorname{Cov}(\mathbf{X})$是一个半正定矩阵，根据\cref{prop:HermitianMatEigen}和\cref{theo:PositiveSemidefinite}(3)中的第五条可知存在正交矩阵$Q$使得：
+	(3)显然。\par
+	(4)由\cref{prop:CovMat}(2)可得$\operatorname{Cov}(\mathbf{X})$是一个半正定矩阵，根据\cref{prop:HermitianMatEigen}(3)和\cref{theo:PositiveSemidefinite}(3)中的第五条可知存在正交矩阵$Q$使得：
 	\begin{equation*}
 		Q\operatorname{Cov}(\mathbf{X})Q^T=\operatorname{diag}\{\seq{\lambda}{r},0,0,\dots,0\},\quad\lambda_i>0,\;i=1,2,\dots,r
 	\end{equation*}
@@ -107,8 +118,8 @@
 		\mathbf{0}
 		\end{pmatrix}^T\mathbf{Z}+b=\alpha^T\varepsilon+b
 	\end{equation*}\par
-	(4)由(2)(3)和\cref{prop:CovMat}(2)立即可得。\par
-	(5)由(1)的证明过程可知若$L(Y|\mathbf{X})=\alpha^T(\mathbf{X}-\boldsymbol{\mu})+b$是最佳线性预测，则对任意的$\beta\in\mathbb{R}^{n}$，有：
+	(5)由(3)(4)和\cref{prop:CovMat}(2)立即可得。\par
+	(6)由(2)的证明过程可知若$L(Y|\mathbf{X})=\alpha^T(\mathbf{X}-\boldsymbol{\mu})+b$是最佳线性预测，则对任意的$\beta\in\mathbb{R}^{n}$，有：
 	\begin{equation*}
 		\operatorname{E}\{[Y-b-\beta^T(\mathbf{X}-\boldsymbol{\mu})]^2\}=\operatorname{E}[(Y-b)^2]+\operatorname{E}\{[(\alpha^T-\beta^T)(\mathbf{X}-\boldsymbol{\mu})]^2\}
 	\end{equation*}
@@ -121,22 +132,22 @@
 		\alpha^T(\mathbf{X}-\boldsymbol{\mu})+b=\beta^T(\mathbf{X}-\boldsymbol{\mu})+b,\quad a.e.
 	\end{equation*}
 	反之若上式成立，则由\cref{prop:NonnegativeMearsurableIntegral}(10)可得此时上上式成立，根据定义即可得到$\beta^T(\mathbf{X}-\boldsymbol{\mu})+b$是最佳线性预测。\par
-	(6)此时预测方程有解$\alpha=\mathbf{0}$，由(1)(5)可知$L(Y|\mathbf{X})=b\;$a.e.。\par
-	(7)由最佳线性预测的定义和(5)立即可得。\par
-	(8)由\cref{prop:MearsurableIntegral}(6)可得：
+	(7)此时预测方程有解$\alpha=\mathbf{0}$，由(2)(6)可知$L(Y|\mathbf{X})=b\;$a.e.。\par
+	(8)由最佳线性预测的定义和(6)立即可得。\par
+	(9)由\cref{prop:MearsurableIntegral}(6)可得：
 	\begin{align*}
 		\operatorname{E}\{(\mathbf{X}-\boldsymbol{\mu})[Y-a^T(\mathbf{X}-\boldsymbol{\mu})-b]\}&=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]-\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})a^T(\mathbf{X}-\boldsymbol{\mu}) \\
 		&=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]-\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(\mathbf{X}-\boldsymbol{\mu})^T\alpha] \\
 		&=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]-\operatorname{Cov}(\mathbf{X})\alpha=\mathbf{0}
 	\end{align*}
-	上式即$\operatorname{Cov}(\mathbf{X})\alpha=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]$，所以预测方程的解满足上式，由(4)(5)可立即得出结论。\par
-	(9)设$\operatorname{E}(Y_i)=b_i$，由(4)(1)可得$L(Y_i|\mathbf{X})=\alpha_i^T(\mathbf{X}-\boldsymbol{\mu})+b_i$，其中$\alpha_i$是用$\mathbf{X}$对$Y_i$进行预测时的最佳线性预测的预测方程的解，由\cref{prop:MeasurableIntegral}(6)可得：
+	上式即$\operatorname{Cov}(\mathbf{X})\alpha=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-b)]$，所以预测方程的解满足上式，由(5)(6)可立即得出结论。\par
+	(10)设$\operatorname{E}(Y_i)=b_i$，由(5)(2)可得$L(Y_i|\mathbf{X})=\alpha_i^T(\mathbf{X}-\boldsymbol{\mu})+b_i$，其中$\alpha_i$是用$\mathbf{X}$对$Y_i$进行预测时的最佳线性预测的预测方程的解，由\cref{prop:MeasurableIntegral}(6)可得：
 	\begin{align*}
 		\operatorname{Cov}(\mathbf{X})\left(\sum_{i=1}^{n}k_i\alpha_i\right)&=\sum_{i=1}^{n}k_i\operatorname{Cov}(\mathbf{X})\alpha_i=\sum_{i=1}^{n}k_i\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y_i-b_i)] \\
 		&=\operatorname{E}\left\{(\mathbf{X}-\boldsymbol{\mu})\left[\sum_{i=1}^{n}k_i(Y_i-b_i)\right]\right\} =\operatorname{E}\left[(\mathbf{X}-\boldsymbol{\mu})\left(\sum_{i=1}^{n}k_iY_i-\sum_{i=1}^{n}b_i\right)\right]
 	\end{align*}
-	由(1)(5)可立即得出结论。\par
-	(10)设$\operatorname{E}(\mathbf{Z})=\boldsymbol{\nu},\;L(Y|\mathbf{X})=\alpha^T(\mathbf{X}-\boldsymbol{\mu})+b,\;L(Y|\mathbf{Z})=\beta^T(\mathbf{Z}-\boldsymbol{\nu})+b$，由(8)可得：
+	由(2)(6)可立即得出结论。\par
+	(11)设$\operatorname{E}(\mathbf{Z})=\boldsymbol{\nu},\;L(Y|\mathbf{X})=\alpha^T(\mathbf{X}-\boldsymbol{\mu})+b,\;L(Y|\mathbf{Z})=\beta^T(\mathbf{Z}-\boldsymbol{\nu})+b$，由(9)可得：
 	\begin{equation*}
 		\operatorname{E}\{(\mathbf{X}-\boldsymbol{\mu})[Y-\alpha^T(\mathbf{X}-\boldsymbol{\mu})-b]\}=\mathbf{0},\quad
 		\operatorname{E}\{(\mathbf{Z}-\boldsymbol{\nu})[Y-\beta^T(\mathbf{Z}-\boldsymbol{\nu})-b]\}=\mathbf{0}
@@ -195,5 +206,128 @@
 		\end{pmatrix}
 		\right]=\mathbf{0}
 	\end{align*}
-	于是由(8)可得$L(Y|\mathbf{X},\mathbf{Z})=L(Y|\mathbf{X})+L(Y|\mathbf{Z})$。
+	于是由(9)可得$L(Y|\mathbf{X},\mathbf{Z})=L(Y|\mathbf{X})+L(Y|\mathbf{Z})$。\par
+	(12)令$\mathbf{Z}=(\seq{\mathbf{X}}{n-1}),\;\operatorname{E}(\mathbf{Z})=\boldsymbol{\nu}$，由(8)可得：
+	\begin{equation*}
+		\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(Y-\hat{Y})]=\mathbf{0},\quad\operatorname{E}[(\mathbf{Z}-\boldsymbol{\nu})(Y-\tilde{Y})]=\mathbf{0}
+	\end{equation*}
+	所以$\operatorname{E}[(\mathbf{Z}-\boldsymbol{\nu})(Y-\hat{Y})]=\mathbf{0}$，于是由\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{equation*}
+		\operatorname{E}[(\mathbf{Z}-\boldsymbol{\nu})(Y-\tilde{Y})]-\operatorname{E}[(\mathbf{Z}-\boldsymbol{\nu})(Y-\hat{Y})]\operatorname{E}[(\mathbf{Z}-\boldsymbol{\nu})(Y-\tilde{Y}-Y+\hat{Y})]=\operatorname{E}[(\mathbf{Z}-\boldsymbol{\nu})(\hat{Y}-\tilde{Y})]=\mathbf{0}
+	\end{equation*}
+	所以$L(\hat{Y}|\seq{\mathbf{X}}{n-1})=\tilde{Y}$。因为$\tilde{Y}$也是对$Y$的线性预测，所以由最佳线性预测的定义可得$\operatorname{E}[(Y-\hat{Y})^2]\leqslant\operatorname{E}[(Y-\tilde{Y})^2]$。\par
+	(13)显然。
+\end{proof}
+\begin{note}
+	注意最佳线性预测是无偏估计，所以它的均方误差就等于方差。\info{均方误差与方差}
+\end{note}
+\subsubsection{样本最佳线性预测}
+\begin{derivation}
+	预测任务为：给定$\seq{x}{N}$，要求预测$x_{N+k}$。若使用$x_{N-n+1},x_{N-n+2},\dots,x_{N}$，令$\mathbf{X}=(X_{N-n+1},X_{N-n+2},\dots,X_N)^T,\;\operatorname{E}(X_t)=\mu,\;\hat{\mu}=\bar{x}_N$，则此时的预测方程为：
+	\begin{gather*}
+		\operatorname{Cov}(\mathbf{X})\alpha=\operatorname{E}[(\mathbf{X}-\boldsymbol{\mu})(X_{N+k}-\mu)] \\
+		\Gamma_n\alpha=[\gamma(n+k-1),\gamma(n+k-2),\dots,\gamma(k)]^T
+	\end{gather*}
+	样本预测方程为：
+	\begin{equation*}
+		\hat{\Gamma}_n\alpha=[\hat{\gamma}(n+k-1),\hat{\gamma}(n+k-2),\dots,\hat{\gamma}(k)]^T
+	\end{equation*}
+	由\cref{theo:StationarySeriesAutoCovariancePE}(3)可知以$\dfrac{1}{n}$为分母构成的自协方差矩阵$\hat{\Gamma}_n$是正定的，根据\cref{theo:PositiveSemidefinite}(3)中的第五条可知$\hat{\Gamma}_n$可逆，所以有$\alpha=\hat{\Gamma}_n^{-1}[\hat{\gamma}(n+k-1),\hat{\gamma}(n+k-2),\dots,\hat{\gamma}(k)]^T$，最佳线性预测的预测值即为：
+	\begin{equation*}
+		\hat{X}_{N+k}=\alpha^T(x_{N-n+1}-\hat{\mu},x_{N-n+2}-\hat{\mu},\dots,x_{N}-\hat{\mu})^T+\hat{\mu}
+	\end{equation*}
+	此时必须满足$N\leqslant n+k-1$。
+\end{derivation}
+
+\subsection{最佳预测}
+\begin{definition}
+	设$Y$是方差有限的随机变量，$\mathbf{X}=(\seq{\mathbf{X}}{n})^T$是各分量方差有限的随机向量，令：
+	\begin{equation*}
+		M=\overline{\operatorname{sp}}\left\{g(\mathbf{X})|\operatorname{E}[g^2(\mathbf{X})]<+\infty,\;g(\cdot)\text{是可测函数}\right\}
+	\end{equation*}
+	称：
+	\begin{equation*}
+		L(Y|M)=\mathcal{P}_M(\mathbf{X})
+	\end{equation*}
+	是用$\mathbf{X}$对$Y$进行预测时的\textbf{最佳预测}，其中$\mathcal{P}_M$是向$M$的投影算子。
+\end{definition}
+\begin{property}
+	设$Y$是方差有限的随机变量，$\mathbf{X}=(\seq{\mathbf{X}}{n})^T$是各分量方差有限的随机向量，$\operatorname{E}(\mathbf{X})=\boldsymbol{\mu}$。用$\mathbf{X}$对$Y$进行预测时的最佳预测具有如下性质：
+	\begin{enumerate}
+		\item 从方差的角度，最佳预测优于最佳线性预测；
+		\item 若$(\mathbf{X},Y)\sim\operatorname{N}_{n+1}(\boldsymbol{\mu},\Sigma)$，则最佳预测$L(Y|M)$与最佳线性预测$L(Y|\mathbf{X})$相同。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)\info{写完高概回来修改这边，整个时间序列的Hilbert空间理论}\par
+	(2)由\cref{prop:BestLinearForcast}(1)可得$\operatorname{E}[Y-L(Y|\mathbf{X})]=0$，显然有$\operatorname{E}(\mathbf{X}-\boldsymbol{\mu})=\mathbf{0}$。由\cref{prop:BestLinearForcast}(9)可得此时$Y-L(Y|\mathbf{X})$与$\mathbf{X}-\boldsymbol{\mu}$不相关，根据\cref{theo:IndependentCorrelationNormal}可知$Y-L(Y|\mathbf{X})$与$\mathbf{X}-\boldsymbol{\mu}$独立，于是$Y-L(Y|\mathbf{X})$与$M$中的任何元素都独立。对任意的$\alpha\in M$，由\cref{prop:CovMat}(6)可得$\operatorname{E}\{\alpha[Y-L(Y|\mathbf{X})]\}=\operatorname{E}(\alpha)\operatorname{E}[Y-L(Y|\mathbf{X})]=0$，所以$Y-L(Y|\mathbf{X})\perp M$。因为$L(Y|\mathbf{X})\in M$，由最佳预测的定义可得$L(Y|\mathbf{X})=L(Y|M)$。
+\end{proof}
+
+\section{平稳序列的Wold表示}
+\begin{definition}
+	设$\{X_t\}$是平稳序列，$\operatorname{E}(X_t)=\mu$，记：
+	\begin{equation*}
+		\mathbf{X}_{t,n}=(X_t,X_{t-1},\dots,X_{t-n+1}),\quad\hat{X}_{t+k,n}=L(X_{t+k}|\mathbf{X}_{t,n}),\quad\sigma_{k,n}^2=\operatorname{E}[(X_{t+k}-\hat{X}_{t+k,n})^2]
+	\end{equation*}
+	由\cref{prop:BestLinearForcast}(12)可得$\sigma_{k,n}^2$随着$n$的增大单调不增且有下界$0$，\info{单调有界必收敛}所以定义：
+	\begin{equation*}
+		\sigma_k^2=\lim_{n\to+\infty}\sigma_{k,n}^2
+	\end{equation*}
+\end{definition}
+\begin{property}
+	设$\{X_t\}$是平稳序列，$\operatorname{E}(X_t)=\mu$，则：
+	\begin{enumerate}
+		\item $\sigma_k^2$与$t$无关；
+		\item $\sigma_k^2\geqslant\sigma_{k-1}^2$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)设$\alpha$满足用$\mathbf{X}_{t,n}$预测$X_{t+k}$时的预测方程，因为$\{X_t\}$是平稳序列，所以$\alpha=(\seq{a}{n})^T$与$t$无关。因为：
+	\begin{align*}
+		&(X_{t+k}-\hat{X}_{t+k,n})^2=\left[X_{t+k}-\sum_{i=1}^{n}a_i(X_{t+1-i}-\mu)-\mu\right]^2 \\
+		=&(X_{t+k}-\mu)^2+\left[\sum_{i=1}^{n}a_i(X_{t+1-i}-\mu)\right]^2-\sum_{i=1}^{n}a_i(X_{t+1-i}-\mu)(X_{t+k}-\mu) \\
+		=&(X_{t+k}-\mu)^2+\sum_{i=1}^{n}a_i^2(X_{t+1-i}-\mu)^2+\sum_{i=1}^{n}\sum_{j=1}^{n}a_ia_j(X_{t+1-i}-\mu)(X_{t+1-j}-\mu) \\
+		&-\sum_{i=1}^{n}a_i(X_{t+1-i}-\mu)(X_{t+k}-\mu)
+	\end{align*}
+	由\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{equation*}
+		\sigma_{k,n}^2=\operatorname{E}[(X_{t+k}-\hat{X}_{t+k,n})^2]=\sum_{i=1}^{n}(1+a_i^2)\gamma(0)+\sum_{i=1}^{n}\sum_{j=1}^{n}a_ia_j\gamma(j-i)-\sum_{i=1}^{n}a_i\gamma(1-i-k)
+	\end{equation*}
+	与$t$无关，所以$\sigma_k^2$与$t$也无关。\par
+	(2)由\cref{prop:BestLinearForcast}可得：
+	\begin{align*}
+		\sigma_k^2&=\lim_{n\to+\infty}\operatorname{E}\{[X_{t+k}-L(X_{t+k}|\mathbf{X}_{t,n})]^2\} \\
+		&=\lim_{n\to+\infty}\operatorname{E}\{[X_{t+k-1}-L(X_{t+k-1}|\mathbf{X}_{t-1,n})]^2\} \\
+		&\geqslant\lim_{n\to+\infty}\operatorname{E}\{[X_{t+k-1}-L(X_{t+k-1}|\mathbf{X}_{t,n+1})]^2\}=\sigma_{k-1}^2\qedhere
+	\end{align*}
+\end{proof}
+\begin{definition}
+	设$\{X_t\}$是平稳序列。
+	\begin{enumerate}
+		\item 若$\sigma_1^2=0$，称$\{X_t\}$是\textbf{决定性平稳序列}；
+		\item 若$\sigma_1^2>0$，称$\{X_t\}$是\textbf{非决定性平稳序列}，并称$\sigma_1^2$为$\{X_t\}$的\textbf{$1$步预测误差的方差}；
+		\item 若$\lim\limits_{k\to+\infty}\sigma_k^2=\gamma(0)$，则称$\{X_t\}$是\textbf{纯非决定性的}。
+	\end{enumerate}
+\end{definition}
+\begin{note}
+	如果$\{X_t\}$是纯非决定性的，说明用充分多的历史对遥远的未来进行预测和用$\mu$对其进行预测的效果差不多，因为：
+	\begin{equation*}
+		\operatorname{MSE}(X_t-\mu)=\operatorname{Var}(X_t)=\gamma(0)=\lim_{k\to+\infty}\sigma_k^2
+	\end{equation*}
+	即预测方差相近并且都为无偏估计。
+\end{note}
+
+\begin{lemma}
+	设$\{X_t\}$是一个零均值平稳序列，令：
+	\begin{gather*}
+		K_n=\left\{\sum_{i=0}^{m}c_iX_{n-i}:c_i\in\mathbb{R}^{},\;m\in\mathbb{N}^+\right\},\quad
+		H_n=\overline{\operatorname{sp}}\{X_n,X_{n-1},X_{n-2},\cdots\}
+	\end{gather*}
+	则对任意的$\xi\in H_n$，存在$K_n$中的点列$\{\xi_n\}$使得：
+	\begin{equation*}
+		\lim_{n\to+\infty}\operatorname{E}[(\xi_n-\xi)^2]=0
+	\end{equation*}
+\end{lemma}
+\begin{proof}
+	用$\overline{K}_n$表示$K_n$中的随机变量和它们均方极限，只需证明$\overline{K}_n=H_n$。\info{写完泛函重新修改}
 \end{proof}
