@@ -1,0 +1,203 @@
+\section{线性回归模型}
+\begin{definition}\label{model:LinearRegressionModel}
+	设因变量$Y$和自变量$\seq{X}{p-1}$满足：
+	\begin{equation*}
+		Y=\beta_0+\beta_1X_1+\beta_2X_2+\cdots+\beta_{p-1}X_{p-1}+e
+	\end{equation*}
+	若对因变量$Y$和自变量$\seq{X}{p-1}$进行了$n$次观察，得到$n$组数据，它们满足：
+	\begin{equation*}
+		y_i=\beta_0+\beta_1x_{i1}+\beta_2x_{i2}+\cdots+\beta_{p-1}x_{ip-1}+\varepsilon_i,\quad i=1,2,\dots,n
+	\end{equation*}
+	记：
+	\begin{equation*}
+		y=
+		\begin{pmatrix}
+			y_1 \\
+			y_2 \\
+			\vdots \\
+			y_n
+		\end{pmatrix},\quad
+		X=
+		\begin{pmatrix}
+			1 & x_{11} & \cdots & x_{1p-1} \\
+			1 & x_{21} & \cdots & x_{2p-1} \\
+			\vdots & \vdots & \ddots & \vdots \\
+			1 & x_{n1} & \cdots & x_{np-1} \\
+		\end{pmatrix},\quad
+		\beta=
+		\begin{pmatrix}
+			\beta_0 \\
+			\beta_1 \\
+			\vdots \\
+			\beta_{p-1}
+		\end{pmatrix},\quad
+		\varepsilon=
+		\begin{pmatrix}
+			\varepsilon_1 \\
+			\varepsilon_2 \\
+			\vdots \\
+			\varepsilon_n
+		\end{pmatrix}
+	\end{equation*}
+	且假设$\operatorname{rank}(X)=p,\;\operatorname{E}(\varepsilon)=\mathbf{0},\;\operatorname{Cov}(\varepsilon)=\sigma^2I_n$，则得到\gls{LinearRegressionModel}：
+	\begin{equation*}
+		y=X\beta+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
+	\end{equation*}
+	称$\beta_0$为常数项，$\beta_I=(\seq{\beta}{p-1})^T$为回归系数。若记$X=(\mathbf{1}_n,\tilde{X})$，其中$\mathbf{1}_n$为由$n$个$1$构成的列向量，则线性回归模型可被改写为：
+	\begin{equation*}
+		y=\mathbf{1}_n\beta_0+\tilde{X}\beta_I+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
+	\end{equation*}
+\end{definition}
+\begin{derivation}
+	由\cref{theo:AATPositiveSemidefinite}可知$X^TX$是一个半正定阵。若存在不为零向量的$\alpha$使得$\alpha^TX^TX\alpha=0$，则有$||X\alpha||=0$，即$X\alpha=\mathbf{0}$。而$\operatorname{rank}(X)=p$，所以$\alpha=\mathbf{0}$，矛盾，于是$X^TX$是一个正定阵，它是可逆的\info{正定阵可逆}。
+\end{derivation}
+\begin{definition}\label{model:NormalLinearRegressionModel}
+	对于\cref{model:LinearRegressionModel}，若$\varepsilon\sim\operatorname{N}_n(\mathbf{0},\sigma^2I_n)$，则称此时的线性回归模型为\textbf{正态线性回归模型}。
+\end{definition}
+\subsubsection{中心化与标准化处理}
+\begin{definition}
+	对于\cref{model:LinearRegressionModel}，记：
+	\begin{equation*}
+		\bar{x}_j=\frac{1}{n}\sum_{i=1}^{n}x_{ij},\quad s_j^2=\sum_{i=1}^{n}(x_{ij}-\bar{x}_j)^2
+	\end{equation*}\par
+	称：
+	\begin{gather*}
+		y_i=\gamma_0+\beta_1(x_{i1}-\bar{x}_1)+\beta_2(x_{i2}-\bar{x}_2)+\cdots+\beta_{p-1}(x_{ip-1}-\bar{x}_{p-1})+\varepsilon_i \\
+		y=\gamma_0\mathbf{1}_n+\tilde{X}_c\beta_I+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
+	\end{gather*}
+	为\textbf{中心化线性回归模型}，其中$\gamma_0=\beta_0+\bar{x}^T\beta_I,\;\bar{x}=(\seq{\bar{x}}{p-1})^T$，$\tilde{X}_c=\left(I_n-\dfrac{1}{n}\mathbf{1}_n\mathbf{1}_n^T\right)\tilde{X}$被称为\textbf{中心化设计阵}，第二行是第一行的矩阵表示。\par
+	称：
+	\begin{gather*}
+		y_i=\alpha_0+\beta_1^0\frac{x_{i1}-\bar{x}_1}{s_1}+\beta_2^0\frac{x_{i2}-\bar{x}_2}{s_2}+\cdots+\beta^0_{p-1}\frac{x_{ip-1}-\bar{x}_{p-1}}{s_{p-1}}+\varepsilon_i \\
+		y=\alpha_0\mathbf{1}_n+Z\beta_S+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
+	\end{gather*}
+	为\textbf{标准化线性回归模型}，其中$\alpha_0=\beta_0,\beta_i^0=s_i\beta_i$，$Z$为经过中心化和标准化的设计阵，第二行是第一行的矩阵表示。
+\end{definition}
+\begin{theorem}\label{theo:CenterStandardLinearModel}
+	对于中心化和标准化后的线性回归模型，设$\hat{\beta}=(\seq{\hat{\beta}}{p-1})$为正则方程的解，则有以下结论：
+	\begin{enumerate}
+		\item $\mathbf{1}_n^T\tilde{X_c}=\mathbf{0}$；
+		\item $\hat{\gamma}_0=\bar{y}=\hat{\beta}_0+\bar{x}^T\hat{\beta}_I$；
+		\item $\mathbf{1}_n^TZ=\mathbf{0}$；
+		\item $R=Z^TZ$，其中$R$为回归自变量之间的相关系数矩阵；
+		\item $\hat{\alpha}_0=\bar{y}$；
+		\item $\hat{\beta}_i^0=s_i\hat{\beta}_i$；
+		\item 三种模型的经验回归方程分别为：
+		\begin{gather*}
+			\text{一般模型：}\hat{Y}=\hat{\beta}_0+\hat{\beta}_1X_1+\hat{\beta}_2X_2+\cdots+\hat{\beta}_{p-1}X_{p-1} \\
+			\text{中心化模型：}\hat{Y}=\hat{\gamma}_0+\hat{\beta}_1(X_1-\bar{x}_1)+\hat{\beta}_2(X_2-\bar{x}_2)+\cdots+\hat{\beta}_{p-1}(X_{p-1}-\bar{x}_{p-1}) \\
+			\text{标准化模型：}\hat{Y}=\hat{\alpha}_0+\hat{\beta}_1^0\frac{X_1-\bar{x}_1}{s_1}+\hat{\beta}_2^0\frac{X_2-\bar{x}_2}{s_2}+\cdots+\hat{\beta}_{p-1}^0\frac{X_{p-1}-\bar{x}_{p-1}}{s_{p-1}}
+		\end{gather*}
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	直接代入正则方程观察即可。
+\end{proof}
+
+\subsection{假设检验}
+\begin{definition}
+	对于\cref{model:NormalLinearRegressionModel}，称假设检验：
+	\begin{equation*}
+		H_0:\beta_1=\beta_2=\cdots=\beta_{p-1}=0,\quad H_1:\text{至少有一个回归系数不为}0
+	\end{equation*}
+	为\textbf{回归方程的显著性检验}。称：
+	\begin{equation*}
+		H_0:\beta_i=0,\quad H_1:\beta_i\ne0
+	\end{equation*}
+	为\textbf{回归系数$\beta_i$的显著性检验}。
+\end{definition}
+\begin{theorem}
+	对于\cref{model:NormalLinearRegressionModel}，回归方程的显著性检验的统计量和拒绝域为：
+	\begin{equation*}
+		F=\frac{\hat{\beta}_I^T\tilde{X}_c^Ty/(p-1)}{SSE/(n-p)},\quad \{F:F>F_{p-1,n-p}(\alpha)\}
+	\end{equation*}
+	回归系数$\beta_i$的显著性检验的统计量和拒绝域为：
+	\begin{equation*}
+		t=\frac{\hat{\beta}_i}{\sqrt{c_{ii}}\hat{\sigma}},\quad\{t:|t|>t_{n-p}(\alpha/2)\}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	(1)可以发现此时的假设检验即为在\cref{theo:NormalLinearModelHypothesisTesting}中取$A=(\mathbf{0},I_{p-1}),\;b=\mathbf{0}$时的情况。原假设下模型变为：
+	\begin{equation*}
+		y_i=\beta_0+\varepsilon_i,\quad i=1,2,\dots,n
+	\end{equation*}
+	此时设计阵为$\mathbf{1}_n$，正则方程为$n\hat{\beta}_0=n\bar{y}$，$\hat{\beta}=\bar{y}$，由\cref{theo:SSESSEACalculate}可得$SSE_A=y^Ty-\bar{y}\mathbf{1}_n^Ty=y^Ty-\bar{y}n\bar{y}=y^Ty-n\bar{y}^2$。备择假设下根据\cref{theo:CenterStandardLinearModel}(2)可得：
+	\begin{equation*}
+		SSE=y^Ty-\hat{\beta}^TX^Ty=y^Ty-\hat{\gamma}_0n\bar{y}-\hat{\beta}_I^T\tilde{X}_c^Ty=y^Ty-n\bar{y}^2-\hat{\beta}_I^T\tilde{X}_c^Ty
+	\end{equation*}
+	于是有：
+	\begin{equation*}
+		SSE_A-SSE=y^Ty-n\bar{y}^2-(y^Ty-n\bar{y}^2-\hat{\beta}_I^T\tilde{X}_c^Ty)=\hat{\beta}_I^T\tilde{X}_c^Ty
+	\end{equation*}
+	由\cref{theo:NormalLinearModelHypothesisTesting}(5)即可得出结论。\par
+	(2)仿照\cref{prop:NormalLinearModel}(2)的证明过程可知：
+	\begin{equation*}
+		\hat{\beta}\sim\operatorname{N}_p[\beta,\sigma^2(X^TX)^{-1}]
+	\end{equation*}
+	记$C=(X^TX)^{-1}=(c_{ij})$，由\cref{cor:MultiNormalLinearTransform}(5)可得：
+	\begin{equation*}
+		\hat{\beta}_i\sim\operatorname{N}(\beta_i,\sigma^2c_{ii})
+	\end{equation*}
+	所以当$H_0$成立时有：
+	\begin{equation*}
+		\frac{\hat{\beta}_i}{\sigma\sqrt{c_{ii}}}\sim\operatorname{N}(0,1)
+	\end{equation*}
+	由\cref{prop:NormalLinearModel}(2)可知：
+	\begin{equation*}
+		\frac{(n-p)\hat{\sigma}^2}{\sigma^2}\sim\chi_{n-r}^2
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\frac{\hat{\beta}_i}{\sigma\sqrt{c_{ii}}}\Big/\sqrt{\frac{(n-p)\hat{\sigma}^2}{\sigma^2(n-p)}}=\frac{\hat{\beta}_i}{\sqrt{c_{ii}}\hat{\sigma}}\sim t_{n-p}\qedhere
+	\end{equation*}
+\end{proof}
+
+\subsection{复相关系数}
+
+\subsection{模型选择}
+\subsubsection{变量选择}
+\begin{theorem}
+	当全模型正确时：
+	\begin{enumerate}
+		\item 剔除一部分自变量后，可使得剩余的那部分自变量的回归系数的LSE的方差减小，但此时的估计一般为有偏估计。若被剔除的自变量对因变量影响较小，则可使得剩余的那部分自变量的回归系数的LSE的MSE减小；
+		\item 若用选模型作预测，预测一般是有偏的，但预测偏差的方差减小。若被剔除的自变量对因变量影响较小，则可使得预测的MSE减小。
+	\end{enumerate}
+\end{theorem}
+\subsubsection{RMSq准则}
+\subsubsection{Cp准则}
+\subsubsection{AIC准则}
+
+\subsection{回归诊断}
+\begin{definition}
+	当模型为\cref{model:NormalLinearRegressionModel}时，将：
+	\begin{equation*}
+		r_i=\frac{\hat{e}_i}{\sqrt{\hat{\sigma}^2(1-p_{ii})}}
+	\end{equation*}
+	称为\textbf{学生化残差}。由\cref{prop:ehat}(1)可知它相当于是对$\hat{e}$进行标准化然后用$\sigma^2$的估计$\hat{\sigma}^2$进行替换后得到的值。
+\end{definition}
+\begin{note}
+	应用上可以近似地认为$r_i$相互独立且服从$N(0,1)$。若将$\hat{e}$与$\hat{y}$画作二维散点图，以$\hat{y}$为横坐标、$r_i$为纵坐标，点的纵坐标应大致分布于$[-2,2]$，且由\cref{prop:ehat}(3)可得这些点不应呈现出任何趋势。若不满足上述现象，则此时模型有问题，可能是漏掉了重要的回归自变量，也可能是数据不满足\cref{model:NormalLinearRegressionModel}中的假设。
+\end{note}
+\begin{definition}
+	称以某种残差为纵坐标、其它量为横坐标的散点图为\textbf{残差图}。
+\end{definition}
+
+\subsection{影响分析}
+影响分析即为探查对估计或预测有较大影响的数据。
+\begin{definition}
+	定义第$i$个样本\textbf{Cook统计量}为：
+	\begin{equation*}
+		D_1=\frac{(\hat{\beta}-\hat{\beta}_{(i)})^TX^TX(\hat{\beta}-\hat{\beta}_{(i)})}{p\hat{\sigma}^2},\quad i=1,2,\dots,n
+	\end{equation*}
+	其中$\hat{\beta}_{(i)}$表示删除第$i$个样本后拟合得到的回归系数。
+\end{definition}
+\begin{theorem}
+	$D_i$有如下计算公式：
+	\begin{equation*}
+		D_i=\frac{1}{p}\left(\frac{p_{ii}}{1-p_{ii}}\right)r_i^2,\quad i=1,2,\dots,n
+	\end{equation*}
+	其中$r_i$时学生化残差，$p_{ii}$时矩阵$P_X$的第$i$个主对角元。
+\end{theorem}
+\begin{note}
+	Cook统计量$D_i$越大表示第$i$个样本对估计或预测造成的影响越大。
+\end{note}

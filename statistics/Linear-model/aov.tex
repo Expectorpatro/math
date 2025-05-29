@@ -1,0 +1,322 @@
+\section{方差分析模型}
+
+方差分析模型是一种特殊的正态线性模型，它的自变量取值只能为$0$或$1$。
+
+\subsection{单因子方差分析}
+
+\begin{definition}
+	设因子$A$有$a$个水平，分别为$\seq{A}{a}$，有数据：
+	\begin{table}[H]
+		\centering
+		\begin{tabularx}{\textwidth}
+			{>{\centering\arraybackslash}c|*{4}{>{\centering\arraybackslash}X}}
+			\hline
+			水平   & \multicolumn{4}{c}{观测值} \\ 
+			\hline
+			$A_1$    & $y_{11}$ & $y_{12}$  & $\cdots$  & $y_{1n_1}$ \\
+			$A_2$    & $y_{21}$ & $y_{22}$  & $\cdots$  & $y_{2n_2}$ \\
+			$\vdots$ & $\vdots$ & $\vdots$  & $\ddots$  & $\vdots$   \\
+			$A_a$    & $y_{a1}$ & $y_{a2}$  & $\cdots$  & $y_{an_a}$ 
+			\\
+			\hline
+		\end{tabularx}
+		\caption{单因子试验数据}
+	\end{table}
+	其中$y_{ij}$表示在第$i$个水平$A_i$下第$j$次重复试验的观察值。记$n=\sum\limits_{i=1}^{a}n_i$，则此时的单因子方差分析模型为：
+	\begin{equation*}\label{model:one-way-anova}
+		\begin{cases}
+			y_{ij}=\mu+\alpha_i+\varepsilon_{ij} \\
+			\varepsilon_{ij}\quad\mathrm{i.i.d.~}N(0,\sigma^2) \\
+			s.t.\quad\sum\limits_{i=1}^an_i\alpha_i=0
+		\end{cases}
+		\qquad i=1,2,\dots,a,\;j=1,2,\dots,n_i
+	\end{equation*}
+	称$\mu$为一般平均（这里表示因子$A$的这$a$个水平对数据的一般影响），$\alpha_i$为水平$A_i$的效应，$\varepsilon_{ij}$为随机误差。于是模型的设计阵和参数向量分别为：
+	\begin{equation*}
+		X=
+		\begin{pmatrix}
+			\mathbf{1}_{n_1} & \mathbf{1}_{n_1} & \mathbf{0} & \cdots & \mathbf{0} \\
+			\mathbf{1}_{n_2} & \mathbf{0} & \mathbf{1}_{n_2} & \cdots & \mathbf{0} \\
+			\vdots & \vdots & \vdots & \ddots & \vdots \\
+			\mathbf{1}_{n_a} & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{1}_{n_a}
+		\end{pmatrix},\quad
+		\beta=
+		\begin{pmatrix}
+			\mu \\
+			\alpha_1 \\
+			\alpha_2 \\
+			\cdots \\
+			\alpha_a
+		\end{pmatrix}
+	\end{equation*}
+\end{definition}
+\subsubsection{参数估计}
+\begin{definition}
+	对于\cref{model:one-way-anova}，称满足条件$\sum\limits_{i=1}^{a}c_i=0$的函数$\sum\limits_{i=1}^{a}c_i\alpha_i$为一个\textbf{对照}。
+\end{definition}
+\begin{theorem}\label{theo:one-way-anova-estimate}
+	对于\cref{model:one-way-anova}，记：
+	\begin{equation*}
+		y_{..}=\sum_{i=1}^a\sum_{j=1}^{n_i}y_{ij},\quad\bar{y}_{..}=\frac{y_{..}}{n},\quad y_{i.}=\sum_{j=1}^{n_i}y_{ij},\quad \bar{y}_{i.}=\frac{y_{i.}}{n_i},\;i=1,2,\dots,a
+	\end{equation*}
+	则有如下结论：
+	\begin{enumerate}
+		\item $\operatorname{rank}(X)=a$；
+		\item 正则方程$X^TX\beta=X^Ty$为：
+		\begin{equation*}
+			n\mu+\sum_{i=1}^{a}n_i\alpha_i=y_{..},\quad n_i\mu+n_i\alpha_i=y_{i.},\quad i=1,2,\dots,a
+		\end{equation*}
+		\item $\mu$和$\alpha_i$是不可估的；
+		\item $\mu$和$\alpha_i$的一组解为：
+		\begin{equation*}
+			\hat{\mu}=\bar{y}_{..},\quad\hat{\alpha}_i=\bar{y}_{i.}-\bar{y}_{..}
+		\end{equation*}
+		$\sigma^2$的无偏估计为$SSE/(n-a)$；
+		\item $\mu+\alpha_i,\;i=1,2,\dots,a$是可估的且线性无关，进而任一可估函数都可表示为：
+		\begin{equation*}
+			\sum_{i=1}^{a}c_i(\mu+\alpha_i)=\mu\sum_{i=1}^{a}c_i+\sum_{i=1}^{a}c_i\alpha_i
+		\end{equation*}
+		\item $\sum\limits_{i=1}^{a}c_i\alpha_i$可估当且仅当$\sum\limits_{i=1}^{a}c_i\alpha_i$是一个对照；
+		\item 对照$\sum\limits_{i=1}^{a}c_i\alpha_i$唯一的BLUE为$\sum\limits_{i=1}^{a}c_i\bar{y}_{i.}$。
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)通过矩阵的初等行列变换显然可得。\par
+	(2)将$X$和$\beta$带入运算即可得到。\par
+	(3)由可估函数的定义，若$\mu$可估，则存在$\alpha$使得：
+	\begin{equation*}
+		\operatorname{E}(\alpha^Ty)=\mu=(1,0,0,\dots,0)^T\beta
+	\end{equation*}
+	由\cref{prop:EstimableFunction}(1)可知此时关于$a$的线性方程组：
+	\begin{equation*}
+		\begin{pmatrix}
+			\mathbf{1}_{n_1}^T & \mathbf{1}_{n_2}^T & \mathbf{1}_{n_3}^T & \cdots & \mathbf{1}_{n_a}^T \\
+			\mathbf{1}_{n_1}^T & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{0} \\
+			\mathbf{0} & \mathbf{1}_{n_2} & \mathbf{0} & \cdots & \mathbf{0} \\
+			\vdots & \vdots & \vdots & \ddots & \vdots \\
+			\mathbf{0} & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{1}_{n_a}^T
+		\end{pmatrix}a=(1,0,0,\dots,0)^T
+	\end{equation*}
+	有解，但将增广矩阵的第一行依次减去第二行到第$a+1$行，第一行便变为方程$0=1$，由\cref{theo:SolutionOfSLE1}可知该线性方程组无解，于是$\mu$不可估。\par
+	若$\alpha_i$可估，则关于$a$的线性方程组：
+	\begin{equation*}
+		\begin{pmatrix}
+			\mathbf{1}_{n_1}^T & \mathbf{1}_{n_2}^T & \mathbf{1}_{n_3}^T & \cdots & \mathbf{1}_{n_a}^T \\
+			\mathbf{1}_{n_1}^T & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{0} \\
+			\mathbf{0} & \mathbf{1}_{n_2} & \mathbf{0} & \cdots & \mathbf{0} \\
+			\vdots & \vdots & \vdots & \ddots & \vdots \\
+			\mathbf{0} & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{1}_{n_a}^T
+		\end{pmatrix}a=(0,0,\dots,1,0,0,\dots,0)^T
+	\end{equation*}
+	有解，其中等式右边向量第$i+1$个分量为$1$，其它分量都为$0$。将增广矩阵的第一行依次减去除了$i+1$行的所有行，再用第$i+1$行减去第一行，第$i+1$行便变为$0=1$，由\cref{theo:SolutionOfSLE1}可知该线性方程组无解，于是$\alpha_i$不可估。\par
+	(4)考虑到模型中增加的约束条件$\sum\limits_{i=1}^{a}n_i\alpha_i=0$，由(2)可直接得到关于$\mu$和$\alpha_i$的结论。由\cref{theo:VarianceOfErrorTerm}和(1)可直接得到关于$\sigma^2$的结论\par
+	(5)类似(3)可得，关于表示方法的结论可由\cref{prop:EstimableFunction}(2)得到。\par
+	(6)由(5)可得。\par
+	(7)由(6)可知此时$\sum\limits_{i=1}^{a}c_i\alpha_i$可估，由\cref{prop:EstimableFunction}(4)可知：
+	\begin{equation*}
+		\sum_{i=1}^{a}c_i\alpha_i=\mu\sum_{i=1}^{a}c_i+\sum_{i=1}^{a}c_i\alpha_i
+	\end{equation*}
+	的最小二乘解与$X^TX\beta=X^Ty$解的选择无关，用(4)代入可得该对照的最小二乘解为：
+	\begin{equation*}
+		\hat{\mu}\sum_{i=1}^{a}c_i+\sum_{i=1}^{a}c_i\hat{\alpha_i}=	\bar{y}_{..}\sum_{i=1}^{a}c_i+\sum_{i=1}^{a}c_i\bar{y}_{i.}-\sum_{i=1}^{a}c_i\bar{y}_{..}=\sum_{i=1}^{a}c_i\bar{y}_{i.}
+	\end{equation*}
+	由\cref{prop:EstimableFunction}(7)可得上式是唯一的BLUE。
+\end{proof}
+
+\subsubsection{模型的假设检验}
+\begin{note}
+	对于\cref{model:one-way-anova}，我们关心的是因子$A$的$a$个水平效应是否有显著差异，此时的原假设为：
+	\begin{equation*}
+		H_0:\alpha_1=\alpha_2=\cdots=\alpha_a
+	\end{equation*}
+	注意到上式的等价形式为：
+	\begin{equation*}
+		H_0:\alpha_1-\alpha_a=\alpha_2-\alpha_a=\alpha_{a-1}-\alpha_a=\mathbf{0}
+	\end{equation*}
+	令$H=(I_{a-1},-\mathbf{1}_{a-1}),\;\alpha=(\seq{\alpha}{a})^T$，则上述原假设可写作矩阵形式$H\alpha=\mathbf{0}$。
+\end{note}
+\begin{theorem}\label{theo:AOVHypothesisTesting}
+	对于\cref{model:one-way-anova}，设$H=(I_{a-1},-\mathbf{1}_{a-1}),\;\alpha=(\seq{\alpha}{a})^T$，则假设检验问题：
+	\begin{equation*}
+		H_0:\alpha_1=\alpha_2=\cdots=\alpha_a
+	\end{equation*}
+	的检验统计量和置信度为$1-\alpha$的拒绝域分别为：
+	\begin{equation*}
+		F=\frac{(SSE_H-SSE)/(a-1)}{SSE/(n-a)},\quad\{F:F>F_{a-1,n-a}(\alpha)\}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由\cref{theo:one-way-anova-estimate}(1)可知$\operatorname{rank}(X)=a$，由$H$的定义可知$\operatorname{rank}(H)=a-1$，根据\cref{theo:one-way-anova-estimate}(6)可知$\mathcal{M}(H^T)\subseteq\mathcal{M}(X^T)$，所以由\cref{theo:NormalLinearModelHypothesisTesting}(5)直接可得出结论。
+\end{proof}
+\subsubsection{对比的假设检验}
+\begin{theorem}
+	对于\cref{model:one-way-anova}，设$H=(\seq{c}{a}),\;\alpha=(\seq{\alpha}{a})^T$，则对比$\sum\limits_{i=1}^{a}c_i\alpha_i$的假设检验问题：
+	\begin{equation*}
+		H_0:\sum_{i=1}^{a}c_i\alpha_i=0,\quad H_1:\sum_{i=1}^{a}c_i\alpha_i\ne0
+	\end{equation*}
+	的检验统计量和置信度为$1-\alpha$的拒绝域分别为：
+	\begin{equation*}
+		F=\frac{(SSE_H-SSE)}{SSE/(n-a)},\quad\{F:F>F_{1,n-a}(\alpha)\}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由\cref{theo:one-way-anova-estimate}(6)和\cref{theo:AOVHypothesisTesting}立即可得。
+\end{proof}
+接下来介绍各水平等重复情形下Duncan多重比较法。
+\begin{note}
+	请注意Duncan多重比较法并没有作多重假设检验修正。
+\end{note}
+\begin{definition}
+	将$a$个水平下观察值的平均值$\bar{y}_{1.},\bar{y}_{2.},\dots,\bar{y}_{a.}$从小到大排序。如果$\bar{y}_i$与$\bar{y}_j$（$\bar{y}_i\leqslant\bar{y}_j$）在排序后中间有$p-2,\;p\geqslant2$个数，那么称$\bar{y}_j-\bar{y}_i$为$p$级极差，记为$R_p$。
+\end{definition}
+\begin{theorem}
+	对于\cref{model:one-way-anova}，多重假设检验问题：
+	\begin{equation*}
+	H_0:\alpha_i=\alpha_j,\;\forall\;i\ne j
+	\end{equation*}
+	的检验统计量和置信度为$1-\alpha$的拒绝域分别为：
+	\begin{equation*}
+		r(p,n-a)=\frac{R_p}{MSE/m},\quad\{r:r>r_{p,f}(\alpha)\}
+	\end{equation*}
+	其中$p$为极差级数，$m$为因子$A$每个水平下重复实验的次数。
+\end{theorem}
+\begin{proof}
+	设$\bar{y}_i-\bar{y}_j$是$p$级极差。\par
+	(1)将$r(p,n-a)$分子分母同除$\sigma$可得：
+	\begin{equation*}
+		r(p,n-a)=\frac{\dfrac{R_p}{\sigma/\sqrt{m}}}{\sqrt{MSE/\sigma^2}}
+	\end{equation*}
+	注意到分母：
+	\begin{equation*}
+		\frac{MSe}{\sigma^2}=\frac{1}{n-a}\frac{SSe}{\sigma^2}
+	\end{equation*}
+	由\cref{prop:NormalLinearModel}(2)可知上式是一个服从$\chi^2(f)$分布变量的$\dfrac{1}{f}$倍的变量，其分布与$\mu,\;\sigma^2$无关。\par
+	当$\alpha_i=\alpha_j$时：
+	\begin{equation*}
+		\frac{\bar{y}_{i.}-\nu}{\sigma/\sqrt{m}}\sim N(0,\;1),\quad\frac{\bar{y}_{j.}-\nu}{\sigma/\sqrt{m}}\sim N(0,\;1)
+	\end{equation*}
+	这里$\nu=\mu+\alpha_i=\mu+\alpha_j$，上式中两个随机变量的分布与$\mu,\sigma^2$都无关，所以分子：
+	\begin{equation*}
+		\frac{R_p}{\sigma/\sqrt{m}}=\max(\frac{\bar{y}_{j.}-\nu}{\sigma/\sqrt{m}},\frac{\bar{y}_{i.}-\nu}{\sigma/\sqrt{m}})-\min(\frac{\bar{y}_{j.}-\nu}{\sigma/\sqrt{m}},\frac{\bar{y}_{i.}-\nu}{\sigma/\sqrt{m}})
+	\end{equation*}
+	也与$\mu,\sigma^2$无关。\par
+	综上，原假设情况下$r(p,n-a)$与$\mu,\sigma^2$无关。\par
+	(2)当$\alpha_i=\alpha_j$不成立时，对应的$R_p$会较大。因此当$r(p,n-a)$较大时，有理由怀疑零假设。所以$H_0$的拒绝域是右向单尾的，置信度为$1-\alpha$的拒绝域为$\{r:r>r_{p,f}(\alpha)\}$。
+\end{proof}
+\begin{note}
+	Duncan多重比较的检验步骤为：将$\bar{y}_{1.},\bar{y}_{2.},\dots,\bar{y}_{a.}$从小到大排序为$\bar{y}^1,\bar{y}^2,\dots,\bar{y}^a$。令：
+	\begin{equation*}
+		r_{p,n-a}(\alpha)\sqrt{\frac{MSe}{m}}=R_p^*
+	\end{equation*}
+	按以下顺序进行比较：
+	\begin{gather*}
+		\bar{y}^a-\bar{y}^1\text{与$R_a^*$进行比较} \\
+		\bar{y}^a-\bar{y}^2\text{与$R_{a-1}^*$进行比较} \\
+		\cdots\cdots \\
+		\bar{y}^a-\bar{y}^{a-1}\text{与$R_2^*$进行比较} \\
+		\bar{y}^{a-1}-\bar{y}^1\text{与$R_{a-1}^*$进行比较} \\
+		\bar{y}^{a-1}-\bar{y}^2\text{与$R_{a-2}^*$进行比较} \\
+		\cdots\cdots
+	\end{gather*}
+	若前者大于后者，则拒绝原假设，直到全部$\binom{a}{2}$对水平均值比较完为止。因为$r_{p_n-a}$的分布不好求解，使用Monte Carlo方法求$r_{p,n-a}(\alpha)$的近似值。
+\end{note}
+\begin{algorithm}[H]
+	\caption{Duncan多重比较法统计量分布的蒙特卡洛模拟}
+	\begin{algorithmic}[1]
+		\State \textbf{Input:} $m$, $p$, $n-a$, $N$ \Comment{组内重复次数、极差的级数、SSe的自由度、模拟次数}
+		\State \textbf{Output:} $r(p,f)$的模拟分布
+		
+		\State 初始化模拟值存储向量：$List\gets\emptyset$
+		\For{$i \gets 1$ to $N$}
+		\State 生成$2$个随机数$x_i\sim N(0,1),\;i=1,2$
+		\State 计算$\frac{R_p}{\sigma/\sqrt{m}}$：
+		\begin{equation*}
+			\frac{R_p}{\sigma/\sqrt{m}}=\max\{x_i:i=1,2\}-\min\{x_i:i=1,2\}
+		\end{equation*}
+		\State 从$\chi^2(n-a)$中产生一个随机数记为$\chi^2$
+		\State 计算$r(p,n-a)$：
+		\begin{equation*}
+			r(p,n-a)=\frac{\dfrac{R_p}{\sigma/\sqrt{m}}}{\sqrt{\chi^2/(n-a)}}
+		\end{equation*}
+		\State 将$r(p,n-a)$加入$List$
+		\EndFor
+		\State 返回$List$
+	\end{algorithmic}
+\end{algorithm}
+\subsubsection{实际计算}
+\begin{theorem}\label{theo:SSESSEACalculateAOV}
+	$SSE_H$和$SSE$有如下计算公式：
+	\begin{equation*}
+		SSE_H=\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}-\frac{y_{..}^2}{n},\quad SSE=\sum_{i=1}^{a}\sum_{j=1}^{n_i}y_{ij}^2-\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	在约束$H\alpha=\mathbf{0}$的情况下，因为$\alpha_1=\alpha_2=\cdots=\alpha_a$，所以可将它们并入$\mu$，于是$\mu$的估计为$\bar{y}_{..}$，此时：
+	\begin{equation*}
+		RSS_H(\mu)=\hat{\mu}\mathbf{1}_n^Ty=\bar{y}_{..}y_{..}=\frac{y_{..}}{n}y_{..}=\frac{y_{..}^2}{n}
+	\end{equation*}\par
+	在无约束的情况下有：
+	\begin{align*}
+		RSS(\beta)&=\hat{\beta}^TX^Ty=\hat{\mu}y_{..}+\sum_{i=1}^{a}\hat{\alpha}_iy_{i.} =\frac{y_{..}}{n}y_{..}+\sum_{i=1}^{a}(\bar{y}_{i.}-\bar{y}_{..})y_{i.} \\
+		&=\frac{y_{..}^2}{n}+\sum_{i=1}^{a}\left(\frac{y_{i.}}{n_i}-\frac{y_{..}}{n}\right)y_{i.} =\frac{y_{..}^2}{n}+\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}-\sum_{i=1}^{a}y_{i.}\frac{y_{..}}{n}=\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}
+	\end{align*}
+	于是由\cref{theo:SSESSEACalculate}可得：
+	\begin{equation*}
+		SSE=y^Ty-RSS(\beta)=\sum_{i=1}^{a}\sum_{j=1}^{n_i}y_{ij}^2-\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}
+	\end{equation*}
+	所以：
+	\begin{align*}
+		SSE_H&=SSE_H-SSE=y^Ty-RSS_H(\mu)-y^Ty+RSS(\beta) \\
+		&=RSSS(\beta)-RSS_H(\mu)=\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}-\frac{y_{..}^2}{n}\qedhere
+	\end{align*}
+\end{proof}
+\begin{definition}
+	对于\cref{model:one-way-anova}，令$H=(I_{a-1},-\mathbf{1}_{a-1}),\;\alpha=(\seq{\alpha}{a})^T$。记约束$H\alpha=\mathbf{0}$下的回归平方和$SSE_A$与无约束条件下的回归平方和$SSE$的差$SSE_A-SSE$为$SSA$，称其为\textbf{因子$A$的平方和}或\textbf{组间平方和}。称$SSE$为\textbf{组内平方和}。分别称$MSA=SSA/(a-1)$和$MSE=SSE/(n-a)$为因子$A$和误差的\textbf{均方和}。
+\end{definition}
+\begin{note}
+	下给出上述定义的解释。\par
+	记$\bar{\varepsilon}_{i.}=\frac{1}{n_i}\sum\limits_{j=1}^{n_i}\varepsilon_{ij}$，由\cref{theo:SSESSEACalculateAOV}可得：
+	\begin{equation*}
+		SSE=\sum_{i=1}^{a}\sum_{j=1}^{n_i}y_{ij}^2-\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}=\sum_{i=1}^{a}\sum_{j=1}^{n_i}(y_{ij}-\bar{y}_{i.})^2=\sum_{i=1}^{a}\sum_{j=1}^{n_i}(\varepsilon_{ij}-\bar{\varepsilon}_{i.})^2
+	\end{equation*}
+	可见该项完全是由误差引起的。\par
+	对于$SSE_H$，有：
+	\begin{equation*}
+		SSE_H=\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}-\frac{y_{..}^2}{n}=\sum_{i=1}^{a}n_i(\bar{y}_{i.}-\bar{y}_{..})^2
+	\end{equation*}
+	可见该项是由因子$A$的水平变化所引起的观测数据的变差平方和。
+\end{note}
+\begin{table}[H]
+	\centering
+	\begin{tabularx}{\textwidth}
+		{>{\centering\arraybackslash}c|*{5}{>{\centering\arraybackslash}X}}
+		\toprule
+		来源   &平方和&自由度&均方和             &F值  \\ 
+		\midrule
+		因子A & SSA&$f_A=a-1$ &$\dfrac{SSA}{a-1}$ &$F=\dfrac{MSA}{MSe}$\\
+		误差   &SSe  &$f_e=n-a$ &$\dfrac{SSe}{n-a}$ & \\
+		总     &SST  &$f_T=n-1$ &                  & \\
+		\bottomrule
+	\end{tabularx}
+	\caption{单因子试验方差分析表}
+\end{table}
+\subsubsection{置信区间}
+\begin{theorem}
+	任意$m$个对照$\sum\limits_{i=1}^{a}c_i^{(j)}\alpha_i,\;j=1,2,\dots,m$的置信度为$1-\alpha$的Bonferroni置信区间和所有对照$\sum\limits_{i=1}^{a}c_i\alpha_i$的置信度为$1-\alpha$的Scheffe置信区间分别为：
+	\begin{gather*}
+		\sum_{i=1}^{a}c_i^{(j)}\bar{y}_{i.}\pm t_{n-a}\left(\frac{\alpha}{2m}\right)\sqrt{\hat{\sigma}^2\sum_{i=1}^{a}\frac{(c_i^{(j)})^2}{n_i}},\quad j=1,2,\dots,m \\
+		\sum_{i=1}^{a}c_i\bar{y}_{i.}\pm\sqrt{(a-1)\hat{\sigma}^2F_{a-1,n-a}(\alpha)\sum_{i=1}^{a}\frac{c_i^2}{n_i}}
+	\end{gather*}
+	特别的。对于$m$个形如$a_i-a_j$的对照的置信度为$1-\alpha$的Bonferroni置信区间和所有$a_i-a_j$的置信度为$1-\alpha$的Scheffe置信区间为：
+	\begin{gather*}
+		\bar{y}_{i.}-\bar{y}_{j.}\pm t_{n-a}\left(\frac{\alpha}{2m}\right)\sqrt{\hat{\sigma}^2\left(\frac{1}{n_i}+\frac{1}{n_j}\right)} \\
+		\bar{y}_{i.}-\bar{y}_{j.}\pm\sqrt{(a-1)\hat{\sigma}^2F_{a-1,n-a}(\alpha)\left(\frac{1}{n_i}+\frac{1}{n_j}\right)}
+	\end{gather*}
+\end{theorem}
+\begin{proof}
+	根据\cref{theo:BonferroniCI}和\cref{theo:ScheffeCI}，只需证明：
+	\begin{equation*}
+		\left(0,\seq{c}{a}\right)^T(X^TX)^-\left(0,\seq{c}{a}\right)=\sum_{i=1}^{a}\frac{(c_i^{(j)})^2}{n_i},\quad(e_i-e_j)^T(X^TX)^-(e_i-e_j)=\frac{1}{n_i}+\frac{1}{n_j}
+	\end{equation*}
+	其中$e_i,e_j$分别是第$i$个分量和第$j$各分量为$1$的单位向量，\info{搞明白$A(X^TX)^-A^T$后回来补充}
+\end{proof}

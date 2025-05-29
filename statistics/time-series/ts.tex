@@ -400,7 +400,7 @@
 		\begin{equation*}
 			X_t=\sum_{i=0}^{+\infty}\psi_i\varepsilon_{t-i}
 		\end{equation*}
-		其中$\psi_i$为$A^{-1}(z)$在$\{z:|z|\leqslant\rho\}$内展开的幂级数的系数，称之为\textbf{Wold系数}，对$j<0$定义$\psi_j=0$，那么它具有递推公式：
+		其中$\psi_i$为$A^{-1}(z)$在$\{z:|z|\leqslant\rho\}$内展开的幂级数的系数，称之为\textbf{Wold系数}，$\{\psi_n\}\in l^1$。对$j<0$定义$\psi_j=0$，那么它具有递推公式：
 		\begin{equation*}
 			\psi_0=1,\quad\psi_j=\sum_{i=1}^{p}a_i\psi_{j-i},\;\forall\;j\geqslant1
 		\end{equation*}
@@ -445,7 +445,7 @@
 	综上，$\{X_t\}$是$\operatorname{AR}(p)$模型唯一的平稳解。\par
 	(2)由(1)、\cref{theo:GeneralSolutionNonhomogeneousLinearDifferenceEquation}与\cref{theo:GeneralSolutionHomogeneousLinearDifferenceEqConstantCoefficients}即可得通解为：
 	\begin{equation*}
-		X_t+\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}c_{ij}t^{j}z_i^t=\sum_{i=0}^{+\infty}\psi_i\varepsilon_{t-i}+\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}c_{ij}t^{j}z_i^{-t}
+		X_t+\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}c_{ij}t^{j}z_i^{-t}=\sum_{i=0}^{+\infty}\psi_i\varepsilon_{t-i}+\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}c_{ij}t^{j}z_i^{-t}
 	\end{equation*}\par
 	(3)由(1)(2)可得对于$\operatorname{AR}(p)$模型的任一解$\{Y_t\}$有：
 	\begin{equation*}
@@ -488,29 +488,29 @@
 		\item $\{X_t\}$的自协方差函数与自相关函数具有拖尾性，即$\gamma(n)$和$\rho(n)$始终不为$0$，且二者的模随着$n$的增大指数衰减到$0$；
 		\item $\{X_t\}$具有如下谱密度函数：
 		\begin{equation*}
-			f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=0}^{+\infty}\psi_je^{ij\lambda}\right|^2=\frac{\sigma^2}{2\pi|A(e^{i\lambda})|^2},\quad\lambda\in[-\pi,\pi]
+			f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=0}^{+\infty}\psi_je^{ij\lambda}\right|^2=\frac{\sigma^2}{2\pi|A(e^{i\lambda})|^2}=\frac{1}{2\pi}\sum_{n=-\infty}^{+\infty}\gamma(n)e^{in\lambda},\quad\lambda\in[-\pi,\pi]
 		\end{equation*}
 		\item $\{X_t\}$的自协方差矩阵为正定矩阵；
 		\item $\{X_t\}$是最小序列；
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)因为$\operatorname{E}(\varepsilon_{t+i})=0$，由\cref{prop:NonnegativeMeasurablegIntegral}(9)可知$\varepsilon_{t+i}\;$a.e.有限，由\cref{theo:l1LinearlyStationarySeries}可知$X_t\;$a.e.有限，于是$X_t\varepsilon_{t+i}$良定义。根据\cref{prop:NonnegativeMeasurablegIntegral}(4)(6)可知：
+	(1)因为$\operatorname{E}(\varepsilon_{t+i})=0$，由\cref{prop:NonnegativeMeasurableIntegral}(9)可知$\varepsilon_{t+i}\;$a.e.有限，由\cref{theo:l1LinearlyStationarySeries}可知$X_t\;$a.e.有限，于是$X_t\varepsilon_{t+i}$良定义。根据\cref{prop:NonnegativeMeasurableIntegral}(4)(6)可知：
 	\begin{align*}
 		\operatorname{E}\left(\sum_{j=0}^{+\infty}|\psi_j\varepsilon_{t-j}\varepsilon_{t+i}|\right)
 		&=\lim_{n\to+\infty}\operatorname{E}\left(\sum_{j=0}^{n}|\psi_j\varepsilon_{t-j}\varepsilon_{t+i}|\right)
-		=\lim_{n\to+\infty}\left[\sum_{j=0}^{n}\psi_j\operatorname{E}(|\varepsilon_{t-j}\varepsilon_{t+i}|)\right] \\
+		=\lim_{n\to+\infty}\left[\sum_{j=0}^{n}|\psi_j|\operatorname{E}(|\varepsilon_{t-j}\varepsilon_{t+i}|)\right] \\
 		&=\sum_{j=0}^{+\infty}|\psi_j|\operatorname{E}(|\varepsilon_{t-j}\varepsilon_{t+i}|)
 	\end{align*}
 	由\cref{ineq:cauchy-schiwarz-expectations}可知：
 	\begin{equation*}
 		\operatorname{E}(|\varepsilon_{t-j}\varepsilon_{t+i}|)=\Big|\operatorname{E}(|\varepsilon_{t-j}\varepsilon_{t+i}|)\Big|\leqslant\sqrt{\operatorname{E}(\varepsilon_{t-j}^2)\operatorname{E}(\varepsilon_{t+i}^2)}=\sigma^2
 	\end{equation*}
-	因为$\{\psi_i\}\in l^1$，所以：
+	由\cref{theo:ARPSolution}(1)可得$\{\psi_i\}\in l^1$，所以：
 	\begin{equation*}
 		\operatorname{E}\left(\sum_{j=0}^{+\infty}|\psi_j\varepsilon_{t-j}\varepsilon_{t+i}|\right)\leqslant\sigma^2\sum_{j=0}^{+\infty}|\psi_j|<+\infty
 	\end{equation*}
-	取控制函数$\sum\limits_{j=0}^{+\infty}|\psi_j\varepsilon_{t-j}\varepsilon_{t+i}|$，由\cref{theo:DominatedConvergenceTheorem}和\cref{prop:NonnegativeMeasurablegIntegral}(6)可得：
+	取控制函数$\sum\limits_{j=0}^{+\infty}|\psi_j\varepsilon_{t-j}\varepsilon_{t+i}|$，由\cref{theo:DominatedConvergenceTheorem}和\cref{prop:NonnegativeMeasurableIntegral}(6)可得：
 	\begin{align*}
 		\operatorname{E}(X_t\varepsilon_{t+i})&=\operatorname{E}\left(\sum_{j=0}^{+\infty}\psi_j\varepsilon_{t-j}\varepsilon_{t+i}\right)=\operatorname{E}\left[\lim_{n\to+\infty}\left(\sum_{j=0}^{n}\psi_j\varepsilon_{t-j}\varepsilon_{t+i}\right)\right] \\
 		&=\lim_{n\to+\infty}\operatorname{E}\left(\sum_{j=0}^{n}\psi_j\varepsilon_{t-j}\varepsilon_{t+i}\right)=\lim_{n\to+\infty}\left[\sum_{j=0}^{n}\psi_j\operatorname{E}(\varepsilon_{t-j}\varepsilon_{t+i})\right]=0
@@ -571,9 +571,13 @@
 		\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}c_{ij}n^{j}\lambda_i^n,\;\forall\;n\in\mathbb{N}
 	\end{equation*}
 	其中$\seq{\lambda}{s}$为对应常系数齐次线性差分方程的特征方程的根，$c_{ij}$为任意常数。若$c_{ij}$全为$0$，则$\gamma(0),\rho(0)$都为$0$，所以它们不可能全为$0$.由$\operatorname{AR}(p)$序列的定义，$|\lambda_i|<1$，因为$a_p\ne0$，所以$\lambda_i\ne0$，由此可得$\gamma(n)$和$\rho(n)$始终不为$0$。由指数函数与幂函数的收敛速度比较可知$\gamma(n)$和$\rho(n)$的模随着$n$的增大将以指数阶的速度减小。\par
-	(6)由\cref{prop:LinearlyStationarySeries}可知：
+	(6)由\cref{prop:LinearlyStationarySeries}和\cref{theo:ARPSolution}(1)可知：
 	\begin{equation*}
 		f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=0}^{+\infty}\psi_je^{ij\lambda}\right|^2
+	\end{equation*}
+	由\cref{theo:SpectralGamma}和\cref{theo:ARPSolution}(1)可得：
+	\begin{equation*}
+		f(\lambda)=\frac{1}{2\pi}\sum_{n=-\infty}^{+\infty}\gamma(n)e^{-in\lambda}
 	\end{equation*}
 	根据\cref{theo:ARPSolution}(1)中的论述，有：
 	\begin{equation*}
@@ -633,7 +637,7 @@
 		\end{equation*}
 		\item $\{X_t\}$具有谱密度：
 		\begin{equation*}
-			f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=0}^{q}b_je^{ij\lambda}\right|^2=\frac{\sigma^2}{2\pi}|B(e^{i\lambda})|^2,\quad\lambda\in[-\pi,\pi]
+			f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=0}^{q}b_je^{ij\lambda}\right|^2=\frac{\sigma^2}{2\pi}|B(e^{i\lambda})|^2=\frac{1}{2\pi}\sum_{n=-k}^{k}\gamma(n)e^{-in\lambda},\quad\lambda\in[-\pi,\pi]
 		\end{equation*}
 		\item $\{X_t\}$的自协方差矩阵为正定矩阵；
 		\item 若$\{X_t\}$可逆，则$\{X_t\}$是最小序列；若$\{X_t\}$不可逆，则$\{X_t\}$不是最小序列；
@@ -641,7 +645,7 @@
 \end{property}
 \begin{proof}
 	(1)由\cref{theo:ECovFiniteMovingAverage}立即可得。\par
-	(2)由(1)立即得出。\par
+	(2)由(1)和\cref{theo:RhotGamma0}立即得出。\par
 	(3)对$k<0$定义$\psi_k=0$，因为$\{X_t\}$可逆，所以：
 	\begin{align*}
 		1&=B(z)B^{-1}(z)=\left(1+\sum_{i=1}^{q}b_iz^i\right)B^{-1}(z)=\sum_{i=0}^{q}b_iz^i\sum_{j=0}^{+\infty}\psi_jz^j \\
@@ -651,7 +655,7 @@
 	\begin{equation*}
 		\sum_{i=0}^{q}b_i\psi_{-i}=1,\quad\sum_{i=0}^{q}b_i\psi_{j-i}=0,\;\forall\;j\geqslant1
 	\end{equation*}\par
-	(4)由\cref{prop:ARp}(6)和$B(z)$的定义立即可得。\par
+	(4)由\cref{prop:ARp}(6)和$B(z)$的定义立即可得，第三种表达方式由(1)和\cref{theo:SpectralGamma}立即可得。\par
 	(5)由(4)和\cref{theo:GammaPositiveDefinite}立即可得。
 \end{proof}
 
@@ -682,7 +686,7 @@
 		\begin{equation*}
 			X_t=\sum_{i=0}^{+\infty}\psi_i\varepsilon_{t-i}
 		\end{equation*}
-		其中$\psi_i$为$\Phi(z)=A^{-1}(z)B(z)$在$\{z:|z|\leqslant\rho\}$内展开的幂级数的系数，称之为\textbf{Wold系数}，对$j<0$定义$\psi_j=0$，对$j>q$定义$b_j=0$，那么它具有递推公式：
+		其中$\psi_i$为$\Phi(z)=A^{-1}(z)B(z)$在$\{z:|z|\leqslant\rho\}$内展开的幂级数的系数，称之为\textbf{Wold系数}，$\{\psi_n\}\in l^1$。对$j<0$定义$\psi_j=0$，对$j>q$定义$b_j=0$，那么它具有递推公式：
 		\begin{equation*}
 			\psi_0=1,\quad\psi_j=b_j+\sum_{i=1}^{p}a_i\psi_{j-i},\;\forall\;j\geqslant1
 		\end{equation*}
@@ -769,7 +773,7 @@
 		\item $\{X_t\}$的自协方差函数与自相关函数具有截尾性，即对任意的$k>q$有$\gamma(k)=\rho(k)=0$，且二者的模随着$n$的增大指数衰减；
 		\item $\{X_t\}$具有谱密度：
 		\begin{equation*}
-			f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=0}^{+\infty}\psi_je^{ij\lambda}\right|^2=\frac{\sigma^2}{2\pi}\left|\frac{B(e^{i\lambda})}{A(e^{i\lambda})}\right|^2
+			f(\lambda)=\frac{\sigma^2}{2\pi}\left|\sum_{j=0}^{+\infty}\psi_je^{ij\lambda}\right|^2=\frac{\sigma^2}{2\pi}\left|\frac{B(e^{i\lambda})}{A(e^{i\lambda})}\right|^2=\frac{1}{2\pi}\sum_{n=-\infty}^{+\infty}\gamma(n)e^{-in\lambda}
 		\end{equation*}
 		\item $\{X_t\}$的自协方差矩阵为正定矩阵；
 	\end{enumerate}
@@ -789,8 +793,8 @@
 		|\gamma(n)|&=\left|\sigma^2\sum_{i=0}^{+\infty}\psi_i\psi_{i+n}\right|\leqslant\sigma^2\sum_{i=0}^{+\infty}|\psi_i||\psi_{i+n}|\leqslant\sigma^2\left(\sum_{i=0}^{+\infty}\psi_i^2\sum_{i=0}^{+\infty}\psi_{i+n}^2\right)^{\frac{1}{2}} \\
 		&\leqslant c_0\left(\sum_{i=n}^{+\infty}\rho^{-2i}\right)^{\frac{1}{2}}\leqslant c_1\rho^{-n}
 	\end{align*}
-	于是自协方差函数与自相关函数的模随着$n$的增大指数衰减。\par
-	(5)由\cref{prop:LinearlyStationarySeries}(3)和$\Phi(z)$的定义立即可得。\par
+	上式第一行到第二行的过程中利用$\{\psi_n\}\in l^1$将第一个求和和$\sigma^2$放缩为$c_0$，最后一个放缩利用$\{\rho^{-2i}\}$的收敛性显然可得，于是由自协方差函数的模随着$n$的增大呈现出指数衰减，根据\cref{theo:RhotGamma0}可得自相关函数的对应结论。\par
+	(5)由\cref{prop:LinearlyStationarySeries}(3)和$\Phi(z)$的定义立即可得，第三个表示方法由\cref{theo:ARMAPQSolution}(1)和\cref{theo:SpectralGamma}立即可得。\par
 	(6)由(5)和\cref{theo:GammaPositiveDefinite}立即可得。
 \end{proof}
 
