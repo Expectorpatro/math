@@ -27,12 +27,13 @@
 		\begin{cases}
 			y_{ij}=\mu+\alpha_i+\varepsilon_{ij} \\
 			\varepsilon_{ij}\quad\mathrm{i.i.d.~}N(0,\sigma^2) \\
-			s.t.\quad\sum\limits_{i=1}^an_i\alpha_i=0
+			\operatorname{s.t.}\quad\sum\limits_{i=1}^an_i\alpha_i=0
 		\end{cases}
 		\qquad i=1,2,\dots,a,\;j=1,2,\dots,n_i
 	\end{equation*}
-	称$\mu$为一般平均（这里表示因子$A$的这$a$个水平对数据的一般影响），$\alpha_i$为水平$A_i$的效应，$\varepsilon_{ij}$为随机误差。于是模型的设计阵和参数向量分别为：
-	\begin{equation*}
+	称$\mu$为一般平均（这里表示因子$A$的这$a$个水平对数据的一般影响），$\alpha_i$为水平$A_i$的效应，$\varepsilon_{ij}$为随机误差。于是模型的$y$值向量和对应的设计阵、参数向量可写作：
+	\begin{gather*}
+		y=(y_{11},y_{12},\dots,y_{1n_1},y_{21},y_{22},\dots,y_{2n_2},\dots,y_{a1},y_{a2},\dots,y_{an_a})^T \\
 		X=
 		\begin{pmatrix}
 			\mathbf{1}_{n_1} & \mathbf{1}_{n_1} & \mathbf{0} & \cdots & \mathbf{0} \\
@@ -48,7 +49,7 @@
 			\cdots \\
 			\alpha_a
 		\end{pmatrix}
-	\end{equation*}
+	\end{gather*}
 \end{definition}
 \subsubsection{参数估计}
 \begin{definition}
@@ -156,7 +157,7 @@
 	\end{equation*}
 	的检验统计量和置信度为$1-\alpha$的拒绝域分别为：
 	\begin{equation*}
-		F=\frac{(SSE_H-SSE)}{SSE/(n-a)},\quad\{F:F>F_{1,n-a}(\alpha)\}
+		F=\frac{SSE_H-SSE}{SSE/(n-a)},\quad\{F:F>F_{1,n-a}(\alpha)\}
 	\end{equation*}
 \end{theorem}
 \begin{proof}
@@ -176,7 +177,7 @@
 	\end{equation*}
 	的检验统计量和置信度为$1-\alpha$的拒绝域分别为：
 	\begin{equation*}
-		r(p,n-a)=\frac{R_p}{MSE/m},\quad\{r:r>r_{p,f}(\alpha)\}
+		r(p,n-a)=\frac{R_p}{\sqrt{MSE/m}},\quad\{r:r>r_{p,f}(\alpha)\}
 	\end{equation*}
 	其中$p$为极差级数，$m$为因子$A$每个水平下重复实验的次数。
 \end{theorem}
@@ -315,8 +316,50 @@
 \end{theorem}
 \begin{proof}
 	根据\cref{theo:BonferroniCI}和\cref{theo:ScheffeCI}，只需证明：
-	\begin{equation*}
-		\left(0,\seq{c}{a}\right)^T(X^TX)^-\left(0,\seq{c}{a}\right)=\sum_{i=1}^{a}\frac{(c_i^{(j)})^2}{n_i},\quad(e_i-e_j)^T(X^TX)^-(e_i-e_j)=\frac{1}{n_i}+\frac{1}{n_j}
-	\end{equation*}
+	\begin{gather*}
+		\left(0,\seq{c}{a}\right)^T(X^TX)^-\left(0,\seq{c}{a}\right)=\sum_{i=1}^{a}\frac{(c_i^{(j)})^2}{n_i} \\
+		(e_i-e_j)^T(X^TX)^-(e_i-e_j)=\frac{1}{n_i}+\frac{1}{n_j}
+	\end{gather*}
 	其中$e_i,e_j$分别是第$i$个分量和第$j$各分量为$1$的单位向量，\info{搞明白$A(X^TX)^-A^T$后回来补充}
 \end{proof}
+
+\subsection{可加效应的两因子方差分析}
+\info{可加的含义与无重复}
+\begin{definition}
+	设因子$A$有$a$个水平，分别为$\seq{A}{a}$，因子$B$有$b$个水平，分别为$\seq{B}{b}$，有数据：
+	\begin{table}[H] 
+		\centering
+		\begin{tabularx}{\textwidth}
+			{c|>{\centering\arraybackslash}X>{\centering\arraybackslash}Xc>{\centering\arraybackslash}X}
+			\hline
+			\diagbox{因子A}{因子B} & $B_1$ & $B_2$ & $\cdots$ & $B_b$ \\ \hline
+			$A_1$ & $y_{11}$ & $y_{12}$ & $\cdots$ & $y_{1b}$ \\ 
+			$A_2$ & $y_{21}$ & $y_{22}$ & $\cdots$ & $y_{2b}$ \\
+			$\vdots$ & $\vdots$ & $\vdots$ & & $\vdots$ \\
+			$A_a$ & $y_{a1}$ & $y_{a2}$ & $\cdots$ & $y_{ab}$ \\ 
+			\hline
+		\end{tabularx}
+		\caption{无重复两因子试验数据表}
+	\end{table}
+	其中$y_{ij}$表示在因子A的第$i$个水平$A_i$和因子B的第$j$个水平$B_j$下试验的观察值。记$n=ab$，则此时可加效应的两因子方差分析模型为：
+	\begin{equation*}\label{model:additive-effect-two-way-anova}
+		\begin{cases}
+			y_{ij}=\mu+\tau_i+\beta_j+\varepsilon_{ij} \\
+			\varepsilon_{ij}\quad\mathrm{i.i.d.~}N(0,\sigma^2) \\
+			\operatorname{s.t.}\quad\sum\limits_{i=1}^a\tau_i=0,\quad\sum\limits_{j=1}^b\beta_j=0 \\
+			i=1,2,\dots,a,\;j=1,2,\dots,b
+		\end{cases}
+	\end{equation*}
+	称$\mu$为一般平均，表示$ab$个总体的均值的平均值；称$\tau_i$为因子A第$i$个水平$A_i$的主效应；称$\beta_j$为因子B第$j$个水平$B_j$的主效应。$\varepsilon_{ij}$为随机误差。于是模型的$y$值向量和对应的设计阵、参数向量可写作：
+	\begin{gather*}
+		y=(y_{11},y_{12},\dots,y_{1b},y_{21},y_{22},\dots,y_{2b},\dots,y_{a1},y_{a2},\dots,y_{ab})^T \\
+		\beta=(\mu,\alpha_1,\alpha_2,\dots,\alpha_a,\beta_1,\beta_2,\dots,\beta_b)^T \\
+		X=
+		\begin{pmatrix}
+			\mathbf{1}_b & \mathbf{1}_b & \mathbf{0} & \cdots & \mathbf{0} & I_b \\
+			\mathbf{1}_b & \mathbf{0} & \mathbf{1}_b & \cdots & \mathbf{0} & I_b \\
+			\vdots & \vdots & \vdots & \ddots & \mathbf{0} & I_b \\
+			\mathbf{1}_b & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{1}_b & I_b 
+		\end{pmatrix}
+	\end{gather*}
+\end{definition}
