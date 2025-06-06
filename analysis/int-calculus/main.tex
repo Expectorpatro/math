@@ -35,7 +35,7 @@
 	\begin{equation*}
 		|\sigma(f,P,\xi)-I|<\varepsilon
 	\end{equation*}
-	则称$f$在区间$[a,b]$上\textbf{Riemann可积}，并且把$I$称为函数$f$在区间$[a,b]$上的积分，记为：
+	则称$f$在区间$[a,b]$上\textbf{Riemann可积}，并且把$I$称为函数$f$在区间$[a,b]$上的\textbf{积分}，记为：
 	\begin{equation*}
 		\int_{a}^{b}f(x)\dif x=\lim_{|P|\to0}\sigma(f,P,\xi)=I
 	\end{equation*}
@@ -238,10 +238,13 @@
 		\omega=\sup_{x_1,x_2\in J}|f(x_1)-f(x_2)|\qedhere
 	\end{equation*}
 \end{proof}
-\begin{theorem}
+\begin{theorem}\label{theo:RiemannIntegrable4ArithmeticOperation}
 	设函数$f,g$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上可积，$\alpha,\beta\in\mathbb{R}^{}$，则：
 	\begin{enumerate}
-		\item $\alpha f+\beta g$在$[a,b]$上可积；
+		\item $\alpha f+\beta g$在$[a,b]$上可积且：
+		\begin{equation*}
+			\int_{a}^b[\alpha f(x)+\beta g(x)]\dif x=\alpha\int_{a}^bf(x)\dif x+\beta\int_{a}^bg(x)\dif x
+		\end{equation*}
 		\item $fg$在$[a,b]$上可积；
 		\item 若存在常数$c>0$使得$|f(x)|\geqslant c,\;\forall\;x\in[a,b]$，则$\dfrac{1}{f}$在$[a,b]$上可积；
 		\item $|f|$在$[a,b]$上可积。
@@ -258,7 +261,10 @@
 		&=\alpha\lim_{|P|\to0}\sigma(f,P,\xi)+\beta\lim_{|P|\to0}\sigma(g,P,\xi) \\
 		&=\alpha I_1+\beta I_2\in\mathbb{R}^{}
 	\end{align*}
-	由定义可得$\alpha f+\beta g$可积。\par
+	由定义可得$\alpha f+\beta g$可积，所以：
+	\begin{equation*}
+		\int_{a}^b[\alpha f(x)+\beta g(x)]\dif x=\alpha\int_{a}^bf(x)\dif x+\beta\int_{a}^bg(x)\dif x
+	\end{equation*}\par
 	(2)由\cref{theo:RiemannIntegrableBounded}可知$f,g$在$[a,b]$上有界，设：
 	\begin{equation*}
 		|f(x)|\leqslant K,\;|g(x)|\leqslant L,\quad\forall\;x\in[a,b]
@@ -342,14 +348,14 @@
 	\end{equation*}
 	由\cref{theo:RiemannIntegrableIff}(2)可得$|f|$在$[a,b]$上可积。
 \end{proof}
-\begin{theorem}
+\begin{theorem}\label{theo:RiemannIntegrable}
 	关于函数的可积性，有如下结论：
 	\begin{enumerate}
 		\item 设$[a_1,b_1]\subseteq[a,b]\subseteq\mathbb{R}^{}$，若函数$f$在$[a,b]$上可积，则$f$在$[a_1,b_1]$上可积；
 		\item 若函数$f$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上有定义且单调有界，则$f$在$[a,b]$上可积；
 		\item 若函数$f$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上连续，则$f$在$[a,b]$上可积；
 		\item 若函数$f$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上有界且除了有限个间断点外在其它各点连续，则$f$在$[a,b]$上可积；
-		\item 若函数$f,g$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上有定义且有界，除了有限个点$\seq{c}{m}$以外有$f=g$，此时如果$f$可积，则$g$也可积，且有：
+		\item 若函数$f,g$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上有定义且有界，除了有限个点$\seq{c}{l}$以外有$f=g$，此时如果$f$可积，则$g$也可积，且有：
 		\begin{equation*}
 			\int_{a}^bf(x)\dif x=\int_{a}^bg(x)\dif x
 		\end{equation*}
@@ -395,6 +401,108 @@
 		\lim_{|P|\to0}\Omega(f,P)=0
 	\end{equation*}
 	由\cref{theo:RiemannIntegrableIff}(2)可得$f$在$[a,b]$上可积。\par
+	(4)设$f$的间断点为$\seq{c}{l}$，对任意给定的充分小的$\eta$，取$l$个开区间：
+	\begin{equation*}
+		J_j=(c_j-\eta,c_j+\eta),\quad j=1,2,\dots,l
+	\end{equation*}
+	在$[a,b]$减去$\seq{J}{l}$后所余下的有限个闭子区间上，$f$是连续的，由\info{连续则一致连续}可得$f$在其上一致连续，所以存在$\delta>0$，使得只要：
+	\begin{equation*}
+		x_,y\in[a,b]\Big\backslash\left(\underset{j=1}{\overset{l}{\cup}}J_j\right),\;|x-y|<\delta
+	\end{equation*}
+	就有$|f(x)-f(y)|<\eta$。取$[a,b]$上的分割$P$使得$|P|<\min\{\eta,\delta\}$。因为$|P|<\eta$，注意到一个$J_j$最多与四个$P$的闭子区间相交，所以在$P$的各闭子区间中，最多只有总长度不超过$4l\eta$的子区间与某个$J_j$相交。可以把$\Omega(f,P)$分成两部分：
+	\begin{equation*}
+		\Omega(f,P)=\sum_s'\omega_s\Delta x_s+\sum_t''\omega_t\Delta x_t
+	\end{equation*}
+	第一部分与所有的$J_j$都不相交，第二部分与某个$J_j$相交，于是有：
+	\begin{align*}
+		\Omega(f,P)&=\sum_s'\omega_s\Delta x_s+\sum_t''\omega_t\Delta x_t<\eta\sum_{s}'\omega_s+\omega\sum_{t}''\Delta x_t \\
+		&\leqslant\eta(b-a)+\omega4l\eta=(b-a+4l\omega)\eta
+	\end{align*}
+	对任意的$\varepsilon>0$，只要取：
+	\begin{equation*}
+		\eta<\frac{\varepsilon}{b-a+4l\omega}
+	\end{equation*}
+	就可以得到$\Omega(f,P)<\varepsilon$，即：
+	\begin{equation*}
+		\lim_{|P|\to0}\Omega(f,P)=0
+	\end{equation*}
+	由\cref{theo:RiemannIntegrableIff}(2)可得$f$在$[a,b]$上可积。\par
+	(5)记：
+	\begin{equation*}
+		K=\max\{|g(c_1)-f(c_1)|,|g(c_2)-f(c_2)|,\dots,|g(c_l)-f(c_l)|\}
+	\end{equation*}
+	设$P$是$[a,b]$上的任意分割，则在$P$的各个闭子区间中，最多只有$2l$个能够包含某个$c_i$（考虑$|P|$足够小的情况，这时一个闭子区间只能含有一个$c_i$），同时当且仅当$f$在$P$的包含$c_i$的闭子区间上的最大值或最小值是$f(c_i)$或$g$在该区间上的极值为$g(c_i)$时$\omega_i(f)$和$\omega_i(g)$才会不一样。分类讨论可得此时$|\omega_i(g)-\omega_i(f)|\leqslant K$，所以：
+	\begin{align*}
+		|\sigma(g,P,\xi)-\sigma(f,P,\xi)|&\leqslant\sum_{i=1}^{n}|[\omega_i(g)-\omega_i(f)]\Delta x_i| \\
+		&\leqslant\sum_{i=1}^{n}|[\omega_i(g)-\omega_i(f)]||P|\leqslant2lK|P|
+	\end{align*}
+	于是：
+	\begin{equation*}
+		\int_{a}^bf(x)\dif x=\lim_{|P|\to0}\sigma(f,P,\xi)=\lim_{|P|\to0}\sigma(g,P,\xi)=\int_{a}^bg(x)\dif x\qedhere
+	\end{equation*}
+\end{proof}
+
+\subsection{定积分的性质}
+\begin{property}
+	定积分具有如下性质：
+	\begin{enumerate}
+		\item 设$a<b<c$，若$f$在$[a,b]$和$[b,c]$上都可积，则$f$在$[a,c]$上也可积，且：
+		\begin{equation*}
+			\int_{a}^cf(x)\dif x=\int_{a}^bf(x)\dif x+\int_{b}^cf(x)\dif x
+		\end{equation*}
+		\item 若函数$f,g$在闭区间$[a,b]\in\mathbb{R}^{}$上可积且$f\leqslant g$在$[a,b]$上恒成立，则：
+		\begin{equation*}
+			\int_{a}^bf(x)\dif x\leqslant\int_{a}^bg(x)\dif x
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)因为，由\cref{theo:RiemannIntegrableBounded}可知$f$在$[a,c]$上有界，即存在$M>0$使得$|f(x)|\leqslant M$对任意的$x\in[a,c]$成立。\par
+	取$[a,c]$上的一个分割$P$，若$b$在$P$的标志点集$\xi$中，则令$P'=P,\xi'=\xi$，其中$\xi'$是$P'$的标志点集。若$b$不在$\xi$中，则令：
+	\begin{equation*}
+		P':\;a=x_0<x_1<x_2<\cdots<x_j<b<x_{j+1}<\cdots<x_n=c,\quad \xi'=\xi\cup{b}
+	\end{equation*}
+	其中$x_i\in\xi,\;i=1,2,\dots,n$。注意到$\sigma(f,P,\xi)$和$\sigma(f,P',\xi')$的差别至多为：
+	\begin{align*}
+		|\sigma(f,P',\xi')-\sigma(f,P,\xi)|&=|f(\xi'_{j+1})(b-x_j)+f(\xi'_{j+2})(x_{j+1}-b)-f(\xi_{j+1})(x_{j+1}-x_j)| \\
+		&<|f(\xi'_{j+1})+f(\xi'_{j+2})-f(\xi_{j+1})||P|\leqslant3M|P|
+	\end{align*}
+	即：
+	\begin{equation*}
+		\lim_{|P|\to0}\sigma(f,P,\xi)=\sigma(f,P',\xi')
+	\end{equation*}
+	将$P'$分别限制在$[a,b]$和$[b,c]$上可以得到分割$P_1,P_2$及其对应的标志点组$\varphi,\psi$。因为$f$在$[a,b]$和$[b,c]$上都可积，所以极限：
+	\begin{equation*}
+		\lim_{|P_1|\to0}\sigma(f,P_1,\varphi),\quad\lim_{|P_2|\to0}\sigma(f,P_2,\psi)
+	\end{equation*}
+	存在，因为：
+	\begin{equation*}
+		\sigma(f,P',\xi')=\sigma(f,P_1,\varphi)+\sigma(f,P_2,\psi),\quad|P'|\to0\longrightarrow|P_1|,|P_2|\to0
+	\end{equation*}
+	由\info{极限的运算法则}可得：
+	\begin{equation*}
+		\lim_{|P'|\to0}\sigma(f,P',\xi)=\lim_{|P_1|\to0}\sigma(f,P_1,\varphi)+\lim_{|P_2|\to0}\sigma(f,P_2,\psi)=\int_{a}^bf(x)\dif x+\int_{b}^cf(x)\dif x
+	\end{equation*}
+	而$|P|\to0$包含了$|P'|\to0$，所以：
+	\begin{equation*}
+		\lim_{|P|\to0}\sigma(f,P,\xi)=\int_{a}^bf(x)\dif x+\int_{b}^cf(x)\dif x\in\mathbb{R}^{}
+	\end{equation*}
+	由定积分的定义即可得到：
+	\begin{equation*}
+		\int_{a}^cf(x)\dif x=\int_{a}^bf(x)\dif x+\int_{b}^cf(x)\dif x
+	\end{equation*}\par
+	(2)因为$f\leqslant g$在$[a,b]$上恒成立，所以$\varphi=g-f\geqslant0$在$[a,b]$上恒成立。因为$f,g$在$[a,b]$上可积，由\cref{theo:RiemannIntegrable4ArithmeticOperation}(1)可知$\varphi$在$[a,b]$上可积且：
+	\begin{equation*}
+		\int_{a}^b\varphi(x)\dif x=\int_{a}^bg(x)\dif x-\int_{a}^bf(x)\dif x
+	\end{equation*}
+	因为$\varphi$在$[a,b]$上非负，所以对$[a,b]$上任意的分割$P$及其标志点组$\xi$都有$\sigma(\varphi,P,\xi)\geqslant0$，由\info{极限的不等式性}可得：
+	\begin{equation*}
+		\int_{a}^b\varphi(x)\dif x=\lim_{|P|\to0}\sigma(\varphi,P,\xi)\geqslant0
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\int_{a}^bg(x)\dif x-\int_{a}^bf(x)\dif x\geqslant0
+	\end{equation*}\par
 \end{proof}
 
 \chapter{Lebesgue积分}
