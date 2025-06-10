@@ -1,0 +1,57 @@
+\section{Logistic模型}
+
+\begin{definition}\label{model:Logistic}
+	称以下模型为\textbf{逻辑回归模型}：
+	\begin{equation*}
+		y_i|x_i\sim\operatorname{Bernoulli}(p_i),\quad
+		\operatorname{E}(y_i|x_i)=p_i =\operatorname{P}(y_i=1|x_i) =  \frac{1}{1+\exp(-x_i^T\beta)}, \quad i=1,2,\dots,n
+	\end{equation*}
+	其中 $y_i$相互独立，$x_i$ 为第 $i$ 个观测的 $p\times 1$ 特征向量，$\beta$ 为 $p\times1$ 的回归系数向量。记$p = (p_1,p_2,\dots,p_n)^T,\;X=(x_1;x_2;\cdots;x_n),\;y=(\seq{y}{n})$。
+\end{definition}
+
+\subsection{参数估计}
+\begin{property}
+	对于\cref{model:Logistic}，有如下结论：
+	\begin{enumerate}
+		\item $\seq{y}{n}\in\{0,1\}^n$ 的条件概率函数为：
+		\begin{equation*}
+			L(\beta) = \prod_{i=1}^{n} p_i^{y_i}(1-p_i)^{1-y_i}
+		\end{equation*}
+		\item 模型的对数似然函数为：
+		\begin{equation*}
+			\ln L(\beta)=\sum_{i=1}^{n} \left[y_i\log(p_i)+(1-y_i)\log(1-p_i)\right]
+		\end{equation*}
+		\item 模型的对数似然函数对$\beta$的梯度为：
+		\begin{equation*}
+			\frac{\dif\ln L(\beta)}{\dif\beta} = X^T(y - p)
+		\end{equation*}
+		\item 模型的对数似然函数对$\beta$的Hesse矩阵为：
+		\begin{equation*}
+			\frac{\dif^2\ln L(\beta)}{\dif\beta\dif\beta^T}=-X^T\operatorname{diag}\{p_1(1-p_1),p_2(1-p_2),\dots,p_n(1-p_n)\}X
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由Bernulli分布的概率函数及$y_i$之间的独立性立即可得。\par
+	(2)由(1)立即可得。\par
+	(3) 对 $\ell(\beta)$ 求导：
+	\[
+	\frac{\dif\ln L(\beta)}{\dif \beta}
+	= \sum_{i=1}^n \left[ \frac{y_i}{p_i} - \frac{1 - y_i}{1 - p_i} \right] \cdot \frac{\dif p_i}{\dif \beta}
+	\]
+	而：
+	\[
+	\frac{\dif p_i}{\dif \beta}=-[1+\exp(-x_i^T\beta)]^{-2}(-x_i)\exp(-x_i^T\beta)=p_i(1 - p_i) x_i
+	\]
+	代入上式得：
+	\begin{align*}
+		\frac{\dif\ln L(\beta)}{\dif \beta}&=\sum_{i=1}^{n}\left[\frac{y_i}{p_i}-\frac{1-y_i}{1-p_i}\right]p_i(1-p_i)x_i=\sum_{i=1}^{n}[y_i(1-p_i)-(1-y_i)p_i]x_i \\
+		&=\sum_{i=1}^{n}(y_i-y_ip_i-p_i+y_ip_i)=\sum_{i=1}^n (y_i - p_i)x_i = X^T(y - p)
+	\end{align*}\par
+	(4)对上式再求导：
+	\begin{align*}
+		\frac{\dif^2 \ln L(\beta)}{\dif \beta \dif \beta^T}
+		&=-\sum_{i=1}^{n}\frac{\dif p_i}{\dif\beta}x_i^T=-\sum_{i=1}^{n}p_i(1-p_i)x_ix_i^T \\
+		&=-X^T\operatorname{diag}\{p_1(1-p_1),p_2(1-p_2),\dots,p_n(1-p_n)\}X\qedhere
+	\end{align*}
+\end{proof}
