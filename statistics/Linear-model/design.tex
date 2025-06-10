@@ -1,0 +1,175 @@
+\section{最优设计}
+在之前的讨论中，我们都是在设计阵$X$已知的情况下去对模型的统计性质进行讨论，但理论表明我们可以选择试验点（即选择$(X,y)$，$(X,y)$的一行被称之为一个试验点）来让模型进一步获得某些优良性质，这种方法被称之为\textbf{最优设计}。下面给出设计的模型。
+
+\begin{definition}\label{model:design}
+	设$\mathcal{X}\in\mathbb{R}^{p}$是\textbf{试验点集}，试验时只能在$\mathcal{X}$内选取试验点，试验点记为$z$。假设：
+	\begin{enumerate}
+		\item $\mathcal{X}$是一个紧集，由\info{$\mathbb{R}^{n}$上的紧集等价于有界闭集}可知该条件等价于$\mathcal{X}$是一个有界闭集；
+		\item $f_1(x),f_2(x),\dots,f_p(x)$是$\mathcal{X}$上已知的$p$个线性无关的连续函数，记：
+		\begin{equation*}
+			f(x)=[f_1(x),f_2(x),\dots,f_p(x)]^T
+		\end{equation*}
+		\item 自变量$x$与响应变量$y$满足：
+		\begin{equation*}
+			y(x)=f^T(x)\beta+\varepsilon,\quad\varepsilon\sim\operatorname{N}(0,\sigma^2)
+		\end{equation*}
+	\end{enumerate}
+\end{definition}
+\subsection{信息矩阵}
+\begin{definition}
+	对于\cref{model:design}，称试验点集$\mathcal{X}$上的任一概率分布$\mu$为一个\textbf{设计}，定义其\textbf{信息矩阵}为：
+	\begin{equation*}
+		M(\mu)=\int_{\mathcal{X}}f(x)f^T(x)\dif\mu
+	\end{equation*}
+	若$\mu$是一个取值个数有限的离散型概率分布，$n\in\mathbb{N}^+$为$\mu$的取值数，则记：
+	\begin{equation*}
+		\mu=
+		\begin{pmatrix}
+			z_1 & z_2 & \cdots & z_n \\
+			p_1 & p_2 & \cdots & p_n
+		\end{pmatrix}
+	\end{equation*}
+	称$\seq{z}{n}$为设计$\mu$的\textbf{谱点}。
+\end{definition}
+\begin{property}
+	对于\cref{model:design}，信息矩阵具有下述性质：
+	\begin{enumerate}
+		\item 任一设计$\mu$的信息矩阵$M(\mu)$都是半正定的；
+		\item 若设计：
+		\begin{equation*}
+			\mu=
+			\begin{pmatrix}
+				z_1 & z_2 & \cdots & z_n \\
+				p_1 & p_2 & \cdots & p_n
+			\end{pmatrix}
+		\end{equation*}
+		的谱点数$n<p$，则$M(\mu)$是退化矩阵；
+		\item $M(\Xi)$是一个闭凸集；
+		\item 对于任意设计$\mu$，存在离散设计：
+		\begin{equation*}
+			\mu_0=
+			\begin{pmatrix}
+				z_1 & z_2 & \cdots & z_n \\
+				p_1 & p_2 & \cdots & p_n
+			\end{pmatrix}
+		\end{equation*}
+		使得$M(\mu)=M(\mu_0)$，其中：
+		\begin{equation*}
+			n\leqslant\frac{p(p+1)}{2}+1
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)任取设计$\mu$，由信息矩阵的定义，$M(\mu)$是对称矩阵。由\cref{prop:NonnegativeMeasurableIntegral}(2)(6)可知对任意的$z\in\mathbb{R}^{p}$有：
+	\begin{equation*}
+		z^TM(\mu)z=z^T\int_{\mathcal{X}}f(x)f^T(x)\dif\mu z=\int_{\mathcal{X}}z^Tf(x)f^T(x)z\dif\mu=\int_{\mathcal{X}}[f^T(x)z]^2\dif\mu\geqslant0
+	\end{equation*}
+	所以$M(\mu)$是半正定矩阵。由$\mu$的任意性即可得出结论。\par
+	(2)此时有：
+	\begin{equation*}
+		M(\mu)=\sum_{i=1}^{n}p_if(z_i)f^T(z_i)=
+		\begin{pmatrix}
+			p_1 & 0 & \cdots & 0 \\
+			0 & p_2 & \cdots & 0 \\
+			\vdots & \vdots & \ddots & \vdots \\
+			0 & 0 & \cdots & p_n 
+		\end{pmatrix}
+		\begin{pmatrix}
+			f(z_1) & f(z_2) & \cdots & f(z_n)
+		\end{pmatrix}
+		\begin{pmatrix}
+			f^T(z_1) \\
+			f^T(z_2) \\
+			\vdots \\
+			f^T(z_n)
+		\end{pmatrix}
+	\end{equation*}
+	因为$n<p$，所以$\operatorname{rank}\{[f(z_1),f(z_2),\dots,f(z_n)]\}\leqslant n$，而由\info{矩阵乘积的秩}可得：
+	\begin{equation*}
+		\operatorname{rank}[M(\mu)]\leqslant\operatorname{rank}\{[f(z_1),f(z_2),\dots,f(z_n)]\}\leqslant n<p
+	\end{equation*}
+	所以$M(\mu)$是退化矩阵。\par
+	(3)对任意的$\mu_1,\mu_2\in\Xi$，若$\alpha\in[0,1]$，则由\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{align*}
+		\alpha M(\mu_1)+(1-\alpha)M(\mu_2)&=\alpha\int_{\mathcal{X}}f(x)f^T(x)\dif\mu_1+(1-\alpha)\int_{\mathcal{X}}f(x)f^T(x)\dif\mu_2 \\
+		&=\int_{\mathcal{X}}\alpha f(x)f^T(x)\dif\mu_1+\int_{\mathcal{X}}(1-\alpha)f(x)f^T(x)\dif\mu_2 \\
+		&=\int_{\mathcal{X}}f(x)f^T(x)\dif(\alpha\mu_1)+\int_{\mathcal{X}}f(x)f^T(x)\dif[(1-\alpha)\mu_2] \\
+		&=\int_{\mathcal{X}}f(x)f^T(x)\dif[\alpha\mu_1+(1-\alpha)\mu_2] \\
+		&=M[\alpha\mu_1+(1-\alpha)\mu_2]
+	\end{align*}
+	因为$\alpha\mu_1+(1-\alpha)\mu_2\in\Xi$，所以$M[\alpha\mu_1+(1-\alpha)\mu_2]\in M(\Phi)$，于是$M(\Phi)$是一个凸集。\info{仍需证明是一个闭集}\par
+\end{proof}
+\subsection{优良性准则}
+\begin{definition}
+	对于\cref{model:design}，设$\Xi=\{\mu:\mu\text{是$\mathcal{X}$上的概率分布}\},\;M(\Xi)=\{M(\mu):\mu\in\Xi\}$，$\Phi$是定义在$M(\Xi)$上的一个\textbf{准则函数}。若设计$\mu^*\in\Xi$满足：
+	\begin{equation*}
+		\Phi[M(\mu^*)]=\inf_{\mu\in\Xi}\Phi[M(\mu)]
+	\end{equation*}
+	则称设计$\mu^*$为$\Phi$最优设计。
+\end{definition}
+\subsubsection{D最优性}
+\begin{definition}
+	对于\cref{model:design}，设定义在$M(\Xi)$上的函数$\Phi[M(\mu)]=-\ln[\det M(\mu)]$。若设计$\mu^*$满足：
+	\begin{equation*}
+		\Phi[M(\mu^*)]=\inf_{\mu\in\Xi}-\ln[\det M(\mu)]
+	\end{equation*}
+	则称$\mu^*$为D最优设计。
+\end{definition}
+\begin{note}
+	可以证明在参数$\beta$下\cref{theo:NormalLinearModelConfidenceEllipsoid}中的置信椭球体积为：
+	\begin{equation*}
+		V(\mu)=\frac{(p+2)^{k/2}\pi^{k/2}}{\Gamma\left(\frac{k}{2}+1\right)\sqrt{\det M(\mu)}}
+	\end{equation*}
+	所以D最优设计的意义即为使得置信椭球的体积最小。
+\end{note}
+\subsubsection{G最优性}
+\begin{definition}
+	对于\cref{model:design}，设定义在$M(\Xi)$上的函数：
+	\begin{equation*}
+		\Phi[M(\mu)]=
+		\begin{cases}
+			\max\limits_{x\in\mathcal{X}}d(x,\mu)=\max\limits_{x\in\mathcal{X}}f(x)^TM^{-1}(\mu)f(x),&\det M(\mu)\ne0 \\
+			+\infty,&\det M(\mu)=0
+		\end{cases}
+	\end{equation*}
+	若设计$\mu^*$满足：
+	\begin{equation*}
+		\Phi[M(\mu^*)]=\inf_{\mu\in\Xi}\Phi[M(\mu)]
+	\end{equation*}
+	则称$\mu^*$为G最优设计。
+\end{definition}
+\begin{note}
+	当利用\cref{model:design}进行预测时，在信息矩阵$M(\mu)$非退化的情况下，由\cref{prop:NormalLinearModel}(2)可知点$x$处预测值$\hat{y}(x)$的方差等于：
+	\begin{equation*}
+		\operatorname{Var}[\hat{y}(x)]=\sigma^2f^T(x)M^{-1}(\mu)f(x)=d(x,\mu)
+	\end{equation*}
+	所以$G$最优设计的意义即为使得在试验点集中方差最大的点的方差最小。
+\end{note}
+\subsubsection{D最优与G最优的等价性}
+\begin{lemma}
+	对于\cref{model:design}，有如下结论：
+	\begin{enumerate}
+		\item 设$\mu\in\Phi$且$\det M(\mu)\ne0$，则：
+		\begin{equation*}
+			\operatorname{E}[d(x,\mu)]=\int_{\mathcal{X}}d(x,\mu)\dif\mu=p,\quad\max_{x\in\mathcal{X}}d(x,\mu)\geqslant p
+		\end{equation*}
+		\item $\ln[\det M(\mu)]$作为$M(\Phi)$上的函数是一个凹函数；
+		\item 设设计$\mu_1,\mu_2$的信息矩阵分别为$M(\mu_1),M(\mu_2)$，$0<\alpha<1$。令$\mu=\alpha\mu_1+(1-\alpha)\mu_2$，则：
+		\begin{equation*}
+			\frac{\dif\ln[\det M(\mu)]}{\dif\alpha}=\operatorname{tr}\{M^{-1}(\mu)[M(\mu_1)-M(\mu_2)]\}
+		\end{equation*}
+		\item 设$\mu$是任一设计，$\mu_{x_0}$表示只有一个谱点$x_0$的设计，$0<\alpha<1$，则对设计$\mu_0=\alpha\mu_{x_0}+(1-\alpha)\mu$有：
+		\begin{equation*}
+			\det M(\mu_0)=(1-\alpha)^p\left[1+\frac{\alpha}{1-\alpha}d(x_0,\mu)\right]\det M(\mu)
+		\end{equation*}
+	\end{enumerate}
+\end{lemma}
+\begin{theorem}
+	对于\cref{model:design}，下述三个结论等价：
+	\begin{enumerate}
+		\item $\mu$是D最优设计；
+		\item $\mu$是G最优设计；
+		\item $\mu^*$满足$\max\limits_{x\in\mathcal{X}}d(x,\mu^*)=p$；
+	\end{enumerate}
+	分别满足上述条件(1)、(2)、(3)的三个信息矩阵类彼此相同，满足上述条件(1)、(2)、(3)的设计的系数和为$1$的线性组合也满足条件(1)、(2)、(3)。
+\end{theorem}
