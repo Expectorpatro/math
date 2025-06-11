@@ -225,4 +225,191 @@
 	(5)显然$\mathcal{M}(B)$是一个凸闭集\info{$K^{n}$子空间为闭集}，由\cref{theo:BestApproximationElement}立即可得。\par
 \end{proof}
 
-\input{algebra/matrix/svd.tex}
+\subsection{初等反射矩阵}
+\begin{definition}
+	设$\omega\in\mathbb{R}^{n},\;||\omega||=1$，称矩阵$H(\omega)=I_n-2\omega\omega^T$为\textbf{初等反射矩阵}，也称为\textbf{Householder变换}。
+\end{definition}
+\begin{note}
+	下面说明初等反射矩阵$H$的几何意义。取$\mathbb{R}^{n}$中以$\omega$为法向量且过原点的超平面$S:\omega^Tx=0$，再任取$v\in\mathbb{R}^{n}$。因为$v$可以分解成$x+y$，其中$x\in S,\;y\in S^\perp$，于是有：
+	\begin{equation*}
+		Hx=(I_n-2\omega\omega^T)x=x-2\omega\omega^Tx=x
+	\end{equation*}\par
+	关于$y$，因为$y\in S^\perp$，所以$y\parallel\omega$，即存在$\alpha\in\mathbb{R}^{}$使得$y=\alpha\omega$，所以有：
+	\begin{equation*}
+		Hy=(I_n-2\omega\omega^T)y=y-2\omega\omega^T\alpha\omega=y-2\alpha\omega=y-2y=-y
+	\end{equation*}\par
+	由上述讨论可得：
+	\begin{equation*}
+		Hv=H(x+y)=x-y
+	\end{equation*}
+	而$x-y$是$v$关于平面$S$的镜面反射。
+\end{note}
+
+\begin{tikzpicture}[scale=3,
+	x={(0.9cm,-0.3cm)},
+	y={(0.9cm,0.3cm)},
+	z={(0cm,1cm)},
+	>=stealth
+	]
+	
+	% 坐标点定义
+	\coordinate (O) at (0,0,0);
+	\coordinate (x) at (0.8,0,0);
+	\coordinate (y) at (0,0,0.6);
+	\coordinate (v) at ($(x)+(y)$);
+	\coordinate (v') at ($(x)-(y)$);
+	\coordinate (w) at (0,0,1.0);
+	
+	% 平面 S
+	\fill[gray!10] (-1.2,-0.8,0) -- (1.2,-0.8,0) -- (1.2,1.0,0) -- (-1.2,1.0,0) -- cycle;
+	\draw[thick] (-1.2,-0.8,0) -- (1.2,-0.8,0) -- (1.2,1.0,0) -- (-1.2,1.0,0) -- cycle;
+	
+	% 原点
+	\node at (-0.1,-0.1,0) {$O$};
+	
+	% 向量 x
+	\draw[->,thick,blue] (O) -- (x) node[below left=-2pt] {$x$};
+	
+	% 向量 y
+	\draw[->,thick,orange] (x) -- (v) node[right=2pt] {$y$};
+	
+	% 向量 v
+	\draw[->,thick,red] (O) -- (v) node[above right=3pt] {$v$};
+	
+	% 向量 v'
+	\draw[->,thick,green!60!black] (O) -- (v') node[below right=2pt] {$v'$};
+	
+	% 虚线连接 v 与 v'
+	\draw[dashed, thick,gray] (v) -- (v');
+	
+	% omega（垂直）
+	\draw[->,thick,purple] (O) -- (w) node[above left=2pt] {$\omega$};
+	
+	% 平面 S 的标注
+	\node at (-1,1.1,0) {$S$};
+	
+\end{tikzpicture}
+
+\begin{property}\label{prop:Householder}
+	设$H\in M_{n}(\mathbb{R}^{})$是一个初等反射矩阵，则：
+	\begin{enumerate}
+		\item $H$是对称矩阵；
+		\item $H$是正交矩阵；
+		\item 若$A\in M_{n}(\mathbb{R}^{})$为对称矩阵，则$HAH$也是对称矩阵。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由定义可得$H^T=I_n-2\omega\omega^T$，于是$H$是一个对称矩阵。\par
+	(2)由(1)可得：
+	\begin{equation*}
+		H^TH=H^2=(I_n-2\omega\omega^T)^2=I_n-2\omega\omega^T-2\omega\omega^T+4\omega\omega^T\omega\omega^T=I_n
+	\end{equation*}
+	所以$H^{-1}=H^T$。\par
+	(3)由(1)可得$(HAH)^T=H^TA^TH^T=HAH$。
+\end{proof}
+\begin{theorem}\label{theo:HouseholderExistence}
+	设$x,y\in\mathbb{R}^{n},\;x\ne y$且$||x||=||y||$，则存在一个初等反射矩阵$H$使得$Hx=y$。
+\end{theorem}
+\begin{proof}
+	令$\omega=\dfrac{x-y}{||x-y||}$，则$||\omega||=1$，于是$H=I_n-2\omega\omega^T$是一个初等反射矩阵。注意到：
+	\begin{gather*}
+		Hx=x-2\frac{(x-y)(x-y)^Tx}{||x-y||^2}=x-2\frac{(x-y)(x^Tx-y^Tx)}{||x-y||^2} \\
+		||x-y||^2=(x-y)^T(x-y)=(x^T-y^T)(x-y)=(x^Tx-x^Ty-y^Tx+y^Ty)=2(x^Tx-y^Tx)
+	\end{gather*}
+	最后一式是因为$||x||=||y||$。于是：
+	\begin{equation*}
+		Hx=x-\frac{(x-y)||x-y||^2}{||x-y||^2}=x-(x-y)=y\qedhere
+	\end{equation*}
+\end{proof}
+\begin{theorem}[$H$约化定理]\label{theo:Householder}
+	设$x=(\seq{x}{n})^T\in\mathbb{R}^{n}$，则存在初等反射矩阵$H$使得$Hx=\alpha e_1$，$e_1=(1,0,0,\dots,0^T)\in\mathbb{R}^{n}$，其中：
+	\begin{equation*}
+		\begin{cases}
+			\alpha=||x|| \\
+			u=x-\alpha e_1 \\
+			\beta=\alpha(\alpha-x_1) \\
+			H=I_n-\beta^{-1}uu^T
+		\end{cases}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	取$\alpha=||x||,\;y=\alpha e_1$，则$||x||=||y||$。由\cref{theo:HouseholderExistence}可知存在初等反射矩阵$H$满足：
+	\begin{equation*}
+		H=I_n-2\omega\omega^T,\quad\omega=\frac{x-y}{||x-y||^2}=\frac{x-\alpha e_1}{||x-\alpha e_1||^2},\quad Hx=y
+	\end{equation*}
+	同时令$u=x-\alpha e_1$，令：
+	\begin{align*}
+		\beta&=\frac{1}{2}||u||^2=\frac{1}{2}[(x_1-\alpha)^2+x_2^2+\cdots+x_n^2]=\frac{1}{2}\left[\left(\sum_{i=1}^{n}x_i^2\right)-2x_1\alpha+\alpha^2\right] \\
+		&=\frac{1}{2}(2\alpha^2-2x_1\alpha)=\alpha^2-\alpha x_1=\alpha(\alpha-x_1)
+	\end{align*}
+	即有$H=I_n-\beta^{-1}uu^T$。
+\end{proof}
+\begin{note}
+	为了防止有效数字的损失，在数值计算中一般取$\alpha=\operatorname{sign}(x_1)||x||$。为了防止计算$||x||$时出现数值溢出，一般会将$x$规范化：
+	\begin{equation*}
+		d=||x||_\infty,\quad x'=\frac{x}{d}
+	\end{equation*}
+	这样计算过程就变为了：
+	\begin{equation*}
+		\alpha'=\operatorname{sign}(x_1)||x'||,\quad u'=x'+\alpha' e_1,\quad\beta'=\alpha'(\alpha'+x_1'),\quad H'=I_n-(\beta')^{-1}u'(u')^T
+	\end{equation*}
+	可以验证$H$在数值上与原本的结果是一样的。
+\end{note}
+
+\subsection{平面旋转矩阵}
+\begin{definition}
+	称$n$阶实方阵：
+	\begin{equation*}
+		G(i,j,\theta) = 
+	\left(
+	\begin{array}{rcccccccccccc}
+		& 1 &   &   &   &   &   &   &   &   &   &  &   \\
+		&   & \ddots &   &   &   &   &   &   &   &   &  &   \\
+		&   &   & 1 &   &   &   &   &   &   &   &  &  \\
+		\text{\scriptsize 第$i$行} &
+		&   &   & \cos\theta & 0 & \cdots & 0 & \sin\theta &   &   &   & \\
+		&   &   &   & \vdots & 1 &   &   & \vdots &   &   &   &   \\
+		&   &   &   & \vdots &   & \ddots &   & \vdots &   &   &   &   \\
+		&   &   &   & \vdots &   &   & 1 & \vdots &   &   &   &   \\
+		\text{\scriptsize 第$j$行} &
+		&   &   & -\sin\theta & 0 & \cdots & 0 & \cos\theta &   &   &   &  \\
+		&   &   &   &   &   &   &   &   & 1 &   &   &   \\
+		&   &   &   &   &   &   &   &   &   & \ddots &   &   \\
+		&   &   &   &   &   &   &   &   &   &   & 1
+	\end{array}
+	\right)
+	\end{equation*}
+	为$\mathbb{R}^{n}$中平面${x_i,x_j}$的\textbf{平面旋转矩阵}，也称为\textbf{Givens变换}。
+\end{definition}
+\begin{property}\label{prop:Givens}
+	设$G(i,j,\theta)$为平面${x_i,x_j}$的平面旋转矩阵，则：
+	\begin{enumerate}
+		\item $G$是正交矩阵；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)注意到$GG^T$只需计算第$i,j$行元素：
+	\begin{equation*}
+		\begin{pmatrix}
+			\cos\theta & \sin\theta \\
+			-\sin\theta & \cos\theta
+		\end{pmatrix}
+		\begin{pmatrix}
+			\cos\theta & -\sin\theta \\
+			\sin\theta & \cos\theta
+		\end{pmatrix}
+		=I_2
+	\end{equation*}
+\end{proof}
+\begin{theorem}[G约化定理]\label{theo:Givens}
+	设$x=(x_1,\dots,x_i,\dots,x_j,\dots,x_n)^T\in\mathbb{R}^{n},\;x_ix_j\ne0$，则平面旋转矩阵$G(i,j,\theta)$使得$Px=(x_1,\dots,x_i',\dots,0,\dots,x_n)^T$，其中$x_i'=\sqrt{x_i^2+x_j^2},\;\theta=\arctan(x_j/x_i)$。
+\end{theorem}
+\begin{proof}
+	计算即可得到：
+	\begin{gather*}
+		x_i'=\cos\theta x_i+\sin\theta x_j=\frac{x_i}{\sqrt{x_i^2+x_j^2}}x_i+\frac{x_j}{\sqrt{x_i^2+x_j^2}}x_j=\frac{x_i^2+x_j^2}{\sqrt{x_i^2+x_j^2}}=\sqrt{x_i^2+x_j^2} \\
+		x_j'=-\sin\theta x_i+\cos\theta x_j=-\frac{x_j}{\sqrt{x_i^2+x_j^2}}x_i+\frac{x_i}{\sqrt{x_i^2+x_j^2}}x_j=0
+	\end{gather*}
+\end{proof}
+
+\input{algebra/matrix/decomposition.tex}
