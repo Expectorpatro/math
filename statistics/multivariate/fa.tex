@@ -1,0 +1,265 @@
+\section{因子分析}
+\gls{FactorAnalysis}的目的是从多个高度相关的观测变量中提取出少数几个\gls{LatentFactor}，这些因子代表了变量背后的共通结构，从而实现降维并提升可解释性。\par
+假设对一组学生进行了以下六门课程的测试：语文、英语、数学、物理、化学、生物，发现语文和英语成绩之间高度相关，数学、物理、化学、生物也彼此高度相关。此时可以猜测：这些成绩可能是由两个更基本的“能力”决定的，比如语言能力和理科能力。通过因子分析就可以提取出这两个潜在因子，并发现语文和英语主要由“语言能力”因子决定，理科四门主要由“理科能力”因子解释。这样就可以用两个因子有效地概括了六个变量的结构，同时让模型更易解释、更简洁。
+\begin{definition}
+	设$\mathbf{X}$是一个可观测的$m$维随机向量，$\operatorname{E}(\mathbf{X})=\boldsymbol{\mu},\;\operatorname{Cov}(\mathbf{X})=\Sigma=(\sigma_{ij})$。因子分析的数学模型为：
+	\begin{gather*}
+		\mathbf{X}=\boldsymbol{\mu}+AF+\varepsilon \\
+		\begin{cases}
+			\operatorname{E}(F)=\mathbf{0},\;\operatorname{Cov}(F)=I_n \\
+			\operatorname{E}(\varepsilon)=\mathbf{0},\;\operatorname{Cov}(\varepsilon)=D=\operatorname{diag}\{\seq{\sigma^2}{m}\} \\
+			\operatorname{Cov}(F,\varepsilon)=\mathbf{0}
+		\end{cases}
+	\end{gather*}
+	其中$F=(\seq{f}{n})^T$是不可观测的$n$维随机变量，$\varepsilon$是不可观测的$m$维随机变量，分别称$F$和$\varepsilon$为\gls{CommonFactor}和\gls{SpecificFactor}。$A=(a_{ij})$是一个非随机矩阵，$a_{ij}$表示公共因子$f_j$、随机变量$\mathbf{X}_i$的因子载荷。$a_{1j},a_{2j},\dots,a_{ij}$中至少有两个不为$0$，否则可将$f_i$并入到$\varepsilon_i$中去；$\varepsilon_i$也仅出现在$\mathbf{X}_i$的表达式中。
+\end{definition}
+\begin{property}\label{prop:FactorAnalysis}
+	上述因子分析模型具有如下性质：
+	\begin{enumerate}
+		\item $\Sigma=AA^T+D$；
+		\item 模型不受单位影响。若$\mathbf{X}^*=C\mathbf{X}$，$C$是一个对角矩阵，则有：
+		\begin{equation*}
+			\mathbf{Y}=C\boldsymbol{\mu}+CAF+C\varepsilon=\boldsymbol{\mu}^*+A^*F+\varepsilon^*
+		\end{equation*}
+		依旧满足因子分析模型；
+		\item 因子载荷不唯一；
+		\item $\operatorname{Cov}(\mathbf{X},F)=A$，即$\operatorname{Cov}(\mathbf{X}_i,F_j)=a_{ij}$
+		\item 令$h_i^2=\sum\limits_{j=1}^{n}a_{ij}^2$，则有：
+		\begin{equation*}
+			\operatorname{Var}(\mathbf{X}_i)=\sigma_{ii}=\sum_{j=1}^{n}a_{ij}^2+\sigma_i^2=h_i^2+\sigma_i^2,\;i=1,2,\dots,m
+		\end{equation*}
+		\item 令$g_j^2=\sum\limits_{i=1}^{m}a_{ij}^2$，则有：
+		\begin{equation*}
+			\sum_{i=1}^{m}\operatorname{Var}(\mathbf{X}_i)=\sum_{j=1}^{n}g_j^2+\sum_{i=1}^{n}\sigma_i^2
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由\cref{prop:CovMat}(3)(4)(5)可得：
+	\begin{align*}
+		\Sigma&=\operatorname{Cov}(\mathbf{X})=\operatorname{Cov}(\boldsymbol{\mu}+AF+\varepsilon,\boldsymbol{\mu}+AF+\varepsilon) \\
+		&=\operatorname{Cov}(\boldsymbol{\mu},\boldsymbol{\mu}+AF+\varepsilon)+\operatorname{Cov}(AF,\boldsymbol{\mu}+AF+\varepsilon)+\operatorname{Cov}(\varepsilon,\boldsymbol{\mu}+AF+\varepsilon) \\
+		&=\operatorname{Cov}(AF,\boldsymbol{\mu})+\operatorname{Cov}(AF)+\operatorname{Cov}(AF,\varepsilon)+\operatorname{Cov}(\mathbf{\varepsilon},\boldsymbol{\mu})+\operatorname{Cov}(\varepsilon,AF)+\operatorname{Cov}(\varepsilon) \\
+		&=A\operatorname{Cov}(F)A^T+A\operatorname{Cov}(F,\varepsilon)+\operatorname{Cov}(\varepsilon,F)A^T+D \\
+		&=AA^T+D
+	\end{align*}\par
+	(2)显然。\par
+	(3)取正交矩阵$Q$，令$A^*=AQ$，$F^*=Q^TF$，由\info{期望的性质}、\cref{prop:CovMat}(3)则依然有：
+	\begin{equation*}
+		\operatorname{E}(F^*)=Q^T\operatorname{E}(F)=\mathbf{0},\;\operatorname{Cov}(F^*)=Q^T\operatorname{Cov}(F)Q=I_n,\;\mathbf{X}=\boldsymbol{\mu}+A^*F^*+\varepsilon
+	\end{equation*}\par
+	(4)由\cref{prop:CovMat}(3)(4)(5)可得：
+	\begin{equation*}
+		\operatorname{Cov}(\mathbf{X},F)=\operatorname{Cov}(\boldsymbol{\mu}+AF+\varepsilon,F)=\operatorname{Cov}(\boldsymbol{\mu},F)+\operatorname{Cov}(AF,F)+\operatorname{Cov}(\varepsilon,F)=A
+	\end{equation*}\par
+	(5)由(1)即可得到结论。\par
+	(6)由\cref{prop:CovMat}(1)、(1)和\cref{prop:Trace}(1)可得：
+	\begin{align*}
+		\sum_{i=1}^{m}\operatorname{Var}(\mathbf{X}_i)&=\operatorname{tr}[\operatorname{Cov}(\mathbf{X})]=\operatorname{tr}(AA^T+D)=\sum_{i=1}^{m}\sum_{j=1}^{n}a_{ij}^2+\sum_{i=1}^{n}\sigma_i^2 \\
+		&=\sum_{j=1}^{n}\sum_{i=1}^{m}a_{ij}^2+\sum_{i=1}^{n}\sigma_i^2=\sum_{j=1}^{n}g_j^2+\sum_{i=1}^{n}\sigma_i^2\qedhere
+	\end{align*}
+\end{proof}
+\begin{definition}
+	称$h_i^2$为变量$\mathbf{X}_i$的\gls{CommonVariance}，它反映了公共因子对$\mathbf{X}_i$的方差贡献度。称$\sigma_i^2$为$\mathbf{X}_i$的\gls{SpecificVariance}，它反映了特殊因子$\varepsilon_i$对$\mathbf{X}_i$的方差贡献度。$g_j^2$可视为公共因子$f_j$对$\seq{\mathbf{X}}{m}$的总方差贡献度。
+\end{definition}
+
+\subsection{参数估计方法}
+\subsubsection{主成分法}
+\begin{method}
+	设观测变量$\mathbf{X}$的协方差矩阵$\Sigma$，它的特征值从大到小依次为$\seq{\lambda}{m}$，对应的单位正交特征向量分别为$\seq{l}{m}$。于是$\Sigma$有分解式：
+	\begin{equation*}
+		\Sigma=
+		\begin{pmatrix}
+			l_1 & l_2 & \cdots &l_m
+		\end{pmatrix}
+		\begin{pmatrix}
+			\lambda_1 & 0 & \cdots & 0 \\
+			0 & \lambda_2 & \cdots & 0 \\
+			\vdots & \vdots & \ddots & \vdots \\
+			0 & 0 & \cdots & \lambda_m
+		\end{pmatrix}
+		\begin{pmatrix}
+			l_1^T \\
+			l_2^T \\
+			\vdots \\
+			l_m^T
+		\end{pmatrix}
+		=\sum_{i=1}^{m}\lambda_il_il_i^T
+	\end{equation*}
+	由\cref{prop:CovMat}(2)和\cref{theo:PositiveSemidefinite}(3)的第五条可知$\lambda_m\geqslant0$。当最后$m-n$个特征值较小时，$\Sigma$有如下近似：
+	\begin{equation*}
+		\Sigma=\sum_{i=1}^{m}\lambda_il_il_i^T\approx\sum_{i=1}^{n}\lambda_il_il_i^T+\hat{D}=\hat{A}\hat{A}^T+\hat{D}
+	\end{equation*}
+	其中：
+	\begin{equation*}
+		\hat{A}=
+		\begin{pmatrix}
+			\sqrt{\lambda_1}l_1 & \cdots & \sqrt{\lambda_n}l_n
+		\end{pmatrix},\;
+		\hat{D}=\operatorname{diag}(\Sigma-\hat{A}\hat{A}^T)
+	\end{equation*}
+	与PCA一样，一般通过使$\left(\sum\limits_{i=1}^{n}\lambda_i\right)\Big/\left(\sum\limits_{i=1}^{m}\lambda_i\right)$大于一定比例来选择$n$的具体值。
+\end{method}
+\subsubsection{主因子法}
+\begin{method}
+	令$AA^T=\Sigma-D$。取$\seq{\hat{\sigma}^2}{m}$为特殊方差的合理初始估计（(1)全零，(2)取$\max\limits_{j\ne i}\sigma_{ij}$），则有：
+	\begin{equation*}
+		\widehat{AA^T}=
+		\begin{pmatrix}
+			\sigma_{11}-\hat{\sigma}_1^2 & \sigma_{12} & \cdots & \sigma_{1m} \\
+			\sigma_{21} & \sigma_{22}-\hat{\sigma}_2^2 & \cdots & \sigma_{2m} \\
+			\vdots & \vdots & \ddots & \vdots \\
+			\sigma_{m1} & \sigma_{m2} & \cdots & \sigma_{mm}-\hat{\sigma}_m^2
+		\end{pmatrix}
+	\end{equation*}
+	取$\widehat{AA^T}$前$n$个大于$0$的特征值，从大到小依次为$\seq{\hat{\lambda}}{n}$，对应的单位正交特征向量为$\seq{\hat{l}}{n}$，则有近似的：
+	\begin{equation*}
+		\hat{A}=
+		\begin{pmatrix}
+			\sqrt{\hat{\lambda}_1}\hat{l}_1 & \cdots & \sqrt{\hat{\lambda}_n}\hat{l}_n
+		\end{pmatrix}
+	\end{equation*}
+	令$\hat{\sigma}_i^2=\sigma_{ii}-\hat{h}_i^2$，继续上面的迭代过程以得到稳定的近似解。
+\end{method}
+\begin{algorithm}
+	\caption{主因子法求解因子分析}
+	\begin{algorithmic}[1]
+		\State \textbf{Input:} 协方差矩阵 $\Sigma$，初始特殊方差估计 $\hat{\sigma}^2_1, \ldots, \hat{\sigma}^2_m$，目标因子数 $n$
+		\State \textbf{Output:} 因子载荷矩阵估计 $\hat{A}$，特殊方差估计 $\hat{\sigma}_i^2$
+		
+		\State 初始化 $\hat{\sigma}_i^2$ 为合理值
+		\Repeat
+		\State 构造矩阵 $\widehat{AA^T} = \Sigma - \operatorname{diag}(\hat{\sigma}_1^2, \ldots, \hat{\sigma}_m^2)$
+		\State 对 $\widehat{AA^T}$ 做特征值分解，得到部分特征值 $\hat{\lambda}_1 \geqslant \cdots \geqslant \hat{\lambda}_n$，及对应单位正交特征向量 $\hat{l}_1, \ldots, \hat{l}_n$
+		\State 构造因子载荷矩阵估计：
+		$
+		\hat{A}=(\hat{a}_{ij}) = \begin{pmatrix}
+			\sqrt{\hat{\lambda}_1} \hat{l}_1 & \cdots & \sqrt{\hat{\lambda}_n} \hat{l}_n
+		\end{pmatrix}
+		$
+		\State 令 $\hat{h}_i^2 = \sum\limits_{j=1}^n \hat{a}_{ij}^2$，更新 $\hat{\sigma}_i^2 = \sigma_{ii} - \hat{h}_i^2,\;i=1,2,\dots,m$
+		\Until{特殊方差估计 $\hat{\sigma}_i^2$ 收敛或达到最大迭代次数}
+	\end{algorithmic}
+\end{algorithm}
+\subsubsection{正态分布假设下的极大似然估计法}
+\begin{derivation}
+	若假设$F\sim N_n(\mathbf{0},I_n),\;\varepsilon\sim N_m(\mathbf{0},D)$，因为$F$和$\varepsilon$不相关，由\cref{theo:IndependentCorrelationNormal}可知$F$和$\varepsilon$独立。由\cref{theo:MatNormalLinearTransform}和\cref{theo:MultiNormalAdditivity}可得$\mathbf{X}\sim N_m(\boldsymbol{\mu},AA^T+D)$。对$\mathbf{X}$进行简单抽样获得$s$个样本，由\cref{theo:MultiNormalAdditivity}和\cref{theo:MultiNormalLinearTransform}可得这$s$个样本的均值$\bar{\mathbf{X}}\sim N_n\left(\boldsymbol{\mu},\dfrac{1}{s}(AA^T+D)\right)$。若样本均值为$\bar{x}$，则似然函数为：
+	\begin{equation*}
+		L(A,D)=(2\pi)^{-\frac{m}{2}}|\det[\frac{1}{s}(AA^T+D)]|^{-\frac{1}{2}}\exp\left\{-\frac{1}{2}(\bar{x}-\boldsymbol{\mu})^T\left[\frac{1}{s}(AA^T+D)\right]^{-1}(\bar{x}-\boldsymbol{\mu})\right\}
+	\end{equation*}
+	对数似然函数省去常数项即为：
+	\begin{align*}
+		\ln L(A,D)&=-\frac{1}{2}\ln\left\{\left|\det\left[\frac{1}{s}(AA^T+D)\right]\right|\right\}-\frac{1}{2}(\bar{x}-\boldsymbol{\mu})^T\left[\frac{1}{s}(AA^T+D)\right]^{-1}(\bar{x}-\boldsymbol{\mu}) \\
+		&=-\frac{1}{2}\ln\left\{\frac{1}{s^m}\left|\det(AA^T+D)\right|\right\}-\frac{s}{2}(\bar{x}-\boldsymbol{\mu})^T(AA^T+D)^{-1}(\bar{x}-\boldsymbol{\mu})
+	\end{align*}
+\end{derivation}
+
+\subsection{因子旋转}
+为了提高因子的可解释性，我们希望每个因子对观测变量的影响是集中且明显的，即一个因子主要对少数几个变量有显著影响，对其余变量几乎没有作用。这种结构反映在因子载荷矩阵$A$上即为$A$每一列的元素$a_{ij},\;i=1,2,\dots,m$不是均匀地分布在中间水平，而是趋于两极分化：其绝对值要么接近于$0$，要么较大。这样可以使得每个因子更容易被识别和解释——因为它只与一小组变量高度相关。这种结构等价于希望载荷矩阵$A$的每一列具有稀疏性，从而便于赋予因子明确的语义标签。
+\begin{derivation}
+	由\cref{prop:FactorAnalysis}(3)可知在初步求得因子载荷矩阵$A$后，可以使用一个正交矩阵右乘$A$，此时仍能得到一个因子模型。使用正交矩阵来右乘$A$相当于是对因子$F$进行旋转变换，我们可以通过不断旋转$F$来得到更加稀疏的因子载荷矩阵，从而提高因子的可解释性。\par
+	如何旋转？怎么衡量旋转后因子载荷矩阵的优良性？\par
+	令：
+	\begin{equation*}
+		d_{ij}^2=\frac{a_{ij}^2}{h_i^2},\quad i=1,2,\dots,m,\;j=1,2,\dots,n
+	\end{equation*}
+	$d_{ij}^2$衡量了因子$j$对观测变量$\mathbf{X}_i$的影响，且消除了$a_{ij}$的正负号带来的差异和各观测变量在因子载荷大小上的不同带来的差异。定义第$j$列$p$个数据$d_{ij}^2,\;i=1,2,\dots,m$的方差为：
+	\begin{align*}
+		V_j&=\frac{1}{m}\sum_{i=1}^{m}(d_{ij}^2-\bar{d}_j)^2=\frac{1}{m}\sum_{i=1}^{m}\left(d_{ij}^2-\frac{1}{m}\sum_{i=1}^{m}d_{ij}^2\right)^2 \\
+		&=\frac{1}{m}\left[\sum_{i=1}^{m}d_{ij}^4-2d_{ij}^2\frac{1}{m}\sum_{i=1}^{m}d_{ij}^2+\frac{1}{m^2}\left(\sum_{i=1}^{m}d_{ij}^2\right)^2\right] \\
+		&=\frac{1}{m}\left[\sum_{i=1}^{m}d_{ij}^4-d_{ij}^2\frac{2}{m}\sum_{i=1}^{m}d_{ij}^2+\frac{1}{m^2}\left(\sum_{i=1}^{m}d_{ij}^2\right)^2\right] \\
+		&=\frac{1}{m}\left[\sum_{i=1}^{m}d_{ij}^4-m\frac{1}{m^2}\left(\sum_{i=1}^{m}d_{ij}^2\right)^2\right] \\
+		&=\frac{1}{m^2}\left[m\sum_{i=1}^{m}d_{ij}^4-\frac{1}{m}\left(\sum_{i=1}^{m}d_{ij}^2\right)^2\right] \\
+		&=\frac{1}{m^2}\left[m\sum_{i=1}^{m}\frac{a_{ij}^4}{h_i^4}-\frac{1}{m}\left(\sum_{i=1}^{m}\frac{a_{ij}^2}{h_i^2}\right)^2\right]
+	\end{align*}
+	若$V_j$越大，则第$j$个因子对观测变量的影响越集中。定义因子载荷矩阵$A$的方差为：
+	\begin{equation*}
+		V=\sum_{j=1}^{n}V_j=\frac{1}{m^2}\left\{\sum_{j=1}^{n}\left[m\sum_{i=1}^{m}\frac{a_{ij}^4}{h_i^4}-\frac{1}{m}\left(\sum_{i=1}^{m}\frac{a_{ij}^2}{h_i^2}\right)^2\right]\right\}
+	\end{equation*}
+	若$V$越大，则表明因子对观测变量的影响越集中。\par
+	综上，我们只需使得旋转后得到的因子载荷矩阵$A$的方差$V$达到最大即可。
+\end{derivation}
+
+\subsection{模型检验}
+由上面的讨论可以看出，潜在因子的数目是一个超参数，也是一个非常重要的参数，我们该如何选择呢？有没有什么办法能够确定这一超参数的值？\par
+\begin{derivation}
+	在正态性假设下（仍需假设$\mathbf{X}$是$n$维正态随机向量），我们可以对求解后的因子分析模型进行似然比检验。\par
+	设样本数为$p$，分别为$\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_p}$，都独立同分布于$\operatorname{N}_m(\boldsymbol{\mu},\Sigma)$。构建似然比检验假设：
+	\begin{equation*}
+		H_0:\Sigma=AA^T+D,\quad H_1:\Sigma\text{为其它任一正定矩阵}
+	\end{equation*}\par
+	由\cref{def:MultiNormalPDF2}可得此时备择假设下的对数似然函数为：
+	\begin{align*}
+		L_1&=\sum_{i=1}^{p}\ln\left\{\frac{1}{(2\pi)^{\frac{m}{2}}(\det\Sigma)^{\frac{1}{2}}}e^{-\frac{1}{2}\operatorname{tr}[(\mathbf{X_i}-\boldsymbol{\mu})(\mathbf{X_i}-\boldsymbol{\mu})^T\Sigma^{-1}]}\right\} \\
+		&=\sum_{i=1}^{p}\left\{-\frac{m}{2}\ln(2\pi)-\frac{1}{2}\ln(\det\Sigma)-\frac{1}{2}\operatorname{tr}[(\mathbf{X_i}-\boldsymbol{\mu})(\mathbf{X_i}-\boldsymbol{\mu})^T\Sigma^{-1}]\right\} \\
+		&=-\frac{p}{2}\left\{m\ln(2\pi)+\ln(\det\Sigma)+\frac{1}{p}\sum_{i=1}^{p}\operatorname{tr}[(\mathbf{X_i}-\boldsymbol{\mu})(\mathbf{X_i}-\boldsymbol{\mu})^T\Sigma^{-1}]\right\}
+	\end{align*}
+	上式可以化为\footnote{样本因子分析时需要注意使用协方差矩阵的无偏估计。}：
+	\begin{equation*}
+		L_1(\Sigma)=-\frac{p}{2}\left[m\ln(2\pi)+\ln(\det\Sigma)+\operatorname{tr}(S\Sigma^{-1})\right]
+	\end{equation*}
+	其中$S$为样本协方差阵。这个似然函数在$\Sigma=S$时取最大值\info{证明}，于是：
+	\begin{equation*}
+		L_1=-\frac{p}{2}[m\ln(2\pi)+\ln(\det S)+p]
+	\end{equation*}\par
+	同理，此时原假设下的似然函数值为：
+	\begin{equation*}
+		L_2=-\frac{p}{2}\left[m\ln(2\pi)+\ln(\det\hat{\Sigma})+\operatorname{tr}(S\hat{\Sigma})\right]
+	\end{equation*}
+	其中$\hat{\Sigma}=\hat{A}\hat{A}^T-\hat{D}$。\par
+	由似然比检验原理\info{似然比检验}可知：
+	\begin{equation*}
+	-2[L_2(\Sigma)-L_1(\Sigma)]\sim\chi^2_{df}
+	\end{equation*}
+	当
+	\begin{equation*}
+		p[\ln(\det\hat{\Sigma})+\operatorname{tr}(S\hat{\Sigma})-\ln(\det S)-p]>\chi^2_{0.95}(df)
+	\end{equation*}
+	时应拒绝原假设，即$n$个因子不足以解释数据，应增大因子个数。其中$\chi^2_{0.95}(df)$为分布的$0.95$分位数。\info{自由度的计算}
+\end{derivation}
+
+\subsection{因子得分}
+在拟合得到因子载荷矩阵后，我们可以反过来求解各样本因子的取值，这样一来就可以根据因子值去进行进一步的分析。例如在开头的例子里，我们可以得到每个学生语言能力与理科能力的值，进而可以进行分类或选择。因子得分有两种计算方式。
+\subsubsection{加权最小二乘法}
+\begin{derivation}
+	考虑加权最小二乘函数：
+	\begin{equation*}
+		\varphi(F)=(\mathbf{X}-\boldsymbol{\mu}-AF)^TD^{-1}(\mathbf{X}-\boldsymbol{\mu}-AF)
+	\end{equation*}
+	求：
+	\begin{equation*}
+		\hat{F}=\arg\min\varphi(F)
+	\end{equation*}
+	由极值的必要条件得到：
+	\begin{gather*}
+		\frac{\partial\varphi(F)}{\partial F}=-2A^TD^{-1}(\mathbf{X}-\boldsymbol{\mu}-AF)=0 \\
+		A^TD^{-1}(\mathbf{X}-\boldsymbol{\mu})=A^TD^{-1}AF \\
+		F=(A^TD^{-1}A)^{-1}A^TD^{-1}(\mathbf{X}-\boldsymbol{\mu})
+	\end{gather*}
+	需要注意$A^TD^{-1}A$的可逆性。\par
+	若认为$\mathbf{X}\sim\operatorname{N}_m(\boldsymbol{\mu}+AF,D)$，则上述解得的$F$也是极大似然估计的结果。
+\end{derivation}
+\begin{definition}
+	称加权最小二乘法得到的因子得分为Bartlett因子得分。
+\end{definition}
+从求解过程可以看出，该方法实际上是对特殊方差更大的变量施以更宽容的残差值。
+
+\subsubsection{回归法}
+\begin{derivation}
+	设：
+	\begin{equation*}
+		f_j=\sum_{i=1}^{m}b_{ji}(\mathbf{X}_i-\boldsymbol{\mu}_i)+\varepsilon_j,\;\operatorname{Cov}(\mathbf{X}_i,\varepsilon_j)=0,\quad j=1,2,\dots,n
+	\end{equation*}
+	由\cref{prop:FactorAnalysis}(4)和\cref{prop:CovMat}(3)(5)可知：
+	\begin{equation*}
+		a_{ij}=\operatorname{Cov}(\mathbf{X}_i,f_j)=\operatorname{Cov}\left[\mathbf{X}_i,\sum_{k=1}^{m}b_{jk}(\mathbf{X}_k-\boldsymbol{\mu}_k)+\varepsilon_j\right]=\sum_{k=1}^{m}\sigma_{ik}b_{jk}
+	\end{equation*}
+	令$B=(b_{ij})$，则有：
+	\begin{equation*}
+		A=\Sigma B^T
+	\end{equation*}
+	于是$B=A^T\Sigma^{-1}$，需要注意$\Sigma$的可逆性。回归法的因子得分即为：
+	\begin{equation*}
+		F=A^T\Sigma^{-1}(\mathbf{X}-\boldsymbol{\mu})	
+	\end{equation*}
+\end{derivation}

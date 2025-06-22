@@ -1,0 +1,76 @@
+\section{本科时间序列}
+
+\subsection{预处理}
+\subsection{title}
+\begin{gather*}
+	\bar{x}=\frac{\sum\limits_{t=1}^{n}x_t}{n} \\
+	\hat{\gamma}(k)=\frac{\sum_{t=1}^{n-k}(x_t-\bar{x})(x_{t+k}-\bar{x})}{n-k},\;
+	\hat{\gamma}(0)=s^2 \\
+	\hat{\rho}_k=\frac{\hat{\gamma}(k)}{\hat{\gamma}(0)}
+\end{gather*}
+
+acf(x, lag=)
+虚线为自相关系数$2$倍标准差位置
+
+\subsubsection{平稳性检验}
+\begin{enumerate}
+	\item 时序图观察
+	\item 自相关系数图acf函数，应呈现出迅速衰减向$0$
+\end{enumerate}
+
+\subsubsection{白噪声检验}
+同均值同方差不相关
+\begin{theorem}\label{theo:Barlett}
+	如果一个时间序列是白噪声，得到一个观察期数为$n$的观察序列$\{x_t\}$，那么有：
+	\begin{equation*}
+		\hat{\rho}_k\sim\operatorname{N}\left(0,\frac{1}{n}\right),\;\forall\;k\ne0
+	\end{equation*}
+	近似成立。
+\end{theorem}
+
+\begin{derivation}
+	构建假设：
+	\begin{enumerate}
+		\item 原假设：延迟期数小于或等于$m$期的序列值之间不相关，即：
+		\begin{equation*}
+			H_0:\rho_1=\rho_2=\cdots=\rho_m=0
+		\end{equation*}
+		\item 备择假设：延迟期数小于或等于$m$期的序列值之间有相关性，即：
+		\begin{equation*}
+			\text{至少存在某个}\rho_k\ne0,\;k\leqslant m
+		\end{equation*}
+	\end{enumerate}
+	构建$Q$统计量：
+	\begin{equation*}
+		Q=n\sum_{k=1}^{m}\hat{\rho}_k^2
+	\end{equation*}
+	若原假设成立，则$\hat{\rho}_k^2$之间也彼此独立，于是：
+	\begin{equation*}
+		Q=\sum_{k=1}^{m}(\sqrt{n}\hat{\rho}_k)^2=n\sum_{k=1}^{m}\hat{\rho}_k^2\sim\chi^2_m
+	\end{equation*}
+	当原假设不成立时，$Q$统计量的值应该偏大，于是拒绝域取$\chi^2_m$分布的上$\alpha$分位点。\par
+	Box和Ljung为了弥补小样本情况时$Q$统计量效果较差的问题，推导出了LB统计量：
+	\begin{equation*}
+		LB=n(n+2)\sum_{k=1}^{m}\left(\frac{\hat{\rho}_k^2}{n-k}\right)\sim\chi^2_m
+	\end{equation*}\par
+	两种检验的代码为Box.test(x, type=, lag=)
+\end{derivation}
+
+\subsection{arima}
+\subsubsection{wold分解定理}
+任意一个平稳时间序列$\{X_t\}$都可以分解为两个不相关的平稳序列之和：
+\begin{gather*}
+	X_t=V_t+\xi_t,\quad\operatorname{Cov}(V_t,\xi_s)=0,\;\forall\;t\ne s \\ V_t=\sum_{j=0}^{+\infty}\varphi_jX_{t-j},\quad\xi_t=\sum_{j=0}^{+\infty}\theta_j\varepsilon_{t-j},\;\varepsilon_t\sim\operatorname{WN}(0,\sigma^2),\theta_0=1,\{\theta_t\}\in l^2
+\end{gather*}
+称$\{V_t\}$为确定性序列，$\{\xi_t\}$为随机平稳序列。\par
+若使用线性函数对$Y_t$进行预测的方差随着自变量个数的增大趋于$0$，称序列为确定性序列；若方差趋于$\operatorname{Var}(Y_t)$，称为纯随机序列；介于二者之间的是随机序列。
+\subsubsection{ar模型}
+白噪声、$\varepsilon_t$与$X_t$不相关，中心化序列，自回归系数多项式。\par
+齐次线性差分方程的解$\sum\limits_{i=1}^{p}c_i\lambda_i^t$。非齐次特解用常数特解。\par
+特征多项式的根都在单位元内，自回归系数多项式的根要在单位圆外。AR(2)平稳域为三角形(x从-2到2，y从-1到1)\par
+均值，方差（wold系数满足$\psi_0=1$，从1开始满足回归方程），协方差（满足回归方程），自相关（满足回归方程，指数衰减、拖尾性证明），偏自相关系数（用Yule-Walker方程构造线性方程组求解，求kk）
+\subsubsection{ma模型}
+移动平均系数多项式\par
+均值，方差，自协方差函数（），自相关系数\par
+可逆性（特征方程）\par
+逆函数公式
