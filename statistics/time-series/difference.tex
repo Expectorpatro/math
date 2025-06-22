@@ -1,0 +1,371 @@
+\section{线性差分方程理论}
+
+\subsection{差分与位移}
+\begin{definition}
+	设$f(x)$是定义在$\mathbb{R}^{}$上的函数，称$\Delta f(x)=f(x)-f(x-1)$为$f(x)$在$x$处的$1$阶\textbf{差分}，称$\Delta$为\textbf{差分算子}，对$n-1$阶差分后的函数再进行一次$1$阶差分运算称为$n$阶差分，记$\Delta^nf(x)$为$f(x)$的$n$阶差分，则：
+	\begin{equation*}
+		\Delta^nf(x)=\Delta^{n-1}f(x)-\Delta^{n-1}f(x-1)
+	\end{equation*}\par
+	将$\mathcal{B}f(x)=f(x-1)$称为$f(x)$在$x$处的$1$步\textbf{位移}，称$\mathcal{B}$为位移算子，对$n-1$步位移后的函数再进行一次$1$步位移运算称为$n$步位移，记$\mathcal{B}^nf(x)$为$f(x)$的$n$步位移，则：
+	\begin{equation*}
+		\mathcal{B}^nf(x)=f(x-n)
+	\end{equation*}
+\end{definition}
+\begin{property}
+	设$f(x),g(x)$为定义在$\mathbb{R}^{}$上的函数，$\alpha,\beta$是任意常数，$\mathcal{B}$为位移算子。差分算子$\Delta$和位移算子$\mathcal{B}$具有如下性质：
+	\begin{enumerate}
+		\item 差分算子是线性算子，即：
+		\begin{equation*}
+			\Delta[\alpha f(x)+\beta g(x)]=\alpha\Delta f(x)+\beta\Delta g(x)
+		\end{equation*}
+		\item $\Delta[f(x)g(x)]=\Delta f(x)g(x)+\Delta g(x)\mathcal{B}f(x)$；
+		\item $\Delta\left[\dfrac{f(x)}{g(x)}\right]=\dfrac{\Delta f(x)\mathcal{B}g(x)-\Delta g(x)\mathcal{B}f(x)}{g(x)\mathcal{B}g(x)}$；
+		\item $\mathcal{B}\alpha=\alpha$；
+		\item 位移算子是线性算子，即：
+		\begin{equation*}
+			\mathcal{B}[\alpha f(x)+\beta g(x)]=\alpha\mathcal{B}f(x)+\beta\mathcal{B}g(x)
+		\end{equation*}
+		\item 对于多项式$\varphi(x)=\sum\limits_{i=0}^{m}a_ix^i,\;\psi(x)=\sum\limits_{i=0}^{n}b_ix^i$的乘积$A(x)=\varphi(x)\psi(x)$，有：
+		\begin{equation*}
+			A(\mathcal{B})f(x)=\varphi(\mathcal{B})[\psi(\mathcal{B})f(x)]=\psi(\mathcal{B})[\varphi(\mathcal{B})f(x)]
+		\end{equation*}
+		\item 差分算子与位移算子具有如下关系：
+		\begin{gather*}
+			\Delta^n=(I-\mathcal{B})^n=\sum_{i=0}^{n}\binom{n}{i}(-1)^i\mathcal{B}^i \\
+			\mathcal{B}^n=(I-\Delta)^n=\sum_{i=0}^{n}\binom{n}{i}(-1)^i\Delta^i \\
+			\Delta\mathcal{B}=\mathcal{B}\Delta
+		\end{gather*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)(4)(5)(7)是显然的。\par
+	(2)注意到：
+	\begin{align*}
+		\Delta[f(x)g(x)]&=f(x)g(x)-f(x-1)g(x-1) \\
+		&=f(x)g(x)-f(x-1)g(x)+g(x)f(x-1)-g(x-1)f(x-1) \\
+		&=[f(x)-f(x-1)]g(x)+[g(x)-g(x-1)]f(x-1) \\
+		&=\Delta f(x)g(x)+\Delta g(x)\mathcal{B}f(x)
+	\end{align*}\par
+	(3)注意到：
+	\begin{align*}
+		\Delta\left[\frac{f(x)}{g(x)}\right]
+		&=\frac{f(x)}{g(x)}-\frac{f(x-1)}{g(x-1)}
+		=\frac{f(x)g(x-1)-f(x-1)g(x)}{g(x)g(x-1)} \\
+		&=\frac{f(x)g(x-1)-f(x-1)g(x-1)+f(x-1)g(x-1)-f(x-1)g(x)}{g(x)\mathcal{B}g(x)} \\
+		&=\frac{[f(x)-f(x-1)]g(x-1)-[g(x)-g(x-1)]f(x-1)}{g(x)\mathcal{B}g(x)} \\
+		&=\frac{\Delta f(x)\mathcal{B}g(x)-\Delta g(x)\mathcal{B}f(x)}{g(x)\mathcal{B}g(x)}
+	\end{align*}\par
+	(6)注意到：
+	\begin{equation*}
+		A(x)=\varphi(x)\psi(x)=\left(\sum_{i=0}^{m}a_ix^i\right)\left(\sum_{i=0}^{n}b_ix^i\right)=\sum_{i=0}^{m}\sum_{j=0}^{n}a_ib_j x^{i+j}
+	\end{equation*}
+	所以：
+	\begin{align*}
+		A(\mathcal{B})f(x)&=\sum_{i=0}^{m}\sum_{j=0}^{n}a_ib_j\mathcal{B}^{i+j}f(x)
+		=\sum_{i=0}^{m}\sum_{j=0}^{n}a_ib_j \mathcal{B}^i\mathcal{B}^j f(x) \\
+		&=\sum_{i=0}^{m}a_i\mathcal{B}^i\left[\sum_{j=0}^{n}b_j\mathcal{B}^j f(x)\right]
+		=\varphi(\mathcal{B})[\psi(\mathcal{B})f(x)]
+	\end{align*}
+	同理可证$A(\mathcal{B})f(x)=\psi(\mathcal{B})[\varphi(\mathcal{B})f(x)]$。
+\end{proof}
+
+
+\subsection{线性差分方程}
+\begin{definition}
+	称方程：
+	\begin{equation*}
+		x_m+a_1(m)x_{m-1}+a_2(m)x_{m-2}+\cdots+a_n(m)x_{m-n}=f(m)
+	\end{equation*}
+	为关于$\{x_m\}$的$n$阶线性差分方程，其中$f(x),a_1(x),a_2(x),\dots,a_n(x)$为定义在$\mathbb{Z}^{}$上的函数，且$a_n(x)\ne0$在$x\in\mathbb{Z}^{}$恒成立。当$f(x)=0$时，称上述方程为关于$\{x_m\}$的$n$阶齐次线性差分方程。
+\end{definition}
+\begin{note}
+	这里的线性指的是方程关于$\{x_m\}$是线性的。$x_m-\sin(x_{m-1})$不是一个线性方程。
+\end{note}
+\begin{derivation}
+	定义算子：
+	\begin{equation*}
+		L(x_m)=I+a_1(m)\mathcal{B}x_m+a_2(m)\mathcal{B}^2x_m+\cdots+a_n(m)\mathcal{B}^nx_m
+	\end{equation*}
+	则线性差分方程可表示为：
+	\begin{equation*}
+		L(x_m)=f(m)
+	\end{equation*}
+\end{derivation}
+\begin{theorem}\label{theo:LinearDifferenceEqExistenceUniqueness}
+	初值问题：
+	\begin{equation*}
+		L(x_m)=f(m),\;x_0=y_0,\;x_1=y_1,\;\cdots,\;x_{n-1}=y_{n-1}
+	\end{equation*}
+	有唯一的解。
+\end{theorem}
+\begin{proof}
+	注意到关系：
+	\begin{gather*}
+		x_m+a_1(m)x_{m-1}+a_2(m)x_{m-2}+\cdots+a_n(m)x_{m-n}=f(m),\;\forall\;m\geqslant n \\
+		x_{m}=-\frac{x_{m+n}}{a_n(m+n)}-\frac{a_1(m)x_{m+n-1}}{a_n(m+n)}-\cdots-\frac{a_{n-1}x_{m+1}}{a_n(m+n)}+\frac{f(m)}{a_n(m+n)},\;\forall\;m<0
+	\end{gather*}
+	于是当如上$n$个初始值给定时，$\{x_m\}$的所有值都可以由上述递推关系唯一得到。
+\end{proof}
+\begin{definition}
+	若存在不全为$0$的常数$\seq{c}{k}$使得序列$\{x_m^{(1)}\},\{x_m^{(2)}\},\dots,\{x_m^{(k)}\}$满足：
+	\begin{equation*}
+		c_1x_m^{(1)}+c_2x_m^{(2)}+\cdots+c_kx_m^{(k)}=0,\;\forall\;m\in\mathbb{Z}^{}
+	\end{equation*}
+	则称这些序列\textbf{线性相关}，否则就称这些序列\textbf{线性无关}。
+\end{definition}
+\begin{definition}
+	称矩阵：
+	\begin{equation*}
+		C(m)=
+		\begin{pmatrix}
+			x_m^{(1)} & x_m^{(2)} & \cdots & x_m^{(k)} \\
+			\mathcal{B}x_m^{(1)} & \mathcal{B}x_m^{(2)} & \cdots & \mathcal{B}x_m^{(k)} \\
+			\vdots & \vdots & \ddots & \vdots \\
+			\mathcal{B}^{k-1}x_m^{(1)} & \mathcal{B}^{k-1}x_m^{(2)} & \cdots & \mathcal{B}^{k-1}x_m^{(k)} \\
+		\end{pmatrix}
+	\end{equation*}
+	为序列$\{x_m^{(1)}\},\{x_m^{(2)}\},\dots,\{x_m^{(k)}\}$的\textbf{Casorati矩阵}，将$\det C(m)$称为其\textbf{Casorati行列式}。
+\end{definition}
+\begin{theorem}\label{theo:CasoratiEq0LinearDependent}
+	若序列$\{x_m^{(1)}\},\{x_m^{(2)}\},\dots,\{x_m^{(k)}\}$线性相关，则其Casorati行列式$\det C(m)$在$m\in\mathbb{Z}^{}$上恒为$0$。
+\end{theorem}
+\begin{proof}
+	因为$\{x_m^{(1)}\},\{x_m^{(2)}\},\dots,\{x_m^{(k)}\}$线性相关，所以存在不全为$0$的常数$\seq{c}{k}$使得
+	\begin{equation*}
+		c_1x_m^{(1)}+c_2x_m^{(2)}+\cdots+c_kx_m^{(k)}=0,\;\forall\;m\in\mathbb{Z}^{}
+	\end{equation*}
+	于是以$C(m)$为系数矩阵的线性方程组有非零解。由\info{链接线性方程组理论}可知$\det C(m)=0$在$m\in\mathbb{Z}^{}$上恒成立。
+\end{proof}
+\begin{corollary}\label{cor:CasoratiNe0LinearIndependent}
+	若存在$m\in\mathbb{Z}^{}$使得$\det C(m)\ne0$，则序列$\{x_m^{(1)}\},\{x_m^{(2)}\},\dots,\{x_m^{(k)}\}$线性无关。
+\end{corollary}
+\subsubsection{齐次线性差分方程解的一般理论}
+\begin{theorem}\label{theo:LinearDifferenceLinearCombination}
+	如果$\{x_m^{(1)}\},\{x_m^{(2)}\},\dots,\{x_m^{(k)}\}$是$n$阶常系数齐次线性差分方程$L(x_m)=0$的$k$个解，则它们的线性组合：
+	\begin{equation*}
+		\{x_m=c_1x_m^{(1)}+c_2x_m^{(2)}+\cdots+c_kx_m^{(k)}\}
+	\end{equation*}
+	也是解，其中$c_i$为任意常数，$i=1,2,\dots,k$。
+\end{theorem}
+\begin{proof}
+	因为$x_m^{(j)},\;j=1,2,\dots,k$是$L(x_m)=0$的解，所以：
+	\begin{equation*}
+		x_m^{(j)}+a_{1}x_{m-1}^{(j)}+\cdots+a_nx_{m-n}^{(j)}=0
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\sum_{j=1}^{k}x_m^{(j)}+a_1\sum_{j=1}^{k}x_{m-1}^{(j)}+\cdots+a_n\sum_{j=1}^{k}x_{m-n}^{j}=0
+	\end{equation*}
+	即：
+	\begin{equation*}
+		x_m+a_{1}x_{m-1}+\cdots+a_nx_{m-n}=0\qedhere
+	\end{equation*}
+\end{proof}
+\begin{theorem}
+	$n$阶齐次线性差分方程$L(x_m)=0$一定存在$n$个线性无关的解。
+\end{theorem}
+\begin{proof}
+	由\cref{theo:LinearDifferenceEqExistenceUniqueness}可知$L(x_m)=0$满足初值条件：
+	\begin{equation*}
+		\begin{cases}
+			x_0=1,\;x_1=0,\;\dots,\;x_{n-1}=0 \\
+			x_0=0,\;x_1=1,\;\dots,\;x_{n-1}=0 \\
+			\cdots\cdots\cdots \\
+			x_0=0,\;x_1=0,\;\dots,\;x_{n-1}=1 \\
+		\end{cases}
+	\end{equation*}
+	的解一定存在，由\cref{cor:CasoratiNe0LinearIndependent}可知这$n$个解线性无关。
+\end{proof}
+\begin{theorem}\label{theo:GeneralSolutionHomogeneousLinearDifferenceEquation}
+	设$\{x_m^{(1)}\},\{x_m^{(2)}\},\dots,\{x_m^{(n)}\}$是$n$阶齐次线性差分方程$L(x_m)=0$的$n$个线性无关的解，则方程的通解可以表示为：
+	\begin{equation*}
+		x_m=c_1x_m^{(1)}+c_2x_m^{(2)}+\cdots+c_nx_m^{(n)},\;\forall\;m\in\mathbb{Z}^{}
+	\end{equation*}
+	其中$\seq{c}{n}$是任意常数。
+\end{theorem}
+\begin{proof}
+	因为$\{x_m^{(1)}\},\{x_m^{(2)}\},\dots,\{x_m^{(n)}\}$线性无关，由\cref{theo:CasoratiEq0LinearDependent}可知存在$m\in\mathbb{Z}^{}$使得Casorati行列式$\det C(m)\ne0$，于是此时的Casorati矩阵$C(n)$可逆。任取$L(x_m)=0$的一个解$\{y_m\}$，则$y_m,\mathcal{B}y_m,\dots,\mathcal{B}^{n-1}y_m$是确定的数，于是关于$(\seq{c}{n})^T$的线性方程组：
+	\begin{equation*}
+		\begin{pmatrix}
+			x_m^{(1)} & x_m^{(2)} & \cdots & x_m^{(n)} \\
+			\mathcal{B}x_m^{(1)} & \mathcal{B}x_m^{(2)} & \cdots & \mathcal{B}x_m^{(n)} \\
+			\vdots & \vdots & \ddots & \vdots \\
+			\mathcal{B}^{n-1}x_m^{(1)} & \mathcal{B}^{n-1}x_m^{(2)} & \cdots & \mathcal{B}^{n-1}x_m^{(n)} \\
+		\end{pmatrix}
+		\begin{pmatrix}
+			c_1 \\
+			c_2 \\
+			\cdots \\
+			c_n
+		\end{pmatrix}=
+		\begin{pmatrix}
+			y_m \\
+			\mathcal{B}y_m \\
+			\vdots \\
+			\mathcal{B}^{n-1}y_m
+		\end{pmatrix}
+	\end{equation*}
+	存在唯一解$(\seq{c^*}{n})^T$，即在这$n$个位置处$\{y_m\}$可以由$\{x_m^{(1)}\},\{x_m^{(2)}\},\dots,\{x_m^{(n)}\}$线性表出。令：
+	\begin{equation*}
+		z_m=c_1^*x_m^{(1)}+c_2^*x_m^{(2)}+\cdots+c_n^*x_m^{(n)},\;\forall\;m\in\mathbb{Z}^{}
+	\end{equation*}
+	则$\{z_m\}$在这$n$个位置处的值等于$\{y_m\}$对应位置上的值，且$\{z_m\}$可以由$\{x_m^{(1)}\},\{x_m^{(2)}\},\dots,\{x_m^{(n)}\}$线性表出。而由\cref{theo:LinearDifferenceEqExistenceUniqueness}可知$L(x_m)=0$的解由任意的$n$个初始值唯一确定，于是$\{y_m\}$就是$\{z_m\}$，所以它也可以由$\{x_m^{(1)}\},\{x_m^{(2)}\},\dots,\{x_m^{(n)}\}$线性表出。由$\{y_m\}$的任意性，结论成立。
+\end{proof}
+\begin{corollary}\label{cor:LinearSpaceSolutionHomogeneousLinearDifferenceEquation}
+	$n$阶齐次线性差分方程的所有解构成一个$n$维线性空间。
+\end{corollary}
+\begin{definition}
+	称$n$阶齐次线性差分方程的任意$n$个线性无关的解为其\textbf{基本解组}。
+\end{definition}
+\subsubsection{非齐次线性差分方程解的一般理论}
+\begin{theorem}\label{theo:DifStillSolutionHomogeneousLinearDifferenceEquation}
+	$n$阶非齐次线性差分方程$L(x_m)=f(m)$任意两个解的差是$n$阶齐次线性差分方程$L(x_m)=0$的解。
+\end{theorem}
+\begin{theorem}\label{theo:AddStillSolutionNonhomogeneousLinearDifferenceEquation}
+	$n$阶非齐次线性差分方程$L(x_m)=f(m)$任意一个解与$n$阶齐次线性差分方程$L(x_m)=0$任意一个解的和还是$L(x_m)=f(m)$的解。
+\end{theorem}
+\begin{theorem}\label{theo:GeneralSolutionNonhomogeneousLinearDifferenceEquation}
+	设$\{x_m^{(1)}\},\{x_m^{(2)}\},\dots,\{x_m^{(n)}\}$是$n$阶齐次线性差分方程$L(x_m)=0$的基本解组，$\{y_m\}$是$n$阶非齐次线性差分方程$L(x_m)=f(m)$的一个解，则$L(x_m)=f(m)$的通解可表示为：
+	\begin{equation*}
+		x_m=y_m+c_1x_m^{(1)}+c_2x_m^{(2)}+\cdots+c_nx_m^{(n)},\;\forall\;m\in\mathbb{Z}^{}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	对任意的$\{y_m\}$，由\cref{theo:DifStillSolutionHomogeneousLinearDifferenceEquation}和\cref{theo:GeneralSolutionHomogeneousLinearDifferenceEquation}可知$L(x_m)=f(m)$的任意一个解可以表示为上述形式。由$\{y_m\}$的任意性可得出结论。
+\end{proof}
+
+\subsection{$n$阶常系数线性差分方程}
+\begin{definition}
+	若$n$阶线性差分方程：
+	\begin{equation*}
+		x_m+a_1(m)x_{m-1}+a_2(m)x_{m-2}+\cdots+a_n(m)x_{m-n}=f(m)
+	\end{equation*}
+	中$a_1(x),a_2(x),\dots,a_n(x)$都是常数，则称上述方程为关于$\{x_m\}$的$n$阶常系数线性差分方程。
+\end{definition}
+\subsubsection{常系数齐次线性差分方程解的一般理论}
+\begin{derivation}
+	取一个一阶常系数齐次线性差分方程$x_m+a_1x_{m-1}=0$，可以看出该方程的通解为$x_m=C(-a_1)^m,\;\forall\;m\in\mathbb{Z}^{}$，其中$C$为任意常数。受此启发，我们对于$n$阶常系数齐次线性差分方程寻找指数形式的解。
+\end{derivation}
+\begin{definition}
+	称：
+	\begin{equation*}
+		\lambda^n+a_1\lambda^{n-1}+a_2\lambda^{n-2}+\cdots+a_{n-1}\lambda+a_n=0
+	\end{equation*}
+	为$n$阶常系数齐次线性差分方程：
+	\begin{equation*}
+		x_m+a_1x_{m-1}+a_2x_{m-2}+\cdots+a_nx_{m-n}=0
+	\end{equation*}
+	的\textbf{特征方程}，等号左边关于$\lambda$的多项式被称为\textbf{特征多项式}，记为$l(\lambda)$。
+\end{definition}
+\begin{theorem}\label{theo:GeneralSolutionHomogeneousLinearDifferenceEqConstantCoefficients}
+	设$\seq{\lambda}{s}$是$n$阶常系数齐次线性差分方程$L(x_m)=0$的特征方程$l(\lambda)=0$的解，其重数分别为$\seq{r}{s}$，则$L(x_m)=0$的通解可以表示为：
+	\begin{equation*}
+		x_m=\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}c_{ij}m^{j}\lambda_i^m,\;\forall\;m\in\mathbb{Z}^{}
+	\end{equation*}
+	其中$c_{ij},\;i=1,2,\dots,s,\;j=0,1,\dots,r_i-1$为常数。
+\end{theorem}
+\begin{proof}
+	\textbf{情况一：}此时特征方程有$n$个互不相同的实根，分别设为$\seq{\lambda}{n}$。将$\{\lambda_i^m\},\;i=1,2,\dots,n$代入$L(x_m)=0$中可以发现：
+	\begin{align*}
+		&\lambda_i^m+a_1\lambda_i^{m-1}+a_2\lambda_i^{m-2}+\cdots+a_n\lambda_i^{m-n} \\
+		=&\lambda_i^{m-n}(\lambda_i^n+a_1\lambda_i^{n-1}+a_2\lambda_i^{n-2}+\cdots+a_n)=0
+	\end{align*}
+	所以它们就是$L(x_m)=0$的解。由$n$阶线性差分方程的定义，$a_n\ne0$，所以$\lambda_i\ne0$。于是有：
+	\begin{equation*}
+		\det C(0)=
+		\begin{vmatrix}
+			1 & 1 & \cdots & 1 \\
+			\lambda_1^{-1} & \lambda_2^{-1} & \cdots & \lambda_n^{-1} \\
+			\lambda_1^{-2} & \lambda_2^{-2} & \cdots & \lambda_n^{-2} \\
+			\vdots & \vdots & \ddots & \vdots \\
+			\lambda_1^{-(n-1)} & \lambda_2^{-(n-1)} & \cdots & \lambda_n^{-(n-1)} \\
+		\end{vmatrix}
+		=\prod_{1\leqslant i<j\leqslant n}(\lambda_j-\lambda_i)\ne0
+	\end{equation*}
+	由\cref{cor:CasoratiNe0LinearIndependent}可知这$n$个解线性无关，所以构成一个基本解组。\par
+	\textbf{情况二：}此时特征方程存在重实根。假设根$\lambda_i$的重数为$r_i$，代入可知$\{\lambda_i^m\}$是$L(x_m)=0$的解。下证明对$1\leqslant b\leqslant r_i-1$且$b\in\mathbb{N}^+$，$\{m^b\lambda_i^m\}$都是$L(x_m)=0$的解。设$a_0=1$，则：
+	\begin{align*}
+		&m^{b}\lambda_i^m+a_1(m-1)^{b}\lambda_i^{m-1}+\cdots+a_{n}(m-n)^{b}\lambda_i^{m-n} \\
+		=&\sum_{k=0}^{n}a_k(m-k)^b\lambda_i^{m-k} =\sum_{k=0}^{n}a_k\sum_{j=0}^{b}\binom{b}{j}m^j(-k)^{b-j}\lambda_i^{m-k} \\
+		=&\sum_{k=0}^{n}\sum_{j=0}^{b}a_k\binom{b}{j}m^j(-k)^{b-j}\lambda_i^{m-k}
+		=\sum_{j=0}^{b}\sum_{k=0}^{n}a_k\binom{b}{j}m^j(-k)^{b-j}\lambda_i^{m-k} \\
+		=&\sum_{j=0}^{b}\binom{b}{j}m^j\sum_{k=0}^{n}a_k(-k)^{b-j}\lambda_i^{m-k}=\lambda_i^m\sum_{j=0}^{b}\binom{b}{j}m^j\sum_{k=0}^{n}a_k(-k)^{b-j}\lambda_i^{-k}
+	\end{align*}
+	取函数$f(\lambda_i)=\sum\limits_{k=0}^{n}a_k\lambda_i^{-k}$，则：
+	\begin{equation*}
+		\sum_{k=0}^{n}a_k(-k)^{b-j}\lambda_i^{-k}
+	\end{equation*}
+	可以表示为$f(\lambda_i),f'(\lambda_i),\dots,f^{(b-j)}(\lambda_i)$的线性组合。考虑特征多项式$l(\lambda_i)$：
+	\begin{equation*}
+		l(\lambda_i)=\lambda_i^n+a_1\lambda_i^{n-1}+a_2\lambda_i^{n-2}+\cdots+a_{n-1}\lambda_i+a_n=\sum_{k=0}^{n}a_k\lambda_i^{n-k}=\lambda_i^nf(\lambda_i)
+	\end{equation*}
+	于是有：
+	\begin{equation*}
+		f(\lambda_i)=\frac{l(\lambda_i)}{\lambda_i^n}
+	\end{equation*}
+	所以$f^{(b-j)}(\lambda_i)$可以由$l(\lambda_i),l'(\lambda_i),\dots,l^{(b-j)}(\lambda_i)$线性表出。于是：
+	\begin{align*}
+		&m^{b}\lambda_i^m+a_1(m-1)^{b}\lambda_i^{m-1}+\cdots+a_{n}(m-n)^{b}\lambda_i^{m-n} \\
+		=&\lambda_i^m\sum_{j=0}^{b}\binom{b}{j}m^j\sum_{k=0}^{n}a_k(-k)^{b-j}\lambda_i^{-k}=\lambda_i^m\sum_{j=0}^{b}\binom{b}{j}m^jg[l(\lambda_i),l'(\lambda_i),\dots,l^{(b-j)}(\lambda_i)]
+	\end{align*}
+	其中$g$是$l(\lambda_i),l'(\lambda_i),\dots,l^{(b-j)}(\lambda_i)$的线性函数。因为$\lambda_i$是特征方程的$r_i$重根，所以：
+	\begin{equation*}
+		l(\lambda)=(\lambda-\lambda_i)^{r_i}h(\lambda)=0
+	\end{equation*}
+	求导可知$l(\lambda_i)=l'(\lambda_i)=\cdots=l^{(b-j)}(\lambda_i)=0$，所以$g=0$，即：
+	\begin{equation*}
+		m^{b}\lambda_i^m+a_1(m-1)^{b}\lambda_i^{m-1}+\cdots+a_{n}(m-n)^{b}\lambda_i^{m-n}=0
+	\end{equation*}
+	所以$\{m^b\lambda_i^m\},\;b=0,1,2,\dots,r_i-1$都是$L(x_m)=0$的解。\par
+	若$\{m^b\lambda_i^m\},\;b=0,1,2,\dots,r_i-1$线性相关，则存在不全为$0$的$\seq{c}{r_i}$使得：
+	\begin{equation*}
+		c_1\lambda_i^m+c_2m\lambda_i^m+\cdots+c_{r_i}m^{r_i-1}\lambda_i^m=\lambda_i^m(c_1+c_2m+\cdots+c_{r_i}m^{r_i-1})=0
+	\end{equation*}
+	对任意的$m\in\mathbb{Z}$成立。由$n$阶线性差分方程的定义，$a_n\ne0$，所以$\lambda_i\ne0$，于是需要上式中关于整数$m$的多项式恒等于$0$，此时应有$c_1=c_2=\cdots=c_{r_i}=0$，矛盾，所以$\{m^b\lambda_i^m\},\;b=0,1,2,\dots,r_i-1$线性无关。\info{不同$\lambda_i$之间的线性无关性涉及到广义Vandermonde行列式，以后再写}\par
+	\textbf{情形三：}此时特征方程存在一对共轭复根$a+bi,a-bi$，令：
+	\begin{equation*}
+		\rho=\sqrt{a^2+b^2},\;\theta=\arctan\left(\frac{b}{a}\right)
+	\end{equation*}
+	则：
+	\begin{gather*}
+		(a+bi)^m=(\rho e^{i\theta})^m=\rho^m[\cos(m\theta)+i\sin(m\theta)],\;\forall\;m\in\mathbb{Z}^{} \\
+		(a-bi)^m=(\rho e^{-i\theta})^m=\rho^m[\cos(m\theta)-i\sin(m\theta)],\;\forall\;m\in\mathbb{Z}^{}
+	\end{gather*}
+	都是$L(x_m)$的解。\par
+	综上可得出定理的结论。
+\end{proof}
+\subsubsection{常系数齐次线性差分方程解的收敛性}
+\begin{derivation}
+	设$\seq{\lambda}{s}$为$n$阶常系数齐次线性差分方程$L(x_m)=0$的特征方程$l(\lambda)=0$的解。\par
+	\textbf{(1)$\;\lambda_i$都在单位圆内：}此时存在$\alpha$使得：
+	\begin{equation*}
+		\min\{|\lambda_i|:i=1,2,\dots,s\}<\alpha<1
+	\end{equation*}
+	于是$L(x_m)=0$的任何解$\{x_m\}$满足：
+	\begin{equation*}
+		|x_m|=\left|\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}c_{ij}m^{j}\lambda_i^m\right|\leqslant\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}|c_{ij}m^{j}|\;|\lambda_i^m|\leqslant\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}|c_{ij}m^{j}|\alpha^m
+	\end{equation*}
+	由指数函数$\alpha^m$与幂函数$m^j$的收敛速度比较可得：
+	\begin{equation*}
+		\lim_{m\to+\infty}|x_m|=0
+	\end{equation*}
+	此时称$\{x_m\}$\textbf{以负指数收敛到$0$}。\par
+	\textbf{(2)$\;\lambda_i$在单位圆上：}设$\lambda_i=a+bi$，由\cref{theo:GeneralSolutionHomogeneousLinearDifferenceEqConstantCoefficients}可知此时$L(x_m)=0$有解：
+	\begin{equation*}
+		x_m=\cos(m\theta)+i\sin(m\theta),\;\theta=\arctan\left(\frac{b}{a}\right),\;\forall\;m\in\mathbb{Z}^{}
+	\end{equation*}
+	当$\theta=\dfrac{\pi}{4}$时，这个解不收敛，是一个周期解。\par
+	\textbf{(3)$\;\lambda_i$在单位圆外：}显然此时存在发散于$+\infty$的解。
+\end{derivation}
+\subsubsection{常系数非齐次线性差分方程解的一般理论}
+\begin{theorem}\label{theo:GeneralSolutionNonhomogeneousLinearDifferenceEqConstantCoefficients}
+	设$\seq{\lambda}{s}$是$n$阶常系数齐次线性差分方程$L(x_m)=0$的特征方程$l(\lambda)=0$的互异根，其重数分别为$\seq{r}{s}$，$n$阶常系数非齐次线性差分方程$L(x_m)=f(m)$的一个特解为$\{y_m\}$，则$L(x_m)=f(m)$的通解可以表示为：
+	\begin{equation*}
+		x_m=y_m+\sum_{i=1}^{s}\sum_{j=0}^{r_i-1}c_{ij}m^{j}\lambda_i^m,\;\forall\;m\in\mathbb{Z}^{}
+	\end{equation*}
+	其中$c_{ij},\;i=1,2,\dots,s,\;j=0,1,\dots,r_i-1$为常数。
+\end{theorem}
+\begin{proof}
+	由\cref{theo:GeneralSolutionNonhomogeneousLinearDifferenceEquation}和\cref{theo:GeneralSolutionHomogeneousLinearDifferenceEqConstantCoefficients}可直接得到。
+\end{proof}
+
