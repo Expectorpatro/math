@@ -1,7 +1,7 @@
 \section{矩阵空间}
 
 \begin{definition}
-	由$s\cdot m$个数排成$s$行、$m$列的一张表称为一个$s\times m$\gls{Matrix}，通常用大写英文字母表示，其中的每一个数称为这个矩阵的一个元素，第$i$行与第$j$列交叉位置的元素称为矩阵的$(i,j)$元，记作$A(i;j)$。一个$s\times m$矩阵可以简单地记作$A_{s\times m}$。如果矩阵$A$的$(i,j)$元是$a_{ij}$，那么可以记作$A=(a_{ij})$。如果一个矩阵的行数和列数相同，则称它为方阵，$n$行$n$列的方阵也成为$n$阶矩阵。对于两个矩阵$A$和$B$，如果它们的行数都等于$s$且列数都等于$m$，同时还有$A(i;j)=B(i;j),i=1,2,\dots,s,\;j=1,2,\dots,m$，那么称$A$和$B$相等，记作$A=B$。
+	由$s\times m$个数排成$s$行、$m$列的一张表称为一个$s\times m$\gls{Matrix}，通常用大写英文字母表示，其中的每一个数称为这个矩阵的一个元素，第$i$行与第$j$列交叉位置的元素称为矩阵的$(i,j)$元，记作$A(i;j)$。一个$s\times m$矩阵可以简单地记作$A_{s\times m}$。如果矩阵$A$的$(i,j)$元是$a_{ij}$，那么可以记作$A=(a_{ij})$。如果一个矩阵的行数和列数相同，则称它为方阵，$n$行$n$列的方阵也成为$n$阶矩阵。对于两个矩阵$A$和$B$，如果它们的行数都等于$s$且列数都等于$m$，同时还有$A(i;j)=B(i;j),i=1,2,\dots,s,\;j=1,2,\dots,m$，那么称$A$和$B$相等，记作$A=B$。
 \end{definition}
 
 \subsection{矩阵的运算}
@@ -34,7 +34,7 @@
 \begin{definition}
 	定义$M_{s\times m}(K)$上矩阵的减法如下：设$A,B\in M_{s\times m}(K)$，则：
 	\begin{equation*}
-		A-B\overset{def}{=}A+(-B)
+		A-B\coloneq A+(-B)
 	\end{equation*}
 \end{definition}
 \subsubsection{乘法}
@@ -44,6 +44,10 @@
 		c_{ij}=\sum_{k=1}^{n}a_{ik}b_{kj},\;i=1,2,\dots,s,\;j=1,2,\dots,m
 	\end{equation*}
 	则矩阵$C$称作矩阵$A$与$B$的乘积，记作$C=AB$。
+\end{definition}
+\subsubsection{转置}
+\begin{definition}
+	设$A\in M_{m\times n}(K)$，定义$A$的转置$A^T\in M_{n\times m}(K)$，它的第$i$行是$A$的第$i$列，第$j$列是$A$的第$j$行。
 \end{definition}
 \subsubsection{初等变换}
 \begin{definition}
@@ -61,10 +65,363 @@
 	\end{enumerate}
 \end{definition}
 \subsection{矩阵的行列式}
+\subsubsection{排列}
+\begin{definition}
+	$n$个不同的正整数的一个全排列称为一个\textbf{$n$元排列}。
+\end{definition}
+\begin{definition}
+	在$n$元排列$a_1a_2\cdots a_n$中，从左到右任取一对数$a_ia_j(i<j)$，若$a_i<a_j$，则称这一对数构成一个\textbf{顺序}；若$a_i>a_j$，则称这一对数构成一个\textbf{逆序}。
+\end{definition}
+\begin{definition}
+	一个$n$元排列$a_1a_2\cdots a_n$中逆序的总数称为\textbf{逆序数}，记作$\tau(a_1a_2\cdots a_n)$。逆序数为奇数的排列称为\textbf{奇排列}，逆序数为偶数的排列称为\textbf{偶排列}。
+\end{definition}
+\begin{definition}
+	将一个排列$a_1a_2\cdots a_n$中第$i$个位置的元素$a_i$与第$j$个位置的元素$a_j$交换位置的运算称为\textbf{对换}，记作$(a_i,a_j)$。
+\end{definition}
+\begin{property}\label{prop:Transposition}
+	$n$元排列的对换具有如下性质：
+	\begin{enumerate}
+		\item 对换改变$n$元排列的奇偶性；
+		\item 任一由$1,2,\dots,n$构成的$n$元排列与排列$12\cdots n$可以经过一系列对换互变，且所作的对换的次数与这个$n$元排列具有相同的奇偶性。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)任取一个$n$元排列$a_1a_2\cdots a_n$，若对换$(a_i,a_j)$的两个数$a_i,a_j$相邻，即：
+	\begin{equation*}
+		a_1a_2\cdots a_ia_j\cdots a_n\longrightarrow a_1a_2\cdots a_ja_i\cdots a_n
+	\end{equation*}
+	这个对换只改变了$a_i$与$a_j$构成的数对的顺逆序关系，于是对换前后排列的奇偶性相反。\par
+	对于一般情况：
+	\begin{equation*}
+		a_1a_2\cdots a_ik_1k_2\cdots k_sa_j\cdots a_n\longrightarrow a_1a_2\cdots a_jk_2\cdots k_sa_i\cdots a_n
+	\end{equation*}
+	这个对换只需作$2s+1$次相邻数的对换即可达到：
+	\begin{equation*}
+		(a_i,k_1),\;(a_i,k_2),\;\dots,(a_i,k_s),\;(a_i,a_j),\;(k_s,a_j),\;(k_{s-1},a_j)\;\dots,(k_1,a_j)	
+	\end{equation*}
+	所以对换前后排列的奇偶性相反。\par
+	综上，对换改变$n$元排列的奇偶性。\par
+	(2)排列$12\cdots n$是一个偶排列，于是由(1)立即可得出结论。
+\end{proof}
+\subsubsection{行列式的定义与性质}
+\begin{definition}
+	定义$A=(a_{ij})\in M_{n}(K)$的\textbf{行列式}$\det A$为：
+	\begin{equation*}
+		\begin{vmatrix}
+			a_{11} & a_{12} & \cdots & a_{1n} \\
+			a_{21} & a_{22} & \cdots & a_{2n} \\
+			\vdots & \vdots & \ddots & \vdots \\
+			a_{n1} & a_{n2} & \cdots & a_{nn}
+		\end{vmatrix}=
+		\sum_{j_1j_2\cdots j_n}^{}(-1)^{\tau(j_1j_2\cdots j_n)}a_{1j_1}a_{2j_2}\cdots a_{nj_n}
+	\end{equation*}
+	其中$j_1j_2\cdots j_n$是由$1$到$n$构成的$n$元排列，$\det A$也记作$|A|$。
+\end{definition} 
+\begin{definition}
+	设$A\in M_{n}(K)$。在$A$中任意取定$k(1\leqslant k<n)$行（$i_1,i_2,\dots,i_k$）、$k$列（$j_1,j_2,\dots,j_k$），位于这些行和列交叉处的$k^2$个元素按原来的次序组成的$k$阶矩阵的行列式称为$A$的一个\textbf{$k$阶子式}，记作：
+	\begin{equation*}
+		A\left\{ \begin{array}{l}
+			i_1,i_2,\dots,i_k \\
+			j_1,j_2,\dots,j_k
+		\end{array} \right\}
+	\end{equation*}
+	其余元素按原来的次序组成的$n-k$阶矩阵的行列式称为上式的\textbf{余子式}，称：
+	\begin{equation*}
+		(-1)^{(i_1+i_2+\cdots+i_k)+(j_1+j_2+\cdots+j_k)}A\left\{ \begin{array}{l}
+			i_1',i_2',\dots,i_{n-k}' \\
+			j_1',j_2',\dots,j_{n-k}'
+		\end{array} \right\}
+	\end{equation*}
+	为其\textbf{代数余子式}，其中：
+	\begin{gather*}
+		\{i_1',i_2',\dots,i_{n-k}'\}=\{1,2,\dots,n\}\backslash\{i_1,i_2,\dots,i_k\} \\
+		\{j_1',j_2',\dots,j_{n-k}'\}=\{1,2,\dots,n\}\backslash\{j_1,j_2,\dots,j_k\}
+	\end{gather*}
+	特别的，$A$的$(i,j)$元的余子式记作$M_{ij}$，代数余子式记作$A_{ij}$。
+\end{definition}
+\begin{property}\label{prop:Determinant}
+	矩阵$A=(a_{ij})\in M_{n}(K)$的行列式$\det A$具有如下性质：
+	\begin{enumerate}
+		\item $\det A$有一个等价表达式：
+		\begin{equation*}
+			\sum_{k_1k_2\cdots k_n}^{}(-1)^{\tau(i_1i_2\cdots i_n)+\tau(k_1k_2\cdots k_n)}a_{i_1k_1}a_{i_2k_2}\cdots a_{nk_n}
+		\end{equation*}
+		\item $\det A^T=\det A$；
+		\item 行列式一行（列）的公因子可以提出去：
+		\begin{gather*}
+			\begin{vmatrix}
+				a_{11} & a_{12} & \cdots & a_{1n} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				ka_{i1} & ka_{i2} & \cdots & ka_{in} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{n1} & a_{n2} & \cdots & a_{nn}
+			\end{vmatrix}=k
+			\begin{vmatrix}
+				a_{11} & a_{12} & \cdots & a_{1n} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{i1} & a_{i2} & \cdots & a_{in} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{n1} & a_{n2} & \cdots & a_{nn}
+			\end{vmatrix} \\
+			\begin{vmatrix}
+				a_{11} & \cdots & ka_{1j} & \cdots & a_{1n} \\
+				a_{21} & \cdots & ka_{2j} & \cdots & a_{2n} \\
+				\vdots & \ddots & \vdots & \ddots & \vdots \\
+				a_{n1} & \cdots & ka_{nj} & \cdots & a_{nn}
+			\end{vmatrix}=k
+			\begin{vmatrix}
+				a_{11} & \cdots & a_{1j} & \cdots & a_{1n} \\
+				a_{21} & \cdots & a_{2j} & \cdots & a_{2n} \\
+				\vdots & \ddots & \vdots & \ddots & \vdots \\
+				a_{n1} & \cdots & a_{nj} & \cdots & a_{nn}
+			\end{vmatrix}
+		\end{gather*}
+		\item 行列式的行（列）可以作拆分：
+		\begin{gather*}
+			\begin{vmatrix}
+				a_{11} & a_{12} & \cdots & a_{1n} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{i1}+a_{i1}' & a_{i2}+a_{i2}' & \cdots & a_{in}+a_{in}' \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{n1} & a_{n2} & \cdots & a_{nn}
+			\end{vmatrix}=
+			\begin{vmatrix}
+				a_{11} & a_{12} & \cdots & a_{1n} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{i1} & a_{i2} & \cdots & a_{in} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{n1} & a_{n2} & \cdots & a_{nn}
+			\end{vmatrix}+
+			\begin{vmatrix}
+				a_{11} & a_{12} & \cdots & a_{1n} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{i1}' & a_{i2}' & \cdots & a_{in}' \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{n1} & a_{n2} & \cdots & a_{nn}
+			\end{vmatrix} \\
+			\begin{aligned}
+				&\begin{vmatrix}
+					a_{11} & \cdots & a_{1j}+a_{1j}' & \cdots & a_{1n} \\
+					a_{21} & \cdots & a_{2j}+a_{2j}' & \cdots & a_{2n} \\
+					\vdots & \ddots & \vdots & \ddots & \vdots \\
+					a_{n1} & \cdots & a_{nj}+a_{nj}' & \cdots & a_{nn}
+				\end{vmatrix} \\
+				=&
+				\begin{vmatrix}
+					a_{11} & \cdots & a_{1j} & \cdots & a_{1n} \\
+					a_{21} & \cdots & a_{2j} & \cdots & a_{2n} \\
+					\vdots & \ddots & \vdots & \ddots & \vdots \\
+					a_{n1} & \cdots & a_{nj} & \cdots & a_{nn}
+				\end{vmatrix}+
+				\begin{vmatrix}
+					a_{11} & \cdots & a_{1j}' & \cdots & a_{1n} \\
+					a_{21} & \cdots & a_{2j}' & \cdots & a_{2n} \\
+					\vdots & \ddots & \vdots & \ddots & \vdots \\
+					a_{n1} & \cdots & a_{nj}' & \cdots & a_{nn}
+				\end{vmatrix}
+			\end{aligned}
+		\end{gather*}
+		\item 行列式两行（列）互换，行列式反号：
+		\begin{gather*}
+			\begin{vmatrix}
+				a_{11} & a_{12} & \cdots & a_{1n} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{i1} & a_{i2} & \cdots & a_{in} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{j1} & a_{j2} & \cdots & a_{jn} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{n1} & a_{n2} & \cdots & a_{nn}
+			\end{vmatrix}=-
+			\begin{vmatrix}
+				a_{11} & a_{12} & \cdots & a_{1n} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{j1} & a_{j2} & \cdots & a_{jn} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{i1} & a_{i2} & \cdots & a_{in} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{n1} & a_{n2} & \cdots & a_{nn}
+			\end{vmatrix} \\
+			\begin{vmatrix}
+				a_{11} & \cdots & a_{1i} & \cdots & a_{1j} & \cdots & a_{1n} \\
+				a_{21} & \cdots & a_{2i} & \cdots & a_{2j} & \cdots & a_{2n} \\
+				\vdots & \ddots & \vdots & \ddots & \vdots & \ddots & \vdots \\
+				a_{n1} & \cdots & a_{ni} & \cdots & a_{nj} & \cdots & a_{nn}
+			\end{vmatrix}=-
+			\begin{vmatrix}
+				a_{11} & \cdots & a_{1j} & \cdots & a_{1i} & \cdots & a_{1n} \\
+				a_{21} & \cdots & a_{2j} & \cdots & a_{2i} & \cdots & a_{2n} \\
+				\vdots & \ddots & \vdots & \ddots & \vdots & \ddots & \vdots \\
+				a_{n1} & \cdots & a_{nj} & \cdots & a_{ni} & \cdots & a_{nn}
+			\end{vmatrix}
+		\end{gather*}
+		\item 行列式两行（列）相同则值为$0$：
+		\begin{equation*}
+			\begin{vmatrix}
+				a_{11} & a_{12} & \cdots & a_{1n} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{i1} & a_{i2} & \cdots & a_{in} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{i1} & a_{i2} & \cdots & a_{in} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{n1} & a_{n2} & \cdots & a_{nn}
+			\end{vmatrix}=
+			\begin{vmatrix}
+			a_{11} & \cdots & a_{1j} & \cdots & a_{1j} & \cdots & a_{1n} \\
+			a_{21} & \cdots & a_{2j} & \cdots & a_{2j} & \cdots & a_{2n} \\
+			\vdots & \ddots & \vdots & \ddots & \vdots & \ddots & \vdots \\
+			a_{n1} & \cdots & a_{nj} & \cdots & a_{nj} & \cdots & a_{nn}
+			\end{vmatrix}=0
+		\end{equation*}
+		\item 行列式两行（列）成比例则值为$0$：
+		\begin{equation*}
+			\begin{vmatrix}
+			a_{11} & a_{12} & \cdots & a_{1n} \\
+			\vdots & \vdots & \ddots & \vdots \\
+			a_{i1} & a_{i2} & \cdots & a_{in} \\
+			\vdots & \vdots & \ddots & \vdots \\
+			ka_{i1} & ka_{i2} & \cdots & ka_{in} \\
+			\vdots & \vdots & \ddots & \vdots \\
+			a_{n1} & a_{n2} & \cdots & a_{nn}
+			\end{vmatrix}=
+			\begin{vmatrix}
+			a_{11} & \cdots & a_{1j} & \cdots & ka_{1j} & \cdots & a_{1n} \\
+			a_{21} & \cdots & a_{2j} & \cdots & ka_{2j} & \cdots & a_{2n} \\
+			\vdots & \ddots & \vdots & \ddots & \vdots & \ddots & \vdots \\
+			a_{n1} & \cdots & a_{nj} & \cdots & ka_{nj} & \cdots & a_{nn}
+			\end{vmatrix}=0
+		\end{equation*}
+		\item 把一行（列）的倍数加到另一行（列）上行列式的值不变：
+		\begin{gather*}
+			\begin{vmatrix}
+				a_{11} & a_{12} & \cdots & a_{1n} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{i1} & a_{i2} & \cdots & a_{in} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{j1}+ka_{i1} & a_{j2}+ka_{i2} & \cdots & a_{jn}+ka_{in} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{n1} & a_{n2} & \cdots & a_{nn}
+			\end{vmatrix}=
+			\begin{vmatrix}
+				a_{11} & a_{12} & \cdots & a_{1n} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{i1} & a_{i2} & \cdots & a_{in} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{j1} & a_{j2} & \cdots & a_{jn} \\
+				\vdots & \vdots & \ddots & \vdots \\
+				a_{n1} & a_{n2} & \cdots & a_{nn}
+			\end{vmatrix} \\
+			\begin{vmatrix}
+				a_{11} & \cdots & a_{1i} & \cdots & a_{1j}+ka_{1i} & \cdots & a_{1n} \\
+				a_{21} & \cdots & a_{2i} & \cdots & a_{2j}+ka_{2i} & \cdots & a_{2n} \\
+				\vdots & \ddots & \vdots & \ddots & \vdots & \ddots & \vdots \\
+				a_{n1} & \cdots & a_{ni} & \cdots & a_{nj}+ka_{ni}  & \cdots & a_{nn}
+			\end{vmatrix}=
+			\begin{vmatrix}
+				a_{11} & \cdots & a_{1i} & \cdots & a_{1j} & \cdots & a_{1n} \\
+				a_{21} & \cdots & a_{2i} & \cdots & a_{2j} & \cdots & a_{2n} \\
+				\vdots & \ddots & \vdots & \ddots & \vdots & \ddots & \vdots \\
+				a_{n1} & \cdots & a_{ni} & \cdots & a_{nj} & \cdots & a_{nn}
+			\end{vmatrix}
+		\end{gather*}
+		\item $A$的行列式等于它的第$i$行（第$j$列）元素与自己代数余子式的乘积之和，即：
+		\begin{equation*}
+			\det A=\sum_{j=1}^{n}a_{ij}A_{ij}=\sum_{i=1}^{n}a_{ij}A_{ij}
+		\end{equation*}
+		\item $A$的第$i$行（列）元素与第$j(j\ne i)$行（列）相应元素的代数余子式之和等于$0$，即：
+		\begin{equation*}
+			\sum_{k=1}^{n}a_{ik}A_{jk}=\sum_{k=1}^{n}a_{ki}A_{kj}=0
+		\end{equation*}
+		\item \textbf{Laplace Theorem:} 取定$A$的第$i_1,i_2,\dots,i_k(i_1<i_2<\cdots<i_k)$行，则这$k$行元素构成的所有$k$阶子式与它们自己的代数余子式的乘积之和等于$\det A$，即：
+		\begin{align*}
+			\det A&=\sum_{1\leqslant j_1<j_2<\cdots<j_k\leqslant n}A\left\{ \begin{array}{l}
+				i_1,i_2,\dots,i_k \\
+				j_1,j_2,\ \dots,j_k
+			\end{array} \right\} \\
+			&\quad(-1)^{(i_1+i_2+\cdots+i_k)+(j_1+j_2+\cdots+j_k)}A\left\{ \begin{array}{l}
+				i_1',i_2',\dots,i_{n-k}' \\
+				j_1',j_2',\ \dots,j_{n-k}'
+			\end{array} \right\}
+		\end{align*}
+		\item 若$A$是上三角矩阵\info{特殊矩阵}，则$\det A=\prod\limits_{i=1}^na_{ii}$；
+		\item 称下述行列式为\textbf{Vandermonde行列式}：
+		\begin{equation*}
+			\begin{vmatrix}
+				1 & 1 & 1 & \cdots & 1 \\
+				x_1 & x_2 & x_3 & \cdots & x_n \\
+				x_1^2 & x_2^2 & x_3^2 & \cdots & x_n^2 \\
+				\vdots & \vdots & \vdots & \ddots & \vdots \\
+				x_1^{n-2} & x_2^{n-2} & x_3^{n-2} & \cdots & x_n^{n-2} \\
+				x_1^{n-1} & x_2^{n-1} & x_3^{n-1} & \cdots & x_n^{n-1}
+			\end{vmatrix}=\prod_{1\leqslant i<j\leqslant n}(a_j-a_i)
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)对排列$a_{i_1k_1}a_{i_2k_2}\cdots a_{nk_n}$进行考察，设其进行了$s$次对换得到$a_{1j_1}a_{2j_2}\cdots a_{nj_n}$。由\cref{prop:Transposition}(2)可知：
+	\begin{equation*}
+		(-1)^{\tau(i_1i_2\cdots i_n)}(-1)^{s}=(-1)^{\tau(12\cdots n)}=1,\quad
+		(-1)^{\tau(k_1k_2\cdots k_n)}(-1)^{s}=(-1)^{\tau(j_1j_2\cdots j_n)}
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		(-1)^{\tau(i_1i_2\cdots i_n)}(-1)^{s}(-1)^{\tau(k_1k_2\cdots k_n)}(-1)^{s}=(-1)^{\tau(j_1j_2\cdots j_n)}
+	\end{equation*}
+	即：
+	\begin{equation*}
+		(-1)^{\tau(i_1i_2\cdots i_n)+\tau(k_1k_2\cdots k_n)}=(-1)^{\tau(j_1j_2\cdots j_n)}
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\sum_{j_1j_2\cdots j_n}^{}(-1)^{\tau(j_1j_2\cdots j_n)}a_{1j_1}a_{2j_2}\cdots a_{nj_n}=\sum_{k_1k_2\cdots k_n}^{}(-1)^{\tau(i_1i_2\cdots i_n)+\tau(k_1k_2\cdots k_n)}a_{i_1k_1}a_{i_2k_2}\cdots a_{nk_n}
+	\end{equation*}\par
+	(2)利用(1)将行列式分别按行顺序与列顺序展开即可得到。\par
+	(3)由定义可得：
+	\begin{equation*}
+		\sum_{j_1j_2\cdots j_n}^{}(-1)^{\tau(j_1j_2\cdots j_n)}a_{1j_1}a_{2j_2}\cdots ka_{ij_i}\cdots a_{nj_n}=k\sum_{j_1j_2\cdots j_n}^{}(-1)^{\tau(j_1j_2\cdots j_n)}a_{1j_1}a_{2j_2}\cdots a_{ij_i}\cdots a_{nj_n}
+	\end{equation*}
+	列的结果由(2)和行的结果即可得到。\par
+	(4)由定义可得：
+	\begin{align*}
+		&\sum_{j_1j_2\cdots j_n}^{}(-1)^{\tau(j_1j_2\cdots j_n)}a_{1j_1}a_{2j_2}\cdots (a_{ij_i}+a_{ij_i}')\cdots a_{nj_n} \\
+		=&\sum_{j_1j_2\cdots j_n}^{}(-1)^{\tau(j_1j_2\cdots j_n)}a_{1j_1}a_{2j_2}\cdots a_{ij_i}\cdots a_{nj_n} \\
+		&+\sum_{j_1j_2\cdots j_n}^{}(-1)^{\tau(j_1j_2\cdots j_n)}a_{1j_1}a_{2j_2}\cdots a_{ij_i}'\cdots a_{nj_n}
+	\end{align*}
+	列的结果由(2)和行的结果即可得到。\par
+	(5)由定义和\cref{prop:Transposition}(1)可得：
+	\begin{align*}
+		&\sum_{j_1j_2\cdots j_n}^{}(-1)^{\tau(j_1j_2\cdots j_i\cdots j_k\cdots j_n)}a_{1j_1}a_{2j_2}\cdots a_{ij_i}\cdots a_{kj_k}\cdots a_{nj_n} \\
+		=&\sum_{j_1j_2\cdots j_n}^{}(-1)^{\tau(j_1j_2\cdots j_k\cdots j_i\cdots j_n)}a_{1j_1}a_{2j_2}\cdots a_{kj_k}\cdots a_{ij_i}\cdots a_{nj_n} \\
+		=&(-1)\sum_{j_1j_2\cdots j_n}^{}(-1)^{\tau(j_1j_2\cdots j_i\cdots j_k\cdots j_n)}a_{1j_1}a_{2j_2}\cdots a_{ij_i}\cdots a_{kj_k}\cdots a_{nj_n}
+	\end{align*}\par
+	(6)由(5)可得。\par
+	(7)由(3)(6)可得。\par
+	(8)由(3)(7)可得。\par
+	(9)由定义可得：
+	\begin{align*}
+		\det A&=\sum_{k_1k_2\cdots k_{i-1}jk_{i+1}\cdots k_n}^{}(-1)^{\tau(k_1k_2\cdots k_{i-1}jk_{i+1}\cdots k_n)}a_{1k_1}a_{2k_2}\cdots a_{(i-1)k_{i-1}}a_{ij}a_{(i+1)k_{i+1}}\cdots a_{nk_n} \\
+		&=\sum_{jk_1k_2\cdots k_{i-1}k_{i+1}\cdots k_n}^{}(-1)^{\tau[i12\cdots(i-1)(i+1)\cdots n]+\tau(jk_1k_2\cdots k_{i-1}k_{i+1}\cdots k_n)} \\
+		&\quad a_{ij}a_{1k_1}a_{2k_2}\cdots a_{(i-1)k_{i-1}}a_{(i+1)k_{i+1}}\cdots a_{nk_n} \\
+		&=\sum_{jk_1k_2\cdots k_{i-1}k_{i+1}\cdots k_n}^{}(-1)^{i-1}(-1)^{j-1}(-1)^{\tau(k_1k_2\cdots k_{i-1}k_{i+1}\cdots k_n)} \\
+		&\quad a_{ij}a_{1k_1}a_{2k_2}\cdots a_{(i-1)k_{i-1}}a_{(i+1)k_{i+1}}\cdots a_{nk_n} \\
+		&=\sum_{j=1}^{n}(-1)^{i-1}(-1)^{j-1}a_{ij}\sum_{k_1k_2\cdots k_{i-1}k_{i+1}\cdots k_n}(-1)^{\tau(k_1k_2\cdots k_{i-1}k_{i+1}\cdots k_n)} \\
+		&\quad a_{1k_1}a_{2k_2}\cdots a_{(i-1)k_{i-1}}a_{(i+1)k_{i+1}}\cdots a_{nk_n} \\
+		&=\sum_{j=1}^{n}(-1)^{i+j}a_{ij}M_{ij}=\sum_{j=1}^{n}a_{ij}A_{ij}
+	\end{align*}
+	列的结果由(2)和行的结果即可得到。\par
+	(10)由(6)即可得到。\par
+	(11)给定$A$的一个行指标$i_1i_2\cdots i_ki_1'i_2'\cdots i_{n-k}'$，由(1)可得：
+	\begin{equation*}
+		\det A=\sum_{\mu_1\mu_2\cdots\mu_k\nu_1\nu_2\cdots\nu_{n-k}}(-1)^{\tau(i_1i_2\cdots i_ki_1'i_2'\cdots i_{n-k}')+\tau(\mu_1\mu_2\cdots\mu_k\nu_1\nu_2\cdots\nu_{n-k})}a_{i_1\mu_1}a_{i_2\mu_2}\cdots a_{i_k\mu_k}a_{i_1'\nu_1}a_{i_2'\nu_2}\cdots a_{i_{n-k}'\nu_{n-k}}
+	\end{equation*}
+	\info{Laplace定理的证明}\par
+	(12)由行列式的定义立即可得。\par
+	(13)\info{Vandermonde行列式记得证明}
+\end{proof}
+
 
 \subsection{矩阵的秩}
 \begin{definition}
-	矩阵$A$的列向量组的秩称为$A$的\textbf{列秩}，行向量组的秩称为$A$的\textbf{行秩}
+	矩阵$A$的列向量组的秩称为$A$的\textbf{列秩}，行向量组的秩称为$A$的\textbf{行秩}。
 \end{definition}
 \begin{lemma}\label{lem:REFRankColumnRow}
 	阶梯形矩阵$J$的行秩与等于列秩且都等于非零行数，$J$的主元所在的行构成行向量组的一个极大线性无关组，主元所在列构成列向量组的一个极大线性无关组。
