@@ -68,70 +68,8 @@
 \begin{definition}
 	设增广矩阵化简后变为阶梯形矩阵，称每一行主元所在列所对应的未知数为\gls{PivotVariable}，同时称非主元所在列对应的未知数为\gls{FreeVariable}。
 \end{definition}
-%\begin{algorithm}
-%	\caption{高斯消元法（Gaussian Elimination）完整实现}
-%	\label{alg:gauss}
-%	\begin{algorithmic}[1]
-	%		\REQUIRE 增广矩阵 $[A|\mathbf{b}] \in \mathbb{R}^{m \times (n+1)}$
-	%		\ENSURE 解的情况及具体表达式
-	%		
-	%		\STATE \textbf{步骤1：前向消元（Forward Elimination）}
-	%		\FOR{$j = 1$ \TO $n$}
-	%		\STATE 在行 $j$ 到 $m$ 中找到使得 $|a_{pj}|$ 最大的行 $p$ \COMMENT{列主元选取}
-	%		\IF{$|a_{pj}| < \epsilon$} \COMMENT{$\epsilon$ 为浮点精度阈值}
-	%		\STATE \textbf{continue} \COMMENT{跳过零列}
-	%		\ENDIF
-	%		\STATE 交换第 $p$ 行与第 $j$ 行 \COMMENT{确保主元非零}
-	%		\FOR{$i = j+1$ \TO $m$}
-	%		\STATE $\text{ratio} \gets a_{ij}/a_{jj}$ \COMMENT{计算消元系数}
-	%		\STATE $R_i \gets R_i - \text{ratio} \cdot R_j$ \COMMENT{$R_i$ 表示对第 $i$ 行操作}
-	%		\STATE $a_{ij} \gets 0$ \COMMENT{显式置零避免浮点误差}
-	%		\ENDFOR
-	%		\ENDFOR
-	%		\STATE \textbf{步骤2：矛盾行检测}
-	%		\FOR{$i = 1$ \TO $m$}
-	%		\IF{第 $i$ 行形如 $[0 \dots 0 | c]$ 且 $c \neq 0$}
-	%		\STATE \RETURN ``无解（矛盾方程）''
-	%		\ENDIF
-	%		\ENDFOR
-	%		\STATE \textbf{步骤3：主变量与自由变量识别}
-	%		\STATE 主变量集合 $\mathcal{P} \gets \{j \mid \text{第}j\text{列存在首非零元}\}$
-	%		\STATE 自由变量集合 $\mathcal{F} \gets \{1,2,\dots,n\} \setminus \mathcal{P}$
-	%		\STATE $r \gets |\mathcal{P}|$ \COMMENT{主变量个数}
-	%		\IF{$r = n$}
-	%		\STATE \textbf{唯一解回代：}
-	%		\STATE 初始化解向量 $\mathbf{x} \gets (0,0,\dots,0)^T$
-	%		\FOR{$i = n$ \DOWNTO $1$}
-	%		\STATE $x_i \gets \left(b_i - \sum_{k=i+1}^{n} a_{ik}x_k\right) / a_{ii}$
-	%		\ENDFOR
-	%		\STATE \RETURN $\mathbf{x} = (x_1,x_2,\dots,x_n)^T$
-	%		\ELSE
-	%		\STATE \textbf{无穷解构造：}
-	%		\STATE 将矩阵化为简化行阶梯形（RREF）
-	%		\STATE 设自由变量为 $t_1,t_2,\dots,t_k$（$k = n - r$）
-	%		\STATE \textbf{构造特解 $\mathbf{x}_p$：}
-	%		\STATE 令所有自由变量 $t_j = 0$
-	%		\FOR{每个主变量 $x_p \in \mathcal{P}$}
-	%		\STATE 从主元行 $i_p$ 得：$x_p = \frac{1}{a_{i_pp}}\left(b_{i_p} - \sum_{q > p} a_{i_pq}x_q\right)$
-	%		\ENDFOR
-	%		\STATE \textbf{构造基解 $\{\mathbf{v}_i\}$：}
-	%		\FOR{$j = 1$ \TO $k$}
-	%		\STATE 令 $t_j = 1$，其他自由变量为 0
-	%		\FOR{每个主变量 $x_p \in \mathcal{P}$}
-	%		\STATE 从主元行 $i_p$ 得：$x_p = \frac{1}{a_{i_pp}}\left( - \sum_{q \in \mathcal{F}} a_{i_pq}t_q \right)$
-	%		\ENDFOR
-	%		\STATE 记录解向量 $\mathbf{v}_j$
-	%		\ENDFOR
-	%		\STATE 通解形式：
-	%		\[
-	%		\mathbf{x} = \mathbf{x}_p + \sum_{j=1}^k t_j\mathbf{v}_j
-	%		\]
-	%		\STATE \RETURN ``无穷多解：$\mathbf{x} = \mathbf{x}_p + \sum t_j\mathbf{v}_j$''
-	%		\ENDIF
-	%	\end{algorithmic}
-%\end{algorithm}
 \subsection{初等方法}
-\begin{theorem}\label{theo:SolutionOfSLE1}
+\begin{theorem}\label{theo:SolutionOfSLE1}	
 	数域$K$上的$n$元线性方程组的解的情况只有三种可能：
 	\begin{enumerate}
 		\item \textbf{无解：}增广矩阵化成的阶梯形方程出现$0=d$且$d\ne0$；
@@ -219,3 +157,82 @@
 	(3)由(1)(2)可得。\par
 	(4)由(3)立即可得。
 \end{proof}
+\begin{algorithm}
+	\caption{Gaussian Elimination}
+	\label{alg:gauss}
+	\begin{algorithmic}[1]
+		\Require Augmented matrix $[A|\mathbf{b}] \in \mathbb{R}^{m \times (n+1)}$
+		\Ensure Solution status and expression
+		\State \textbf{Step 1: Forward Elimination}
+		\For{$j = 1$ to $n$}
+		\State Find $p$ such that $|a_{pj}|$ is maximum for $j \leq p \leq m$ \Comment{Pivoting}
+		\If{$|a_{pj}| < \varepsilon$}
+		\State \textbf{continue} \Comment{Skip zero column}
+		\EndIf
+		\State Swap row $p$ and row $j$
+		\For{$i = j+1$ to $m$}
+		\For{$k = j$ to $n+1$}
+		\State $a_{ik} \gets a_{ik} - a_{ij} / a_{jj} \cdot a_{jk}$
+		\EndFor
+		\State $a_{ij} \gets 0$ \Comment{Explicitly zero to avoid error}
+		\EndFor
+		\EndFor
+		
+		\State \textbf{Step 2: Inconsistency Check}
+		\For{$i = 1$ to $m$}
+		\If{All $a_{ij} = 0$ for $j = 1$ to $n$ \textbf{and} $a_{i(n+1)} \neq 0$}
+		\State \Return ``No solution (inconsistent row)''
+		\EndIf
+		\EndFor
+		
+		\State \textbf{Step 3: Identify Pivot and Free Variables}
+		\State $\mathcal{P} \gets$ set of index of pivot columns in row echelon form, $\mathcal{F} \gets \{1,\dots,n\}\backslash\mathcal{P}$, $r \gets |\mathcal{P}|$
+		\If{$r = n$}
+		\State \textbf{Back substitution: unique solution}
+		\State Initialize $\mathbf{x} \gets (0,\dots,0)^T$
+		\For{$i = n$ downto $1$}
+		\State $x_i \gets \left(a_{i(n+1)} - \sum\limits_{k=i+1}^{n} a_{ik} x_k\right) / a_{ii}$
+		\EndFor
+		\State \Return $\mathbf{x} = (x_1,\dots,x_n)^T$
+		\EndIf
+	\end{algorithmic}
+\end{algorithm}
+\begin{algorithm}
+	\caption{Gaussian Elimination (Part 2): General Solution via RREF}
+	\begin{algorithmic}[1]
+		\Require Row echelon form (REF) matrix $[A|\mathbf{b}]$ with $r < n$
+		\Ensure General solution $\mathbf{x} = \mathbf{x}_p + \sum t_j \mathbf{v}_j$
+		
+		\State \textbf{Construct general solution: infinite solutions}
+		\State \textbf{Step 4: Transform to Reduced Row Echelon Form (RREF)}
+		\For{$j = r$ downto $1$}
+		\State Let $i$ be the row where pivot in column $\mathcal{P}[j]$ appears
+		\State Divide entire row $i$ by $a_{i\mathcal{P}[j]}$ to make pivot = 1
+		\For{$k = 1$ to $i-1$}
+		\For{$l = \mathcal{P}[j]$ to $n+1$}
+		\State $a_{kl} \gets a_{kl} - a_{k\mathcal{P}[j]} \cdot a_{il}$
+		\EndFor
+		\EndFor
+		\EndFor
+		
+		\State \textbf{Step 5: Compute Particular Solution $\mathbf{x}_p$}
+		\State Initialize $\mathbf{x}_p = (0, 0, \dots, 0)^T$
+		\For{$j = 1$ to $r$}
+		\State Let $i$ be the row where pivot in column $\mathcal{P}[j]$ appears
+		\State $\mathbf{x}_{p\mathcal{P}[j]}\gets a_{i(n+1)}$
+		\EndFor
+		
+		\State \textbf{Step 6: Compute Basis Vectors $\{\mathbf{v}_j\}$}
+		\For{$j = 1$ to $n-r$}
+		\State Initialize $\mathbf{v}_j = (0, 0, \dots, 0)^T$
+		\State $\mathbf{v}_{j\mathcal{F}[j]}\gets1$
+		\State Let $i$ be the first row such that the pivot column index is greater than $\mathcal{F}[j]$
+		\For{$k=1$ to $i-1$}
+		\State $\mathbf{v}_{jk}\gets-a_{k\mathcal{F}[j]}$
+		\EndFor
+		\State Store $\mathbf{v}_j$
+		\EndFor
+		
+		\State \Return General solution: $\mathbf{x} = \mathbf{x}_p + \sum\limits_{j=1}^{n-r} c_j \mathbf{v}_j$, where $c_j\in\mathbb{R}^{}$
+	\end{algorithmic}
+\end{algorithm}
