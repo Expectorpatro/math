@@ -35,7 +35,7 @@
 		\item \textbf{交换律：}$A\cup B=B\cup A,\;A\cap B=B\cap A$；
 		\item \textbf{结合律：}$(A\cup B)\cup C=A\cup(B\cup C),\;(A\cap B)\cap C=A\cap(B\cap C)$；
 		\item \textbf{分配律：}$(A\cup B)\cap C=(A\cap C)\cup(B\cap C),\;(A\cap B)\cup C=(A\cup C)\cap(B\cup C)$，$(A\cup B)\backslash C=(A\backslash C)\cup(B\backslash C),\;(A\backslash B)\cap C=(A\cap C)\backslash(B\cap C)$；
-		\item $(A\backslash B)\backslash C=A\backslash(B\cup C)$；
+		\item $(A\backslash B)\backslash C=A\backslash(B\cup C)=(A\backslash B)\cap(A\backslash C)$；
 		\item $A\backslash B=A\cap B^c$；
 		\item \textbf{De-Morgan Law：}
 		\begin{equation*}
@@ -66,8 +66,8 @@
 \begin{definition}
 	设$\{A_n\}$为一个集合序列，
 	\begin{enumerate}
-		\item 若$A_n\subset A_{n+1},\;\forall\;n\in\mathbb{N}^+$，则称$\{A_n\}$为单调递增的集合序列，记为$A_n\uparrow$；
-		\item 若$A_n\supset A_{n+1},\;\forall\;n\in\mathbb{N}^+$，则称$\{A_n\}$为单调递减的集合序列，记为$A_n\downarrow$；
+		\item 若$A_n\subseteq A_{n+1},\;\forall\;n\in\mathbb{N}^+$，则称$\{A_n\}$为单调递增的集合序列，记为$A_n\uparrow$；
+		\item 若$A_n\supseteq A_{n+1},\;\forall\;n\in\mathbb{N}^+$，则称$\{A_n\}$为单调递减的集合序列，记为$A_n\downarrow$；
 	\end{enumerate}
 	单调递增和单调递减的集合序列统称为单调的集合序列。
 \end{definition}
@@ -92,7 +92,7 @@
 		\item $\{A_n\}$的上下极限具有如下等价定义：
 		\begin{gather*}
 			\varliminf_{n\to+\infty}A_n=\{x:\exists\;N\in\mathbb{N}^+,\;\forall\;n\geqslant N,\;x\in A_n\} \\
-			\varlimsup_{n\to+\infty}A_n=\{x:\forall\;N\in\mathbb{N}^+,\;\exists\;n\geqslant N,\;x\in A_n\}
+			\varlimsup_{n\to+\infty}A_n=\{x:\forall\;N\in\mathbb{N}^+,\;\exists\;n\geqslant N,\;x\in A_n\}=\{x:x\text{属于无穷多个$A_n$中}\}
 		\end{gather*}
 		\item $\{A_n\}$的下极限包含于上极限，即：
 		\begin{equation*}
@@ -125,6 +125,9 @@
 		\iff
 		\forall\;N\in\mathbb{N}^+,\;\exists\;n\geqslant N,\;x\in A_n
 	\end{equation*}\par
+	下证明上极限的第二个等价定义。\par
+	\textbf{必要性：}若此时$x$没有出现在无穷多个$A_n$中，则存在$N\in\mathbb{N}^+$，当$n>N$时有$x\notin A_n$，矛盾。\par
+	\textbf{充分性：}当$x$存在于无穷多个$A_n$中时，若存在$N\in\mathbb{N}^+$，当$n>N$时有$x\notin A_n$，则$x$最多存在于$N$个集合中，矛盾。\par
 	(2)由(1)可直接得出结论。\par
 	(3)当$A_n\uparrow$时，由集合序列上下极限的定义可得：
 	\begin{equation*}
@@ -165,6 +168,20 @@
 	\end{enumerate}
 	则称$\mathscr{A}$为\gls{Semiring}。
 \end{definition}
+\begin{property}\label{prop:Semiring}
+	若$\mathscr{A}$是一个半环，$A,\seq{B}{m}\in\mathscr{A}$，则存在有限个互不相交的$\{C_i\in\mathscr{A}:i=1,2,\dots,n\}$使得：
+	\begin{equation*}
+		A\Big\backslash\left(\underset{i=1}{\overset{m}{\cup}}B_i\right)=\underset{i=1}{\overset{n}{\cup}}C_i
+	\end{equation*}
+\end{property}
+\begin{proof}
+	当$m=1$时由半环的定义即可得出结论。\par
+	当$m=2$时，由\cref{prop:SetOperation}(5)(4)和半环的定义可得存在互不相交的$\seq{C}{k_1}\in\mathscr{A}$和$\seq{D}{k_2}\in\mathscr{A}$使得：
+	\begin{equation*}
+		A\backslash(B_1\cup B_2)=(A\backslash B_1)\cap(A\backslash B_2)=\left(\underset{i=1}{\overset{k_1}{\cup}}C_i\right)\bigcap\left(\underset{i=1}{\overset{k_2}{\cup}}D_i\right)=\underset{}{\overset{}{\cup}}(C_i\cap D_j)
+	\end{equation*}
+	因为半环对交封闭，所以$C_i\cap D_j\in\mathscr{A}$，注意到它们之间是互不相交的，于是结论成立。接下来用数学归纳法就可以了，懒得再继续写了。
+\end{proof}
 \begin{definition}
 	如果$X$上的非空集族$\mathscr{A}$对并和差的运算是封闭的，即对任意的$A,B\in\mathscr{A}$：
 	\begin{enumerate}
@@ -241,7 +258,8 @@
 		\item $\sigma$域是域；
 		\item $\sigma$域对有限交和可列交封闭；
 		\item $\sigma$域对有限并封闭；
-		\item $\sigma$域对差封闭。
+		\item $\sigma$域对差封闭；
+		\item 若$\mathscr{A}_i,\;i\in I$都是$\sigma$域，则$\underset{i\in I}{\overset{+\infty}{\cap}}\mathscr{A}_i$也是$\sigma$域。
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -264,8 +282,9 @@
 	所以$\mathscr{A}$对有限并封闭。\par
 	(4)任取$A,B\in\mathscr{A}$，由\cref{prop:SetOperation}(6)、$\sigma$域定义和(2)可得：
 	\begin{equation*}
-		A\backslash B=A\cap B^c\in\mathscr{A}\qedhere
-	\end{equation*}
+		A\backslash B=A\cap B^c\in\mathscr{A}
+	\end{equation*}\par
+	(5)显然。
 \end{proof}
 \begin{theorem}\label{theo:SetNecessarilySet2}
 	$\lambda$系是单调系，$\sigma$域是$\lambda$系。
@@ -543,7 +562,7 @@
 \end{proof}
 \subsubsection{Borel$\;\sigma$域}
 \begin{definition}
-	设$\mathbb{R}$上所有有限开区间构成的集合为$\mathcal{C}$，称$\sigma(\mathcal{C})$为\gls{BorelSigmaField}，记作$\mathcal{B}$。$\mathcal{B}$中的元素被称为\gls{BorelSet}。
+	称$\sigma(\{(a,b):a,b\in\mathbb{R}^{}\})$为\gls{BorelSigmaField}，记作$\mathcal{B}$。$\mathcal{B}$中的元素被称为\gls{BorelSet}。
 \end{definition}
 \begin{lemma}\label{lem:OpenSet=CountableFiniteOpenSetUnion}
 	$\mathbb{R}$上任意开集可以表示为至多可列个有限开区间的并集。
@@ -570,56 +589,74 @@
 	\begin{enumerate}
 		\item $\mathcal{B}$有如下等价定义：
 		\begin{enumerate}
-			\item 设$\mathbb{R}$上所有开集构成的集合为$\mathcal{O}$，则$\sigma(\mathcal{O})=\mathcal{B}$；
-			\item $\mathcal{B}=\sigma(\{(a,b]:a,b\in\mathbb{R}^{}\})$；
-			\item $\mathcal{B}=\sigma(\{(-\infty,a]:a\in\mathbb{R}^{}\})$。
+			\item 设$\mathbb{R}$上所有开集构成的集族为$\mathcal{O}$，则$\sigma(\mathcal{O})=\mathcal{B}$；
+			\item 
+			设$\mathbb{R}$上所有闭集构成的集族为$\mathcal{D}$，则$\sigma(\mathcal{D})=\mathcal{B}$；
+			\item $\mathcal{B}=\sigma(\{(-\infty,a]:a\in\mathbb{R}^{}\})=\sigma(\{(-\infty,a):a\in\mathbb{R}^{}\})=\sigma(\{(a,+\infty):a\in\mathbb{R}^{}\})=\sigma(\{[a,+\infty):a\in\mathbb{R}^{}\})$；
+			\item $\mathcal{B}=\sigma(\{(a,b]:a,b\in\mathbb{R}^{}\})=\sigma(\{[a,b):a,b\in\mathbb{R}^{}\})$；
+			\item $\mathcal{B}=\sigma(\{[a,b]:a,b\in\mathbb{R}^{}\})$；
 		\end{enumerate}
-		\item $\mathbb{R}$中的开集、闭集和区间（有限或无穷）都是Borel集。
+		\item $\mathbb{R}$中的开集、闭集、区间（有限或无穷）、单点集都是Borel集。
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1) \textbf{a：}因为有限开区间都是开集，所以$\mathcal{C}\subseteq\mathcal{O}$，于是有$\mathcal{C}\subseteq\sigma(\mathcal{O})$，由生成的定义可得$\mathcal{B}=\sigma(\mathcal{C})\subseteq\sigma(\mathcal{O})$。\par
-	由\cref{lem:OpenSet=CountableFiniteOpenSetUnion}可知对$\mathbb{R}^{}$中的任意一个开集，它都可以表示为至多可列个有限开区间的并集，所以$\mathcal{O}\subseteq\sigma(\mathcal{C})=\mathcal{B}$，由生成的定义可得$\sigma(\mathcal{O})\subseteq\mathcal{B}$。\par
+	(1) \textbf{a：}因为有限开区间都是开集，所以$\{(a,b):a,b\in\mathbb{R}^{}\}\subseteq\mathcal{O}$，于是有$\{(a,b):a,b\in\mathbb{R}^{}\}\subseteq\sigma(\mathcal{O})$，由生成的定义可得$\mathcal{B}=\sigma(\{(a,b):a,b\in\mathbb{R}^{}\})\subseteq\sigma(\mathcal{O})$。\par
+	由\cref{lem:OpenSet=CountableFiniteOpenSetUnion}可知对$\mathbb{R}^{}$中的任意一个开集，它都可以表示为至多可列个有限开区间的并集，所以$\mathcal{O}\subseteq\sigma(\{(a,b):a,b\in\mathbb{R}^{}\})=\mathcal{B}$，由生成的定义可得$\sigma(\mathcal{O})\subseteq\mathcal{B}$。\par
 	综上，$\sigma(\mathcal{O})=\mathcal{B}$。\par
-	\textbf{b：}对于任意的$(a,b],\;a,b\in\mathbb{R}^{}$，取$(-\infty,a],(-\infty,b]$即有$(a,b]=(-\infty,b]\backslash(-\infty,a]\in\sigma(\{(-\infty,a]:a\in\mathbb{R}^{}\})$，所以有$\{(a,b]:a,b\in\mathbb{R}^{}\}\subset\sigma(\{(-\infty,a]:a\in\mathbb{R}^{}\})$。由生成的定义，$\sigma(\{(a,b]:a,b\in\mathbb{R}^{}\})\subset\sigma(\{(-\infty,a]:a\in\mathbb{R}^{}\})$。\par
-	对于任意的$(-\infty,a],\;a\in\mathbb{R}^{}$，因为$\sigma$域对可列并封闭，并且$(a-n,a]\in\{(a,b]:a,b\in\mathbb{R}^{}\}$对任意$n\in\mathbb{N}^+$成立，所以：
+	\textbf{b：}由\cref{theo:duality between openset and closed set}可知开集的补集是闭集，根据(1)可得$\mathcal{D}\subseteq\sigma(\mathcal{O})$，由生成的定义可得$\sigma(\mathcal{D})\subseteq\sigma(\mathcal{O})$。\par
+	由\cref{theo:duality between openset and closed set}可知闭集的补集是开集，所以$\mathcal{O}\subseteq\sigma(\mathcal{D})$，由生成的定义可得$\sigma(\mathbb{O})\subseteq\sigma(\mathcal{D})$。\par
+	综上，$\sigma(\mathcal{D})=\sigma(\mathcal{O})=\mathcal{B}$。\par
+	\textbf{cde：}仅给出构造公式，利用这些公式、\cref{prop:SigmaField}以及生成的定义即可得出所有的结论。
+	\begin{gather*}
+		(a,b)=\underset{n=1}{\overset{+\infty}{\bigcup}}\left\{\left(-\infty,b-\frac{1}{n}\right]\Big\backslash\left(-\infty,a+\frac{1}{n}\right]\right\}\in\sigma(\{(-\infty,a]:a\in\mathbb{R}^{}\}) \\
+		(-\infty,a]=\left[\underset{n=1}{\overset{+\infty}{\cup}}(a-n,a)\right]\bigcup\left[\underset{n=1}{\overset{+\infty}{\bigcap}}\left(a-\frac{1}{n},a+\frac{1}{n}\right)\right]\in\sigma(\{(a,b):a,b\in\mathbb{R}^{}\}) \\
+		(a,b)=(-\infty,b)\Big\backslash\left[\underset{n=1}{\overset{+\infty}{\bigcap}}\left(-\infty,a+\frac{1}{n}\right)\right]\in\sigma(\{(-\infty,a):a\in\mathbb{R}^{}\}) \\
+		(-\infty,a)=\underset{n=1}{\overset{+\infty}{\cup}}(a-n,a)\in\sigma(\{(a,b):a,b\in\mathbb{R}^{}\}) \\
+		(a,b)=(a,+\infty)\Big\backslash\left[\underset{n=1}{\overset{+\infty}{\bigcap}}\left(b-\frac{1}{n},+\infty\right)\right]\in\sigma(\{(a,+\infty):a\in\mathbb{R}^{}\}) \\
+		(a,+\infty)=\underset{n=1}{\overset{+\infty}{\cup}}(a,a+n)\in\sigma(\{(a,b):a,b\in\mathbb{R}^{}\}) \\
+		(a,b)=\underset{n=1}{\overset{+\infty}{\bigcup}}\left\{\left[a+\frac{1}{n},+\infty\right)\Big\backslash\left[b-\frac{1}{n},+\infty\right)\right\}\in\sigma(\{[a,+\infty):a\in\mathbb{R}^{}\}) \\
+		[a,+\infty)=\left[\underset{n=1}{\overset{+\infty}{\cup}}(a,a+n)\right]\bigcup\left[\underset{n=1}{\overset{+\infty}{\bigcap}}\left(a-\frac{1}{n},a+\frac{1}{n}\right)\right]\in\sigma(\{(a,b):a,b\in\mathbb{R}^{}\}) \\
+		(a,b)=\underset{n=1}{\overset{+\infty}{\bigcup}}\left(a,b-\frac{1}{n}\right]\in\sigma(\{(a,b]:a,b\in\mathbb{R}^{}\}) \\
+		(a,b]=(a,b)\bigcup\left[\underset{n=1}{\overset{+\infty}{\bigcap}}\left(b-\frac{1}{n},b+\frac{1}{n}\right)\right]\in\sigma(\{(a,b):a,b\in\mathbb{R}^{}\}) \\
+		(a,b)=\underset{n=1}{\overset{+\infty}{\bigcup}}\left[a+\frac{1}{n},b\right)\in\sigma(\{[a,b):a,b\in\mathbb{R}^{}\}) \\
+		[a,b)=(a,b)\bigcup\left[\underset{n=1}{\overset{+\infty}{\bigcap}}\left(a-\frac{1}{n},a+\frac{1}{n}\right)\right]\in\sigma(\{(a,b):a,b\in\mathbb{R}^{}\}) \\
+		(a,b)=[a,b]\Big\backslash\left\{\underset{n=1}{\overset{+\infty}{\bigcap}}\left[a,a+\frac{1}{n}\right]\right\}\Big\backslash\left\{\underset{n=1}{\overset{+\infty}{\bigcap}}\left[b,b+\frac{1}{n}\right]\right\}\in\sigma(\{[a,b]:a,b\in\mathbb{R}^{}\}) \\
+		[a,b]=\underset{n=1}{\overset{+\infty}{\bigcap}}\left(a-\frac{1}{n},b+\frac{1}{n}\right)\in\sigma(\{(a,b):a,b\in\mathbb{R}^{}\})
+	\end{gather*}\par
+	(2)开集、闭集、区间的结论由(1)立即可得。对于单点集只需注意到：
 	\begin{equation*}
-		(-\infty,a]=\underset{n=1}{\overset{+\infty}{\cup}}(a-n,a]\in\sigma(\{(a,b]:a,b\in\mathbb{R}^{}\})
+		\forall\;n\in\mathbb{N}^+,\;\underset{n=1}{\overset{+\infty}{\cup}}\left(a-\frac{1}{n},a+\frac{1}{n}\right)\in\mathcal{B}\qedhere
 	\end{equation*}
-	由生成的定义，$\sigma(\{(-\infty,a]:a\in\mathbb{R}^{}\})\subset\sigma(\{(a,b]:a,b\in\mathbb{R}^{}\})$。\par
-	综上，$\sigma(\{(-\infty,a]:a\in\mathbb{R}^{}\})=\sigma(\{(a,b]:a,b\in\mathbb{R}^{}\})$。\par
-	对$(-\infty,a]$取补集即可得到$(a,+\infty)$，于是$\{(a,+\infty):a\in\mathbb{R}^{}\}\subset\sigma(\{(-\infty,a]:a\in\mathbb{R}^{}\})$，因为所有有限开区间都可以由$\{(a,+\infty):a\in\mathbb{R}^{}\}$中两个元素的差集来表示，所以$\mathcal{C}\subset\sigma(\{(-\infty,a]:a\in\mathbb{R}^{}\})$。由生成的定义，$\mathcal{B}=\sigma(\mathcal{C})\subset\sigma(\{(-\infty,a]:a\in\mathbb{R}^{}\})$。\par
-	注意到对任意的$(a,+\infty),a\in\mathbb{R}^{}$都可由有限开区间的可列并表示，于是有$\{(a,+\infty):a\in\mathbb{R}^{}\}\subset\sigma(\mathcal{C})$。由生成的定义，$\sigma(\{(a,+\infty):a\in\mathbb{R}^{}\})\subset\sigma(\mathcal{C})$\info{证明未完成，考虑到borel代数的等价定义实在太多}\par
-	(2)由\cref{lem:OpenSet=CountableFiniteOpenSetUnion}和$\sigma$域对可列并封闭可得开集是Borel集。\par
-	$\mathbb{R}$上的闭集可表示为实直线挖去一些开区间后剩下的部分，而开区间都是开集，从而都是Borel集，由\cref{lem:OpenSet=CountableFiniteOpenSetUnion}可知它们也都能表示为至多可列个有限开区间的并集。可将差运算转化为交与补的运算，由\cref{prop:SetOperation}(7)又可将交运算转化为并与补的运算，因为$\sigma$域对可列并与补封闭，所以闭集是Borel集。\par
-	开区间是开集，闭区间是闭集，它们都是Borel集，剩余区间可以由这二者进行并与补的运算得到，因为$\sigma$域对可列并与补封闭，所以区间也是Borel集。
 \end{proof}
 \begin{definition}
-	定义:
-	\begin{equation*}
-		\mathcal{B}_{\overline{\mathbb{R}}}=\sigma(\mathcal{B},{-\infty},{+\infty})
-	\end{equation*}
+	定义$\mathcal{B}_{\overline{\mathbb{R}}}=\sigma(\{\mathcal{B},\{-\infty\},\{+\infty\}\})$。
 \end{definition}
 \begin{theorem}\label{theo:BorelRwqEquivDef}
 	$\mathcal{B}_{\overline{\mathbb{R}}}$有如下等价定义：
 	\begin{align*}
 		\mathcal{B}_{\overline{\mathbb{R}}}
-		&=\sigma([-\infty,a):a\in\mathbb{R}) \\
-		&=\sigma([-\infty,a]:a\in\mathbb{R}) \\
-		&=\sigma((a,+\infty]:a\in\mathbb{R}) \\
-		&=\sigma([a,+\infty]:a\in\mathbb{R})
+		&=\sigma(\{[-\infty,a):a\in\mathbb{R}\}) \\
+		&=\sigma(\{[-\infty,a]:a\in\mathbb{R}\}) \\
+		&=\sigma(\{(a,+\infty]:a\in\mathbb{R}\}) \\
+		&=\sigma(\{[a,+\infty]:a\in\mathbb{R}\})
 	\end{align*}
 \end{theorem}
 \begin{proof}
-	(1)对任意的$a\in\mathbb{R}$，有：
-	\begin{equation*}
-		[-\infty,a)=\{-\infty\}\cup(-\infty,a)\in\mathcal{B}_{\overline{\mathbb{R}}}
-	\end{equation*}
-	由生成的定义：
-	\begin{equation*}
-		\sigma([-\infty,a):a\in\mathbb{R})\subset\mathcal{B}_{\overline{\mathbb{R}}}
-	\end{equation*}
-	
+	下给出构造公式，利用\cref{prop:BorelSigmaField}(2)、\cref{prop:SigmaField}和生成的定义即可得出结论。
+	\begin{gather*}
+		[-\infty,a)=\{-\infty\}\cup(-\infty,a)\in\mathcal{B}_{\overline{\mathbb{R}}} \\
+		\{-\infty\}=\underset{n=1}{\overset{+\infty}{\cap}}[-\infty, -n),\{+\infty\}=\underset{n=1}{\overset{+\infty}{\cap}}[-\infty,n)^c\in\sigma(\{[-\infty,a):a\in\mathbb{R}\}) \\
+		(-\infty, a)=[-\infty,a)\backslash\{-\infty\}\in\sigma(\{[-\infty,a):a\in\mathbb{R}\}) \\
+		[-\infty,a]=\{-\infty\}\cup(-\infty,a]\in\mathcal{B}_{\overline{\mathbb{R}}} \\
+		\{-\infty\}=\underset{n=1}{\overset{+\infty}{\cap}}[-\infty,-n],\{+\infty\}=\underset{n=1}{\overset{+\infty}{\cap}}[-\infty,n]^c\in\sigma(\{[-\infty,a]:a\in\mathbb{R}\}) \\
+		(-\infty,a]=[-\infty,a]\backslash\{-\infty\}\in\sigma(\{[-\infty,a):a\in\mathbb{R}\}) \\
+		(a,+\infty]=(a,+\infty)\cup\{+\infty\}\in\mathcal{B}_{\overline{\mathbb{R}}} \\
+		\{-\infty\}=\underset{n=1}{\overset{+\infty}{\cap}}(-n,+\infty]^c,\{+\infty\}=\underset{n=1}{\overset{+\infty}{\cap}}(n,+\infty]\in\sigma(\{(a,+\infty]:a\in\mathbb{R}\}) \\
+		(a,+\infty)=(a,+\infty]\backslash\{+\infty\}\in\sigma(\{(a,+\infty]:a\in\mathbb{R}\}) \\
+		[a,+\infty]=[a,+\infty)\cup\{+\infty\}\in\mathcal{B}_{\overline{\mathbb{R}}} \\
+		\{-\infty\}=\underset{n=1}{\overset{+\infty}{\cap}}[-n,+\infty]^c,,\{+\infty\}=\underset{n=1}{\overset{+\infty}{\cap}}[n,+\infty]\in\sigma(\{[a,+\infty]:a\in\mathbb{R}\}) \\
+		[a,+\infty)=[a,+\infty]\backslash\{+\infty\}\in\sigma(\{[a,+\infty]:a\in\mathbb{R}\})\qedhere
+	\end{gather*}
 \end{proof}
 
 
