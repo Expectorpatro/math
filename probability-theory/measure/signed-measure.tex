@@ -2,18 +2,18 @@
 
 \subsection{符号测度}
 \begin{definition}
-	设$(X,\mathscr{F})$是一个可测空间，若从$\mathscr{F}$到$\overline{R}$的集函数$\varphi$满足：
+	设$(X,\mathscr{F})$是一个可测空间，若从$\mathscr{F}$到$\overline{\mathbb{R}^{}}$的集函数$\varphi$满足：
 	\begin{enumerate}
 		\item $\varphi(\varnothing)=0$；
 		\item $\varphi$具有可列可加性。
 	\end{enumerate}
-	则称$\varphi$	为\gls{SignedMeasure}。若对任意的$A\in\mathscr{F}$有$|\varphi(A)|<+\infty$，则称$\varphi$是有限的；若存在$X$的可列可测分割$\{A_n\}\subset\mathscr{F}$满足对任意的$n\in\mathbb{N}^+$有$|\varphi(A_n)|<+\infty$，则称$\varphi$是$\sigma$有限的。
+	则称$\varphi$	为\gls{SignedMeasure}。若对任意的$A\in\mathscr{F}$有$|\varphi(A)|<+\infty$，则称$\varphi$是有限的；若存在$X$的可列可测分割$\{A_n\}\subseteq\mathscr{F}$满足对任意的$n\in\mathbb{N}^+$有$|\varphi(A_n)|<+\infty$，则称$\varphi$是$\sigma$有限的。
 \end{definition}
 \begin{property}
 	设$(X,\mathscr{F})$是一个可测空间，其上的符号测度$\varphi$具有如下性质：
 	\begin{enumerate}
 		\item $\varphi$具有有限可加性；
-		\item $\varphi$只可能出现以下两种情况中的一种：
+		\item $\varphi$只可能出现以下两种情况中的一种\footnote{下面所涉及的结论都是关于第一种情况的，对于第二种情况只需取$-\varphi$即可得到相关结果。}：
 		\begin{gather*}
 			\forall\;A\in\mathscr{F},\;-\infty<\varphi(A)\leqslant+\infty \\
 			\forall\;A\in\mathscr{F},\;-\infty\leqslant\varphi(A)<+\infty
@@ -27,11 +27,16 @@
 		\begin{equation*}
 			\sum_{n=1}^{+\infty}|\varphi(A_n)|<+\infty
 		\end{equation*}
+		\item 记：
+		\begin{equation*}
+			\forall\;A\in\mathscr{F},\;\varphi^*(A)=\sup\{\varphi(B):B\subseteq A,\;B\in\mathscr{F}\}
+		\end{equation*}
+		则$\varphi^*$是$\mathscr{F}$上单调且满足$\varphi^*(\varnothing)=0$的非负集函数；
 	\end{enumerate}
 \end{property}
 \begin{proof}
 	(1)由符号测度的定义显然可得。\par
-	(2)设$A,B\in\mathscr{F}$且$\varphi(A)=+\infty,\varphi(B)=-\infty$，则由(1)可得：
+	(2)设$A,B\in\mathscr{F}$且$\varphi(A)=+\infty,\varphi(B)=-\infty$，则由(1)和\cref{prop:SigmaField}(4)可得：
 	\begin{equation*}
 		\varphi(A\cup B)=\varphi(A)+\varphi(B\backslash A)=\varphi(B)+\varphi(A\backslash B)
 	\end{equation*}
@@ -60,10 +65,27 @@
 		\left|\varphi\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n^+\right)\right|<+\infty,\quad
 		\left|\varphi\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n^-\right)\right|<+\infty
 	\end{equation*}
-	因为$\{A_n\}$互不相交，由$\{A_n^+\},\{A_n^-\}$的构造方式显然二者内部互不相交且二者之间也互不相交，于是：
+	因为$\{A_n\}$互不相交，由$\{A_n^+\},\{A_n^-\}$的构造方式显然二者内部互不相交且二者之间也互不相交，于是有：
 	\begin{align*}
 		\sum_{n=1}^{+\infty}|\varphi(A_n)|&=\sum_{n=1}^{+\infty}[|\varphi(A_n^+)|+|\varphi(A_n^-)|] =\sum_{n=1}^{+\infty}\varphi(A_n^+)+\sum_{n=1}^{+\infty}|\varphi(A_n^-)| \\
 		&=\sum_{n=1}^{+\infty}\varphi(A_n^+)+\left|\sum_{n=1}^{+\infty}\varphi(A_n^-)\right|
-		=\varphi\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n^+\right)+\left|\varphi\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n^-\right)\right|<+\infty\qedhere
-	\end{align*}
+		=\varphi\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n^+\right)+\left|\varphi\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n^-\right)\right|<+\infty
+	\end{align*}\par
+	(5)由$\varphi(\varnothing)=0$显然可得。
+\end{proof}
+\begin{definition}
+	设$(X,\mathscr{F})$是一个可测空间，$\mu,\nu$为其上的两个测度。只要$\mu,\nu$中有一个是有限的，则可定义符号测度：
+	\begin{equation*}
+		\forall\;A\in\mathscr{F},\;(\mu-\nu)(A)\coloneq\mu(A)-\nu(A)
+	\end{equation*}
+\end{definition}
+\begin{lemma}
+	设$(X,\mathscr{F})$是一个可测空间，$\varphi$是其上的符号测度。
+	\begin{enumerate}
+		\item 若$A\in\mathscr{F}$且$\varphi(A)<+\infty$，则对任意的$\varepsilon>0$，存在$B\subseteq A$满足$\varphi(B)\geqslant0$且$\varphi^*(A\backslash B)\leqslant\varepsilon$；
+		\item 若$A\in\mathscr{F}$且$\varphi(A)<0$，则存在$B\in\mathscr{F}$满足$B\subseteq A,\;\varphi(B)<0$且$\varphi^*(B)=0$。
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	(1)
 \end{proof}
