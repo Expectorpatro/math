@@ -6,103 +6,17 @@
 	\end{equation*}
 	则称其服从均值为$\mu$、方差为$\sigma^2$的\textbf{正态分布}，记作$X\sim\operatorname{N}(\mu,\sigma^2)$。
 \end{definition}
-\subsection{多元正态分布的定义}
-\begin{definition}\label{def:MultiNormal1}
-	若一个随机向量$\mathbf{X}=(\mathbf{X}_1,\mathbf{X}_2,\dots,\mathbf{X}_n)^T\in\mathbb{R}^n$满足以下概率密度函数：
-	\begin{equation}
-		p(\mathbf{X}|\boldsymbol{\mu},\Sigma)=\frac{1}{(2\pi)^{\frac{n}{2}}(\det\Sigma)^{\frac{1}{2}}}e^{-\frac{1}{2}(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{X}-\boldsymbol{\mu})}\notag
-	\end{equation}
-	则称其为一个正态随机向量，记作$\mathbf{X}\sim N_n(\boldsymbol{\mu},\;\Sigma)$。其中，$\boldsymbol{\mu}=(\seq{\mu}{n})^T\in\mathbb{R}^{n}$，$\Sigma\in M_{n}(\mathbb{R})$且$\Sigma>\mathbf{0}$。
-\end{definition}
-\begin{theorem}
-	对于正态随机向量的概率密度函数，$\boldsymbol{\mu}$和$\Sigma$分别是$\mathbf{X}$的均值向量和协方差矩阵。
-\end{theorem}
-\begin{proof}
-	令：
-	\begin{equation}
-		\mathbf{Y}=\Sigma^{-\frac{1}{2}}(\mathbf{X}-\boldsymbol{\mu})\notag
-	\end{equation}\par
-	则有$\mathbf{X}=\Sigma^{\frac{1}{2}}\mathbf{Y}+\boldsymbol{\mu}$，由求随机变量函数的分布中的变量变换法可知\footnote{这是由于$\mathbf{X}$到$\mathbf{Y}$的变换是一个线性变换，线性变换让$\mathbf{X}$关于$\mathbf{Y}$有连续偏导数，同时这个线性变换可逆，满足变量变换法的两大条件。}\info{写完变量变换法链接过来}：
-	\begin{equation}
-		p(\mathbf{Y})=p(\Sigma^{\frac{1}{2}}\mathbf{Y}+\boldsymbol{\mu})|\mathbf{J}|\notag
-	\end{equation}\par
-	其中$\mathbf{J}$为变换的Jacobi行列式：
-	\begin{equation}
-		\mathbf{J}=
-		\begin{vmatrix}
-			\dfrac{\partial \mathbf{X}_1}{\partial \mathbf{Y}_1} & \cdots & \dfrac{\partial \mathbf{X}_1}{\partial \mathbf{Y}_n} \\
-			\vdots & \ddots & \vdots \\
-			\dfrac{\partial \mathbf{X}_n}{\partial \mathbf{Y}_1} & \cdots & \dfrac{\partial \mathbf{X}_n}{\partial \mathbf{Y}_n}
-		\end{vmatrix}
-		=\det\Sigma^{\frac{1}{2}}=(\det\Sigma)^{\frac{1}{2}}\notag
-	\end{equation}\par
-	那么$\mathbf{Y}$的概率密度函数为：
-	\begin{equation*}
-		p(\mathbf{Y})
-		=\frac{1}{(2\pi)^{\frac{n}{2}}}e^{-\frac{1}{2}               \mathbf{Y}^T\mathbf{Y}}
-		=\prod_{i=1}^n\frac{1}{\sqrt{2\pi}}e^{-\frac{\mathbf{Y}_i^2}{2}}
-	\end{equation*}\par
-	对$\mathbf{Y}_i$求边缘分布可得$\mathbf{Y}_i\sim N(0,\;1)$，并且可以发现$\mathbf{Y}$的$n$个分量的联合密度等于每个分量密度函数的乘积，于是$\mathbf{Y}$的各个分量相互独立，所以有：
-	\begin{equation*}
-		\operatorname{E}(\mathbf{Y})=\mathbf{0},\;\operatorname{Cov}(\mathbf{Y})=\mathbf{I}
-	\end{equation*}
-	结合$\mathbf{Y}$与$\mathbf{X}$的关系，由\cref{prop:CovMat}可得：
-	\begin{equation*}
-		\operatorname{E}(\mathbf{X})=\boldsymbol{\mu},\;\operatorname{Cov}(\mathbf{X})=\Sigma \qedhere
-	\end{equation*}
-\end{proof}
-\begin{definition}\label{def:MultiNormalPDF2}
-	正态随机向量$\mathbf{X}$的概率密度函数也可写作：
-	\begin{equation*}
-		p(\mathbf{X})=\frac{1}{(2\pi)^{\frac{n}{2}}(\det\Sigma)^{\frac{1}{2}}}e^{-\frac{1}{2}\operatorname{tr}[(\mathbf{X}-\boldsymbol{\mu})(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^{-1}]}
-	\end{equation*} 
-\end{definition}
-\begin{proof}
-	只需注意到二次型的迹就是自身以及\cref{prop:Trace}：
-	\begin{equation*}
-		(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{X}-\boldsymbol{\mu})=\operatorname{tr}[(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{X}-\boldsymbol{\mu})]=\operatorname{tr}[(\mathbf{X}-\boldsymbol{\mu})(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^{-1}]\qedhere
-	\end{equation*}
-\end{proof}
-\subsubsection{多元正态分布的等价定义}
+\subsection{多元正态分布}
 \begin{definition}\label{def:MultiNormal}
 	$\mathbf{X}$为$n$维随机向量。若存在矩阵$A\in M_{n\times r}(\mathbb{R})$使得$\mathbf{X}=A\mathbf{U}+\boldsymbol{\mu}$，其中$\mathbf{U}=(\mathbf{U}_1,\mathbf{U}_2,\dots,\mathbf{U}_r)^T,\;\mathbf{U}_i\sim N(0,1)$且相互独立，$\boldsymbol{\mu}$为$n$维非随机实向量，则称$\mathbf{X}$为服从均值为$\boldsymbol{\mu}$、协方差矩阵为$\Sigma=AA^T$的多元正态向量，记为$\mathbf{X}\sim N_n(\boldsymbol{\mu},\Sigma)$，其中$\Sigma\geqslant\mathbf{0}$。若$|\Sigma|=0$，则称此时的分布为\textbf{奇异正态分布}。
 \end{definition}
-\begin{theorem}
-	$\mathbf{X}$是一个随机向量，其协方差矩阵为正定矩阵，则$\mathbf{X}$满足\cref{def:MultiNormal1}的充分必要条件是满足\cref{def:MultiNormal}，即两种正态分布的定义在随机向量的协方差矩阵是正定矩阵的情形下是等价的。
-\end{theorem}
-\begin{proof}
-	\textbf{(1)充分性：}
-	设$\mathbf{X}$满足\cref{def:MultiNormal}，因为$\mathbf{U}$中的元素服从标准正态分布且彼此独立，所以有：
-	\begin{equation*}
-		\operatorname{E}(\mathbf{U})=\mathbf{0},\;\operatorname{Cov}(\mathbf{U})=I
-	\end{equation*}
-	同时：
-	\begin{equation*}
-		p(\mathbf{U})
-		=\prod_{i=1}^n\frac{1}{\sqrt{2\pi}}e^{-\frac{\mathbf{U}_i^2}{2}} \\
-		=\frac{1}{(2\pi)^{\frac{n}{2}}[\det \operatorname{Cov}(\mathbf{U})]^{\frac{1}{2}}}e^{-\frac{1}{2}\mathbf{U}^T[\operatorname{Cov}(\mathbf{U})]^{-1}\mathbf{U}}
-	\end{equation*}
-	因为$\mathbf{X}=A\mathbf{U}+\boldsymbol{\mu}$，由\info{期望的性质}和\cref{prop:CovMat}(3)(4)(5)可得：
-	\begin{equation*}
-		\operatorname{E}(\mathbf{X})=\boldsymbol{\mu},\;\operatorname{Cov}(\mathbf{X})=AA^T
-	\end{equation*}
-	因为$\operatorname{Cov}(\mathbf{X})>0$，由\cref{theo:PositiveDefinite}可得$\operatorname{rank}[\operatorname{Cov}(\mathbf{X})]=n$。因为$\operatorname{rank}(AB)\leqslant\min\{\operatorname{rank}(A),\operatorname{rank}(B)\}$\info{写完矩阵的秩做链接}，所以$\operatorname{rank}(A)=n$，即$r=n$，$A$是一个$n$阶可逆矩阵，于是$\mathbf{U}=A^{-1}(\mathbf{X}-\boldsymbol{\mu})$。由求随机变量函数的分布中的变量变换法可知\info{写完变量变换法链接过来}：
-	\begin{align*}
-		P(\mathbf{X})
-		&=P[A^{-1}(\mathbf{X}-\boldsymbol{\mu})]|\mathbf{J}| \\
-		&=\frac{1}{(2\pi)^{\frac{n}{2}}\{\det \operatorname{Cov}[A^{-1}(\mathbf{X}-\boldsymbol{\mu})]\}^{\frac{1}{2}}} \\
-		&\quad\cdot e^{-\frac{1}{2}[A^{-1}(\mathbf{X}-\boldsymbol{\mu})]^T\{ \operatorname{Cov}[A^{-1}(\mathbf{X}-\boldsymbol{\mu})]\}^{-1}[A^{-1}(\mathbf{X}-\boldsymbol{\mu})]}|\det A^{-1}| \\
-		&=\frac{1}{(2\pi)^{\frac{n}{2}}[\det \operatorname{Cov}(\mathbf{X})]^{\frac{1}{2}}}e^{-\frac{1}{2}(\mathbf{X}-\boldsymbol{\mu})^T[\operatorname{Cov}(\mathbf{X})]^{-1}(\mathbf{X}-\boldsymbol{\mu})}
-	\end{align*}
-	即$\mathbf{X}$满足\cref{def:MatNormal1}。\par
-	\textbf{(2)必要性：}设$\mathbf{X}$满足\cref{def:MultiNormal1}，此时只要选择$A=\Sigma^\frac{1}{2}$即可得到$\mathbf{X}$满足\cref{def:MultiNormal}。
-\end{proof}
-
-\subsection{多元正态分布的性质}
+\begin{note}
+	因为由\info{期望的性质}和\cref{prop:CovMat}(3)(4)(5)可得$\operatorname{E}(\mathbf{X})=\boldsymbol{\mu},\;\operatorname{Cov}(\mathbf{X})=AA^T$，所以上定义成立。
+\end{note}
 \begin{property}\label{prop:MultiNormal}
-	设$\mathbf{X}\sim\operatorname{N}_n(\boldsymbol{\mu},\Sigma),\Sigma\geqslant\mathbf{0}$，则：
+	多元正态分布具有如下性质：
 	\begin{enumerate}
-		\item 当$\Sigma>\mathbf{0}$时，$\mathbf{X}$的概率函数为：
+		\item 设$\mathbf{X}\sim\operatorname{N}_n(\boldsymbol{\mu},\Sigma),\Sigma\geqslant\mathbf{0}$，则当$\Sigma>\mathbf{0}$时，$\mathbf{X}$的概率函数为：
 		\begin{align*}
 			p(\mathbf{X})&=\frac{1}{(2\pi)^{\frac{n}{2}}(\det\Sigma)^{\frac{1}{2}}}\exp\left\{-\frac{1}{2}(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{X}-\boldsymbol{\mu})\right\} \\
 			&=\frac{1}{(2\pi)^{\frac{n}{2}}(\det\Sigma)^{\frac{1}{2}}}\exp\{-\frac{1}{2}\operatorname{tr}[(\mathbf{X}-\boldsymbol{\mu})(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^{-1}]\}
@@ -111,28 +25,8 @@
 		\begin{equation*}
 			p(\mathbf{X})=(2\pi)^{-\frac{r}{2}}\left(\prod\limits_{i=1}^r\lambda_i\right)^{-\frac{1}{2}}\exp\left\{-\frac{1}{2}(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^-(\mathbf{X}-\boldsymbol{\mu})\right\}
 		\end{equation*}
-		\item 设$B\in M_{m\times n}(\mathbb{R}),\;c\in\mathbb{R}^{n}$，则$\mathbf{Y}=B\mathbf{X}+c\sim N(B\boldsymbol{\mu}+c,B\Sigma B^T)$。
-	\end{enumerate}
-\end{property}
-\begin{proof}
-	(2)因为$\mathbf{X}\sim N_n(\boldsymbol{\mu},\Sigma)$，由\cref{def:MultiNormal}可得，存在$A\in M_{n\times r}(\mathbb{R}),\;\boldsymbol{\mu}\in\mathbb{R}^{n}$使得：
-	\begin{equation*}
-		\mathbf{X}=A\mathbf{U}+\boldsymbol{\mu},\;AA^T=\Sigma,\;U\sim N(\mathbf{0},I)
-	\end{equation*}
-	于是：
-	\begin{equation*}
-		\mathbf{Y}=B(A\mathbf{U}+\boldsymbol{\mu})+c=BA\mathbf{U}+B\boldsymbol{\mu}+c
-	\end{equation*}
-	注意到$BA(BA)^T=BAA^TB^T=B\Sigma B^T$，由\cref{def:MultiNormal}可得$\mathbf{Y}\sim N(B\boldsymbol{\mu}+c,B\Sigma B^T)$。
-\end{proof}
-\begin{corollary}\label{cor:MultiNormalLinearTransform}
-	由上述定理可以得到如下推论：
-	\begin{enumerate}
-		\item 设$\mathbf{X}\sim N_n(\boldsymbol{\mu},\Sigma),\;\Sigma>\mathbf{0}$，则$\mathbf{Y}=\Sigma^{-\frac{1}{2}}\mathbf{X}\sim N_n(\Sigma^{-\frac{1}{2}}\boldsymbol{\mu},I_n)$；
-		\item 设$\mathbf{X}\sim N_n(\boldsymbol{\mu},\sigma^2I_n)$，$Q$为正交矩阵，则$Q\mathbf{X}\sim N_n(Q\boldsymbol{\mu},\sigma^2I_n)$；
-		\item 设$\mathbf{X}\sim N_n(\boldsymbol{\mu},\Sigma),\;c\in \mathbb{R}^{n}$，则$c^T\mathbf{X}\sim N(c^T\boldsymbol{\mu},c^T\Sigma c)$；
-		\item 设$\mathbf{X}\sim N_n(\boldsymbol{\mu},\Sigma),\;\boldsymbol{\mu}=(\seq{\mu}{n})^T,\;\Sigma=(\sigma_{ij})$，则$\mathbf{X}_i\sim N(\mu_i,\sigma_{ii}),\;i=1,2,\dots,n$。
-		\item 设$\mathbf{X}\sim N_n(\boldsymbol{\mu},\Sigma),\;\boldsymbol{\mu}=(\seq{\mu}{n})^T,\;\Sigma=(\sigma_{ij})$，$i_1<i_2<\cdots<i_k$，则有$(\mathbf{X}_{i_1},\mathbf{X}_{i_2},\dots,\mathbf{X}_{i_k})^T\sim N(\boldsymbol{\mu}_0,\Sigma_0)$，其中：
+		\item 设$\mathbf{X}\sim\operatorname{N}_n(\boldsymbol{\mu},\Sigma),\Sigma\geqslant\mathbf{0}$，$B\in M_{m\times n}(\mathbb{R}),\;c\in\mathbb{R}^{n}$，则$\mathbf{Y}=B\mathbf{X}+c\sim N(B\boldsymbol{\mu}+c,B\Sigma B^T)$；
+		\item 设$\mathbf{X}\sim N_n(\boldsymbol{\mu},\Sigma),\;\boldsymbol{\mu}=(\seq{\mu}{n})^T,\;\Sigma=(\sigma_{ij})$，$i_1<i_2<\cdots<i_k,\;k\leqslant n$，则有$(\mathbf{X}_{i_1},\mathbf{X}_{i_2},\dots,\mathbf{X}_{i_k})^T\sim N(\boldsymbol{\mu}_0,\Sigma_0)$，其中：
 		\begin{equation*}
 			\boldsymbol{\mu}_0=
 			\begin{pmatrix}
@@ -150,36 +44,62 @@
 				\sigma_{i_ki_1} & \sigma_{i_ki_2} & \cdots & \sigma_{i_ki_k}
 			\end{pmatrix}
 		\end{equation*}
+		\item 设$\mathbf{X}$是一个$n$维随机向量，则$\mathbf{X}\sim N_n(\boldsymbol{\mu},\Sigma)$当且仅当它的特征函数为：
+		\begin{equation*}
+			\varphi_\mathbf{X}(t)=\exp\left(it^T\boldsymbol{\mu}-\frac{t^T\Sigma t}{2}\right),\;t\in\mathbb{R}^{n}
+		\end{equation*}
+		\item 设$\mathbf{X}$是一个$n$维随机向量，则$\mathbf{X}$服从$n$维多元正态分布的充分必要条件为对于任意的$\alpha\in\mathbb{R}^{n}$，$\alpha^T\mathbf{X}$服从正态分布；
+		\item 设$\mathbf{X}\sim\operatorname{N}_m(\boldsymbol{\mu}_1,\Sigma_1)$和$\mathbf{Y}\sim\operatorname{N}_n(\boldsymbol{\mu}_2,\Sigma_2)$独立，则：
+		\begin{equation*}
+			\mathbf{Z}=
+			\begin{pmatrix}
+				\mathbf{X} \\
+				\mathbf{Y}
+			\end{pmatrix}
+			\sim N_{m+n}\left[
+			\begin{pmatrix}
+				\boldsymbol{\mu}_{1} \\
+				\boldsymbol{\mu}_{2}
+			\end{pmatrix},\;
+			\begin{pmatrix}
+				\Sigma_1 & \mathbf{0} \\
+				\mathbf{0} & \Sigma_2
+			\end{pmatrix}
+			\right]
+		\end{equation*}
+		\item 设$\mathbf{X}\sim N_n(\boldsymbol{\mu}_1,\Sigma_1)$和$\mathbf{Y}\sim N_n(\boldsymbol{\mu}_2,\Sigma_2)$独立，则$\mathbf{X}+\mathbf{Y}\sim N_n(\boldsymbol{\mu}+\boldsymbol{\nu},\Sigma_\mathbf{X}+\Sigma_\mathbf{Y})$；
+		\item 设$\mathbf{X_j}\sim\operatorname{N}_{r_j}(\boldsymbol{\mu_j},\Sigma_{j}),\;j=1,2,\dots,m$，$\mathbf{X_j}$的联合分布为正态分布。若$\mathbf{X_j}$不相关，则$\mathbf{X_j}$相互独立，即对于服从多维正态分布的随机向量而言，若它们的联合分布仍是多维正态分布，则不相关和独立等价；
+		\item 设$\mathbf{X}\sim N_n(\boldsymbol{\mu},\Sigma)$，$\Sigma>\mathbf{0}$，则$(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{X}-\boldsymbol{\mu})\sim\chi_n^2$。
 	\end{enumerate}
-\end{corollary}
+\end{property}
 \begin{proof}
-	(1)由\cref{prop:ReverseSquareRootMat}(3)可知$\Sigma^{-\frac{1}{2}}$是对称阵，所以：
+	(1)\textbf{当$\Sigma>\mathbf{0}$时：}因为$\Sigma$是实对称矩阵且$\Sigma>\mathbf{0}$，所以$\Sigma^{\frac{1}{2}},\Sigma^{-\frac{1}{2}}$存在，可将$\mathbf{X}$表示为$\mathbf{X}=\Sigma^{\frac{1}{2}}\mathbf{Y}+\boldsymbol{\mu}$，其中$\mathbf{Y}$是由相互独立的服从标准正态分布的随机变量构成的$n$维随机向量，有分布函数：
 	\begin{equation*}
-		\Sigma^{-\frac{1}{2}}\Sigma(\Sigma^{-\frac{1}{2}})^T=\Sigma^{-\frac{1}{2}}\Sigma^{\frac{1}{2}}\Sigma^{\frac{1}{2}}\Sigma^{-\frac{1}{2}}=I_n
-	\end{equation*}\par
-	(2)显然：
-	\begin{equation*}
-		Q\sigma^2IQ^T=\sigma^2QQ^T=\sigma^2I_n
-	\end{equation*}\par
-	(3)可直接得到。\par
-	(4)对$\mathbf{X}_i$，取$c=(0,\dots,0,1,0,\dots,0)^T$，其中$c$的第$i$位为$1$其余全是$0$，于是：
-	\begin{equation*}
-		c^T\mathbf{X}=\mathbf{X}_i,\;c^T\boldsymbol{\mu}=\mu_i,\;c^T\Sigma c=\sigma_{ii}
+		p(\mathbf{Y})=\prod_{i=1}^{n}\frac{1}{\sqrt{2\pi}}\exp\left(-\frac{\mathbf{Y}_i^2}{2}\right)=\frac{1}{(2\pi)^{\frac{n}{2}}}\exp\left(-\frac{1}{2}\mathbf{Y}^T\mathbf{Y}\right)
 	\end{equation*}
-	所以$\mathbf{X}_i\sim N(\mu_i,\sigma_{ii}),\;i=1,2,\dots,n$。\par
-	(5)取：
+	由求随机变量函数的分布中的变量变换法可知\info{随机变量函数分布的变量变换法，逆矩阵的行列式，正定矩阵的行列式，矩阵乘积的行列式，逆平方根阵的对称性，矩阵乘积的转置}：
+	\begin{align*}
+		&p(\mathbf{X})=p[\Sigma^{-\frac{1}{2}}(\mathbf{X}-\boldsymbol{\mu})]|\det\Sigma^{-\frac{1}{2}}| \\
+		=&\frac{1}{(2\pi)^{\frac{n}{2}}(\det\Sigma)^\frac{1}{2}}\exp\left\{-\frac{1}{2}[\Sigma^{-\frac{1}{2}}(\mathbf{X}-\boldsymbol{\mu})]^T[\Sigma^{-\frac{1}{2}}(\mathbf{X}-\boldsymbol{\mu})]\right\} \\
+		=&\frac{1}{(2\pi)^{\frac{n}{2}}(\det\Sigma)^{\frac{1}{2}}}\exp\left\{-\frac{1}{2}(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{X}-\boldsymbol{\mu})\right\}
+	\end{align*}
+	只需注意到二次型的迹就是自身以及\cref{prop:Trace}(3)就有：
 	\begin{equation*}
-		A=
-		\begin{pmatrix}
-			e_{i_1}^T \\
-			e_{i_2}^T \\
-			\vdots \\
-			e_{i_k}^T
-		\end{pmatrix}
+		(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{X}-\boldsymbol{\mu})=\operatorname{tr}[(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{X}-\boldsymbol{\mu})]=\operatorname{tr}[(\mathbf{X}-\boldsymbol{\mu})(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^{-1}]
+	\end{equation*}\par
+	\textbf{当$\det\Sigma=0$时：}\par
+	(2)因为$\mathbf{X}\sim N_n(\boldsymbol{\mu},\Sigma)$，所以存在$A\in M_{n\times r}(\mathbb{R}),\;\boldsymbol{\mu}\in\mathbb{R}^{n}$使得：
+	\begin{equation*}
+		\mathbf{X}=A\mathbf{U}+\boldsymbol{\mu},\;AA^T=\Sigma,\;U\sim N(\mathbf{0},I)
 	\end{equation*}
-	其中$e_{i_j}$为单位列向量，只在第$i_j$位取$1$，其余位置上元素为$0$，$j=1,2,\dots,k$。于是有：
+	于是：
+	\begin{equation*}
+		\mathbf{Y}=B(A\mathbf{U}+\boldsymbol{\mu})+c=BA\mathbf{U}+B\boldsymbol{\mu}+c
+	\end{equation*}
+	注意到$BA(BA)^T=BAA^TB^T=B\Sigma B^T$，所以$\mathbf{Y}\sim N(B\boldsymbol{\mu}+c,B\Sigma B^T)$。\par
+	(3)取$A=(e_{i_1}^T;e_{i_2}^T;\cdots;e_{i_k}^T)$，其中$e_{i_j}$为单位列向量，只在第$i_j$位取$1$，其余位置上元素为$0$，$j=1,2,\dots,k$，于是有：
 	\begin{gather*}
-		A\boldsymbol{\mu}=(\mu_{i_i},\mu_{i_2},\dots,\mu_{i_k})^T=\mu_0
+		A\boldsymbol{\mu}=(\mu_{i_i},\mu_{i_2},\dots,\mu_{i_k})^T=\boldsymbol{\mu}_0
 		\\
 		A\Sigma A^T=
 		\begin{pmatrix}
@@ -197,16 +117,8 @@
 		\end{pmatrix}
 		=\Sigma_0
 	\end{gather*}
-	由上一定理可得$(\mathbf{X}_{i_1},\mathbf{X}_{i_2},\dots,\mathbf{X}_{i_k})^T\sim N(\boldsymbol{\mu}_0,\Sigma_0)$。
-\end{proof}
-\begin{theorem}\label{theo:c.f.MultiNormal}
-	设$\mathbf{X}$是一个随机向量，则$\mathbf{X}\sim N_n(\boldsymbol{\mu},\Sigma)$当且仅当它的特征函数为：
-	\begin{equation*}
-		\varphi_\mathbf{X}(t)=\exp\left(it^T\boldsymbol{\mu}-\frac{t^T\Sigma t}{2}\right),\;t\in\mathbb{R}^{n}
-	\end{equation*}
-\end{theorem}
-\begin{proof}
-	若$X\sim N_n(\boldsymbol{\mu},\Sigma)$，则由\cref{def:MultiNormal}可知，存在矩阵$A\in M_{n\times r}(\mathbb{R})$使得$\mathbf{X}=A\mathbf{U}+\boldsymbol{\mu}$，其中$\mathbf{U}=(\mathbf{U}_1,\mathbf{U}_2,\dots,\mathbf{U}_r)^T$，$\mathbf{U}_i\sim N(0,1)$且互相独立，$\boldsymbol{\mu}$为$n$维非随机实向量，$\Sigma=AA^T$。由\cref{prop:CharacteristicFunction}(5)可得\info{需要证明1维正态分布的特征函数}：
+	由(2)可得$(\mathbf{X}_{i_1},\mathbf{X}_{i_2},\dots,\mathbf{X}_{i_k})^T\sim N(\boldsymbol{\mu}_0,\Sigma_0)$。\par
+	(4)	若$X\sim N_n(\boldsymbol{\mu},\Sigma)$，则存在矩阵$A\in M_{n\times r}(\mathbb{R})$使得$\mathbf{X}=A\mathbf{U}+\boldsymbol{\mu}$，其中$\mathbf{U}=(\mathbf{U}_1,\mathbf{U}_2,\dots,\mathbf{U}_r)^T$，$\mathbf{U}_i\sim N(0,1)$且互相独立，$\boldsymbol{\mu}$为$n$维非随机实向量，$\Sigma=AA^T$。由\cref{prop:CharacteristicFunction}(5)可得\info{需要证明1维正态分布的特征函数}：
 	\begin{equation*}
 		\varphi_\mathbf{U}(t)=\prod_{i=1}^n\varphi_{\mathbf{U}_i}(t_i)
 		=\prod_{i=1}^ne^{-\frac{t_i^2}{2}}=e^{-\frac{t^Tt}{2}},\;t\in\mathbb{R}^{n}
@@ -222,14 +134,9 @@
 		=e^{it^T\boldsymbol{\mu}}e^{-\frac{t^T\Sigma t}{2}}
 		=\exp\left(it^T\boldsymbol{\mu}-\frac{t^T\Sigma t}{2}\right)
 	\end{align*}
-	由\cref{prop:CharacteristicFunction}(6)，概率分布与特征函数之间是一一对应的关系，于是结论成立。
-\end{proof}
-\begin{theorem}\label{theo:MultiNormal3}
-	设$\mathbf{X}$是一个$n$维随机向量，则$\mathbf{X}$服从$n$维多元正态分布的充分必要条件为对于任意的$\alpha\in\mathbb{R}^{n}$，$\alpha^T\mathbf{X}$服从正态分布。
-\end{theorem}
-\begin{proof}
-	\textbf{(1)必要性：}由\cref{cor:MultiNormalLinearTransform}(3)直接得到。\par
-	\textbf{(2)充分性：}由\cref{theo:c.f.MultiNormal}可知此时$\alpha^T\mathbf{X}$的特征函数为：
+	由\cref{prop:CharacteristicFunction}(6)可知结论成立。\par
+	(5)\textbf{(必要性：}由(2)直接得到。\par
+	\textbf{充分性：}由(4)可知此时$\alpha^T\mathbf{X}$的特征函数为：
 	\begin{equation*}
 		\varphi_{\alpha^T\mathbf{X}}(t)=\exp\left(it\mu-\frac{1}{2}t^2\sigma^2\right)
 	\end{equation*}
@@ -240,42 +147,15 @@
 	\end{gather*}
 	于是有：
 	\begin{equation*}
-		\varphi_{\alpha^T\mathbf{X}}(t)=\exp\left(it\alpha^T\operatorname{E}(\mathbf{X})-\frac{t\alpha^T\operatorname{Cov}(\mathbf{X})\alpha t}{2}\right)
+		\varphi_{\alpha^T\mathbf{X}}(t)=\exp\left[it\alpha^T\operatorname{E}(\mathbf{X})-\frac{t\alpha^T\operatorname{Cov}(\mathbf{X})\alpha t}{2}\right]
 	\end{equation*}
 	由$\alpha$的任意性，上式可写作：
 	\begin{equation*}
-		\varphi_{\mathbf{X}}(\beta)=\exp\left(i\beta^T\operatorname{E}(\mathbf{X})-\frac{\beta^T\operatorname{Cov}(\mathbf{X})\beta}{2}\right)
+		\varphi_{\mathbf{X}}(\beta)=\exp\left[i\beta^T\operatorname{E}(\mathbf{X})-\frac{\beta^T\operatorname{Cov}(\mathbf{X})\beta}{2}\right]
 	\end{equation*}
-	由\cref{prop:CharacteristicFunction}(6)和\cref{theo:c.f.MultiNormal}可知$\mathbf{X}$服从多元正态分布。
-\end{proof}
-\begin{theorem}\label{theo:MultiNormalConcat}
-	设$\mathbf{X}$和$\mathbf{Y}$分别为$m$维正态随机向量和$n$维正态随机向量且相互独立，则：
-	\begin{equation*}
-		\mathbf{Z}=
-		\begin{pmatrix}
-			\mathbf{X} \\
-			\mathbf{Y}
-		\end{pmatrix}
-		\sim N_{m+n}\left[
-		\begin{pmatrix}
-			\boldsymbol{\mu}_{\mathbf{X}} \\
-			\boldsymbol{\mu}_{\mathbf{Y}}
-		\end{pmatrix},\;
-		\begin{pmatrix}
-			\Sigma_\mathbf{X} & \mathbf{0} \\
-			\mathbf{0} & \Sigma_\mathbf{Y}
-		\end{pmatrix}
-		\right]
-	\end{equation*}
-\end{theorem}
-\begin{proof}
-	由\cref{def:MultiNormal}可得。
-\end{proof}
-\begin{theorem}\label{theo:MultiNormalAdditivity}
-	设$\mathbf{X}\sim N_n(\boldsymbol{\mu},\Sigma_\mathbf{X})$和$\mathbf{Y}\sim N_n(\boldsymbol{\nu},\Sigma_\mathbf{Y})$且相互独立，则$\mathbf{X}+\mathbf{Y}\sim N_n(\boldsymbol{\mu}+\boldsymbol{\nu},\Sigma_\mathbf{X}+\Sigma_\mathbf{Y})$。
-\end{theorem}
-\begin{proof}
-	因为：
+	由\cref{prop:CharacteristicFunction}(6)和(4)可知$\mathbf{X}$服从多元正态分布。\par
+	(6)由\cref{def:MultiNormal}可得。\par
+	(7)	因为：
 	\begin{equation*}
 		\mathbf{X}+\mathbf{Y}=
 		\begin{pmatrix}
@@ -286,31 +166,26 @@
 			\mathbf{Y}
 		\end{pmatrix}
 	\end{equation*}
-	由\cref{theo:MultiNormalConcat}可得：
+	由(6)可得：
 	\begin{equation*}
 		\mathbf{Z}=
 		\begin{pmatrix}
 			\mathbf{X} \\
 			\mathbf{Y}
 		\end{pmatrix}
-		\sim N_{m+n}\left[
+		\sim N_{2n}\left[
 		\begin{pmatrix}
-			\boldsymbol{\mu}_{\mathbf{X}} \\
-			\boldsymbol{\mu}_{\mathbf{Y}}
+			\boldsymbol{\mu}_1 \\
+			\boldsymbol{\mu}_2
 		\end{pmatrix},\;
 		\begin{pmatrix}
-			\Sigma_\mathbf{X} & \mathbf{0} \\
-			\mathbf{0} & \Sigma_\mathbf{Y}
+			\Sigma_1 & \mathbf{0} \\
+			\mathbf{0} & \Sigma_2
 		\end{pmatrix}
 		\right]
 	\end{equation*}
-	根据\cref{prop:MultiNormal}(2)即可得到结论。
-\end{proof}
-\begin{theorem}\label{theo:IndependentCorrelationNormal}
-	设$\mathbf{X_j}\sim\operatorname{N}_{r_j}(\boldsymbol{\mu_j},\Sigma_{j}),\;j=1,2,\dots,m$，$\mathbf{X_j}$的联合分布为正态分布。若$\mathbf{X_j}$不相关，则$\mathbf{X_j}$相互独立，即对于服从多维正态分布的随机向量而言，若它们的联合分布仍是多维正态分布，则不相关和独立等价。
-\end{theorem}
-\begin{proof}
-	设$\mathbf{X}=(\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_m})^T\sim\operatorname{N}_n(\boldsymbol{\mu},\Sigma)$。因为$\mathbf{X_j}$之间不相关，于是：
+	根据(2)即可得到结论。\par
+	(8)设$\mathbf{X}=(\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_m})^T\sim\operatorname{N}_n(\boldsymbol{\mu},\Sigma)$。因为$\mathbf{X_j}$之间不相关，于是：
 	\begin{equation*}
 		\boldsymbol{\mu}=
 		\begin{pmatrix}
@@ -327,14 +202,23 @@
 			\mathbf{0} & \mathbf{0} & \cdots & \Sigma_m
 		\end{pmatrix}
 	\end{equation*}
-	由\cref{theo:c.f.MultiNormal}可得：
+	由(4)可得：
 	\begin{align*}
 		\varphi_\mathbf{X}(t)
 		&=\exp\left(it\boldsymbol{\mu}-\frac{t^T\Sigma t}{2}\right)
-		=\exp\left[i\sum_{j=1}^{m}t_j^T\boldsymbol{\mu_j}-\frac{\sum\limits_{j=1}^{m}t_j^T\Sigma_j t_j}{2}\right] \\
+		=\exp\left(i\sum_{j=1}^{m}t_j^T\boldsymbol{\mu_j}-\frac{\sum\limits_{j=1}^{m}t_j^T\Sigma_j t_j}{2}\right) \\
 		&=\prod_{j=1}^m\exp\left(it_j\boldsymbol{\mu_j}-\frac{t_j^T\Sigma_j t_j}{2}\right)=\prod_{j=1}^m\varphi_\mathbf{X_j}(t_j)
 	\end{align*}
-	由\cref{prop:CharacteristicFunction}(5)可知$\mathbf{X_j}$相互独立，$j=1,2,\dots,m$。
+	由\cref{prop:CharacteristicFunction}(5)可知$\mathbf{X_j}$相互独立，$j=1,2,\dots,m$。\par
+	(9)因为$\Sigma>\mathbf{0}$，所以存在$\Sigma^{-\frac{1}{2}}$。由(2)可得：
+	\begin{equation*}
+		\Sigma^{-\frac{1}{2}}(\mathbf{X}-\boldsymbol{\mu})\sim N_n(\mathbf{0},I_n)
+	\end{equation*}
+	于是根据\cref{prop:ReverseSquareRootMat}(1)和(3)可得：
+	\begin{align*}
+		(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{X}-\boldsymbol{\mu})&=(\mathbf{X}-\boldsymbol{\mu})^T(\Sigma^{-\frac{1}{2}}\Sigma^{-\frac{1}{2}})(\mathbf{X}-\boldsymbol{\mu}) =(\mathbf{X}-\boldsymbol{\mu})^T(\Sigma^{-\frac{1}{2}})^T\Sigma^{-\frac{1}{2}}(\mathbf{X}-\boldsymbol{\mu}) \\
+		&=[\Sigma^{-\frac{1}{2}}(\mathbf{X}-\boldsymbol{\mu})]^T\Sigma^{-\frac{1}{2}}(\mathbf{X}-\boldsymbol{\mu})\sim\chi_n^2\qedhere
+	\end{align*}
 \end{proof}
 \subsubsection{正态随机向量的二次型}
 \begin{theorem}
@@ -345,7 +229,7 @@
 	\end{equation*}
 \end{theorem}
 \begin{proof}
-	期望可直接由\cref{theo:ERVQuadraticForm}得到。记$\mathbf{Y}=\Sigma^{-\frac{1}{2}}\mathbf{X}$，由\cref{cor:MultiNormalLinearTransform}(1)可知$\mathbf{Y}\sim N_n(\Sigma^{-\frac{1}{2}}\boldsymbol{\mu},I_n)$，根据\cref{theo:IndependentCorrelationNormal}，$\mathbf{Y}$的各分量相互独立。注意到$\mathbf{Y}$的各分量的三阶中心矩和四阶中心矩分别为$0$和$3$，由\cref{theo:VRVQuadraticForm}、\cref{prop:ReverseSquareRootMat}(3)和\cref{prop:Trace}(3)可得：
+	期望可直接由\cref{theo:ERVQuadraticForm}得到。记$\mathbf{Y}=\Sigma^{-\frac{1}{2}}\mathbf{X}$，由\cref{prop:MultiNormal}(2)可知$\mathbf{Y}\sim N_n(\Sigma^{-\frac{1}{2}}\boldsymbol{\mu},I_n)$，根据\cref{prop:MultiNormal}(8)，$\mathbf{Y}$的各分量相互独立。注意到$\mathbf{Y}$的各分量的三阶中心矩和四阶中心矩分别为$0$和$3$，由\cref{theo:VRVQuadraticForm}、\cref{prop:ReverseSquareRootMat}(3)和\cref{prop:Trace}(3)可得：
 	\begin{align*}
 		\operatorname{Var}(\mathbf{X}^TA\mathbf{X})
 		&=\operatorname{Var}(\mathbf{Y}^T\Sigma^{\frac{1}{2}}A\Sigma^{\frac{1}{2}}\mathbf{Y}) \\
@@ -354,20 +238,6 @@
 		&=2\operatorname{tr}(\Sigma^{\frac{1}{2}}A\Sigma A\Sigma^{\frac{1}{2}})+4\boldsymbol{\mu}^TA\Sigma A\boldsymbol{\mu} \\
 		&=2\operatorname{tr}(A\Sigma A\Sigma^{\frac{1}{2}}\Sigma^{\frac{1}{2}})+4\boldsymbol{\mu}^TA\Sigma A\boldsymbol{\mu} \\
 		&=2\operatorname{tr}[(A\Sigma)^2]+4\boldsymbol{\mu}^TA\Sigma A\boldsymbol{\mu}\qedhere
-	\end{align*}
-\end{proof}
-\begin{theorem}
-	设$\mathbf{X}\sim N_n(\boldsymbol{\mu},\Sigma)$，$\Sigma>\mathbf{0}$，则$(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{X}-\boldsymbol{\mu})\sim\chi_n^2$。
-\end{theorem}
-\begin{proof}
-	因为$\Sigma>\mathbf{0}$，所以存在$\Sigma^{-\frac{1}{2}}$。由\cref{cor:MultiNormalLinearTransform}(1)可得：
-	\begin{equation*}
-		\Sigma^{-\frac{1}{2}}(\mathbf{X}-\boldsymbol{\mu})\sim N_n(\mathbf{0},I_n)
-	\end{equation*}
-	于是根据\cref{prop:ReverseSquareRootMat}(1)和(3)可得：
-	\begin{align*}
-		(\mathbf{X}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{X}-\boldsymbol{\mu})&=(\mathbf{X}-\boldsymbol{\mu})^T(\Sigma^{-\frac{1}{2}}\Sigma^{-\frac{1}{2}})(\mathbf{X}-\boldsymbol{\mu}) =(\mathbf{X}-\boldsymbol{\mu})^T(\Sigma^{-\frac{1}{2}})^T\Sigma^{-\frac{1}{2}}(\mathbf{X}-\boldsymbol{\mu}) \\
-		&=[\Sigma^{-\frac{1}{2}}(\mathbf{X}-\boldsymbol{\mu})]^T\Sigma^{-\frac{1}{2}}(\mathbf{X}-\boldsymbol{\mu})\sim\chi_n^2\qedhere
 	\end{align*}
 \end{proof}
 \begin{theorem}\label{theo:XAXChi2}
@@ -383,7 +253,7 @@
 			\mathbf{0} & \mathbf{0}
 		\end{pmatrix}Q
 	\end{equation*}
-	令$\mathbf{Y}=Q\mathbf{X}$，由\cref{cor:MultiNormalLinearTransform}(2)可知$\mathbf{Y}\sim N_n(Q\boldsymbol{\mu},I_n)$。对$\mathbf{Y}$和$Q$进行分块：
+	令$\mathbf{Y}=Q\mathbf{X}$，由\cref{prop:MultiNormal}(2)可知$\mathbf{Y}\sim N_n(Q\boldsymbol{\mu},I_n)$。对$\mathbf{Y}$和$Q$进行分块：
 	\begin{equation*}
 		\mathbf{Y}=
 		\begin{pmatrix}
@@ -430,7 +300,7 @@
 	\begin{equation*}
 		\lambda=(Q_1\boldsymbol{\mu})^TQ_1\boldsymbol{\mu}=\boldsymbol{\mu}^TQ_1^TQ_1\boldsymbol{\mu}=\boldsymbol{\mu}^TA\boldsymbol{\mu}
 	\end{equation*}
-	这是因为\cref{cor:MultiNormalLinearTransform}(5)和：
+	这是因为\cref{prop:MultiNormal}(3)和：
 	\begin{equation*}
 		A=Q^{-1}
 		\begin{pmatrix}
@@ -474,7 +344,7 @@
 		\end{pmatrix}
 		Q\mathbf{X}
 	\end{equation*}
-	令$\mathbf{Y}=Q\mathbf{X}$，由\cref{cor:MultiNormalLinearTransform}(2)可知$\mathbf{Y}=(\seq{\mathbf{Y}}{n})\sim N_n(Q\boldsymbol{\mu},I_n)$，根据\cref{theo:IndependentCorrelationNormal}可得$\mathbf{Y}_j$之间彼此独立。令$c=Q\boldsymbol{\mu}=(\seq{c}{n})^T$，由\cref{cor:MultiNormalLinearTransform}(5)可知$\mathbf{Y}_j\sim N(c_j,1)$。而：
+	令$\mathbf{Y}=Q\mathbf{X}$，由\cref{prop:MultiNormal}(2)可知$\mathbf{Y}=(\seq{\mathbf{Y}}{n})\sim N_n(Q\boldsymbol{\mu},I_n)$，根据\cref{prop:MultiNormal}(8)可得$\mathbf{Y}_j$之间彼此独立。令$c=Q\boldsymbol{\mu}=(\seq{c}{n})^T$，由\cref{prop:MultiNormal}(3)可知$\mathbf{Y}_j\sim N(c_j,1)$。而：
 	\begin{equation*}
 		\mathbf{X}^TA\mathbf{X}=\mathbf{Y}^T
 		\begin{pmatrix}
@@ -648,7 +518,7 @@
 		\end{pmatrix}
 		=Q_1\varLambda Q_1^T
 	\end{equation*}
-	记$\mathbf{Y}=Q^T\mathbf{X}$，由\cref{cor:MultiNormalLinearTransform}(2)可得：
+	记$\mathbf{Y}=Q^T\mathbf{X}$，由\cref{prop:MultiNormal}(2)可得：
 	\begin{equation*}
 		\mathbf{Y}=
 		\begin{pmatrix}
@@ -662,13 +532,13 @@
 		\end{pmatrix}
 		\sim N_n(Q^T\boldsymbol{\mu},\sigma^2I_n)
 	\end{equation*}
-	由\cref{theo:IndependentCorrelationNormal}可知$\mathbf{Y_1}$与$\mathbf{Y_2}$独立。因为：
+	由\cref{prop:MultiNormal}(8)可知$\mathbf{Y_1}$与$\mathbf{Y_2}$独立。因为：
 	\begin{gather*}
 		B\mathbf{X}=C_1Q_2^T\mathbf{X}=C_1\mathbf{Y_2} \\
 		\mathbf{X}^TA\mathbf{X}=\mathbf{X}^TQ_1\varLambda Q_1^T\mathbf{X}=\mathbf{Y_1}^T\varLambda\mathbf{Y_1}
 	\end{gather*}
 	所以$B\mathbf{X}$与$\mathbf{X}^TA\mathbf{X}$独立，结论在$\Sigma=I_n$时成立。\par
-	当$\Sigma$为一般正定阵时，存在$\Sigma^{-\frac{1}{2}}$。由\cref{prop:ReverseSquareRootMat}(3)和\cref{cor:MultiNormalLinearTransform}(1)可得此时有：
+	当$\Sigma$为一般正定阵时，存在$\Sigma^{-\frac{1}{2}}$。由\cref{prop:ReverseSquareRootMat}(3)和\cref{prop:MultiNormal}(2)可得此时有：
 	\begin{gather*}
 		\Sigma^{-\frac{1}{2}}\mathbf{X}\sim\operatorname{N}_n(\Sigma^{-\frac{1}{2}}\boldsymbol{\mu},I_n),\quad B\mathbf{X}=B\Sigma^{\frac{1}{2}}\Sigma^{-\frac{1}{2}}\mathbf{X} \\
 		\mathbf{X}^TA\mathbf{X}=\mathbf{X}^T\Sigma^{-\frac{1}{2}}\Sigma^{\frac{1}{2}}A\Sigma^{\frac{1}{2}}\Sigma^{-\frac{1}{2}}\mathbf{X}=(\Sigma^{-\frac{1}{2}}\mathbf{X})^T\Sigma^{\frac{1}{2}}A\Sigma^{\frac{1}{2}}\Sigma^{-\frac{1}{2}}\mathbf{X}
@@ -692,12 +562,12 @@
 	\begin{equation*}
 		Q\varLambda_1Q^TQ\varLambda_2Q^T=Q\varLambda_1\varLambda_2Q^T=\mathbf{0}
 	\end{equation*}
-	等式两边先同时左乘$Q^T$再同时右乘$Q$即可得到$\varLambda_1\varLambda_2=\mathbf{0}$，即$\lambda_i^{(1)}$和$\lambda_i^{(2)}$中至少有一个为$0,\;i=1,2,\dots,n$。令$\mathbf{Y}=Q^T\mathbf{X}$，由\cref{cor:MultiNormalLinearTransform}(2)可得$\mathbf{Y}\sim\operatorname{N}_n(Q^T\boldsymbol{\mu},I_n)$，所以$\mathbf{Y}$的各分量相互独立。因为：
+	等式两边先同时左乘$Q^T$再同时右乘$Q$即可得到$\varLambda_1\varLambda_2=\mathbf{0}$，即$\lambda_i^{(1)}$和$\lambda_i^{(2)}$中至少有一个为$0,\;i=1,2,\dots,n$。令$\mathbf{Y}=Q^T\mathbf{X}$，由\cref{prop:MultiNormal}(2)可得$\mathbf{Y}\sim\operatorname{N}_n(Q^T\boldsymbol{\mu},I_n)$，所以$\mathbf{Y}$的各分量相互独立。因为：
 	\begin{equation*}
 		\mathbf{X}^TA\mathbf{X}=\mathbf{X}^TQ\varLambda_1Q^T\mathbf{X}=\mathbf{Y}^T\varLambda_1\mathbf{Y},\quad\mathbf{X}^TB\mathbf{X}=\mathbf{X}^TQ\varLambda_2Q^T\mathbf{X}=\mathbf{Y}^T\varLambda_2\mathbf{Y}
 	\end{equation*}
 	二者依赖的$\mathbf{Y}$的分量不同，所以$\mathbf{X}^TA\mathbf{X}$与$\mathbf{X}^TB\mathbf{X}$独立。\par
-	当$\Sigma$为一般正定矩阵时，存在$\Sigma^{-\frac{1}{2}}$。由\cref{prop:ReverseSquareRootMat}(3)和\cref{cor:MultiNormalLinearTransform}(1)可得此时有：
+	当$\Sigma$为一般正定矩阵时，存在$\Sigma^{-\frac{1}{2}}$。由\cref{prop:ReverseSquareRootMat}(3)和\cref{prop:MultiNormal}(2)可得此时有：
 	\begin{gather*}
 		\Sigma^{-\frac{1}{2}}\mathbf{X}\sim\operatorname{N}_n(\Sigma^{-\frac{1}{2}}\boldsymbol{\mu},I_n) \\
 		\mathbf{X}^TA\mathbf{X}=\mathbf{X}^T\Sigma^{-\frac{1}{2}}\Sigma^{\frac{1}{2}}A\Sigma^{\frac{1}{2}}\Sigma^{-\frac{1}{2}}\mathbf{X}=(\Sigma^{-\frac{1}{2}}\mathbf{X})^T\Sigma^{\frac{1}{2}}A\Sigma^{\frac{1}{2}}\Sigma^{-\frac{1}{2}}\mathbf{X} \\

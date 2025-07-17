@@ -9,7 +9,7 @@
 	\end{enumerate}
 	则称$\varphi$	为\gls{SignedMeasure}。若对任意的$A\in\mathscr{F}$有$|\varphi(A)|<+\infty$，则称$\varphi$是有限的；若存在$X$的可列可测分割$\{A_n\}\subseteq\mathscr{F}$满足对任意的$n\in\mathbb{N}^+$有$|\varphi(A_n)|<+\infty$，则称$\varphi$是$\sigma$有限的。
 \end{definition}
-\begin{property}
+\begin{property}\label{prop:SignedMeasure}
 	设$(X,\mathscr{F})$是一个可测空间，其上的符号测度$\varphi$具有如下性质：
 	\begin{enumerate}
 		\item $\varphi$具有有限可加性；
@@ -19,7 +19,7 @@
 			\forall\;A\in\mathscr{F},\;-\infty\leqslant\varphi(A)<+\infty
 		\end{gather*}
 		\item 若$A,B\in\mathscr{F},\;B\subseteq A$且$|\varphi(A)|<+\infty$，则$|\varphi(B)|<+\infty$；
-		\item 若$\{A_n\}$两两不交且满足：
+		\item 若$\{A_n\}\subseteq\mathscr{F}$两两不交且满足：
 		\begin{equation*}
 			\left|\varphi\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)\right|<+\infty
 		\end{equation*}
@@ -27,11 +27,10 @@
 		\begin{equation*}
 			\sum_{n=1}^{+\infty}|\varphi(A_n)|<+\infty
 		\end{equation*}
-		\item 记：
+		\item 设$\mu,\nu$为$(X,\mathscr{F})$上的两个测度。只要$\mu,\nu$中有一个是有限的，则可定义符号测度：
 		\begin{equation*}
-			\forall\;A\in\mathscr{F},\;\varphi^*(A)=\sup\{\varphi(B):B\subseteq A,\;B\in\mathscr{F}\}
+			\forall\;A\in\mathscr{F},\;(\mu-\nu)(A)\coloneq\mu(A)-\nu(A)
 		\end{equation*}
-		则$\varphi^*$是$\mathscr{F}$上单调且满足$\varphi^*(\varnothing)=0$的非负集函数；
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -71,21 +70,131 @@
 		&=\sum_{n=1}^{+\infty}\varphi(A_n^+)+\left|\sum_{n=1}^{+\infty}\varphi(A_n^-)\right|
 		=\varphi\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n^+\right)+\left|\varphi\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n^-\right)\right|<+\infty
 	\end{align*}\par
-	(5)由$\varphi(\varnothing)=0$显然可得。
+	(5)$\;(\mu-\nu)(\varnothing)=\mu(\varnothing)-\nu(\varnothing)=0$。取互不相交的$\{A_n\}\subseteq\mathscr{F}$，由测度的定义可得：
+	\begin{align*}
+		(\mu-\nu)\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)&=\mu\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)-\nu\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)=\sum_{n=1}^{+\infty}\mu(A_n)-\sum_{n=1}^{+\infty}\nu(A_n) \\
+		&=\sum_{n=1}^{+\infty}[\mu(A_n)-\nu(A_n)]=\sum_{n=1}^{+\infty}(\mu-\nu)(A)
+	\end{align*}
+	所以$\mu-\nu$是一个符号测度。
 \end{proof}
+\subsection{Hahn, Jordan, Lebesgue分解}
 \begin{definition}
-	设$(X,\mathscr{F})$是一个可测空间，$\mu,\nu$为其上的两个测度。只要$\mu,\nu$中有一个是有限的，则可定义符号测度：
+	 设$(X,\mathscr{F})$是一个可测空间，$\varphi$是其上的符号测度。定义$\varphi^*$：
 	\begin{equation*}
-		\forall\;A\in\mathscr{F},\;(\mu-\nu)(A)\coloneq\mu(A)-\nu(A)
+		\forall\;A\in\mathscr{F},\;\varphi^*(A)=\sup\{\varphi(B):B\subseteq A,\;B\in\mathscr{F}\}
 	\end{equation*}
 \end{definition}
+\begin{property}\label{prop:varphi*}
+	设$(X,\mathscr{F})$是一个可测空间，$\varphi$是其上的符号测度。$\varphi^*$具有如下性质：
+	\begin{enumerate}
+		\item $\varphi^*(\varnothing)=0$；
+		\item $\varphi^*$具有单调性；
+		\item $\varphi^*$是非负集函数；
+		\item $\mathscr{A}=\{A\in\mathscr{F}:\varphi^*(A)=0\}$是一个$\sigma$环。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由$\varphi^*$的定义和$\varphi(\varnothing)=0$即可得出。\par
+	(2)由$\varphi^* $的定义即可得出。\par
+	(3)由(1)(2)立即可得。\par
+	(4)由(1)可知$\mathscr{A}\ne\varnothing$。任取$A,B\in\mathscr{A}$，由\cref{prop:SigmaField}(4)和(3)(2)可得：
+	\begin{equation*}
+		0\leqslant\varphi^*(A\backslash B)\leqslant\varphi^*(A)=0
+	\end{equation*}
+	所以$\varphi^*(A\backslash B)=0,\;A\backslash B\in\mathscr{A}$。\par
+	任取$\{A_n\}\subseteq\mathscr{A}$，由(1)可得：
+	\begin{equation*}
+		0\leqslant\varphi^*\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)=\sup\left\{\varphi(B):B\subseteq\underset{n=1}{\overset{+\infty}{\cup}}A_n,\;B\in\mathscr{F}\right\}
+	\end{equation*}
+\end{proof}
 \begin{lemma}
 	设$(X,\mathscr{F})$是一个可测空间，$\varphi$是其上的符号测度。
 	\begin{enumerate}
-		\item 若$A\in\mathscr{F}$且$\varphi(A)<+\infty$，则对任意的$\varepsilon>0$，存在$B\subseteq A$满足$\varphi(B)\geqslant0$且$\varphi^*(A\backslash B)\leqslant\varepsilon$；
+		\item 若$A\in\mathscr{F}$且$\varphi(A)<+\infty$，则对任意的$\varepsilon>0$，存在$B\in\mathscr{F}$满足$B\subseteq A,\varphi(B)\geqslant0$且$\varphi^*(A\backslash B)\leqslant\varepsilon$；
 		\item 若$A\in\mathscr{F}$且$\varphi(A)<0$，则存在$B\in\mathscr{F}$满足$B\subseteq A,\;\varphi(B)<0$且$\varphi^*(B)=0$。
 	\end{enumerate}
 \end{lemma}
 \begin{proof}
-	(1)
+	(1)若此时不满足结论，即存在$\varepsilon>0$，对于任意的$B\subseteq A$都有$\varphi(B)<0$或$\varphi^*(A\backslash B)>\varepsilon$。取$B=\varnothing$即可排除$\varphi(B)<0$，即此时必须有$\varphi^*(A\backslash B)>\varepsilon$。取$B_0=\varnothing$，根据归纳假设可得$\varphi^*(A\backslash B_0)=\varphi^*(A)>\varepsilon$，由$\varphi^*$的定义可知存在$B_1\in\mathscr{F}$满足$B_1\subseteq A\backslash B_0=A$且$\varphi(B_1)>\varepsilon$。根据归纳假设，因为$B_1\subseteq A$，所以有$\varphi^*(A\backslash B_1)>\varepsilon$，即存在$B_2\in\mathscr{F}$满足$B_2\subseteq A\backslash B_1\subseteq A$且$\varphi(B_2)>\varepsilon$。根据归纳假设，因为$B_1\cup B_2\subseteq A$，所以有$\varphi^*[A\backslash(B_1\cup B_2)]>\varepsilon$，即存在$B_3\in\mathscr{F}$满足$B_3\subseteq A\backslash(B_1\cup B_2)\subseteq A$且$\varphi(B_3)>\varepsilon$。继续操作下去，可以得到互不相交的集合序列$\{B_n\}$满足：
+	\begin{equation*}
+		B_n\subseteq A,\;B_n\in\mathscr{F},\;\varphi(B_n)>\varepsilon
+	\end{equation*}
+	令$B=\underset{n=1}{\overset{+\infty}{\cup}}B_n$，则有：
+	\begin{equation*}
+		B\subseteq A,\;B\in\mathscr{F},\;\varphi(B)=\sum_{n=1}^{+\infty}\varphi(B_n)=+\infty
+	\end{equation*}
+	由\cref{prop:SignedMeasure}(3)可得$|\varphi(A)|=+\infty$，于是只能有$\varphi(A)=-\infty$，矛盾，所以结论成立。\par
+	(2)由(1)可知存在$B_1\subseteq A$满足$\varphi(B)\geqslant0$且$\varphi^*(A\backslash B)\leqslant1$。根据$\varphi^*$的定义可得：
+	\begin{equation*}
+		\varphi(A\backslash B_1)\leqslant\varphi^*(A\backslash B_1)\leqslant1
+	\end{equation*}
+	所以存在$B_2\subseteq A\backslash B_1$满足$\varphi(B)\geqslant0$且$\varphi^*[A\backslash (B_1\cup B_2)]\leqslant\frac{1}{2}$。继续操作下去，可以得到互不相交的集合序列$\{B_n\}\subseteq\mathscr{F}$满足：
+	\begin{equation*}
+		B_n\subseteq A,\;\varphi(B_n)\geqslant0,\;\varphi^*\left[A\Big\backslash\left(\underset{i=1}{\overset{n}{\cup}}B_n\right)\right]\leqslant\frac{1}{n}
+	\end{equation*}
+	令$B=\underset{n=1}{\overset{+\infty}{\cup}}B_n$，由符号测度的可列可加性以及\cref{prop:varphi*}(2)(3)可得：
+	\begin{equation*}
+		\varphi(B)=\sum_{n=1}^{+\infty}\varphi(B_n)\geqslant0,\quad0\leqslant\varphi^*(A\backslash B)\leqslant\varphi^*\left[A\Big\backslash\left(\underset{i=1}{\overset{n}{\cup}}B_n\right)\right]\leqslant\frac{1}{n}
+	\end{equation*}
+	所以$\varphi^*(A\backslash B)=0$。取$A_0=A\backslash B$，根据\cref{prop:SigmaField}(4)可得：
+	\begin{equation*}
+		A_0\in\mathscr{F},\;A_0\subseteq A,\;\varphi^*(A_0)=0
+	\end{equation*}
+	而由\cref{prop:SignedMeasure}(1)可得：
+	\begin{equation*}
+		\varphi(A)=\varphi(A_0)+\varphi(B)
+	\end{equation*}
+	因为$\varphi(A)<0,\;\varphi(B)\geqslant0$，所以$\varphi(A_0)<0$，$A_0$即满足条件。
 \end{proof}
+\begin{theorem}[Hahn Decomposition]\label{theo:HahnDecomposition}
+	设$\varphi$是可测空间$(X,\mathscr{F})$上的符号测度，则存在$X^{\pm}\in\mathscr{F}$满足：
+	\begin{equation*}
+		X^+\cup X^-=X,\quad X^+\cap X^-=\varnothing
+	\end{equation*}
+	并且有（\cref{prop:SigmaField}(2)）：
+	\begin{equation*}
+		\forall\;A\in\mathscr{F},\;\varphi(A\cap X^+)\geqslant0\geqslant\varphi(A\cap X^-)
+	\end{equation*}
+	且$X^{\pm}$在下列意义下是唯一的：若$\{X^+_1,X^-_1\},\{X^+_2,X^-_2\}$都满足上述条件，则：
+	\begin{gather*}
+		\forall\;A\in\mathscr{F},A\subseteq X^+_1\Delta X^+_2\Rightarrow\varphi(A)=0 \\
+		\forall\;A\in\mathscr{F},A\subseteq X^-_1\Delta X^-_2\Rightarrow\varphi(A)=0
+	\end{gather*}
+	称$\{X^+,X^-\}$为$\varphi$的\textbf{Hahn分解}。
+\end{theorem}
+\begin{proof}
+	令$\mathscr{A}=\{A\in\mathscr{F}:\varphi^*(A)=0\}$，记$\alpha=\inf\{\varphi(A):A\in\mathscr{A}\}$。由\cref{prop:varphi*}(1)可知$\varnothing\in\mathscr{A}$，所以$\alpha\leqslant\varphi(\varnothing)=0$。取$\{A_n\}\subseteq\mathscr{A}$满足$\lim_{n\to+\infty}\limits\varphi(A_n)=\alpha$，令$X^-=\underset{n=1}{\overset{+\infty}{\cup}}A_n$。由\cref{prop:varphi*}(4)可知$\mathscr{A}$是一个$\sigma$环，所以$X^-\in\mathscr{A}$，$X^-\in\mathscr{F}$。根据$\varphi^*$的定义、\cref{prop:SigmaField}(2)和\cref{prop:varphi*}(2)可得：
+	\begin{equation*}
+		\varphi(A\cap X^-)\leqslant\varphi^*(A\cap X^-)\leqslant\varphi^*(X^-)=0
+	\end{equation*}
+	所以$X^-$满足要求。\par
+	令$X^+=X\backslash X^-$，则$X^+\cup X^-=X$。由\cref{prop:SigmaField}(4)可知$X^+\in\mathscr{F}$。若存在$A\in\mathscr{F}$使得$\varphi(A\cap X^+)$
+\end{proof}
+\begin{theorem}[Jordan Decomposition]
+	设$\varphi$是可测空间$(X,\mathscr{F})$上的符号测度，则存在测度$\varphi^+$和有限测度$\varphi^-$使得$\varphi=\varphi^+-\varphi^-$并且有：
+	\begin{equation*}
+		\forall\;A\in\mathscr{F},\;\varphi^+(A)=\varphi^*(A)=\varphi(A\cap X^+),\;\varphi^-(A)=(-\varphi)^*=-\varphi(A\cap X^-)
+	\end{equation*}
+	称分解式$\varphi=\varphi^+-\varphi^-$为$\varphi$的\textbf{Jordan分解}，分别称$\varphi^+,\varphi^-,|\varphi|\coloneq\varphi^++\varphi^-$为$\varphi$的\textbf{上变差、下变差和全变差}。
+\end{theorem}
+\begin{definition}
+	设$\varphi$和$\mu$分别是可测空间$(X,\mathscr{F})$上的符号测度与测度，若对任何的$\mu$零测集$A$都有$\varphi(A)=0$，则称$\varphi$对$\mu$\textbf{绝对连续}，记作$\varphi\ll\mu$。
+\end{definition}
+\begin{definition}
+	设$\varphi$和$\psi$是可测空间$(X,\mathscr{F})$上的符号测度，若存在$N\in\mathscr{F}$使得$|\varphi|(N^c)=|\psi|(N)=0$，则称$\varphi$和$\psi$是\textbf{相互奇异}的，记作$\varphi\perp\psi$。
+\end{definition}
+\begin{theorem}[Lebesgue Decomposition]
+	设$\varphi$和$\psi$是可测空间$(X,\mathscr{F})$上$\sigma$有限的符号测度，则存在两个$\sigma$有限符号测度$\varphi_c,\varphi_s$使得：
+	\begin{equation*}
+		\varphi=\varphi_c+\varphi_s,\;\varphi_c\ll\psi,\;\varphi_s\perp\psi
+	\end{equation*}
+\end{theorem}
+
+\subsection{Randon-Nikodym导数}
+\begin{theorem}\label{theo:RandomNikodym}
+	设$\varphi$和$\mu$分别是测度空间$(X,\mathscr{F})$上的符号测度和$\sigma$有限测度。若$\varphi\ll\mu$，则存在$(X,\mathscr{F},\mu)$上在a.e.意义下唯一的可测函数$f$满足：
+	\begin{equation*}
+		\forall\;A\in\mathscr{F},\;\varphi(A)=\int_{A}f(x)\dif\mu\quad\int_{X}f^-(x)\dif\mu<+\infty
+	\end{equation*}
+	若$\varphi$是$\sigma$有限的，则$f$有限a.e.于$X$。
+\end{theorem}
