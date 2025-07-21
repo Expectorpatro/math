@@ -142,7 +142,7 @@
 	相似的矩阵有相同的特征多项式，进而有相同的特征值（包括重数相同）。
 \end{theorem}
 \begin{proof}
-	设$A,B\in M_{n}(K)$且$A$与$B$相似，于是存在可逆矩阵$P\in M_{n}(K)$使得$P^{-1}AP=B$，就有：
+	设$A,B\in M_{n}(K)$且$A$与$B$相似，于是存在可逆矩阵$P\in M_{n}(K)$使得$P^{-1}AP=B$，由\cref{prop:Determinant}(11)就有：
 	\begin{align*}
 		|\lambda I-B|
 		&=|\lambda I-P^{-1}AP|=|P^{-1}\lambda IP-P^{-1}AP| \\
@@ -173,7 +173,7 @@
 			\mathbf{0} & C
 		\end{pmatrix}
 	\end{align*}
-	由\cref{theo:SameEigenvalue}可得：
+	由\cref{theo:SameEigenvalue}和\cref{prop:Determinant}(10)可得：
 	\begin{align*}
 		|\lambda I-A|&=
 		\begin{vmatrix}
@@ -212,7 +212,7 @@
 	(1)显然：
 	\begin{align*}
 		&A\text{与}\text{对角矩阵}D=\operatorname{diag}\{\seq{\lambda}{n}\}\text{相似},\;\text{其中}\lambda_i\in K,\;i=1,2,\dots,n \\
-		\iff&\text{如果存在可逆矩阵$P\in M_{n}(K)$，使得}P^{-1}AP=D \\
+		\iff&\text{存在可逆矩阵$P\in M_{n}(K)$，使得}P^{-1}AP=D \\
 		&\text{即}AP=PD \\
 		&\text{即}A(\seq{\alpha}{n})=(\seq{\alpha}{n})D \\
 		&\text{即}(A\alpha_1,A\alpha_2,\dots,A\alpha_n)=(\lambda_1\alpha_1,\lambda_2\alpha_2,\dots,\lambda_n\alpha_n) \\
@@ -242,38 +242,36 @@
 
 \subsection{Hermitian矩阵的对角化}
 \begin{definition}
-	若对于$A,B\in M_{n}(\mathbb{C})$，存在一个$n$阶正交矩阵$Q$，使得$Q^{-1}AQ=B$，则称$A$\textbf{正交相似}于$B$。
+	若对于$A,B\in M_{n}(\mathbb{C})$，存在一个$n$阶正交（酉）矩阵$Q$，使得$Q^{-1}AQ=B$，则称$A$\textbf{正交（酉）相似}于$B$。
 \end{definition}
-\begin{theorem}
-	正交相似是$M_{n}(\mathbb{C})$上的一个等价关系。
-\end{theorem}
-\begin{theorem}
-	$A\in\ M_n(\mathbb{C})$。若$A$正交相似与一个对角矩阵$D$，则$A$一定是Hermitian矩阵。
-\end{theorem}
-\begin{proof}
-	因为$A$正交相似于$D$，所以存在正交矩阵$Q$使得$Q^{-1}AQ=D$，即$A=QDQ^{-1}$，于是有：
-	\begin{equation*}
-		A^H=(QDQ^{-1})^H=(Q^{-1})^HD^HQ^H=(Q^H)^HDQ^{-1}=QDQ^{-1}=A
-	\end{equation*}
-	所以$A$是一个Hermitian矩阵。
-\end{proof}
-\begin{corollary}
-	正交相似一定相似，相似不一定正交相似。
-\end{corollary}
-\begin{proof}
-	设非Hermitian矩阵$A$相似于一个对角矩阵$D$，若$A$正交相似于$D$，则$A$得是一个Hermitian矩阵，而$A$不是一个Hermitian矩阵。
-\end{proof}
-\begin{property}\label{prop:HermitianMatEigen}
-	设Hermitian矩阵$A,B\in M_{n}(\mathbb{C})$，则：
+\begin{property}\label{prop:OrthogonalUnitarySimilarity}
+	正交相似与酉相似具有如下性质：
 	\begin{enumerate}
-		\item $A$的特征多项式的每一个根都是实数，从而都是$A$的特征值；
-		\item $A$属于不同特征值的特征向量是正交的；
-		\item $A$一定正交相似于由它的特征值构成的对角矩阵；
-		\item $A$与$B$正交相似的充分必要条件为$A$与$B$相似。
+		\item 正交（酉）相似是$M_{n}(\mathbb{C})$上的一个等价关系；
+		\item $A\in\ M_n(\mathbb{R})$（$\mathbb{C}^{}$）。若$A$正交（酉）相似于一个对角矩阵$D$，则$A$一定是对称（Hermitian）矩阵；
+		\item 正交(酉)相似一定相似，相似不一定正交（酉）相似。
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)设$\lambda$是$A$的特征多项式的任意一个根，将$A$看作是复数域$\mathbb{C}$上的矩阵，取$A$属于特征值$\lambda$的一个特征向量$\alpha$，考虑$\mathbb{C}^{n}$中的内积，有：
+	(1)由\cref{prop:OrthogonalUnitaryMatrix}(4)(5)可得。\par
+	(2)仅证明酉相似时的情况，正交相似可看作酉相似的特例。因为$A$酉相似于$D$，所以存在酉矩阵$Q$使得$Q^{-1}AQ=D$，即$A=QDQ^{-1}$，于是由\cref{prop:OrthogonalUnitaryMatrix}(4)和\cref{prop:Transpose}(2)可得：
+	\begin{equation*}
+		A^H=(QDQ^{-1})^H=(Q^{-1})^HD^HQ^H=(Q^H)^HDQ^{-1}=QDQ^{-1}=A
+	\end{equation*}
+	所以$A$是一个Hermitian矩阵。\par
+	(3)可举例论证。
+\end{proof}
+\begin{property}\label{prop:HermitianMatEigen}
+	设Hermitian矩阵$A,B\in M_{n}(\mathbb{C})$（对称矩阵$A,B\in M_{n}(\mathbb{R})$），则：
+	\begin{enumerate}
+		\item $A$的特征多项式的每一个根都是实数，从而都是$A$的特征值；
+		\item $A$属于不同特征值的特征向量是正交的；
+		\item $A$一定酉（正交）相似于由它的特征值构成的对角矩阵；
+		\item $A$与$B$酉（正交）相似的充分必要条件为$A$与$B$相似。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)设$\lambda$是$A$的特征多项式的任意一个根，将$A$看作是复数域$\mathbb{C}$上的矩阵，取$A$属于特征值$\lambda$的一个特征向量$\alpha$，考虑$\mathbb{C}^{n}$中的内积，由\cref{prop:Transpose}(4)可得：
 	\begin{gather*}
 		(A\alpha,\alpha)=(\lambda\alpha,\alpha)=\lambda(\alpha,\alpha) \\
 		(\alpha,A\alpha)=(\alpha,\lambda\alpha)=\overline{\lambda}(\alpha,\alpha) \\
@@ -282,9 +280,8 @@
 	所以$\lambda(\alpha,\alpha)=\overline{\lambda}(\alpha,\alpha)$。因为$\alpha$是特征向量，所以$\alpha\ne\mathbf{0}$，于是$\lambda=\overline{\lambda}$，因此$\lambda$是一个实数。由$\lambda$的任意性，结论成立。\par
 	(2)设$\lambda_1,\lambda_2$是$A$的不同的特征值（由(1)得它们都是实数），$\alpha_1,\alpha_2$分别是$A$属于$\lambda_1,\lambda_2$的一个特征向量，考虑$\mathbb{C}^{n}$上的标准内积：
 	\begin{align*}
-		\lambda_1(\alpha_1,\alpha_2)
-		&=(\lambda_1\alpha_1,\alpha_2)=(A\alpha_1,\alpha_2)
-		=A(\alpha_1,\alpha_2)=(\alpha_1,A^H\alpha_2) \\
+		&\quad\lambda_1(\alpha_1,\alpha_2)
+		=(\lambda_1\alpha_1,\alpha_2)=(A\alpha_1,\alpha_2)=(\alpha_1,A^H\alpha_2) \\
 		&=(\alpha_1,A\alpha_2)=(\alpha_1,\lambda_2\alpha_2)=\overline{\lambda_2}(\alpha_1,\alpha_2)=\lambda_2(\alpha_1,\alpha_2)
 	\end{align*}
 	于是有$(\lambda_1-\lambda_2)(\alpha_1,\alpha_2)=0$。因为$\lambda_1\ne\lambda_2$，所以$(\alpha_1,\alpha_2)=0$。\par
@@ -367,7 +364,7 @@
 	所以$A$正交相似于对角矩阵$\operatorname{diag}\{\seq{\lambda}{n}\}$。由$AQ=Q\operatorname{diag}\{\seq{\lambda}{n}\}$可以得到$\lambda_2,\lambda_3,\dots,\lambda_n$是$A$的特征值。\par
 	综上，结论成立。\par
 	(4)\textbf{必要性：}正交相似也是相似。\par
-	\textbf{充分性：}因为$A$与$B$相似，由\cref{theo:SameEigenvalue}可知$A$与$B$有相同的特征值（包括重数）$\seq{\lambda}{n}$。由(3)可得$A$与$B$都正交相似于$\operatorname{diag}\{\seq{\lambda}{n}\}$（考虑$\lambda_i$的顺序的话只需要更改$Q$中列向量的顺序）。因为正交相似具有对称性与传递性，所以$A$正交相似于$B$。
+	\textbf{充分性：}因为$A$与$B$相似，由\cref{theo:SameEigenvalue}可知$A$与$B$有相同的特征值（包括重数）$\seq{\lambda}{n}$。由(3)可得$A$与$B$都正交相似于$\operatorname{diag}\{\seq{\lambda}{n}\}$（考虑$\lambda_i$的顺序的话只需要更改$Q$中列向量的顺序）。根据\cref{prop:OrthogonalUnitarySimilarity})(1)可得$A$正交相似于$B$。
 \end{proof}
 \subsubsection{求解正交矩阵$Q$}
 \begin{theorem}
