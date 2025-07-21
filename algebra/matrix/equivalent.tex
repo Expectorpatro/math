@@ -8,7 +8,7 @@
 	\end{equation*}
 	的矩阵$X$都被称为是$A$的\gls{GeneralizedInverse}，记为$A^-$。
 \end{definition}
-\begin{theorem}\label{theo:ExistenceOfGeneralizedInverse}
+ \begin{theorem}\label{theo:ExistenceOfGeneralizedInverse}
 	设非零矩阵$A\in M_{m\times n}(K)$，$\operatorname{rank}(A)=r$且：
 	\begin{equation*}
 		A=P
@@ -121,20 +121,20 @@
 	\end{equation*}
 \end{proof}
 \begin{property}\label{prop:A-}
-	设$A,\in M_{m\times n}(K),\;B\in M_{m\times q}(K),\;C\in M_{p\times n}(K)$，则广义逆$A^-$具有如下性质：
+	设$A\in M_{m\times n}(K),\;B\in M_{m\times q}(K),\;C\in M_{p\times n}(K)$，则广义逆$A^-$具有如下性质：
 	\begin{enumerate}
 		\item $A^-$唯一的充分必要条件为$A$可逆，此时$A^-=A^{-1}$；
 		\item $\operatorname{rank}(A^-)\geqslant\operatorname{rank}(A)=\operatorname{rank}(AA^-)=\operatorname{rank}(A^-A)$；
-		\item 若$\mathcal{M}(B)\subset\mathcal{M}(A),\mathcal{M}(C)\subset\mathcal{M}(A^T)$，则$C^TA^-B$与$A^-$的选择无关\info{证明有问题}；
-		\item $A(A^TA)^-A^T$与$(A^TA)^-$的选择无关；
+		\item 若$\mathcal{M}(B)\subseteq\mathcal{M}(A),\mathcal{M}(C)\subseteq\mathcal{M}(A^T)$，则$C^TA^-B$是唯一的\info{两个唯一性的证明都问题}；
+		\item $A(A^TA)^-A^T$是唯一的；
+		\item 若$A$对称，则$(A^-)^T=A^-$；
 		\item $A(A^TA)^-A^TA=A,\;A^TA(A^TA)^-A^T=A^T$；
-		\item 若$A$对称，则$[(A)^-]^T=(A)^-$；
 		\item 若存在$\alpha$使得$c=A^T\alpha$，则$c^T(A^TA)^-A^TA=c^T$。
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)\textbf{充分性：}若$A$可逆，则$r=n$，由$A^-$的通解公式，显然此时$A^-$唯一。\par
-	\textbf{必要性：}若$A^-$唯一，则$r=n$，显然此时$A$可逆。\par
+	(1)\textbf{充分性：}若$A$可逆，由\cref{prop:InvertibleMatrix}(3)可知$r=n$，由\cref{theo:ExistenceOfGeneralizedInverse}中$A^-$的通解公式，显然此时$A^-$唯一。\par
+	\textbf{必要性：}若$A^-$唯一，则$r=n$，由\cref{prop:InvertibleMatrix}(3)可知此时$A$可逆。\par
 	(2)由$A^-$的通解公式，$\operatorname{rank}(A^-)\geqslant r=\operatorname{rank}(A)$。因为：
 	\begin{gather*}
 		AA^-=P
@@ -178,7 +178,11 @@
 		C^TA^-B=D_2^TAA^-AD_1=D_2^TAD_1
 	\end{equation*}\par
 	(4)由\cref{prop:OrthogonalProjectionMat}(2)可知$A(A^TA)^-A^T$是向$\mathcal{M}(A)$的正交投影阵，由\cref{prop:ProjectionTransformation}(7)和\cref{theo:LinearTransformationMatrix}可得$A(A^TA)^-A$是唯一的，与$(A^TA)^-$的选择无关。\par
-	(5)设$B=A(A^TA)^-A^TA-A$，则：
+	(5)此时有：
+	\begin{equation*}
+		AXA=A\iff A^TX^TA^T=A^T\iff AX^TA=A
+	\end{equation*}\par
+	(6)设$B=A(A^TA)^-A^TA-A$，则：
 	\begin{align*}
 		B^TB
 		&=\{A^TA[(A^TA)^-]^TA^T-A^T\}[A(A^TA)^-A^TA-A] \\
@@ -186,21 +190,8 @@
 		&\quad-A^TA(A^TA)^-A^TA+A^TA \\
 		&=A^TA[(A^TA)^-]^TA^TA-A^TA[(A^TA)^-]^TA^TA-A^TA+A^TA=\mathbf{0}
 	\end{align*}
-	所以$B=\mathbf{0}$（考虑$B^TB$主对角线上的元素），于是$A(A^TA)^-A^TA=A$。\par
-	设$C=A^TA(A^TA)^-A^T-A^T$，则：
-	\begin{align*}
-		CC^T
-		&=[A^TA(A^TA)^-A^T-A^T]\{A[(A^TA)^-]^TA^TA-A\} \\
-		&=A^TA(A^TA)^-A^TA[(A^TA)^-]^TA^TA-A^TA(A^TA)^-A^TA \\
-		&\quad-A^TA[(A^TA)^-]^TA^TA+A^TA \\
-		&=A^TA[(A^TA)^-]^TA^TA-A^TA-A^TA[(A^TA)^-]^TA^TA+A^TA=\mathbf{0}
-	\end{align*}
-	所以$C=\mathbf{0}$，于是$A^TA(A^TA)^-A^T=A^T$。\par
-	(6)此时有：
-	\begin{equation*}
-		AXA=A\iff A^TX^TA^T=A^T\iff AX^TA=A
-	\end{equation*}\par
-	(7)由(5)可得：
+	所以$B=\mathbf{0}$（考虑$B^TB$主对角线上的元素），于是$A(A^TA)^-A^TA=A$。第二个等式由\cref{prop:Transpose}(4)和第一个等式即可得到。\par
+	(7)由(6)和\cref{prop:Transpose}(4)可得：
 	\begin{equation*}
 		c^T(A^TA)^-A^TA=\alpha^TA(A^TA)^-A^TA=\alpha^TA=c^T\qedhere
 	\end{equation*}
@@ -385,7 +376,7 @@
 	\end{align*}
 	所以Penrose方程组的解是唯一的。\par
 	(2)由Penrose方程的对称性可直接得到。\par
-	(3)由$A^+$的奇异值分解表示（\cref{theo:A+SVD}）可得：
+	(3)由$A^+$的奇异值分解表示（\cref{theo:A+SVD}）和\cref{prop:Transpose}(4)可得：
 	\begin{align*}
 		(A^+)^H&=\left[Q
 		\begin{pmatrix}
@@ -462,8 +453,8 @@
 		[A^H(A^+)^H]^H=[(A^+)^HA^H]^H=A^+A=I
 	\end{gather*}
 	因为$I$是Hermitian矩阵，于是$(A^+)^H$与$A^H$的Penrose方程组相容，所以$(A^+)^H=(A^H)^+$。\par
-	(4)由$A^+$的奇异值分解表示（\cref{theo:A+SVD}）显然可得$\operatorname{rank}(A^+)=\operatorname{rank}(\varLambda)$，而$\operatorname{rank}(\varLambda)=\operatorname{rank}(A)$，所以有$\operatorname{rank}(A^+)=\operatorname{rank}(A)$。\par
-	(5)因为$A$是一个Hermitian矩阵，由\cref{prop:HermitianMatEigen}(3)可知存在正交矩阵$Q$使得：
+	(4)由$A^+$的奇异值分解表示（\cref{theo:A+SVD}）和\cref{prop:InvertibleMatrix}(16)可得$\operatorname{rank}(A^+)=\operatorname{rank}(\varLambda)$，而$\operatorname{rank}(\varLambda)=\operatorname{rank}(A)$，所以有$\operatorname{rank}(A^+)=\operatorname{rank}(A)$。\par
+	(5)因为$A$是一个Hermitian矩阵，由\cref{prop:HermitianMatEigen}(3)可知存在酉矩阵$Q$使得：
 	\begin{equation*}
 		A=Q
 		\begin{pmatrix}
@@ -471,7 +462,7 @@
 			\mathbf{0} & \mathbf{0}
 		\end{pmatrix}Q^H
 	\end{equation*}
-	将$Q
+	由\cref{prop:Transpose}(4)，将$Q
 	\begin{pmatrix}
 		\varLambda^{-1} & \mathbf{0} \\
 		\mathbf{0} & \mathbf{0}

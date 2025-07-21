@@ -1,5 +1,7 @@
 \chapter{矩阵}
 
+本章若按照证明顺序则不可避免地需要将线性方程组的知识打散，无法统一叙述，经过思考最终还是决定将线性方程组的部分统一，请读者在阅读过程中自行决定该部分的阅读顺序。
+
 \input{algebra/matrix/matrix-space.tex}
 \input{algebra/matrix/vector-space.tex}
 \input{algebra/matrix/linear-equations.tex}
@@ -13,20 +15,17 @@
 \begin{definition}
 	若矩阵$A\in M_{n}(K)$满足$A^2=I_n$，则称$A$为\gls{IdempotentMatrix}。
 \end{definition}
-\begin{theorem}\label{theo:A^-AIdempotent}
-	$A^-A,AA^-,I-A^-A,I-AA^-$都是幂等阵。
-\end{theorem}
-\begin{proof}
-	代入广义逆方程即可得出结论。
-\end{proof}
 \begin{property}\label{prop:IdempotentMat}
 	设$A\in M_{n}(K)$是一个幂等阵，$\operatorname{rank}(A)=r$，则：
 	\begin{enumerate}
 		\item $A$的特征值只能是$1$或$0$；
 		\item $\operatorname{tr}(A)=\operatorname{rank}(A)$；
+		\item $A$可逆当且仅当$A=I_n$；
+		\item 幂等性在相似变化下是不变的。
 		\item $A\text{幂等}\iff\operatorname{rank}(A)+\operatorname{rank}(I_n-A)=n$；
 		\item 若$A$是Hermitian矩阵，则存在秩为$r$的$B\in M_{n}(K)$使得$A=B(B^HB)^{-1}B^H$；
-		\item 若$A$是Hermitian矩阵，则$A^+=A$。
+		\item 若$A$是Hermitian矩阵，则$A^+=A$；
+		\item $A^-A,AA^-,I-A^-A,I-AA^-$是幂等阵。
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -117,11 +116,13 @@
 	\begin{equation*}
 		\operatorname{tr}(A)=\operatorname{tr}(P_1Q_1)=\operatorname{tr}(Q_1P_1)=\operatorname{tr}(I_r)=r=\operatorname{rank}(A)
 	\end{equation*}\par
-	(3)\textbf{必要性：}因为$A$是一个幂等阵，所以$(I_n-A)(I_n-A)=I_n-2A+A^2=I_n-A$，即$I_n-A$也是一个幂等阵。由\cref{prop:Trace}(1)和(2)可知：
+	(3)$A^2=A$两端同时乘$A^{-1}$即可。\par
+	(4)设$S$是一个可逆矩阵，则$(SAS^{-1})^2=SAS^{-1}SAS^{-1}=SAS^{-1}$，所以$SAS^{-1}$也是一个幂等阵。\par
+	(5)\textbf{必要性：}因为$A$是一个幂等阵，所以$(I_n-A)(I_n-A)=I_n-2A+A^2=I_n-A$，即$I_n-A$也是一个幂等阵。由\cref{prop:Trace}(1)和(2)可知：
 	\begin{equation*}
 		n=\operatorname{tr}(I_n)=\operatorname{tr}(I_n-A+A)=\operatorname{tr}(I_n-A)+\operatorname{tr}(A)=\operatorname{rank}(I_n-A)+\operatorname{rank}(A)
 	\end{equation*}\par
-	\textbf{充分性：}因为$\operatorname{rank}(A)=r$，由\cref{prop:HomogeneousSLESolution}(3)可知存在齐次线性方程组$Ax=\mathbf{0}$存在$n-r$个线性无关的解，它们是$A$的特征值$0$的特征向量。因为$\operatorname{rank}(I_n-A)=n-r$，所以齐次线性方程组$(I_n-A)x=\mathbf{0}$有$n-r$个线性无关的解，即$Ax=x$有$n-r$个线性无关的解，$A$的特征值$1$有$n-r$个线性无关的特征向量，于是存在可逆矩阵$P$使得：
+	\textbf{充分性：}因为$\operatorname{rank}(A)=r$，由\cref{prop:HomogeneousSLESolution}(3)可知存在齐次线性方程组$Ax=\mathbf{0}$存在$n-r$个线性无关的解，它们是$A$的特征值$0$的特征向量。因为$\operatorname{rank}(I_n-A)=n-r$，所以齐次线性方程组$(I_n-A)x=\mathbf{0}$有$r$个线性无关的解，即$Ax=x$有$r$个线性无关的解，$A$的特征值$1$有$r$个线性无关的特征向量，于是存在可逆矩阵$P$使得：
 	\begin{equation*}
 		A=P
 		\begin{pmatrix}
@@ -130,7 +131,7 @@
 		\end{pmatrix}P^{-1}
 	\end{equation*}
 	所以$A^2=A$，$A$是一个幂等阵。\par
-	(4)因为$A$是Hermitian幂等阵，由\cref{prop:HermitianMatEigen}(3)与(1)(2)可得存在正交阵$Q=\begin{pmatrix}
+	(6)因为$A$是Hermitian幂等阵，由\cref{prop:HermitianMatEigen}(3)与(1)可知存在酉矩阵$Q=\begin{pmatrix}
 		Q_1 & Q_2
 	\end{pmatrix}$使得：
 	\begin{equation*}
@@ -152,7 +153,7 @@
 		=Q_1Q_1^H=Q_1(Q_1^HQ_1)^{-1}Q_1^H
 	\end{equation*}
 	因为$Q_1$是正交矩阵$Q$的前$r$列构成的矩阵，所以$Q_1$的列向量组线性无关，$\operatorname{rank}(Q_1)=r$。于是取$B=Q_1$即可。\par
-	(5)因为$A$是一个Hermitian幂等阵，由\cref{prop:A+}(5)和(1)可得：
+	(7)因为$A$是一个Hermitian幂等阵，由\cref{prop:A+}(5)和(1)可得：
 	\begin{equation*}
 		A^+=Q
 		\begin{pmatrix}
@@ -160,7 +161,8 @@
 			\mathbf{0} & \mathbf{0}
 		\end{pmatrix}Q^H
 	\end{equation*}
-	令$X=A^+$，将其代入关于$A^+$的Penrose方程组可知相容。由\cref{prop:A+}(2)(1)即可得$A=A^+$。
+	令$X=A^+$，将其代入关于$A^+$的Penrose方程组可知相容。由\cref{prop:A+}(2)(1)即可得$A=A^+$。\par
+	(8)由广义逆的定义代入验证即可得到。
 \end{proof}
 
 \subsection{正交投影阵}
@@ -169,33 +171,27 @@
 	\begin{equation*}
 		x=y+z,\;y\in E,\;z\in E^\perp
 	\end{equation*}
-	则称$y$为$x$在$E$上的\textbf{正交投影}。若$P$为$n$阶方阵，且对任意的$x\in K^n$，都有$y=Px\in E$和$x-y\in E^\perp$，则称$P$为向$E$的\gls{OrthogonalProjectionMatrix}。
+	则称$y$为$x$在$E$上的\textbf{正交投影}。若$P$为$n$阶方阵，且对任意的$x\in K^n$，都有$y=Px\in E$和$x-y\in E^\perp$，则称$P$为向$E$的\gls{OrthogonalProjectionMatrix}。\info{写泛函的时候补充$P\in M_{n}(K)$为正交投影阵当且仅当对任意的$x\in K^n$有$||x-Px||=\inf_{u\in\mathcal{M}(P)}||x-u||$}
 \end{definition}
 \begin{property}\label{prop:OrthogonalProjectionMat}
 	设$P_1,P_2$为两个正交投影阵，$A\in M_{m\times n}(K)$，$P_A$是向$\mathcal{M}(A)$的正交投影阵，则：
 	\begin{enumerate}
 		\item $\operatorname{rank}(P_A)=\operatorname{rank}(A)$；
-		\item $P_A=A(A^TA)^-A^T$；
+		\item $P_A=A(A^TA)^-A^T$且是唯一的；
 		\item $P\in M_{n}(K)$为正交投影阵当且仅当$P$为对称幂等阵；
-		\item $I_m-P_A$是对称幂等阵；
-		\item $P\in M_{n}(K)$为正交投影阵当且仅当对任意的$x\in K^n$有：
-		\begin{equation*}
-			||x-Px||=\inf_{u\in\mathcal{M}(P)}||x-u||
-		\end{equation*}
-		\item $P=P_1+P_2$为正交投影阵$\iff P_1P_2=P_2P_1=\mathbf{0}$；
-		\item 当$P_1P_2=P_2P_1=\mathbf{0}$时，$P=P_1+P_2$为向$\mathcal{M}(P_1)\oplus\mathcal{M}(P_2)$上的正交投影阵；
-		\item $P=P_1P_2$为正交投影阵$\iff P_1P_2=P_2P_1$；
-		\item 当$P_1P_2=P_2P_1$时，$P=P_1P_2$为向$\mathcal{M}(P_1)\cap\mathcal{M}(P_2)$上的正交投影阵；
-		\item $P=P_1-P_2$为正交投影阵$\iff P_1P_2=P_2P_1=P_2$；
-		\item 当$P_1P_2=P_2P_1=P_2$时，$P=P_1-P_2$为向$\mathcal{M}(P_1)\oplus\mathcal{M}(P_2)^\perp$上的正交投影阵。
+		\item $P=P_1+P_2$为向$\mathcal{M}(P_1)\oplus\mathcal{M}(P_2)$上的正交投影阵$\iff P_1P_2=P_2P_1=\mathbf{0}$；
+		\item $P=P_1P_2$为向$\mathcal{M}(P_1)\cap\mathcal{M}(P_2)$上的正交投影阵$\iff P_1P_2=P_2P_1$；
+		\item $P=P_1-P_2$为向$\mathcal{M}(P_1)\cap\mathcal{M}(P_2)^\perp$上的正交投影阵$\iff P_1P_2=P_2P_1=P_2$；
+		\item $I_m-P_A$是向$\mathcal{M}(P_A)^\perp$上的正交投影阵；
+		\item $(I_m-P_A)P_A=P_A(I_m-P_A)=\mathbf{0}$。
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)因为对任意的$x\in K^n$有$P_Ax\in\mathcal{M}(A)$，所以$\mathcal{M}(P_A)\subseteq\mathcal{M}(A)$。对任意的$y\in\mathcal{M}(A)$，存在$x\in K^n$有$P_Ax=y$（只要取$x=y+z$，$z$是$\mathcal{M}(A)^\perp$中的一个向量即可），于是$\mathcal{M}(A)\subseteq\mathcal{M}(P_A)$，所以$\mathcal{M}(A)=\mathcal{M}(P_A)$。由\cref{prop:SpanSubspace}(4)可得：
+	(1)因为对任意的$x\in K^m$有$P_Ax\in\mathcal{M}(A)$，所以$\mathcal{M}(P_A)\subseteq\mathcal{M}(A)$。对任意的$y\in\mathcal{M}(A)$，存在$x\in K^m$有$P_Ax=y$（只要取$x=y+z$，$z$是$\mathcal{M}(A)^\perp$中的一个向量即可），于是$\mathcal{M}(A)\subseteq\mathcal{M}(P_A)$，所以$\mathcal{M}(A)=\mathcal{M}(P_A)$。由\cref{prop:SpanSubspace}(3)可得：
 	\begin{equation*}
 		\operatorname{rank}(P_A)=\dim[\mathcal{M}(P_A)]=\dim[\mathcal{M}(A)]=\operatorname{rank}(A)
 	\end{equation*}\par
-	(2)由$\mathcal{M}(A)$的定义可知$\mathcal{M}(A)$是$K^m$的子空间，根据\cref{theo:ExistenceOfComplement}和\cref{prop:SpanSubspace}(4)可知存在$\mathcal{M}(A)$的补空间，且这个补空间的维数为$m-\operatorname{rank}(A)$。取补空间的一组正交于$A$的列向量组的基\info{存在性证明}$\seq{b}{m-\operatorname{rank}(A)}$，则该补空间等于由这组基构成列向量组的矩阵$B$的列空间，即$\mathcal{M}(B)=\mathcal{M}(A)^\perp$。于是对任意的$x\in K^m$有：
+	(2)由$\mathcal{M}(A)$的定义可知$\mathcal{M}(A)$是$K^m$的子空间，根据\cref{theo:ExistenceOfComplement}和\cref{prop:SpanSubspace}(3)可知存在$\mathcal{M}(A)$的补空间，且这个补空间的维数为$m-\operatorname{rank}(A)$。根据\cref{theo:ExistenceOfBasis}，取补空间的一组正交于$A$的列向量组的基\info{存在性证明}$\seq{b}{m-\operatorname{rank}(A)}$，则该补空间等于由这组基构成列向量组的矩阵$B$的列空间，即$\mathcal{M}(B)=\mathcal{M}(A)^\perp$。于是对任意的$x\in K^m$有：
 	\begin{gather*}
 		x=
 		\begin{pmatrix}
@@ -214,15 +210,15 @@
 			P_AB=\mathbf{0}
 		\end{cases}
 	\end{equation*}
-	由第二个方程可以得到$P_A^T$的每一列都与$B$的每一列正交，于是$\mathcal{M}(P_A^T)\subseteq\mathcal{M}(B)^\perp=\mathcal{M}(A)$，于是存在矩阵$C$使得$P_A^T=AC$。将该式代入第一个方程可得到$C^TA^TA=A$，即$A^TAC=A^T$，因为该方程是相容的，由\cref{theo:InhomogeneousLinearEq'sGeneralSolution2}可知$C$的通解为$(A^TA)^-A^T$，于是$P_A^T=A(A^TA)^-A^T$。由\cref{prop:A-}(6)可得$P_A=A(A^TA)^-A^T$。\par
-	(3)\textbf{充分性：}由(2)和\cref{prop:IdempotentMat}(4)立即得出。\par
-	\textbf{必要性：}设$P$是向$\mathcal{M}(A)$的正交投影阵。对称性由(2)和\cref{prop:A-}(6)得出。由\cref{prop:A-}(5)可知：
+	由第二个方程可以得到$P_A^T$的每一列都与$B$的每一列正交，于是$\mathcal{M}(P_A^T)\subseteq\mathcal{M}(B)^\perp=\mathcal{M}(A)$，于是存在矩阵$C$使得$P_A^T=AC$。将该式代入第一个方程可得到$C^TA^TA=A$，由\cref{prop:Transpose}(4)可知即$A^TAC=A^T$。根据\cref{prop:MatrixRank}(8)和\cref{theo:SolutionOfSLE2}(2)可知该方程是相容的，由\cref{theo:InhomogeneousLinearEq'sGeneralSolution2}可知$C$的通解为$(A^TA)^-A^T$，于是$P_A^T=A(A^TA)^-A^T$。由\cref{prop:Transpose}(4)和\cref{prop:A-}(5)可得$P_A=A(A^TA)^-A^T$，唯一性由\cref{prop:A-}(4)可得。\par
+	(3)\textbf{充分性：}由(2)和\cref{prop:IdempotentMat}(6)立即得出。\par
+	\textbf{必要性：}设$P$是向$\mathcal{M}(A)$的正交投影阵。对称性由(2)和\cref{prop:A-}(5)得出。由\cref{prop:A-}(6)可知：
 	\begin{equation*}
 		P^2=A(A^TA)^-A^TA(A^TA)^-A^T=A(A^TA)^-A^T
 	\end{equation*}
 	即$P$幂等，于是$P$是一个对称幂等阵。\par
-	(4)由(3)可知$P_A$是对称幂等阵，显然$I_m-P_A$也是对称幂等阵。\par
-	(5)显然$\mathcal{M}(B)$是一个凸闭集\info{$K^{n}$子空间为闭集}，由\cref{theo:BestApproximationElement}立即可得。\par
+	(7)由(6)立即可得。\par
+	(8)由(7)可得。
 \end{proof}
 
 \subsection{初等反射矩阵}
