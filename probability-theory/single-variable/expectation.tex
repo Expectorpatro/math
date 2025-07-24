@@ -1,9 +1,72 @@
 \section{期望}
 
 \begin{definition}
-	设$X$是一个随机变量，具有分布函数$F(x)$。若$X$的积分有限，则称：
+	设$f$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量，则称$f$的\gls{MathematicalExpectation}（简称为期望）存在，并将：
 	\begin{equation*}
-		\operatorname{E}(X)=\int_{-\infty}^{+\infty}x\dif F(x)
+		\operatorname{E}(f)\coloneq\int_{X}f(x)\dif P
 	\end{equation*}
-	为$X$的\gls{MathematicalExpectation}。
+	称为$f$的期望。若$f$可积，则称$f$的期望是有限的。
 \end{definition}
+
+\subsection{条件期望}
+\begin{lemma}\label{lem:ConditionalExpectation}
+	设$f$为概率空间$(X,\mathscr{F},P)$上积分存在的随机变量。对任意的$A\in\mathscr{F}$，令：
+	\begin{equation*}
+		\varphi(A)=\int_{A}f(x)\dif P
+	\end{equation*}
+	则：
+	\begin{enumerate}
+		\item $\varphi$是$\mathscr{F}$上的符号测度；
+		\item $\varphi\ll P$。
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	(1)因为$P(\varnothing)=0$，由\cref{prop:MeasurableIntegral}(1)可得$\varphi(\varnothing)=0$。根据\cref{theo:MeasurableCountableIntegral}可知对互不相交的$\{A_n\}\subseteq\mathscr{F}$有：
+	\begin{equation*}
+		\varphi\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)=\int_{\underset{n=1}{\overset{+\infty}{\cup}}A_n}f(x)\dif P=\sum_{n=1}^{+\infty}\left[\int_{A_n}f(x)\dif P\right]=\sum_{n=1}^{+\infty}\varphi(A_n)
+	\end{equation*}
+	所以$\varphi$是$\mathscr{F}$上的符号测度。\par
+	(2)由(1)和\cref{prop:MeasurableIntegral}(1)直接可得。
+\end{proof}
+\begin{definition}
+	设$f$为概率空间$(X,\mathscr{F},P)$上积分存在的随机变量，$\mathscr{A}$是$\mathscr{F}$的一个子$\sigma$域，对任意的$A\in\mathscr{F}$，令：
+	\begin{equation*}
+		\varphi(A)=\int_{A}f(x)\dif P
+	\end{equation*}
+	因为概率是$\sigma$有限测度，由\cref{prop:Measure}(4)、\cref{lem:ConditionalExpectation}、\cref{prop:SignedMeasure}(6)和\cref{theo:RandomNikodym}可知存在$(X,\mathscr{A},P)$上a.s.意义下唯一的可测函数$\operatorname{E}(f|\mathscr{A})$满足：
+	\begin{equation*}
+		\forall\;A\in\mathscr{A},\;\varphi(A)=\int_{A}\operatorname{E}(f|\mathscr{A})\dif P
+	\end{equation*}
+	若：
+	\begin{enumerate}
+		\item $\operatorname{E}(f|\mathscr{A})$在$(X,\mathscr{A},P)$上积分存在；
+		\item 对任意的$A\in\mathscr{A}$有：
+		\begin{equation*}
+			\int_{A}\operatorname{E}(f|\mathscr{A})\dif P=\int_{A}f(x)\dif P
+		\end{equation*}
+	\end{enumerate}
+	则称：
+	\begin{equation*}
+		P(A|\mathscr{A})\coloneq\operatorname{E}(I_A|\mathscr{A})
+	\end{equation*}
+	为事件$A\in\mathscr{F}$关于$\mathscr{A}$的子$\sigma$域的\gls{ConditionalProbability}。若$g$是$(X,\mathscr{A},P)$到可测空间$(Y,\mathscr{B})$的可测映射，则分别称：
+	\begin{equation*}
+		\operatorname{E}(f|g)\coloneq\operatorname{E}(f|\sigma(g)),\quad P(A|g)\coloneq P(A|\sigma(g))
+	\end{equation*}
+	为$f$关于$g$的\gls{ConditionalExpectation}和事件$A\in\mathscr{F}$关于$g$的条件概率。
+\end{definition}
+\begin{theorem}
+	设$f,g$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量，$\mathscr{A},\mathscr{B}$是$\mathscr{F}$的子$\sigma$域，则：
+	\begin{enumerate}
+		\item 若$f$关于$\mathscr{A}$可测，则$\operatorname{E}(f|\mathscr{A})=f\;$a.s.于$\mathscr{A}$；
+		\item 若$f$与$\mathscr{A}$独立，则$\operatorname{E}(f|\mathscr{A})=\operatorname{E}(f)\;$a.s.于$\mathscr{A}$；
+		\item 若$\mathscr{A}\subseteq\mathscr{B}$，则$\operatorname{E}[\operatorname{E}(f|\mathscr{A})|\mathscr{B}]=\operatorname{E}(f|\mathscr{A})=\operatorname{E}[\operatorname{E}(f|\mathscr{B})|\mathscr{A}]\;$a.s.于；
+		\item 若$f\leqslant g\;$a.s.于，则$\operatorname{E}(f|\mathscr{A})\leqslant\operatorname{E}(g|\mathscr{A})\;$a.s.于
+		\item 对任意的$\alpha,\beta\in\mathbb{R}^{}$，若$\alpha\operatorname{E}(f)+\beta\operatorname{E}(g)$有意义，则：
+		\begin{equation*}
+			\operatorname{E}(\alpha f+\beta g|\mathscr{A})=\alpha\operatorname{E}(f|\mathscr{A})+b\operatorname{E}(g|\mathscr{A})
+		\end{equation*}
+		a.e.于
+		\item 若$0$
+	\end{enumerate}
+\end{theorem}
