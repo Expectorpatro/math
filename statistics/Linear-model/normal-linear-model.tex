@@ -86,9 +86,10 @@
 		c^T\hat{\beta}=c^T(X^TX)^-X^Ty,\quad\hat{\sigma}^2=\frac{y^T(I_n-P_X)y}{n-r}
 	\end{equation*}
 	因为$c^T\beta$是可估函数，所以存在$\alpha$使得$c=X^T\alpha$，由\cref{prop:Transpose}(4)、\cref{prop:MatrixMultiplication}(2)和\cref{prop:OrthogonalProjectionMat}(8)可得：
-	\begin{equation*}
-		c^T(X^TX)^-X^T\operatorname{Cov}(y)\frac{I_n-P_X}{n-r}=\frac{\sigma^2}{n-r}\alpha^TX(X^TX)^-X^T(I_n-P_X)=\frac{\sigma^2}{n-r}\alpha^TP_X(I_n-P_X)=\mathbf{0}
-	\end{equation*}
+	\begin{align*}
+		c^T(X^TX)^-X^T\operatorname{Cov}(y)\frac{I_n-P_X}{n-r}&=\frac{\sigma^2}{n-r}\alpha^TX(X^TX)^-X^T(I_n-P_X) \\
+		&=\frac{\sigma^2}{n-r}\alpha^TP_X(I_n-P_X)=\mathbf{0}
+	\end{align*}
 	由\cref{theo:BXXAXIndependent}可知$c^T\hat{\beta}$与$\hat{\sigma}^2$独立。\par
 	(4)\par
 	(5)\par
@@ -134,33 +135,33 @@
 	\begin{equation*}
 		\lambda(y)=\frac{L(\hat{\beta},\tilde{\sigma}^2;y)}{L(\hat{\beta}_A,\tilde{\sigma}_A^2;y)}=\left(\frac{SSE_A}{SSE}\right)^\frac{n}{2}
 	\end{equation*}\par
-	(2)根据\cref{prop:A-}(5)(7)和\cref{prop:OrthogonalProjectionMat}(7)(3)以及$(I_n-P_X)X=\mathbf{0}$对$SSE_A$作分解：
+	(2)根据\cref{prop:Transpose}(4)、\cref{prop:InvertibleMatrix}(12)、\cref{prop:A-}(5)(7)和\cref{prop:OrthogonalProjectionMat}(7)(3)对$SSE_A$作分解：
 	\begin{align*}
 		SSE_A&=||y-X\hat{\beta}_A||^2=\Big\|y-X\{\hat{\beta}-(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)\}\Big\|^2 \\
 		&=\Big\|y-X\hat{\beta}+X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)\Big\|^2 \\
-		&=||y-X\hat{\beta}||^2+2(y-X\hat{\beta})^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=SSE+2(y-X\hat{\beta})^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
 		&\quad+\{X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)\}^T \\
 		&\quad\cdot X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
-		&=||y-X\hat{\beta}||^2+2[y-X(X^TX)^-X^Ty]^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=SSE+2[y-X(X^TX)^-X^Ty]^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
 		&\quad+(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^T \\
 		&\quad\cdot X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
-		&=||y-X\hat{\beta}||^2+2[(I_n-P_X)y]^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=SSE+2[(I_n-P_X)y]^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
 		&\quad+(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
-		&=||y-X\hat{\beta}||^2+2y^T(I_n-P_X)X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=SSE+2y^T(I_n-P_X)X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
 		&\quad+(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
-		&=||y-X\hat{\beta}||^2+(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
+		&=SSE+(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
 	\end{align*}
 	所以有：
 	\begin{equation*}
 		SSE_A-SSE=(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
 	\end{equation*}
-	由\cref{prop:NormalLinearModel}(2)可知：
+	由\cref{prop:NormalLinearModel}(2)和\cref{prop:MultiNormal}(2)可知：
 	\begin{equation*}
 		A\hat{\beta}-b\sim\operatorname{N}_k[A\beta-b,\sigma^2A(X^TX)^-A^T]
 	\end{equation*}
 	根据\info{$A(X^TX)^-A^T$的正定性}可知$A(X^TX)^-A^T$存在平方根阵及平方根阵的逆矩阵，由\cref{prop:MultiNormal}(2)可知：
 	\begin{equation*}
-		\frac{[A(X^TX)^-A^T]^{-\frac{1}{2}}}{\sigma}(A\hat{\beta}-b)\sim\operatorname{N}_k\{[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\beta-b),I_n\}
+		\frac{[A(X^TX)^-A^T]^{-\frac{1}{2}}}{\sigma}(A\hat{\beta}-b)\sim\operatorname{N}_k\left\{\frac{[A(X^TX)^-A^T]^{-\frac{1}{2}}}{\sigma}(A\beta-b),I_k\right\}
 	\end{equation*}
 	于是由$\chi^2$分布的定义可得：
 	\begin{equation*}
@@ -168,21 +169,22 @@
 	\end{equation*}
 	其中：
 	\begin{align*}
-		\alpha&=\{[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\beta-b)\}^T[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\beta-b) \\
-		&=(A\beta-b)^T[A(X^TX)^-A^T]^{-1}(A\beta-b)
+		\alpha&=(\sigma^2)^{-1}\{[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\beta-b)\}^T[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\beta-b) \\
+		&=(\sigma^2)^{-1}(A\beta-b)^T[A(X^TX)^-A^T]^{-1}(A\beta-b)
 	\end{align*}\par
-	(3)由\cref{prop:ehat}(2)可知$SSE=y^T(I_n-P_X)y$，由(2)的过程可得：
+	(3)由\cref{prop:ehat}(2)可知$SSE=y^T(I_n-P_X)y$，由(2)的过程和\cref{prop:Transpose}(4)可得：
 	\begin{align*}
 		SSE_A-SSE&=(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
 		&=[A(X^TX)^-X^Ty-b]^T[A(X^TX)^-A^T]^{-1}[A(X^TX)^-X^Ty-b] \\
 		&=y^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^Ty \\
-		&\quad-2b^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^Ty+b^T[A(X^TX)^-A^T]^{-1}b
+		&\quad-2b^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^Ty+b^T[A(X^TX)^-A^T]^{-1}b \\
+		&=y^TyBy-Cy+c
 	\end{align*}
-	因为$(I_n-P_X)X=\mathbf{0}$，由\cref{prop:OrthogonalProjectionMat}(7)(3)可得：
+	因为$(I_n-P_X)X=\mathbf{0}$，由\cref{prop:OrthogonalProjectionMat}(7)(3)和\cref{prop:Transpose}(4)可得：
 	\begin{gather*}
-		(I_n-P_X)X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^T=\mathbf{0} \\
+		(I_n-P_X)B=(I_n-P_X)X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^T=\mathbf{0} \\
 		\begin{aligned}
-			&2b^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^T(I_n-P_X) \\
+			&C(I_n-P_X)=2b^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^T(I_n-P_X) \\
 			=&2b^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-[(I_n-P_X)X]^T=\mathbf{0}
 		\end{aligned}
 	\end{gather*}
