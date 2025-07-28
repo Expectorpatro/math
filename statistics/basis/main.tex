@@ -1,0 +1,318 @@
+\chapter{统计初步}
+
+\section{基于测度论的统计简介}
+\begin{definition}
+	设$(X,\mathscr{A},P)$为概率空间，$f$是从可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$上的随机变量。称概率测度$P$为\gls{Population}，$f$的观测和$f$都被称为\gls{Sample}，称$f$的观测的数目为\gls{SampleSize}。
+\end{definition}
+\begin{note}
+	由定义可以看出，样本具有两重性，若将随机变量的观测看作样本，则样本是固定的，没有随机性，但在理论分析中我们往往研究的是具有随机性的样本，也即随机变量本身。换句话讲，抽样实施以前，样本被看作随机变量，抽样实施以后，样本是具体的。
+\end{note}
+\begin{definition}
+	设$\mathscr{P}$为可测空间$(X,\mathscr{A})$上的一个概率测度族，则称$(X,\mathscr{A},\mathscr{P})$为\gls{StatisticalStructure}或\gls{StatisticalModel}。若$\mathscr{P}$仅依赖于参数$\theta$，即：
+	\begin{equation*}
+		\mathscr{P}=\{P_{\theta}:\theta\in\Theta\}
+	\end{equation*}
+	其中$\Theta$为参数空间，则称此结构为\gls{ParametricStructure}，否则称为\gls{Non-parametricStructure}。
+\end{definition}
+\begin{note}
+	引入统计结构是因为在统计学中我们往往没有总体$P$的全部信息，它是不确定的，但我们会根据现有信息去假设$P$可能是怎样的，从而给出一族可能的概率测度$\mathscr{P}$，因此产生了统计学的两大问题：参数估计和假设检验。二者都是在获得样本后对$\mathscr{P}$进行分析的统计工具，其中参数估计又可分为点估计和区间估计。点估计分析$\mathscr{P}$中哪一个概率测度最有可能是真实总体，区间估计是为了得到一个尽可能小的$\mathscr{P}_0$使得真实总体最有可能在这里面，假设检验分析对于$\mathscr{P}_1,\mathscr{P_2}\subset\mathscr{P}$，真实总体最有可能出现在哪一个之中。
+\end{note}
+\begin{definition}
+	设$(X_1,\mathscr{A}_1,\mathscr{P}_1),(X_2,\mathscr{A}_2,\mathscr{P}_2),\dots,(X_n,\mathscr{A}_n,\mathscr{P}_n)$为$n$个统计结构，称：
+	\begin{equation*}
+		\left(\prod_{i=1}^nX_i,\sigma\left(\prod_{i=1}^n\mathscr{A}_i\right),\prod_{i=1}^n\mathscr{P}_i\right)
+	\end{equation*}
+	为它们的\gls{ProductStructure}，其中$\prod$表示Cartisian积。
+\end{definition}
+\begin{definition}
+	设$(X,\mathscr{A},\mathscr{P})$为统计结构。若可测空间$(X,\mathscr{A})$上存在一个$\sigma$有限测度$\mu$满足对任意的$P\in\mathscr{P}$有$P\ll\mu$，则称$(X,\mathscr{A},\mathscr{P})$是\gls{Controllable}，称$\mu$为对应的\gls{ControllingMeasure}。
+\end{definition}
+\begin{definition}
+	设$(X,\mathscr{A},\mathscr{P})$为统计结构，$T$是可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$的可测映射。若$T$不依赖于$\mathscr{P}$，则称$T$为$(X,\mathscr{A},\mathscr{P})$上的\gls{Statistic}。统计量的分布称为\gls{SamplingDistribution}或\gls{InducedDistribution}。
+\end{definition}
+在测度论的可测映射那一小节我们提到了概率分布，接下来我们所提到的统计量的分布若无特殊说明都默认为是概率分布。
+\begin{property}
+	设$f$是可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$上的统计量，$(X,\mathscr{A},\mathscr{P})$是统计结构。则：
+	\begin{enumerate}
+		\item 对于任意的$P\in\mathscr{P}$，概率分布$Pf^{-1}$是$(Y,\mathscr{B})$上的概率测度；
+		\item 若$(X,\mathscr{A},\mathscr{P})$是可控的，则$(Y,\mathscr{B},\mathscr{P}f^{-1})$也可控，其中$\mathscr{P}f^{-1}=\{Pf^{-1}:P\in\mathscr{P}\}$；
+		\item 若$(X,\mathscr{A},\mathscr{P})$有概率函数族$\left\{\dfrac{\dif P}{\dif\mu}\right\}$，则$(Y,\mathscr{B},\mathscr{P}f^{-1})$有概率函数族$\left\{\dfrac{\dif Pf^{-1}}{\dif\mu f^{-1}}\right\}$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由\cref{prop:MeasurableMapping}(3)即可得到。\par
+	(2)因为$(X,\mathscr{A},\mathscr{P})$是可控的，所以存在$(X,\mathscr{A})$上的一个$\sigma$有限测度$\mu$满足对任意的$P\in\mathscr{P}$有$P\ll\mu$，由\cref{prop:MeasurableMapping}(3)可知$\mu f^{-1}$也是$\sigma$有限测度。若集合$A\in\mathscr{B}$满足$\mu f^{-1}(A)=0$，即$\mu[f^{-1}(A)]=0$，因为$P\ll\mu$，所以$Pf^{-1}(A)=P[f^{-1}(A)]=0$，于是$Pf^{-1}\ll\mu f^{-1}$。根据$P$的任意性，$(Y,\mathscr{B},\mathscr{P}f^{-1})$可控。\par
+	(3)由(2)即可得到。
+\end{proof}
+
+\subsection{次序统计量}
+\begin{definition}
+	设$\seq{X}{n}$为从总体中抽取的样本，将其按大小排列为$X_{(1)}\leqslant X_{(2)}\leqslant\cdots\leqslant X_{(n)}$，称$(X_{(1)},X_{(2)},\dots,X_{(n)})$为样本$\seq{X}{n}$的\gls{OrderStatistic}。
+\end{definition}
+\begin{lemma}\label{lem:OrderStatistics}
+	设总体的分布函数为$F(x)$，密度函数为$f(x)$，$\seq{X}{n}$为从总体中抽取的简单样本，则有：
+	\begin{equation*}
+		\underset{a<x_1<\cdots<x_n<b}{\int\cdots\int}f(x_1)\cdots f(x_n)\dif x_1\cdots\dif x_n=\frac{1}{n!}[F(b)-F(a)]^n
+	\end{equation*}
+	其中$a,b\in\overline{\mathbb{R}}$。
+\end{lemma}
+\begin{proof}
+	因为$\seq{X}{n}$独立同分布，所以：
+	\begin{equation*}
+		\int_{a}^{b}\cdots\int_{a}^{b}f(x_1)\cdots f(x_n)\dif x_1\cdots\dif x_n=\left[\int_{a}^{b}f(x_1)\dif x_1\right]^n=[F(b)-F(a)]^n
+	\end{equation*}
+	在这个区域上对$\seq{x}{n}$的排序结果一共有$n!$种（不考虑等于的情况，测度为$0$，不影响积分结果），每种排序都是等可能的，于是结论成立。
+\end{proof}
+\begin{theorem}\label{theo:OrderStatisticsDist}
+	设$\seq{X}{n}$为从总体中抽取的简单样本，总体的分布函数和密度函数分别为$F(x),f(x)$。
+	\begin{enumerate}
+		\item 令$Y_i=X_{(i)},\;i=1,2,\dots,n$，则次序统计量$(\seq{Y}{n})$的联合密度为：
+		\begin{equation*}
+			g(\seq{y}{n})=
+			\begin{cases}
+				n!f(y_1)f(y_2)\cdots f(y_n),&y_1<y_2<\cdots<y_n \\
+				0,&\text{其它}
+			\end{cases}
+		\end{equation*}
+		\item 样本次序统计量中任意$m$个分量$Y_{(i_1)},Y_{(i_2)},\dots,Y_{(i_m)},\;i_1<i_2<\cdots<i_m$的联合密度为：
+		\begin{equation*}
+			g(y_{i_1},y_{i_2},\dots,y_{i_m})=
+			\begin{cases}
+				n!\prod\limits_{j=1}^{m}f(y_{i_j})\left\{\prod\limits_{k=2}^{m}\frac{1}{(i_k-i_{k-1}-1)!}[F(y_{i_k})-F(y_{i_{k-1}})]^{i_k-i_{k-1}-1}\right\} & \\
+				\quad\frac{F^{i_1-1}(y_{i_1})}{(i_1-1)!}\frac{[1-F(y_{i_m})]^{n-i_m}}{(n-i_m)!},\quad y_{i_1}<y_{i_2}<\cdots<y_{i_m} \\
+				0, \quad\text{其他}
+			\end{cases}
+		\end{equation*}
+		\item 对于任意的$i,j=1,2,\dots,n$满足$i<j$，令$V=Y_j-Y_i$，则有：
+		\begin{equation*}
+			g(v)=\int_{-\infty}^{+\infty}g(u,v)\dif u
+		\end{equation*}
+		其中：
+		\begin{equation*}
+			g(u,v)=
+			\begin{cases}
+				\dfrac{n!f(u)f(u+v)}{(i-1)!(j-i-1)!(n-j)!}F^{i-1}(u)[F(u+v)-F(u)]^{j-i-1} \\
+				\quad\quad[1-F(u+v)]^{n-j},&v>0 \\
+				0,&\text{其它}
+			\end{cases}
+		\end{equation*}
+		\item 次序统计量$(\seq{Y}{n})$极差的分布为：
+		\begin{equation*}
+			g(v)=\int_{-\infty}^{+\infty}g(u,v)\dif u
+		\end{equation*}
+		其中：
+		\begin{equation*}
+			g(u,v)=
+			\begin{cases}
+				n(n-1)f(u)f(u+v)[F(u+v)-F(u)]^{n-2},&v>0 \\
+				0,&\text{其它}
+			\end{cases}
+		\end{equation*}
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	在$\mathbb{R}^{n}$中划分$n!$个区域，每个区域分别对应着一个$\seq{i}{n}$使得$x_{i1}<x_{i2}<\cdots<x_{in}$，因为$\seq{x}{n}$的排列一共有$n!$种，所以这$n!$个区域加上包括等于号的一些零测集就构成了整个$\mathbb{R}^{n}$。因为次序统计量的密度函数也是在$\mathbb{R}^{n}$上的一个概率测度，则可以对每个划分的区域求$(\seq{Y}{n})$的概率测度，再对所有区域求和，即可得到次序统计量的联合密度。这个过程类似于全概率公式。\par
+	任取一个上述区域$A$作变换：
+	\begin{equation*}
+		y_j=x_{i_j},\;j=1,2,\dots,n,\;x_{i1}<x_{i2}<\cdots<x_{in}
+	\end{equation*}
+	则该变换的Jacobi行列式为$|\mathbf{J}|=|I_n|=1$，因为$\seq{X}{n}$是简单样本，所以在该区域上的：
+	\begin{equation*}
+		g(\seq{y}{n}|A)=
+		\begin{cases}
+			\prod\limits_{i=1}^{n}f(x_i)=\prod\limits_{i=1}^{n}f(y_i),&y_1<y_2<\cdots<y_n \\
+			0,&\text{其它}
+		\end{cases}
+	\end{equation*}
+	由区域的任意性可得在整个$\mathbb{R}^{n}$上：
+	\begin{equation*}
+		g(\seq{y}{n})=
+		\begin{cases}
+			n!f(y_1)f(y_2)\cdots f(y_n),&y_1<y_2<\cdots<y_n \\
+			0,&\text{其它}
+		\end{cases}
+	\end{equation*}\par
+	(2)注意到$Y_{(i_1)},Y_{(i_2)},\dots,Y_{(i_m)}$的联合密度是次序统计量的边缘密度，所以由(1)和\cref{lem:OrderStatistics}可得：
+	\begin{align*}
+		g(y_{i_1},y_{i_2},\dots,y_{i_m})
+		&=\underset{-\infty<y_1<\cdots<y_n<+\infty}{\int\cdots\int}n!f(y_1)f(y_2)\cdots f(y_n)\dif y_1\cdots\dif y_{i_1-1} \\
+		&\quad\dif y_{i_1+1}\cdots\dif y_{i_2-1}\dif y_{i_2+1}\cdots\dif y_{i_m-1}\dif y_{i_m+1}\cdots\dif y_n \\
+		&=n!\prod_{j=1}^{m}f(y_{i_j})\underset{-\infty<y_1<\cdots<y_{i_1}}{\int\cdots\int}f(y_1)\cdots f(y_{i_1-1})\dif y_1\cdots\dif y_{i_1-1} \\
+		&\quad\times\underset{y_{i_1}<y_{i_1+1}<y_{i_1+2}<\cdots<y_{i_2}}{\int\cdots\int}f(y_{i_1+1})\cdots f(y_{i_2-1})\dif y_{i_1+1}\cdots\dif y_{i_2-1} \\
+		&\quad\cdots\cdots \\
+		&\quad\times\underset{y_{i_m}<y_{i_m+1}<y_{i_m+2}<\cdots<+\infty}{\int\cdots\int}f(y_{i_m+1})\cdots f(y_n)\dif y_{i_m+1}\cdots\dif y_n \\
+		&=n!\prod_{j=1}^{m}f(y_{i_j})\frac{1}{(i_1-1)!}F^{i_1-1}(y_{i_1})\frac{1}{(i_2-i_1-1)!}[F(y_{i_2})-F(y_{i_1})]^{i_2-i_1-1} \\
+		&\quad\cdots\frac{1}{(n-i_m)!}[1-F(y_{i_m})]^{n-i_m} \\
+		&=n!\prod_{j=1}^{m}f(y_{i_j})\frac{1}{(i_1-1)!}F^{i_1-1}(y_{i_1})\frac{1}{(n-i_m)!}[1-F(y_{i_m})]^{n-i_m} \\
+		&\quad\left\{\prod_{k=2}^{m}\frac{1}{(i_k-i_{k-1}-1)!}[F(y_{i_k})-F(y_{i_{k-1}})]^{i_k-i_{k-1}-1}\right\}
+	\end{align*}\par
+	(3)使用增补变量法\info{链接随机变量函数的分布中的增补变量法}，做变换：
+	\begin{equation*}
+		\begin{cases}
+			U=Y_i \\
+			V=Y_j-Y_i
+		\end{cases}
+		\Leftrightarrow
+		\begin{cases}
+			Y_i=U \\
+			Y_j=V+U
+		\end{cases}
+	\end{equation*}
+	该变换的Jacobi行列式为：
+	\begin{equation*}
+		|\mathbf{J}|=
+		\begin{vmatrix}
+			1 & 0 \\
+			1 & 1
+		\end{vmatrix}
+		=1
+	\end{equation*}
+	由(2)可得$(Y_i,Y_j)$的联合密度：
+	\begin{equation*}
+		g(y_i,y_j)=
+		\begin{cases}
+			\dfrac{n!f(y_i)f(y_j)}{(i-1)!(j-i-1)!(n-j)!}F^{i-1}(y_i)[F(y_j)-F(y_i)]^{j-i-1} \\
+			\quad\quad[1-F(y_j)]^{n-j},&y_i<y_j \\
+			0,&\text{其它}
+		\end{cases}
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		g(u,v)=
+		\begin{cases}
+			\dfrac{n!f(u)f(u+v)}{(i-1)!(j-i-1)!(n-j)!}F^{i-1}(u)[F(u+v)-F(u)]^{j-i-1} \\
+			\quad\quad[1-F(u+v)]^{n-j},&v>0 \\
+			0,&\text{其它}
+		\end{cases}
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		g(v)=\int_{-\infty}^{+\infty}g(u,v)\dif u
+	\end{equation*}\par
+	(4)由(3)立即可得。
+\end{proof}
+
+\subsection{充分统计量}
+\begin{definition}
+	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$\Theta$为参数空间，$T$是可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$上的统计量。若对任意的$P\in\mathscr{P}$，样本$\mathbf{X}$在给定$T(\mathbf{X})$下的条件分布$P(\mathbf{X}|T(\mathbf{X}))$与参数$\theta$无关a.e.于$(X,\sigma(T),PT^{-1})$，则称$T$为$\theta$的\gls{SufficientStatistic}，也称$T$为$\mathscr{P}$的充分统计量。
+\end{definition}
+\begin{theorem}[Factorization Theorem]
+	\label{theo:FactorizationTheorem}
+	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$\mu$是控制测度，$\Theta$是参数空间，$T$是可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$上的统计量。$T$对$\mathscr{P}$充分当且仅当存在非负$\mathscr{B}$可测函数$g_\theta$和非负$\mathscr{A}$可测函数$h$使得：
+	\begin{equation*}
+		\forall\;\theta\in\Theta,\;\frac{\dif P_\theta}{\dif\mu}(x)=g_\theta[T(x)]h(x)\;\text{a.e.于}(X,\mathscr{A},\mu)
+	\end{equation*}
+\end{theorem}
+\begin{property}\label{prop:SufficientStatistic}
+	充分统计量具有如下性质：
+	\begin{enumerate}
+		\item 设$(\mathbb{R}^{},\mathcal{B},\mathscr{P})$为统计结构，则其上的次序统计量是$\mathscr{P}$的充分统计量；
+		\item 充分统计量的可逆变换仍为充分统计量；
+	\end{enumerate}
+\end{property}
+\subsubsection{极小充分统计量}
+\begin{definition}
+	设$(X,\mathscr{A},\mathscr{P})$是统计结构，$T$是可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$上对$\mathscr{P}$充分的统计量。若对任意$\mathscr{P}$的充分统计量$S$存在$(Y,\mathscr{B})$到$(Y,\mathscr{B})$上的可测映射$\varphi$满足：
+	\begin{equation*}
+		\forall\;P\in\mathscr{P},\;T=\varphi(S)\;a.s.\text{于}(X,\mathscr{A},P)
+	\end{equation*}
+	则称$T$为$\mathscr{P}$的\gls{MinimalSufficientStatistic}。
+\end{definition}
+\begin{property}\label{prop:MinimalSufficientStatistic}
+	设$(X,\mathscr{A},\mathscr{P})$是统计结构，$T$是可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$上的统计量。极小充分统计量具有如下性质：
+	\begin{enumerate}
+		\item 在$X$为欧氏空间且$(X,\mathscr{A},\mathscr{P})$是可控结构的条件下，极小充分统计量一定存在；
+		\item 极小充分统计量的可逆可测变换仍为极小充分统计量；
+		\item 若将可由一个可逆的可测映射a.s.互变的两个极小充分统计量视为同一个统计量，则极小充分统计量在此意义下是唯一的；
+		\item 若$T$是$\mathscr{P}_0\subseteq\mathscr{P}$的极小充分统计量且是$\mathscr{P}$的充分统计量，对任意的$P\in\mathscr{P}_0\;$a.s.就对任意的$P\in\mathscr{P}\;$a.s.，则$T$是$\mathscr{P}$的极小充分统计量；
+		\item 若$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$X$是欧氏空间，$\mu$是控制测度，$\Theta$为参数空间，则如果满足：
+		\begin{equation*}
+			\forall\;x,y\in X,\;\forall\;\theta\in\Theta,\;\frac{\dif P_\theta}{\dif\mu}(x)=\frac{\dif P_\theta}{\dif\mu}(y)f(x,y)\Rightarrow T(x)=T(y)
+		\end{equation*}
+		其中$f$是一个可测函数，则$T$是$\mathscr{P}$的极小充分统计量；
+		\item 若$\mathscr{P}=\{P_n\},\;n=0,1,2,\dots$，则统计量：
+		\begin{equation*}
+			T(x)=\left(\frac{P_1(x)}{P_0(x)},\frac{P_2(x)}{P_0(x)},\dots\right)
+		\end{equation*}
+		是$\mathscr{P}$的极小充分统计量；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)不予证明。\par
+	(2)由定义即可得出。\par
+	(3)\info{JunShao的证明很简单，由定义即可得出，但没想明白}\par
+	(4)设$S$是$\mathscr{P}$的充分统计量，所以$S$也是$\mathscr{P}_0$的充分统计量，于是存在可测映射$\varphi$使得：
+	\begin{equation*}
+		\forall\;P\in\mathscr{P}_0,\;T=\varphi(S)\;a.s.\text{于}(X,\mathscr{A},P)
+	\end{equation*}
+	由条件即可得到：
+	\begin{equation*}
+		\forall\;P\in\mathscr{P},\;T=\varphi(S)\;a.s.\text{于}(X,\mathscr{A},P)
+	\end{equation*}\par
+	(5)\info{证明未完成}
+\end{proof}
+
+
+\subsection{完备性}
+\begin{definition}
+	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，$T$是可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$上的统计量。若对任意的Borel函数$f$有：
+	\begin{equation*}
+		\forall\;\theta\in\Theta,\;\int_{X}f[T(x)]\dif P_{\theta}=0\Rightarrow f[T(x)]=0\;a.s.\text{于}(X,\mathscr{A},P_{\theta})
+	\end{equation*}
+	则称$T$为\gls{CompleteStatistic}，称$\mathscr{P}T^{-1}$是\textbf{完全的}。若对任意的有界Borel函数有上述结论，则称$T$为\gls{BoundedlyCompleteStatistic}。
+\end{definition}
+\begin{property}\label{prop:CompleteStatistic}
+	完备统计量具有如下性质：
+	\begin{enumerate}
+		\item 完备统计量是有界完备统计量；
+		\item 完备（有界完备）统计量的可测变换仍是完备（有界完备）统计量；
+		\item 充分完备统计量是极小充分统计量；
+	\end{enumerate}
+\end{property}
+
+\subsection{指数族}
+\begin{definition}
+	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$\mu$是控制测度，$\Theta$是参数空间。若$\mathscr{P}$满足：
+	\begin{equation*}
+		\forall\;\theta\in\Theta,\;\frac{\dif P_{\theta}}{\dif\mu}=\exp\left[\eta^T(\theta)T(x)-\xi(\theta)\right]h(x)=C(\theta)\exp\left[\eta^T(\theta)T(x)\right]h(x)
+	\end{equation*}
+	则称$\mathscr{P}$是\gls{ExponentialFamily}。其中$\eta(\theta),T(x)$是$n$维实向量，$n$被称为该指数族的维数，$h$是非负Borel函数，$\xi(\theta)$是实值函数。称：
+	\begin{equation*}
+		\frac{\dif P_{\theta}}{\dif\mu}=\exp\left[\eta^TT(x)-\xi(\eta)\right]h(x)=C(\eta)\exp\left[\eta^TT(x)\right]h(x)
+	\end{equation*}
+	为指数族的\gls{CanonicalForm}，此时的新参数$\eta$被称为\gls{NaturalParameter}，称：
+	\begin{equation*}
+		\Xi=\left\{\eta(\theta):\theta\in\Theta,\;\int_{X}\exp\left[\eta^TT(x)\right]h(x)\dif\mu<+\infty\right\}
+	\end{equation*}
+	为\gls{NaturalParameterSpace}。当$T(x)$或$\eta(\theta)$的各分量之间满足线性约束时，此时称$\theta$\textbf{不可识别}。若自然参数空间中有一个开集，则称该指数族是\textbf{满秩的}。若自然参数满足非线性约束，称此时的指数族为\textbf{curved exponential family}。
+\end{definition}
+\begin{property}\label{prop:ExponentialFamily}
+	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$\mu$是控制测度，$\mathscr{P}$是指数族，则：
+	\begin{enumerate}
+		\item $\dfrac{\dif P_{\theta}}{\dif\mu}$表达式不唯一；
+		\item 对于$\xi(\theta)$和自然参数$\xi(\eta)$有：
+		\begin{gather*}
+			\xi(\theta)=\log\exp\left\{\int_{X}\exp\left[\eta^T(\theta)T(x)\right]h(x)\dif\mu\right\} \\
+			\xi(\eta)=\log\exp\left\{\int_{X}\exp\left[\eta^TT(x)\right]h(x)\dif\mu\right\}
+		\end{gather*}
+		\item 自然参数空间$\Xi$是凸集；
+		\item 若$\mathscr{P}$满秩，$T(x)$或$\eta(\theta)$的各分量之间不满足线性约束或非线性约束；
+		\item 有限个概率分布是指数族的随机变量的联合概率分布仍为指数族；
+		\item $T(x)$是$\mathscr{P}$的充分统计量；
+		\item 若$\mathscr{P}$满秩，则$T(x)$是$\mathscr{P}$的极小充分统计量和完备统计量；
+		\item Bernoulli分布、二项分布、负二项分布、Possion分布、多项分布、正态分布、Gamma分布、Beta分布、卡方分布是指数族；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)显然。\par
+	(2)概率测度在$X$上的积分应为$1$。\par
+	(3)设$\theta,\vartheta\in\Xi$且$\theta\ne\vartheta$。对任意的 $\alpha\in(0,1)$，将$h$吸收进$\mu$得到$\nu$，由\cref{ineq:holder-ineq-Lebesgue}可得：
+	\begin{align*}
+		&\int_{}^{}\exp\left\{[\alpha\theta+(1-\alpha)\vartheta]^TT(x)\right\}\dif\nu \\
+		=&\int_{}^{}\exp\left[\alpha\theta^TT(x)\right]\exp\left[(1-\alpha)\vartheta^TT(x)\right]\dif\nu \\
+		\leqslant&\left\{\int_{}^{}\exp\left[\theta^TT(x)\right]\dif\nu\right\}^{\alpha}\left\{\int_{}^{}\exp\left[\vartheta^TT(x)\right]\dif\nu\right\}^{1-\alpha}<+\infty
+	\end{align*}\par
+\end{proof}
+
+
+\input{statistics/basis/deltamethod.tex}
