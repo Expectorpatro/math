@@ -4,7 +4,7 @@
 	称$X$和其上的一个$\sigma$域$\mathscr{A}$为\gls{MeasurableSpace}，记为$(X,\mathscr{A})$。
 \end{definition}
 \begin{definition}
-	设$(X,\mathscr{A})$和$(Y,\mathscr{B})$为可测空间，$f$是一个$X$到$Y$的映射。如果$f^{-1}(\mathscr{B})\subseteq\mathscr{A}$，则称$f$为从$(X,\mathscr{A})$到$(Y,\mathscr{B})$的\gls{MeasurableMap}。
+	设$(X,\mathscr{A})$和$(Y,\mathscr{B})$为可测空间，$f$是一个$X$到$Y$的映射。如果$f^{-1}(\mathscr{B})\subseteq\mathscr{A}$，则称$f$为从$(X,\mathscr{A})$到$(Y,\mathscr{B})$的\gls{MeasurableMap}，也称$f$是$\mathscr{A}$可测的。
 \end{definition}
 \begin{lemma}\label{lem:PreimageSigmaField}
 	设$X,Y$为两个集合，$f$为一个$X$到$Y$的映射，$\mathscr{A}\subseteq Y$，则：
@@ -89,10 +89,13 @@
 	若$\mu$是有限测度，由$\nu$的定义即可得$\nu$也是有限测度。\par
 	\info{未完成}
 \end{proof}
+\begin{note}
+	上述第三条性质是一个很重要的结论，$\nu$被称之为pushforward measure，在数理统计和积分的变量替换中有很多它的应用。需要注意到的一点是$\nu$在$(X,\sigma(f))$上也构成一个测度，这句话不太对，因为$\nu$是定义在$\mathscr{B}$上的，但一些书也把$\sigma(f)$看作其定义域，其实就是$\mu$限制在$\sigma(f)$上的结果，根据\cref{prop:Measure}(4)即可得出结论。
+\end{note}
 
 \subsection{可测函数}
 \begin{definition}
-	从可测空间$(X,\mathscr{A})$到可测空间$(\overline{\mathbb{R}},\mathcal{B}_{\overline{\mathbb{R}}})$的可测映射称为$(X,\mathscr{A})$上的\gls{MeasurableFunction}。特别的，从可测空间$(X,\mathscr{A})$到可测空间$(\mathbb{R},\mathcal{B})$的可测映射称为$(X,\mathscr{A})$上的有限值可测函数或\gls{r.v.}。
+	从可测空间$(X,\mathscr{A})$到可测空间$(\overline{\mathbb{R}},\mathcal{B}_{\overline{\mathbb{R}}})$的可测映射称为$(X,\mathscr{A})$上的\gls{MeasurableFunction}。特别的，从可测空间$(X,\mathscr{A})$到可测空间$(\mathbb{R},\mathcal{B})$的可测映射称为$(X,\mathscr{A})$上的有限值可测函数或\gls{r.v.}或Borel可测函数（简称Borel函数）。
 \end{definition}
 \subsubsection{简单函数}
 \begin{definition}
@@ -210,7 +213,7 @@
 			\item 对任意的$a\in\mathbb{R}$，$\{f\geqslant a\}\in\mathscr{A}$。
 		\end{enumerate}
 		\item 若$f$是$(X,\mathscr{A})$上的可测函数，则$\{f=+\infty\},\{f=-\infty\}\in\mathscr{A}$；
-		\item 若$f$和$g$是$(X,\mathscr{A})$上的可测函数，则$\{f<g\},\{f\leqslant g\},\{f=g\}.\{f\ne g\}\in\mathscr{A}$，同时对于任意的$\varepsilon>0$，有$\{|f-g|\geqslant\varepsilon\}\in \mathscr{A}$。
+		\item 若$f$和$g$是$(X,\mathscr{A})$上的可测函数，则$\{f<g\},\{f\leqslant g\},\{f=g\}.\{f\ne g\}\in\mathscr{A}$，同时对于任意的$\varepsilon>0$，有$\{|f-g|\geqslant\varepsilon\},\{|f-g|>\varepsilon\}\in \mathscr{A}$。
 		\item 如果$f$是$(X,\mathscr{A})$上的可测函数，则$f$为简单函数的充分必要条件为它的值域是有限个实数组成的集合；
 		\item 若$f,g$是$(X,\mathscr{A})$上的可测函数，则：
 		\begin{enumerate}
@@ -257,7 +260,8 @@
 	因为$g$是可测函数，由(1)可得$g+\varepsilon$和$g-\varepsilon$也是可测函数，所以$\{f\geqslant g+\varepsilon\},\{f\leqslant g-\varepsilon\}\in\mathscr{A}$。由\cref{prop:SigmaField}(3)可得：
 	\begin{equation*}
 		\{|f-g|\geqslant\varepsilon\}=\{f\geqslant g+\varepsilon\}\cup\{f\leqslant g-\varepsilon\}\in \mathscr{A}
-	\end{equation*}\par
+	\end{equation*}
+	同理可得$\{|f-g|>\varepsilon\}\in\mathscr{A}$。\par
 	(4)必要性由简单函数的定义即可立即得到。设$f$的值域为$\{a_i:i=1,2,\dots,n\}$，因为$f$是可测函数，由(1)和\cref{prop:SigmaField}(4)可得$\{f=a_i\}=\{f\leqslant a_i\}\backslash\{f<a_i\}\in\mathscr{A}$，于是$f$可表为：
 	\begin{equation*}
 		f(x)=\sum_{i=1}^{n}a_iI_{\{f=a_i\}}(x),\quad X=\underset{i=1}{\overset{n}{\cup}}\{f=a_i\},\quad\{f=a_i\}\cap\{f=a_j\}=\varnothing,\;\forall\;i\ne j
@@ -541,7 +545,7 @@
 	\begin{equation*}
 		P(f^{-1}A),\;\forall\;A\in \mathscr{A}
 	\end{equation*}
-	为$f$的\gls{ProbabilityDistribution}，简记为$Pf^{-1}$。
+	为$f$的\gls{ProbabilityDistribution}，简记为$Pf^{-1}$。在没有明确可测映射的场合，也称概率测度$P$为概率分布。
 \end{definition}
 \begin{definition}
 	设$\{f_n\sim F_n\}$是概率空间$(X,\mathscr{F},P)$上的随机变量序列，$F$是一个分布函数。若对于$F$的每一个连续点$x$都有：
