@@ -15,7 +15,7 @@
 	其中$\Theta$为参数空间，则称此结构为\gls{ParametricStructure}，否则称为\gls{Non-parametricStructure}。
 \end{definition}
 \begin{note}
-	引入统计结构是因为在统计学中我们往往没有总体$P$的全部信息，它是不确定的，但我们会根据现有信息去假设$P$可能是怎样的，从而给出一族可能的概率测度$\mathscr{P}$，因此产生了统计学的两大问题：参数估计和假设检验。二者都是在获得样本后对$\mathscr{P}$进行分析的统计工具，其中参数估计又可分为点估计和区间估计。点估计分析$\mathscr{P}$中哪一个概率测度最有可能是真实总体，区间估计是为了得到一个尽可能小的$\mathscr{P}_0$使得真实总体最有可能在这里面，假设检验分析对于$\mathscr{P}_1,\mathscr{P_2}\subset\mathscr{P}$，真实总体最有可能出现在哪一个之中。
+	引入统计结构是因为在统计学中我们往往没有总体$P$的全部信息，它是不确定的，但我们会根据现有信息去假设$P$可能是怎样的，从而给出一族可能的概率测度$\mathscr{P}$，因此产生了统计学的两大问题：参数估计和假设检验。二者都是在获得样本后对$\mathscr{P}$进行分析的统计工具，其中参数估计又可分为点估计和区间估计。点估计分析$\mathscr{P}$中哪一个概率测度最有可能是真实总体，区间估计是为了得到一个尽可能小的$\mathscr{P}_0$使得真实总体最有可能在这里面，假设检验分析对于$\mathscr{P}_1,\mathscr{P}_2\subset\mathscr{P}$，真实总体最有可能出现在哪一个之中。
 \end{note}
 \begin{definition}
 	设$(X_1,\mathscr{A}_1,\mathscr{P}_1),(X_2,\mathscr{A}_2,\mathscr{P}_2),\dots,(X_n,\mathscr{A}_n,\mathscr{P}_n)$为$n$个统计结构，称：
@@ -47,10 +47,20 @@
 
 \subsection{次序统计量}
 \begin{definition}
-	设$\seq{X}{n}$为从总体中抽取的样本，将其按大小排列为$X_{(1)}\leqslant X_{(2)}\leqslant\cdots\leqslant X_{(n)}$，称$(X_{(1)},X_{(2)},\dots,X_{(n)})$为样本$\seq{X}{n}$的\gls{OrderStatistic}。
+	设$\seq{f}{n}$为可测空间$(X,\mathscr{A})$上的随机变量，对每个$x\in X$，将其按大小排列为$f_{(1)}\leqslant f_{(2)}\leqslant\cdots\leqslant f_{(n)}$，若存在相等的情况则可随意排列，由此可得到新的函数$f_{(1)},f_{(2)},\dots,f_{(n)}$，称$(f_{(1)},f_{(2)},\dots,f_{(n)})$为$\seq{f}{n}$的\gls{OrderStatistic}。
 \end{definition}
+\begin{property}\label{prop:OrderStatistics}
+	设$\seq{f}{n}$为可测空间$(X,\mathscr{A})$上的随机变量，$(f_{(1)},f_{(2)},\dots,f_{(n)})$为$\seq{f}{n}$的次序统计量。对任意的$i=1,2,\dots,n$，$f_{(i)}$是$(X,\mathscr{A})$上的随机变量。
+\end{property}
+\begin{proof}
+	注意到对任意的$i=1,2,\dots,n$和任意的$a\in\mathbb{R}^{}$，$f_{(i)}$是从$X$到$\mathbb{R}$上的映射，并且有：
+	\begin{equation*}
+		\{f_{(i)}\leqslant a\}=\left\{\sum_{j=1}^{n}I_{\{f_j\leqslant a\}}\geqslant i\right\}
+	\end{equation*}
+	由\cref{prop:MeasurableFunction}(1.b)、\cref{prop:SimpleFunction}(3)(1)、\cref{prop:MeasurableFunction}(5.a)(1.d)即可得到$\{f_{(i)}\leqslant a\}\in\mathscr{A}$，于是$f_{(i)}$是$(X,\mathscr{A})$上的随机变量。
+\end{proof}
 \begin{lemma}\label{lem:OrderStatistics}
-	设总体的分布函数为$F(x)$，密度函数为$f(x)$，$\seq{X}{n}$为从总体中抽取的简单样本，则有：
+	设总体的分布函数为$F(x)$，概率函数为$f(x)$，$\seq{X}{n}$为从总体中抽取的简单样本，则有：
 	\begin{equation*}
 		\underset{a<x_1<\cdots<x_n<b}{\int\cdots\int}f(x_1)\cdots f(x_n)\dif x_1\cdots\dif x_n=\frac{1}{n!}[F(b)-F(a)]^n
 	\end{equation*}
@@ -64,61 +74,69 @@
 	在这个区域上对$\seq{x}{n}$的排序结果一共有$n!$种（不考虑等于的情况，测度为$0$，不影响积分结果），每种排序都是等可能的，于是结论成立。
 \end{proof}
 \begin{theorem}\label{theo:OrderStatisticsDist}
-	设$\seq{X}{n}$为从总体中抽取的简单样本，总体的分布函数和密度函数分别为$F(x),f(x)$。
+	设$\seq{X}{n}$是测度空间$(X,\mathscr{A},P)$上独立同分布的随机变量，分布函数和概率函数分别为$F(x),f(x)$。
 	\begin{enumerate}
-		\item 令$Y_i=X_{(i)},\;i=1,2,\dots,n$，则次序统计量$(\seq{Y}{n})$的联合密度为：
+		\item 令$Y_i=X_{(i)},\;i=1,2,\dots,n$，则次序统计量$(\seq{Y}{n})$的联合概率函数为：
 		\begin{equation*}
-			g(\seq{y}{n})=
+			p(\seq{y}{n})=
 			\begin{cases}
 				n!f(y_1)f(y_2)\cdots f(y_n),&y_1<y_2<\cdots<y_n \\
 				0,&\text{其它}
 			\end{cases}
 		\end{equation*}
-		\item 样本次序统计量中任意$m$个分量$Y_{(i_1)},Y_{(i_2)},\dots,Y_{(i_m)},\;i_1<i_2<\cdots<i_m$的联合密度为：
+		\item 次序统计量中任意$m\geqslant2$个分量$Y_{i_1},Y_{i_2},\dots,Y_{i_m},\;i_1<i_2<\cdots<i_m$的联合概率函数为：
 		\begin{equation*}
-			g(y_{i_1},y_{i_2},\dots,y_{i_m})=
+			p(y_{i_1},y_{i_2},\dots,y_{i_m})=
 			\begin{cases}
 				n!\prod\limits_{j=1}^{m}f(y_{i_j})\left\{\prod\limits_{k=2}^{m}\frac{1}{(i_k-i_{k-1}-1)!}[F(y_{i_k})-F(y_{i_{k-1}})]^{i_k-i_{k-1}-1}\right\} & \\
 				\quad\frac{F^{i_1-1}(y_{i_1})}{(i_1-1)!}\frac{[1-F(y_{i_m})]^{n-i_m}}{(n-i_m)!},\quad y_{i_1}<y_{i_2}<\cdots<y_{i_m} \\
 				0, \quad\text{其他}
 			\end{cases}
 		\end{equation*}
+		\item 次序统计量中单个分量$Y_{m},\;m=1,2,\dots,n$的概率函数为：
+		\begin{equation*}
+			p(y_{m})=n!f(y_m)\frac{F^{m-1}(y_m)}{(m-1)!}\frac{[1-F(y_m)]^{n-m}}{(n-m)!}
+		\end{equation*}
 		\item 对于任意的$i,j=1,2,\dots,n$满足$i<j$，令$V=Y_j-Y_i$，则有：
 		\begin{equation*}
-			g(v)=\int_{-\infty}^{+\infty}g(u,v)\dif u
+			p(v)=\int_{-\infty}^{+\infty}p(u,v)\dif u
 		\end{equation*}
 		其中：
 		\begin{equation*}
-			g(u,v)=
+			p(u,v)=
 			\begin{cases}
 				\dfrac{n!f(u)f(u+v)}{(i-1)!(j-i-1)!(n-j)!}F^{i-1}(u)[F(u+v)-F(u)]^{j-i-1} \\
 				\quad\quad[1-F(u+v)]^{n-j},&v>0 \\
 				0,&\text{其它}
 			\end{cases}
 		\end{equation*}
-		\item 次序统计量$(\seq{Y}{n})$极差的分布为：
+		\item 次序统计量$(\seq{Y}{n})$极差$V$的概率函数为：
 		\begin{equation*}
-			g(v)=\int_{-\infty}^{+\infty}g(u,v)\dif u
+			p(v)=\int_{-\infty}^{+\infty}p(u,v)\dif u
 		\end{equation*}
 		其中：
 		\begin{equation*}
-			g(u,v)=
+			p(u,v)=
 			\begin{cases}
 				n(n-1)f(u)f(u+v)[F(u+v)-F(u)]^{n-2},&v>0 \\
 				0,&\text{其它}
 			\end{cases}
 		\end{equation*}
+		分布函数为：
+		\begin{equation*}
+			F(V\leqslant x)=\int_{-\infty}^{+\infty}nf(u)[F(u+x)-F(u)]^{n-1}\dif u 
+		\end{equation*}
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
-	在$\mathbb{R}^{n}$中划分$n!$个区域，每个区域分别对应着一个$\seq{i}{n}$使得$x_{i1}<x_{i2}<\cdots<x_{in}$，因为$\seq{x}{n}$的排列一共有$n!$种，所以这$n!$个区域加上包括等于号的一些零测集就构成了整个$\mathbb{R}^{n}$。因为次序统计量的密度函数也是在$\mathbb{R}^{n}$上的一个概率测度，则可以对每个划分的区域求$(\seq{Y}{n})$的概率测度，再对所有区域求和，即可得到次序统计量的联合密度。这个过程类似于全概率公式。\par
+	(1)在$\mathbb{R}^{n}$中划分$n!$个区域，每个区域分别对应着一个$\seq{i}{n}$使得$x_{i1}<x_{i2}<\cdots<x_{in}$，因为$\seq{x}{n}$的排列一共有$n!$种，所以这$n!$个区域加上包括等于号的一些零测集就构成了整个$\mathbb{R}^{n}$。因为次序统计量的概率函数也是在$\mathbb{R}^{n}$上的一个概率测度，则可以对每个划分的区域求$(\seq{Y}{n})$的概率测度，再对所有区域求和，即可得到次序统计量的联合概率函数。这个过程类似于全概率公式。\par
 	任取一个上述区域$A$作变换：
 	\begin{equation*}
 		y_j=x_{i_j},\;j=1,2,\dots,n,\;x_{i1}<x_{i2}<\cdots<x_{in}
 	\end{equation*}
 	则该变换的Jacobi行列式为$|\mathbf{J}|=|I_n|=1$，因为$\seq{X}{n}$是简单样本，所以在该区域上的：
 	\begin{equation*}
-		g(\seq{y}{n}|A)=
+		p(\seq{y}{n}|A)=
 		\begin{cases}
 			\prod\limits_{i=1}^{n}f(x_i)=\prod\limits_{i=1}^{n}f(y_i),&y_1<y_2<\cdots<y_n \\
 			0,&\text{其它}
@@ -126,15 +144,15 @@
 	\end{equation*}
 	由区域的任意性可得在整个$\mathbb{R}^{n}$上：
 	\begin{equation*}
-		g(\seq{y}{n})=
+		p(\seq{y}{n})=
 		\begin{cases}
 			n!f(y_1)f(y_2)\cdots f(y_n),&y_1<y_2<\cdots<y_n \\
 			0,&\text{其它}
 		\end{cases}
 	\end{equation*}\par
-	(2)注意到$Y_{(i_1)},Y_{(i_2)},\dots,Y_{(i_m)}$的联合密度是次序统计量的边缘密度，所以由(1)和\cref{lem:OrderStatistics}可得：
+	(2)注意到$Y_{(i_1)},Y_{(i_2)},\dots,Y_{(i_m)}$的联合概率函数是次序统计量的边缘概率函数，所以由(1)和\cref{lem:OrderStatistics}可得：
 	\begin{align*}
-		g(y_{i_1},y_{i_2},\dots,y_{i_m})
+		p(y_{i_1},y_{i_2},\dots,y_{i_m})
 		&=\underset{-\infty<y_1<\cdots<y_n<+\infty}{\int\cdots\int}n!f(y_1)f(y_2)\cdots f(y_n)\dif y_1\cdots\dif y_{i_1-1} \\
 		&\quad\dif y_{i_1+1}\cdots\dif y_{i_2-1}\dif y_{i_2+1}\cdots\dif y_{i_m-1}\dif y_{i_m+1}\cdots\dif y_n \\
 		&=n!\prod_{j=1}^{m}f(y_{i_j})\underset{-\infty<y_1<\cdots<y_{i_1}}{\int\cdots\int}f(y_1)\cdots f(y_{i_1-1})\dif y_1\cdots\dif y_{i_1-1} \\
@@ -146,7 +164,8 @@
 		&=n!\prod_{j=1}^{m}f(y_{i_j})\frac{1}{(i_1-1)!}F^{i_1-1}(y_{i_1})\frac{1}{(n-i_m)!}[1-F(y_{i_m})]^{n-i_m} \\
 		&\quad\left\{\prod_{k=2}^{m}\frac{1}{(i_k-i_{k-1}-1)!}[F(y_{i_k})-F(y_{i_{k-1}})]^{i_k-i_{k-1}-1}\right\}
 	\end{align*}\par
-	(3)使用增补变量法\info{链接随机变量函数的分布中的增补变量法}，做变换：
+	(3)类似(2)的过程即可得到，省略。\par
+	(4)使用增补变量法\info{链接随机变量函数的分布中的增补变量法}，做变换：
 	\begin{equation*}
 		\begin{cases}
 			U=Y_i \\
@@ -167,9 +186,9 @@
 		\end{vmatrix}
 		=1
 	\end{equation*}
-	由(2)可得$(Y_i,Y_j)$的联合密度：
+	由(2)可得$(Y_i,Y_j)$的联合概率函数：
 	\begin{equation*}
-		g(y_i,y_j)=
+		p(y_i,y_j)=
 		\begin{cases}
 			\dfrac{n!f(y_i)f(y_j)}{(i-1)!(j-i-1)!(n-j)!}F^{i-1}(y_i)[F(y_j)-F(y_i)]^{j-i-1} \\
 			\quad\quad[1-F(y_j)]^{n-j},&y_i<y_j \\
@@ -178,7 +197,7 @@
 	\end{equation*}
 	于是：
 	\begin{equation*}
-		g(u,v)=
+		p(u,v)=
 		\begin{cases}
 			\dfrac{n!f(u)f(u+v)}{(i-1)!(j-i-1)!(n-j)!}F^{i-1}(u)[F(u+v)-F(u)]^{j-i-1} \\
 			\quad\quad[1-F(u+v)]^{n-j},&v>0 \\
@@ -187,9 +206,16 @@
 	\end{equation*}
 	所以：
 	\begin{equation*}
-		g(v)=\int_{-\infty}^{+\infty}g(u,v)\dif u
+		p(v)=\int_{-\infty}^{+\infty}p(u,v)\dif u
 	\end{equation*}\par
-	(4)由(3)立即可得。
+	(5)由(4)立即可得概率函数。对于分布函数有：
+	\begin{align*}
+		F(V\leqslant x)&=\int_{-\infty}^x\int_{-\infty}^{+\infty}g(u,v)\dif u\dif v =\int_{-\infty}^0\int_{-\infty}^{+\infty}0\dif u\dif v \\
+		&\quad+\int_{0}^x\int_{-\infty}^{+\infty}n(n-1)f(u)f(u+v)[F(u+v)-F(u)]^{n-2}\dif u\dif v \\
+		&=\int_{-\infty}^{+\infty}\dif u\int_{0}^xn(n-1)f(u)f(u+v)[F(u+v)-F(u)]^{n-2}\dif v \\
+		&=\int_{-\infty}^{+\infty}nf(u)[F(u+v)-F(u)]^{n-1}\Big|_0^x\dif u \\
+		&=\int_{-\infty}^{+\infty}nf(u)[F(u+x)-F(u)]^{n-1}\dif u \qedhere
+	\end{align*}
 \end{proof}
 
 \subsection{充分统计量}
@@ -206,7 +232,7 @@
 \begin{property}\label{prop:SufficientStatistic}
 	充分统计量具有如下性质：
 	\begin{enumerate}
-		\item 设$(\mathbb{R}^{},\mathcal{B},\mathscr{P})$为统计结构，则其上的次序统计量是$\mathscr{P}$的充分统计量；
+		\item 设$(\mathbb{R},\mathcal{B},\mathscr{P})$为统计结构，则其上的次序统计量是$\mathscr{P}$的充分统计量；
 		\item 充分统计量的可逆变换仍为充分统计量；
 	\end{enumerate}
 \end{property}
@@ -297,10 +323,10 @@
 		\end{gather*}
 		\item 自然参数空间$\Xi$是凸集；
 		\item 若$\mathscr{P}$满秩，$T(x)$或$\eta(\theta)$的各分量之间不满足线性约束或非线性约束；
-		\item 有限个概率分布是指数族的随机变量的联合概率分布仍为指数族；
+		\item 有限个概率分布是指数族的相互独立的随机变量的联合概率分布仍为指数族；
 		\item $T(x)$是$\mathscr{P}$的充分统计量；
 		\item 若$\mathscr{P}$满秩，则$T(x)$是$\mathscr{P}$的极小充分统计量和完备统计量；
-		\item Bernoulli分布、二项分布、负二项分布、Possion分布、多项分布、正态分布、Gamma分布、Beta分布、卡方分布是指数族；
+		\item Bernoulli分布、二项分布、负二项分布、几何分布、Possion分布、多项分布、正态分布、Gamma分布、Beta分布、卡方分布是指数族；
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -308,11 +334,140 @@
 	(2)概率测度在$X$上的积分应为$1$。\par
 	(3)设$\theta,\vartheta\in\Xi$且$\theta\ne\vartheta$。对任意的 $\alpha\in(0,1)$，将$h$吸收进$\mu$得到$\nu$，由\cref{ineq:holder-ineq-Lebesgue}可得：
 	\begin{align*}
-		&\int_{}^{}\exp\left\{[\alpha\theta+(1-\alpha)\vartheta]^TT(x)\right\}\dif\nu \\
-		=&\int_{}^{}\exp\left[\alpha\theta^TT(x)\right]\exp\left[(1-\alpha)\vartheta^TT(x)\right]\dif\nu \\
-		\leqslant&\left\{\int_{}^{}\exp\left[\theta^TT(x)\right]\dif\nu\right\}^{\alpha}\left\{\int_{}^{}\exp\left[\vartheta^TT(x)\right]\dif\nu\right\}^{1-\alpha}<+\infty
+		&\int_{}\exp\left\{[\alpha\theta+(1-\alpha)\vartheta]^TT(x)\right\}\dif\nu \\
+		=&\int_{}\exp\left[\alpha\theta^TT(x)\right]\exp\left[(1-\alpha)\vartheta^TT(x)\right]\dif\nu \\
+		\leqslant&\left\{\int_{}\exp\left[\theta^TT(x)\right]\dif\nu\right\}^{\alpha}\left\{\int_{}\exp\left[\vartheta^TT(x)\right]\dif\nu\right\}^{1-\alpha}<+\infty
 	\end{align*}\par
+	(8)
+\end{proof}
+\begin{theorem}
+	设$X\sim\operatorname{Binom}(n,p)$，$\seq{X}{m}$是$X$的一个样本，则：
+	\begin{enumerate}
+		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
+		\begin{gather*}
+			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(1+e^{\eta})^{-mn}\exp\left[\ln\left(\frac{p}{1-p}\right)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\binom{n}{x_i} \\
+			\eta=\ln\left(\frac{p}{1-p}\right),\quad C(\eta)=(1+e^{\eta})^{-mn},\quad T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}\binom{n}{x_i}
+		\end{gather*}
+		\item $\seq{X}{m}$分布的充分统计量为$\sum\limits_{i=1}^{m}x_i$；
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由二项分布的定义可以得到：
+	\begin{align*}
+		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+		=&\prod_{i=1}^{m}\left[\binom{n}{x_i}p^{x_i}(1-p)^{n-x_i}\right]=\prod_{i=1}^{m}\left[\binom{n}{x_i}\left(\frac{p}{1-p}\right)^{x_i}(1-p)^n\right] \\
+		=&(1-p)^{mn}\exp\left[\ln\left(\frac{p}{1-p}\right)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\binom{n}{x_i}
+	\end{align*}
+	令：
+	\begin{equation*}
+		\eta=\ln\left(\frac{p}{n-p}\right)
+	\end{equation*}
+	可解得：
+	\begin{equation*}
+		p=\frac{e^{\eta}}{e^{\eta}+1}
+	\end{equation*}
+	于是有：
+	\begin{equation*}
+		C(\eta)=(1-p)^{mn}=\left(\frac{1}{e^{\eta}+1}\right)^{mn}=(1+e^{\eta})^{-mn}
+	\end{equation*}\par
+	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
 \end{proof}
 
+\begin{theorem}
+	设$X\sim\operatorname{NB}(r,p)$，$\seq{X}{m}$是$X$的一个样本，则：
+	\begin{enumerate}
+		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
+		\begin{gather*}
+			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(1-e^{\eta})^{mr}\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\binom{x_i+r-1}{r-1} \\
+			\eta=\ln(1-p),\quad C(\eta)=(1-e^{\eta})^{mr},\quad T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}\binom{x_i+r-1}{r-1}
+		\end{gather*}
+		\item $\seq{X}{m}$分布的充分统计量为$\sum\limits_{i=1}^{m}x_i$；
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由负二项分布的定义可以得到：
+	\begin{align*}
+		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+		=&\prod_{i=1}^{m}\left[\binom{x_i+r-1}{r-1}p^r(1-p)^{x_i}\right] \\
+		=&p^{mr}\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\binom{x_i+r-1}{r-1}
+	\end{align*}
+	令$\eta=\ln(1-p)$，可解得$p=1-e^{\eta}$，于是有$C(\eta)=p^{mr}=(1-e^{\eta})^{mr}$。\par
+	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
+\end{proof}
+
+\begin{theorem}
+	设$X\sim\operatorname{Geom}(p)$，$\seq{X}{m}$是$X$的一个样本，则：
+	\begin{enumerate}
+		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
+		\begin{gather*}
+			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(1-e^{\eta})^n\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right] \\
+			\eta=\ln(1-p),\quad C(\eta)=(1-e^{\eta})^n,\quad T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=1
+		\end{gather*}
+		\item $\seq{X}{m}$分布的充分统计量为$\sum\limits_{i=1}^{m}x_i$；
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由几何分布的定义可以得到：
+	\begin{equation*}
+		p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\prod_{i=1}^{m}[(1-p)^{x_i}p]=p^n\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right]
+	\end{equation*}
+	令$\eta=\ln(1-p)$，可解得$p=1-e^{\eta}$，于是有$C(\eta)=p^n=(1-e^{\eta})^n$。\par
+	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
+\end{proof}
+
+\begin{theorem}
+	设$X\sim\operatorname{Possion}(\lambda)$，$\seq{X}{m}$是$X$的一个样本，则：
+	\begin{enumerate}
+		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
+		\begin{gather*}
+			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(1-e^{\eta})^n\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right] \\
+			\eta=\ln(\lambda),\quad C(\eta)=e^{\eta},\quad T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}\frac{1}{x_i!}
+		\end{gather*}
+		\item $\seq{X}{m}$分布的充分统计量为$\sum\limits_{i=1}^{m}x_i$；
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由Possion分布的定义可以得到：
+	\begin{equation*}
+		p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\prod_{i=1}^{m}\left(\frac{\lambda^{x_i}}{x_i!}e^{-\lambda}\right)=e^{-m\lambda}\exp\left[\ln(\lambda)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\frac{1}{x_i!}
+	\end{equation*}
+	令$\eta=\ln(\lambda)$，可解得$\lambda=e^{\eta}$，于是有$C(\eta)=e^{-m\lambda}=\exp(-me^{\eta})$。\par
+	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
+\end{proof}
+
+\begin{theorem}
+	设$X\sim\operatorname{N}(\mu,\sigma^2)$，$\seq{X}{m}$是$X$的一个样本，则：
+	\begin{enumerate}
+		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
+		\begin{gather*}
+			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^{m}x_i^2+\frac{\mu}{2\sigma^2}2\sum_{i=1}^{m}x_i\right) \\
+			\eta=\left(-\frac{1}{2\sigma^2},\frac{\mu}{\sigma^2}\right),\quad C(\eta)=\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right) \\
+			T(x)=\left(\sum_{i=1}^{m}x_i^2,\sum_{i=1}^{m}x_i\right),\quad h(x)=1
+		\end{gather*}
+		\item $\seq{X}{m}$分布的充分统计量为$\left(\sum\limits_{i=1}^{m}x_i^2,\sum\limits_{i=1}^{m}x_i\right)$；
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由正态分布的定义可以得到：
+	\begin{align*}
+		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\prod_{i=1}^{m}\left\{(2\pi\sigma^2)^{-\frac{1}{2}}\exp\left[-\frac{(x_i-\mu)^2}{2\sigma^2}\right]\right\} \\
+		=&(2\pi\sigma^2)^{-\frac{m}{2}}\prod_{i=1}^{m}\left[\exp\left(-\frac{x_i^2-2x_i\mu+\mu^2}{2\sigma^2}\right)\right] \\
+		=&(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^{m}x_i^2+\frac{\mu}{\sigma^2}\sum_{i=1}^{m}x_i-\frac{m\mu^2}{2\sigma^2}\right) \\
+		=&(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^{m}x_i^2+\frac{\mu}{\sigma^2}\sum_{i=1}^{m}x_i\right)
+	\end{align*}
+	令：
+	\begin{equation*}
+		\eta=\left(-\frac{1}{2\sigma^2},\frac{\mu}{\sigma^2}\right)
+	\end{equation*}
+	可解得：
+	\begin{equation*}
+		\mu=-\frac{\eta_2}{2\eta_1},\quad\sigma^2=-\frac{1}{2\eta_1}
+	\end{equation*}
+	于是有
+	\begin{equation*}
+		(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right)
+	\end{equation*}\par
+	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
+\end{proof}
 
 \input{statistics/basis/deltamethod.tex}
