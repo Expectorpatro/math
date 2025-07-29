@@ -1,8 +1,7 @@
 \section{矩估计}
 
-\subsection{矩法}
 \begin{definition}
-	设$(X,\mathscr{A},\mathscr{P})$是一个参数统计结构，$\mathbf{X_n}=(\seq{X}{n})$为从总体$F$中抽取的简单样本。将：
+	设$(X,\mathscr{A},\mathscr{P})$是参数统计结构，$\mathbf{X_n}=(\seq{X}{n})$为从总体$F$中抽取的简单样本。将：
 	\begin{equation*}
 		\mu_{nk}=\frac{1}{n}\sum_{i=1}^{n}X_i^k,\quad
 		\nu_{nk}=\frac{1}{n}\sum_{i=1}^{n}(X_i-\mu_{n1})^k
@@ -26,19 +25,17 @@
 	\end{align*}
 \end{proof}
 \begin{definition}
-	设$(X,\mathscr{A},\mathscr{P})$是一个参数统计结构，$\Theta$是参数空间，$\mathbf{X_n}=(\seq{X}{n})$为从总体中抽取的简单样本，$g(\theta)$是定义在$\Theta$上的函数，$\delta(\mathbf{X})$是$g(\theta)$的一个估计量。它可以表示为总体分布的一些矩的函数，即：
+	设$(X,\mathscr{A},\mathscr{P})$是一个参数统计结构，$\Theta$是参数空间，$\mathbf{X}=(\seq{X}{n})$为从总体中抽取的简单样本，$g(\theta)$是定义在$\Theta$上的函数，它可以表示为总体分布的一些矩的函数，即：
 	\begin{equation*}
 		g(\theta)=f(\seq{\mu}{s},\seq{\nu}{t})
 	\end{equation*}
-	设$\mathbf{X}=(\seq{X}{n})$是从上述总体分布族中抽取的简单样本，将$f$中的总体矩用样本矩代替，得到：
+	将$f$中的总体矩用样本矩代替，得到：
 	\begin{equation*}
 		\delta(\mathbf{X})=f(\mu_{n1},\mu_{n2},\dots,\mu_{ns},\nu_{n1},\nu_{n2},\dots,\nu_{nt})
 	\end{equation*}
 	则$\delta(\mathbf{X})$成为$g(\theta)$的一个点估计，称$\delta(\mathbf{X})$为$g(\theta)$的\gls{MomentEstimation}，这种求矩估计量的方法称为\gls{MethodOfMoments}。
 \end{definition}
-
-\subsection{矩估计的性质}
-\begin{property}
+\begin{property}\label{prop:MomentEstimation}
 	矩估计具有如下性质：
 	\begin{enumerate}
 		\item 样本$k$阶原点矩$\mu_{nk}$是总体$k$阶原点矩$\mu_k$的无偏估计、强相合估计；
@@ -64,23 +61,23 @@
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)由：
+	(1)由\cref{prop:MeasurableIntegral}(5)可得：
 	\begin{equation*}
-		\operatorname{E}(\mu_{nk})=\operatorname{E}\left[\frac{1}{n}\sum_{i=1}^{n}X_i^k\right]=\frac{1}{n}\sum_{i=1}^{n}\operatorname{E}(X_i^k)=\frac{1}{n}\sum_{i=1}^{n}\mu_k=\mu_k
+		\operatorname{E}_{\theta}(\mu_{nk})=\operatorname{E}_{\theta}\left(\frac{1}{n}\sum_{i=1}^{n}X_i^k\right)=\frac{1}{n}\sum_{i=1}^{n}\operatorname{E}_{\theta}(X_i^k)=\frac{1}{n}\sum_{i=1}^{n}\mu_k=\mu_k
 	\end{equation*}
 	可得无偏性。\par
 	由\cref{theo:StrongLawOfLargeNumbers}可得：
 	\begin{equation*}
-		\mu_{nk}=\frac{1}{n}\sum_{i=1}^{n}X_i^k\overset{\text{a.e.}}{\longrightarrow}\frac{1}{n}\sum_{i=1}^{n}E(X_i^k)=\mu_k
+		\mu_{nk}=\frac{1}{n}\sum_{i=1}^{n}X_i^k\overset{\text{a.s.}}{\longrightarrow}\operatorname{E}(X_1^k)=\mu_k
 	\end{equation*}\par
 	(2)\info{不无偏还未证明}由\cref{theo:Moment}可得：
 	\begin{equation*}
 		\nu_k=\sum_{i=0}^{k}\binom{k}{i}\mu_i(-\mu_1)^{k-i}=f(\seq{\mu}{k})
 	\end{equation*}
-	所以$\nu_k$是$\seq{\mu}{k}$的连续函数。由\cref{theo:ContinuousMappingTheorem}(1)、(1)、\cref{theo:SampleMoment}可得：
+	所以$\nu_k$是$\seq{\mu}{k}$的连续函数。由\cref{theo:SampleMoment}、(1)和\cref{theo:ContinuousMappingTheorem}(1)可得：
 	\begin{equation*}
-		\nu_{nk}=f(\mu_{n1},\mu_{n2},\dots,\mu_{nk})\overset{\text{a.e.}}{\longrightarrow}f(\seq{\mu}{k})=\nu_{k}
+		\nu_{nk}=f(\mu_{n1},\mu_{n2},\dots,\mu_{nk})\overset{\text{a.s.}}{\longrightarrow}f(\seq{\mu}{k})=\nu_{k}
 	\end{equation*}\par
 	(3)由(1)直接可得。\par
-	(4)由\cref{theo:ContinuousMappingTheorem}(1)、(1)(2)直接可得。
+	(4)由\cref{theo:ContinuousMappingTheorem}(1)、(1)(2)直接可得\info{需要证明各分量几乎处处收敛则随机向量几乎处处收敛}。
 \end{proof}
