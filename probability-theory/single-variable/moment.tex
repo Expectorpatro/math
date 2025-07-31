@@ -1,72 +1,34 @@
 \section{矩}
 
-\subsection{原点矩}
 \begin{definition}
-	设$X$是一个随机变量，$n\in\mathbb{N}^+$。若数学期望：
+	设$f$是概率空间$(X,\mathscr{F},P)$上的随机变量，$n\in\mathbb{N}^+$。若$\operatorname{E}(|f|^n)<+\infty$，则称$f$的$n$阶\gls{Moment}存在并将：
 	\begin{equation*}
-		\mu_n=\operatorname{E}(X^n)
+		\mu_n=\operatorname{E}(f^n),\quad\nu_n=\operatorname{E}\{[f-\operatorname{E}(f)]^n\}
 	\end{equation*}
-	存在，则称$\mu_n$为$X$的$n$阶\gls{RawMoment}。
+	称为$f$的$n$阶\gls{RawMoment}和$n$阶\gls{CentralMoment}。
 \end{definition}
-\begin{definition}
-	设$\mathbf{X}$是一个$n$维随机向量，$\seq{\alpha}{n}\in\mathbb{N}$。若数学期望：
-	\begin{equation*}
-		\mu_{\seq{\alpha}{n}}=\operatorname{E}\left(\prod_{i=1}^{n}\mathbf{X}_i^{\alpha_i}\right)
-	\end{equation*}
-	存在，则称$\mu_{\seq{\alpha}{n}}$为$\mathbf{X}$的阶数为$(\seq{\alpha}{n})$的原点矩。
-\end{definition}
-\begin{theorem}\label{theo:LowerRawMoment}
-	设$X$是一个随机变量，$m\in\mathbb{N}^+$。若$X$的$m$阶原点矩$\mu_{m}$存在，则$X$具有所有不超过$m$阶的原点矩。
-\end{theorem}
+\begin{property}\label{prop:Moment}
+	设$f$是概率空间$(X,\mathscr{F},P)$上的随机变量，$n\in\mathbb{N}^+$。$f$的矩具有如下性质：
+	\begin{enumerate}
+		\item 若$f$的$n$阶矩存在，则$f$具有所有不超过$n$阶的矩；
+		\item $f$的中心矩$\nu_n$与原点矩$\mu_n$之间存在如下关系：
+		\begin{equation*}
+			\nu_n=\sum_{i=0}^{n}\binom{n}{i}\mu_i(-\mu_1)^{n-i}
+		\end{equation*}
+		\item 若$f$的$n$阶矩存在，则$\mu_n,\nu_n\in\mathbb{R}^{}$。
+	\end{enumerate}
+\end{property}
 \begin{proof}
-	取任意的$n<m$且$n\in\mathbb{N}^+$，则显然：
-	\begin{equation*}
-		|x^n|\leqslant
-		\begin{cases}
-			1, & |x|\leqslant1 \\
-			|x^m|, & |x|>1
-		\end{cases}
-	\end{equation*}
-	于是$|x^n|\leqslant1+|x^m|$。因为$X$有$m$阶中心矩，所以：
-	\begin{equation*}
-		\int_{-\infty}^{+\infty}|x^m|p(x)\dif x<+\infty
-	\end{equation*}
-	于是：
-	\begin{equation*}
-		\int_{-\infty}^{+\infty}|x|^np(x)\dif x
-		\leqslant\int_{-\infty}^{+\infty}(|x|^m+1)p(x)\dif x
-		=\int_{-\infty}^{+\infty}|x|^mp(x)\dif x+1<+\infty
-	\end{equation*}
-	所以$X$具有$n$阶原点矩。由$n$的任意性，结论成立。
-\end{proof}
-
-\subsection{中心矩}
-\begin{definition}
-	设$X$是一个随机变量，$\mu_1=\operatorname{E}(X),\;n\in\mathbb{N}^+$。若数学期望：
-	\begin{equation*}
-		\nu_n=\operatorname{E}[(X-\mu_1)^n]
-	\end{equation*}
-	存在，则称$\nu_n$为$X$的$n$阶\gls{CentralMoment}。
-\end{definition}
-\begin{definition}
-设$\mathbf{X}$是一个$n$维随机向量，$\mu=\operatorname{E}(\mathbf{X}),\;\seq{\alpha}{n}\in\mathbb{N}$。若数学期望：
-\begin{equation*}
-	\nu_{\seq{\alpha}{n}}=\operatorname{E}\left[\prod_{i=1}^{n}(\mathbf{X}_i-\mu_i)^{\alpha_i}\right]
-\end{equation*}
-存在，则称$\nu_{\seq{\alpha}{n}}$为$\mathbf{X}$的阶数为$(\seq{\alpha}{n})$的中心矩。
-\end{definition}
-\begin{theorem}\label{theo:Moment}
-	随机变量$X$的中心矩$\nu_n$与原点矩$\mu_n$之间存在如下关系：
-	\begin{equation*}
-		\nu_n=\sum_{i=0}^{n}\binom{n}{i}\mu_i(-\mu_1)^{n-i}
-	\end{equation*}
-\end{theorem}
-\begin{proof}
-	由中心矩的定义可得：
+	(1)设$f$的$n$阶矩存在，则$\operatorname{E}(|f|^n)<+\infty$，由\cref{theo:LtLs}可知对任意的非负数$i\leqslant n$有$\operatorname{E}(|f|^i)<+\infty$，于是$f$具有所有不超过$n$阶的矩。\par
+	(2)由(1)和\cref{prop:MeasurableIntegral}(4)可知$f^i,\;i=0,1,\dots,n$在$X$上可积，即$\mu_i=\operatorname{E}(f)<+\infty$。由中心矩的定义和\cref{prop:MeasurableIntegral}(5)可得：
 	\begin{equation*}
 		\nu_n
-		=\operatorname{E}[(X-\mu_1)^n]
-		=\operatorname{E}\left[\sum_{i=0}^{n}\binom{n}{i}X^i(-\mu_1)^{n-i}\right]
-		=\sum_{i=0}^{n}\binom{n}{i}\mu_i(-\mu_1)^{n-i}\qedhere
-	\end{equation*}
+		=\operatorname{E}\{[f-\operatorname{E}(f)]^n\}
+		=\operatorname{E}\left[\sum_{i=0}^{n}\binom{n}{i}f^i(-\mu_1)^{n-i}\right]
+		=\sum_{i=0}^{n}\binom{n}{i}\mu_i(-\mu_1)^{n-i}
+	\end{equation*}\par
+	(3)因为$f$的$n$阶矩存在，所以$\operatorname{E}(|f|^n)<+\infty$，即$|f|^n=|f^n|$在$X$上可积，由\cref{prop:MeasurableIntegral}(4)可知$f^n$在$X$上可积，于是$\mu_n=\operatorname{E}(f^n)\in\mathbb{R}^{}$。结合(1)(2)可得$\nu_n\in\mathbb{R}^{}$。综上，$f$的$n$阶中心矩与$n$阶原点矩在$\mathbb{R}^{}$上。
 \end{proof}
+\begin{note}
+	需要注意随机变量的期望是可以取无穷的，而矩则必须是有限值。
+\end{note}
