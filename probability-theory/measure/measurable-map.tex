@@ -486,7 +486,7 @@
 	则称可测函数列$\{f_n\}$\gls{ConvergentInMeasure}到$f$，记为$f_n\overset{\mu}{\longrightarrow}f$。若$(X,\mathscr{F},P)$是概率空间，称$f_n\overset{P}{\longrightarrow}f$为$\{f_n\}$\gls{ConvergentInProbability}到$f$。
 \end{definition}
 \subsubsection{依分布收敛}
-\begin{theorem}
+\begin{theorem}\label{theo:Quasi-distributionMeasure}
 	设$X=\mathbb{R},\;\mathscr{A}=\{(a,b]:a,b\in\mathbb{R}\}$，$F$为$\mathbb{R}$上非降右连续实值函数。对任意的$a,b\in\mathbb{R}$，令：
 	\begin{equation*}
 		\mu\Bigl((a,b]\Bigr)=
@@ -552,6 +552,38 @@
 	\end{equation*}
 	为$f$的\gls{ProbabilityDistribution}，简记为$Pf^{-1}$。在没有明确可测映射的场合，也称概率测度$P$为概率分布。
 \end{definition}
+\begin{note}
+	可以看出随机变量的分布函数为其概率分布在$\{(-\infty,a]:a\in\mathbb{R}^{}\}$上的取值。
+\end{note}
+\begin{definition}
+	设$F$是一个准分布函数。定义：
+	\begin{equation*}
+		\forall\;t\in(F(-\infty),F(+\infty)),\;F^{\leftarrow}(t)=\inf\{x\in\mathbb{R}^{}:F(x)\geqslant t\}
+	\end{equation*}
+	称$F^{\leftarrow}$为$F$的\gls{Left-continuousInverse}。
+\end{definition}
+\begin{property}
+	对任意的准分布函数$F$，有：
+	\begin{enumerate}
+		\item $\forall\;t\in(F(-\infty),F(+\infty)),\;F^{\leftarrow}(t)\in\mathbb{R}^{}$；
+		\item $F^{\leftarrow}$左连续；
+		\item $\forall\;t\in(F(-\infty),F(+\infty)),\;\forall\;x\in\mathbb{R}^{},\;F^{\leftarrow}(t)\leqslant x\Leftrightarrow F(x)\geqslant t$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)若存在$t\in(F(-\infty),F(+\infty))$使得$F^{\leftarrow}(t)=-\infty$，\par
+	(2)注意到：
+	\begin{equation*}
+		\lim_{y\to t-}F^{\leftarrow}(y)=\lim_{y\to t-}\inf\{x\in\mathbb{R}^{}:F(x)\geqslant y\}
+	\end{equation*}\par
+	(3)由$F$的单调性可得：
+	\begin{equation*}
+		F^{\leftarrow}(t)\leqslant x\Leftrightarrow\inf\{y\in\mathbb{R}^{}:F(y)\geqslant t\}\leqslant x\Leftrightarrow F(x)\geqslant t\qedhere
+	\end{equation*}
+\end{proof}
+\begin{theorem}
+	对任何分布函数$F$，必存在一个概率空间$(X,\mathscr{F},P)$和其上的随机变量$f$使得$f\sim F$。
+\end{theorem}
 \begin{definition}
 	设$\{f_n\sim F_n\}$是概率空间$(X,\mathscr{F},P)$上的随机变量序列，$F$是一个分布函数。若对于$F$的每一个连续点$x$都有：
 	\begin{equation*}
@@ -568,7 +600,7 @@
 		\item 若$\mu(X)<+\infty$，则$f_n\overset{\text{a.u.}}{\longrightarrow}f\iff f_n\overset{\text{a.e.}}{\longrightarrow}f\Rightarrow f_n\overset{\mu}{\longrightarrow}f$；
 		\item $f_n\overset{\mu}{\longrightarrow}f$当且仅当对$\{f_n\}$的任一子列，存在该子列的子列$\{f_{n_k}\}$使得$f_{n_k}\overset{\text{a.u.}}{\longrightarrow}f$；
 		\item $f_n\overset{P}{\longrightarrow}f$可推出$f_n\overset{d}{\longrightarrow}f$；
-		\item 当$f$为常值函数时，$f_n\overset{P}{\longrightarrow}f\iff f_n\overset{L}{\longrightarrow}f\Rightarrow f_n\overset{\mu}{\longrightarrow}f$
+		\item 当$f$为常值函数时，$f_n\overset{P}{\longrightarrow}f\iff f_n\overset{d}{\longrightarrow}f$
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
@@ -687,7 +719,7 @@
 		\lim_{n\to+\infty}F_n(x)=F(x)
 	\end{equation}
 	即$f_n\overset{d}{\longrightarrow}f$。\par
-	(5)设$f=c$且$f_n\overset{L}{\longrightarrow}f$，对任意的$\varepsilon>0$，由\cref{prop:Measure}(3)（有限可加性）可得：
+	(5)设$f=c$且$f_n\overset{d}{\longrightarrow}f$，对任意的$\varepsilon>0$，由\cref{prop:Measure}(3)（有限可加性）可得：
 	\begin{equation*}
 		P(\{|f_n-f|\geqslant\varepsilon\})=1-P(\{|f_n-f|\leqslant\varepsilon\})=1-P(\{-\varepsilon\leqslant f_n-f\leqslant\varepsilon\})=1-F_n(c+\varepsilon)+F_n(c-\varepsilon)
 	\end{equation*}

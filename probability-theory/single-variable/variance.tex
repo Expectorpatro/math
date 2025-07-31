@@ -1,43 +1,50 @@
 \section{方差}
 
+\begin{definition}
+	设$f$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量。若$[f-\operatorname{E}(f)]^2$的积分存在，则称：
+	\begin{equation*}
+		\operatorname{Var}(f)\coloneq\operatorname{E}\{[f-\operatorname{E}(f)]^2\}
+	\end{equation*}
+	为$f$的\gls{Variance}。若$[f-\operatorname{E}(f)]^2$可积，则称$f$的方差是有限的。
+\end{definition}
 \begin{property}\label{prop:Variance}
-	设$X,Y$是随机变量，则：
+	设$f,g$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量。方差具有如下性质：
 	\begin{enumerate}
-		\item $\operatorname{Var}(X)=\operatorname{E}(X^2)-[\operatorname{E}(X)]^2$；
-		\item $\operatorname{Var}(X)=\operatorname{E}[\operatorname{Var}(X|Y)]+\operatorname{Var}[\operatorname{E}(X|Y)]$；
-		\item $\operatorname{Var}(X\pm Y)=\operatorname{Var}(X)\pm\operatorname{Cov}(X,Y)+\operatorname{Var}(Y)$，若$X,Y$不相关，则有$\operatorname{Var}(X\pm Y)=\operatorname{Var}(X)+\operatorname{Var}(Y)$；
+		\item 若$f\in L_2(X)$，则$\operatorname{Var}(f)=\operatorname{E}(f^2)-[\operatorname{E}(f)]^2$；
+		\item $\operatorname{Var}(f)=\operatorname{E}[\operatorname{Var}(f|g)]+\operatorname{Var}[\operatorname{E}(f|g)]$；
+		\item $\operatorname{Var}(f\pm g)=\operatorname{Var}(f)\pm\operatorname{Cov}(f,g)+\operatorname{Var}(g)$，若$f,g$不相关，则有$\operatorname{Var}(f\pm g)=\operatorname{Var}(f)+\operatorname{Var}(g)$；
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)设$\operatorname{E}(X)=\mu$，由方差的定义：
+	(1)因为$f\in L_2(X)$，所以$\operatorname{E}(|f|^2)<+\infty$，由\cref{theo:LtLs}和\cref{prop:MeasurableIntegral}(4)可知$\operatorname{E}(f)=\mu\in\mathbb{R}^{}$。根据方差的定义和\cref{prop:MeasurableIntegral}(5)可得：
 	\begin{align*}
-		\operatorname{Var}(X)
-		=\operatorname{E}[(X-\mu)^2]
-		=\operatorname{E}(X^2-2\mu X+\mu^2)
-		=\operatorname{E}(X^2)-2\mu^2+\mu^2
-		=\operatorname{E}(X^2)-\mu^2
+		\operatorname{Var}(f)
+		=\operatorname{E}[(f-\mu)^2]
+		=\operatorname{E}(f^2-2\mu f+\mu^2)
+		=\operatorname{E}(f^2)-2\mu^2+\mu^2
+		=\operatorname{E}(f^2)-\mu^2
 	\end{align*}\par
 	(2)由(1)可得：
 	\begin{align*}
-		\operatorname{E}[\operatorname{Var}(X|Y)]
-		&=\operatorname{E}\{\operatorname{E}(X^2|Y)-[\operatorname{E}(X|Y)]^2\} \\
-		&=\operatorname{E}[\operatorname{E}(X^2|Y)]-\operatorname{E}\{[\operatorname{E}(X|Y)]^2\} \\
-		&=\operatorname{E}(X^2)-\operatorname{E}\{[\operatorname{E}(X|Y)]^2\} \\
-		\operatorname{Var}[\operatorname{E}(X|Y)]
-		&=\operatorname{E}\{[\operatorname{E}(X|Y)]^2\}-\{\operatorname{E}[\operatorname{E}(X|Y)]\}^2 \\
-		&=\operatorname{E}\{[\operatorname{E}(X|Y)]^2\}-[\operatorname{E}(X)]^2
+		\operatorname{E}[\operatorname{Var}(f|g)]
+		&=\operatorname{E}\{\operatorname{E}(f^2|g)-[\operatorname{E}(f|g)]^2\} \\
+		&=\operatorname{E}[\operatorname{E}(f^2|g)]-\operatorname{E}\{[\operatorname{E}(f|g)]^2\} \\
+		&=\operatorname{E}(f^2)-\operatorname{E}\{[\operatorname{E}(f|g)]^2\} \\
+		\operatorname{Var}[\operatorname{E}(f|g)]
+		&=\operatorname{E}\{[\operatorname{E}(f|g)]^2\}-\{\operatorname{E}[\operatorname{E}(f|g)]\}^2 \\
+		&=\operatorname{E}\{[\operatorname{E}(f|g)]^2\}-[\operatorname{E}(f)]^2
 	\end{align*}
 	于是：
 	\begin{equation*}
-		\operatorname{E}[\operatorname{Var}(X|Y)]+\operatorname{Var}[\operatorname{E}(X|Y)]=\operatorname{E}(X^2)-[\operatorname{E}(X)]^2=\operatorname{Var}(X)
+		\operatorname{E}[\operatorname{Var}(f|g)]+\operatorname{Var}[\operatorname{E}(f|g)]=\operatorname{E}(f^2)-[\operatorname{E}(f)]^2=\operatorname{Var}(f)
 	\end{equation*}\par
 	(3)由方差的定义可得：
 	\begin{align*}
-		\operatorname{Var}(X\pm Y)
-		&=\operatorname{E}[X\pm Y-\operatorname{E}(X\pm Y)]^2 \\
-		&=\operatorname{E}\{[X-\operatorname{E}(X)\pm[Y-\operatorname{E}(Y)]]\}^2 \\
-		&=\operatorname{E}\{[X-\operatorname{E}(X)]^2\pm 2[X-\operatorname{E}(X)][Y-\operatorname{E}(Y)]+[Y-\operatorname{E}(Y)]^2\} \\
-		&=\operatorname{Var}(X)\pm2\operatorname{Cov}(X,Y)+\operatorname{Var}(Y)
+		\operatorname{Var}(f\pm g)
+		&=\operatorname{E}[f\pm g-\operatorname{E}(f\pm g)]^2 \\
+		&=\operatorname{E}\{[f-\operatorname{E}(f)\pm[g-\operatorname{E}(g)]]\}^2 \\
+		&=\operatorname{E}\{[f-\operatorname{E}(f)]^2\pm 2[f-\operatorname{E}(f)][g-\operatorname{E}(g)]+[g-\operatorname{E}(g)]^2\} \\
+		&=\operatorname{Var}(f)\pm2\operatorname{Cov}(f,g)+\operatorname{Var}(g)
 	\end{align*}
 \end{proof}
 

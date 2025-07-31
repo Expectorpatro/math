@@ -300,11 +300,11 @@
 \begin{definition}
 	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$\mu$是控制测度，$\Theta$是参数空间。若$\mathscr{P}$满足：
 	\begin{equation*}
-		\forall\;\theta\in\Theta,\;\frac{\dif P_{\theta}}{\dif\mu}=\exp\left[\eta^T(\theta)T(x)-\xi(\theta)\right]h(x)=C(\theta)\exp\left[\eta^T(\theta)T(x)\right]h(x)
+		\forall\;\theta\in\Theta,\;\frac{\dif P_{\theta}}{\dif\mu}(x)=\exp\left[\eta^T(\theta)T(x)-\xi(\theta)\right]h(x)=C(\theta)\exp\left[\eta^T(\theta)T(x)\right]h(x)
 	\end{equation*}
-	则称$\mathscr{P}$是\gls{ExponentialFamily}。其中$\eta(\theta),T(x)$是$n$维实向量，$n$被称为该指数族的维数，$h$是非负Borel函数，$\xi(\theta)$是实值函数。称：
+	且支撑$\left\{x:\frac{\dif P_{\theta}}{\dif\mu}(x)>0\right\}$不依赖于未知参数$\theta$，则称$\mathscr{P}$是\gls{ExponentialFamily}。其中$\eta(\theta),T(x)$是$n$维实向量，$n$被称为该指数族的维数，$h$是非负Borel函数，$\xi(\theta)$是实值函数。称：
 	\begin{equation*}
-		\frac{\dif P_{\theta}}{\dif\mu}=\exp\left[\eta^TT(x)-\xi(\eta)\right]h(x)=C(\eta)\exp\left[\eta^TT(x)\right]h(x)
+		\frac{\dif P_{\theta}}{\dif\mu}(x)=\exp\left[\eta^TT(x)-\xi(\eta)\right]h(x)=C(\eta)\exp\left[\eta^TT(x)\right]h(x)
 	\end{equation*}
 	为指数族的\gls{CanonicalForm}，此时的新参数$\eta$被称为\gls{NaturalParameter}，称：
 	\begin{equation*}
@@ -345,8 +345,8 @@
 	\begin{enumerate}
 		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
 		\begin{gather*}
-			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(1+e^{\eta})^{-mn}\exp\left[\ln\left(\frac{p}{1-p}\right)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\binom{n}{x_i} \\
-			\eta=\ln\left(\frac{p}{1-p}\right),\quad C(\eta)=(1+e^{\eta})^{-mn},\quad T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}\binom{n}{x_i}
+			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(1+e^{\eta})^{-mn}\exp\left(\eta\sum_{i=1}^{m}x_i\right)\prod_{i=1}^{m}\left[\binom{n}{x_i}I_{\mathbb{N}_0}(x_i)\right] \\
+			\eta=\ln\left(\frac{p}{1-p}\right),\quad C(\eta)=(1+e^{\eta})^{-mn} \\ T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}\left[\binom{n}{x_i}I_{\mathbb{N}_0}(x_i)\right]
 		\end{gather*}
 		\item $\seq{X}{m}$分布的充分统计量为$\sum\limits_{i=1}^{m}x_i$；
 	\end{enumerate}
@@ -355,12 +355,12 @@
 	(1)由二项分布的定义可以得到：
 	\begin{align*}
 		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
-		=&\prod_{i=1}^{m}\left[\binom{n}{x_i}p^{x_i}(1-p)^{n-x_i}\right]=\prod_{i=1}^{m}\left[\binom{n}{x_i}\left(\frac{p}{1-p}\right)^{x_i}(1-p)^n\right] \\
-		=&(1-p)^{mn}\exp\left[\ln\left(\frac{p}{1-p}\right)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\binom{n}{x_i}
+		=&\prod_{i=1}^{m}\left[\binom{n}{x_i}p^{x_i}(1-p)^{n-x_i}I_{\mathbb{N}_0}(x_i)\right]=\prod_{i=1}^{m}\left[\binom{n}{x_i}\left(\frac{p}{1-p}\right)^{x_i}(1-p)^nI_{\mathbb{N}_0}(x_i)\right] \\
+		=&(1-p)^{mn}\exp\left[\ln\left(\frac{p}{1-p}\right)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\left[\binom{n}{x_i}I_{\mathbb{N}_0}(x_i)\right]
 	\end{align*}
 	令：
 	\begin{equation*}
-		\eta=\ln\left(\frac{p}{n-p}\right)
+		\eta=\ln\left(\frac{p}{1-p}\right)
 	\end{equation*}
 	可解得：
 	\begin{equation*}
@@ -378,8 +378,12 @@
 	\begin{enumerate}
 		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
 		\begin{gather*}
-			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(1-e^{\eta})^{mr}\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\binom{x_i+r-1}{r-1} \\
-			\eta=\ln(1-p),\quad C(\eta)=(1-e^{\eta})^{mr},\quad T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}\binom{x_i+r-1}{r-1}
+			\begin{aligned}
+				&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+				=&(1-e^{\eta})^{mr}\exp\left(\eta\sum_{i=1}^{m}x_i\right)\prod_{i=1}^{m}\left[\binom{x_i+r-1}{r-1}I_{\mathbb{N}_0}(x_i)\right]
+			\end{aligned} \\
+			\eta=\ln(1-p),\quad C(\eta)=(1-e^{\eta})^{mr} \\
+			T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}\left[\binom{x_i+r-1}{r-1}I_{\mathbb{N}_0}(x_i)\right]
 		\end{gather*}
 		\item $\seq{X}{m}$分布的充分统计量为$\sum\limits_{i=1}^{m}x_i$；
 	\end{enumerate}
@@ -388,8 +392,8 @@
 	(1)由负二项分布的定义可以得到：
 	\begin{align*}
 		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
-		=&\prod_{i=1}^{m}\left[\binom{x_i+r-1}{r-1}p^r(1-p)^{x_i}\right] \\
-		=&p^{mr}\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\binom{x_i+r-1}{r-1}
+		=&\prod_{i=1}^{m}\left[\binom{x_i+r-1}{r-1}p^r(1-p)^{x_i}I_{\mathbb{N}_0}(x_i)\right] \\
+		=&p^{mr}\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\left[\binom{x_i+r-1}{r-1}I_{\mathbb{N}_0}(x_i)\right]
 	\end{align*}
 	令$\eta=\ln(1-p)$，可解得$p=1-e^{\eta}$，于是有$C(\eta)=p^{mr}=(1-e^{\eta})^{mr}$。\par
 	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
@@ -400,18 +404,19 @@
 	\begin{enumerate}
 		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
 		\begin{gather*}
-			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(1-e^{\eta})^n\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right] \\
-			\eta=\ln(1-p),\quad C(\eta)=(1-e^{\eta})^n,\quad T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=1
+			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(1-e^{\eta})^m\exp\left(\eta\sum_{i=1}^{m}x_i\right)\prod_{i=1}^{m}I_{\mathbb{N}_0}(x_i) \\
+			\eta=\ln(1-p),\quad C(\eta)=(1-e^{\eta})^m,\quad T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}I_{\mathbb{N}_0}(x_i)
 		\end{gather*}
 		\item $\seq{X}{m}$分布的充分统计量为$\sum\limits_{i=1}^{m}x_i$；
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
 	(1)由几何分布的定义可以得到：
-	\begin{equation*}
-		p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\prod_{i=1}^{m}[(1-p)^{x_i}p]=p^n\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right]
-	\end{equation*}
-	令$\eta=\ln(1-p)$，可解得$p=1-e^{\eta}$，于是有$C(\eta)=p^n=(1-e^{\eta})^n$。\par
+	\begin{align*}
+		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+		=&\prod_{i=1}^{m}[(1-p)^{x_i}pI_{\mathbb{N}_0}(x_i)] =p^m\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}I_{\mathbb{N}_0}(x_i)
+	\end{align*}
+	令$\eta=\ln(1-p)$，可解得$p=1-e^{\eta}$，于是有$C(\eta)=p^m=(1-e^{\eta})^m$。\par
 	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
 \end{proof}
 
@@ -420,18 +425,89 @@
 	\begin{enumerate}
 		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
 		\begin{gather*}
-			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(1-e^{\eta})^n\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right] \\
-			\eta=\ln(\lambda),\quad C(\eta)=e^{\eta},\quad T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}\frac{1}{x_i!}
+			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\exp(-me^{\eta})\exp\left(\eta\sum_{i=1}^{m}x_i\right)\prod_{i=1}^{m}\frac{I_{\mathbb{N}_0}(x_i)}{x_i!} \\
+			\eta=\ln\lambda,\quad C(\eta)=\exp(-me^{\eta}),\quad T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}\frac{I_{\mathbb{N}_0}(x_i)}{x_i!}
 		\end{gather*}
 		\item $\seq{X}{m}$分布的充分统计量为$\sum\limits_{i=1}^{m}x_i$；
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
 	(1)由Possion分布的定义可以得到：
-	\begin{equation*}
-		p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\prod_{i=1}^{m}\left(\frac{\lambda^{x_i}}{x_i!}e^{-\lambda}\right)=e^{-m\lambda}\exp\left[\ln(\lambda)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\frac{1}{x_i!}
-	\end{equation*}
-	令$\eta=\ln(\lambda)$，可解得$\lambda=e^{\eta}$，于是有$C(\eta)=e^{-m\lambda}=\exp(-me^{\eta})$。\par
+	\begin{align*}
+		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+		=&\prod_{i=1}^{m}\left(\frac{\lambda^{x_i}}{x_i!}e^{-\lambda}I_{\mathbb{N}_0}(x_i)\right) =e^{-m\lambda}\exp\left[\ln(\lambda)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\frac{I_{\mathbb{N}_0}(x_i)}{x_i!}
+	\end{align*}
+	令$\eta=\ln\lambda$，可解得$\lambda=e^{\eta}$，于是有$C(\eta)=e^{-m\lambda}=\exp(-me^{\eta})$。\par
+	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
+\end{proof}
+
+\begin{theorem}
+	设$X\sim\operatorname{Power}(\theta)$，$\seq{X}{m}$是$X$的一个样本，则：
+	\begin{enumerate}
+		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
+		\begin{gather*}
+			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(\eta+1)^m\exp\left(\eta\sum_{i=1}^{m}\ln x_i\right)\prod_{i=1}^{m}I_{(0,1)}(x_i) \\
+			\eta=\theta-1,\quad C(\eta)=(\eta+1)^m,\quad
+			T(x)=\sum_{i=1}^{m}\ln x_i,\quad h(x)=\prod_{i=1}^{m}I_{(0,1)}(x_i)
+		\end{gather*}
+		\item $\seq{X}{m}$分布的充分统计量为$\sum\limits_{i=1}^{m}\ln x_i$；
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由幂分布的定义可以得到：
+	\begin{align*}
+		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+		=&\prod_{i=1}^{m}\left[\theta x_i^{\theta-1}I_{(0,1)}(x_i)\right]=\theta^m\exp\left[(\theta-1)\sum_{i=1}^{m}\ln x_i\right]\prod_{i=1}^{m}I_{(0,1)}(x_i)
+	\end{align*}
+	令$\eta=\theta-1$，于是有$C(\eta)=\theta^{m}=(\eta+1)^m$。\par
+	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
+\end{proof}
+
+\begin{theorem}
+	设$X\sim\operatorname{Weibull}(n,\theta)$，$\seq{X}{m}$是$X$的一个样本，则：
+	\begin{enumerate}
+		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
+		\begin{gather*}
+			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(-\eta)^{m}\exp\left(\eta\sum_{i=1}^{m}x_i^n\right)\prod_{i=1}^{m}\left[nx_i^{n-1}I_{(0,+\infty)}(x_i)\right] \\
+			\eta=-\theta^{-n},\quad C(\eta)=(-\eta)^{m},\quad
+			T(x)=\sum_{i=1}^{m}x_i^n,\quad h(x)=\prod_{i=1}^{m}\left[nx_i^{n-1}I_{(0,+\infty)}(x_i)\right]
+		\end{gather*}
+		\item $\seq{X}{m}$分布的充分统计量为$\sum\limits_{i=1}^{m}x_i^n$；
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由Weibull分布的定义可以得到：
+	\begin{align*}
+		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+		=&\prod_{i=1}^{m}\left\{nx_i^{n-1}\theta^{-n}\exp\left[-\left(\frac{x_i}{\theta}\right)^n\right]I_{(0,+\infty)}(x_i)\right\} \\
+		=&\theta^{-mn}\exp\left(-\frac{1}{\theta^n}\sum_{i=1}^{m}x_i^n\right)\prod_{i=1}^{m}\left[nx_i^{n-1}I_{(0,+\infty)}(x_i)\right]
+	\end{align*}
+	令$\eta=-\theta^{-n}$，于是有$C(\eta)=\theta^{-mn}=(-\eta)^{m}$。\par
+	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
+\end{proof}
+
+\begin{theorem}
+	设$X\sim\operatorname{Pareto}(\alpha,\beta)$，$\seq{X}{m}$是$X$的一个样本，则：
+	\begin{enumerate}
+		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
+		\begin{gather*}
+			\begin{aligned}
+				&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+				=&(-\eta-1)^m\alpha^{-m(\eta+1)}\exp\left(\eta\sum_{i=1}^{m}\ln x_i\right)\prod_{i=1}^{m}I_{(\alpha,+\infty)}(x_i)
+			\end{aligned} \\
+			\eta=-(\beta+1),\quad C(\eta)=(-\eta-1)^m\alpha^{-m(\eta+1)} \\
+			T(x)=\sum_{i=1}^{m}\ln x_i,\quad h(x)=\prod_{i=1}^{m}I_{(\alpha,+\infty)}(x_i)
+		\end{gather*}
+		\item $\seq{X}{m}$分布的充分统计量为$\sum\limits_{i=1}^{m}\ln x_i$；
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由Pareto分布的定义可以得到：
+	\begin{align*}
+		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+		=&\prod_{i=1}^{m}\left[\beta\alpha^{\beta}x_i^{-(\beta+1)}I_{(\alpha,+\infty)}(x_i)\right]=\beta^m\alpha^{m\beta}\exp\left[-(\beta+1)\sum_{i=1}^{m}\ln x_i\right]\prod_{i=1}^{m}I_{(\alpha,+\infty)}(x_i)
+	\end{align*}
+	令$\eta=-(\beta+1)$，于是有$C(\eta)=\beta^{m}\alpha^{m\beta}=(-\eta-1)^m\alpha^{-m(\eta+1)}$。\par
 	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
 \end{proof}
 
@@ -440,7 +516,10 @@
 	\begin{enumerate}
 		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
 		\begin{gather*}
-			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^{m}x_i^2+\frac{\mu}{2\sigma^2}2\sum_{i=1}^{m}x_i\right) \\
+			\begin{aligned}
+				&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+				=&\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right)\exp\left(\eta_1\sum_{i=1}^{m}x_i^2+\eta_2\sum_{i=1}^{m}x_i\right)
+			\end{aligned} \\
 			\eta=\left(-\frac{1}{2\sigma^2},\frac{\mu}{\sigma^2}\right),\quad C(\eta)=\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right) \\
 			T(x)=\left(\sum_{i=1}^{m}x_i^2,\sum_{i=1}^{m}x_i\right),\quad h(x)=1
 		\end{gather*}
@@ -463,11 +542,173 @@
 	\begin{equation*}
 		\mu=-\frac{\eta_2}{2\eta_1},\quad\sigma^2=-\frac{1}{2\eta_1}
 	\end{equation*}
-	于是有
+	于是有：
 	\begin{equation*}
-		(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right)
+		C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right)
 	\end{equation*}\par
 	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
 \end{proof}
+
+\begin{theorem}
+	设$X\sim\operatorname{LN}(\mu,\sigma^2)$，$\seq{X}{m}$是$X$的一个样本，则：
+	\begin{enumerate}
+		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
+		\begin{gather*}
+			\begin{aligned}
+				&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+				=&\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right)\exp\left(\eta_1\sum_{i=1}^{m}\ln^2 x_i+\eta_2\sum_{i=1}^{m}\ln x_i\right)\prod_{i=1}^{m}\frac{I_{(0,+\infty)}(x_i)}{x_i}
+			\end{aligned} \\
+			\eta=\left(-\frac{1}{2\sigma^2},\frac{\mu}{\sigma^2}\right),\quad C(\eta)=\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right) \\
+			T(x)=\left(\sum_{i=1}^{m}\ln^2 x_i,\sum_{i=1}^{m}\ln x_i\right),\quad h(x)=\prod_{i=1}^{m}\frac{I_{(0,+\infty)}(x_i)}{x_i}
+		\end{gather*}
+		\item $\seq{X}{m}$分布的充分统计量为$\left(\sum\limits_{i=1}^{m}\ln^2 x_i,\sum\limits_{i=1}^{m}\ln x_i\right)$；
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由对数正态分布的定义可以得到：
+	\begin{align*}
+		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+		=&\prod_{i=1}^{m}\left\{(2\pi\sigma^2)^{-\frac{1}{2}}\frac{1}{x_i}\exp\left[-\frac{(\ln x_i-\mu)^2}{2\sigma^2}\right]I_{(0,+\infty)}(x_i)\right\} \\
+		=&(2\pi\sigma^2)^{-\frac{m}{2}}\prod_{i=1}^{m}\left[\exp\left(-\frac{\ln^2 x_i-2\mu\ln x_i+\mu^2}{2\sigma^2}\right)\frac{I_{(0,+\infty)}(x_i)}{x_i}\right] \\
+		=&(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^{m}\ln^2 x_i+\frac{\mu}{\sigma^2}\sum_{i=1}^{m}\ln x_i-\frac{m\mu^2}{2\sigma^2}\right)\prod_{i=1}^{m}\frac{I_{(0,+\infty)}(x_i)}{x_i} \\
+		=&(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^{m}\ln^2 x_i+\frac{\mu}{\sigma^2}\sum_{i=1}^{m}\ln x_i\right)\prod_{i=1}^{m}\frac{I_{(0,+\infty)}(x_i)}{x_i}
+	\end{align*}
+	令：
+	\begin{equation*}
+		\eta=\left(-\frac{1}{2\sigma^2},\frac{\mu}{\sigma^2}\right)
+	\end{equation*}
+	可解得：
+	\begin{equation*}
+		\mu=-\frac{\eta_2}{2\eta_1},\quad\sigma^2=-\frac{1}{2\eta_1}
+	\end{equation*}
+	于是有：
+	\begin{equation*}
+		C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right)
+	\end{equation*}\par
+	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
+\end{proof}
+
+\begin{theorem}
+	设$X\sim\operatorname{Exp}(\lambda)$，$\seq{X}{m}$是$X$的一个样本，则：
+	\begin{enumerate}
+		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
+		\begin{gather*}
+			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) =(-\eta)^m\lambda^m\exp\left(\eta\sum_{i=1}^{m}x_i\right)\prod_{i=1}^mI_{\mathbb{R}^{}\backslash\mathbb{R}^{-}}(x_i) \\
+			\eta=-\lambda,\quad C(\eta)=(-\eta)^m,\quad
+			T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}I_{\mathbb{R}^{}\backslash\mathbb{R}^{-}}(x_i)
+		\end{gather*}
+		\item $\seq{X}{m}$分布的充分统计量为$\sum\limits_{i=1}^{m}x_i$；
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由指数分布的定义可以得到：
+	\begin{align*}
+		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+		=&\prod_{i=1}^{m}\left[\lambda\exp(-\lambda x_i)I_{\mathbb{R}^{}\backslash\mathbb{R}^{-}}(x_i)\right]=\lambda^m\exp\left(-\lambda\sum_{i=1}^{m}x_i\right)\prod_{i=1}^mI_{\mathbb{R}^{}\backslash\mathbb{R}^{-}}(x_i)
+	\end{align*}
+	令$\eta=-\lambda$，于是有$C(\eta)=\lambda^m=(-\eta)^m$。\par
+	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
+\end{proof}
+
+\begin{theorem}
+	设$X\sim\operatorname{Laplace}(\theta)$，$\seq{X}{m}$是$X$的一个样本，则：
+	\begin{enumerate}
+		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
+		\begin{gather*}
+			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) =(-\eta)^m\exp\left(\eta\sum_{i=1}^{m}|x_i|\right) \\
+			\eta=-\theta^{-1},\quad C(\eta)=(-\eta)^m,\quad
+			T(x)=\sum_{i=1}^{m}|x_i|,\quad h(x)=1
+		\end{gather*}
+		\item $\seq{X}{m}$分布的充分统计量为$\sum\limits_{i=1}^{m}|x_i|$；
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由Laplace分布的定义可以得到：
+	\begin{align*}
+		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+		=&\prod_{i=1}^{m}\left[\frac{1}{\theta}\exp\left(-\frac{|x_i|}{\theta}\right)\right]=\frac{1}{\theta^m}\exp\left(-\frac{1}{\theta}\sum_{i=1}^{m}|x_i|\right)
+	\end{align*}
+	令$\eta=-\theta^{-1}$，于是有$C(\eta)=\theta^{-m}=(-\eta)^m$。\par
+	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
+\end{proof}
+
+\begin{theorem}
+	设$X\sim\operatorname{Rayleigh}(\lambda)$，$\seq{X}{m}$是$X$的一个样本，则：
+	\begin{enumerate}
+		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
+		\begin{gather*}
+			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) =(-\eta)^m\exp\left(\eta\sum_{i=1}^{m}x_i^2\right)\prod_{i=1}^{m}\left[2x_iI_{\mathbb{R}^{}\backslash\mathbb{R}^{-}}(x_i)\right] \\
+			\eta=-\lambda,\quad C(\eta)=(-\eta)^m,\quad
+			T(x)=\sum_{i=1}^{m}x_i^2,\quad h(x)=\prod_{i=1}^{m}\left[2x_iI_{\mathbb{R}^{}\backslash\mathbb{R}^{-}}(x_i)\right]
+		\end{gather*}
+		\item $\seq{X}{m}$分布的充分统计量为$\sum\limits_{i=1}^{m}x_i^2$；
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由Rayleigh分布的定义可以得到：
+	\begin{align*}
+		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\prod_{i=1}^{m}\left[2\lambda x_i\exp(-\lambda x_i^2)I_{\mathbb{R}^{}\backslash\mathbb{R}^{-}}(x_i)\right] \\
+		=&\lambda^m\exp\left(-\lambda\sum_{i=1}^{m}x_i^2\right)\prod_{i=1}^{m}\left[2x_iI_{\mathbb{R}^{}\backslash\mathbb{R}^{-}}(x_i)\right]
+	\end{align*}
+	令$\eta=-\lambda$，于是有$C(\eta)=\lambda^{m}=(-\eta)^m$。\par
+	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
+\end{proof}
+
+\begin{theorem}
+	设$X\sim\operatorname{Gamma}(\alpha,\lambda)$，$\seq{X}{m}$是$X$的一个样本，则：
+	\begin{enumerate}
+		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
+		\begin{gather*}
+			\begin{aligned}
+				&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+				=&\frac{(-\eta_2)^{m(\eta_1+1)}}{\Gamma^m(\eta_1+1)}\exp\left[\eta_1\sum_{i=1}^{m}\ln x_i+\eta_2\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}I_{\mathbb{R}^{}\backslash\mathbb{R}^{-}}(x_i)
+			\end{aligned} \\
+			\eta=(\alpha-1,-\lambda),\quad C(\eta)=\frac{(-\eta_2)^{m(\eta_1+1)}}{\Gamma^m(\eta_1+1)} \\
+			T(x)=\left(\sum_{i=1}^{m}\ln x_i,\sum_{i=1}^{m}x_i\right),\quad h(x)=\prod_{i=1}^{m}I_{\mathbb{R}^{}\backslash\mathbb{R}^{-}}(x_i)
+		\end{gather*}
+		\item $\seq{X}{m}$分布的充分统计量为$\left(\sum\limits_{i=1}^{m}\ln x_i,\sum\limits_{i=1}^{m}x_i\right)$；
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由Gamma分布的定义可以得到：
+	\begin{align*}
+		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\prod_{i=1}^{m}\left[\frac{\lambda^{\alpha}}{\Gamma(\alpha)}x_i^{\alpha-1}e^{-\lambda x_i}I_{\mathbb{R}^{}\backslash\mathbb{R}^{-}}(x_i)\right] \\
+		=&\frac{\lambda^{m\alpha}}{\Gamma^m(\alpha)}\exp\left[(\alpha-1)\sum_{i=1}^{m}\ln x_i-\lambda\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}I_{\mathbb{R}^{}\backslash\mathbb{R}^{-}}(x_i)
+	\end{align*}
+	令$\eta=(\alpha-1,-\lambda)$，于是有：
+	\begin{equation*}
+		C(\eta)=\frac{\lambda^{m\alpha}}{\Gamma^m(\alpha)}=\frac{(-\eta_2)^{m(\eta_1+1)}}{\Gamma^m(\eta_1+1)}
+	\end{equation*}\par
+	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
+\end{proof}
+
+\begin{theorem}
+	设$X\sim\operatorname{Beta}(\alpha,\beta)$，$\seq{X}{m}$是$X$的一个样本，则：
+	\begin{enumerate}
+		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
+		\begin{gather*}
+			\begin{aligned}
+				&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+				=&\left[\frac{\Gamma(\eta_1+\eta_2+2)}{\Gamma(\eta_1+1)\Gamma(\eta_2+1)}\right]^m\exp\left[\eta_1\sum_{i=1}^{m}\ln x_i+\eta_2\sum_{i=1}^{m}\ln(1-x_i)\right]\prod_{i=1}^{m}I_{(0,1)}(x_i)
+			\end{aligned} \\
+			\eta=(\alpha-1,\beta-1),\quad C(\eta)=\left[\frac{\Gamma(\eta_1+\eta_2+2)}{\Gamma(\eta_1+1)\Gamma(\eta_2+1)}\right]^m \\
+			T(x)=\left(\sum_{i=1}^{m}\ln x_i,\sum_{i=1}^{m}\ln(1-x_i)\right),\quad h(x)=\prod_{i=1}^{m}I_{(0,1)}(x_i)
+		\end{gather*}
+		\item $\seq{X}{m}$分布的充分统计量为$\left(\sum\limits_{i=1}^{m}\ln x_i,\sum\limits_{i=1}^{m}\ln(1-x_i)\right)$；
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由Beta分布的定义可以得到：
+	\begin{align*}
+		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\prod_{i=1}^{m}\left[\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}x_i^{\alpha-1}(1-x_i)^{\beta-1}I_{(0,1)}(x_i)\right] \\
+		=&\left[\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}\right]^m\exp\left[(\alpha-1)\sum_{i=1}^{m}\ln x_i+(\beta-1)\sum_{i=1}^{m}\ln(1-x_i)\right]\prod_{i=1}^{m}I_{(0,1)}(x_i)
+	\end{align*}
+	令$\eta=(\alpha-1,\beta-1)$，于是有：
+	\begin{equation*}
+		C(\eta)=\left[\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}\right]^m=\left[\frac{\Gamma(\eta_1+\eta_2+2)}{\Gamma(\eta_1+1)\Gamma(\eta_2+1)}\right]^m
+	\end{equation*}\par
+	(2)由(1)和\cref{prop:ExponentialFamily}(6)立即可得。
+\end{proof}
+
 
 \input{statistics/basis/deltamethod.tex}
