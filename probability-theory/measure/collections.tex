@@ -150,7 +150,7 @@
 \subsection{重要集族}
 \subsubsection{$\pi$系、半环、环、域}
 \begin{definition}
-	如果$X$上的非空集族$\mathscr{A}$对交的运算是封闭的，即：
+	如果$X$上的非空集族$\mathscr{A}$对有限交的运算是封闭的，即：
 	\begin{equation*}
 		\forall\;A,B\in\mathscr{A},\;A\cap B\in\mathscr{A}
 	\end{equation*}
@@ -160,7 +160,7 @@
 	如果$X$上的非空集族$\mathscr{A}$满足：
 	\begin{enumerate}
 		\item $\varnothing\in\mathscr{A}$；
-		\item 对交的运算封闭；
+		\item 对有限交的运算封闭；
 		\item 若$A,B\in\mathscr{A}$，则存在有限个互不相交的$\{C_i\in\mathscr{A}:i=1,2,\dots,n\}$，使得：
 		\begin{equation*}
 			A\backslash B=\underset{i=1}{\overset{n}{\cup}}C_i
@@ -169,18 +169,23 @@
 	则称$\mathscr{A}$为\gls{Semiring}。
 \end{definition}
 \begin{property}\label{prop:Semiring}
-	若$\mathscr{A}$是一个半环，$A,\seq{B}{m}\in\mathscr{A}$，则存在有限个互不相交的$\{C_i\in\mathscr{A}:i=1,2,\dots,n\}$使得：
-	\begin{equation*}
-		A\Big\backslash\left(\underset{i=1}{\overset{m}{\cup}}B_i\right)=\underset{i=1}{\overset{n}{\cup}}C_i
-	\end{equation*}
+	半环具有如下性质：
+	\begin{enumerate}
+		\item 若$\mathscr{A}$是一个半环，$A,\seq{B}{m}\in\mathscr{A}$，则存在有限个互不相交的$\{C_i\in\mathscr{A}:i=1,2,\dots,n\}$使得：
+		\begin{equation*}
+			A\Big\backslash\left(\underset{i=1}{\overset{m}{\cup}}B_i\right)=\underset{i=1}{\overset{n}{\cup}}C_i
+		\end{equation*}
+		\item 若$X=\mathbb{R}^{}$，则集族$\{(a,b]:a,b\in\mathbb{R}^{}\},\{[a,b):a,b\in\mathbb{R}^{}\}$都是半环。
+	\end{enumerate}
 \end{property}
 \begin{proof}
-	当$m=1$时由半环的定义即可得出结论。\par
+	(1)当$m=1$时由半环的定义即可得出结论。\par
 	当$m=2$时，由\cref{prop:SetOperation}(5)(4)和半环的定义可得存在互不相交的$\seq{C}{k_1}\in\mathscr{A}$和$\seq{D}{k_2}\in\mathscr{A}$使得：
 	\begin{equation*}
 		A\backslash(B_1\cup B_2)=(A\backslash B_1)\cap(A\backslash B_2)=\left(\underset{i=1}{\overset{k_1}{\cup}}C_i\right)\bigcap\left(\underset{i=1}{\overset{k_2}{\cup}}D_i\right)=\underset{}{\overset{}{\cup}}(C_i\cap D_j)
 	\end{equation*}
-	因为半环对交封闭，所以$C_i\cap D_j\in\mathscr{A}$，注意到它们之间是互不相交的，于是结论成立。接下来用数学归纳法就可以了，懒得再继续写了。
+	因为半环对交封闭，所以$C_i\cap D_j\in\mathscr{A}$，注意到它们之间是互不相交的，于是结论成立。接下来用数学归纳法就可以了，懒得再继续写了。\par
+	(2)逐条验证定义即可，很简单，略去证明。
 \end{proof}
 \begin{definition}
 	如果$X$上的非空集族$\mathscr{A}$对并和差的运算是封闭的，即对任意的$A,B\in\mathscr{A}$：
@@ -259,7 +264,8 @@
 		\item $\sigma$域对有限交和可列交封闭；
 		\item $\sigma$域对有限并封闭；
 		\item $\sigma$域对有限差封闭；
-		\item 若$\mathscr{A}_i,\;i\in I$都是$\sigma$域，则$\underset{i\in I}{\overset{+\infty}{\cap}}\mathscr{A}_i$也是$\sigma$域。
+		\item 若$\mathscr{A}_i,\;i\in I$都是$\sigma$域，则$\underset{i\in I}{\overset{+\infty}{\cap}}\mathscr{A}_i$也是$\sigma$域；
+		\item 设$A\subseteq X$且$A\ne\varnothing$，$\mathscr{A}$是$X$上的$\sigma$域，则$A\cap\mathscr{A}\coloneq\{A\cap E:E\in\mathscr{A}\}$是$A$上的$\sigma$域。
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -284,7 +290,19 @@
 	\begin{equation*}
 		A\backslash B=A\cap B^c\in\mathscr{A}
 	\end{equation*}\par
-	(5)显然。
+	(5)显然。\par
+	(6)因为$X\in\mathscr{A}$，所以$A=A\cap X\in A\cap\mathscr{A}$。\par
+	对任意的$B\in A\cap\mathscr{A}$，有$B=A\cap C$，其中$C\in\mathscr{A}$，于是由\cref{prop:SetOperation}(7)(4)：
+	\begin{equation*}
+		A\backslash B=A\cap B^c=A\cap(A\cap C)^c=A\cap(A^c\cup C^c)=(A\cap A^c)\cup(A\cap C^c)=A\cap C^c
+	\end{equation*}
+	因为$C\in\mathscr{A}$，所以$C^c\in\mathscr{A}$，于是$A\backslash B\in\mathscr{A}$，即$B$在$A$中的补集仍然在$\mathscr{A}$中。\par
+	对任意的$\{B_n\}\subseteq A\cap\mathscr{A}$，有$B_n=A\cap C_n$，其中$C_n\in\mathscr{A}$。由\cref{prop:SetOperation}(4)可得：
+	\begin{equation*}
+		\underset{n=1}{\overset{+\infty}{\cup}}B_n=\underset{n=1}{\overset{+\infty}{\cup}}(A\cap C_n)=A\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}C_n\right)
+	\end{equation*}
+	因为$\mathscr{A}$是$\sigma$域，所以$\underset{n=1}{\overset{+\infty}{\cup}}C_n\in\mathscr{A}$，于是$\underset{n=1}{\overset{+\infty}{\cup}}B_n\in A\cap\mathscr{A}$。\par
+	综上，$A\cap\mathscr{A}$是$A$上的$\sigma$域。
 \end{proof}
 \begin{theorem}\label{theo:SetNecessarilySet2}
 	$\lambda$系是单调系，$\sigma$域是$\lambda$系。
