@@ -16,7 +16,7 @@
 		\end{equation*}
 		之一有意义，则二者一定相等。特别的，当$f$为连续型随机变量时，上式化作：
 		\begin{equation*}
-			\operatorname{E}(g\circ f),\quad\int_{\mathbb{R}^{}}g(x)p(x)\dif\lambda
+			\operatorname{E}(g\circ f),\quad\int_{\mathbb{R}^{}}g(x)p(x)\dif\lambda,\quad p(x)=\frac{\dif Pf^{-1}}{\dif\lambda}
 		\end{equation*}
 		其中$\lambda$为L测度；当$f$为离散型随机变量时，令$D=\{x_n\}$，含义与随机变量分类时的含义相同，则上式化作：
 		\begin{equation*}
@@ -29,7 +29,7 @@
 	\begin{equation*}
 		\operatorname{E}(g\circ f)=\int_{X}g[f(x)]\dif P=\int_{f^{-1}(\mathbb{R}^{})}g[f(x)]\dif P
 	\end{equation*}
-	由\cref{theo:IntBySubstitution}即可得出结论。
+	由\cref{theo:IntBySubstitution}即可得出一般结论。根据\cref{lem:IntChangeOfMeasure}可得出连续型随机变量时的结论。对于离散型随机变量，使用典型方法证明即可。
 \end{proof}
 \begin{note}
 	很多教材在上述定理中写的并不是$g$对pushforward measure$Pf^{-1}$进行积分，而是对$f$的分布函数$F$进行积分。$F$是一个测度吗？$F$与$Pf^{-1}$等价吗？显然并不是。由\cref{theo:Quasi-distributionMeasure}和\cref{prop:Semiring}(2)我们可以看到$F$可以引出半环$\mathscr{A}=\{(a,b]:a,b\in\mathbb{R}^{}\}$上的测度$\mu$，注意到：
@@ -102,14 +102,36 @@
 	\end{equation*}
 	为$f$关于$g$的\gls{ConditionalExpectation}和事件$A\in\mathscr{F}$关于$g$的条件概率。
 \end{definition}
-\begin{lemma}
-	
+\begin{lemma}\label{lem:IndependentExpectation}
+	设$f$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量。若$f$与$\mathscr{A}\subseteq\mathscr{F}$独立，则对任意的$A\in\mathscr{A}$有：
+	\begin{equation*}
+		\operatorname{E}(fI_A)=\operatorname{E}(f)\cdot P(A)
+	\end{equation*}
 \end{lemma}
+\begin{proof}
+	使用典型方法进行证明。\par
+	\textbf{(1)非负简单函数：}设$f$为非负简单函数，由\cref{prop:SigmaField}(4)和\cref{prop:NonnegativeSimpleIntegral}(4)可得：
+	\begin{align*}
+		\operatorname{E}(fI_A)&=\int_{X}f(x)I_A(x)\dif P=\int_{A}f(x)\dif P=\sum_{i=1}^{n}c_iP(A\cap E_i) \\
+		&=\sum_{i=1}^{n}c_iP(E_i)P(A)=\operatorname{E}(f)\cdot P(A)
+	\end{align*}\par
+	\textbf{(2)非负可测函数：}设$f$为非负可测函数，根据\cref{prop:MeasurableFunction}(8)，取非负简单函数列$\{f_n\}$满足$f_n\uparrow f$，由\cref{prop:Independent}(6)可知 $f_n$与$\mathscr{A}$独立。显然有$f_nI_A\uparrow fI_A$，根据\cref{prop:SimpleFunction}(3)(2)可知$f_nI_A$为非负简单函数，所以由\cref{prop:NonnegativeMeasurableIntegral}(4)、非负简单函数时的结论和极限的线性性质可得：
+	\begin{align*}
+		\operatorname{E}(fI_A)&=\int_{X}f(x)I_A(x)\dif P=\lim_{n\to+\infty}\left[\int_{X}f_n(x)I_A(x)\dif P\right] \\
+		&=\lim_{n\to+\infty}[\operatorname{E}(f_n)\cdot P(A)]=P(A)\lim_{n\to+\infty}\operatorname{E}(f_n)=P(A)\cdot\operatorname{E}(f)
+	\end{align*}\par
+	\textbf{(3)一般可测函数：}设$f$为一般可测函数，因为$f$积分存在，根据\cref{prop:NonnegativeMeasurableIntegral}(7)可知$(fI_A)^+=f^+I_A,(fI_A)^-=f^-I_A$中至少一个积分有限，所以$fI_A$积分存在。由\cref{prop:Independent}(5)和非负可测函数时的情况可得：
+	\begin{align*}
+		\operatorname{E}(fI_A)&=\int_{X}f(x)I_A(x)\dif P=\int_{X}f^+(x)I_A(x)\dif P-\int_{X}f^-(x)I_A(x)\dif P \\
+		&=P(A)\int_{X}f^+(x)\dif P-P(A)\int_{X}f^-(x)\dif P=P(A)\left[\int_{X}f^+(x)\dif P-\int_{X}f^-(x)\dif P\right] \\
+		&=P(A)\int_{X}f(x)\dif\mu=P(A)\cdot\operatorname{E}(f)\qedhere
+	\end{align*}
+\end{proof}
 \begin{theorem}
 	设$f,g$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量，$\mathscr{A},\mathscr{B}$是$\mathscr{F}$的子$\sigma$域，则：
 	\begin{enumerate}
 		\item 若$f$关于$\mathscr{A}$可测，则$\operatorname{E}(f|\mathscr{A})=f\;$a.s.于$X$；
-		\item 若$f$与$\mathscr{A}$独立，则$\operatorname{E}(f|\mathscr{A})=\operatorname{E}(f)\;$a.s.于$X$；
+		\item 若$f$与$\mathscr{A}$独立，则$\operatorname{E}(f|\mathscr{A})=\operatorname{E}(f)\;$a.s.于$(X,\mathscr{A},P)$；
 		\item 若$\mathscr{A}\subseteq\mathscr{B}$，则$\operatorname{E}[\operatorname{E}(f|\mathscr{A})|\mathscr{B}]=\operatorname{E}(f|\mathscr{A})=\operatorname{E}[\operatorname{E}(f|\mathscr{B})|\mathscr{A}]\;$a.s.于；
 		\item 若$f\leqslant g\;$a.s.于，则$\operatorname{E}(f|\mathscr{A})\leqslant\operatorname{E}(g|\mathscr{A})\;$a.s.于
 		\item 对任意的$\alpha,\beta\in\mathbb{R}^{}$，若$\alpha\operatorname{E}(f)+\beta\operatorname{E}(g)$有意义，则：
@@ -122,5 +144,10 @@
 \end{theorem}
 \begin{proof}
 	(1)由\cref{prop:MeasurableIntegral}(11)即可得到。\par
-	(2)
+	(2)显然$\operatorname{E}(f)$作为$(X,\mathscr{A},P)$上的函数是可测的并且积分存在。对于任意的$A\in\mathscr{A}$，因为$f$与$\mathscr{A}$独立，由\cref{lem:IndependentExpectation}、\cref{prop:SigmaField}(4)和\cref{theo:MeasurableCountableIntegral}可得：
+	\begin{equation*}
+		\int_{A}\operatorname{E}(f)\dif\mu=\operatorname{E}(f)\cdot P(A)=\operatorname{E}(fI_A)=\int_{X}f(x)I_A(x)\dif\mu=\int_{A}f(x)\dif\mu
+	\end{equation*}
+	上第一个等号成立是因为：若$\operatorname{E}(f)\in\mathbb{R}^{}$，可由非负简单函数积分的定义和\cref{prop:NonnegativeSimpleIntegral}(5)（这是因为$\operatorname{E}(f)$可能为负）得出等号；若$|\operatorname{E}(X)|=+\infty$，可构造简单函数列进行逼近，由\cref{prop:NonnegativeMeasurableIntegral}(4)得出等号。根据$\operatorname{E}(f|\mathscr{A})$的定义可知结论成立。\par
+	(3)由$\operatorname{E}(f|\mathscr{A})$的定义可知$\operatorname{E}(f|\mathscr{A})$是$\mathscr{A}$可测的，因为$\mathscr{A}\subseteq\mathscr{B}$，所以$\operatorname{E}(f|\mathscr{A})$是$\mathscr{B}$可测的。由(1)可得$\operatorname{E}[\operatorname{E}(f|\mathscr{A})|\mathscr{B}]=\operatorname{E}(f|\mathscr{A})$。由$\operatorname{E}[\operatorname{E}(f|\mathscr{B})|\mathscr{A}]$的定义可知它是$\mathscr{A}$可测的，
 \end{proof}
