@@ -27,7 +27,7 @@
 		\begin{equation*}
 			\sum_{n=1}^{+\infty}|\varphi(A_n)|<+\infty
 		\end{equation*}
-		\item 对$a\in\mathbb{R}^{}$，定义$(a\varphi)(A)=a\varphi(A),\;\forall\;A\in\mathscr{F}$，则$a\varphi$也是一个符号测度；若$\psi$也是$(X,\mathscr{F})$上的符号测度，则$\varphi+\psi$也是一个符号测度\footnote{从此处开始，提及符号测度的和的时候不考虑和符号测度不存在的情况，即不考虑两个符号测度在同一集合$A\in\mathscr{F}$上取异号极限。}；
+		\item 对$a\in\mathbb{R}^{}$，定义$(a\varphi)(A)\coloneq a\varphi(A),\;\forall\;A\in\mathscr{F}$，则$a\varphi$也是一个符号测度；
 		\item 设$\mu,\nu$为$(X,\mathscr{F})$上的两个测度。只要$\mu,\nu$中有一个是有限的，则可定义符号测度：
 		\begin{equation*}
 			\forall\;A\in\mathscr{F},\;(\mu-\nu)(A)\coloneq\mu(A)-\nu(A)
@@ -172,7 +172,7 @@
 		\varphi(A\cap X^-)\leqslant\varphi^*(A\cap X^-)\leqslant\varphi^*(X^-)=0
 	\end{equation*}
 	所以$X^-$满足要求。\par
-	令$X^+=X\backslash X^-$，则$X^+\cup X^-=X$。由\cref{prop:SigmaField}(4)可知$X^+\in\mathscr{F}$。若存在$A\in\mathscr{F}$使得$\varphi(A\cap X^+)$
+	令$X^+=X\backslash X^-$，则$X^+\cup X^-=X$。由\cref{prop:SigmaField}(4)可知$X^+\in\mathscr{F}$。若存在$A\in\mathscr{F}$使得$\varphi(A\cap X^+)$\info{未完成}
 \end{proof}
 \begin{theorem}[Jordan Decomposition]
 	\label{theo:JordanDecomposition}
@@ -207,47 +207,86 @@
 \begin{lemma}\label{lem:IntChangeOfMeasure}
 	设$\varphi$和$\mu$是可测空间$(X,\mathscr{F})$上的$\sigma$有限测度，$\varphi\ll\mu$。对任意$(X,\mathscr{F})$上的可测函数$f$和任意的$A\in\mathscr{F}$，只要：
 	\begin{equation*}
-		\int_{A}f(x)\dif\nu=\int_{A}f(x)\frac{\dif\nu}{\dif\mu}\dif\mu
+		\int_{A}f(x)\dif\varphi,\quad\int_{A}f(x)\frac{\dif\varphi}{\dif\mu}\dif\mu
 	\end{equation*}
+	之一有意义，二者一定相等。
 \end{lemma}
 \begin{proof}
-	content...
+	使用典型方法进行证明。仅对上左侧式子有意义的情况进行证明，右侧有意义的情况可由等号的传递性得出。\par
+	\textbf{(1)非负简单函数：}设$f$是$(X,\mathscr{F})$上的非负简单函数，由\cref{prop:MeasurableIntegral}(5)和\cref{theo:MeasurableCountableIntegral}可知：
+	\begin{align*}
+		\int_{A}f(x)\dif\varphi&=\sum_{i=1}^{n}c_i\varphi(A\cap E_i)=\sum_{i=1}^{n}\left[c_i\int_{A\cap E_i}\frac{\dif\varphi}{\dif\mu}\dif\mu\right] \\
+		&=\sum_{i=1}^{n}\left[\int_{A\cap E_i}f(x)\frac{\dif\varphi}{\dif\mu}\dif\mu\right]=\int_{A}f(x)\frac{\dif\varphi}{\dif\mu}\dif\mu
+	\end{align*}\par
+	\textbf{(2)非负可测函数：}设$f$是$(X,\mathscr{F})$上的非负可测函数，根据\cref{prop:MeasurableFunction}(8)，取$(X,\mathscr{F})$上的非负简单函数列$\{f_n\}$满足$f_n\uparrow f$。由非负简单函数时的结论和\cref{prop:NonnegativeMeasurableIntegral}(4)可得：
+	\begin{equation*}
+		\int_{A}f(x)\dif\varphi=\lim_{n\to+\infty}\left[\int_{A}f_n(x)\dif\varphi\right]=\lim_{n\to+\infty}\left[\int_{A}f_n(x)\frac{\dif\varphi}{\dif\mu}\dif\mu\right]
+	\end{equation*}
+	由\cref{prop:MeasurableFunction}(1)可知：
+	\begin{equation*}
+		\left\{\frac{\dif\varphi}{\dif\mu}<0\right\}\in\mathscr{F}
+	\end{equation*}
+	若上述集合关于$\mu$的测度大于$0$，由\cref{prop:MeasurableIntegral}(12)可得：
+	\begin{equation*}
+		\nu\left(\left\{\frac{\dif\varphi}{\dif\mu}<0\right\}\right)=\int_{\left\{\frac{\dif\varphi}{\dif\mu}<0\right\}}\frac{\dif\varphi}{\dif\mu}\dif\mu<0
+	\end{equation*}
+	与$\varphi$是测度相矛盾，所以有：
+	\begin{equation*}
+		\mu\left(\left\{\frac{\dif\varphi}{\dif\mu}<0\right\}\right)=0
+	\end{equation*}
+	于是$f_n\dfrac{\dif\varphi}{\dif\mu}$是a.e.非负的且有$f_n\dfrac{\dif\varphi}{\dif\mu}\uparrow f\dfrac{\dif\varphi}{\dif\mu}$，由\cref{theo:LeviTheorem}即可得到：
+	\begin{equation*}
+		\int_{A}f(x)\dif\varphi=\lim_{n\to+\infty}\left[\int_{A}f_n(x)\frac{\dif\varphi}{\dif\mu}\dif\mu\right]=\int_{A}f(x)\frac{\dif\varphi}{\dif\mu}\dif\mu
+	\end{equation*}\par
+	\textbf{(3)一般可测函数：}设$f$是$(X,\mathscr{F})$上的非负可测函数，由非负可测函数时的情形和\cref{prop:MeasurableIntegral}(7)可得：
+	\begin{align*}
+		\int_{A}f(x)\dif\mu&=\int_{A}f^+(x)\dif\mu-\int_{A}f^-(x)\dif\mu=\int_{A}f^+(x)\frac{\dif\varphi}{\dif\mu}\dif\mu-\int_{A}f^-(x)\frac{\dif\varphi}{\dif\mu}\dif\mu \\
+		&=\int_{A}\left[f(x)\frac{\dif\varphi}{\dif\mu}\right]^+\dif\mu-\int_{A}\left[f(x)\frac{\dif\varphi}{\dif\mu}\right]^-\dif\mu=\int_{A}f(x)\frac{\dif\varphi}{\dif\mu}\dif\mu\qedhere
+	\end{align*}
 \end{proof}
 \begin{property}
 	设$(X,\mathscr{F})$是一个可测空间。Randon-Nikodym导数的计算具有如下性质：
 	\begin{enumerate}
 		\item 设$\varphi$是$(X,\mathscr{F})$上的符号测度，$\nu$和$\mu$是$(X,\mathscr{F})$上的$\sigma$有限测度且$\varphi\ll\nu\ll\mu$，则有：
 		\begin{equation*}
-			\frac{\dif\varphi}{\dif\mu}=\frac{\dif\varphi}{\dif\nu}\cdot\frac{\dif\nu}{\dif\mu}\;\text{a.e.于}X
+			\frac{\dif\varphi}{\dif\mu}=\frac{\dif\varphi}{\dif\nu}\cdot\frac{\dif\nu}{\dif\mu}\;\text{a.e.于}(X,\mathscr{F},\nu)
 		\end{equation*}
 		\item 设$\nu$和$\mu$是$(X,\mathscr{F})$上的$\sigma$有限测度且$\nu\ll\mu$，则$\mu\ll\nu$当且仅当$\dfrac{\dif\nu}{\dif\mu}>0\;$a.e.于$(X,\mathscr{F},\mu)$，此时有：
 		\begin{equation*}
-			\frac{\dif\mu}{\dif\nu}=1\Big/\frac{\dif\nu}{\dif\mu}\;\text{a.e.于}X
+			\frac{\dif\nu}{\dif\mu}\cdot\frac{\dif\mu}{\dif\nu}=1\;\text{a.e.于}(X,\mathscr{F},\mu)\text{或}(X,\mathscr{F},\nu)
 		\end{equation*}
 		\item 若$\varphi$是$(X,\mathscr{F})$上的符号测度，$\mu$是$(X,\mathscr{F})$上的$\sigma$有限测度，$\varphi\ll\mu$，则对任意的$a\in\mathbb{R}^{}$有：
 		\begin{equation*}
 			\frac{\dif(a\varphi)}{\dif\mu}=a\frac{\dif\varphi}{\dif\mu}\;\text{a.e.于}(X,\mathscr{F},\mu)
 		\end{equation*}
-		\item 若$\varphi,\psi$是$(X,\mathscr{F})$上的符号测度，$\mu$是$(X,\mathscr{F})$上的$\sigma$有限测度且$\varphi,\psi\ll\mu$，则有：
+		\item 若$\varphi,\psi$是$(X,\mathscr{F})$上的符号测度，$\mu$是$(X,\mathscr{F})$上的$\sigma$有限测度且$\varphi,\psi\ll\mu$。定义$(\varphi+\psi)(A)\coloneq\varphi(A)+\psi(A),\;\forall\;A\in\mathscr{F}$，如果$\varphi+\psi$也是$(X,\mathscr{F})$上的符号测度，则有：
 		\begin{equation*}
 			\frac{\dif(\varphi+\psi)}{\dif\mu}=\frac{\dif\varphi}{\dif\mu}+\frac{\dif\psi}{\dif\mu}\;\text{a.e.于}(X,\mathscr{F},\mu)
 		\end{equation*}
 	\end{enumerate}
 \end{property}
 \begin{proof}
+	(1)因为$\varphi$是符号测度，$\nu$是$\sigma$有限测度且$\varphi\ll\nu$，根据\cref{theo:RandonNikodym}可知存在$(X,\mathscr{F},\nu)$上在a.e.于$X$的意义下唯一的可测函数$\dfrac{\dif\varphi}{\dif\nu}$使得：
+	\begin{equation*}
+		\forall\;A\in\mathscr{F},\;\varphi(A)=\int_{A}\frac{\dif\varphi}{\dif\nu}\dif\nu
+	\end{equation*}
+	由\cref{lem:IntChangeOfMeasure}可得：
+	\begin{equation*}
+		\varphi(A)=\int_{A}\frac{\dif\varphi}{\dif\nu}\frac{\dif\nu}{\dif\mu}\dif\mu
+	\end{equation*}
+	因为$\varphi$是符号测度，$\mu$是$\sigma$有限测度且$\varphi\ll\mu$，根据\cref{theo:RandonNikodym}可知存在$(X,\mathscr{F},\mu)$上在a.e.于$X$的意义下唯一的可测函数$\dfrac{\dif\varphi}{\dif\mu}$使得：
+	\begin{equation*}
+		\forall\;A\in\mathscr{F},\;\varphi(A)=\int_{A}\frac{\dif\varphi}{\dif\mu}\dif\mu
+	\end{equation*}
+	因为$\nu\ll\mu$，所以在$(X,\mathscr{F},\mu)$上a.e.即在$(X,\mathscr{F},\nu)$上a.e.，于是有：
+	\begin{equation*}
+		\frac{\dif\varphi}{\dif\nu}\frac{\dif\nu}{\dif\mu}=\frac{\dif\varphi}{\dif\mu}\;\text{a.e.于}(X,\mathscr{F},\nu)
+	\end{equation*}\par
 	(2)因为$\nu\ll\mu$且$\nu$和$\mu$是$\sigma$有限测度，根据\cref{theo:RandonNikodym}可知存在$(X,\mathscr{F},\mu)$上在a.e.于$X$的意义下唯一的可测函数$\dfrac{\dif\nu}{\dif\mu}$使得：
 	\begin{equation*}
 		\forall\;A\in\mathscr{F},\;\nu(A)=\int_{A}\frac{\dif\nu}{\dif\mu}\dif\mu
 	\end{equation*}
-	由\cref{prop:MeasurableFunction}(1)可知：
-	\begin{equation*}
-		\left\{\frac{\dif\nu}{\dif\mu}<0\right\}\in\mathscr{F}
-	\end{equation*}
-	若上述集合关于$\mu$的测度大于$0$，则：
-	\begin{equation*}
-		\nu\left(\left\{\frac{\dif\nu}{\dif\mu}<0\right\}\right)=\int_{\left\{\frac{\dif\nu}{\dif\mu}<0\right\}}\frac{\dif\nu}{\dif\mu}\dif\mu<0
-	\end{equation*}
-	与$\nu$是测度相矛盾，所以有：
+	由\cref{lem:IntChangeOfMeasure}中非负可测函数时的论证可得：
 	\begin{equation*}
 		\mu\left(\left\{\frac{\dif\nu}{\dif\mu}<0\right\}\right)=0
 	\end{equation*}\par
@@ -264,11 +303,27 @@
 		\mu\left(\left\{\dfrac{\dif\nu}{\dif\mu}\leqslant0\right\}\right)=\mu\left(\left\{\dfrac{\dif\nu}{\dif\mu}<0\right\}\right)+\mu\left(\left\{\dfrac{\dif\nu}{\dif\mu}=0\right\}\right)=0
 	\end{equation*}
 	所以$\dfrac{\dif\nu}{\dif\mu}>0\;$a.e.于$(X,\mathscr{F},\mu)$。\par
-	\textbf{充分性：}若此时不满足$\mu\ll\nu$，即存在满足$\nu(A)=0$的$A\in\mathscr{F}$有$\mu(A)>0$。因为$\dfrac{\dif\nu}{\dif\mu}>0\;$a.e.于$(X,\mathscr{F},\mu)$，由\cref{prop:MeasurableIntegral}(7)
-	
+	\textbf{充分性：}若此时不满足$\mu\ll\nu$，即存在满足$\nu(A)=0$的$A\in\mathscr{F}$有$\mu(A)>0$。因为$\dfrac{\dif\nu}{\dif\mu}>0\;$a.e.于$(X,\mathscr{F},\mu)$，由\cref{prop:MeasurableIntegral}(12)可得：
+	\begin{equation*}
+		\nu(A)=\int_{A}\frac{\dif\nu}{\dif\mu}\dif\mu>0
+	\end{equation*}
+	与$\nu(A)=0$矛盾。\par
+	由\cref{lem:IntChangeOfMeasure}可知：
+	\begin{equation*}
+		\forall\;A\in\mathscr{F},\;\nu(A)=\int_{A}\frac{\dif\nu}{\dif\mu}\dif\mu=\int_{A}\frac{\dif\nu}{\dif\mu}\cdot\frac{\dif\mu}{\dif\nu}\dif\nu
+	\end{equation*}
+	而：
+	\begin{equation*}
+		\forall\;A\in\mathscr{F},\;\int_{A}1\dif\nu=\nu(A)
+	\end{equation*}
+	于是由\cref{prop:MeasurableIntegral}(11)可得：
+	\begin{equation*}
+		\frac{\dif\nu}{\dif\mu}\cdot\frac{\dif\mu}{\dif\nu}=1\;\text{a.e.于}(X,\mathscr{F},\nu)
+	\end{equation*}
+	因为$\mu\ll\nu$，所以上式成立也a.e.于$(X,\mathscr{F},\mu)$。\par
 	(3)根据\cref{prop:SignedMeasure}(5)可知$a\varphi$也是一个符号测度。因为$\varphi\ll\mu$，由$a\varphi$的定义可得$a\varphi\ll\mu$，根据\cref{theo:RandonNikodym}可知存在$(X,\mathscr{F},\mu)$上在a.e.于$X$的意义下唯一的可测函数$\dfrac{\dif(a\varphi)}{\dif\mu}$使得：
 	\begin{equation*}
-		(a\varphi)(A)=a\varphi(A)=\int_{A}\frac{\dif(a\varphi)}{\dif\mu}\dif\mu
+		\forall\;A\in\mathscr{F},\;(a\varphi)(A)=a\varphi(A)=\int_{A}\frac{\dif(a\varphi)}{\dif\mu}\dif\mu
 	\end{equation*}
 	由\cref{prop:MeasurableIntegral}(5)可知：
 	\begin{equation*}
@@ -282,9 +337,9 @@
 	\begin{equation*}
 		\frac{\dif(a\varphi)}{\dif\mu}=a\dfrac{\dif\varphi}{\dif\mu}\;\text{a.e.于}(X,\mathscr{F},\mu)
 	\end{equation*}\par
-	(4)由\cref{prop:SignedMeasure}(5)可知$\varphi+\psi$也是一个符号测度。因为$\varphi,\psi\ll\mu$，根据$\varphi+\psi$的定义可得$\varphi+\psi\ll\mu$。由\cref{theo:RandonNikodym}可知存在$(X,\mathscr{F},\mu)$上在a.e.于$X$的意义下唯一的可测函数$\dfrac{\dif(\varphi+\psi)}{\dif\mu}$使得：
+	(4)因为$\varphi,\psi\ll\mu$，根据$\varphi+\psi$的定义可得$\varphi+\psi\ll\mu$。由\cref{theo:RandonNikodym}可知存在$(X,\mathscr{F},\mu)$上在a.e.于$X$的意义下唯一的可测函数$\dfrac{\dif(\varphi+\psi)}{\dif\mu}$使得：
 	\begin{equation*}
-		(\varphi+\psi)(A)=\varphi(A)+\psi(A)=\int_{A}\frac{\dif(\varphi+\psi)}{\dif\mu}\dif\mu
+		\forall\;A\in\mathscr{F},\;(\varphi+\psi)(A)=\varphi(A)+\psi(A)=\int_{A}\frac{\dif(\varphi+\psi)}{\dif\mu}\dif\mu
 	\end{equation*}
 	同理可得：
 	\begin{equation*}

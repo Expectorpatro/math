@@ -11,6 +11,10 @@
 		\int_{A}\varphi(x)\dif\mu=\sum_{i=1}^{n}c_i\mu(A\cap E_i)
 	\end{equation*}
 \end{definition}
+\begin{note}
+	在定义积分的时候，一些书只定义函数在空间$X$上的积分，个人觉得失去了一般性，但根据\cref{prop:SigmaField}(6)可知可以将可测集$A$视为空间，此时的$A\cap\mathscr{F}$构成了$\mathscr{F}$的一个子$\sigma$域，而由\cref{prop:Measure}(4)可知$\mu$在$A\cap\mathscr{F}$上也构成测度，所以函数在可测集$A$上的的积分可以看作是函数在测度空间$(A,A\cap\mathscr{F},\mu)$的空间$A$上的积分，这样一来可以发现两个定义是完全等价的。\par
+	接下来我们还会提到命题成立a.e.于$A\in\mathscr{F}$，请注意这里a.e.的对象指的是$(A,A\cap\mathscr{F},\mu)$。
+\end{note}
 \begin{property}\label{prop:NonnegativeSimpleIntegral}
 	设$\varphi,\;\psi$为测度空间$(X,\mathscr{F},\mu)$上的非负简单函数，可分别表示为：
 	\begin{equation*}
@@ -366,7 +370,7 @@
 		\int_{A}\alpha f(x)\dif\mu&=\int_{A}(-\alpha)f^-(x)\dif\mu-\int_{A}(-\alpha)f^+(x)\dif\mu \\
 		&=-\alpha\left[\int_{A}f^-(x)\dif\mu-\int_{A}f^+(x)\dif\mu\right]=\alpha\int_{A}f(x)\dif\mu
 	\end{align*}\par
-	\textbf{加法：}\par
+	\textbf{加法：}\info{未完成}\par
 	(6)因为$f\leqslant g\;$a.e.于$A$，由\cref{prop:Measure}(3)可得$f^+\leqslant g^+\;$a.e.于$A$，$f^-\geqslant g^-\;$a.e.于$A$。由\cref{prop:NonnegativeMeasurableIntegral}(7)可得：
 	\begin{equation*}
 		\int_{A}f(x)\dif\mu=\int_{A}f^+(x)\dif\mu-\int_{A}f^-(x)\dif\mu\leqslant\int_{A}g^+(x)\dif\mu-\int_{A}g^-(x)\dif\mu=\int_{A}g(x)\dif\mu
@@ -392,7 +396,7 @@
 	即$|f|<+\infty\;$a.e.于$A$。\par
 	(9)第一个结论由\cref{prop:Measure}(3)和\cref{prop:NonnegativeMeasurableIntegral}(10)可知显然成立，下证第二个结论。\par
 	只需证明$f\geqslant0\;$a.e.于$A$时的情况，对于$f\leqslant0\;$a.e.于$A$，只需取$-f$并由(5)即可得出结论。\par 
-	由\cref{prop:MeasurableFunction}(11)和(7)可知，可以改变$f$在零测集$\{f<0\}$上的值使得得到的函数$f'$为非负可测函数且满足$\int_{A}f'(x)\dif\mu=0$，由\cref{prop:NonnegativeMeasurableIntegral}(10)可知$f'=0\;$a.e.于$A$，于是根据\cref{prop:Measure}(1)可得：
+	由\cref{prop:MeasurableFunction}(11)和(7)可知，可以改变$f$在零测集$\{f<0\}\cap A$上的值使得得到的函数$f'$为非负可测函数且满足$\int_{A}f'(x)\dif\mu=0$，由\cref{prop:NonnegativeMeasurableIntegral}(10)可知$f'=0\;$a.e.于$A$，于是根据\cref{prop:Measure}(1)可得：
 	\begin{equation*}
 		\mu(\{f\ne0\})=\mu(\{f'\ne0\}\cup\{f<0\})=\mu(\{f'\ne0\})+\mu(\{f<0\})=0
 	\end{equation*}
@@ -415,7 +419,24 @@
 	\end{equation*}
 	因为$f>g$在$\{f>g\}$上恒成立，由(9)可得$f-g=0\;$a.e.于$\{f>g\}$，所以$\mu(\{f>g\})=0$，即$f\leqslant g\;$a.e.于$X$。\par
 	(11)由(10)立即可得。\par
-	(12)由(7)和\cref{prop:NonnegativeMeasurableIntegral}(4)证明\info{未完成}。
+	(12)因为$f$是一个可测函数，由\cref{prop:MeasurableFunction}(1)可知$\{f\leqslant0\}\in\mathscr{F}$，所以$\{f\leqslant0\}\cap A\in A\cap\mathscr{F}$。因为$f>0\;$a.e.于$A$。所以$\mu(\{f\leqslant0\}\cap A)=0$。由\cref{prop:MeasurableFunction}(11)，更改$f$在零测集$\{f\leqslant0\}\cap A$上的值从而得到的非负可测函数$f'$。根据\cref{prop:MeasurableFunction}(1)可知对任意的$n\in\mathbb{N}^+$有：
+	\begin{equation*}
+		\left\{f'>\frac{1}{n}\right\}\in\mathscr{F}\Rightarrow\left\{f'>\frac{1}{n}\right\}\cap A\in A\cap\mathscr{F}
+	\end{equation*}
+	由\cref{prop:Measure}(3)（次可列可加性）可得：
+	\begin{equation*}
+		\mu(A)=\mu(\{f'>0\}\cap A)=\mu\left[\underset{n=1}{\overset{+\infty}{\cup}}\left(\left\{f'>\frac{1}{n}\right\}\cap A\right)\right]\leqslant\sum_{n=1}^{+\infty}\mu\left(\left\{f'>\frac{1}{n}\right\}\cap A\right)
+	\end{equation*}
+	因为$\mu(A)>0$，则必然存在一个$n$使得：
+	\begin{equation*}
+		\mu\left(\left\{f'>\frac{1}{n}\right\}\cap A\right)>0
+	\end{equation*}
+	由(7)(6)、\cref{prop:SimpleFunction}(3)(1)、\cref{prop:MeasurableFunction}(5.b)、(6)和非负简单函数积分的定义可知：
+	\begin{align*}
+		\int_{A}f(x)\dif\mu&=\int_{A}f'(x)\dif\mu\geqslant\int_{A}f'(x)I_{\left\{f'>\frac{1}{n}\right\}\cap A}(x)\dif\mu \\
+		&=\int_{A}\frac{1}{n}I_{\left\{f'>\frac{1}{n}\right\}\cap A}(x)\dif\mu=\frac{1}{n}\mu\left(\left\{f'>\frac{1}{n}\right\}\cap A\right)>0
+	\end{align*}
+	同理可得$f<0\;$a.e.于$A$时的情况。
 \end{proof}
 \begin{theorem}[积分的绝对连续性]
 	设$f$是测度空间$(X,\mathscr{F},\mu)$上的可积函数，对于任意的$\varepsilon>0$，$\exists\;\delta>0$，使得对于任意的$A\in\mathscr{F}$，只要$\mu(A)<\delta$，就有：
@@ -445,7 +466,7 @@
 	\end{equation*}
 \end{theorem}
 \begin{proof}
-	由\cref{prop:MeasurableIntegral}(7)和\cref{prop:Measure}(3)（次有限可加性），可仅对$f,\{f_n\}$是非负可测函数且$f_n\uparrow f$讨论。对每个$n\in\mathbb{N}^+$作非负简单函数列$\{f_{nm}\}$使得$f_{nm}\uparrow f_n$，令$g_k(x)=\max\limits_{1\leqslant n\leqslant k}f_{nk}(x)$。\par
+	由\cref{prop:MeasurableFunction}(11)、\cref{prop:MeasurableIntegral}(7)和\cref{prop:Measure}(3)（次有限可加性），可仅对$f,\{f_n\}$是非负可测函数且$f_n\uparrow f$讨论。对每个$n\in\mathbb{N}^+$作非负简单函数列$\{f_{nm}\}$使得$f_{nm}\uparrow f_n$，令$g_k(x)=\max\limits_{1\leqslant n\leqslant k}f_{nk}(x)$。\par
 	由\cref{prop:SimpleFunction}(2)可知$g_k$是非负简单函数。因为$\{f_{nm}\}\uparrow$，所以：
 	\begin{equation*}
 		g_k=\max_{1\leqslant n\leqslant k}f_{nk}\leqslant\max_{1\leqslant n\leqslant k}f_{n(k+1)}\leqslant\max_{1\leqslant n\leqslant k+1}f_{n(k+1)}=g_{k+1}
@@ -480,7 +501,7 @@
 	\end{equation*}
 \end{proof}
 \begin{theorem}\label{theo:MeasurableCountableIntegral}
-	设$f$是测度空间$(X,\mathscr{F},\mu)$上的可测函数。若$f$在$A\in\mathscr{F}$上积分存在，则对任一$A$的可列可测分割$\{A_n\}$有：
+	设$f$是测度空间$(X,\mathscr{F},\mu)$上的可测函数。若$f$在$A\in\mathscr{F}$上积分存在，则对任一$A$的可列可测分割或有限可测分割$\{A_n\}$有：
 	\begin{equation*}
 		\int_{A}f(x)\dif\mu=\sum_{n=1}^{+\infty}\int_{A_n}f(x)\dif\mu
 	\end{equation*}
@@ -519,8 +540,12 @@
 		&=\lim_{n\to+\infty}\left[\int_{A}f_n^+(x)\dif\mu\right]-\lim_{n\to+\infty}\left[\int_{A}f_n^-(x)\dif\mu\right] \\
 		&=\lim_{n\to+\infty}\left\{\sum_{i=1}^{n}\left[\int_{A_i}f^+(x)\dif\mu\right]\right\}-\lim_{n\to+\infty}\left\{\sum_{i=1}^{n}\left[\int_{A_i}f^-(x)\dif\mu\right]\right\} \\
 		&=\lim_{n\to+\infty}\left\{\sum_{i=1}^{n}\left[\int_{A_i}f^+(x)\dif\mu-\int_{A_i}f^-(x)\dif\mu\right]\right\} \\
-		&=\lim_{n\to+\infty}\left\{\sum_{i=1}^{n}\left[\int_{A_i}f(x)\dif\mu\right]\right\}=\sum_{n=1}^{+\infty}\left[\int_{A_n}f(x)\dif\mu\right]\qedhere
+		&=\lim_{n\to+\infty}\left\{\sum_{i=1}^{n}\left[\int_{A_i}f(x)\dif\mu\right]\right\}=\sum_{n=1}^{+\infty}\left[\int_{A_n}f(x)\dif\mu\right]
 	\end{align*}
+	对于有限可测分割的情况，因为$\mu(\varnothing)=0$，由\cref{prop:MeasurableIntegral}(1)可知：
+	\begin{equation*}
+		\int_{A}f(x)\dif\mu=\int_{\underset{n=1}{\overset{+\infty}{\cup}}A_n}f(x)\dif\mu=\sum_{i=1}^{n}\left[\int_{A_i}f(x)\dif\mu\right]+\sum_{i=n+1}^{+\infty}\left[\int_{\varnothing}f(x)\dif\mu\right]=\sum_{i=1}^{n}\left[\int_{A_i}f(x)\dif\mu\right]\qedhere
+	\end{equation*}
 \end{proof}
 \begin{theorem}[Fatou Lemma]\label{theo:FatouLemma}
 	设$\{f_n\}$是测度空间$(X,\mathscr{F},\mu)$上的可测函数列，$A\in\mathscr{F}$，$\{f_n\}$在$A$上a.e.非负，则：
@@ -576,7 +601,7 @@
 	\end{enumerate}
 \end{corollary}
 \begin{proof}
-	(1)构造a.e.非负的可测函数列$\{h_n=f_n-g\}$（\cref{prop:MeasurableFunction}(5)），由\cref{prop:MeasurableIntegral}(7)可将$\{h_n\}$就看做非负可测函数。根据\cref{theo:FatouLemma}可得：
+	(1)构造a.e.非负的可测函数列$\{h_n=f_n-g\}$（\cref{prop:MeasurableFunction}(5)），由\cref{prop:MeasurableFunction}(11)和\cref{prop:MeasurableIntegral}(7)可将$\{h_n\}$就看做非负可测函数。根据\cref{theo:FatouLemma}可得：
 	\begin{equation*}
 		\int_{A}\left[\varliminf_{n\to+\infty}h_n(x)\right]\dif\mu\leqslant\varliminf_{n\to+\infty}\left[\int_{A}h_n(x)\dif\mu\right]
 	\end{equation*}
@@ -624,13 +649,7 @@
 	\begin{equation*}
 		\lim_{n\to+\infty}\left[\int_{A}f_n(x)\dif\mu\right]=\int_{A}f(x)\dif\mu
 	\end{equation*}\par
-	\textbf{(2)$\;\mu$}由\cref{theo:a.e.a.u.mu.d}(3)的必要性可知存在$\{f_n\}$的子列$\{f_{n_k}\}$使得$f_{n_k}\overset{\text{a.u.}}{\longrightarrow}f$，根据\cref{theo:a.e.a.u.mu.d}(1)可得$f_{n_k}\overset{\text{a.e.}}{\longrightarrow}f$，因为对任意的$n\in\mathbb{N}^+$有$|f_n|\leqslant g\;$a.e.于$A$，所以对任意的$k\in\mathbb{N}^+$有$|f_{n_k}|\leqslant g\;$a.e.于$A$。由(1)可得：
-	\begin{equation*}
-		\lim_{k\to+\infty}\left[\int_{A}f_{n_k}(x)\dif\mu\right]=\int_{A}f(x)\dif\mu
-	\end{equation*}
-	\begin{equation*}
-		\left\|\right\|
-	\end{equation*}
+	\textbf{(2)$\;\mu$}\info{未完成}
 \end{proof}
 \begin{corollary}[Lebesgue有界收敛定理]
 	设$\{f_n\}$和$f$是测度空间$(X,\mathscr{F},\mu)$上的可测函数，$A\in\mathscr{F}$且$\mu(A)<+\infty$。若存在$M>0$使得对任意的$n\in\mathbb{N}^+$有$|f_n|\leqslant M\;$a.e.于$A$，则$f_n\overset{\text{a.e.}}{\longrightarrow}f$或$f_n\overset{\mu}{\longrightarrow}f$蕴含：
@@ -649,24 +668,17 @@
 	之一有意义，则二者一定相等。
 \end{theorem}
 \begin{proof}
+	使用典型方法进行证明。仅对上左侧式子有意义的情况进行证明，右侧有意义的情况可由等号的传递性得出。\par
 	\textbf{(1)非负简单函数：}取$(Y,\mathscr{C},\nu)$上的非负简单函数$g$：
 	\begin{equation*}
 		g(y)=\sum_{i=1}^{n}a_iI_{A_i}(y),\quad a_i\geqslant0,\;A_i\in\mathscr{C},\;i=1,2,\dots,n,\;\underset{i=1}{\overset{n}{\cup}}A_i=Y
 	\end{equation*}
-	于是：
-	\begin{equation*}
-		\int_{B}g(y)\dif\nu=\sum_{i=1}^{n}a_i\nu(A_i\cap B)=\sum_{i=1}^{n}a_i\mu[f^{-1}(A_i\cap B)]
-	\end{equation*}
-	由\cref{theo:PropertyOfPreimage}(4)可得：
+	于是由\cref{theo:PropertyOfPreimage}(4)可得：
 	\begin{align*}
-		\int_{f^{-1}(B)}g\circ f\dif\mu&=\int_{f^{-1}(B)}g[f(x)]\dif\mu=\int_{f^{-1}(B)}\sum_{i=1}^{n}a_iI_{A_i}[f(x)]\dif\mu \\
-		&=\sum_{i=1}^{n}a_i\int_{f^{-1}(B)}I_{A_i}[f(x)]\dif\mu=\sum_{i=1}^{n}a_i\int_{f^{-1}(B)}I_{f^{-1}(A_i)}\dif\mu \\
-		&=\sum_{i=1}^{n}a_i\mu[f^{-1}(A_i)\cap f^{-1}(B)]=\sum_{i=1}^{n}a_i\mu[f^{-1}(A_i\cap B)]
-	\end{align*}
-	即：
-	\begin{equation*}
-		\int_{B}g(y)\dif\nu=\int_{f^{-1}(B)}g\circ f\dif\mu
-	\end{equation*}\par
+		\int_{B}g(y)\dif\nu&=\sum_{i=1}^{n}a_i\nu(A_i\cap B)=\sum_{i=1}^{n}a_i\mu[f^{-1}(A_i\cap B)]=\sum_{i=1}^{n}a_i\mu[f^{-1}(A_i)\cap f^{-1}(B)] \\
+		&=\sum_{i=1}^{n}a_i\int_{f^{-1}(B)}I_{f^{-1}(A_i)}\dif\mu=\sum_{i=1}^{n}a_i\int_{f^{-1}(B)}I_{A_i}[f(x)]\dif\mu \\
+		&=\int_{f^{-1}(B)}\sum_{i=1}^{n}a_iI_{A_i}[f(x)]\dif\mu=\int_{f^{-1}(B)}g[f(x)]\dif\mu=\int_{f^{-1}(B)}g\circ f\dif\mu
+	\end{align*}\par
 	\textbf{(2)非负可测函数：}取$(Y,\mathscr{C},\nu)$上的非负可测函数$g$，由\cref{prop:MeasurableFunction}(8)可知存在非负简单函数列$\{g_n\}$使得$g_n\uparrow g$。由非负简单函数时的情形我们得到：
 	\begin{equation*}
 		g_n\circ f=g_n[f(x)]=\sum_{i=1}^{j_n}a_{ni}I_{A_{ni}}[f(x)]=\sum_{i=1}^{j_n}a_{ni}I_{f^{-1}(A_{ni})},\quad\underset{i=1}{\overset{j_n}{\cup}}A_{ni}=Y
