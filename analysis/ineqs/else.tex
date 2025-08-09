@@ -26,6 +26,41 @@
 	将 $x=|a|$ 和 $y=|b|$ 代回，即得所需的不等式。
 \end{proof}
 
+\subsection{Jensen不等式}
+\begin{theorem}
+	设$(X,\mathscr{F},P)$是一个概率空间，$\mathscr{A}\subseteq\mathscr{F}$，$f$是$(X,\mathscr{F})$上可积的Borel函数，$\varphi$为$(\mathbb{R}^{},\mathcal{B})$上的Borel函数且是$\mathbb{R}^{}$上的凸函数，$\varphi\circ f$在$X$上可积，则有：
+	\begin{inequality*}\label{ineq:Jensen}
+		\varphi[\operatorname{E}(f|\mathscr{A})]\leqslant\operatorname{E}(\varphi\circ f|\mathscr{A})
+	\end{inequality*}
+	等号成立a.s.于$(X,\mathscr{A},P)$的一个充分条件为$f=\operatorname{E}(f|\mathscr{A})\;$a.s.于$X$。若$\varphi$是严格凸的，则等号成立a.s.于$(X,\mathscr{A},P)$的充要条件为$f=\operatorname{E}(f|\mathscr{A})\;$a.s.于$X$。
+\end{theorem}
+\begin{proof}
+	令：
+	\begin{equation*}
+		x_0=\operatorname{E}(f|\mathscr{A})
+	\end{equation*}
+	根据\cref{prop:ConvexFunction}(3)可知存在$a,b\in\mathbb{R}^{}$使得：
+	\begin{equation*}
+		\forall\;x\in\mathbb{R}^{},\;ax+b\leqslant\varphi(x)
+	\end{equation*}
+	并满足$ax_0+b=\varphi(x_0)$。根据\cref{prop:MeasurableIntegral}(6)，令$x=f(\omega)$对两侧求关于$\mathscr{A}$的条件期望，由\cref{prop:ConditionalExpectation}(5)(1)可得：
+	\begin{gather*}
+		\operatorname{E}(af+b|\mathscr{A})=a\operatorname{E}(f|\mathscr{A})+b\operatorname{E}(1|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P) \\ a\operatorname{E}(f|\mathscr{A})+b\operatorname{E}(1|\mathscr{A})=a\operatorname{E}(f|\mathscr{A})+b\;\text{a.s.于}(X,\mathscr{A},P)
+	\end{gather*}
+	根据\cref{prop:Measure}(3)（次有限可加性）和测度的非负性可知$\operatorname{E}(af+b|\mathscr{A})=a\operatorname{E}(f|\mathscr{A})+b\;$a.s.于$(X,\mathscr{A},P)$。显然$af(\omega)+b$在$X$上可积，由\cref{prop:ConditionalExpectation}(4)、\cref{prop:Measure}(3)（次有限可加性）和测度的非负性即可得：
+	\begin{equation*}
+		a\operatorname{E}(f|\mathscr{A})+b=\varphi[\operatorname{E}(f|\mathscr{A})]\leqslant\operatorname{E}(\varphi\circ f|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
+	\end{equation*}
+	当$f=\operatorname{E}(f|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$时，$\varphi(f)=\varphi[\operatorname{E}(f|\mathscr{A})]\;$a.s.于$(X,\mathscr{A},P)$，因为$\varphi\circ f\in L_1(X)$，根据\cref{prop:MeasurableIntegral}(7)可知$\varphi[\operatorname{E}(f|\mathscr{A})]\in L_1(X)$。由\cref{prop:MeasurableMapping}(2)和\cref{prop:ConditionalExpectation}(1)可得$\operatorname{E}\{\varphi[\operatorname{E}(f|\mathscr{A})]|\mathscr{A}\}=\varphi[\operatorname{E}(f|\mathscr{A})]\;$a.s.于$(X,\mathscr{A},P)$。由\cref{prop:ConditionalExpectation}(4)、\cref{prop:Measure}(3)（次有限可加性）和测度的非负性可得：
+	\begin{equation*}
+		\operatorname{E}(\varphi\circ f|\mathscr{A})=\operatorname{E}\{\varphi[\operatorname{E}(f|\mathscr{A})]|\mathscr{A}\}=\varphi[\operatorname{E}(f|\mathscr{A})]\;\text{a.s.于}(X,\mathscr{A},P)
+	\end{equation*}\par
+	当$\varphi$严格凸时，对任意的$x\in\mathbb{R}^{}\backslash\{x_0\}$有$ax+b<\varphi(x)$。若$\varphi[\operatorname{E}(f|\mathscr{A})]=\operatorname{E}(\varphi\circ f|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$，则：
+	\begin{equation*}
+		\operatorname{E}\{\varphi[\operatorname{E}(f|\mathscr{A})]\}=\operatorname{E}[\operatorname{E}(\varphi\circ f|\mathscr{A})]=\operatorname{E}(\varphi\circ f)
+	\end{equation*}
+\end{proof}
+
 \subsection{Chebyshev不等式}
 \begin{theorem}
 	设$X$是一个随机变量，其数学期望和方差都存在，则对任意的$\varepsilon>0$，有：
