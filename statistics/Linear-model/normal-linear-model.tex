@@ -16,8 +16,8 @@
 		\item LS估计$c^T\hat{\beta}$是$c^T\beta$的MLE，$\tilde{\sigma}^2=\dfrac{n-r}{n}\hat{\sigma}^2$是$\sigma^2$的MLE。若模型在\cref{theo:ConstraintLinearModel}的约束下，则LS估计$c^T\hat{\beta}_A$是$c^T\beta$的MLE，$\tilde{\sigma}_A^2=\dfrac{n-r+k}{n}\hat{\sigma}_A^2$是$\sigma^2$的MLE；
 		\item $c^T\hat{\beta}\sim N[c^T\beta,\sigma^2c^T(X^TX)^-c]$，$\dfrac{(n-r)\hat{\sigma}^2}{\sigma^2}=\dfrac{SSE}{\sigma^2}\sim\chi_{n-r}^2$；
 		\item $c^T\hat{\beta}$与$\hat{\sigma}^2$相互独立；
-		\item $T_1=y^Ty,\;T_2=X^Ty$为完全充分统计量；
-		\item $c^T\hat{\beta}$是$c^T\beta$唯一的MVUE，$\hat{\sigma}^2$为$\sigma^2$唯一的MVUE；
+		\item $T_1=y^Ty,\;T_2=X^Ty$为$y$的分布族的完全充分统计量；
+		\item 若$c^T\beta$和$\sigma^2$的估计的损失函数是估计量的严格凸函数，则$c^T\hat{\beta}$是$c^T\beta$在几乎处处的意义下唯一的UMRUE，$\hat{\sigma}^2$为$\sigma^2$在几乎处处的意义下唯一的UMRUE；
 		\item $\hat{e}\sim\operatorname{N}_n[\mathbf{0},\sigma^2(I_n-P_X)]$。
 	\end{enumerate}
 \end{property}
@@ -91,8 +91,14 @@
 		&=\frac{\sigma^2}{n-r}\alpha^TP_X(I_n-P_X)=\mathbf{0}
 	\end{align*}
 	由\cref{theo:BXXAXIndependent}可知$c^T\hat{\beta}$与$\hat{\sigma}^2$独立。\par
-	(4)\par
-	(5)\par
+	(4)由\cref{prop:MultiNormal}(1)(2)和\cref{prop:Transpose}(4)可知观测向量$y$的概率函数为：
+	\begin{align*}
+		&p(y)=(2\pi\sigma^2)^{-\frac{n}{2}}\exp\left[-\frac{1}{2}(y-X\beta)^T\frac{1}{\sigma^2}(y-X\beta)\right] \\
+		=&(2\pi\sigma^2)^{-\frac{n}{2}}\exp\left[-\frac{1}{2\sigma^2}(y^Ty-y^TX\beta-\beta^TX^Ty-\beta^TX^TX\beta)\right] \\
+		=&(2\pi\sigma^2)^{-\frac{n}{2}}\exp(\beta^TX^TX\beta)\exp\left[-\frac{1}{2\sigma^2}y^Ty-\frac{\beta^T}{\sigma^2}X^Ty\right]
+	\end{align*}
+	所以$y$的分布族为指数族，自然参数为$\left(-\dfrac{1}{2\sigma^2},-\dfrac{\beta^T}{\sigma^2}\right)$，自然参数空间为$\mathbb{R}^{-}\times\mathbb{R}^{p}$，所以它是满秩的。由\cref{prop:ExponentialFamily}(7)(8)可知$T_1=y^Ty,T_2=X^Ty$是分布族的完全充分统计量。\par
+	(5)由\cref{prop:EstimableFunction}(4)可知$c^T\hat{\beta}=c^T(X^TX)^-X^Ty$是$c^T\beta$的无偏估计，根据(4)可得$c^T\hat{\beta}$是完全充分统计量$X^Ty$的函数，由\cref{theo:Lehmann-Scheffe}可知$c^T\hat{\beta}$是$c^T\beta$在几乎处处的意义下唯一的UMRUE。由\cref{theo:VarianceOfErrorTerm}和\cref{prop:ehat}(2)可知$\hat{\sigma}^2=\dfrac{SSE}{n-r}=\dfrac{y^Ty-y^TX(X^TX)^-X^Ty}{n-r}$是$\sigma^2$的无偏估计，根据(4)可得$\hat{\sigma}^2$是完全充分统计量$y^Ty$和$X^Ty$的函数，由\cref{theo:Lehmann-Scheffe}可知$\hat{\sigma}^2$是$\sigma^2$在几乎处处的意义下唯一的UMRUE。\par
 	(6)由\cref{prop:ehat}(1)立即可得。
 \end{proof}
 
