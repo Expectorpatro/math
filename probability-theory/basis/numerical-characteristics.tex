@@ -1,0 +1,826 @@
+\section{随机变量的数字特征}
+
+\subsection{期望}
+\begin{definition}
+	设$f$是概率空间$(X,\mathscr{F},P)$上的随机变量。若$f$的积分存在，则称$f$的\gls{MathematicalExpectation}（简称为期望）存在，并将：
+	\begin{equation*}
+		\operatorname{E}(f)\coloneq\int_{X}f(x)\dif P
+	\end{equation*}
+	称为$f$的期望。若$f$可积，则称$f$的期望是有限的。随机向量的期望即为各分量期望按原顺序排列成的向量，随机矩阵的期望即为各元素期望按原顺序排成的矩阵。
+\end{definition}
+\begin{property}
+	设$f$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量，分布函数为$F$。期望有如下性质：
+	\begin{enumerate}
+		\item 对任何$(\mathbb{R}^{},\mathcal{B})$上的可测函数$g$，$g\circ f$是$(X,\mathscr{F},P)$上的可测函数，只要：
+		\begin{equation*}
+			\operatorname{E}(g\circ f),\quad\int_{\mathbb{R}^{}}g\dif Pf^{-1}
+		\end{equation*}
+		之一有意义，则二者一定相等。特别的，当$f$为连续型随机变量时，上式化作：
+		\begin{equation*}
+			\operatorname{E}(g\circ f),\quad\int_{\mathbb{R}^{}}g(x)p(x)\dif\lambda,\quad p(x)=\frac{\dif Pf^{-1}}{\dif\lambda}
+		\end{equation*}
+		其中$\lambda$为L测度；当$f$为离散型随机变量时，令$D=\{x_n\}$，含义与随机变量分类时的含义相同，则上式化作：
+		\begin{equation*}
+				\operatorname{E}(g\circ f),\quad\sum_{n=1}^{+\infty}g(x_n)p(x_n)
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	由\cref{prop:MeasurableMapping}(2)可知$g\circ f$是$(X,\mathscr{F},P)$到$(\mathbb{R}^{},\mathcal{B})$上的可测函数。注意到：
+	\begin{equation*}
+		\operatorname{E}(g\circ f)=\int_{X}g[f(x)]\dif P=\int_{f^{-1}(\mathbb{R}^{})}g[f(x)]\dif P
+	\end{equation*}
+	由\cref{theo:IntBySubstitution}即可得出一般结论。根据\cref{lem:IntChangeOfMeasure}可得出连续型随机变量时的结论。对于离散型随机变量，使用典型方法证明即可。\info{离散型得再看看}
+\end{proof}
+\begin{note}
+	很多教材在上述定理中写的并不是$g$对pushforward measure$Pf^{-1}$进行积分，而是对$f$的分布函数$F$进行积分。$F$是一个测度吗？$F$与$Pf^{-1}$等价吗？显然并不是。由\cref{theo:Quasi-distributionMeasure}和\cref{prop:Semiring}(2)我们可以看到$F$可以引出半环$\mathscr{A}=\{(a,b]:a,b\in\mathbb{R}^{}\}$上的测度$\mu$，注意到：
+	\begin{equation*}
+		\mathbb{R}^{}=\underset{n=1}{\overset{+\infty}{\bigcup}}\Big[(n-1,n]\cup(-n,-n+1]\Big]
+	\end{equation*}
+	于是$\mathscr{A}$满足\cref{theo:SemiringMeasureExtension}中的条件，于是$\mu$在$\mathcal{B}=\sigma(\{(a,b]:a,b\in\mathbb{R}^{}\})$（\cref{prop:BorelSigmaField}(1.d)）上存在唯一的扩张$\nu$。在上述半环上，由$\mu$的定义可知：
+	\begin{equation*}
+		\mu\Bigl((a,b]\Bigr)=
+		\begin{cases}
+			F(b)-F(a),&a<b \\
+			0,&a\geqslant b
+		\end{cases}
+	\end{equation*}
+	因为$f$是一个可测函数，由\cref{prop:MeasurableFunction}(1)可知$\{a<f\leqslant b\},\{f\leqslant b\},\{f\leqslant a\}\in\mathscr{F}$。根据\cref{prop:Measure}(3)（可减性）可得：
+	\begin{equation*}
+		Pf^{-1}\Bigl((a,b]\Bigr)=P(\{a<f\leqslant b\})=
+		\begin{cases}
+			P(\{f\leqslant b\}\backslash\{f\leqslant a\})=F(b)-F(a),&a<b \\
+			P(\varnothing)=0,&a\geqslant b
+		\end{cases}
+	\end{equation*}
+	所以$Pf^{-1}$就是$\mu$在$\mathcal{B}$上的扩张$\nu$。由此可以看出$F$可唯一确定$Pf^{-1}$，所以可使用$F$来代表$Pf^{-1}$。
+\end{note}
+
+\subsubsection{条件期望}
+\begin{lemma}\label{lem:ConditionalExpectation}
+	设$f$为概率空间$(X,\mathscr{F},P)$上积分存在的随机变量。对任意的$A\in\mathscr{F}$，令：
+	\begin{equation*}
+		\varphi(A)=\int_{A}f(x)\dif P
+	\end{equation*}
+	则：
+	\begin{enumerate}
+		\item $\varphi$是$\mathscr{F}$上的符号测度；
+		\item $\varphi\ll P$。
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	(1)因为$P(\varnothing)=0$，由\cref{prop:MeasurableIntegral}(1)可得$\varphi(\varnothing)=0$。根据\cref{theo:MeasurableCountableIntegral}可知对互不相交的$\{A_n\}\subseteq\mathscr{F}$有：
+	\begin{equation*}
+		\varphi\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)=\int_{\underset{n=1}{\overset{+\infty}{\cup}}A_n}f(x)\dif P=\sum_{n=1}^{+\infty}\left[\int_{A_n}f(x)\dif P\right]=\sum_{n=1}^{+\infty}\varphi(A_n)
+	\end{equation*}
+	所以$\varphi$是$\mathscr{F}$上的符号测度。\par
+	(2)由\cref{prop:MeasurableIntegral}(1)直接可得。
+\end{proof}
+\begin{definition}
+	设$f$为概率空间$(X,\mathscr{F},P)$上积分存在的随机变量，$\mathscr{A}$是$\mathscr{F}$的一个子$\sigma$域，对任意的$A\in\mathscr{F}$，令：
+	\begin{equation*}
+		\varphi(A)=\int_{A}f(x)\dif P
+	\end{equation*}
+	因为概率是$\sigma$有限测度，由\cref{prop:Measure}(4)、\cref{lem:ConditionalExpectation}、\cref{prop:SignedMeasure}(7)和\cref{theo:RandonNikodym}可知存在$(X,\mathscr{A},P)$上a.s.于$X$的意义下唯一的积分存在的可测函数$\operatorname{E}(f|\mathscr{A})$满足：
+	\begin{equation*}
+		\forall\;A\in\mathscr{A},\;\varphi(A)=\int_{A}\operatorname{E}(f|\mathscr{A})\dif P
+	\end{equation*}
+	若对任意的$A\in\mathscr{A}$有：
+	\begin{equation*}
+		\int_{A}\operatorname{E}(f|\mathscr{A})\dif P=\int_{A}f(x)\dif P
+	\end{equation*}
+	则称$\operatorname{E}(f|\mathscr{A})$为$f$关于$\mathscr{A}$的\gls{ConditionalExpectation}。当$\mathscr{A}=\sigma(g)$，$g$是$(X,\mathscr{F})$到可测空间 $(Y,\mathscr{B})$的可测映射，则称$\operatorname{E}(f|g)\coloneq\operatorname{E}[f|\sigma(g)]$为$f$关于$g$的条件期望（由\cref{lem:PreimageSigmaField}可知$\sigma(g)$为$\mathscr{F}$的子$\sigma$域）。分别称：
+	\begin{equation*}
+		P(A|\mathscr{A})\coloneq\operatorname{E}(I_A|\mathscr{A}),\quad P(A|g)\coloneq P[A|\sigma(g)]
+	\end{equation*}
+	为事件$A\in\mathscr{F}$关于$\mathscr{A}$的\gls{ConditionalProbability}和事件$A\in\mathscr{F}$关于$g$的条件概率（显然$I_A$在概率空间上积分存在）。
+\end{definition}
+\begin{lemma}\label{lem:IndependentExpectation}
+	设$f$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量。若$f$与$\mathscr{A}\subseteq\mathscr{F}$独立，则对任意的$A\in\mathscr{A}$有：
+	\begin{equation*}
+		\operatorname{E}(fI_A)=\operatorname{E}(f)\cdot P(A)
+	\end{equation*}
+\end{lemma}
+\begin{proof}
+	使用典型方法进行证明。\par
+	\textbf{(1)非负简单函数：}设$f$为非负简单函数，由\cref{prop:SigmaField}(4)和\cref{prop:NonnegativeSimpleIntegral}(4)可得：
+	\begin{align*}
+		\operatorname{E}(fI_A)&=\int_{X}f(x)I_A(x)\dif P=\int_{A}f(x)\dif P=\sum_{i=1}^{n}c_iP(A\cap E_i) \\
+		&=\sum_{i=1}^{n}c_iP(E_i)P(A)=\operatorname{E}(f)\cdot P(A)
+	\end{align*}\par
+	\textbf{(2)非负可测函数：}设$f$为非负可测函数，根据\cref{prop:MeasurableFunction}(8)，取非负简单函数列$\{f_n\}$满足$f_n\uparrow f$，由\cref{prop:Independent}(8)可知 $f_n$与$\mathscr{A}$独立。显然有$f_nI_A\uparrow fI_A$，根据\cref{prop:SimpleFunction}(3)(2)可知$f_nI_A$为非负简单函数，所以由\cref{prop:NonnegativeMeasurableIntegral}(4)、非负简单函数时的结论和极限的线性性质可得：
+	\begin{align*}
+		\operatorname{E}(fI_A)&=\int_{X}f(x)I_A(x)\dif P=\lim_{n\to+\infty}\left[\int_{X}f_n(x)I_A(x)\dif P\right] \\
+		&=\lim_{n\to+\infty}[\operatorname{E}(f_n)\cdot P(A)]=P(A)\lim_{n\to+\infty}\operatorname{E}(f_n)=P(A)\cdot\operatorname{E}(f)
+	\end{align*}\par
+	\textbf{(3)一般可测函数：}设$f$为一般可测函数，因为$f$积分存在，根据\cref{prop:NonnegativeMeasurableIntegral}(6)可知$(fI_A)^+=f^+I_A,(fI_A)^-=f^-I_A$中至少一个积分有限，所以$fI_A$积分存在。由\cref{prop:Independent}(7)和非负可测函数时的情况可得：
+	\begin{align*}
+		\operatorname{E}(fI_A)&=\int_{X}f(x)I_A(x)\dif P=\int_{X}f^+(x)I_A(x)\dif P-\int_{X}f^-(x)I_A(x)\dif P \\
+		&=P(A)\int_{X}f^+(x)\dif P-P(A)\int_{X}f^-(x)\dif P=P(A)\left[\int_{X}f^+(x)\dif P-\int_{X}f^-(x)\dif P\right] \\
+		&=P(A)\int_{X}f(x)\dif\mu=P(A)\cdot\operatorname{E}(f)\qedhere
+	\end{align*}
+\end{proof}
+\begin{property}\label{prop:ConditionalExpectation}
+	设$f,g$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量，$\mathscr{A},\mathscr{B}$是$\mathscr{F}$的子$\sigma$域，则：
+	\begin{enumerate}
+		\item 若$f\in L_1(X)$，则$f$关于$\mathscr{A}$可测的充要条件为$\operatorname{E}(f|\mathscr{A})=f\;$a.s.于$(X,\mathscr{A},P)$；
+		\item 若$f$与$\mathscr{A}$独立，则$\operatorname{E}(f|\mathscr{A})=\operatorname{E}(f)\;$a.s.于$(X,\mathscr{A},P)$；
+		\item 若$\mathscr{A}\subseteq\mathscr{B}$，则$\operatorname{E}[\operatorname{E}(f|\mathscr{A})|\mathscr{B}]=\operatorname{E}(f|\mathscr{A})\;$a.s.于$(X,\mathscr{B},P)$，$\operatorname{E}[\operatorname{E}(f|\mathscr{B})|\mathscr{A}]=\operatorname{E}(f|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$，$\operatorname{E}[\operatorname{E}(f|\mathscr{A})]=\operatorname{E}(f)$；
+ 		\item 若$f,g\in L_1(X)$或$f,g$为非负可测函数，$f\leqslant g\;$a.s.于$(X,\mathscr{A},P)$，则$\operatorname{E}(f|\mathscr{A})\leqslant\operatorname{E}(g|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$；
+		\item 对任意的$\alpha,\beta\in\mathbb{R}^{}$，若$\alpha\operatorname{E}(f)+\beta\operatorname{E}(g)$有意义，则：
+		\begin{equation*}
+			\operatorname{E}(\alpha f+\beta g|\mathscr{A})=\alpha\operatorname{E}(f|\mathscr{A})+b\operatorname{E}(g|\mathscr{A})
+		\end{equation*}
+		a.s.于$(X,\mathscr{A},P)$；
+		\item 若$0\leqslant f_n\uparrow f\;$a.s.于$(X,\mathscr{F},P)$，则$0\leqslant\operatorname{E}(f_n|\mathscr{A})\uparrow \operatorname{E}(f|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$；
+		\item 若$f_n\geqslant0\;$a.s.于$(X,\mathscr{F},P)$，则$\operatorname{E}\left(\varliminf\limits_{n\to+\infty}f_n|\mathscr{A}\right)\leqslant\varliminf\limits_{n\to+\infty}\operatorname{E}(f_n|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$；
+		\item 若$|f_n|\leqslant g\in L_1$且$f_n\overset{\text{a.s.}}{\longrightarrow}f$，则$\lim\limits_{n\to+\infty}\operatorname{E}(f_n|\mathscr{A})=\operatorname{E}(f|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)必要性由条件期望的定义和\cref{prop:MeasurableIntegral}(11)即可得到，充分性由条件期望的定义和\cref{prop:MeasurableFunction}(11)即可得到。\par
+	(2)因为$\sigma[\operatorname{E}(f)]=\{\varnothing,X\}\subseteq\mathscr{A}$，所以$\operatorname{E}(f)$作为$(X,\mathscr{A},P)$上的函数是可测的，由一般可测函数积分的定义可知$\operatorname{E}(f)$积分存在。分积分有限、积分为正无穷、积分为负无穷三种情况讨论，由积分的性质可得到$\int_{A}\operatorname{E}(f)\dif P=\operatorname{E}(f)P(A)$\info{回头再看看}。对于任意的$A\in\mathscr{A}$，因为$f$与$\mathscr{A}$独立，由\cref{lem:IndependentExpectation}、\cref{prop:MeasurableIntegral}(6)、\cref{prop:SigmaField}(4)和\cref{theo:MeasurableCountableIntegral}可得：
+	\begin{equation*}
+		\int_{A}\operatorname{E}(f)\dif\mu=\operatorname{E}(f)\cdot P(A)=\operatorname{E}(fI_A)=\int_{X}f(x)I_A(x)\dif\mu=\int_{A}f(x)\dif\mu
+	\end{equation*}
+	根据$\operatorname{E}(f|\mathscr{A})$的定义可知结论成立。\par
+	(3)由$\operatorname{E}(f|\mathscr{A})$的定义可知$\operatorname{E}(f|\mathscr{A})$是$\mathscr{A}$可测的，因为$\mathscr{A}\subseteq\mathscr{B}$，所以$\operatorname{E}(f|\mathscr{A})$是$\mathscr{B}$可测的。由(1)可得$\operatorname{E}[\operatorname{E}(f|\mathscr{A})|\mathscr{B}]=\operatorname{E}(f|\mathscr{A})\;$a.s.于$(X,\mathscr{B},P)$。由$\operatorname{E}[\operatorname{E}(f|\mathscr{B})|\mathscr{A}]$的定义可知它是$\mathscr{A}$可测的，于是对任意的$A\in\mathscr{A}$根据条件期望的定义可得：
+	\begin{equation*}
+		\int_{A}\operatorname{E}[\operatorname{E}(f|\mathscr{B})|\mathscr{A}]\dif P=\int_{A}\operatorname{E}(f|\mathscr{B})\dif P=\int_{A}f(x)\dif\mu
+	\end{equation*}
+	即$\operatorname{E}(f|\mathscr{A})=\operatorname{E}[\operatorname{E}(f|\mathscr{B})|\mathscr{A}]\;$a.s.于$(X,\mathscr{A},P)$。\par
+	因为$\{\varnothing,X\}$是任意$\sigma$域的子$\sigma$域，于是有：
+	\begin{equation*}
+		\operatorname{E}[\operatorname{E}(f|\mathscr{A})|\{\varnothing,X\}]=\operatorname{E}(f|\{\varnothing,X\})\;\text{a.s.于}(X,\{\varnothing,X\},P)
+	\end{equation*}
+	因为任意随机变量与$\{\varnothing,X\}$独立，根据(2)有：
+	\begin{equation*}
+		\operatorname{E}[\operatorname{E}(f|\mathscr{A})|\{\varnothing,X\}]=\operatorname{E}(f|\mathscr{A})\;\text{a.s.于}(X,\{\varnothing,X\},P)
+	\end{equation*}
+	由\cref{prop:MeasurableIntegral}(7)可知：
+	\begin{align*}
+		\operatorname{E}[\operatorname{E}(f|\mathscr{A})]&=\int_{X}\operatorname{E}(f|\mathscr{A})\dif P=\int_{X}\operatorname{E}[\operatorname{E}(f|\mathscr{A})|\{\varnothing,X\}]\dif P \\
+		&=\int_{X}\operatorname{E}(f|\{\varnothing,X\})\dif P=\int_{X}f(x)\dif P=\operatorname{E}(f)
+	\end{align*}\par
+	(4)\textbf{$\;L_1$：}由\cref{prop:MeasurableIntegral}(7)可得：
+	\begin{equation*}
+		\int_{A}\operatorname{E}(f|\mathscr{A})\dif P=\int_{A}f(x)\dif P\leqslant\int_{A}g(x)\dif P=\int_{A}\operatorname{E}(g|\mathscr{A})\dif P
+	\end{equation*}\par
+	根据\cref{prop:MeasurableIntegral}(4)(10)即可得出结论。\par
+	\textbf{非负可测：}定义截断函数：
+	\begin{equation*}
+		\forall\;n\in\mathbb{N}^+,\;f_n=f\wedge n,g_n=g\wedge n
+	\end{equation*}
+	根据\cref{prop:MeasurableFunction}(6)可知$f_n$和$g_n$是可测函数，于是有$0\leqslant f_n\leqslant g_n\leqslant n\;$a.s.于$(X,\mathscr{A},P)$且$f_n\uparrow f,\;g_n\uparrow g$，$f_n,g_n\in L_1$。由$L_1$时的情形可得$\operatorname{E}(f_n|\mathscr{A})\leqslant\operatorname{E}(g_n|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$且$\operatorname{E}(f_n|\mathscr{A})\uparrow\;$a.s.于$(X,\mathscr{A},P)$。由(1)可知$\operatorname{E}(0|\mathscr{A})=0\;$a.s.于$(X,\mathscr{A},P)$，由\cref{prop:Measure}(4)（次有限可加性）和测度的非负性可得$0\leqslant\operatorname{E}(f_n|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$。根据\cref{prop:MeasurableFunction}(6)可知$\lim\limits_{n\to+\infty}\operatorname{E}(f_n|\mathscr{A})$是可测函数，由极限的不等式性它也是非负函数a.s.于$(X,\mathscr{A},P)$。对任意的$A\in\mathscr{A}$，由\cref{theo:LeviTheorem}可得：
+	\begin{equation*}
+		\int_{A}\left[\lim_{n\to+\infty}\operatorname{E}(f_n|\mathscr{A})\right]\dif P=\lim_{n\to+\infty}\left[\int_{A}\operatorname{E}(f_n|\mathscr{A})\dif P\right]=\lim_{n\to+\infty}\left[\int_{A}f_n(x)\dif P\right]=\int_{A}f(x)\dif P
+	\end{equation*}
+	根据条件期望的定义可知：
+	\begin{equation*}
+		\lim_{n\to+\infty}\operatorname{E}(f_n|\mathscr{A})=\operatorname{E}(f|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
+	\end{equation*}
+	同理可得：
+	\begin{equation*}
+		\lim_{n\to+\infty}\operatorname{E}(g_n|\mathscr{A})=\operatorname{E}(g|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
+	\end{equation*}
+	由\cref{prop:Measure}(4)（次有限可加性）、测度的非负性和极限的不等式性即可得出结论。\par
+	(5)根据\cref{prop:MeasurableIntegral}(3)(5)，对任意的$A\in\mathscr{A}$有：
+	\begin{align*}
+		\int_{A}\operatorname{E}(\alpha f+\beta g|\mathscr{A})\dif P&=\int_{A}[\alpha f(x)+\beta g(x)]\dif P=\alpha\int_{A}f(x)\dif P+\beta\int_{A}g(x)\dif P \\
+		&=\alpha\int_{A}\operatorname{E}(f|\mathscr{A})\dif P+\beta\int_{A}\operatorname{E}(g|\mathscr{A})\dif P \\
+		&=\int_{A}\alpha\operatorname{E}(f|\mathscr{A})\dif P+\int_{A}\beta\operatorname{E}(g|\mathscr{A})\dif P \\
+		&=\int_{A}[\alpha\operatorname{E}(f|\mathscr{A})+\beta\operatorname{E}(g|\mathscr{A})]\dif P
+	\end{align*}
+	由条件期望的定义可得$\operatorname{E}(\alpha f+\beta g|\mathscr{A})=\alpha\operatorname{E}(f|\mathscr{A})+\beta\operatorname{E}(g|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$。\par
+	(6)由(4)非负可测的情况立即可得。\par
+	(7)仿照\cref{theo:FatouLemma}即可得到。\par
+	(8)由(7)，仿照\cref{cor:FatouLemma}和\cref{theo:DominatedConvergenceTheorem}即可得到。
+\end{proof}
+
+\subsection{矩}
+\begin{definition}
+	设$f$是概率空间$(X,\mathscr{F},P)$上的随机变量，$n\in\mathbb{N}^+$。若$\operatorname{E}(|f|^n)<+\infty$，则称$f$的$n$阶\gls{Moment}存在并将：
+	\begin{equation*}
+		\mu_n=\operatorname{E}(f^n),\quad\nu_n=\operatorname{E}\{[f-\operatorname{E}(f)]^n\}
+	\end{equation*}
+	称为$f$的$n$阶\gls{RawMoment}和$n$阶\gls{CentralMoment}。
+\end{definition}
+\begin{property}\label{prop:Moment}
+	设$f$是概率空间$(X,\mathscr{F},P)$上的随机变量，$n\in\mathbb{N}^+$。$f$的矩具有如下性质：
+	\begin{enumerate}
+		\item 若$f$的$n$阶矩存在，则$f$具有所有不超过$n$阶的矩；
+		\item $f$的中心矩$\nu_n$与原点矩$\mu_n$之间存在如下关系：
+		\begin{equation*}
+			\nu_n=\sum_{i=0}^{n}\binom{n}{i}\mu_i(-\mu_1)^{n-i}
+		\end{equation*}
+		\item 若$f$的$n$阶矩存在，则$\mu_n,\nu_n\in\mathbb{R}^{}$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)设$f$的$n$阶矩存在，则$\operatorname{E}(|f|^n)<+\infty$，由\cref{theo:LtLs}可知对任意的非负数$i\leqslant n$有$\operatorname{E}(|f|^i)<+\infty$，于是$f$具有所有不超过$n$阶的矩。\par
+	(2)由(1)和\cref{prop:MeasurableIntegral}(4)可知$f^i,\;i=0,1,\dots,n$在$X$上可积，即$\mu_i=\operatorname{E}(f)<+\infty$。由中心矩的定义和\cref{prop:MeasurableIntegral}(5)可得：
+	\begin{equation*}
+		\nu_n
+		=\operatorname{E}\{[f-\operatorname{E}(f)]^n\}
+		=\operatorname{E}\left[\sum_{i=0}^{n}\binom{n}{i}f^i(-\mu_1)^{n-i}\right]
+		=\sum_{i=0}^{n}\binom{n}{i}\mu_i(-\mu_1)^{n-i}
+	\end{equation*}\par
+	(3)因为$f$的$n$阶矩存在，所以$\operatorname{E}(|f|^n)<+\infty$，即$|f|^n=|f^n|$在$X$上可积，由\cref{prop:MeasurableIntegral}(4)可知$f^n$在$X$上可积，于是$\mu_n=\operatorname{E}(f^n)\in\mathbb{R}^{}$。结合(1)(2)可得$\nu_n\in\mathbb{R}^{}$。综上，$f$的$n$阶中心矩与$n$阶原点矩在$\mathbb{R}^{}$上。
+\end{proof}
+\begin{note}
+	需要注意随机变量的期望是可以取无穷的，而矩则必须是有限值。
+\end{note}
+
+\subsection{协方差}
+\begin{definition}
+	对于随机向量$\mathbf{X}$与随机向量$\mathbf{Y}$，若它们的各分量都在$L_2(X)$中，由\cref{ineq:cauchy-schiwarz-expectations}和\cref{theo:LtLs}可知：
+	\begin{equation*}
+		\operatorname{Cov}(\mathbf{X},\mathbf{Y})=\operatorname{E}\Bigl[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Y}-\operatorname{E}(\mathbf{Y})\Bigr)^T\Bigr]
+	\end{equation*}
+	一定存在且每个元素都是有限值，称其为$\mathbf{X}$与$\mathbf{Y}$的\gls{Covariance}矩阵。若$\mathbf{X}=\mathbf{Y}$，则可将$\operatorname{Cov}(\mathbf{X},\mathbf{Y})$简写为$\operatorname{Cov}(\mathbf{X})$。
+\end{definition}
+\begin{definition}
+	设$X,Y$是两个随机变量，则：
+	\begin{enumerate}
+		\item 若$\operatorname{Cov}(X,Y)>0$，称$X,Y$\gls{PositivelyCorrelated}；
+		\item 若$\operatorname{Cov}(X,Y)<0$，称$X,Y$\gls{NegativelyCorrelated}；
+		\item 若$\operatorname{Cov}(X,Y)=0$，称$X,Y$\gls{Uncorrelated}。
+	\end{enumerate}
+\end{definition}
+\begin{property}\label{prop:CovMat}
+	协方差矩阵具有如下性质：
+	\begin{enumerate}
+		\item $\mathbf{X}$是一个$n$维随机向量，则$\operatorname{tr}[\operatorname{Cov}(\mathbf{X})]=\sum\limits_{i=1}^{n}\operatorname{Var}(\mathbf{X}_i)$；
+		\item $\mathbf{X}$是一个$n$维随机向量，则$\operatorname{Cov}(\mathbf{X})$是半正定的对称矩阵；
+		\item 设$A$和$B$分别为$p\times n$和$q\times m$非随机矩阵，$\mathbf{X}$和$\mathbf{Y}$分别为$n$维、$m$维随机向量，则：
+		\begin{equation*}
+			\operatorname{Cov}(A\mathbf{X},B\mathbf{Y})=A\operatorname{Cov}(\mathbf{X},\mathbf{Y})B^T
+		\end{equation*}
+		\item 若$\mathbf{X}$是一个常数向量，$\mathbf{Y}$是一个随机向量，则$\operatorname{Cov}(\mathbf{X},\mathbf{Y})=\mathbf{0}$；
+		\item 设$\mathbf{X},\mathbf{Y},\mathbf{Z}$为随机向量，则：
+		\begin{gather*}
+			\operatorname{Cov}(\mathbf{X}+\mathbf{Y},\mathbf{Z})=\operatorname{Cov}(\mathbf{X},\mathbf{Z})+\operatorname{Cov}(\mathbf{Y},\mathbf{Z}) \\
+			\operatorname{Cov}(\mathbf{X},\mathbf{Y}+\mathbf{Z})=\operatorname{Cov}(\mathbf{X},\mathbf{Y})+\operatorname{Cov}(\mathbf{X},\mathbf{Z})
+		\end{gather*}
+		\item $\operatorname{Cov}(\mathbf{X})=\operatorname{E}(\mathbf{X}\mathbf{X}^T)-[\operatorname{E}(\mathbf{X})][\operatorname{E}(\mathbf{X})]^T$；
+		\item 若随机变量$X$与随机变量$Y$独立，则$\operatorname{Cov}(X,Y)=0$，即$X$与$Y$不相关。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)$\;\operatorname{Cov}(\mathbf{X})$在$(i,i)$位置上的元素为：
+	\begin{equation*}
+		\operatorname{E}\Bigl[\Bigl(\mathbf{X}_i-\operatorname{E}(\mathbf{X}_i)\Bigr)\Bigl(\mathbf{X}_i-\operatorname{E}(\mathbf{X}_i)\Bigr)^T\Bigr]=\operatorname{E}\Bigl[\Bigl(\mathbf{X}_i-\operatorname{E}(\mathbf{X}_i)\Bigr)^2\Bigr]=\operatorname{Var}(\mathbf{X}_i)
+	\end{equation*}
+	所以$\operatorname{tr}[\operatorname{Cov}(\mathbf{X})]=\sum\limits_{i=1}^{n}\operatorname{Var}(\mathbf{X}_i)$。\par
+	(2)因为：
+	\begin{align*}
+		\operatorname{Cov}(\mathbf{X})_{(i,j)}
+		&=\operatorname{E}\Bigl[\Bigl(\mathbf{X}_i-\operatorname{E}(\mathbf{X}_i)\Bigr)\Bigl(\mathbf{X}_j-\operatorname{E}(\mathbf{X}_j)\Bigr)^T\Bigr] \\
+		&=\operatorname{E}\Bigl[\Bigl(\mathbf{X}_j-\operatorname{E}(\mathbf{X}_j)\Bigr)\Bigl(\mathbf{X}_i-\operatorname{E}(\mathbf{X}_i)\Bigr)^T\Bigr] \\
+		&=\operatorname{Cov}(\mathbf{X})_{(j,i)}
+	\end{align*}
+	所以$\operatorname{Cov}(\mathbf{X})$是一个对称矩阵。\par
+	取$n$维非随机向量$c$，设$Y=c^T\mathbf{X}$，由\cref{prop:Transpose}(4)和\cref{prop:MeasurableIntegral}(5)可得：
+	\begin{align*}
+		\operatorname{Var}(Y)
+		&=\operatorname{Var}(c^T\mathbf{X}) \\
+		&=\operatorname{E}\Bigl[\Bigl(c^T\mathbf{X}-\operatorname{E}(c^T\mathbf{X})\Bigr)\Bigl(c^T\mathbf{X}-\operatorname{E}(c^T\mathbf{X})\Bigr)\Bigr] \\
+		&=\operatorname{E}\Bigl[\Bigl(c^T\mathbf{X}-c^T\operatorname{E}(\mathbf{X})\Bigr)\Bigl(c^T\mathbf{X}-c^T\operatorname{E}(\mathbf{X})\Bigr)^T\Bigr] \\
+		&=\operatorname{E}\Bigl\{c^T\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl[c^T\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigr]^T\Bigr\} \\
+		&=c^T\operatorname{E}\Bigl[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)^T\Bigr]c \\
+		&=c^T\operatorname{Cov}(\mathbf{X})c\geqslant0
+	\end{align*}
+	由$c$的任意性，$\operatorname{Cov}(\mathbf{X})$是半正定的。\par
+	(3)类似于(2)中的推导，有：
+	\begin{align*}
+		\operatorname{Cov}(A\mathbf{X},B\mathbf{Y})
+		&=\operatorname{E}\Bigl[\Bigl(A\mathbf{X}-\operatorname{E}(A\mathbf{X})\Bigr)\Bigl(B\mathbf{Y}-\operatorname{E}(B\mathbf{Y})\Bigr)^T\Bigr] \\
+		&=A\operatorname{E}\Bigl[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Y}-\operatorname{E}(\mathbf{Y})\Bigr)^T\Bigr]B^T \\
+		&=A\operatorname{Cov}(\mathbf{X},\mathbf{Y})B^T
+	\end{align*}\par
+	(4)由\cref{prop:NonnegativeMeasurableIntegral}(9)直接可得；\par
+	(5)由\cref{prop:MeasurableIntegral}(5)可得：
+	\begin{gather*}
+		\begin{aligned}
+			\operatorname{Cov}(\mathbf{X}+\mathbf{Y},\mathbf{Z})
+			&=\operatorname{E}\left[\Bigl(\mathbf{X}+\mathbf{Y}-\operatorname{E}(\mathbf{X}+\mathbf{Y})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^T\right] \\
+			&=\operatorname{E}\left[\Bigl(\mathbf{X}+\mathbf{Y}-\operatorname{E}(\mathbf{X})-\operatorname{E}(\mathbf{Y})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^T\right] \\
+			&=\operatorname{E}\left[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^T+\Bigl(\mathbf{Y}-\operatorname{E}(\mathbf{Y})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^T\right] \\
+			&=\operatorname{E}\Bigl[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^T\Bigr]+\operatorname{E}\Bigl[\Bigl(\mathbf{Y}-\operatorname{E}(\mathbf{Y})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^T\Bigr] \\
+			&=\operatorname{Cov}(\mathbf{X},\mathbf{Z})+\operatorname{Cov}(\mathbf{Y},\mathbf{Z})
+		\end{aligned} \\
+		\begin{aligned}
+			\operatorname{Cov}(\mathbf{X},\mathbf{Y}+\mathbf{Z})
+			&=\operatorname{E}\left[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Y}+\mathbf{Z}-\operatorname{E}(\mathbf{Y}+\mathbf{Z})\Bigr)^T\right] \\
+			&=\operatorname{E}\left[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Y}+\mathbf{Z}-\operatorname{E}(\mathbf{Y})-\operatorname{E}(\mathbf{Z})\Bigr)^T\right] \\
+			&=\operatorname{E}\left[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Y}-\operatorname{E}(\mathbf{Y})\Bigr)^T+\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^T\right] \\
+			&=\operatorname{E}\left[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Y}-\operatorname{E}(\mathbf{Y})\Bigr)^T\right]+\operatorname{E}\left[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^T\right] \\
+			&=\operatorname{Cov}(\mathbf{X},\mathbf{Y})+\operatorname{Cov}(\mathbf{X},\mathbf{Z})
+		\end{aligned}
+	\end{gather*}\par
+	(6)显然：
+	\begin{align*}
+		\operatorname{Cov}(\mathbf{X})
+		&=\operatorname{E}\Bigl[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)^T\Bigr]
+		=\operatorname{E}\Bigl[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\mathbf{X}^T-\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\operatorname{E}(\mathbf{X})^T\Bigr] \\
+		&=\operatorname{E}\Bigl[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\mathbf{X}^T\Bigr]-\operatorname{E}[\mathbf{X}-\operatorname{E}(\mathbf{X})]\operatorname{E}(\mathbf{X})^T =\operatorname{E}(\mathbf{X}\mathbf{X}^T)-[\operatorname{E}(\mathbf{X})][\operatorname{E}(\mathbf{X})]^T
+	\end{align*}\par
+	(7)由(6)和\info{独立性质}立即可得。
+\end{proof}
+
+\subsection{方差}
+\begin{definition}
+	设$f$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量。若$[f-\operatorname{E}(f)]^2$的积分存在，则称：
+	\begin{equation*}
+		\operatorname{Var}(f)\coloneq\operatorname{E}\{[f-\operatorname{E}(f)]^2\}
+	\end{equation*}
+	为$f$的\gls{Variance}。若$[f-\operatorname{E}(f)]^2$可积，则称$f$的方差是有限的。
+\end{definition}
+\begin{property}\label{prop:Variance}
+	设$f,g$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量。方差具有如下性质：
+	\begin{enumerate}
+		\item 若$f\in L_2(X)$，则$\operatorname{Var}(f)=\operatorname{E}(f^2)-[\operatorname{E}(f)]^2$；
+		\item 若$f\in L_2(X)$，则$\operatorname{Var}(f)=\operatorname{E}[\operatorname{Var}(f|g)]+\operatorname{Var}[\operatorname{E}(f|g)]$；
+		\item 若$f,g\in L_2(X)$，则$\operatorname{Var}(f\pm g)=\operatorname{Var}(f)\pm2\operatorname{Cov}(f,g)+\operatorname{Var}(g)$；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)因为$f\in L_2(X)$，所以$\operatorname{E}(|f|^2)<+\infty$，由\cref{theo:LtLs}和\cref{prop:MeasurableIntegral}(4)可知$\operatorname{E}(f)=\mu\in\mathbb{R}^{}$。根据方差的定义和\cref{prop:MeasurableIntegral}(5)可得：
+	\begin{align*}
+		\operatorname{Var}(f)
+		=\operatorname{E}[(f-\mu)^2]
+		=\operatorname{E}(f^2-2\mu f+\mu^2)
+		=\operatorname{E}(f^2)-2\mu^2+\mu^2
+		=\operatorname{E}(f^2)-\mu^2
+	\end{align*}\par
+	(2)由(1)和\cref{prop:ConditionalExpectation}(3)可得：
+	\begin{align*}
+		\operatorname{E}[\operatorname{Var}(f|g)]
+		&=\operatorname{E}\{\operatorname{E}(f^2|g)-[\operatorname{E}(f|g)]^2\} \\
+		&=\operatorname{E}[\operatorname{E}(f^2|g)]-\operatorname{E}\{[\operatorname{E}(f|g)]^2\} \\
+		&=\operatorname{E}(f^2)-\operatorname{E}\{[\operatorname{E}(f|g)]^2\} \\
+		\operatorname{Var}[\operatorname{E}(f|g)]
+		&=\operatorname{E}\{[\operatorname{E}(f|g)]^2\}-\{\operatorname{E}[\operatorname{E}(f|g)]\}^2 \\
+		&=\operatorname{E}\{[\operatorname{E}(f|g)]^2\}-[\operatorname{E}(f)]^2
+	\end{align*}
+	于是：
+	\begin{equation*}
+		\operatorname{E}[\operatorname{Var}(f|g)]+\operatorname{Var}[\operatorname{E}(f|g)]=\operatorname{E}(f^2)-[\operatorname{E}(f)]^2=\operatorname{Var}(f)
+	\end{equation*}\par
+	(3)因为$f\in L_2(X)$，所以$\operatorname{E}(|f|^2)<+\infty$，由\cref{theo:LtLs}和\cref{prop:MeasurableIntegral}(4)可知$\operatorname{E}(f)=\mu\in\mathbb{R}^{}$。同理可得$\operatorname{E}(g)\in\mathbb{R}^{}$。由方差的定义和\cref{prop:MeasurableIntegral}(5)可得：
+	\begin{align*}
+		\operatorname{Var}(f\pm g)
+		&=\operatorname{E}[f\pm g-\operatorname{E}(f\pm g)]^2 \\
+		&=\operatorname{E}\{[f-\operatorname{E}(f)\pm[g-\operatorname{E}(g)]]\}^2 \\
+		&=\operatorname{E}\{[f-\operatorname{E}(f)]^2\pm 2[f-\operatorname{E}(f)][g-\operatorname{E}(g)]+[g-\operatorname{E}(g)]^2\} \\
+		&=\operatorname{Var}(f)\pm2\operatorname{Cov}(f,g)+\operatorname{Var}(g)\qedhere
+	\end{align*}
+\end{proof}
+
+\subsection{二次型}
+\begin{definition}
+	$\mathbf{X}$是一个$n$维随机向量，$A=(a_{ij})$为$n$阶非随机实对称阵，则随机变量：
+	\begin{equation*}
+		\mathbf{X}^TA\mathbf{X}=\sum_{i=1}^{n}\sum_{j=1}^{n}a_{ij}\mathbf{X}_i\mathbf{X}_j
+	\end{equation*}
+	称为$\mathbf{X}$的二次型。
+\end{definition}
+\subsubsection{随机变量二次型的均值}
+\begin{theorem}\label{theo:ERVQuadraticForm}
+	$\mathbf{X}$是一个$n$维随机向量，$\operatorname{E}(\mathbf{X})=\mu,\;\operatorname{Cov}(\mathbf{X})=\Sigma$，则：
+	\begin{equation*}
+		\operatorname{E}(\mathbf{X}^TA\mathbf{X})=\mu^TA\mu+\operatorname{tr}(A\Sigma)
+	\end{equation*}	
+\end{theorem}
+\begin{proof}
+	由\cref{prop:MeasurableIntegral}(5)可得
+	\begin{align*}
+		\operatorname{E}(\mathbf{X}^TA\mathbf{X})
+		&=\operatorname{E}[(\mathbf{X}-\mu+\mu)^TA(\mathbf{X}-\mu+\mu)] \\
+		&=\operatorname{E}[(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)]+\operatorname{E}[(\mathbf{X}-\mu)^TA\mu]+\operatorname{E}[\mu^TA(\mathbf{X}-\mu)]+\operatorname{E}(\mu^TA\mu) \\
+		&=\operatorname{E}\{\operatorname{tr}[(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)]\}+\mu^TA\mu \\
+		&=\operatorname{E}\{\operatorname{tr}[A(\mathbf{X}-\mu)(\mathbf{X}-\mu)^T]\}+\mu^TA\mu \\
+		&=\operatorname{tr}\operatorname{E}[A(\mathbf{X}-\mu)(\mathbf{X}-\mu)^T]+\mu^TA\mu \\
+		&=\operatorname{tr}\{A\operatorname{E}[(\mathbf{X}-\mu)(\mathbf{X}-\mu)^T]\}+\mu^TA\mu \\
+		&=\operatorname{tr}(A\Sigma)+\mu^TA\mu
+	\end{align*}
+	第二行到第三行利用到了$\operatorname{E}(\mathbf{X})=\mu$以及$(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)=\operatorname{tr}[(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)]$，后式成立是因为$(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)$是一个标量，标量的迹自然等于自身。第三行到第四行使用到了\cref{prop:Trace}(3)。
+\end{proof}
+\subsubsection{独立随机变量二次型的方差}
+\begin{theorem}\label{theo:VRVQuadraticForm}
+	设随机变量$X_i,\;i=1,2,\dots,n$相互独立，$\operatorname{E}(X_i)=\mu_i\in\mathbb{R}^{},\;\operatorname{Var}(X_i)=\sigma^2\in\mathbb{R}^{},\;\nu_k^{(i)}=\operatorname{E}[(X_i-\mu_i)^k]$，$\mathbf{X}=(\seq{X}{n})^T,\;\mu=(\seq{\mu}{n})^T$，$A=(a_{ij})$为$n$阶非随机实对称阵，$a=(a_{11},a_{22},\dots,a_{nn})^T$，$b=(\nu_3^{(1)}a_{11},\nu_3^{(2)}a_{22},\dots,\nu_3^{(n)}a_{nn})^T$，则：
+	\begin{equation*}
+		\operatorname{Var}(\mathbf{X}^TA\mathbf{X})=\sum_{i=1}^{n}a_{ii}^2\nu_4^{(i)}+\sigma^4[2\operatorname{tr}(A^2)-3a^Ta]+4\sigma^2\mu^TA^2\mu+4\mu^TAb
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由\cref{prop:Variance}(1)可得：
+	\begin{equation*}
+		\operatorname{Var}(\mathbf{X}^TA\mathbf{X})=\operatorname{E}[(\mathbf{X}^TA\mathbf{X})^2]-[\operatorname{E}(\mathbf{X}^TA\mathbf{X})]^2 
+	\end{equation*}
+	由题设可知：
+	\begin{equation*}
+		\operatorname{E}(\mathbf{X})=\mu,\;\operatorname{Var}(\mathbf{X})=\sigma^2I
+	\end{equation*}
+	根据\cref{theo:ERVQuadraticForm}可得：
+	\begin{align*}
+		[\operatorname{E}(\mathbf{X}^TA\mathbf{X})]^2&=[\operatorname{tr}(A\sigma^2I)+\mu^TA\mu]^2=[\sigma^2\operatorname{tr}(A)+\mu^TA\mu]^2 \\
+		&=\sigma^4[\operatorname{tr}(A)]^2+2\sigma^2\operatorname{tr}(A)\mu^TA\mu+(\mu^TA\mu)^2
+	\end{align*}
+	同时：
+	\begin{align*}
+		(\mathbf{X}^TA\mathbf{X})^2
+		&=[(\mathbf{X}-\mu+\mu)^TA(\mathbf{X}-\mu+\mu)]^2 \\
+		&=[(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)+2\mu^TA(\mathbf{X}-\mu)+\mu^TA\mu]^2 \\
+		&=[(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)]^2+4[\mu^TA(\mathbf{X}-\mu)]^2+(\mu^TA\mu)^2 \\
+		&\quad+4(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)\mu^TA(\mathbf{X}-\mu)+2(\mathbf{X}-\mu)^TA(\mathbf{X}-\mu)\mu^TA\mu \\
+		&\quad+4\mu^TA(\mathbf{X}-\mu)\mu^TA\mu
+	\end{align*}
+	令$\mathbf{Y}=\mathbf{X}-\mu$，则有$\operatorname{E}(\mathbf{Y})=\mathbf{0}$，再由\cref{theo:ERVQuadraticForm}可得：
+	\begin{align*}
+		\operatorname{E}[(\mathbf{X}^TA\mathbf{X})^2]
+		&=\operatorname{E}[(\mathbf{Y}^TA\mathbf{Y})^2]+4\operatorname{E}[(\mu^TA\mathbf{Y})^2]+(\mu^TA\mu)^2 \\
+		&\quad+4\operatorname{E}(\mathbf{Y}^TA\mathbf{Y}\mu^TA\mathbf{Y})+2\mu^TA\mu\sigma^2\operatorname{tr}(A)
+	\end{align*}
+	考虑：
+	\begin{align*}
+		\operatorname{E}[(\mathbf{Y}^TA\mathbf{Y})^2]
+		&=\operatorname{E}\left(\sum_{i=1}^{n}\sum_{j=1}^{n}\sum_{k=1}^{n}\sum_{l=1}^{n}a_{ij}a_{kl}\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l\right) \\
+		&=\sum_{i=1}^{n}\sum_{j=1}^{n}\sum_{k=1}^{n}\sum_{l=1}^{n}a_{ij}a_{kl}\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l)
+	\end{align*}
+	作分类讨论：
+	\begin{enumerate}
+		\item $i,j,k,l$互不相同，则$\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l)=E(\mathbf{Y}_i)E(\mathbf{Y}_j)E(\mathbf{Y}_k)E(\mathbf{Y}_l)=0$；
+		\item $i,j,k,l$中存在某两个值相同：
+		\begin{itemize}
+			\item 此时另外两个不同，则$\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l)=0$；
+			\item 此时另外两个也相同（即$i=j,k=l$或$i=k,j=l$或$i=l,j=k$），则$\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l)=\sigma^4$。
+		\end{itemize}
+		\item $i,j,k,l$中存在某三个值相同，则$\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l)=0$；
+		\item $i,j,k,l$相同，则$\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l)=\nu_4^{(i)}$。
+	\end{enumerate}
+	于是：
+	\begin{align*}
+		\operatorname{E}[(\mathbf{Y}^TA\mathbf{Y})^2]
+		&=\sum_{i=1}^{n}\sum_{j=1}^{n}\sum_{k=1}^{n}\sum_{l=1}^{n}a_{ij}a_{kl}\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_k\mathbf{Y}_l) \\
+		&=\sum_{i=1}^{n}a_{ii}^2\nu_4^{(i)}+\sigma^4\left(\sum_{i\ne k}a_{ii}a_{kk}+\sum_{i\ne j}a_{ij}^2+\sum_{i\ne j}a_{ij}a_{ji}\right) \\
+		&=\sum_{i=1}^{n}a_{ii}^2\nu_4^{(i)}+\sigma^4\left(\sum_{i\ne k}a_{ii}a_{kk}+2\sum_{i\ne j}a_{ij}^2\right)
+	\end{align*}
+	因为：
+	\begin{gather*}
+		\sum_{i\ne k}a_{ii}a_{kk}=[\operatorname{tr}(A)]^2-a^Ta \\
+		\sum_{i\ne j}a_{ij}^2=\operatorname{tr}(AA^T)-a^Ta=\operatorname{tr}(A^2)-a^Ta
+	\end{gather*}
+	所以：
+	\begin{equation*}
+		\operatorname{E}[(\mathbf{Y}^TA\mathbf{Y})^2]=\sum_{i=1}^{n}a_{ii}^2\nu_4^{(i)}+\sigma^4\{[\operatorname{tr}(A)]^2+2\operatorname{tr}(A^2)-3a^Ta\}
+	\end{equation*}
+	由\cref{theo:ERVQuadraticForm}和\cref{prop:Trace}(3)可得：
+	\begin{align*}
+		\operatorname{E}[(\mu^TA\mathbf{Y})^2]
+		&=\operatorname{E}(\mu^TA\mathbf{Y}\mu^TA\mathbf{Y})
+		=\operatorname{E}(\mathbf{Y}^TA\mu\mu^TA\mathbf{Y})
+		=\operatorname{tr}(A\mu\mu^TA\sigma^2I) \\
+		&=\sigma^2\operatorname{tr}(A\mu\mu^TA)
+		=\sigma^2\operatorname{tr}(\mu^TA^2\mu)
+		=\sigma^2\mu^TA^2\mu
+	\end{align*}
+	注意到：
+	\begin{align*}
+		\operatorname{E}(\mathbf{Y}^TA\mathbf{Y}\mu^TA\mathbf{Y})
+		&=\operatorname{E}\left(\sum_{i=1}^{n}\sum_{j=1}^{n}a_{ij}\mathbf{Y}_i\mathbf{Y}_j\sum_{k=1}^{n}\sum_{l=1}^{n}a_{kl}\mu_k\mathbf{Y}_l\right) \\
+		&=\operatorname{E}\left(\sum_{i=1}^{n}\sum_{j=1}^{n}\sum_{k=1}^{n}\sum_{l=1}^{n}a_{ij}a_{kl}\mu_k\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_l\right) \\
+		&=\sum_{i=1}^{n}\sum_{j=1}^{n}\sum_{k=1}^{n}\sum_{l=1}^{n}a_{ij}a_{kl}\mu_k\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_l)
+	\end{align*}
+	和之前的讨论类似，可以得到：
+	\begin{equation*}
+		\operatorname{E}(\mathbf{Y}_i\mathbf{Y}_j\mathbf{Y}_l)=
+		\begin{cases}
+			\nu_3^{(i)},\;&i=j=l \\
+			0,\;&\text{其他情况}
+		\end{cases}
+	\end{equation*}
+	于是有：
+	\begin{equation*}
+		\operatorname{E}(\mathbf{Y}^TA\mathbf{Y}\mu^TA\mathbf{Y})
+		=\sum_{i=1}^{n}\sum_{k=1}^{n}a_{ii}\nu_3^{(i)}a_{ki}\mu_k
+	\end{equation*}
+	令$b=(\nu_3^{(1)}a_{11},\nu_3^{(2)}a_{22},\dots,\nu_3^{(n)}a_{nn})^T$，则：
+	\begin{equation*}
+		\operatorname{E}(\mathbf{Y}^TA\mathbf{Y}\mu^TA\mathbf{Y})
+		=\sum_{i=1}^{n}\sum_{k=1}^{n}a_{ii}\nu_3^{(i)}a_{ki}\mu_k=\mu^TAb
+	\end{equation*}
+	将以上求得的期望值全部代入，即可得到：
+	\begin{align*}
+		\operatorname{E}[(\mathbf{X}^TA\mathbf{X})^2]
+		&=\operatorname{E}[(\mathbf{Y}^TA\mathbf{Y})^2]+4\operatorname{E}[(\mu^TA\mathbf{Y})^2]+(\mu^TA\mu)^2 \\
+		&\quad+4\operatorname{E}(\mathbf{Y}^TA\mathbf{Y}\mu^TA\mathbf{Y})+2\mu^TA\mu\sigma^2\operatorname{tr}(A) \\
+		&=\sum_{i=1}^{n}a_{ii}^2\nu_4^{(i)}+\sigma^4\{[\operatorname{tr}(A)]^2+2\operatorname{tr}(A^2)-3a^Ta\} \\
+		&\quad+4\sigma^2\mu^TA^2\mu+(\mu^TA\mu)^2+4\mu^TAb+2\mu^TA\mu\sigma^2\operatorname{tr}(A)
+	\end{align*}
+	于是：
+	\begin{align*}
+		\operatorname{Var}(\mathbf{X}^TA\mathbf{X})
+		&=\operatorname{E}[(\mathbf{X}^TA\mathbf{X})^2]-[\operatorname{E}(\mathbf{X}^TA\mathbf{X})]^2 \\
+		&=\sum_{i=1}^{n}a_{ii}^2\nu_4^{(i)}+\sigma^4\{[\operatorname{tr}(A)]^2+2\operatorname{tr}(A^2)-3a^Ta\} \\
+		&\quad+4\sigma^2\mu^TA^2\mu+(\mu^TA\mu)^2+4\mu^TAb+2\mu^TA\mu\sigma^2\operatorname{tr}(A) \\
+		&\quad-\sigma^4[\operatorname{tr}(A)]^2-2\sigma^2\operatorname{tr}(A)\mu^TA\mu-(\mu^TA\mu)^2 \\
+		&=\sum_{i=1}^{n}a_{ii}^2\nu_4^{(i)}+\sigma^4[2\operatorname{tr}(A^2)-3a^Ta]+4\sigma^2\mu^TA^2\mu+4\mu^TAb\qedhere
+	\end{align*}
+\end{proof}
+
+\subsection{矩母函数}
+\begin{definition}
+	设$X$是一个随机变量。称:
+	\begin{equation*}
+		M_X(t)=\operatorname{E}(e^{tX})
+	\end{equation*}
+	为$X$的\gls{m.g.f.}，其中$t\in\mathbb{R}$。
+\end{definition}
+\begin{definition}
+	设$\mathbf{X}$是一个$n$维随机向量。称:
+	\begin{equation*}
+		M_\mathbf{X}(t)=\operatorname{E}(e^{t^T\mathbf{X}})
+	\end{equation*}
+	为$\mathbf{X}$的矩母函数，其中$t\in\mathbb{R}^{n}$。
+\end{definition}
+\begin{property}\label{prop:m.g.f.}
+	设$\mathbf{X}$是一个$n$维随机向量，则其矩母函数$M_\mathbf{X}(t)$具有如下性质：
+	\begin{enumerate}
+		\item $M_\mathbf{X}(\mathbf{0})=1$；
+		\item $M_\mathbf{X}(t)\geqslant e^{t^T\mu}$，其中$\mu$是$\mathbf{X}$的均值向量；
+		\item 矩母函数与概率分布之间存在一个双射，即$M_\mathbf{X}(t)=M_\mathbf{Y}(t)$当且仅当$\mathbf{X}$与$\mathbf{Y}$具有相同的概率分布；
+		\item 设$m$维随机向量$\seq{\mathbf{X}}{n}$彼此独立，$\alpha_i$为常数，$\beta_i$为$m$维常数向量，则$\mathbf{Y}=\sum\limits_{i=1}^{n}(\alpha_i\mathbf{X}_i+\beta_i)$的特征函数为：
+		\begin{equation*}
+			M_\mathbf{Y}(t)=\prod_{i=1}^ne^{t^T\beta_i}M_{\mathbf{X}_i}(\alpha_it)
+		\end{equation*}
+		\item $M_X^{(n)}(0)=\mu_n$，其中$X$是一个随机变量，$\mu_n$是$X$的$n$阶原点矩；
+		\item $M_\mathbf{X}(t)$有如下幂级数展开：
+		\begin{equation*}
+			M_\mathbf{X}(t)=\sum_{(\seq{m}{n})\in\mathbb{N}^n}\mu_{\seq{m}{n}}\prod_{i=1}^{n}\frac{t_i^{m_i}}{m_i!}
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)$M_\mathbf{X}(\mathbf{0})=\operatorname{E}(e^0)=1$。\par
+	(2)由\cref{ineq:Jensen}直接可得。\par
+	(3)\par
+	(4)由矩母函数定义可得：
+	\begin{equation*}
+		M_\mathbf{Y}(t)=\operatorname{E}(e^{t^T\mathbf{Y}})
+		=\operatorname{E}\left(\exp\left\{t^T\sum_{i=1}^{n}(\alpha_i\mathbf{X}_i+\beta_i)\right\}\right)=\operatorname{E}\left(\prod_{i=1}^{n}e^{\alpha_it^T\mathbf{X}_i}\right)\prod_{i=1}^ne^{t^T\beta_i}
+	\end{equation*}
+	因为$\mathbf{X}_i$互相独立，所以$\alpha_i\mathbf{X}_i$也相互独立，于是有：
+	\begin{equation*}
+		M_\mathbf{Y}(t)=\operatorname{E}\left(\prod_{i=1}^{n}e^{\alpha_it^T\mathbf{X}_i}\right)\prod_{i=1}^ne^{t^T\beta_i}=\prod_{i=1}^{n}\operatorname{E}\left(e^{\alpha_it^T\mathbf{X}_i}\right)\prod_{i=1}^ne^{t^T\beta_i}=\prod_{i=1}^ne^{t^T\beta_i}M_{\mathbf{X}_i}(\alpha_it)
+	\end{equation*}\par
+	(5)将$e^{tX}$展开为幂级数：
+	\begin{equation*}
+		M_X(t)=\operatorname{E}(e^{tX})=\operatorname{E}\left(\sum_{n=0}^{+\infty}\frac{t^nX^n}{n!}\right)
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		M_X^{(n)}(t)=\operatorname{E}\left(X^n+\sum_{m=n+1}^{+\infty}\frac{t^mX^m}{m!}\right)=\mu_n+\sum_{m=1}^{+\infty}\frac{t^m}{m!}\mu_m
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		M_X^{(n)}(0)=\operatorname{E}(X^n)=\mu_n
+	\end{equation*}\par
+	(6)由\info{期望的线性性质，Lebesgue积分}可得：
+	\begin{align*}
+		M_\mathbf{X}(t)&=\operatorname{E}(e^{t^T\mathbf{X}})
+		=\operatorname{E}\left(\exp\left\{\sum_{i=1}^{n}t_i\mathbf{X}_i\right\}\right)
+		=\operatorname{E}\left[\sum_{m=0}^{+\infty}\frac{1}{m!}\left(\sum_{i=1}^{n}t_i\mathbf{X}_i\right)^m\right] \\
+		&=\sum_{m=0}^{+\infty}\frac{1}{m!}\operatorname{E}\left[\left(\sum_{i=1}^{n}t_i\mathbf{X}_i\right)^m\right]
+		=\sum_{m=0}^{+\infty}\frac{1}{m!}\operatorname{E}\left(\sum_{\sum\limits_{i=1}^{n}m_i=m}\frac{m!}{m_1!m_2!\cdots m_n!}\prod_{i=1}^{n}(t_i\mathbf{X}_i)^{m_i}\right) \\
+		&=\sum_{m=0}^{+\infty}\frac{1}{m!}\sum_{\sum\limits_{i=1}^{n}m_i=m}\frac{m!}{m_1!m_2!\cdots m_n!}\operatorname{E}\left[\prod_{i=1}^{n}(t_i\mathbf{X}_i)^{m_i}\right] \\
+		&=\sum_{m=0}^{+\infty}\sum_{\sum\limits_{i=1}^{n}m_i=m}\frac{1}{m_1!m_2!\cdots m_n!}\operatorname{E}\left(\prod_{i=1}^{n}\mathbf{X}_i^{m_i}\right)\prod_{i=1}^{n}t_i^{m_i} \\
+		&=\sum_{(\seq{m}{n})\in\mathbb{N}^n}\mu_{\seq{m}{n}}\prod_{i=1}^{n}\frac{t_i^{m_i}}{m_i!}\qedhere
+	\end{align*}
+\end{proof}
+
+\subsection{累积量生成函数}
+\begin{definition}
+	设$X$是一个随机变量。称$K_X(t)=\log M_X(t)$为$X$的\gls{c.g.f.}，其中$t\in\mathbb{R}$。
+\end{definition}
+\begin{definition}
+	设$\mathbf{X}$是一个$n$维随机向量。称$K_\mathbf{X}(t)=\log M_\mathbf{X}(t)$为$\mathbf{X}$的累积量生成函数，其中$t\in\mathbb{R}^{n}$。
+\end{definition}
+\begin{definition}
+	设$\mathbf{X}$是一个$n$维随机向量。因为：
+	\begin{align*}
+		M_X(t)&=\sum_{(\seq{m}{n})\in\mathbb{N}^n}\frac{1}{m_1!m_2!\cdots m_n!}\prod_{i=1}^{n}t_i^{m_i}\mu_{\seq{m}{n}} \\
+		&=1+\sum_{\substack{(\seq{m}{n})\in\mathbb{N}^n \\ (\seq{m}{n}\ne\mathbf{0})}}\frac{1}{m_1!m_2!\cdots m_n!}\prod_{i=1}^{n}t_i^{m_i}\mu_{\seq{m}{n}}
+	\end{align*}
+	由对数函数的幂级数展开可得：
+	\begin{align*}
+		K_\mathbf{X}(t)
+		&=\log\left(1+\sum_{\substack{(\seq{m}{n})\in\mathbb{N}^n \\ (\seq{m}{n}\ne\mathbf{0})}}\frac{1}{m_1!m_2!\cdots m_n!}\prod_{i=1}^{n}t_i^{m_i}\mu_{\seq{m}{n}}\right) \\
+		&=\sum_{j=1}^{+\infty}(-1)^{j+1}\frac{1}{j}\left(\sum_{\substack{(\seq{m}{n})\in\mathbb{N}^n \\ (\seq{m}{n}\ne\mathbf{0})}}\frac{1}{m_1!m_2!\cdots m_n!}\prod_{i=1}^{n}t_i^{m_i}\mu_{\seq{m}{n}}\right)^j
+	\end{align*}
+\end{definition}
+
+\subsection{特征函数}
+\begin{definition}
+	设$X$是一个随机变量。称:
+	\begin{equation*}
+		\varphi_X(t)=\operatorname{E}(e^{itX})
+	\end{equation*}
+	为$X$的\gls{c.f.}，其中$t\in\mathbb{R}$。
+\end{definition}
+\begin{definition}
+	设$\mathbf{X}$是一个$n$维随机向量。称:
+	\begin{equation*}
+		\varphi_\mathbf{X}(t)=\operatorname{E}(e^{it^T\mathbf{X}})
+	\end{equation*}
+	为$\mathbf{X}$的特征函数，其中$t\in\mathbb{R}^{n}$。
+\end{definition}
+\begin{definition}
+	设$\mathbf{X}$是一个$m\times n$随机矩阵。称:
+	\begin{equation*}
+		\varphi_\mathbf{X}(t)=\operatorname{E}\Bigl[\exp\Bigl(i\operatorname{tr}(t^T\mathbf{X})\Bigr)\Bigr]
+	\end{equation*}
+	为$\mathbf{X}$的特征函数，其中$t\in M_{m\times n}(\mathbb{R})$。
+\end{definition}
+\begin{property}\label{prop:CharacteristicFunction}
+	设$X,Y,\seq{X}{n}$是随机变量，$\seq{\alpha}{n},\;\beta_1,\beta_2,\dots,\beta_n$为常数，则：
+	\begin{enumerate}
+		\item $X$的特征函数$\varphi_X(t)$存在；
+		\item $|\varphi_X(t)|\leqslant\varphi_X(0)=1$；
+		\item $\varphi_X(-t)=\overline{\varphi_X(t)}$；
+		\item 若$\seq{X}{n}$相互独立，则$Y=\sum\limits_{k=1}^n(\alpha_kX_k+\beta_k)$的特征函数为：
+		\begin{equation*}
+			\varphi_{Y}(t)=\prod_{k=1}^ne^{it\beta_k}\varphi_{X_k}(\alpha_kt)
+		\end{equation*}
+		\item $\seq{X}{n}$相互独立的充分必要条件为：
+		\begin{equation*}
+			\varphi_{X_1,\dots,X_n}(t_1,t_2,\dots,t_n)=\prod_{i=1}^n\varphi_{X_i}(t_i)
+		\end{equation*}
+		\item 特征函数与概率分布之间存在一个双射，即$\varphi_X(t)=\varphi_Y(t)$当且仅当$X$与$Y$具有相同的概率分布。
+		\item 若$\operatorname{E}(X^n)$存在，则$\varphi_X^{(n)}(t)$存在，且对$1\leqslant k\leqslant n$有：
+		\begin{equation*}
+			\operatorname{E}(X^k)=i^{-k}\varphi_X^{(k)}(0)
+		\end{equation*}
+		特别的：
+		\begin{equation*}
+			\operatorname{E}(X)=-i\varphi_X'(0),\;
+			\operatorname{Var}(X)=-\varphi_X''(0)+[\varphi_X'(0)]^2
+		\end{equation*}
+		\item 若$\varphi_X(t)$在$t=0$处最高有$n$阶导数，如果$n$为奇数，则$X$具有所有不超过$n-1$阶的原点矩；若$n$为偶数，则$X$具有所有不超过$n$阶的原点矩；
+		\item $\varphi_X(t)$在$\mathbb{R}$上一致连续；
+		\item $\varphi_X(t)$是半正定的，即对任意的$n\in\mathbb{N}^+$及任意的$t=(t_1,t_2,\dots,t_n)^T\in\mathbb{R}^{n}$和任意的$c=(c_1,c_2,\dots,c_n)^T\in\mathbb{C}^{n}$，令$A=[\varphi_X(t_i-t_j)]\in M_{n}(\mathbb{C})$，则有：
+		\begin{equation*}
+			c^TA\overline{c}=\sum_{i=1}^{n}\sum_{j=1}^{n}c_i\overline{c_j}\varphi_X(t_i-t_j)\geqslant0
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)因为：
+	\begin{equation*}
+		e^{itX}=\cos(tX)+i\sin(tX)
+	\end{equation*}
+	所以$|e^{itX}|=1$，于是由\cref{prop:MeasurableIntegral}(2)可得：
+	\begin{equation*}
+		\Bigl|\operatorname{E}(e^{itX})\Bigr|=\Bigl|\int_{-\infty}^{+\infty}e^{itx}p(x)\dif x\Bigr|\leqslant\int_{-\infty}^{+\infty}|e^{itx}|p(x)\dif x=\int_{-\infty}^{+\infty}p(x)\dif x=1
+	\end{equation*}
+	所以$\varphi_X(t)$存在。\par
+	(2)可以发现：
+	\begin{equation*}
+		\varphi_X(0)=\int_{-\infty}^{+\infty}p(x)\dif x=1
+	\end{equation*}
+	再由(1)的证明过程即可得出结论。\par
+	(3)因为：
+	\begin{equation*}
+		\varphi_X(t)=\operatorname{E}(e^{itX})=\operatorname{E}[\cos(tX)+i\sin(tX)]=\operatorname{E}[\cos(tX)]+i\operatorname{E}[\sin(tX)]
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\overline{\varphi_X(t)}=\operatorname{E}[\cos(tX)]-i\operatorname{E}[\sin(tX)]=\operatorname{E}[\cos(-tX)]+i\operatorname{E}[\sin(-tX)]=\varphi_X(-t)
+	\end{equation*}\par
+	(4)因为$X_k$相互独立，所以$e^{it(\alpha_kX_k+\beta_k)}$之间也相互独立，$k=1,2,\dots,n$，于是有：
+	\begin{align*}
+		\varphi_Y(t)
+		&=\operatorname{E}\left[\exp\left(it\sum_{k=1}^{n}(\alpha_kX_k+\beta_k)\right)\right]
+		=\operatorname{E}\left(\prod_{k=1}^ne^{it(\alpha_kX_k+\beta_k)}\right) \\
+		&=\prod_{k=1}^n\operatorname{E}[e^{it(\alpha_kX_k+\beta_k)}]
+		=\prod_{k=1}^ne^{it\beta_k}\operatorname{E}(e^{it\alpha_kX_k})
+		=\prod_{k=1}^ne^{it\beta_k}\varphi_{X_k}(\alpha_kt)
+	\end{align*}\par
+	(5)\textbf{必要性：}因为$X_k$相互独立，所以$e^{it_kX_k}$相互独立，$k=1,2,\dots,n$。由随机向量特征函数的定义可得：
+	\begin{align*}
+		\varphi_{X_1,\dots,X_n}(t_1,t_2,\dots,t_n)
+		&=\operatorname{E}\left[\exp\left(i\sum_{k=1}^{n}t_kX_k\right)\right]
+		=\operatorname{E}\left(\prod_{k=1}^ne^{it_kX_k}\right) \\
+		&=\prod_{k=1}^n\operatorname{E}(e^{it_kX_k})
+		=\prod_{k=1}^n\varphi_{X_k}(t_k)
+	\end{align*}
+	\textbf{充分性：}因为：
+	\begin{gather*}
+		\begin{aligned}
+			\varphi_{X_1,\dots,X_n}(t_1,t_2,\dots,t_n)
+			&=\operatorname{E}\left[\exp\left(i\sum_{k=1}^{n}t_kX_k\right)\right] \\
+			&=\int_{-\infty}^{+\infty}\cdots\int_{-\infty}^{+\infty}\exp\left(i\sum_{k=1}^{n}t_kx_k\right)p(x_1,\dots,x_n)\dif x_1\cdots\dif x_n
+		\end{aligned} \\
+		\begin{aligned}
+			\prod_{i=1}^n\varphi_{X_i}(t_i)
+			&=\prod_{k=1}^n\operatorname{E}(e^{it_kX_k}) \\
+			&=\prod_{k=1}^n\int_{-\infty}^{+\infty}e^{it_kx_k}p(x_k)\dif x_k \\
+			&=\int_{-\infty}^{+\infty}\cdots\int_{-\infty}^{+\infty}\exp\left(i\sum_{k=1}^{n}t_kx_k\right)p(x_1)p(x_2)\cdots p(x_n)\dif x_1\dif x_2\cdots\dif x_n
+		\end{aligned}
+	\end{gather*}
+	若两式相等，则有：
+	\begin{equation*}
+		p(x_1,x_2,\dots,x_n)=p(x_1)p(x_2)\cdots p(x_n)
+	\end{equation*}
+	由\info{链接独立性条件}可得$X_k,\;k=1,2,\dots,n$相互独立。\par
+	(6)\par
+	(7)因为$\operatorname{E}(X^n)$存在，所以：
+	\begin{equation*}
+		\int_{-\infty}^{+\infty}|x|^np(x)\dif x<+\infty
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\left|\int_{-\infty}^{+\infty}i^nx^ne^{itx}p(x)\dif x\right|\leqslant\int_{-\infty}^{+\infty}|x|^np(x)\dif x<+\infty
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\varphi_X^{(n)}(t)=\int_{-\infty}^{+\infty}i^nx^ne^{itx}p(x)\dif x
+	\end{equation*}
+	存在。由\cref{prop:Moment}(1)可知对$1\leqslant k\leqslant n$有$\operatorname{E}(X^k)$存在，于是：
+	\begin{equation*}
+		\varphi_X^{(k)}(0)=\int_{-\infty}^{+\infty}i^kx^kp(x)\dif x=i^k\int_{-\infty}^{+\infty}x^kp(x)\dif x=i^k\operatorname{E}(X^k)
+	\end{equation*}
+	也存在。\par
+	(8)注意到：
+	\begin{equation*}
+		\varphi_X^{(n)}(t)=\int_{-\infty}^{+\infty}i^nx^ne^{itx}p(x)\dif x
+	\end{equation*}
+	因为$\varphi_X(t)$在$t=0$处最高具有$n$阶导数，于是：
+	\begin{equation*}
+		|\varphi_X^{(n)}(0)|=\left|\int_{-\infty}^{+\infty}i^nx^np(x)\dif x\right|=\left|\int_{-\infty}^{+\infty}x^{n}p(x)\dif x\right|<+\infty
+	\end{equation*}
+	当$n=2k+1,\;k\in\mathbb{N}$时，有：
+	\begin{equation*}
+		\int_{-\infty}^{+\infty}|x|^{n}p(x)\dif x>|\varphi_X^{(n)}(0)|=\Bigl|\int_{-\infty}^{+\infty}x^np(x)\dif x\Bigr|
+	\end{equation*}
+	所以$\operatorname{E}(X^n)$不一定存在。\info{需要证明对小于的都存在}
+	当$n=2k,\;k\in\mathbb{N}^+$时，有：
+	\begin{equation*}
+		|\varphi_X^{(n)}(0)|=\left|\int_{-\infty}^{+\infty}x^{n}p(x)\dif x\right|=\int_{-\infty}^{+\infty}|x|^np(x)\dif x<+\infty
+	\end{equation*}
+	存在，于是$\operatorname{E}(X^n)$存在。由\cref{prop:Moment}(1)可知，此时$X$具有所有不超过$n$阶的原点矩。\par
+	(9)对任意的$t,h\in \mathbb{R}$和$a>0$，有：
+	\begin{align*}
+		|\varphi(t+h)-\varphi(t)|
+		&=\left|\int_{-\infty}^{+\infty}[e^{i(t+h)x}-e^{itx}]p(x)\dif x\right| \\
+		&=\left|\int_{-\infty}^{+\infty}(e^{ihx}-1)e^{itx}p(x)\dif x\right| \\
+		&\leqslant\int_{-\infty}^{+\infty}|(e^{ihx}-1)e^{itx}|p(x)\dif x \\
+		&=\int_{-\infty}^{+\infty}|e^{ihx}-1||e^{itx}|p(x)\dif x \\
+		&=\int_{-\infty}^{+\infty}|e^{ihx}-1|p(x)\dif x \\
+		&=\int_{-a}^{a}|e^{ihx}-1|p(x)\dif x+\int_{|x|\geqslant a}|e^{ihx}-1|p(x)\dif x \\
+		&\leqslant\int_{-a}^{a}|e^{ihx}-1|p(x)\dif x+\int_{|x|\geqslant a}(|e^{ihx}|+1)p(x)\dif x \\
+		&=\int_{-a}^{a}|e^{ihx}-1|p(x)\dif x+2\int_{|x|\geqslant a}p(x)\dif x
+	\end{align*}
+	对于任意的$\varepsilon>0$，可以先选定一个充分大的$a$，使得：
+	\begin{equation*}
+		2\int_{|x|\geqslant a}p(x)\dif x<\frac{\varepsilon}{2}
+	\end{equation*}
+	对任意的$x\in[-a,a]$，只要取$\delta=\dfrac{\varepsilon}{2a}$，则当$|h|<\delta$时，就有：
+	\begin{align*}
+		|e^{ihx}-1|
+		&=\Bigl|e^{ihx}-e^{i\frac{hx}{2}}e^{i\frac{-hx}{2}}\Bigr|=\Bigl|e^{i\frac{hx}{2}}(e^{i\frac{hx}{2}}-e^{i\frac{-hx}{2}})\Bigr| \\
+		&=\Bigl|e^{i\frac{hx}{2}}\Bigr|\;\Bigl|e^{i\frac{hx}{2}}-e^{i\frac{-hx}{2}}\Bigr| \\
+		&=\Bigl|e^{i\frac{hx}{2}}-e^{i\frac{-hx}{2}}\Bigr| \\
+		&=\Bigl|\cos\frac{hx}{2}+i\sin\frac{hx}{2}-\cos\frac{-hx}{2}-i\sin\frac{-hx}{2}\Bigr| \\
+		&=\Bigl|2i\sin\frac{hx}{2}\Bigr|
+		=2\Bigl|\sin\frac{hx}{2}\Bigr|\leqslant2\Bigl|\frac{hx}{2}\Bigr|\leqslant ha<\frac{\varepsilon}{2}
+	\end{align*}
+	于是对任意的$t\in\mathbb{R}$，有：
+	\begin{equation*}
+		|\varphi(t+h)-\varphi(t)|<\int_{-a}^{a}\frac{\varepsilon}{2}p(x)\dif x+2\int_{|x|\geqslant a}p(x)\dif x<\frac{\varepsilon}{2}\int_{-\infty}^{+\infty}p(x)\dif x+\frac{\varepsilon}{2}=\varepsilon
+	\end{equation*}
+	即$\varphi_X(t)$在$\mathbb{R}$上一致连续。\par
+	(10)显然：
+	\begin{align*}
+		\sum_{i=1}^{n}\sum_{j=1}^{n}c_i\overline{c}_j\varphi_X(t_i-t_j)
+		&=\sum_{k=1}^{n}\sum_{j=1}^{n}c_k\overline{c}_j\int_{-\infty}^{+\infty}e^{i(t_k-t_j)x}p(x)\dif x \\
+		&=\int_{-\infty}^{+\infty}\sum_{k=1}^{n}\sum_{j=1}^{n}c_k\overline{c}_je^{i(t_k-t_j)x}p(x)\dif x \\
+		&=\int_{-\infty}^{+\infty}\left(\sum_{k=1}^{n}c_ke^{it_kx}\right)\left(\sum_{j=1}^{n}\overline{c}_je^{-it_jx}\right)p(x) \dif x \\
+		&=\int_{-\infty}^{+\infty}\left(\sum_{k=1}^{n}c_ke^{it_kx}\right)\left(\sum_{j=1}^{n}\overline{c_ke^{it_kx}}\right)p(x) \dif x \\
+		&=\int_{-\infty}^{+\infty}\Bigl|\sum_{k=1}^{n}c_ke^{it_kx}\Bigr|^2p(x) \dif x\qedhere
+	\end{align*}
+\end{proof}
+
+\subsection{统计距离}
+\subsubsection{Mahalanobis距离}
+\begin{definition}
+	设$x,y$是均值为$\boldsymbol{\mu}$和协方差矩阵为$\Sigma$的随机向量$\mathbf{X}$的两个实现值，$\mathbf{X}$的分布记为$D$。称：
+	\begin{equation*}
+		d^2_m(x,D)=(x-\boldsymbol{\mu})^T\Sigma^{-1}(x-\boldsymbol{\mu})
+	\end{equation*}
+	为$x$与$D$之间的\textbf{Mahalanobis距离}。称：
+	\begin{equation*}
+		d^2_m(x,y)=(x-y)^T\Sigma^{-1}(x-y)
+	\end{equation*}
+	为$x$与$y$之间的Mahalanobis距离。
+\end{definition}

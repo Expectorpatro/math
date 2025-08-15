@@ -31,19 +31,6 @@
 	设$(X,\mathscr{A},\mathscr{P})$为统计结构，$T$是可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$的可测映射。若$T$不依赖于$\mathscr{P}$，则称$T$为$(X,\mathscr{A},\mathscr{P})$上的\gls{Statistic}。统计量的分布称为\gls{SamplingDistribution}或\gls{InducedDistribution}。
 \end{definition}
 在测度论的可测映射那一小节我们提到了概率分布，接下来我们所提到的统计量的分布若无特殊说明都默认为是概率分布。
-\begin{property}
-	设$f$是可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$上的统计量，$(X,\mathscr{A},\mathscr{P})$是统计结构。则：
-	\begin{enumerate}
-		\item 对于任意的$P\in\mathscr{P}$，概率分布$Pf^{-1}$是$(Y,\mathscr{B})$上的概率测度；
-		\item 若$(X,\mathscr{A},\mathscr{P})$是可控的，则$(Y,\mathscr{B},\mathscr{P}f^{-1})$也可控\info{结论2和3来源于茆诗松高等数理统计，但现在怀疑结论不对}，其中$\mathscr{P}f^{-1}=\{Pf^{-1}:P\in\mathscr{P}\}$；
-		\item 若$(X,\mathscr{A},\mathscr{P})$有概率函数族$\left\{\dfrac{\dif P}{\dif\mu}\right\}$，则$(Y,\mathscr{B},\mathscr{P}f^{-1})$有概率函数族$\left\{\dfrac{\dif Pf^{-1}}{\dif\mu f^{-1}}\right\}$。
-	\end{enumerate}
-\end{property}
-\begin{proof}
-	(1)由\cref{prop:MeasurableMapping}(3)即可得到。\par
-	(2)因为$(X,\mathscr{A},\mathscr{P})$是可控的，所以存在$(X,\mathscr{A})$上的一个$\sigma$有限测度$\mu$满足对任意的$P\in\mathscr{P}$有$P\ll\mu$，由\cref{prop:MeasurableMapping}(3)可知$\mu f^{-1}$也是$\sigma$有限测度。若集合$A\in\mathscr{B}$满足$\mu f^{-1}(A)=0$，即$\mu[f^{-1}(A)]=0$，因为$P\ll\mu$，所以$Pf^{-1}(A)=P[f^{-1}(A)]=0$，于是$Pf^{-1}\ll\mu f^{-1}$。根据$P$的任意性，$(Y,\mathscr{B},\mathscr{P}f^{-1})$可控。\par
-	(3)由(2)即可得到。
-\end{proof}
 
 \subsection{次序统计量}
 \begin{definition}
@@ -321,25 +308,20 @@
 		\item $\dfrac{\dif P_{\theta}}{\dif\mu}$表达式不唯一；
 		\item 对于$\xi(\theta)$和自然参数$\xi(\eta)$有：
 		\begin{gather*}
-			\xi(\theta)=\log\exp\left\{\int_{X}\exp\left[\eta^T(\theta)T(x)\right]h(x)\dif\mu\right\} \\
-			\xi(\eta)=\log\exp\left\{\int_{X}\exp\left[\eta^TT(x)\right]h(x)\dif\mu\right\}
+			\xi(\theta)=\ln\left\{\int_{X}\exp\left[\eta^T(\theta)T(x)\right]h(x)\dif\mu\right\} \\
+			\xi(\eta)=\ln\left\{\int_{X}\exp\left[\eta^TT(x)\right]h(x)\dif\mu\right\}
 		\end{gather*}
 		\item 有限个概率分布是指数族的相互独立的随机变量的联合概率分布仍为指数族，即指数族在简单抽样下是封闭的；
 		\item $\mathscr{P}$的自然参数空间$\Xi$是凸集；
-		\item 设$f$是$(X,\mathscr{A})$上可积的Borel函数，令：
+		\item 设$f$是$(X,\mathscr{A})$上的Borel函数，令：
 		\begin{equation*}
 			G(\eta)=\int_{X}f(x)\exp[\eta^TT(x)]h(x)\dif\mu
 		\end{equation*}
-		记$\Xi_0=\{\eta:G(\eta)<+\in\mathbb{R}^{}\}$。对$\Xi_0$的任意内点$a$，$G$在$a$点连续，且$G$在$a$点的任意阶偏导数都存在并可将求导与积分交换顺序。
+		记$\Xi_0=\{\eta:G(\eta)\in\mathbb{R}^{}\}$。对$\Xi_0$的任意内点$a$，$G$在$a$点连续，且$G$在$a$点的任意阶偏导数都存在并可将求导与积分交换顺序。
 		\item 若$\mathscr{P}$满秩，$T(x)$或$\eta(\theta)$的各分量之间不满足线性约束或非线性约束；
 		\item $T(x)$是$\mathscr{P}$的充分统计量；
 		\item 若$\mathscr{P}$满秩，则$T(x)$是$\mathscr{P}$的极小充分统计量和完备统计量；
 		\item $\operatorname{E}_{\eta}(T_i)=\dfrac{\partial\xi(\eta)}{\partial\eta_i},\;\operatorname{Cov}_{\eta}(T_i,T_j)=\dfrac{\partial^2\xi(\eta)}{\partial\eta_i\partial\eta_j}$；
-		\item 若$\mathscr{P}$的自然参数空间是$\mathbb{R}^{n}$上的开矩形且对任意的$1\leqslant i,j\leqslant n$有：
-		\begin{equation*}
-			\forall\;\eta\in\Xi,\;\operatorname{E}_{\eta}\left[\frac{\partial\ln[p_{\eta}(x)]}{\partial\eta_i}\cdot\frac{\partial\ln[p_{\eta}(x)]}{\partial\eta_j}\right]\in\mathbb{R}^{}
-		\end{equation*}
-		则$\mathscr{P}$是Cramer-Rao正则族。
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -435,30 +417,30 @@
 	(2)由(1)和\cref{prop:ExponentialFamily}(7)(8)立即可得。
 \end{proof}
 
-\begin{theorem}
-	设$X\sim\operatorname{Geom}(p),\;p\in(0,1)$，$\seq{X}{m}$是$X$的一个样本，则：
-	\begin{enumerate}
-		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
-		\begin{gather*}
-			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(1-e^{\eta})^m\exp\left(\eta\sum_{i=1}^{m}x_i\right)\prod_{i=1}^{m}I_{\mathbb{N}_0}(x_i) \\
-			\eta=\ln(1-p),\quad C(\eta)=(1-e^{\eta})^m,\quad T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}I_{\mathbb{N}_0}(x_i)
-		\end{gather*}
-		自然参数空间为$\mathbb{R}^{-}$；
-		\item $\sum\limits_{i=1}^{m}X_i$是该分布族的充分统计量、完备统计量和极小充分统计量；
-	\end{enumerate}
-\end{theorem}
-\begin{proof}
-	(1)由几何分布的定义可以得到：
-	\begin{align*}
-		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
-		=&\prod_{i=1}^{m}[(1-p)^{x_i}pI_{\mathbb{N}_0}(x_i)] =p^m\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}I_{\mathbb{N}_0}(x_i)
-	\end{align*}
-	令$\eta=\ln(1-p)$，可解得$p=1-e^{\eta}$，于是有$C(\eta)=p^m=(1-e^{\eta})^m$。由$\eta$与$p$的关系可得$\eta\in\mathbb{R}^{-}$。\par
-	(2)由(1)和\cref{prop:ExponentialFamily}(7)(8)立即可得。
-\end{proof}
+%\begin{theorem}
+%	设$X\sim\operatorname{Geom}(p),\;p\in(0,1)$，$\seq{X}{m}$是$X$的一个样本，则：
+%	\begin{enumerate}
+%		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
+%		\begin{gather*}
+%			p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(1-e^{\eta})^m\exp\left(\eta\sum_{i=1}^{m}x_i\right)\prod_{i=1}^{m}I_{\mathbb{N}_0}(x_i) \\
+%			\eta=\ln(1-p),\quad C(\eta)=(1-e^{\eta})^m,\quad T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}I_{\mathbb{N}_0}(x_i)
+%		\end{gather*}
+%		自然参数空间为$\mathbb{R}^{-}$；
+%		\item $\sum\limits_{i=1}^{m}X_i$是该分布族的充分统计量、完备统计量和极小充分统计量；
+%	\end{enumerate}
+%\end{theorem}
+%\begin{proof}
+%	(1)由几何分布的定义可以得到：
+%	\begin{align*}
+%		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+%		=&\prod_{i=1}^{m}[(1-p)^{x_i}pI_{\mathbb{N}_0}(x_i)] =p^m\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}I_{\mathbb{N}_0}(x_i)
+%	\end{align*}
+%	令$\eta=\ln(1-p)$，可解得$p=1-e^{\eta}$，于是有$C(\eta)=p^m=(1-e^{\eta})^m$。由$\eta$与$p$的关系可得$\eta\in\mathbb{R}^{-}$。\par
+%	(2)由(1)和\cref{prop:ExponentialFamily}(7)(8)立即可得。
+%\end{proof}
 
 \begin{theorem}
-	设$X\sim\operatorname{Possion}(\lambda),\;\lambda\in\mathbb{R}^+$，$\seq{X}{m}$是$X$的一个样本，则：
+	设$X\sim\operatorname{Poisson}(\lambda),\;\lambda\in\mathbb{R}^+$，$\seq{X}{m}$是$X$的一个样本，则：
 	\begin{enumerate}
 		\item $\seq{X}{m}$的分布是指数族，其标准形式、自然参数、$C(\eta)$、$T(x)$和$h(x)$分别为：
 		\begin{gather*}
@@ -470,7 +452,7 @@
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
-	(1)由Possion分布的定义可以得到：
+	(1)由Poisson分布的定义可以得到：
 	\begin{align*}
 		&p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
 		=&\prod_{i=1}^{m}\left(\frac{\lambda^{x_i}}{x_i!}e^{-\lambda}I_{\mathbb{N}_0}(x_i)\right) =e^{-m\lambda}\exp\left[\ln(\lambda)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\frac{I_{\mathbb{N}_0}(x_i)}{x_i!}
@@ -763,4 +745,4 @@
 \end{proof}
 
 
-\input{statistics/basis/deltamethod.tex}
+\input{statistics/basis/sampling-dist.tex}

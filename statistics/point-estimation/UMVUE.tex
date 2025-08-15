@@ -9,7 +9,7 @@
 \end{definition}
 \begin{note}
 	估计量的一致最小风险估计常不存在。\par
-	设$\delta(\mathbf{X})$是$g(\theta)$的一致风险估计。若风险函数$\operatorname{R}(\theta,d)$存在关于$d$的最小值，任取$\theta_0\in\Theta$，我们总能可以取一个有偏好的$\delta'(\mathbf{X})=\arg\min\operatorname{R}(\theta,d)$，那么$\delta(\mathbf{X})$的风险函数在$\theta_0$处的取值也应是最小值。由$\theta_0$的任意性，$\operatorname{R}[\theta,\delta(\mathbf{X})]$需要在整个参数空间$\Theta$上都取到风险函数的最小值，这显然是不太可能存在的。若风险函数不存在关于$d$的最小值，那么一致最小风险估计当然不存在。\par
+	设$\delta(\mathbf{X})$是$g(\theta)$的一致风险估计。若风险函数$\operatorname{R}(\theta,d)$存在关于$d$的最小值，任取$\theta_0\in\Theta$，我们总能可以取一个有偏好的$\delta'(\mathbf{X})=\arg\min\operatorname{R}(\theta_0,d)$，那么$\delta(\mathbf{X})$的风险函数在$\theta_0$处的取值也应是最小值。由$\theta_0$的任意性，$\operatorname{R}[\theta,\delta(\mathbf{X})]$需要在整个参数空间$\Theta$上都取到风险函数的最小值，这显然是不太可能存在的。若风险函数不存在关于$d$的最小值，那么一致最小风险估计当然也有可能不存在。\par
 	考虑到上述情况，我们转向研究在某一估计量族中寻找一致最小风险估计，而不是在所有估计量中去寻找。人们关注最多的便是在无偏估计量族中的情况。
 \end{note}
 \begin{definition}
@@ -83,16 +83,63 @@
 	对于$g(\theta)$的任意一个UMRUE$\;\delta_1(\mathbf{X})$，它的Rao-Blackwell改进的风险函数值一定等于原本的风险函数值，若$L(\theta,d)$关于$d$严格凸，由\cref{theo:Rao-Blackwell}中的取等条件可知$\delta_1(\mathbf{X})=h[S(\mathbf{X})]\;$a.s.于任意的$P\in\mathscr{P}$，修改其在一个零测集上的数值使得得到的$\delta_1'(\mathbf{X})=h[S(\mathbf{X})]$，由完备性的定义，仿照存在性的证明可得所有经过修改后的UMRUE相等a.s.于任意的$P\in\mathscr{P}$，由\cref{prop:Measure}(3)（次有限可加性）可知原本的UMRUE相等a.s.于任意的$P\in\mathscr{P}$，即UMRUE在a.s.于任意的$P\in\mathscr{P}$的意义下唯一。
 \end{proof}
 \begin{note}
-	上述定理给了寻找UMRUE的第一个方法：如果损失函数$L(\theta,d)$是关于$d$的凸函数，$\mathscr{P}$存在完全充分统计量$S(\mathbf{X})$，则方程组：
+	上述定理给了寻找UMRUE的两个方法：如果损失函数$L(\theta,d)$是关于$d$的凸函数，$\mathscr{P}$存在完全充分统计量$S(\mathbf{X})$，则：
+	\begin{enumerate}
+		\item 方程组：
+		\begin{equation*}
+			\forall\;\theta\in\Theta,\;\operatorname{E}_{\theta}\{\delta[S(\mathbf{X})]\}=g(\theta)
+		\end{equation*}
+		给出的估计量$\delta$即为UMRUE；
+		\item 找出一个$g(\theta)$的无偏估计，求其关于$S(\mathbf{X})$的Rao-Blackwell 改进。
+	\end{enumerate}
+	证明也很简单：对于方法一而言，满足条件的$\delta[S(\mathbf{X})]$是$g(\theta)$的一个无偏估计，且其关于$S(\mathbf{X})$的Rao-Blackwell改进就是自身；方法二是上述定理的直接结果。
+\end{note}
+
+\begin{theorem}
+	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，$\mathbf{X}$为从总体$F$中抽取的简单样本，$g(\theta)\in\mathbb{R}^{}$为U可估的待估量，损失函数$L(\theta,d)$是关于$d$的有界函数，且对于任意的$\theta$有：
 	\begin{equation*}
-		\forall\;\theta\in\Theta,\;\operatorname{E}_{\theta}\{\delta[S(\mathbf{X})]\}=g(\theta)
+		L[\theta,g(\theta)]=\underset{d}{\arg\min}L(\theta,d)=a
 	\end{equation*}
-	给出的估计量$\delta$即为UMRUE。证明也很简单，满足条件的$\delta[S(\mathbf{X})]$是$g(\theta)$的一个无偏估计，且其关于$S(\mathbf{X})$的Rao-Blackwell改进就是自身。
+	那么对任意的$\theta_0\in\Theta$，存在一列无偏估计$\{\delta_n\}$满足：
+	\begin{equation*}
+		\lim_{n\to+\infty}\operatorname{R}(\theta_0,\delta_n)=a
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	设$|L(\theta,d)|\leqslant M$。因为$g(\theta)$是U可估的，所以存在$g(\theta)$的无偏估计量$\delta(\mathbf{X})$，对于任意满足条件：
+	\begin{equation*}
+		\lim_{n\to+\infty}\alpha_n=0,\;\alpha_n\in(0,1),\;\forall\;n\in\mathbb{N}^+
+	\end{equation*}
+	的数列$\{\alpha_n\}$，令：
+	\begin{equation*}
+		\delta_n'(\mathbf{X})=
+		\begin{cases}
+			g(\theta_0),\;&\text{概率为}1-\alpha_n \\
+			\dfrac{1}{\alpha_n}[\delta(\mathbf{X})-g(\theta_0)]+g(\theta_0),\;&\text{概率为}\alpha_n
+		\end{cases}
+	\end{equation*}
+	由\info{极限的线性性质}可得：
+	\begin{gather*}
+		\operatorname{E}_{\theta}[\delta_n'(\mathbf{X})]=(1-\alpha_n)g(\theta_0)+\alpha_n\frac{1}{\alpha_n}[\delta(\mathbf{X})-g(\theta_0)]+\alpha_ng(\theta_0)=g(\theta_0) \\
+		\operatorname{R}[\theta_0,\delta_n'(\mathbf{X})]=(1-\alpha_n)L[\theta_0,g(\theta_0)]+\alpha_nL[\theta_0,\delta_n'(\mathbf{X})]\leqslant(1-\alpha_n)a+\alpha_nM\to a
+	\end{gather*}
+	所以$\{\delta_n'\}$是一列满足条件的无偏估计量。
+\end{proof}
+\begin{note}
+	这个定理告诉我们，当损失函数有界时（无论是否是凸函数），我们可以构造出任意高精度的无偏估计量，所以此时一般是不存在UMRUE的（除非它在每一个参数上都能取到损失函数的最小值），甚至局部的最小风险无偏估计也不存在。\par
+	请注意，它也提醒了一个在构造估计量时可能存在的问题：当$\alpha_n\to0$时，上述定理构造的$\delta_n'(\mathbf{X})$在第二类情况中会使得估计的偏差趋向于正无穷。虽然估计量具有无偏性并且风险也很小，但仍可能给出一个离真实值非常非常远的结果，因为它可以以小概率在期望上来弥补估计量的偏差与风险，也就是说损失函数有界的情况下期望无偏性无法很好的约束自身行为，对大错的惩罚力度会因为小的概率而降低。这个时候讨论中位数无偏性会好一点。
 \end{note}
 
 \subsection{一致最小方差无偏估计}
+\begin{note}
+	如果一个统计量不能达到渐近无偏那么它一般是不可接受的，也就是说估计量在真值$g(\theta)$附近的行为尤其的重要，于是我们想到了Tylor展开。如果损失函数可以进行Taylor展开，可以得到：
+	\begin{equation*}
+		L(\theta,d)=a_0(\theta)+a_1(\theta)[d-g(\theta)]+a_2(\theta)[d-g(\theta)]^2+R
+	\end{equation*}
+	$a_0(\theta)$无需考虑，它与估计量无关；当估计量足够接近真值时，余项$R$也无需考虑；我们往往要求$L(\theta,d)$恒正或恒负，否则求损失进行期望计算的时候正负可能被抵消，风险的大小就没什么意义了，在这种情况下，$a_1(\theta)$可以认为是$0$。综上，整个$L(\theta,d)$最重要的部分便是$[d-g(\theta)]^2$了，也就是说对于风险而言最重要的是$\operatorname{E}[d-g(\theta)]^2$，这就是我们讨论方差的原因。
+\end{note}
 \begin{definition}
-	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，$\mathbf{X}$为从总体$F$中抽取的简单样本，$g(\theta)$为存在无偏估计量的待估量。若估计量$\delta(\mathbf{X})$对$g(\theta)$的任一无偏估计量$\delta'(\mathbf{X})$：有\info{链接MSE}：
+	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，$\mathbf{X}$为从总体$F$中抽取的简单样本，$g(\theta)$为存在无偏估计量的待估量。若估计量$\delta(\mathbf{X})$对$g(\theta)$的任一无偏估计量$\delta'(\mathbf{X})$有\info{链接MSE}：
 	\begin{equation*}
 		\operatorname{MSE}_{\theta}[\delta(\mathbf{X})]=\operatorname{Var}_{\theta}[\delta(\mathbf{X})]\leqslant\operatorname{MSE}_{\theta}[\delta'(\mathbf{X})]=\operatorname{Var}_{\theta}[\delta'(\mathbf{X})],\;\forall\;\theta\in\Theta
 	\end{equation*}
@@ -146,6 +193,13 @@
 %	\end{equation*}
 %	根据取等条件可知$\delta(\mathbf{X})=\operatorname{E}[\delta(\mathbf{X})|T]\;$a.s.于任意的$P\in\mathscr{P}$。
 %\end{proof}
+\begin{note}
+	设$\delta\in L_2(X)$是$g(\theta)$的一个无偏估计量，$f$是零无偏估计量，根据\cref{prop:0UnbiasedEstimator}(1)和\cref{prop:Variance}(3)可得：
+	\begin{equation*}
+		\operatorname{Var}_{\theta}(\delta)=\operatorname{Var}_{\theta}(\delta-f)=\operatorname{E}_{\theta}[(\delta-f)^2]-g^2(\theta)
+	\end{equation*}
+	为了得到UMVUE，我们就要对任意的$f$最小化$\operatorname{E}_{\theta}[(\delta-f)^2]$，这可以理解为寻找$\delta$在所有零无偏估计张成的子空间上的投影$f^*$。
+\end{note}
 \begin{theorem}\label{theo:UMVUE0UnbiasedEstimation}
 	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，$\mathbf{X}$为从总体$F$中抽取的简单样本，$g(\theta)$为U可估的待估量，$\delta(\mathbf{X})$是$g(\theta)$的一个无偏估计量，对任意的$\theta\in\Theta$有$\operatorname{Var}_{\theta}[\delta(\mathbf{X})]<+\infty$。令：
 	\begin{equation*}
@@ -162,7 +216,7 @@
 		&\operatorname{Cov}_{\theta}[\delta(\mathbf{X}),f(\mathbf{X})]=\operatorname{E}_{\theta}\{[\delta(\mathbf{X})-g(\theta)]f(\mathbf{X})\} \\
 		=&\operatorname{E}_{\theta}[\delta(\mathbf{X})\cdot f(\mathbf{X})]-g(\theta)\operatorname{E}_{\theta}[f(\mathbf{X})]=\operatorname{E}_{\theta}[\delta(\mathbf{X})\cdot f(\mathbf{X})]
 	\end{align*}\par
-	\textbf{(1)充分性：}对任意$g(\theta)$的无偏估计$\delta'(\mathbf{X})$，都存在一个$f(\mathbf{X})\in A$使得$\delta'(\mathbf{X})=\delta(\mathbf{X})+f(\mathbf{X})$。由\cref{prop:Variance}(3)和\cref{prop:NonnegativeMeasurableIntegral}(2)可得：
+	\textbf{(1)充分性：}由\cref{prop:0UnbiasedEstimator}(1)可知对任意$g(\theta)$的无偏估计$\delta'(\mathbf{X})$，都存在一个$f(\mathbf{X})\in A$使得$\delta'(\mathbf{X})=\delta(\mathbf{X})+f(\mathbf{X})$。由\cref{prop:Variance}(3)和\cref{prop:NonnegativeMeasurableIntegral}(2)可得：
 	\begin{align*}
 		\operatorname{Var}_{\theta}[\delta'(\mathbf{X})]&=\operatorname{Var}_{\theta}[\delta(\mathbf{X})+f(\mathbf{X})]=\operatorname{Var}_{\theta}[\delta(\mathbf{X})]+\operatorname{Var}_{\theta}[f(\mathbf{X})]+2\operatorname{Cov}_{\theta}[\delta(\mathbf{X}),f(\mathbf{X})] \\
 		&=\operatorname{Var}_{\theta}[\delta(\mathbf{X})]+\operatorname{Var}_{\theta}[f(\mathbf{X})]\geqslant\operatorname{Var}_{\theta}[\delta(\mathbf{X})]
@@ -193,14 +247,271 @@
 		\forall\;\theta\in\Theta,\;\forall\;f(T)\in A,\;\operatorname{Cov}_{\theta}[\delta(T),f(T)]=\operatorname{E}_{\theta}[\delta(T)\cdot f(T)]=0
 	\end{equation*}
 \end{corollary}
-\subsubsection{信息不等式}
-\begin{definition}
-	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，$T$是$(X,\mathscr{A})$到$(Y,\mathscr{B})$上的统计量。若
-\end{definition}
 \begin{note}
-	总结一下求UMVUE的方法：
-	\begin{enumerate}
-		\item 求分布族的充分统计量，求充分统计量的期望从而得到一个充分统计量的函数使得它是待估量的无偏估计；求所有零无偏估计，使得协方差为$0$；
-		\item 求分布族的完全充分统计量，求待估量的一个无偏估计，求该无偏估计关于完全充分统计量的Rao-Blackwell改进。
-	\end{enumerate}
+	其实这个定理也可以推广到凸函数的情况，但是要涉及到一些优化的知识，我对优化了解的太少了，看不懂。
 \end{note}
+
+\subsubsection{信息不等式}
+现在我们来换一种角度去思考，能否求出所有无偏估计量方差的下界（它应该是个关于参数的函数），然后通过计算一个估计量的方差是否等于该下界来判断它是不是UMVUE？于是我们想到了\cref{ineq:cauchy-schiwarz-expectations}，设$\delta$是一个无偏估计量，$\varphi$是$x$和参数$\theta$的函数，当$\delta,\varphi\in L_2(X)$时有：
+\begin{equation*}
+	\operatorname{Var}(\delta)\geqslant\frac{[\operatorname{Cov}(\delta,\varphi)]^2}{\operatorname{Var}(\varphi)}
+\end{equation*}
+可此时还是没用，因为左右两边都包含了$\delta$。当右式依赖于$\delta$的方式是仅依赖于它的期望$g(\theta)$时，上式就能给出$\operatorname{Var}(\delta)$的一个下界了。
+\begin{lemma}
+	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，$\mathbf{X}$为从总体$F$中抽取的简单样本，$g(\theta)$为U可估的待估量，$\delta(\mathbf{X})$是$g(\theta)$的一个无偏估计量，$\varphi$是$\mathbf{X}$和参数$\theta$的函数，$\delta,\varphi\in L_2(X)$。令：
+	\begin{equation*}
+		A=\{f(\mathbf{X}):\forall\;\theta\in\Theta,\;\operatorname{E}_{\theta}[f(\mathbf{X})]=0,\;f(\mathbf{X})\in L_2(X)\}
+	\end{equation*}
+	$\operatorname{Cov}(\delta,\varphi)$依赖于$\delta$的方式是仅依赖于$g(\theta)$的充要条件是对任意的$\theta\in\Theta$和任意的$f(\mathbf{X})\in A$有$\operatorname{Cov}(f,\varphi)=0$。
+\end{lemma}
+\begin{proof}
+	$\operatorname{Cov}(\delta,\varphi)$依赖于$\delta$的方式是仅依赖于$g(\theta)$当且仅当对$g(\theta)$的任意两个无偏估计量$\delta_1,\delta_2$有$\operatorname{Cov}(\delta_1,\varphi)=\operatorname{Cov}(\delta_2,\varphi)$，由\cref{prop:CovMat}(3)(5)可知上式成立当且仅当$\operatorname{Cov}(\delta_1-\delta_2,\varphi)=0$，由\cref{prop:MeasurableIntegral}(5)可知$\operatorname{E}(\delta_1-\delta_2)=\operatorname{E}(\delta_1)-\operatorname{E}(\delta_2)=0$，充分性成立。必要性使用反证法即可。
+\end{proof}
+\begin{note}
+	由上述引理，我们想到可以构造$\varphi$来让$\operatorname{Cov}_{\theta}(f,\varphi)=0$，一个很容易想到的情况是：$\varphi$是一个分数，分母为$p_{\theta}(x)$（用来抵消期望带来的$p_{\theta}(x)$），分子也是概率函数（利用零无偏估计期望为$0$来得到协方差为$0$）。
+\end{note}
+\begin{theorem}[Hammersley-Chapman-Robbins Inequality]
+	\label{theo:Hammersley-Chapman-RobbinsInequality}
+	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，控制测度为$\mu$，$\Theta$是参数空间，概率函数族$\left\{p_{\theta}:\theta\in\Theta,\;P_{\theta}\in\mathscr{P},\;p_{\theta}=\dfrac{\dif P_{\theta}}{\dif\mu}\right\}$有共同支撑，$\mathbf{X}$为从总体$F$中抽取的简单样本，$\delta(\mathbf{X})\in L_2(X)$是一个估计量，则：
+	\begin{equation*}
+		\operatorname{Var}_{\theta}[\delta(\mathbf{X})]\geqslant\sup_{\theta'\ne\theta}\dfrac{[\operatorname{E}_{\theta'}(\delta)-\operatorname{E}_{\theta}(\delta)]^2}{\operatorname{E}_{\theta}\left\{\left[\frac{p_{\theta'}(x)}{p_{\theta}(x)}-1\right]^2\right\}}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	给出$\varphi$的两种构造：
+	\begin{equation*}
+		\varphi_1(x,\theta)=\frac{p_{\theta'}(x)}{p_{\theta}(x)}-1,\quad\varphi_2(x,\theta)=\frac{p_{\theta'}(x)-p_{\theta}(x)}{\theta'-\theta}\frac{1}{p_{\theta}(x)}
+	\end{equation*}
+	仅对第二种情况进行证明。\par
+	由\cref{prop:MeasurableIntegral}(5)可得：
+	\begin{align*}
+		&\operatorname{E}_{\theta}[\varphi(x,\theta)]=\int_{X}\frac{p_{\theta'}(x)-p_{\theta}(x)}{\theta'-\theta}\frac{1}{p_{\theta}(x)}p_{\theta}(x)\dif\mu \\
+		=&\frac{1}{\theta'-\theta}\left[\int_{X}p_{\theta'}(x)\dif\mu-\int_{X}p_{\theta}(x)\dif\mu\right]=\frac{1}{\theta'-\theta}\cdot0=0
+	\end{align*}
+	于是对任意的零无偏估计$f$，根据\cref{prop:MeasurableIntegral}(5)可得：
+	\begin{align*}
+		&\operatorname{Cov}_{\theta}(f,\varphi)=\operatorname{E}_{\theta}(f\varphi)=\int_{X}f\cdot\frac{p_{\theta'}(x)-p_{\theta}(x)}{\theta'-\theta}\frac{1}{p_{\theta}(x)}p_{\theta}(x)\dif\mu \\
+		=&\frac{1}{\theta'-\theta}\left[\int_{X}fp_{\theta'}(x)\dif\mu-\int_{X}fp_{\theta}(x)\dif\mu\right]=\frac{1}{\theta'-\theta}\cdot(0-0)=0
+	\end{align*}
+	同时有：
+	\begin{align*}
+		&\operatorname{Cov}_{\theta}(\delta,\varphi)=\operatorname{E}_{\theta}\{[\delta-\operatorname{E}_{\theta}(\delta)]\varphi\}=\int_{X}[\delta-\operatorname{E}_{\theta}(\delta)]\frac{p_{\theta'}(x)-p_{\theta}(x)}{\theta'-\theta}\frac{1}{p_{\theta}(x)}p_{\theta}(x)\dif\mu \\
+		=&\frac{1}{\theta'-\theta}\left\{\int_{X}\delta[p_{\theta'}(x)-p_{\theta}(x)]\dif\mu-\operatorname{E}_{\theta}(\delta)\left[\int_{X}p_{\theta'}(x)\dif\mu-\int_{X}p_{\theta}(x)\dif\mu\right]\right\} \\
+		=&\frac{1}{\theta'-\theta}\left[\int_{X}\delta p_{\theta'}(x)\dif\mu-\int_{X}\delta p_{\theta}(x)\dif\mu\right]=\frac{\operatorname{E}_{\theta'}(\delta)-\operatorname{E}_{\theta}(\delta)}{\theta'-\theta}
+	\end{align*}
+	由\cref{ineq:cauchy-schiwarz-expectations}\info{验证$\varphi\in L_2$}和\cref{prop:MeasurableIntegral}(5)可得：
+	\begin{align*}
+		&\operatorname{Var}_{\theta}[\delta(\mathbf{X})]\geqslant\frac{\operatorname{Cov}_{\theta}^2(\delta,\varphi)}{\operatorname{Var}(\varphi)} \\
+		=&\left[\frac{\operatorname{E}_{\theta'}(\delta)-\operatorname{E}_{\theta}(\delta)}{\theta'-\theta}\right]^2\Big/\operatorname{E}\left\{\left[\frac{p_{\theta'}(x)-p_{\theta}(x)}{p_{\theta}(x)(\theta'-\theta)}\right]^2\right\} \\
+		=&[\operatorname{E}_{\theta'}(\delta)-\operatorname{E}_{\theta}(\delta)]^2\Big/\operatorname{E}_{\theta}\left\{\left[\frac{p_{\theta'}(x)}{p_{\theta}(x)}-1\right]^2\right\}
+	\end{align*}
+	由上确界的不等式性即可得出结论。
+\end{proof}
+\begin{note}
+	第二种构造让我们想起了$\dfrac{\dif\ln p_{\theta}(x)}{\dif\theta}$。在什么情况下$\varphi_2(x,\theta)$可以被替换为它呢？首先需要保证$\ln p_{\theta}(x)$有关于$\theta$的导数，那么参数空间$\Theta$最好是一个开集，这样对于每一个$\theta$，它可以在各个方向都有导数。其次需要让：
+	\begin{equation*}
+		\operatorname{E}_{\theta}\left[\frac{\dif\ln p_{\theta}(x)}{\dif\theta}\right]=0
+	\end{equation*}
+	由\info{链式求导法则}可知也即：
+	\begin{equation*}
+		\int_{X}p_{\theta}'(x)\dif\mu=0
+	\end{equation*}
+	如果对$p_{\theta}(x)$的积分和对$\theta$微分可以交换顺序，那么我们就可以得到：
+	\begin{equation*}
+		0=\frac{\dif1}{\dif\theta}=\frac{\dif}{\dif\theta}\int_{X}p_{\theta}(x)\dif\mu=\int_{X}\frac{\dif p_{\theta}(x)}{\dif\theta}\dif\mu
+	\end{equation*}
+	这需要假设概率函数族$\{p_{\theta}\}$的支撑与$\theta$无关，也即概率函数族有共同支撑，否则由\info{莱布尼兹积分求导法则}可知无法交换积分和微分的顺序。最后，为了让$p_{\theta}’(x)$的后续操作更便捷，我们要求$p_{\theta}‘(x)$有限。
+\end{note}
+\begin{definition}
+	设$\mathscr{P}=\{P_{\theta}:\theta\in\Theta\}$是一族概率测度，对任意的$\theta\in\Theta$，$P_{\theta}$有关于$\sigma$有限测度$\mu$的概率函数$p_{\theta}(x)$。令：
+	\begin{equation*}
+		S_{\theta}(x)=\left(\frac{\partial\ln p_{\theta}(x)}{\partial\theta_1},\frac{\partial\ln p_{\theta}(x)}{\partial\theta_2},\dots,\frac{\partial\ln p_{\theta}(x)}{\partial\theta_n}\right)^T
+	\end{equation*}
+	若对任意的$\theta\in\Theta$，$p_{\theta}(x)$满足如下正则条件：
+	\begin{enumerate}
+		\item $S_{\theta}(x)$有定义；
+		\item $\operatorname{E}_{\theta}[S_{\theta}(x)]=\mathbf{0}$；
+		\item $S_{\theta}(x)$模平方可积，即$\operatorname{E}_{\theta}[|S_{\theta}(x)|^2]<+\infty$；
+	\end{enumerate}
+	则称：
+	\begin{equation*}
+		I(\theta)=\operatorname{Cov}_{\theta}[S_{\theta}(x)]=\operatorname{E}_{\theta}[S_{\theta}(x)S_{\theta}^T(x)]
+	\end{equation*}
+	为$\{p_{\theta}:\theta\in\Theta\}$的\gls{FIM}，$n=1$时称$I(\theta)$为$\{p_{\theta}:\theta\in\Theta\}$的\textbf{Fisher信息量}。类似定义随机变量概率函数族的Fisher信息量。
+\end{definition}
+\begin{definition}
+	概率函数族$\{p_{\theta}(x):\theta\in\Theta\}$若满足：
+	\begin{enumerate}
+		\item 参数空间$\Theta$是欧氏空间上的开矩形；
+		\item $\ln p_{\theta}(x)$关于$\theta$的一阶偏导数对所有$\theta\in\Theta$都存在且有限；
+		\item $p_{\theta}(x)$的支撑与$\theta$无关；
+		\item 对$p_{\theta}(x)$的积分与微分可交换顺序；
+		\item 对任意的$i,j$和任意的$\theta\in\Theta$有：
+		\begin{equation*}
+			\operatorname{E}_{\theta}\left[\frac{\partial\ln p_{\theta}(x)}{\partial\theta_i}\cdot\frac{\partial\ln p_{\theta}(x)}{\partial\theta_j}\right]\in\mathbb{R}^{}
+		\end{equation*}
+	\end{enumerate}
+	则称该概率函数族为\textbf{Cramer-Rao正则族}。
+\end{definition}
+\begin{property}\label{prop:FIM}
+	$\{p_{\theta}(x):\theta\in\Theta\}$是一个满足正则条件的概率函数族。Fisher信息矩阵具有如下性质：
+	\begin{enumerate}
+		\item Cramer-Rao正则族具有Fisher信息矩阵；
+		\item 若$\ln p_{\theta}(x)$有关于$\theta$的所有二阶导数，且可以交换对一阶导数进行求导与积分的顺序，则：
+		\begin{equation*}
+			[I(\theta)]_{ij}=-\operatorname{E}_{\theta}\left[\frac{\partial^2\ln p_{\theta}(x)}{\partial\theta_i\partial\theta_j}\right]
+		\end{equation*}
+		\item Fisher信息量与参数选择有关，若$\theta=h(\xi)$且$h$具有所有一阶偏导数，则$I(\xi)=J_{\theta}^T(\xi)I(\theta)J_{\theta}(\xi)$，其中$J_{\theta}(\xi)$是$\theta$关于$\xi$的Jacobian矩阵；
+		\item 设$\seq{X}{n}$相互独立，参数空间都是$\Theta$且联合概率函数族是Cramer-Rao正则族，$I_i(\theta)$是$X_i$的Fisher信息矩阵，则$(\seq{X}{n})$的Fisher信息矩阵为$\sum\limits_{i=1}^{n}I_i(\theta)$；
+		\item 若$\{p_{\theta}(x):\theta\in\Theta\}$是满秩指数族的概率函数族，$T(x)$的每一个分量都在$L_2(X)$中，令$\theta=\operatorname{E}_{\eta}(T)$，则$I(\eta)=\operatorname{Cov}_{\eta}(T),\;I(\theta)=[\operatorname{Cov}_{\eta}^T(T)]^{-1}$；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)Cramer-Rao正则族的条件2可得到正则条件1，由\cref{prop:NonnegativeMeasurableIntegral}(10)可知条件5可推出正则条件3。由条件4可得：
+	\begin{align*}
+		&\operatorname{E}_{\theta}[S_{\theta}^{(i)}(x)]=\int_{X}\frac{\partial\ln p_{\theta}(x)}{\partial\theta_i}p_{\theta}(x)\dif P_{\theta}=\int_{X}\frac{1}{p_{\theta}(x)}\frac{\partial p_{\theta}(x)}{\partial\theta_i}p_{\theta}(x)\dif P_{\theta} \\
+		&=\int_{X}\frac{\partial p_{\theta}(x)}{\partial\theta_i}\dif P_{\theta}=\frac{\partial}{\partial\theta_i}\int_{X}p_{\theta}(x)ß\dif P_{\theta}=\frac{\partial1}{\partial\theta_i}=0
+	\end{align*}
+	于是Cramer-Rao正则族满足正则条件2。综上，Cramer-Rao正则族具有Fisher信息矩阵。\par
+	(2)由正则条件和\cref{prop:MeasurableIntegral}(5)可得：
+	\begin{gather*}
+		\frac{\partial}{\partial\theta_j}\operatorname{E}_{\theta}\left[\frac{\partial\ln p_{\theta}(x)}{\partial\theta_i}\right]=0 \\
+		\frac{\partial}{\partial\theta_j}\int_{X}\frac{\partial\ln p_{\theta}(x)}{\partial\theta_i}p_{\theta}(x)\dif P_{\theta}=0 \\
+		\int_{X}\frac{\partial}{\partial\theta_j}\left[\frac{\partial\ln p_{\theta}(x)}{\partial\theta_i}p_{\theta}(x)\right]\dif P_{\theta}=0 \\
+		\int_{X}\left[\frac{\partial^2\ln p_{\theta}(x)}{\partial\theta_i\partial\theta_j}p_{\theta}(x)+\frac{\partial\ln p_{\theta}(x)}{\partial\theta_i}\frac{\partial p_{\theta}(x)}{\partial\theta_j}\right]\dif P_{\theta}=0 \\
+		\int_{X}\left[\frac{\partial^2\ln p_{\theta}(x)}{\partial\theta_i\partial\theta_j}p_{\theta}(x)+\frac{\partial\ln p_{\theta}(x)}{\partial\theta_i}\frac{\partial \ln p_{\theta}(x)}{\partial\theta_j}p_{\theta}(x)\right]\dif P_{\theta}=0 \\
+		\operatorname{E}_{\theta}\left[\left(\frac{\partial\ln p_{\theta}(x)}{\partial\theta_i}\right)\left(\frac{\partial\ln p_{\theta}(x)}{\partial\theta_j}\right)\right]=-\operatorname{E}_{\theta}\left[\frac{\partial^2\ln p_{\theta}(x)}{\partial\theta_i\partial\theta_j}\right]
+	\end{gather*}\par
+	(3)由\info{链式求导法则}可知：
+	\begin{align*}
+		[i(\xi)]_{ij}&=\operatorname{E}_{\xi}\left[\frac{\partial\ln p_{\theta}(x)}{\partial\xi_i}\cdot\frac{\partial\ln p_{\theta}(x)}{\partial\xi_j}\right] \\
+		&=\operatorname{E}_{\xi}\left\{\left[\sum_{k=1}^n\frac{\partial\ln p_{\theta}(x)}{\partial\theta_k}\cdot\frac{\partial\theta_k}{\partial\xi_i}\right]\cdot\left[\sum_{l=1}^n\frac{\partial\ln p_{\theta}(x)}{\partial\theta_l}\cdot\frac{\partial\theta_l}{\partial\xi_j}\right]\right\} \\
+		&=\operatorname{E}_{\xi}\left[\left(\frac{\partial\theta}{\partial\xi_i}\right)^TS_{\theta}(x)S_{\theta}^T(x)\left(\frac{\partial\theta}{\partial\xi_j}\right)\right]
+	\end{align*}
+	于是结论成立。\par
+	(4)设$X_i$在参数$\theta\in\Theta$下的概率函数为$p_{\theta,i}(x_i)$，由\info{独立密度乘积}和\cref{prop:MeasurableIntegral}(5)可得：
+	\begin{align*}
+		I(\theta)_{ij}&=\operatorname{E}_{\theta}\left\{\frac{\partial}{\partial\theta_i}\ln\left[\prod_{k=1}^{n}p_{\theta,k}(x_k)\right]\cdot\frac{\partial}{\partial\theta_j}\ln\left[\prod_{l=1}^{n}p_{\theta,l}(x_l)\right]\right\} \\
+		&=\operatorname{E}_{\theta}\left\{\left[\sum_{k=1}^{n}\frac{\partial\ln p_{\theta,k}(x_k)}{\partial\theta_i}\right]\cdot\left[\sum_{l=1}^{n}\frac{\partial\ln p_{\theta,l}(x_l)}{\partial\theta_j}\right]\right\} \\
+		&=\sum_{k=1}^{n}\sum_{l=1}^{n}\operatorname{E}_{\theta}[S_{\theta,k}(x_k)S_{\theta,l}^T(x_l)]
+	\end{align*}
+	当$k\ne l$时，由\info{独立性条件，需要再检查}和正则条件可知：
+	\begin{align*}
+		&\{\operatorname{E}_{\theta}[S_{\theta,k}(x_k)S_{\theta,l}^T(x_l)]\}_{p,q}=\operatorname{E}_{\theta}\left[\frac{\partial\ln p_{\theta,k}(x_k)}{\partial\theta_p}\cdot\frac{\partial\ln p_{\theta,l}(x_l)}{\partial\theta_q}\right] \\
+		=&\operatorname{E}_{\theta}\left[\frac{\partial\ln p_{\theta,k}(x_k)}{\partial\theta_p}\right]\cdot\operatorname{E}_{\theta}\left[\frac{\partial\ln p_{\theta,l}(x_l)}{\partial\theta_q}\right]=0
+	\end{align*}
+	所以：
+	\begin{equation*}
+		I(\theta)_{ij}=\sum_{k=1}^{n}\sum_{l=1}^{n}\operatorname{E}_{\theta}[S_{\theta,k}(x_k)S_{\theta,k}^T(x_k)]
+	\end{equation*}
+	即$I(\theta)=\sum\limits_{i=1}^{n}I_i(\theta)$。\par
+	(5)为了书写方便，下面的积分展开式都是多维的情况。因为：
+	\begin{gather*}
+		\ln p_{\eta}(x)=\ln\left\{\exp\left[\eta^TT(x)-\xi(\eta)\right]h(x)\right\}=\eta^TT(x)-\xi(\eta)+\ln h(x) \\
+		\frac{\partial\ln p_{\eta}(x)}{\partial\eta}=T(x)-\frac{\partial\xi(\eta)}{\partial\eta}
+	\end{gather*}
+	由\cref{prop:ExponentialFamily}(2)、\info{复合函数求导法则}、\cref{prop:ExponentialFamily}(5)和\cref{prop:MeasurableIntegral}(5)可知：
+	\begin{align*}
+		&\frac{\partial\xi(\eta)}{\partial\eta}=\frac{\partial}{\partial\eta}\ln\left\{\int_{X}\exp\left[\eta^TT(x)\right]h(x)\dif\mu\right\} \\
+		=&\frac{1}{\int_{X}\exp\left[\eta^TT(x)\right]h(x)\dif\mu}\int_{X}\frac{\partial}{\partial\eta}\exp\left[\eta^TT(x)\right]h(x)\dif\mu \\
+		=&\frac{\int_{X}T(x)\exp\left[\eta^TT(x)\right]h(x)\dif\mu}{\int_{X}\exp\left[\eta^TT(x)\right]h(x)\dif\mu} \\
+		=&\frac{\int_{X}T(x)C(\eta)\exp\left[\eta^TT(x)\right]h(x)\dif\mu}{\int_{X}C(\eta)\exp\left[\eta^TT(x)\right]h(x)\dif\mu}=\operatorname{E}_{\eta}(T)
+	\end{align*}
+	所以根据\cref{prop:MeasurableIntegral}(5)可得：
+	\begin{equation*}
+			\operatorname{E}_{\eta}\left[\frac{\partial\ln p_{\eta}(x)}{\partial\eta}\right]=\operatorname{E}_{\eta}(T)-\frac{\partial\xi(\eta)}{\partial\eta}=\mathbf{0}
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		I(\eta)=\operatorname{Cov}_{\eta}\left[\frac{\partial\ln p_{\eta}(x)}{\partial\eta}\right]=\operatorname{Cov}_{\eta}[T(x)-\operatorname{E}_{\eta}[T(x)]]=\operatorname{Cov}_{\eta}(T)
+	\end{equation*}\par
+	因为$T$是统计量，所以根据\cref{prop:ExponentialFamily}(5)、\cref{prop:MeasurableIntegral}(5)和\cref{prop:CovMat}(6)可得：
+	\begin{align*}
+		&J_{\theta}(\eta)=\frac{\partial\theta}{\partial\eta^T}=\frac{\partial}{\partial\eta^T}\operatorname{E}_{\eta}(T)=\int_{X}\frac{\partial}{\partial\eta^T}\left\{T(x)\exp\left[\eta^TT(x)-\xi(\eta)\right]h(x)\right\}\dif\mu \\
+		=&\int_{X}T(x)\left\{T^T(x)-\left[\frac{\partial\xi(\eta)}{\partial\eta}\right]^T\right\}\exp\left[\eta^TT(x)-\xi(\eta)\right]h(x)\dif\mu \\
+		=&\operatorname{E}_{\eta}(TT^T)-\operatorname{E}_{\eta}(T)[\operatorname{E}_{\eta}(T)]^T=\operatorname{Cov}_{\eta}(T)
+	\end{align*}
+	由(3)可知：
+	\begin{equation*}
+		I(\eta)=J_{\theta}^T(\eta)I(\theta)J_{\theta}^T(\eta)=\operatorname{Cov}_{\eta}^T(T)I(\theta)\operatorname{Cov}_{\eta}(T)
+	\end{equation*}
+	因为指数族满秩，由\cref{prop:ExponentialFamily}(6)可知$T(x)$分量之间不满足任何线性约束，即$T(x)$的分量线性无关，所以$\operatorname{Cov}_{\eta}(T)$可逆\info{需要严格证明}，根据\cref{prop:InvertibleMatrix}(12)即可得出结论。
+\end{proof}
+\begin{theorem}[One-Dimensional Information Inequality]
+	\label{theo:InformationInequality1}
+	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，$\mathscr{P}$的概率函数族$\{p_{\theta}(x):\theta\in\Theta\}$是Cramer-Rao正则族，其Fisher信息矩阵$I(\theta)$可逆，$\mathbf{X}$为从总体$F$中抽取的简单样本，$\delta(\mathbf{X})\in L_2(X)$是一个估计量且：
+	\begin{equation*}
+		\frac{\dif}{\dif\theta}\int_{X}\delta p_{\theta}(x)\dif\mu=\int_{X}\frac{\dif}{\dif\theta}[\delta p_{\theta}(x)]\dif\mu
+	\end{equation*}
+	则有：
+	\begin{equation*}
+		\operatorname{Var}_{\theta}[\delta(\mathbf{X})]\geqslant\frac{1}{I(\theta)}\left[\frac{\dif\operatorname{E}_{\theta}(\delta)}{\dif\theta}\right]^2
+	\end{equation*}
+	称右式为\textbf{Cramer-Rao下界}，等号成立当且仅当存在不全为$0$的$a,b$（$a,b$可能依赖于参数）使得：
+	\begin{equation*}
+		\delta=a\frac{\dif\ln p_{\theta}(x)}{\dif\theta}+b\;\text{a.s.}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	在\cref{theo:Hammersley-Chapman-RobbinsInequality}中取：
+	\begin{equation*}
+		\varphi=\frac{\dif\ln p_{\theta}(x)}{\dif\theta}
+	\end{equation*}
+	即可，取等条件由\cref{ineq:cauchy-schiwarz-expectations}得到。
+\end{proof}
+\begin{theorem}
+	关于一维信息不等式的取等情况，有如下结论：
+	\begin{enumerate}
+		\item 设$\mathscr{P}$是单参数Cramer-Rao正则指数族，其概率函数为：
+		\begin{equation*}
+			p_{\eta}(x)=C(\eta)\exp[\eta T(x)]h(x)
+		\end{equation*}
+		则$\delta(X)$是$T(x)$的线性变换时才有可能达到Cramer-Rao下界的估计量；
+		\item (Muller-Funk)设$\{p_{\theta}(x):\theta\in\Theta\}$是Cramer-Rao正则族，参数空间为$\Theta$，估计量$\delta$满足$\operatorname{Var}_{\theta}(\delta)<+\infty$，$\delta$达到Cramer-Rao下界当且仅当存在一个$C_1$函数$\varphi(\theta)$使得：
+		\begin{equation*}
+			p_{\theta}(x)=C(\theta)\exp[\varphi(\theta)\delta]h(x)
+		\end{equation*}
+		是一个概率密度函数。当$\delta$是$g(\theta)$的无偏估计时，应有：
+		\begin{equation*}
+			\delta=\frac{g'(\theta)}{I(\theta)}\frac{\dif\ln p_{\theta}(x)}{\dif\theta}+g(\theta),\quad g(\theta)=-\frac{C'(\theta)}{C(\theta)\varphi'(\theta)},\quad I(\theta)=\varphi'(\theta)g'(\theta)
+		\end{equation*}
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由\cref{theo:InformationInequality1}和\cref{prop:FIM}(5)的过程可知$\delta$达到Cramer-Rao下界当且仅当：
+	\begin{equation*}
+		\delta=a\frac{\dif\ln p_{\eta}(x)}{\dif\eta}+b=a\left[T-\operatorname{E}_{\eta}(T)\right]+b
+	\end{equation*}
+	为了使得$\delta$是一个统计量，$\delta$只能是$T(x)$的线性变换。
+\end{proof}
+\begin{theorem}\label{theo:InformationInequalityn}
+	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是$n$维参数空间，$\mathscr{P}$的概率函数族$\{p_{\theta}(x):\theta\in\Theta\}$是Cramer-Rao正则族，其Fisher信息矩阵$I(\theta)$可逆，$\mathbf{X}$为从总体$F$中抽取的简单样本，$\delta(\mathbf{X})\in L_2(X)$是一个估计量且：
+	\begin{equation*}
+		\frac{\partial\operatorname{E}_{\theta}(\delta)}{\partial\theta_i}=\int_{X}\frac{\partial}{\partial\theta_i}[\delta p_{\theta}(x)]\dif\mu,\;i=1,2,\dots,n
+	\end{equation*}
+	则有：
+	\begin{equation*}
+		\operatorname{Var}_{\theta}[\delta(\mathbf{X})]\geqslant\left[\frac{\partial\operatorname{E}_{\theta}(\delta)}{\partial\theta}\right]^T[I(\theta)]^{-1}\left[\frac{\partial\operatorname{E}_{\theta}(\delta)}{\partial\theta}\right]
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	对任意$n$维实向量$\alpha$，由正则条件和\cref{ineq:cauchy-schiwarz-expectations}可得：
+	\begin{equation*}
+		\operatorname{Var}_{\theta}(\delta)\geqslant\frac{\operatorname{Cov}_{\theta}^2[\delta,\alpha^TS_{\theta}(x)]}{\operatorname{Var}_{\theta}[\alpha^TS_{\theta}(x)]}
+	\end{equation*}
+	令：
+	\begin{equation*}
+		\gamma_i=\operatorname{Cov}_{\theta}[\delta,S_{\theta,i}(x)],\;\gamma=(\seq{\gamma}{n})
+	\end{equation*}
+	由最值的不等式性和\info{注意这个代数不等式}可得：
+	\begin{equation*}
+		\operatorname{Var}_{\theta}(\delta)\geqslant\max_{\alpha}\frac{\operatorname{Cov}_{\theta}^2[\delta,\alpha^TS_{\theta}(x)]}{\operatorname{Var}_{\theta}[\alpha^TS_{\theta}(x)]}=\max_{\alpha}\frac{\alpha^T\gamma\gamma^T\alpha}{\alpha^TI(\theta)\alpha}=\gamma^T[I(\theta)]^{-1}\gamma
+	\end{equation*}
+	根据\cref{prop:MeasurableIntegral}(5)和条件可得：
+	\begin{align*}
+		&\operatorname{Cov}_{\theta}[\delta,S_{\theta,i}(x)]=\int_{X}[\delta-\operatorname{E}_{\theta}(\delta)]\frac{\partial\ln p_{\theta}(x)}{\partial\theta_i}p_{\theta}(x)\dif\mu \\
+		=&\int_{X}\delta\frac{\partial\ln p_{\theta}(x)}{\partial\theta_i}p_{\theta}(x)\dif\mu-\operatorname{E}_{\theta}(\delta)\int_{X}\frac{\partial\ln p_{\theta}(x)}{\partial\theta_i}p_{\theta}(x)\dif\mu \\
+		=&\frac{\partial}{\partial\theta_i}\operatorname{E}_{\theta}(\delta)-\int_{X}\frac{\partial p_{\theta}(x)}{\partial\theta_i}\dif\mu=\frac{\partial}{\partial\theta_i}\operatorname{E}_{\theta}(\delta)
+	\end{align*}
+	于是结论成立。
+\end{proof}

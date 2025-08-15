@@ -1,0 +1,77 @@
+\section{独立性}
+\begin{definition}
+	设$(X,\mathscr{F},P)$是一个概率空间，$T$是一个指标集。
+	\begin{enumerate}
+		\item 若$(X,\mathscr{F},P)$上的集族$\{A_n:n\in T\}$对任意的$m\in\mathbb{N}^+$和任意的$\{\seq{n}{m}\}\subseteq T$，有：
+		\begin{equation*}
+			P\left(\underset{i=1}{\overset{m}{\cap}}A_{n_i}\right)=\prod_{i=1}^{m}P(A_{n_i})
+		\end{equation*}
+		则称$\{A_n:n\in T\}$\gls{MutuallyIndependent}；
+		\item 设$\{\mathscr{A}_n\subseteq\mathscr{F}:n\in T\}$是$(X,\mathscr{F},P)$上由集族构成的集族，若对每个$n\in T$任取一个$A_n\in\mathscr{A}_n$所构成的集族$\{A_n:n\in T\}$相互独立，则称$\{\mathscr{A}_n\subseteq\mathscr{F}:n\in T\}$相互独立；
+		\item 设$\{f_n:n\in T\}$是由$(X,\mathscr{F},P)$上的随机变量构成的随机变量族，若$\{\sigma(f_n):n\in T\}$相互独立，则称$\{f_n:n\in T\}$相互独立。若$\sigma(f)$与$\mathscr{A}\subseteq\mathscr{F}$独立，也称为$f$与$\mathscr{A}$独立。
+	\end{enumerate}
+	若$(X,\mathscr{F},P)$上的集族$\{A_n\}$对任意的$i\ne j$有$P(A_i\cap A_j)=P(A_i)P(A_j)$，则称$\{A_n\}$\gls{PairwiseIndependent}。可见两个集合之间的相互独立性与成对独立性是等价的，于是将两个集合相互独立或成对独立简称为它们独立。
+\end{definition}
+\begin{property}\label{prop:Independent}
+	设$(X,\mathscr{F},P)$是一个概率空间。独立性具有如下性质：
+	\begin{enumerate}
+		\item 若$\{A_n\}\subseteq\mathscr{F}$相互独立，则对其中任意个元素取补集后得到的$\{B_n\}$也相互独立；
+		\item $\{A_n\}\subseteq\mathscr{F}$相互独立当且仅当$\{I_{A_n}\}$相互独立；
+		\item $\{\mathscr{A}_n\subseteq\mathscr{F}\}$相互独立则$\{(X,\mathscr{A}_n)\}$上任意的随机变量族也相互独立；
+		\item 设$\{f_n\}$是$(X,\mathscr{F},P)$上相互独立的随机变量族，$\{g_n\}$是一族$(\mathbb{R}^{},\mathcal{B})$上的Borel函数，则$\{g_n\circ f_n\}$是相互独立的随机变量族；
+		\item 若由$\pi$系构成的集族$\{\mathscr{A}_n\subseteq\mathscr{F}\}$相互独立，则将其中任意个元素修改为由自身生成的$\sigma$域后得到的$\{\mathscr{B}_n\}$也相互独立；
+		\item 设$f$为$(X,\mathscr{F})$上的随机变量，$f$与$\mathscr{A}\subseteq\mathscr{F}$独立，$g$是$(\mathbb{R}^{},\mathcal{B})$上的Borel函数，则$g\circ f$与$\mathscr{A}$独立；
+		\item 若$f$与$\mathscr{A}\subseteq\mathscr{F}$独立，则$f^+,f^-$与$\mathscr{A}$独立；
+		\item 若$f$与$\mathscr{A}\subseteq\mathscr{F}$独立，当$f$是非负可测函数时，\cref{prop:MeasurableFunction}(8)中满足$\varphi_n\uparrow f$的非负简单函数列$\{\varphi_n\}$与$\mathscr{A}$独立；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)当$\{A_n\}=\{\seq{A}{n}\}$时，考虑$\{A_1^c,A_2,\dots,A_n\}$的情况。对任意的$m\in\{1,2,\dots,n\}$和任意的$\{\seq{n}{m}\}\subseteq\{1,2,\dots,n\}$，若$1\notin\{\seq{n}{m}\}$，自然有：
+	\begin{equation*}
+		P\left(\underset{i=1}{\overset{m}{\cap}}A_{n_i}\right)=\prod_{i=1}^{m}P(A_{n_i})
+	\end{equation*}
+	若$1\in\{\seq{n}{m}\}$，修改数值使得$n_1=1$，由\cref{prop:SetOperation}(6)和\cref{prop:Measure}(2)可知：：
+	\begin{align*}
+		P\left[A_1^c\cap\left(\underset{i=2}{\overset{m}{\cap}}A_{n_i}\right)\right]&=P\left\{\underset{i=2}{\overset{m}{\cap}}A_{n_i}\backslash\left[A_1\cap\left(\underset{i=2}{\overset{m}{\cap}}A_{n_i}\right)\right]\right\}=P\left(\underset{i=2}{\overset{m}{\cap}}A_{n_i}\right)-P\left(\underset{i=1}{\overset{m}{\cap}}A_{n_i}\right) \\
+		&=\prod_{i=2}^{m}P(A_{n_i})-\prod_{i=1}^{m}P(A_{n_i})=[1-P(A_1)]\prod_{i=2}^{m}P(A_{n_i}) \\
+		&=P(A_1^c)\prod_{i=2}^{m}P(A_{n_i})
+	\end{align*}
+	于是$\{A_1^c,A_2,\dots,A_n\}$相互独立，该结论显然可推广至对$\{A_n\}$中任意个元素取补集后得到的$\{B_n\}$也相互独立。\par
+	当$\{A_n\}$含有无穷个元素时，由相互独立的定义和有限个元素时的情况即可得出结论。\par
+	(2)注意到$\{\sigma(I_{A_n})\}=\Big\{\{\varnothing,A_n,A_n^c,X\}\Big\}$，所以充分性显然成立，下证必要性。对每个$n\in T$任取一个$B_n\in\sigma(I_{A_n})$从而构成集族$\{B_n\}$。对任意的$m\in\mathbb{N}^+$且$m$小于等于$\{B_n\}$中元素的个数，从$\{B_n\}$中任取$m$个元素构成集族$\{C_n\}$。若$\varnothing\in\{C_n\}$，则：
+	\begin{equation*}
+		P\left(\underset{i=1}{\overset{m}{\cap}}C_i\right)=P(\varnothing)=0,\quad\prod_{i=1}^{m}P(C_i)=0
+	\end{equation*}
+	二者相等。其它情况由$X=\varnothing^c$和(1)即可得出。\par
+	(3)由随机变量的定义立即可得。\par
+	(4)由\cref{prop:MeasurableMapping}(2)的证明过程可知$\sigma(g_n\circ f_n)\subseteq\sigma(f_n)$，而$\{\sigma(f_n)\}$相互独立，所以$\{g_n\circ f_n\}$相互独立。\par
+	(5)当$\{\mathscr{A}_n\}=\{\seq{\mathscr{A}}{n}\},\;\{\mathscr{B}_n\}=\{\sigma(\mathscr{A}_1),\mathscr{A}_2,\dots,\mathscr{A}_n\}$时，记：
+	\begin{equation*}
+		\mathscr{B}=\left\{A\in\mathscr{F}:\textbf{对任意的}B=\underset{i=2}{\overset{m}{\cap}}A_{n_i},A_{n_i}\in\mathscr{A}_{n_i},\;i=2,\dots,m,\;m\leqslant n\textbf{有}P(A\cap B)=P(A)P(B)\right\}
+	\end{equation*}
+	注意到$P(X\cap B)=P(B)=P(X)P(B)$，所以$X\in\mathscr{B}$。若$C,D\in\mathscr{B}$且$D\subseteq C$，由\cref{prop:SetOperation}(4)和\cref{prop:Measure}(2)可得：
+	\begin{align*}
+		P[(C\backslash D)\cap B]&=P[(C\cap B)\backslash(D\cap B)]=P(C\cap B)-P(D\cap B) \\
+		&=P(C)P(B)-P(D)P(B)=[P(C)-P(D)]P(B)=P(C\backslash D)P(B)
+	\end{align*}
+	所以$C\backslash D\in\mathscr{B}$。取$\mathscr{B}$中单调递增的集合序列$\{B_m\}$，由\cref{prop:SigmaField}(2)可知$\{B_m\cap B\}$也是$\mathscr{F}$中单调递增的集合序列，由\cref{prop:SetOperation}(4)和\cref{prop:Measure}(3)（下连续性）可得：
+	\begin{align*}
+		P\left[\left(\underset{m=1}{\overset{+\infty}{\cup}}B_m\right)\cap B\right]&=P\left[\underset{m=1}{\overset{+\infty}{\cup}}(B_m\cap B)\right]=\lim_{m\to+\infty}P\left[B_m\cap B\right] \\
+		&=\lim_{m\to+\infty}[P(B_m)P(B)]=P(B)\lim_{m\to+\infty}P(B_m) \\
+		&=P(B)P\left(\underset{m=1}{\overset{+\infty}{\cup}}B_m\right)
+	\end{align*}
+	于是$\underset{m=1}{\overset{+\infty}{\cup}}B_m\in\mathscr{B}$。\par
+	综上，$\mathscr{B}$是一个$\lambda$系，由相互独立性的定义可知$\mathscr{A}_1\subseteq\mathscr{B}$，根据\cref{cor:SigmaPi=LambdaPi}可得$\sigma(\mathscr{A}_1)\subseteq\mathscr{B}$，所以有$\sigma(\mathscr{A}_1),\mathscr{A}_2,\dots,\mathscr{A}_n$相互独立。显然可将该结论推广为：将$\seq{\mathscr{A}}{n}$中任意个元素修改为由自身生成的$\sigma$域后得到的$\seq{\mathscr{B}}{n}$也相互独立。\par
+	当$\{\mathscr{A}_n\}$含有无穷个元素时，由相互独立的定义和有限个元素时的情况即可得出结论。\par
+	(6)由\cref{prop:MeasurableMapping}(2)的证明过程可知$\sigma(g\circ f)\subseteq\sigma(f)$，而$\sigma(f)$与$\mathscr{A}$相互独立，所以$g\circ f$与$\mathscr{A}$相互独立。\par
+	(7)$\;f^+$可视作$f$关于函数$h$的复合：
+	\begin{equation*}
+		h(x)=
+		\begin{cases}
+			x,&x>0 \\
+			0,&x\leqslant0
+		\end{cases}
+	\end{equation*}
+	显然$h$是一个$\mathbb{R}^{}$上的实值连续函数，由\cref{prop:MeasurableFunction}(10)即可得到$h$是$(\mathbb{R}^{},\mathcal{B})$上的Borel函数，根据(6)即可得出$f^+$与$\mathscr{A}$独立。$f^-$的情况同理可得。\par
+	(8)对任意的$A\in\mathcal{B}$和任意的$n\in\mathbb{N}^+$，根据\cref{prop:MeasurableFunction}(8)可知$\varphi_n^{-1}(A)$是有限个$\sigma(f)$中集合的并集，由\cref{prop:SigmaField}(3)可知$\varphi_n^{-1}(A)\in\sigma(f)$，根据$A$的任意性可得$\sigma(\varphi_n)\subseteq\sigma(f)$。因为$\sigma(f)$与$\mathscr{A}$独立，所以有$\sigma(\varphi_n)$与$\mathscr{A}$独立，即$\varphi_n$与$\mathscr{A}$独立。由$n$的任意性即可得出结论。
+\end{proof}

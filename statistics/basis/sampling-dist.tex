@@ -1,0 +1,213 @@
+\section{抽样分布}
+
+\subsection{一维总体}
+\begin{theorem}
+	设$\seq{X}{m}\;\text{i.i.d.}\sim N(\mu,\sigma^2)$，$\seq{Y}{n}\;\text{i.i.d.}\sim N(\nu,\sigma^2)$，$\seq{X}{m}$和$\seq{Y}{n}$相互独立，$\overline{X},\overline{Y}$为样本均值，$S_X^2,S_Y^2$为样本方差，则：
+	\begin{enumerate}
+		\item $\overline{X}\sim N\left(\mu,\dfrac{\sigma^2}{m}\right)$；
+		\item $\dfrac{(m-1)S_X^2}{\sigma^2}\sim\chi_{m-1}^2$；
+		\item $\overline{X}$与$S_X^2$独立；
+		\item $\dfrac{\sqrt{m}(\overline{X}-\mu)}{S_X}\sim t_{m-1}$；
+		\item $\dfrac{\overline{X}-\overline{Y}-(\mu-\nu)}{S_w}\sqrt{\dfrac{mn}{m+n}}\sim t_{m+n-2}$，其中：
+		\begin{equation*}
+			(m+n-2)S_w^2=(m-1)S_X^2+(n-1)S_Y^2
+		\end{equation*}
+		\item 若$\seq{X}{m}\;\text{i.i.d.}\sim N(\mu,\sigma_1^2)$，$\seq{Y}{n}\;\text{i.i.d.}\sim N(\nu,\sigma_2^2)$，其它条件不变，则：
+		\begin{equation*}
+			\frac{S_X^2\sigma_2^2}{S_Y^2\sigma_1^2}\sim F_{m-1,n-1}
+		\end{equation*}
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	令$\mathbf{X}=(\seq{X}{m})^T,\;\mathbf{Y}=(\seq{Y}{n})^T$。因为$\seq{X}{m}\;\text{i.i.d.}\sim N(\mu,\sigma^2)$，$\seq{Y}{n}\;\text{i.i.d.}\sim N(\nu,\sigma^2)$，所以$\mathbf{X}\sim N_m(\boldsymbol{\mu},\Sigma_m),\;\mathbf{Y}\sim N_n(\boldsymbol{\nu},\Sigma_n)$，其中：
+	\begin{equation*}
+		\boldsymbol{\mu}=\mu\mathbf{1}_m,\quad\Sigma_m=\sigma^2I_m,\quad\boldsymbol{\nu}=\nu\mathbf{1}_n,\quad\Sigma_n=\sigma^2I_n
+	\end{equation*}\par
+	(1)令$m$维行向量$c=\left(\dfrac{1}{m},\dfrac{1}{m},\dots,\dfrac{1}{m}\right)$，
+	由\cref{prop:MultiNormal}(2)可知：
+	\begin{equation*}
+		\overline{X}=c\mathbf{X}\sim N(c\boldsymbol{\mu},c\Sigma c^T)
+	\end{equation*}
+	而：
+	\begin{equation*}
+		c\boldsymbol{\mu}=\sum_{i=1}^{m}\frac{\mu}{m}=\mu,\;c\Sigma c^T=\sum_{i=1}^{m}\frac{\sigma^2}{m^2}=\frac{\sigma^2}{m}
+	\end{equation*}
+	所以$\overline{X}\sim N\left(\mu,\dfrac{\sigma^2}{m}\right)$。\par
+	(2)由Schmidit正交化\info{考虑链接什么过来}可知存在正交矩阵：
+	\begin{equation*}
+		A=
+		\begin{pmatrix}
+			\frac{1}{\sqrt{m}} & \frac{1}{\sqrt{m}} & \cdots & \frac{1}{\sqrt{m}} \\
+			a_{21} & a_{22} & \cdots & a_{2m} \\
+			\vdots & \vdots & \ddots & \vdots \\
+			a_{m1} & a_{m2} & \cdots & a_{mm}
+		\end{pmatrix}
+	\end{equation*}
+	令$\mathbf{Z}=A\mathbf{X}$，由\cref{prop:MultiNormal}(2)可知$\mathbf{Z}\sim N_m(A\boldsymbol{\mu},\sigma^2I_m)$。由\cref{prop:MultiNormal}(3)可知$\mathbf{Z}_i\sim N(\mu_i,\sigma^2)$，其中：
+	\begin{equation*}
+		\mu_i=\mu\sum_{j=1}^{m}a_{ij}
+	\end{equation*}
+	因为$A$是一个正交矩阵，所以：
+	\begin{equation*}
+		\mu_i=\sqrt{m}\mu\sum_{j=1}^{m}\frac{1}{\sqrt{m}}a_{ij}=\sqrt{m}\mu\left(\dfrac{1}{\sqrt{m}},\dfrac{1}{\sqrt{m}},\dots,\dfrac{1}{\sqrt{m}}\right)(a_{i1},a_{i2},\dots,a_{im})^T=0
+	\end{equation*}
+	由\cref{prop:MultiNormal}(2)即可得：
+	\begin{equation*}
+		\frac{\mathbf{Z}_i}{\sigma}\sim N(0,1),\;\forall\;i=1,2,\dots,m
+	\end{equation*}
+	因为$\mathbf{Z}=A\mathbf{X}$，所以：
+	\begin{equation*}
+		\mathbf{Z}_1=\frac{1}{\sqrt{m}}\sum_{i=1}^{m}X_i=\sqrt{m}\overline{X}
+	\end{equation*}
+	因为：
+	\begin{equation*}
+		\mathbf{Z}^T\mathbf{Z}=\sum_{i=1}^{m}\mathbf{Z}_i^2=\mathbf{X}^TA^TA\mathbf{X}=\mathbf{X}^T\mathbf{X}=\sum_{i=1}^{m}X_i^2
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		(m-1)S_X^2=\sum_{i=1}^{m}(X_i-\overline{X})^2=\sum_{i=1}^{m}X_i^2-m\overline{X}^2=\sum_{i=1}^{m}\mathbf{Z}_i^2-\mathbf{Z}_1^2=\sum_{i=2}^{m}\mathbf{Z}_i^2
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\frac{(m-1)S_X^2}{\sigma^2}=\sum_{i=2}^{m}\left(\frac{\mathbf{Z}_i}{\sigma}\right)^2\sim\chi_{m-1}^2
+	\end{equation*}\par
+	(3)由(2)的证明过程可得$\mathbf{Z}\sim N_m(A\boldsymbol{\mu},\sigma^2I_m)$，根据\cref{prop:MultiNormal}(8)可知$\seq{\mathbf{Z}}{m}$相互独立。而：
+	\begin{equation*}
+		S_X^2=\frac{\sum\limits_{i=2}^{m}\mathbf{Z}_i^2}{(m-1)},\;\overline{X}=\frac{\mathbf{Z}_1}{\sqrt{m}}
+	\end{equation*}
+	所以$S_X^2$与$\overline{X}$独立。\par
+	(4)对$\overline{X}$进行标准化可得：
+	\begin{equation*}
+		\frac{\overline{X}-\mu}{\sqrt{\frac{\sigma^2}{m}}}=\frac{\sqrt{m}(\overline{X}-\mu)}{\sigma}\sim N(0,1)
+	\end{equation*}
+	由(2)和(3)进一步可得：
+	\begin{equation*}
+		\frac{\dfrac{\sqrt{m}(\overline{X}-\mu)}{\sigma}}{\sqrt{\dfrac{(m-1)S_X^2}{\sigma^2(m-1)}}}=\frac{\sqrt{m}(\overline{X}-\mu)}{S_X}\sim t_{m-1}
+	\end{equation*}\par
+	(5)由(1)（得到$\overline{X}$和$\overline{Y}$的分布）、$\seq{X}{m}$与$\seq{Y}{n}$相互独立（由\cref{prop:MultiNormal}(6)得到二维随机向量$(\overline{X},\overline{Y})^T$的分布）和\cref{prop:MultiNormal}(2)（对$(\overline{X},\overline{Y})^T$用二维行向量$(1,-1)$做线性变换）可得：
+	\begin{equation*}
+		\overline{X}-\overline{Y}\sim N\left(\mu-\nu,\frac{\sigma^2}{m}+\frac{\sigma^2}{n}\right)
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\frac{\overline{X}-\overline{Y}-(\mu-\nu)}{\sqrt{\dfrac{m+n}{mn}\sigma^2}}\sim N(0,1)
+	\end{equation*}
+	由(2)可得：
+	\begin{equation*}
+		\frac{(m-1)S_X^2}{\sigma^2}\sim\chi_{m-1}^2,\;
+		\frac{(n-1)S_Y^2}{\sigma^2}\sim\chi_{n-1}^2
+	\end{equation*}
+	由\cref{prop:Chi2Distribution}(1)可得：
+	\begin{equation*}
+		\frac{(m-1)S_X^2+(n-1)S_Y^2}{\sigma^2}\sim\chi_{m+n-2}^2
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\frac{(m+n-2)S_w^2}{\sigma^2}\sim\chi_{m+n-2}^2
+	\end{equation*}
+	由(3)可得$\overline{X}$与$S_X^2$独立、$\overline{Y}$与$S_Y^2$独立，所以：
+	\begin{equation*}
+		\frac{\dfrac{\overline{X}-\overline{Y}-(\mu-\nu)}{\sqrt{\dfrac{m+n}{mn}\sigma^2}}}{\sqrt{\dfrac{(m+n-2)S_w^2}{\sigma^2(m+n-2)}}}=\frac{\overline{X}-\overline{Y}-(\mu-\nu)}{S_w}\sqrt{\dfrac{mn}{m+n}}\sim t_{m+n-2}
+	\end{equation*}\par
+	(6)由(2)可知：
+	\begin{equation*}
+		\frac{(m-1)S_X^2}{\sigma_1^2}\sim\chi_{m-1}^2,\;
+		\frac{(n-1)S_Y^2}{\sigma_2^2}\sim\chi_{n-1}^2
+	\end{equation*}
+	因为$\seq{X}{m}$和$\seq{Y}{n}$相互独立，所以上两式也相互独立。由$F$分布的定义即可得：
+	\begin{equation*}
+		\frac{\dfrac{(m-1)S_X^2}{\sigma_1^2(m-1)}}{\dfrac{(n-1)S_Y^2}{\sigma_2^2(n-1)}}=\frac{S_X^2\sigma_2^2}{S_Y^2\sigma_1^2}\sim F_{m-1,n-1}\qedhere
+	\end{equation*}
+\end{proof}
+
+\subsection{多维总体}
+\begin{theorem}\label{theo:MultiVariateSamplingDist}
+	设$\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_m}\;\text{i.i.d.}\sim\operatorname{N}_p(\boldsymbol{\mu},\Sigma)$，$\mathbf{Y_1},\mathbf{Y_2},\dots,\mathbf{Y_n}\;\text{i.i.d.}\sim \operatorname{N}_p(\boldsymbol{\nu},\Sigma)$，$\Sigma>\mathbf{0}$，$\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_m}$和$\mathbf{Y_1},\mathbf{Y_2},\dots,\mathbf{Y_n}$相互独立，$\overline{\mathbf{X}},\overline{\mathbf{Y}}$为样本均值向量，$S_X,S_Y$为样本协方差矩阵，则：
+	\begin{enumerate}
+		\item $\overline{\mathbf{X}}\sim\operatorname{N}_p\left(\boldsymbol{\mu},\dfrac{1}{m}\Sigma\right)$；
+		\item $(m-1)S_X\sim\operatorname{W}_p(m-1,\Sigma)$；
+		\item $\overline{\mathbf{X}}$与$S_X$相互独立；
+		\item $m(\overline{\mathbf{X}}-\boldsymbol{\mu})^TS_X^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu})\sim T^2(p,m-1)$；
+		\item 若$\boldsymbol{\mu}=\boldsymbol{\nu}$，则$\dfrac{mn}{m+n}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})^TS_{w}^{-1}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})\sim T^2(p,m+n-2)$，其中：
+		\begin{equation*}
+			(m+n-2)S_w=(m-1)S_X+(n-1)S_Y 
+		\end{equation*}
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)\par
+	(2)\par
+	(3)\par
+	(4)由(1)(2)(3)和\cref{prop:T^2}(1)可得：
+	\begin{equation*}
+		(m-1)m(\overline{\mathbf{X}}-\boldsymbol{\mu})^T[(m-1)S_X]^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu})=m(\overline{\mathbf{X}}-\boldsymbol{\mu})^TS_X^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu})\sim T^2(p,m-1)
+	\end{equation*}\par
+	(5)由(1)（得到$\overline{\mathbf{X}}$和$\overline{\mathbf{Y}}$的分布）、\cref{prop:MultiNormal}(2)（得到$-\overline{\mathbf{Y}}$的分布）、\cref{prop:MultiNormal}(7)以及$\overline{\mathbf{X}}$与$\overline{\mathbf{Y}}$的独立性可得
+	\begin{equation*}
+		\overline{\mathbf{X}}-\overline{\mathbf{Y}}\sim \operatorname{N}_p\left(\boldsymbol{\mu}-\boldsymbol{\nu},\frac{\Sigma}{m}+\frac{\Sigma}{n}\right)
+	\end{equation*}
+	于是当$\boldsymbol{\mu}=\boldsymbol{\nu}$时由\cref{prop:MultiNormal}(2)可得：
+	\begin{equation*}
+		\overline{\mathbf{X}}-\overline{\mathbf{Y}}-(\mu-\nu)=\overline{\mathbf{X}}-\overline{\mathbf{Y}}\sim \operatorname{N}_p\left(\mathbf{0},\frac{\Sigma}{m}+\frac{\Sigma}{n}\right)
+	\end{equation*}
+	由(2)、$\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_m}$和$\mathbf{Y_1},\mathbf{Y_2},\dots,\mathbf{Y_m}$之间的独立性以及\cref{prop:Wishart}(1)可得：
+	\begin{gather*}
+		(m-1)S_X\sim\operatorname{W}_p(m-1,\Sigma),\quad(n-1)S_Y\sim\operatorname{W}_p(n-1,\Sigma) \\
+		(m+n-2)S_w=(m-1)S_X+(n-1)S_Y\sim\operatorname{W}_p(m+n-2,\Sigma)
+	\end{gather*}
+	于是：
+	\begin{align*}
+		&\frac{m+n-2}{\dfrac{m+n}{mn}}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})^T[(m+n-2)S_{w}]^{-1}(\overline{\mathbf{X}}-\overline{\mathbf{Y}}) \\
+		=&\frac{mn}{m+n}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})^TS_{w}^{-1}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})\sim T^2(p,m+n-2)\qedhere
+	\end{align*}
+\end{proof}
+
+\subsection{多维正态总体参数的检验}
+\subsubsection{均值的检验}
+\begin{theorem}
+	设$\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_n}\;\text{i.i.d.}\sim\operatorname{N}_p(\boldsymbol{\mu},\Sigma)$，$\Sigma>\mathbf{0}$，$\overline{\mathbf{X}}$为样本均值向量，$S$为样本协方差矩阵。假设检验问题：
+	\begin{equation*}
+		H_0:\boldsymbol{\mu}=\boldsymbol{\mu}_0,\quad H_1:\boldsymbol{\mu}\ne\boldsymbol{\mu}_0
+	\end{equation*}
+	的检验统计量与拒绝域为：
+	\begin{gather*}
+		\begin{cases}
+			\chi_0^2=n(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)^T\Sigma^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)\sim\chi_p^2,&\Sigma\text{已知} \\
+			T^2=n(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)^TS^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)\sim T^2(p,n-1),&\Sigma\text{未知}
+		\end{cases} \\
+		\begin{cases}
+			\{\chi_0^2>\chi_p^2(\alpha)\},&\Sigma\text{已知} \\
+			\{T^2>T^2_{p,n-1}(\alpha)\},&\Sigma\text{未知} \\
+		\end{cases}
+	\end{gather*}
+\end{theorem}
+\begin{proof}
+	\textbf{(1)$\;\Sigma$已知：}因为$\Sigma>\mathbf{0}$，所以$\Sigma^{-1},\Sigma^{-\frac{1}{2}}$存在\info{正定矩阵可逆}。在原价设成立的情况下，由\cref{theo:MatNormalLinearTransform}和\cref{theo:MultiVariateSamplingDist}(1)可知：
+	\begin{equation*}
+		\sqrt{n}\Sigma^{-\frac{1}{2}}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)\sim\operatorname{N}_p(\mathbf{0},I_p)
+	\end{equation*}
+	由\cref{prop:ReverseSquareRootMat}(3)可得：
+	\begin{align*}
+		n(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)^T\Sigma^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)
+		&=(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)^T\left(\frac{1}{n}\Sigma\right)^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0) \\
+		&=(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)^T\left(\sqrt{n}\Sigma^{-\frac{1}{2}}\right)^{2}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0) \\
+		&=[\sqrt{n}\Sigma^{-\frac{1}{2}}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)]^T[\sqrt{n}\Sigma^{-\frac{1}{2}}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)]\sim\chi^2_p
+	\end{align*}
+	上式值越大，说明样本均值与$\mu_0$的Mahalanobis距离越大，所以拒绝域取右侧单尾。\par
+	\textbf{(2)$\;\Sigma$未知：}由\cref{theo:MultiVariateSamplingDist}(4)可得统计量的分布，而$S$是$\Sigma$的无偏估计，所以该统计量值越大说明样本均值与$\mu_0$的Mahalanobis距离越大，拒绝域取右侧单尾。
+\end{proof}
+\subsubsection{两总体均值的比较}
+\begin{theorem}
+	设$\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_m}\;\text{i.i.d.}\sim\operatorname{N}_p(\boldsymbol{\mu},\Sigma),\;\mathbf{Y_1},\mathbf{Y_2},\dots,\mathbf{Y_n}\;\text{i.i.d.}\sim\operatorname{N}_p(\boldsymbol{\nu},\Sigma)$，$\Sigma>\mathbf{0}$，$\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_m}$和$\mathbf{Y_1},\mathbf{Y_2},\dots,\mathbf{Y_n}$相互独立，$\overline{\mathbf{X}},\overline{\mathbf{Y}}$为样本均值向量，$S_X,S_Y$为样本协方差矩阵。假设检验问题：
+	\begin{equation*}
+		H_0:\boldsymbol{\mu}=\boldsymbol{\nu},\quad H_1:\boldsymbol{\mu}\ne\boldsymbol{\nu}
+	\end{equation*}
+	的检验统计量与拒绝域为：
+	\begin{equation*}
+		T^2=\frac{mn}{m+n}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})^TS_{w}^{-1}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})\sim T^2(p,m+n-2),\quad\{T^2>T^2_{p,m+n-2}(\alpha)\}
+	\end{equation*}
+	其中$(m+n-2)S_w=(m-1)S_X+(n-1)S_Y$。
+\end{theorem}
+\begin{proof}
+	由\cref{theo:MultiVariateSamplingDist}(4)可得统计量的分布，该统计量值越大说明两个总体均值相近的可能性越小，所以拒绝域取右侧单尾。
+\end{proof}
