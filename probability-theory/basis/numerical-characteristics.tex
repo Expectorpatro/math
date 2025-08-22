@@ -8,7 +8,7 @@
 	\end{equation*}
 	称为$f$的期望。若$f$可积，则称$f$的期望是有限的。随机向量的期望即为各分量期望按原顺序排列成的向量，随机矩阵的期望即为各元素期望按原顺序排成的矩阵。
 \end{definition}
-\begin{property}
+\begin{property}\label{prop:Expectation}
 	设$f$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量，分布函数为$F$。期望有如下性质：
 	\begin{enumerate}
 		\item 对任何$(\mathbb{R}^{},\mathcal{B})$上的可测函数$g$，$g\circ f$是$(X,\mathscr{F},P)$上的可测函数，只要：
@@ -21,7 +21,7 @@
 		\end{equation*}
 		其中$\lambda$为L测度；当$f$为离散型随机变量时，令$D=\{x_n\}$，含义与随机变量分类时的含义相同，则上式化作：
 		\begin{equation*}
-				\operatorname{E}(g\circ f),\quad\sum_{n=1}^{+\infty}g(x_n)p(x_n)
+				\operatorname{E}(g\circ f),\quad\sum_{n=1}^{+\infty}g(x_n)P(f=x_n)
 		\end{equation*}
 	\end{enumerate}
 \end{property}
@@ -30,7 +30,11 @@
 	\begin{equation*}
 		\operatorname{E}(g\circ f)=\int_{X}g[f(x)]\dif P=\int_{f^{-1}(\mathbb{R}^{})}g[f(x)]\dif P
 	\end{equation*}
-	由\cref{theo:IntBySubstitution}即可得出一般结论。根据\cref{lem:IntChangeOfMeasure}可得出连续型随机变量时的结论。对于离散型随机变量，使用典型方法证明即可。\info{离散型得再看看}
+	由\cref{theo:IntBySubstitution}即可得出一般结论。根据\cref{lem:IntChangeOfMeasure}可得出连续型随机变量时的结论。对于离散型随机变量，由\cref{prop:MeasurableFunction}(2)、\cref{prop:SigmaField}(4)、\cref{theo:MeasurableCountableIntegral}、\cref{prop:MeasurableIntegral}(1)和积分的定义（$g(x)$限制在$x_n$上是简单函数，若$g(x_n)<0$还需用到\cref{prop:MeasurableIntegral}(5)）可得：
+	\begin{align*}
+		&\int_{\mathbb{R}^{}}g(x)\dif Pf^{-1}=\int_{(\mathbb{R}^{}\backslash D)\cup\left(\underset{n=1}{\overset{+\infty}{\cup}}\{x_n\}\right)}g(x)\dif Pf^{-1} \\
+		=&\int_{\mathbb{R}^{}\backslash D}g(x)\dif Pf^{-1}+\sum_{n=1}^{+\infty}\int_{\{x_n\}}g(x)\dif Pf^{-1}=\sum_{n=1}^{+\infty}g(x_n)P(f=x_n)\qedhere
+	\end{align*}
 \end{proof}
 \begin{note}
 	很多教材在上述定理中写的并不是$g$对pushforward measure$Pf^{-1}$进行积分，而是对$f$的分布函数$F$进行积分。$F$是一个测度吗？$F$与$Pf^{-1}$等价吗？显然并不是。由\cref{theo:Quasi-distributionMeasure}和\cref{prop:Semiring}(2)我们可以看到$F$可以引出半环$\mathscr{A}=\{(a,b]:a,b\in\mathbb{R}^{}\}$上的测度$\mu$，注意到：
