@@ -1,0 +1,321 @@
+\section{简单随机抽样}
+
+\begin{definition}
+	设总体$F$有$N$个个体。若从$F$中不放回地取$n$个个体作为一个样本，$\binom{N}{n}$个样本出现概率相同，则称该抽样设计为\gls{SRS}或\textbf{simple random sampling without replacement}（此时简记为\textbf{SRSWOR}）。若从$F$中有放回地取$n$个个体作为一个样本，所有个体的入样概率都相同且每次抽样都是独立进行的，则称该抽样设计为\gls{SRSWR}。
+\end{definition}
+\begin{note}
+	我们通常更喜欢不放回抽样，因为同一个个体在样本中多次出现并不能提供额外的信息，同时有放回抽样会导致估计量的方差更大（接下来将证明这一点）。
+\end{note}
+什么时候应使用简单随机抽样？
+\begin{enumerate}
+	\item 可使用的额外信息较少。
+	\item 研究多元关系，没有特别特殊的理由使用别的抽样方法。
+\end{enumerate}
+
+\subsection{SRS的参数估计}
+\begin{property}\label{prop:SRS}
+	SRS具有如下性质：
+	\begin{enumerate}
+		\item 记$Z_i$为表示第$i$个个体是否入样的示性变量，则：
+		\begin{gather*}
+			P(Z_i=1)=\frac{n}{N},\quad P(Z_i=1,Z_j=1)=\frac{n(n-1)}{N(N-1)} \\
+			\operatorname{E}(Z_i)=\frac{n}{N},\quad
+			\operatorname{Var}(Z_i)=\frac{n}{N}\left(1-\frac{n}{N}\right) \\
+			\operatorname{Cov}(Z_i,Z_j)=\frac{-n}{N(N-1)}\left(1-\frac{n}{N}\right),\quad\sum_{i=1}^{N}Z_i=n
+		\end{gather*}
+		\item 总体方差$\sigma^2$有如下点估计：
+		\begin{equation*}
+			\hat{\sigma}^2=\frac{1}{n-1}\sum_{i=1}^N\left(Y_i-\frac{1}{n}\sum_{j=1}^{N}Y_jZ_j\right)^2Z_i
+		\end{equation*}
+		该点估计是一个无偏估计；
+		\item 总体均值$\mu$有如下点估计：
+		\begin{equation*}
+			\hat{\mu}=\frac{1}{n}\sum\limits_{i=1}^{N}Y_iZ_i
+		\end{equation*}
+		该点估计具有如下性质：
+		\begin{gather*}
+			\operatorname{E}(\hat{\mu})=\mu,\;\operatorname{Var}(\hat{\mu})=\left(1-\frac{n}{N}\right)\frac{\sigma^2}{n} \\
+			\widehat{\operatorname{Var}}(\hat{\mu})=\left(1-\frac{n}{N}\right)\frac{\hat{\sigma}^2}{n}\text{是关于}\operatorname{Var}(\hat{\mu})\text{的无偏估计}
+		\end{gather*}
+		该点估计对应的置信水平为$1-\alpha$的区间估计为：
+		\begin{equation*}
+			\hat{\mu}\pm u_{1-\frac{\alpha}{2}}\times\sqrt{\widehat{\operatorname{Var}}(\hat{\mu})}
+		\end{equation*}
+		\item 总体总量$\tau$有如下点估计：
+		\begin{equation*}
+			\hat{\tau}=N\hat{\mu}=\frac{N}{n}\sum\limits_{i=1}^{N}Y_iZ_i
+		\end{equation*}
+		该点估计具有如下性质：
+		\begin{gather*}
+			\operatorname{E}(\hat{\tau})=\tau,\quad \operatorname{Var}(\hat{\tau})=N^2\left(1-\frac{n}{N}\right)\frac{\sigma^2}{n} \\
+			\widehat{\operatorname{Var}}(\hat{\tau})=N^2\left(1-\frac{n}{N}\right)\frac{\hat{\sigma}^2}{n}\text{是关于}\operatorname{Var}(\hat{\tau})\text{的无偏估计}
+		\end{gather*}
+		该点估计对应的置信水平为$1-\alpha$的区间估计为：
+		\begin{equation*}
+			\hat{\tau}\pm u_{1-\frac{\alpha}{2}}\times\sqrt{\widehat{\operatorname{Var}}(\hat{\tau})}
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)注意到：
+	\begin{gather*}
+		P(Z_i=1)=\pi_i=\frac{\binom{N-1}{n-1}}{\binom{N}{n}}=\frac{n}{N} \\
+		P(Z_i=1,Z_j=1)=\frac{\binom{N-2}{n-2}}{\binom{N}{n}}=\frac{n(n-1)}{N(N-1)}
+	\end{gather*}
+	于是有
+	\begin{equation*}
+		\operatorname{E}(Z_i)=1\times P(Z_i=1)=\frac{n}{N}
+	\end{equation*}
+	注意到$\operatorname{E}(Z_i^2)=0\times P(Z_i^2=0)+1\times P(Z_i^2=1)=P(Z_i=1)=\operatorname{E}(Z_i)$，由\cref{prop:Variance}(1)可得：
+	\begin{equation*}
+		\operatorname{Var}(Z_i)=\operatorname{E}(Z_i^2)-\operatorname{E}^2(Z_i)
+		=\operatorname{E}(Z_i)[1-\operatorname{E}(Z_i)]
+		=\frac{n}{N}\left(1-\frac{n}{N}\right)
+	\end{equation*}
+	注意到$\operatorname{E}(Z_iZ_j)=P(Z_i=1,\;Z_j=1)$，由\cref{prop:CovMat}(6)可得：
+	\begin{equation*}
+		\operatorname{Cov}(Z_i,Z_j)=\operatorname{E}(Z_iZ_j)-\operatorname{E}(Z_i)\operatorname{E}(Z_j)
+		=\frac{\binom{N-2}{n-2}}{\binom{N}{n}}-\operatorname{E}^2(Z_i)
+		=\frac{-n}{N(N-1)}\left(1-\frac{n}{N}\right)
+	\end{equation*}
+	最后一式由SRS的定义即可得到。\par
+	(2)由(1)、\cref{prop:MeasurableIntegral}(5)、(3)（先看下面$\mu$的估计）和\cref{prop:Variance}(1)可得：
+	\begin{align*}
+		&\operatorname{E}(\hat{\sigma}^2)=\frac{1}{n-1}\operatorname{E}\left[\sum_{i=1}^N\left(Y_i-\frac{1}{n}\sum_{j=1}^{N}Y_jZ_j\right)^2Z_i\right] \\
+		=&\frac{1}{n-1}\operatorname{E}\left[\sum_{i=1}^{n}Y_i^2Z_i-\frac{2}{n}\sum_{i=1}^{N}Y_iZ_i\sum_{j=1}^{N}Y_jZ_j+\sum_{i=1}^{N}\frac{1}{n^2}Z_i\left(\sum_{j=1}^{N}Y_jZ_j\right)^2\right] \\
+		=&\frac{1}{n-1}\operatorname{E}\left[\sum_{i=1}^{n}Y_i^2Z_i-2n\hat{\mu}^2+\frac{1}{n^2}(n\hat{\mu})^2\sum_{i=1}^NZ_i\right] \\
+		=&\frac{1}{n-1}\operatorname{E}\left[\sum_{i=1}^{n}Y_i^2Z_i-2n\hat{\mu}^2+n\hat{\mu}^2\right] \\
+		=&\frac{1}{n-1}\operatorname{E}\left[\sum_{i=1}^{n}Y_i^2Z_i-n\hat{\mu}^2\right]=\frac{1}{n-1}\left[\operatorname{E}\left(\sum_{i=1}^{N}Y_i^2Z_i\right)-n\operatorname{E}(\hat{\mu}^2)\right] \\
+		=&\frac{1}{n-1}\left\{\operatorname{E}\left(\sum_{i=1}^{N}Y_i^2Z_i\right)-n[\operatorname{Var}(\hat{\mu})+\operatorname{E}^2(\hat{\mu})]\right\} \\
+		=&\frac{1}{n-1}\left[\frac{n}{N}\sum_{i=1}^{N}Y_i^2-\left(1-\frac{n}{N}\right)\sigma^2-n\mu^2\right] \\
+		=&\frac{1}{n-1}\left[\frac{n}{N}\left(\sum_{i=1}^{N}Y_i^2-N\mu^2\right)-\left(1-\frac{n}{N}\right)\sigma^2\right] \\
+		=&\frac{1}{n-1}\left[\frac{n}{N}\sum_{i=1}^{N}(Y_i-\mu)^2-\left(1-\frac{n}{N}\right)\sigma^2\right] \\
+		=&\frac{1}{n-1}\left[\frac{n}{N}(N-1)\sigma^2-\left(1-\frac{n}{N}\right)\sigma^2\right]=\sigma^2
+	\end{align*}\par
+	(3)由(1)和\cref{prop:MeasurableIntegral}(5)可得：
+	\begin{equation*}
+		\operatorname{E}(\hat{\mu})=\frac{1}{n}\sum_{i=1}^{N}Y_i\operatorname{E}(Z_i)=\frac{1}{n}N\mu\frac{n}{N}=\mu
+	\end{equation*}
+	由\cref{prop:Variance}(3)、\cref{prop:CovMat}(2)(3)和(1)可得：
+	\begin{align*}
+		&\operatorname{Var}(\hat{\mu})
+		=\operatorname{Var}\left(\frac{1}{n}\sum_{i=1}^NY_iZ_i\right) \\
+		=&\sum_{i=1}^N\frac{1}{n^2}\operatorname{Var}(Y_iZ_i)+2\sum_{i=1}^N\sum_{j=i+1}^N\frac{1}{n^2}Cov(Y_iZ_i,Y_jZ_j) \\
+		=&\sum_{i=1}^N\frac{1}{n^2}Y_i^2\operatorname{Var}(Z_i)+2\sum_{i=1}^N\sum_{j=i+1}^N\frac{1}{n^2}Y_iY_j\operatorname{Cov}(Z_i,Z_j) \\
+		=&\frac{1}{n^2}\frac{n}{N}\left(1-\frac{n}{N}\right)\sum_{i=1}^{N}Y_i^2-\frac{1}{n^2}\frac{n}{N(N-1)}\left(1-\frac{n}{N}\right)\sum_{i=1}^{N}\sum_{j=i+1}^{N}2Y_iY_j \\
+		=&\frac{1}{n^2}\frac{n}{N}\left(1-\frac{n}{N}\right)\frac{1}{N-1}\left[\sum_{i=1}^{N}(N-1)Y_i^2-\sum_{i=1}^{N}\sum\limits_{j=i+1}^N2Y_iY_j\right] \\
+		=&\frac{1}{n^2}\frac{n}{N}\left(1-\frac{n}{N}\right)\frac{1}{N-1}\left[\sum_{i=1}^{N}(N-1)Y_i^2-\left(\sum_{i=1}^NY_i\right)^2+\sum_{i=1}^NY_i^2\right] \\
+		=&\frac{1}{n^2}\frac{n}{N}\left(1-\frac{n}{N}\right)\frac{1}{N-1}\left[N\sum_{i=1}^{N}Y_i^2-\left(\sum_{i=1}^NY_i\right)^2\right] \\
+		=&\frac{1}{n}\left(1-\frac{n}{N}\right)\frac{1}{N-1}\left(\sum\limits_{i=1}^{N}Y_i^2-N\mu^2\right) \\
+		=&\frac{1}{n}\left(1-\frac{n}{N}\right)\frac{1}{N-1}\left(\sum\limits_{i=1}^{N}Y_i^2-2N\mu^2+N\mu^2\right) \\
+		=&\frac{1}{n}\left(1-\frac{n}{N}\right)\frac{1}{N-1}\left(\sum\limits_{i=1}^{N}Y_i^2-2\mu\sum\limits_{i=1}^NY_i+N\mu^2\right) \\     
+		=&\frac{1}{n}\left(1-\frac{n}{N}\right)\frac{1}{N-1}\sum\limits_{i=1}^N(Y_i-\mu)^2 \\ 
+		=&\frac{1}{n}\left(1-\frac{n}{N}\right)\sigma^2
+	\end{align*}
+	由(2)和\cref{prop:MeasurableIntegral}(5)可知$\widehat{\operatorname{Var}}(\hat{\mu})=\left(1-\dfrac{n}{N}\right)\dfrac{\hat{\sigma}^2}{n}$是$\operatorname{Var}(\hat{\mu})$的无偏估计。由\cref{theo:CLT}可知：
+	\begin{equation*}
+		\frac{\hat{\mu}-\mu}{\sqrt{\operatorname{Var}(\hat{\mu})}}\overset{d}{\longrightarrow}\operatorname{N}(0,1)
+	\end{equation*}
+	由于$\operatorname{Var}(\hat{\mu})$的计算中涉及未知参数$\sigma^2$，以$\widehat{\operatorname{Var}}(\hat{\mu})$代替，因此$\hat{\mu}$置信水平为$1-\alpha$的估计的置信区间为：
+	\begin{equation*}
+		\hat{\mu}\pm u_{1-\frac{\alpha}{2}}\times\sqrt{\widehat{\operatorname{Var}}(\hat{\mu})}
+	\end{equation*}\par
+	(4)由(3)和\cref{prop:MeasurableIntegral}(5)立即可得。
+\end{proof}
+\begin{note}
+	思考一下，上述区间估计用$\operatorname{t}$统计量到底合不合理？估计量应是一个随机变量，$\hat{\mu}=\sum\limits_{i=1}^{n}y_i$是不严谨的写法。能用$s^2$替代$\hat{\sigma}^2$吗？在数理统计中样本具有两重性，我们既可以把样本看作随机变量也可以把它看作随机变量的实现值，所以$s^2$既可以是随机变量也可以是具体实现值，在这种情况下我们才可以去讨论$s^2$的期望等等信息。但在抽样调查基于设计的背景下，$s^2$已经不可以被看作是一个随机变量了。
+\end{note}
+\begin{definition}
+	$1-\dfrac{n}{N}$被称之为\gls{FPC}。
+\end{definition}
+\begin{note}
+	$N$远大于$n$时可忽略FPC，接下来也将证明SRSWR时公式中也不存在FPC。
+\end{note}
+\begin{definition}
+	称：
+	\begin{equation*}
+		\hat{\tau}=\sum\limits_{i=1}^Nw_iY_iZ_i
+	\end{equation*}
+	为$\tau$的\textbf{Horvitz-Thompson估计量}，简称为HT估计量。
+\end{definition}
+\begin{note}
+	对于SRS来讲，由\cref{prop:SRS}(1)可知HT估计量与\cref{prop:SRS}(4)中使用的估计量是一样的。
+\end{note}
+\begin{note}
+	阳性率问题是简单随机抽样的一种特殊形式，此时$Y_i$只能在$0$和$1$中取值，阳性率$p$即为总体均值$\mu$。前述区间估计的计算公式需要满足$n\hat{p}\geqslant5$和$n(1-\hat{p})\geqslant 5$的大样本条件。由于阳性率问题的特殊性（$Y_i^2=Y_i$），总体方差及其估计具有如下性质：
+	\begin{gather*}
+		\sigma^2=\frac{1}{N-1}\sum_{i=1}^N(Y_i-p)^2=\frac{N}{N-1}p(1-p)\notag \\
+		\hat{\sigma^2}=\frac{1}{n-1}\sum_{i=1}^{N}(Y_i-\hat{p})^2Z_i=\frac{n}{n-1}\hat{p}(1-\hat{p})
+	\end{gather*}
+\end{note}
+
+\subsection{SRSWR的参数估计}
+\begin{property}\label{prop:SRSWR}
+	SRSWR具有如下性质：
+	\begin{enumerate}
+		\item 记$Q_i$为第$i$个个体在样本中出现的次数，则：
+		\begin{gather*}
+			\overrightarrow{Q}=(Q_1,Q_2,\dots,Q_N)\sim\operatorname{Multi}\left(n,\; \overbrace{\left(\frac{1}{N},\;\frac{1}{N},\dots,\frac{1}{N}\right)}^{\text{N个}\;\frac{1}{N}}\right)\\
+			Q_i\sim\operatorname{Binom}\left(n,\;\frac{1}{N}\right) \\
+			\operatorname{E}(Q_i)=\frac{n}{N},\;\operatorname{Var}(Q_i)=\frac{n}{N}\left(1-\frac{1}{N}\right) ,\;\operatorname{Cov}(Q_i,\;Q_j)=-\frac{n}{N^2}
+		\end{gather*}
+		\item 总体均值$\mu$有如下点估计：
+		\begin{equation*}
+			\hat{\mu}=\frac{1}{n}\sum_{i=1}^{N}Y_iQ_i
+		\end{equation*}
+		该点估计具有如下性质：
+		\begin{equation*}
+			\operatorname{E}(\hat{\mu})=\mu,\;\operatorname{Var}(\hat{\mu})=\frac{N-1}{N}\frac{\sigma^2}{n}
+		\end{equation*}
+		\item 总体总量$\tau$有如下点估计：
+		\begin{equation*}
+			\hat{\tau}=\frac{N}{n}\sum_{i=1}^NY_iQ_i
+		\end{equation*}
+		该点估计具有如下性质：
+		\begin{equation*}
+			\operatorname{E}(\hat{\tau})=\tau,\;\operatorname{Var}(\hat{\tau})=N(N-1)\frac{\sigma^2}{n}
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof} 
+	(1)由SRSWR的定义可知第一式成立。因为\info{多项分布随机变量的一维边际分布是二项分布}，所以上第二式成立。根据\cref{prop:Binom}(2)可知上第三、四式成立。下证第五式，根据\cref{prop:Binom}(1)将$Q_i$分解为独立两点分布随机变量的和，令$I_i(k)$表示第$k$次抽样是否抽到第$i$个个体，由\cref{prop:CovMat}(5)有：
+	\begin{align*}
+		\operatorname{Cov}(Q_i,\;Q_j)&=\operatorname{Cov}\left[\sum_{k=1}^nI_i(k),\;\sum_{l=1}^nI_j(l)\right] \\
+		&=\sum_{k=1}^n\sum_{l=1}^n\operatorname{Cov}[I_i(k),\;I_j(l)] \\
+		&=\sum_{k=l}\operatorname{Cov}[I_i(k),\;I_j(l)]+\sum_{k\ne l}\operatorname{Cov}[I_i(k),\;I_j(l)]
+	\end{align*}
+	由SRSWR的定义和\cref{prop:CovMat}(7)可知后一项为$0$，根据\cref{prop:CovMat}(6)可得：
+	\begin{equation*}
+		\operatorname{Cov}(Q_i,\;Q_j)
+		=\sum_{k=1}^n\operatorname{Cov}[I_i(k),\;I_j(k)] =\sum_{k=1}^n\left\{\operatorname{E}[I_i(k)I_j(k)]-\operatorname{E}[I_i(k)]\operatorname{E}[I_j(k)]\right\}
+	\end{equation*}
+	由于同一次抽样中不可能抽出两个个体，所以前一项为$0$。根据\cref{prop:Binom}(2)可得：
+	\begin{equation*}
+		\operatorname{Cov}(Q_i,\;Q_j)
+		=-\sum_{k=1}^n\operatorname{E}[I_i(k)]\operatorname{E}[I_j(k)]
+		=-\frac{n}{N^2}
+	\end{equation*}\par
+	(2)类似\cref{prop:SRS}(3)可得。\par
+	(3)由(2)和\cref{prop:MeasurableIntegral}(5)得到。
+\end{proof}
+
+\subsection{样本容量的选择}
+\begin{note}
+	因为总体总量的方差计算中涉及到的有关$N$的表达式无法使用近似来消除，所以一般通过控制总体均值的置信区间长度去选择样本容量而不从总体总量来考虑。
+\end{note}
+\begin{theorem}
+	待估参数为总体均值时有如下样本容量公式：
+	\begin{equation*}
+		n_{\text{SRS}}=\frac{1}{\frac{d^2}{u^2\sigma^2}+\frac{1}{N}},\quad n_{\text{SRSWR}}=\frac{u^2\sigma^2}{d^2}
+	\end{equation*}
+	其中$u$为求解区间估计过程中选择的正态分布分位数，$d$为误差幅度。\par
+	上式中二者有关系（又称为两步法）：
+	\begin{equation}
+		\frac{1}{n_{\text{SRS}}}=\frac{1}{n_{\text{SRSWR}}}+\frac{1}{N}\notag
+	\end{equation}
+	待估参数为总体阳性率时有如下样本容量公式：
+	\begin{equation*}
+		n_{SRS}=\frac{Np(1-p)}{\frac{d^2}{u^2}(N-1)+p(1-p)},\quad n_{\text{SRSWR}}=\frac{u^2}{d^2}\frac{N}{N-1}p(1-p)\approx\frac{u^2p(1-p)}{d^2}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由\cref{prop:SRS}(3)和阳性率时的$\sigma^2$公式即可得到。
+\end{proof}
+\begin{note}
+	公式涉及到总体方差真实值$\sigma^2$和阳性率真实值$p$，解决方案：
+	\begin{enumerate}
+		\item 使用历史数据的样本方差代替$\sigma^2$和$p$；
+		\item 先获取一组样本，用这组样本的样本方差代替$\sigma^2$，然后补充样本到额定值；
+		\item 由正态分布的性质，在$\mu\pm2\sigma$范围内应包含了$97.7\%$的样本，因此，我们使用样本的极差来近似$4\sigma$：用样本极差除4替代$\sigma$。但是这个时候又涉及到极差从何而来的问题，因为是先确定样本容量再去做抽样，没有样本怎么来的极差呢？查阅资料得到样本的大致分布范围；
+		\item 取$p=0.5$，最大化样本容量（对公式取倒数即可证明得到），进行保守估计。
+	\end{enumerate}
+	对于上述方案2、4来讲，若多进行一次抽样的成本大于在抽样过程中多获取一些样本的成本，则应该选择方案4，反之应选择方案2.
+\end{note}
+
+\subsection{标记重捕法}
+不对\gls{TagRecap}的具体操作进行介绍，高中都学过。\par
+\begin{note}
+	标记重捕法有如下假设：
+	\begin{enumerate}
+		\item 种群是封闭的，种群数量在标记与重捕期间没有增减。 
+		\item 每个样本都是来自种群的简单随机样本。
+		\item 两次样本独立。
+		\item 标记不会丢失。
+	\end{enumerate}
+\end{note}
+下给出符号说明。
+\begin{enumerate}
+	\item $X$：初始样本容量，即被标记数据。
+	\item $y$：被重捕的样本数。
+	\item $x$：重捕样本中被标记的数量。
+	\item $t$：总体中的个体数。
+\end{enumerate}
+\begin{theorem}
+	标记重捕法中总体总量$\tau$的点估计如下：
+	\begin{equation*}
+		\hat{t}=\frac{y}{x}X 
+	\end{equation*}
+	它有如下性质：
+	\begin{equation*}
+		\operatorname{Var}(\hat{t})\approx\frac{(yX)^2}{\operatorname{E}^3(x)}\frac{(t-y)(t-X)}{t(t-1)},\quad
+		\widehat{\operatorname{Var}}(\hat{t})=\frac{Xy(y-x)(X-x)}{x^3}
+	\end{equation*}
+	若$x$很小，可对$\hat{t}$和$\hat{\operatorname{Var}}(\hat{t})$作如下修正：
+	\begin{equation*}
+		\hat{t}=\frac{(X+1)(y+1)}{x+1}-1,\quad
+		\widehat{\operatorname{Var}}(\hat{t})=\frac{(X+1)(y+1)(y-x)(X-x)}{(x+1)^2(x+2)}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	在标记重捕法中，$x\sim\operatorname{Hyper}(y,X,t)$。由\info{超几何分布数字特征}可得：
+	\begin{equation*}
+		\operatorname{E}(x)=\frac{yX}{t},\quad
+		\operatorname{Var}(x)=\frac{yX(t-y)(t-X)}{t^2(t-1)}
+	\end{equation*}
+	所以由\cref{sec:deltamethod}：
+	\begin{align*}
+		\operatorname{Var}(\hat{t})&=\operatorname{Var}\left(yX\frac{1}{x}\right)=(yX)^2\operatorname{Var}\left(\frac{1}{x}\right)\approx(yX)^2\left[\frac{-1}{\operatorname{E}^2(x)}\right]^2\operatorname{Var}(x) \\
+		&=\frac{(yX)^2}{\operatorname{E}^4(x)}\frac{yX}{t}\frac{(t-y)(t-X)}{t(t-1)}=\frac{(yX)^2}{\operatorname{E}^3(x)}\frac{(t-y)(t-X)}{t(t-1)}
+	\end{align*}
+	用$x$替代$E(x)$，然后考虑$t$较大时的近似，最后还剩一个$t$，用$\hat{t}$带入进行计算，即可得到：
+	\begin{align*}
+		&\frac{(yX)^2}{x^3}\frac{(t-y)(t-X)}{t(t-1)} \approx\frac{(yX)^2}{x^3}\frac{(t-y)(t-X)}{t^2} \\
+		=&\frac{(yX)^2}{x^3}\left(1-\frac{y}{t}\right)\left(1-\frac{X}{t}\right) \approx\frac{Xy(y-x)(X-x)}{x^3}\qedhere
+	\end{align*}
+\end{proof}
+\begin{note}
+	我们不在这里讨论期望的问题，在前面已经叙述过了，严格满足标记重捕法假设的情况下$x\sim\operatorname{Hyper}(y,X,t)$，如果$P(x=0)>0$，$\operatorname{E}(\hat{t})$无意义，即使$P(x=0)=0$，由\cref{ineq:Jensen}可知该估计量有偏且偏大。
+\end{note}
+\subsubsection{正态近似求置信区间}
+由点估计方差公式易得如下估计的总体总量地置信区间：
+\begin{equation*}
+	\hat{t}\pm u_{1-\frac{\alpha}{2}}\sqrt{\widehat{\operatorname{Var}}(\hat{t})},\quad
+	\tilde{t}\pm u_{1-\frac{\alpha}{2}}\sqrt{\widehat{\operatorname{Var}}(\tilde{t})}
+\end{equation*}
+但正态近似置信区间可能会存在置信区间左端点小于两次捕捉到的总数的现象，这显然是不合理的。
+\subsubsection{Pearson$\chi^2$检验求置信区间}
+由标记重捕法使用条件，第一次被捕到和第二次被捕到这两件事情是独立的，由此可构建如下的列联表：
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{@{}lcc@{}}
+		\toprule
+		& 第二次捕获: 是 & 第二次捕获: 否 \\ 
+		\midrule
+		第一次捕获：是    & $a$           & $b$           \\
+		第一次捕获：否    & $c$           & $d$           \\ 
+		\bottomrule
+	\end{tabular}
+	\caption{标记重捕法的列联表示意图}
+\end{table}\par 
+在这个表里，$a,c,b$显然都是已知的，只有$d$是未知的。可以通过给$d$赋值的方式，去检验列联表行列变量之间是否独立（参考\ref{method:PearsonChisqTest}），选择让独立性检验结果显著的$d$值作为置信区间。
+\subsubsection{似然比检验}
+由样本可计算出$\hat{t}$，然后可以构建如下假设：
+\begin{equation*}
+	H_0:\theta=\hat{t}\quad H_1:\theta=\theta_A
+\end{equation*}
+进行似然比检验（参考\ref{method:LikelihoodTest}）。置信区间为拒绝零假设的$\theta_A$构成的区间，即比$\hat{t}$更适合作为模型参数的$\theta_A$构成置信区间。
+\subsubsection{bootstrap求置信区间}
+在第二个样本中进行bootstrap，有放回的抽取$y$个样本，计算每个样本对总体总量的估计值$\hat{t}$，重复$N$次。将$N$个$\hat{t}$从小到大排序，在此基础上取分位点即产生置信区间，
+\subsubsection{代码}
+以上四种方法的代码如下：
+\inputminted[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines]{r}{statistics/sampling-method/tag-recapture.R}

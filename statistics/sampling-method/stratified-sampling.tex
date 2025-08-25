@@ -1,0 +1,344 @@
+\section{分层抽样}
+
+\begin{definition}
+	分层抽样把总体分为$H$个\gls{Stratum}，每个个体属于且只属于某个亚群体。在每个亚群体中通过概率抽样的方法进行独立抽样，然后汇集信息进行群体估计。
+\end{definition}
+当亚群体内的个体值趋于一致时，分层抽样有意义。
+
+\subsubsection{为什么要使用分层抽样}
+分层抽样相比于SRS具有如下优势：
+\begin{enumerate}
+	\item 分层抽样可以避免因为不同类型的样本对研究结果会产生显著差异从而导致的严重选择偏倚。
+	\item 分层抽样过程有可能更易于管理，同时可以降低成本。
+	\item 分层抽样不仅可以估计群体的特征，还可以估计亚群体特征。
+	\item 样本数相同的情况下，分层抽样通常比SRS更加精确。当亚群体内的个体值趋于一致时，该结论尤其正确。
+\end{enumerate}
+
+\subsubsection{分层随机抽样基本设置}
+\begin{enumerate}
+	\item 必须知道每个$N_h,\;h=1,2,\dots,H$。
+	\item 在每一个层里面独立地使用SRS。
+\end{enumerate}
+
+\begin{table}[h]
+	\centering
+	\setlength{\tabcolsep}{25pt} % 调整列之间的间距，默认值为6pt
+	\renewcommand{\arraystretch}{1.5}
+	\begin{tabular}{cc}
+		\toprule
+		公式      & 含义 \\
+		\midrule
+		$\tau_h=\sum\limits_{j=1}^{N_h}Y_{hj}$ & 第$h$层的总量 \\
+		$\tau=\sum\limits_{h=1}^H\tau_{h}$	& 总体总量 \\
+		$\mu_h=\dfrac{\sum\limits_{j=1}^{N_h}Y_{hj}}{N_h}$                 
+		& 第$h$层的均值 \\
+		$\mu=\dfrac{\sum\limits_{h=1}^H\sum\limits_{j=1}^{N_h}Y_{hj}}{N}$           
+		& 总体均值 \\
+		$\sigma^2_h=\dfrac{\sum\limits_{j=1}^{N_h}\left(Y_{hj}-\mu_h\right)^2}{N_h-1}$                       & 第$h$层的方差 \\
+		$\sigma^2=\dfrac{\sum\limits_{h=1}^H\sum\limits_{j=1}^{N_h}\left(Y_{hj}-\mu\right)^2}{N-1}$                 & 总体方差 \\
+		\bottomrule
+	\end{tabular}
+	\caption{分层抽样部分计算公式}
+\end{table}
+
+\section{参数估计}
+
+\subsection{亚群体特征的估计}
+因为分层随机抽样在亚群体中为简单随机抽样，由简单随机抽样的估计公式即有如下公式：
+\begin{gather*}
+	\hat{\mu}_h=\frac{1}{n_h}\sum_{j=1}^{n_h}y_{hj} \\
+	\hat{\tau}_h=\frac{N_h}{n_h}\sum_{j=1}^{n_h}y_{hj}=N_h\hat{\mu}_h \\
+	\hat{\sigma^2_h}=s^2_h=\frac{1}{n_h-1}\sum_{j=1}^{n_h}\left(y_{hj}-\hat{\mu}_h\right)^2
+\end{gather*}
+
+\subsection{总体总量$\hat{\tau}$的估计}
+\subsubsection{计算公式}
+\begin{equation*}
+	\hat{\tau}_{str}=\sum_{h=1}^H\hat{\tau}_h=\sum_{h=1}^HN_h\bar{y}_h
+\end{equation*}
+\subsubsection{抽样权重形式}
+\begin{equation*}
+	\hat{\tau}_{str}=\sum_{h=1}^HN_h\bar{y}_h=\sum_{h=1}^H\frac{N_h}{n_h}\sum_{j=1}^{n_h}y_{hj}=\sum_{h=1}^H\sum_{j=1}^{n_h}\frac{N_h}{n_h}y_{hj}=\sum_{h=1}^H\sum_{j=1}^{n_h}w_{hj}y_{hj}
+\end{equation*}
+
+\subsection{总体均值$\hat{\mu}$的估计}
+\subsubsection{计算公式}
+\begin{equation*}
+	\hat{\mu}_{str}=\frac{\hat{\tau}_{str}}{N}=\frac{1}{N}\sum_{h=1}^HN_h\bar{y}_h
+\end{equation*}
+\subsubsection{抽样权重形式}
+只需注意到$N=\sum\limits_{h=1}^H\sum\limits_{j=1}^{n_h}w_{hj}$：
+\begin{equation*}
+	\hat{\mu}_{str}=\frac{\sum\limits_{h=1}^H\sum\limits_{j=1}^{n_h}w_{hj}y_{hj}}{\sum\limits_{h=1}^H\sum\limits_{j=1}^{n_h}w_{hj}}
+\end{equation*}
+
+\subsection{估计的性质}
+\subsubsection{无偏性}
+无偏性是显然的：在每一层里面使用的是简单随机抽样，而简单随机抽样的估计量是无偏的，总和也自然是无偏的。
+\subsubsection{方差}
+由各层样本之间的独立性以及每层中的抽样实际是SRS，立即可得如下分层随机抽样估计量的方差公式：
+\begin{gather*}
+	Var(\hat{\tau}_{str})=\sum_{h=1}^HN_h^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h} \\
+	\widehat{Var}(\hat{\tau}_{str})=\sum_{h=1}^HN_h^2\left(1-\frac{n_h}{N_h}\right)\frac{s_h^2}{n_h} \\
+	Var(\hat{\mu}_{str})=\sum_{h=1}^H\left(\frac{N_h}{N}\right)^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h} \\
+	\widehat{Var}(\hat{\mu}_{str})=\sum_{h=1}^H\left(\frac{N_h}{N}\right)^2\left(1-\frac{n_h}{N_h}\right)\frac{s_h^2}{n_h}
+\end{gather*}
+其中：
+\begin{gather*}
+	\sigma_h^2=\frac{1}{N_h-1}\sum_{j=1}^{N_h}\left(Y_{hj}-\mu_h\right)^2 \\
+	s_h^2=\frac{1}{N_h-1}\sum_{j=1}^{n_h}\left(y_{hj}-\bar{y}_h\right)^2 \\
+\end{gather*}
+
+\subsubsection{置信区间}
+\begin{equation*}
+	\hat{\mu}_{str}\pm u_{1-\frac{\alpha}{2}}\sqrt{\widehat{Var}(\hat{\mu}_{str})},\;\hat{\tau}_{str}\pm u_{1-\frac{\alpha}{2}}\sqrt{\widehat{Var})(\hat{\tau}_{str})}
+\end{equation*}
+\subsubsection{自由度问题}
+当使用$t$置信区间的时候，如果各层之间方差是齐的，那么自由度即为$n-H$。如果方差不齐，则使用Satterwaithe approximation来估计自由度：
+\begin{equation*}
+	Dof=\left(\sum_{h=1}^Ha_hs_h^2\right)^2\div\sum_{h=1}^H\frac{(a_hs_h^2)^2}{(n_h-1)}
+\end{equation*}
+其中：
+\begin{equation*}
+	a_h=\frac{N_h(N_h-n_h)}{n_h}
+\end{equation*}
+
+\subsection{群体比例问题}
+\begin{gather*}
+	\hat{p}_{str}=\sum_{h=1}^H\frac{N_h}{N}\hat{p}_h \\
+	\widehat{Var}(\hat{p}_{str})=\sum_{h=1}^H\left(\frac{N_h}{N}\right)^2\left(1-\frac{n_h}{N_h}\right)\frac{\hat{p}_h(1-\hat{p}_h)}{n-1}
+\end{gather*}
+
+\section{估计方法思考}
+在分层抽样中，如果使用如下公式估计$\mu$：
+\begin{equation*}
+	\tilde{\mu}_{str}=\frac{\sum\limits_{h=1}^H\sum\limits_{j=1}^{n_h}y_{hj}}{n}
+\end{equation*}
+\subsubsection{均值}
+讨论阳性率问题。\par
+该方法的总体均值为：
+\begin{align*}
+	E(\tilde{\mu}_{str})
+	&=E\left(\frac{\sum\limits_{h=1}^H\sum\limits_{j=1}^{n_h}y_{hj}}{n}\right) \\
+	&=\frac{1}{n}\sum_{h=1}^HE\left(\sum_{j=1}^{N_h}Y_{hj}Z_{hj}\right) \\
+	&=\frac{1}{n}\sum_{h=1}^H\sum_{j=1}^{N_h}Y_{hj}E(Z_{hj}) \\
+	&=\frac{1}{n}\sum_{h=1}^HE(Z_{hj})\sum_{j=1}^{N_h}Y_{hj} \\
+	&=\frac{1}{n}\sum_{h=1}^H\frac{n_h}{N_h}N_hp_h \\
+	&=\frac{1}{n}\sum_{h=1}^Hn_hp_h
+\end{align*}
+而真实的总体均值为：
+\begin{equation*}
+	\mu=\frac{\tau}{N}=\frac{1}{N}\sum_{h=1}^HN_hp_h
+\end{equation*}
+如果想要无偏，则显然需要满足：
+\begin{equation*}
+	\frac{n_h}{N_h}=\frac{n}{N}
+\end{equation*}
+
+\section{分配原则}
+
+分层随机抽样要考虑两个问题：
+\begin{enumerate}
+	\item 如何定义层？
+	\item 每个层里面样本量是多少？
+\end{enumerate}
+
+\subsection{比例分配}
+\gls{PropAllocation}是指在分层抽样中令$\pi_{hj}=\frac{n}{N}=\frac{n_h}{N_h},\;h=1,2,\dots,H,\;j=1,2,\dots,N_h$。这种分配方式不会出现极端情况，即样本几乎都出自某一层的现象。
+\subsubsection{比例分配与SRS的比较}
+可以注意到此时所有单元的入样概率都一样。\par
+由总体均值、总体总量估计量的计算公式可知：比例分配与SRS对于总体均值、总体总量估计的期望是一样的，即估计量的期望是一样的。但是两种方式对于总体均值、总体总量估计的方差不一样。在$n$相同的情况下，$Var(\tilde{\mu}_{str}),\;Var(\tilde{\tau}_{str})$通常比$Var(\hat{\mu}_{srs}),\;Var(\hat{\tau}_{str})$小。
+\begin{proof}
+	从方差分析\info{回头补方差分析}的角度去分析。因为两种估计方式中总体总量的估计都是总体均值估计的$N$倍，所以只需证明总体均值的情况即可。\par
+	由$\dfrac{n_h}{N_h}=\dfrac{n}{N}$可得：
+	\begin{equation*}
+		Var(\tilde{\tau}_{str})
+		=\sum_{h=1}^HN_h^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h} =\sum_{h=1}^HN_h\left(1-\frac{n}{N}\right)\frac{N}{n}\sigma_h^2 =\left(1-\frac{n}{N}\right)\frac{N}{n}\sum_{h=1}^HN_h\sigma_h^2
+	\end{equation*}
+	从理论角度看待SSe，即计算总体而非样本的SSe，可得到：
+	\begin{equation*}
+		SSe=\sum_{h=1}^H\sum_{j=1}^{N_h}(Y_{hj}-\mu_h)^2=\sum_{h=1}^H(N_h-1)\sigma_h^2
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		Var(\tilde{\tau}_{str})=\left(1-\frac{n}{N}\right)\frac{N}{n}\sum_{h=1}^HN_h\sigma_h^2=\left(1-\frac{n}{N}\right)\frac{N}{n}\left(SSe+\sum_{h=1}^H\sigma_h^2\right)
+	\end{equation*}
+	而：
+	\begin{align*}
+		Var(\hat{\tau}_{srs})
+		&=N^2\left(1-\frac{n}{N}\right)\frac{\sigma^2}{n} \\
+		&=\frac{N^2}{n}\left(1-\frac{n}{N}\right)\frac{SST}{N-1} \\
+		&=\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)(SSA+SSe) \\
+		&=\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)SSA+\left(1-\frac{n}{N}\right)\frac{N}{n}\left(\frac{N}{N-1}SSe\right) \\
+		&=\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)SSA+\left(1-\frac{n}{N}\right)\frac{N}{n}\left(SSe+\frac{1}{N-1}SSe\right) \\
+		&=\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)SSA+\left(1-\frac{n}{N}\right)\frac{N}{n}\left(SSe+\sum_{h=1}^H\frac{N_h-1}{N-1}\sigma_h^2\right) \\
+		&=\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)SSA+\left(1-\frac{n}{N}\right)\frac{N}{n}\left[SSe+\sum_{h=1}^H\left(\frac{N-1}{N-1}-\frac{N-N_h}{N-1}\right)\sigma_h^2\right] \\
+		&=\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)SSA+\left(1-\frac{n}{N}\right)\frac{N}{n}\left(SSe+\sum_{h=1}^H\sigma_h^2\right)+\left(1-\frac{n}{N}\right)\frac{N}{n}\left[\sum_{h=1}^H\left(-\frac{N-N_h}{N-1}\right)\sigma_h^2\right] \\
+		&=Var(\tilde{\tau}_{str})+\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)\left[SSA-\sum_{h=1}^H\left(1-\frac{N_h}{N}\right)\sigma_h^2\right]
+	\end{align*}
+	由上式可以看出，如果比例分配估计量的方差比SRS估计量的方差大，则需要：
+	\begin{equation*}
+		SSA<\sum_{h=1}^H\left(1-\frac{N_h}{N}\right)\sigma_h^2
+	\end{equation*}
+	而这种情况在实践中几乎见不到。
+\end{proof}
+从以上推导中也可以看出，组间差异越大，即SSA越大，比例分配估计量的方差比SRS估计量的方差小得越多，也即精确得更多。而如果每一个层中的方差很大，即$\sigma_h^2$很大，有可能会使比例分配估计量的方差大于SRS估计量的方差，所以在选择分层的时候，要使层内差异小。综上，层间差异大、层内差异小时，比例分配下的分层随机抽样比SRS效果更好。
+
+\subsection{最优分配}
+在考虑分配方式的时候有如下三点主要因素：
+\begin{enumerate}
+	\item 每层中的个体总数$N_h$。
+	\item 层内差异$\sigma_h^2$。
+	\item 在每个层内抽样的平均成本$c_h$。
+\end{enumerate}
+显然，比例分配没有考虑第二点和第三点。
+\subsubsection{成本一致最小化方差}
+当不同层之间抽样成本一致的时候，可以最小化估计量方差。可以将问题转化为：
+\begin{gather*}
+	\min f(\overrightarrow{n})=Var(\hat{\tau}_{str})=\sum_{h=1}^HN_h^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h} \\
+	s.t.\quad\sum_{h=1}^Hn_h=n
+\end{gather*}
+可得\gls{OptimalAllocation}方案为：
+\begin{equation*}
+	n_k=\frac{nN_k\sigma_k}{\sum\limits_{h=1}^HN_h\sigma_h},\quad k=1,2,\dots,H
+\end{equation*}
+\begin{proof}
+	使用Lagrange乘子法求解。引入Lagrange乘子$\lambda$即有：
+	\begin{gather*}
+		f(\overrightarrow{n})=\sum_{h=1}^HN_h^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h} \\
+		g(\overrightarrow{n})=\sum_{h=1}^Hn_h-n \\
+		h(\overrightarrow{n})=f(\overrightarrow{n})+\lambda g(\overrightarrow{n})
+	\end{gather*}
+	对$f$求偏导可得：
+	\begin{align*}
+		\frac{\partial f}{\partial n_h}&
+		=-\frac{N_h^2\sigma_h^2}{N_hn_h}-\left(1-\frac{n_h}{N_h}\right)\frac{N_k^2\sigma_h^2}{n_k^2} \\
+		&=-\frac{N_h\sigma_h^2}{n_h}-\frac{N_h^2\sigma_h^2}{n_h^2}+\frac{N_h\sigma_h^2}{n_h} \\
+		&=-\frac{N_h^2\sigma_h^2}{n_h^2}
+	\end{align*}
+	所以：
+	\begin{gather*}
+		\nabla f(\overrightarrow{n})=(-\frac{N_1^2\sigma_1^2}{n_1^2},-\frac{N_2^2\sigma_2^2}{n_2^2},\dots,-\frac{N_H^2\sigma_H^2}{n_H^2}) \\
+		\nabla g(\overrightarrow{n})=(1,1,\dots,1)
+	\end{gather*}
+	当$f$取最小值时有：
+	\begin{gather*}
+		\frac{\partial h(\overrightarrow{n})}{\partial \overrightarrow{n}}=(-\frac{N_1^2\sigma_1^2}{n_1^2}+\lambda,-\frac{N_2^2\sigma_2^2}{n_2^2}+\lambda,\dots,-\frac{N_H^2\sigma_H^2}{n_H^2}+\lambda)=(0,0,\dots,0) \\
+		\sum_{h=1}^Hn_h=n
+	\end{gather*}
+	解得：
+	\begin{equation*}
+		n_h=\frac{N_h\sigma_h}{\sqrt{\lambda}},\quad h=1,2,\dots,H
+	\end{equation*}
+	此时：
+	\begin{equation*}
+		n=\sum_{h=1}^Hn_h=\frac{\sum\limits_{h=1}^HN_h\sigma_h}{\sqrt{\lambda}}
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\sqrt{\lambda}=\frac{\sum\limits_{h=1}^HN_h\sigma_h}{n}
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		n_k=\frac{nN_k\sigma_k}{\sum\limits_{h=1}^HN_h\sigma_h},\quad k=1,2,\dots,H\qedhere
+	\end{equation*}
+\end{proof}
+\subsubsection{成本不一致最小化方差}
+如果不同层之间抽样成本不一致，且总抽样成本为：
+\begin{equation*}
+	c=c_0+\sum_{h=1}^Hc_hn_h
+\end{equation*}
+可以将问题转化为：
+\begin{gather*}
+	\min f(\overrightarrow{n})=Var(\hat{\tau}_{str})=\sum_{h=1}^HN_h^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h} \\
+	s.t.\quad c-c_0-\sum_{h=1}^Hc_hn_h=0
+\end{gather*}
+则最佳分配方案为：
+\begin{equation*}
+	n_k=\frac{(c-c_0)N_k\sigma_k}{\sum\limits_{h=1}^HN_h\sigma_h\sqrt{c_h}}\frac{1}{\sqrt{c_k}},\quad k=1,2,\dots,H
+\end{equation*}
+从上式中可看出，需要在个数多或方差大得层中分配更多的个体（方差大需要更多的个体来获得有代表性的样本），在成本高的层中分配较少的个体。
+\subsubsection{固定方差最小化成本}
+如果不同层之间抽样成本不一致，且总抽样成本为：
+\begin{equation*}
+	c=c_0+\sum_{h=1}^Hc_hn_h
+\end{equation*}
+此时如果固定方差最小化成本，则最佳分配方案为：
+\begin{equation*}
+	n_k=n\frac{\frac{N_k\sigma_k}{\sqrt{c_k}}}{\sum\limits_{h=1}^H\frac{N_h\sigma_h}{\sqrt{c_h}}},\quad k=1,2,\dots,H
+\end{equation*}
+若计算出来$n_k>N_k$，则令$n_k=N_k$。
+
+
+\section{后分层}
+当使用了SRS后发现获取的样本比较极端时（比如研究人群体重，获得的样本中$90\%$都是男性），此时使用\gls{Poststratification}，即先进行SRS，然后将获得的样本分层。
+
+\subsection{参数估计}
+\subsubsection{总体均值$\mu$的估计}
+\begin{gather*}
+	\hat{\mu}_{poststr}=\sum_{h=1}^H\frac{N_h}{N}\bar{y}_h \\
+	Var(\hat{\mu}_{poststr})=E[Var(\hat{\mu}_{str}\arrowvert\overrightarrow{n})]\approx\left(1-\frac{n}{N}\right)\frac{1}{n}\sum_{h=1}^H\frac{N_h}{N}\sigma_h^2+\left(\frac{N-n}{N-1}\right)\frac{1}{n^2}\sum_{h=1}^H\left(1-\frac{N_h}{N}\right)\sigma_h^2
+\end{gather*}
+下证明：(1)后分层估计量$\hat{\mu}_{poststr}$是无偏估计；(2)如上后分层方差公式正确。
+\begin{proof}
+	(1)后分层估计量的计算公式本质和分层随机抽样一样，因此是无偏的。\par
+	(2)由方差分解公式：
+	\begin{equation*}
+		Var(\hat{\mu}_{poststr})=Var(E[\hat{\mu}_{str}\arrowvert\overrightarrow{n}])+E[Var(\hat{\mu}_{str}\arrowvert\overrightarrow{n})]
+	\end{equation*}
+	而：
+	\begin{align*}
+		E[\hat{\mu}_{str}\arrowvert\overrightarrow{n}]
+		&=E\left(\sum_{h=1}^H\sum_{j=1}^{N_h}\frac{Y_{hj}Z_{hj}}{n}\right) \\
+		&=\sum_{h=1}^H\sum_{j=1}^{N_h}\frac{Y_{hj}}{n}E(Z_{hj}) \\
+		&=\sum_{h=1}^H\sum_{j=1}^{N_h}\frac{Y_{hj}n_h}{nN_h} \\
+		&=\sum_{h=1}^H\frac{n_h}{n}\sum_{j=1}^{N_h}\frac{Y_{hj}}{N_h} \\
+		&=\sum_{h=1}^H\frac{n_h}{n}\mu_h \\
+	\end{align*}
+	可以看出上式是一个定值，所以：
+	\begin{equation*}
+		Var(E[\hat{\mu}_{str}\arrowvert\overrightarrow{n}])=0
+	\end{equation*}
+	于是：
+	\begin{align*}
+		Var(\hat{\mu}_{poststr})
+		&=E[Var(\hat{\mu}_{str}\arrowvert\overrightarrow{n})] \\
+		&=E\left[\sum_{h=1}^H\left(\frac{N_h}{N}\right)^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h}\right] \\
+		&=\sum_{h=1}^H\left(\frac{N_h}{N}\right)^2\sigma_h^2\left[E\left(\frac{1}{n_h}\right)-\frac{1}{N_h}\right] \\
+	\end{align*}
+	由\cref{sec:deltamethod}，利用泰勒展开，令$E(n_h)=\mu$，即有：
+	\begin{align*}
+		E\left(\frac{1}{n_h}\right)
+		&\approx E\left[\frac{1}{\mu}-\frac{1}{\mu^2}(n_h-\mu)+\frac{2}{\mu^3}\frac{(n_h-\mu)^2}{2!}\right] \\
+		&=\frac{1}{\mu}+\frac{1}{\mu^3}Var(n_h)
+	\end{align*}
+	由后分层原理，显然可以得到：
+	\begin{gather*}
+		n_h\sim \text{Hyper}(n,N_h,N) \\
+		E(n_h)=\frac{nN_h}{N},\;Var(n_h)=\frac{nN_h(N-n)(N-N_h)}{N^2(N-1)}
+	\end{gather*}
+	于是：
+	\begin{equation*}
+		E\left(\frac{1}{n_h}\right)=\frac{N}{nN_h}+\left(\frac{N}{nN_h}\right)^2\left(1-\frac{N_h}{N}\right)\frac{N-n}{N-1}
+	\end{equation*}
+	将上式代入$Var(\hat{\mu}_{poststr})$即可得到：
+	\begin{equation*}
+		Var(\hat{\mu}_{poststr})\approx\left(1-\frac{n}{N}\right)\frac{1}{n}\sum_{h=1}^H\frac{N_h}{N}\sigma_h^2+\left(\frac{N-n}{N-1}\right)\frac{1}{n^2}\sum_{h=1}^H\left(1-\frac{N_h}{N}\right)\sigma_h^2\qedhere
+	\end{equation*}
+\end{proof}
+
+\section{样本容量}
+\subsubsection{忽略FPC}
+当$\frac{n_h}{N_h},\;h=1,2,\dots,H$小的时候，忽略层内的FPC，令：
+\begin{equation*}
+	Var(\hat{\mu}_{str})=\frac{1}{n}\sum_{h=1}^H\left(\frac{N_h}{N}\right)^2\frac{n}{n_h}\sigma_h^2=\frac{v}{n}
+\end{equation*}
+则MOE为$u\sqrt{\frac{v}{n}}$，可得：
+\begin{equation*}
+	n=\frac{u^2v}{d^2}
+\end{equation*}
+\subsubsection{不忽略FPC}
+如果$\frac{n_h}{N_h},\;h=1,2,\dots,H$较大，则考虑层内的FPC或使用Monte Carlo算法。
+
+
+

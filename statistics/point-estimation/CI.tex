@@ -1,0 +1,205 @@
+\section{区间估计}
+
+\begin{definition}
+	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，$\mathbf{X}$为从总体$F$中抽取的简单样本，$g_1(\theta)\in\mathbb{R}^{n},g_2(\theta)\in\mathbb{R}^{}$是待估量，$\delta(\mathbf{X}),\delta_1(\mathbf{X}),\delta_2(\mathbf{X})$是统计量且满足对任意的样本有$\delta_1(\mathbf{X})\leqslant\delta_2(\mathbf{X})$，$\alpha\in(0,1)$为给定值。若统计量$\delta(\mathbf{X})$满足：
+	\begin{equation*}
+		\forall\;\theta\in\Theta,\;P_{\theta}(\{g_1(\theta)\in \delta(\mathbf{X})\})\geqslant 1-\alpha
+	\end{equation*}
+	则称$\delta(\mathbf{X})$为$g_1(\theta)$\gls{ConfidenceLevel}为$1-\alpha$的\gls{ConfidenceRegion}，若$n=1$则称$\delta(\mathbf{X})$为$g_1(\theta)$置信水平为$1-\alpha$的\gls{CI}，上式取等号时称$\delta(\mathbf{X})$为$g_1(\theta)$置信水平为$1-\alpha$的\textbf{同等}置信域，称：
+	\begin{equation*}
+		\inf_{\theta\in\Theta}P_{\theta}(\{g_1(\theta)\in\delta(\mathbf{X})\})
+	\end{equation*}
+	为其\gls{ConfidenceCoefficient}。若$\delta_1(\mathbf{X})$满足：
+	\begin{equation*}
+		\forall\;\theta\in\Theta,\;P_{\theta}(\{\delta_1(\mathbf{X})\leqslant g_2(\theta)\})\geqslant 1-\alpha
+	\end{equation*}	
+	则称$\delta_1(\mathbf{X})$是$g_2(\theta)$置信水平为$1-\alpha$的\gls{LowerConfidenceLimit}，上式取等号时称$\delta_1(\mathbf{X})$为$g_2(\theta)$置信水平为$1-\alpha$的\textbf{同等}置信下限，称：
+	\begin{equation*}
+		\inf_{\theta\in\Theta}P_{\theta}(\{\delta_1(\mathbf{X})\leqslant g_2(\theta)\})
+	\end{equation*}
+	为其置信系数。若$\delta_2(\mathbf{X})$满足：
+	\begin{equation*}
+		\forall\;\theta\in\Theta,\;P_{\theta}(\{g_2(\theta)\leqslant\delta_2(\mathbf{X})\})\geqslant 1-\alpha
+	\end{equation*}	
+	则称$\delta_2(\mathbf{X})$是$g_2(\theta)$置信水平为$1-\alpha$的\gls{UpperConfidenceLimit}，上式取等号时称$\delta_2(\mathbf{X})$为$g_2(\theta)$置信水平为$1-\alpha$的\textbf{同等}置信上限，称：
+	\begin{equation*}
+		\inf_{\theta\in\Theta}P_{\theta}(\{g_2(\theta)\leqslant\delta_2(\mathbf{X})\})
+	\end{equation*}
+	为其置信系数。
+\end{definition}
+\begin{note}
+	什么样的置信域是好的？我们当然希望置信域能够包含待估量的真实值（即提高置信水平或置信系数），并且包含的非真实值尽可能的少，但这两点往往是冲突的：置信域越大，更有可能包含真实值，但精度就会降低；置信域小则包含真实值的概率也小。Nyeman提出了一个区间估计的标准：在保持置信水平尽可能大的前提下，使得置信域尽可能的小，即可靠度优先。
+\end{note}
+\begin{note}[枢轴量法]
+	枢轴量法是一个常见的构造区间估计的方法，下面给出其实现的具体步骤：
+	\begin{enumerate}
+		\item 找到一个待估量$g(\theta)$的良好的点估计$\delta(\mathbf{X})$；
+		\item 求出随机变量$f(g,\delta)$的分布，要求$f$的分布与$g(\theta)$的取值无关，称$f(g,\delta)$为\gls{PivotalQuantity}；
+		\item 根据$f(g,\delta)$的分位点给出给定置信水平的区间估计或置信上（下）限。
+	\end{enumerate}
+	考虑置信区间的情况，若$f(g,\delta)$的分布是单峰对称分布（如一元正态分布），很容易找出给定置信水平的最小置信区间（$g$在$f$的分子位置时即取$f(g,\delta)$分布的$\frac{\alpha}{2}$与$1-\frac{\alpha}{2}$分位点），但很多情况下我们需要数值方法来求解最小置信区间，为了避免这些麻烦，我们在多数情况下会构造\textbf{等尾}置信区间，即依旧取$f(g,\delta)$分布的$\frac{\alpha}{2}$与$1-\frac{\alpha}{2}$分位点作为区间估计的两端。
+\end{note}
+\begin{theorem}
+	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\mathbf{X}=(\seq{X}{m})$为从总体$F$中抽取的简单样本，$\mathbf{Y}=(\seq{Y}{n})$为从总体$G$中抽取的简单样本，$\overline{X},\overline{Y}$为样本均值，$S_X^2,S_Y^2$为样本方差，$g(\theta)$为待估量，其区间估计有如下结论：
+	\begin{enumerate}
+		\item 若置信水平为$1-\alpha_1$的$g(\theta)$的置信上限$\delta_1(\mathbf{X})$和置信水平为$1-\alpha_2$的$g(\theta)$的置信上限$\delta_2(\mathbf{X})$满足对任意的样本有$\delta_1(\mathbf{X})\leqslant\delta_2(\mathbf{X})$，则$[\delta_1(\mathbf{X}),\delta_2(\mathbf{X})]$是$g(\theta)$置信水平为$1-\alpha_1-\alpha_2$的置信区间；
+		\item 若总体$F$服从$\operatorname{N}(\mu,\sigma^2)$，在$\sigma^2$已知时$g(\theta)=\mu$置信水平为$1-\alpha$的区间估计为：
+		\begin{equation*}
+			\left[\overline{X}-u_{1-\frac{\alpha}{2}}\sqrt{\dfrac{\sigma^2}{m}},\overline{X}+u_{1-\frac{\alpha}{2}}\sqrt{\dfrac{\sigma^2}{m}}\right]
+		\end{equation*}
+		$\sigma^2$未知时$g(\theta)=\mu$置信水平为$1-\alpha$的区间估计为：
+		\begin{equation*}
+			\left[\overline{X}-\operatorname{t}_{m-1}\left(1-\frac{\alpha}{2}\right)\sqrt{\dfrac{S_X^2}{m}},\overline{X}+\operatorname{t}_{m-1}\left(1-\frac{\alpha}{2}\right)\sqrt{\dfrac{S_X^2}{m}}\right]
+		\end{equation*}
+		\item 若总体$F$服从$\operatorname{N}(\mu,\sigma^2)$，在$\mu$已知时$g(\theta)=\sigma^2$置信水平为$1-\alpha$的区间估计为：
+		\begin{equation*}
+			\left[\frac{1}{\chi_{m}^2\left(1-\frac{\alpha}{2}\right)}\sum_{i=1}^{m}(X_i-\mu)^2,\frac{1}{\chi_{m}^2\left(\frac{\alpha}{2}\right)}\sum_{i=1}^{m}(X_i-\mu)^2\right]
+		\end{equation*}
+		$\mu$未知时$g(\theta)=\sigma^2$置信水平为$1-\alpha$的区间估计为：
+		\begin{equation*}
+			\left[\frac{(m-1)S_X^2}{\chi_{m-1}^2\left(1-\frac{\alpha}{2}\right)},\frac{(m-1)S_X^2}{\chi_{m-1}^2\left(\frac{\alpha}{2}\right)}\right]
+		\end{equation*}
+		\item 若总体$F$服从$\operatorname{N}(\mu,\sigma_1^2)$，$G$服从$\operatorname{N}(\nu,\sigma_2^2)$，$\sigma_1^2$和$\sigma_2^2$已知时$g(\theta)=\mu-\nu$置信水平为$1-\alpha$的区间估计为：
+		\begin{equation*}
+			\left[\overline{X}-\overline{Y}-u_{1-\frac{\alpha}{2}}\sqrt{\dfrac{\sigma_1^2}{m}+\dfrac{\sigma_2^2}{n}},\overline{X}-\overline{Y}+u_{1-\frac{\alpha}{2}}\sqrt{\dfrac{\sigma_1^2}{m}+\dfrac{\sigma_2^2}{n}}\right]
+		\end{equation*}
+		$\sigma_1^2=c\sigma_2^2(c>0)$时$g(\theta)=\mu-\nu$置信水平为$1-\alpha$的区间估计为：
+		\begin{equation*}
+			\left[\overline{X}-\overline{Y}-\operatorname{t}_{m+n-2}\left(1-\frac{\alpha}{2}\right)S_w\sqrt{\dfrac{mc+n}{mn}},\overline{X}-\overline{Y}+\operatorname{t}_{m+n-2}\left(1-\frac{\alpha}{2}\right)S_w\sqrt{\dfrac{mc+n}{mn}}\right]
+		\end{equation*}
+		其中：
+		\begin{equation*}
+			S_w^2=\frac{(m-1)S_X^2+(n-1)S_Y^2/c}{m+n-2}
+		\end{equation*}
+		\item 若总体$F$服从$\operatorname{N}(\mu,\sigma_1^2)$，$G$服从$\operatorname{N}(\nu,\sigma_2^2)$，在$\mu,\nu$已知时$g(\theta)=\dfrac{\sigma_1^2}{\sigma_2^2}$置信水平为$1-\alpha$的区间估计为：
+		\begin{equation*}
+			\left[\frac{n\sum\limits_{i=1}^{m}(X_i-\mu)^2}{m\sum\limits_{i=1}^{n}(Y_i-\nu)^2\operatorname{F}_{m,n}\left(1-\frac{\alpha}{2}\right)},\frac{n\sum\limits_{i=1}^{m}(X_i-\mu)^2}{m\sum\limits_{i=1}^{n}(Y_i-\nu)^2\operatorname{F}_{m,n}\left(\frac{\alpha}{2}\right)}\right]
+		\end{equation*}
+		$\mu,\nu$未知时$g(\theta)=\dfrac{\sigma_1^2}{\sigma_2^2}$置信水平为$1-\alpha$的区间估计为：
+		\begin{equation*}
+			\left[\frac{S_X^2}{S_Y^2\operatorname{F}_{m-1,n-1}\left(1-\frac{\alpha}{2}\right)},\frac{S_X^2}{S_Y^2\operatorname{F}_{m-1,n-1}\left(\frac{\alpha}{2}\right)}\right]
+		\end{equation*}
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)由\cref{prop:Measure}(3)（次有限可加性）可得：
+	\begin{align*}
+		P(\{g(\theta)\leqslant\delta_1(\mathbf{X})\}\cup\{g(\theta)\geqslant\delta_2(\mathbf{X})\})&\leqslant P(\{g(\theta)\leqslant\delta_1(\mathbf{X})\})+P(\{g(\theta)\geqslant\delta_2(\mathbf{X})\}) \\
+		&\leqslant\alpha_1+\alpha_2,\;\forall\;P\in\mathscr{P}
+	\end{align*}
+	根据\cref{prop:Measure}(2)可得：
+	\begin{equation*}
+		\forall\;P\in\mathscr{P},\;P\left(\{\delta_1(\mathbf{X})\leqslant g(\theta)\leqslant\delta_2(\mathbf{X})\}\right)\geqslant1-\alpha_1-\alpha_2
+	\end{equation*}\par
+	(2)\textbf{已知$\sigma^2$：}由\cref{theo:SamplingDist1}(1)和\cref{prop:MultiNormal}(2)可知：
+	\begin{equation*}
+		f(\mu,\bar{X})=\frac{\sqrt{m}(\overline{X}-\mu)}{\sigma}\sim\operatorname{N}(0,1)
+	\end{equation*}
+	根据(1)可知可取：
+	\begin{equation*}
+		u_{\frac{\alpha}{2}}\leqslant f(\mu,\bar{X})\leqslant u_{1-\frac{\alpha}{2}}
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\left[\overline{X}-u_{1-\frac{\alpha}{2}}\sqrt{\dfrac{\sigma^2}{m}},\overline{X}-u_{1-\frac{\alpha}{2}}\sqrt{\dfrac{\sigma^2}{m}}\right]
+	\end{equation*}\par
+	\textbf{未知$\sigma^2$：}由\cref{theo:SamplingDist1}(4)可知：
+	\begin{equation*}
+		f(\mu,\bar{X})=\frac{\sqrt{m}(\overline{X}-\mu)}{S_X}\sim\operatorname{t}_{m-1}
+	\end{equation*}
+	根据(1)可知可取：
+	\begin{equation*}
+		\operatorname{t}_{m-1}\left(\frac{\alpha}{2}\right)\leqslant f(\mu,\bar{X})\leqslant\operatorname{t}_{m-1}\left(1-\frac{\alpha}{2}\right)
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\left[\overline{X}-\operatorname{t}_{m-1}\left(1-\frac{\alpha}{2}\right)\sqrt{\dfrac{S_X^2}{m}},\overline{X}+\operatorname{t}_{m-1}\left(1-\frac{\alpha}{2}\right)\sqrt{\dfrac{S_X^2}{m}}\right]
+	\end{equation*}\par
+	(3)\textbf{已知$\mu$：}由\cref{prop:MultiNormal}(2)和$\chi^2$分布的定义可知：
+	\begin{equation*}
+		f\left(\sigma^2,\frac{1}{m}\sum_{i=1}^{m}(X_i-\mu)^2\right)=\frac{1}{\sigma^2}\sum_{i=1}^{m}(X_i-\mu)^2\sim\chi_{m}^2
+	\end{equation*}
+	根据(1)可知可取：
+	\begin{equation*}
+		\chi_{m}^2\left(\frac{\alpha}{2}\right)\leqslant f\left(\sigma^2,\frac{1}{m}\sum_{i=1}^{m}(X_i-\mu)^2\right)\leqslant\chi_{m}^2\left(1-\frac{\alpha}{2}\right)
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\left[\frac{1}{\chi_{m-1}^2\left(1-\frac{\alpha}{2}\right)}\sum_{i=1}^{m}(X_i-\mu)^2,\frac{1}{\chi_{m-1}^2\left(\frac{\alpha}{2}\right)}\sum_{i=1}^{m}(X_i-\mu)^2\right]
+	\end{equation*}\par
+	\textbf{未知$\mu$：}由\cref{theo:SamplingDist1}(2)可知：
+	\begin{equation*}
+		f\left(\sigma^2,\frac{S_X^2}{m-1}\right)=\frac{(m-1)S_X^2}{\sigma^2}\sim\chi_{m-1}^2
+	\end{equation*}
+	根据(1)可知可取：
+	\begin{equation*}
+		\chi_{m-1}^2\left(\frac{\alpha}{2}\right)\leqslant f\left(\sigma^2,\frac{S_X^2}{m-1}\right)\leqslant\chi_{m-1}^2\left(1-\frac{\alpha}{2}\right)
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\left[\frac{(m-1)S_X^2}{\chi_{m-1}^2\left(1-\frac{\alpha}{2}\right)},\frac{(m-1)S_X^2}{\chi_{m-1}^2\left(\frac{\alpha}{2}\right)}\right]
+	\end{equation*}\par
+	(4)\textbf{已知$\sigma_1^2,\sigma_2^2$：}由(1)（得到$\overline{X}$和$\overline{Y}$的分布）、$\seq{X}{m}$与$\seq{Y}{n}$相互独立（由\cref{prop:MultiNormal}(6)得到二维随机向量$(\overline{X},\overline{Y})^T$的分布）和\cref{prop:MultiNormal}(2)（对$(\overline{X},\overline{Y})^T$用二维行向量$(1,-1)$做线性变换，再做标准化\info{标准化}）可得：
+	\begin{equation*}
+		f(\mu-\nu,\overline{X}-\overline{Y})=\frac{\overline{X}-\overline{Y}-(\mu-\nu)}{\sqrt{\dfrac{\sigma_1^2}{m}+\dfrac{\sigma_2^2}{n}}}\sim\operatorname{N}\left(0,1\right)
+	\end{equation*}
+	根据(1)可知可取：
+	\begin{equation*}
+		u_{\frac{\alpha}{2}}\leqslant f(\mu-\nu,\overline{X}-\overline{Y})\leqslant u_{1-\frac{\alpha}{2}}
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\left[\overline{X}-\overline{Y}-u_{1-\frac{\alpha}{2}}\sqrt{\dfrac{\sigma_1^2}{m}+\dfrac{\sigma_2^2}{n}},\overline{X}-\overline{Y}+u_{1-\frac{\alpha}{2}}\sqrt{\dfrac{\sigma_1^2}{m}+\dfrac{\sigma_2^2}{n}}\right]
+	\end{equation*}\par
+	\textbf{$\sigma_1^2=\sigma_2^2$：}类似\cref{theo:SamplingDist1}(5)可得：
+	\begin{equation*}
+		f(\mu-\nu,\overline{X}-\overline{Y})=\dfrac{\overline{X}-\overline{Y}-(\mu-\nu)}{\sqrt{(m-1)S_X^2+(n-1)S_Y^2/c}}\sqrt{\dfrac{mn(m+n-2)}{mc+n}}\sim \operatorname{t}_{m+n-2}
+	\end{equation*}
+	根据(1)可知可取：
+	\begin{equation*}
+		\operatorname{t}_{m+n-2}\left(\frac{\alpha}{2}\right)\leqslant f(\mu-\nu,\overline{X}-\overline{Y})\leqslant \operatorname{t}_{m+n-2}\left(1-\frac{\alpha}{2}\right)
+	\end{equation*}
+	记：
+	\begin{equation*}
+		S_w^2=\frac{(m-1)S_X^2+(n-1)S_Y^2/c}{m+n-2}
+	\end{equation*}
+	于是可得：
+	\begin{equation*}
+		\left[\overline{X}-\overline{Y}-\operatorname{t}_{m+n-2}\left(1-\frac{\alpha}{2}\right)S_w\sqrt{\dfrac{mc+n}{mn}},\overline{X}-\overline{Y}+\operatorname{t}_{m+n-2}\left(1-\frac{\alpha}{2}\right)S_w\sqrt{\dfrac{mc+n}{mn}}\right]
+	\end{equation*}\par
+	(5)\textbf{已知$\mu,\nu$：}由\cref{prop:MultiNormal}(2)和$\chi^2$分布的定义可知：
+	\begin{equation*}
+		\delta_1(\mathbf{X})=\frac{1}{\sigma_1^2}\sum_{i=1}^{m}(X_i-\mu)^2\sim\chi_{m}^2,\quad\delta_2(\mathbf{Y})=\frac{1}{\sigma_2^2}\sum_{i=1}^{n}(Y_i-\nu)^2\sim\chi_{n}^2
+	\end{equation*}
+	因为$\seq{X}{m}$和$\seq{Y}{n}$相互独立，所以$\delta_1(\mathbf{X})$与$\delta_2(\mathbf{Y})$也相互独立，于是有：
+	\begin{equation*}
+		f\left(\frac{\sigma_1^2}{\sigma_2^2},\frac{S_X^2(n-1)}{S_Y^2(m-1)}\right)=\frac{n\sum\limits_{i=1}^{m}(X_i-\mu)^2\sigma_2^2}{m\sum\limits_{i=1}^{n}(Y_i-\nu)^2\sigma_1^2}\sim\operatorname{F}_{m,n}
+	\end{equation*}
+	根据(1)可知可取：
+	\begin{equation*}
+		\operatorname{F}_{m,n}\left(\frac{\alpha}{2}\right)\leqslant f\left(\frac{\sigma_1^2}{\sigma_2^2},\frac{S_X^2(n-1)}{S_Y^2(m-1)}\right)\leqslant\operatorname{F}_{m,n}\left(1-\frac{\alpha}{2}\right)
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\left[\frac{n\sum\limits_{i=1}^{m}(X_i-\mu)^2}{m\sum\limits_{i=1}^{n}(Y_i-\nu)^2\operatorname{F}_{m,n}\left(1-\frac{\alpha}{2}\right)},\frac{n\sum\limits_{i=1}^{m}(X_i-\mu)^2}{m\sum\limits_{i=1}^{n}(Y_i-\nu)^2\operatorname{F}_{m,n}\left(\frac{\alpha}{2}\right)}\right]
+	\end{equation*}\par
+	\textbf{未知$\mu,\nu$：}由\cref{theo:SamplingDist1}(6)可得：
+	\begin{equation*}
+		f\left(\frac{\sigma_1^2}{\sigma_2^2},\frac{S_X^2(n-1)}{S_Y^2(m-1)}\right)=\frac{S_X^2\sigma_2^2}{S_Y^2\sigma_1^2}\sim\operatorname{F}_{m-1,n-1}
+	\end{equation*}
+	根据(1)可知可取：
+	\begin{equation*}
+		\operatorname{F}_{m-1.n-1}\left(\frac{\alpha}{2}\right)\leqslant f\left(\frac{\sigma_1^2}{\sigma_2^2},\frac{S_X^2(n-1)}{S_Y^2(m-1)}\right)\leqslant\operatorname{F}_{m-1,n-1}\left(1-\frac{\alpha}{2}\right)
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\left[\frac{S_X^2}{S_Y^2\operatorname{F}_{m-1,n-1}\left(1-\frac{\alpha}{2}\right)},\frac{S_X^2}{S_Y^2\operatorname{F}_{m-1,n-1}\left(\frac{\alpha}{2}\right)}\right]\qedhere
+	\end{equation*}
+\end{proof}
+\subsubsection{样本量问题}
+\begin{definition}
+	称置信区间的半径为\gls{MOE}。
+\end{definition}
+\begin{note}
+	可以通过控制误差幅度来计算样本量，比如我们要控制误差幅度在$a$以内，列出不等式可以去计算满足要求的样本量范围，一般来讲误差幅度越小所需的样本量就越大，由此可得到最小样本量。当方程难以求解时，可以采用Monte Carlo算法计算出大量样本量与其对应的MOE值，从而选择出合适的样本量。
+\end{note}

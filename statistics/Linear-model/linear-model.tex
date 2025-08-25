@@ -24,8 +24,8 @@
 			&=y^Ty-y^TX\beta-\beta^TX^Ty-\beta^TX^TX\beta \\
 			&=y^Ty-2y^TX\beta-\beta^TX^TX\beta
 		\end{aligned}\\
-		\frac{\partial y^TX\beta}{\beta}=X^Ty,\quad
-		\frac{\partial \beta^TX^TX\beta}{\beta}=2X^TX\beta \\
+		\frac{\partial y^TX\beta}{\partial\beta}=X^Ty,\quad
+		\frac{\partial \beta^TX^TX\beta}{\partial\beta}=2X^TX\beta \\
 		\frac{\partial Q(\beta)}{\partial\beta}=2X^Ty-2X^TX\beta=0 \\
 		X^TX\beta=X^Ty
 	\end{gather*}
@@ -51,7 +51,7 @@
 	\begin{equation*}
 		Q(\beta)=||y-X\hat{\beta}||^2+||X(\hat{\beta}-\beta)||^2
 	\end{equation*}
-	上第二项总是非负的，由范数的性质其为$0$当且仅当$X\hat{\beta}=X\beta$，即当且仅当$X^TX\beta=X^TX\hat{\beta}=X^Ty$，所以使$Q(\beta)$达到最小值的$\beta$必为正则方程的解$\hat{\beta}=(X^TX)^-X^Ty$。
+	上第二项总是非负的，由范数的定义可知其为$0$当且仅当$X\hat{\beta}=X\beta$，即当且仅当$X^TX\beta=X^TX\hat{\beta}=X^Ty$，所以使$Q(\beta)$达到最小值的$\beta$必为正则方程的解$\hat{\beta}=(X^TX)^-X^Ty$。
 \end{proof}
 \begin{derivation}
 	若$\operatorname{rank}(X)=p$，则$X$的列向量组线性无关。考虑二次型$y^TX^TXy$，$y^TX^TXy=0\Leftrightarrow||Xy||=0\Leftrightarrow Xy=\mathbf{0}$，而$X$的列向量是线性无关的，所以不存在非零向量的$y$使得$Xy=\mathbf{0}$，于是$y^TX^TXy$是一个正定二次型，$X^TX$是一个正定矩阵。由\cref{theo:PositiveDefinite}(3)的第五点和\info{行列式等于特征值的积，行列式大于$0$矩阵可逆}可得$X^TX$可逆。此时$\hat{\beta}=(X^TX)^{-1}X^Ty$，称$\hat{\beta}$为$\beta$的\gls{LSE}。
@@ -69,7 +69,7 @@
 		\item $c^T\hat{\beta}$与$(X^TX)^-$的选择无关；
 		\item $c^T\hat{\beta}$为$c^T\beta$的无偏估计；
 		\item  $\operatorname{Var}(c^T\hat{\beta})=\sigma^2c^T(X^TX)^-c,\;\operatorname{Cov}(c^T\hat{\beta},d^T\hat{\beta})=\sigma^2c^T(X^TX)^-d$，且与$(X^TX)^-$的选择无关；
-		\item $c^T\hat{\beta}$是$c^T\beta$唯一的BLUE；
+		\item (Gauss-Markov)$\;c^T\hat{\beta}$是$c^T\beta$唯一的BLUE；
 		\item 设$\varphi_i=c_i^T\beta,\;i=1,2,\dots,k$都是可估函数，$\seq{\alpha}{k}\in\mathbb{R}^{}$，则$\varphi=\sum\limits_{i=1}^{k}\alpha_i\varphi_i$也是可估的，且$\hat{\varphi}=\sum\limits_{i=1}^{k}\alpha_ic_i^T\hat{\beta}$是$\varphi$的BLUE。
 	\end{enumerate}
 \end{property}
@@ -127,13 +127,13 @@
 \end{definition}
 \subsubsection{残差}
 \begin{definition}
-	记$\hat{y}=X\hat{\beta}$，称$\hat{e}=y-\hat{y}$为\gls{ResidualVector}，称$\hat{e}^T\hat{e}$为\gls{SSE}，记为SSE。
+	记$\hat{y}=X\hat{\beta}$，称$\hat{e}=y-\hat{y}$为\gls{ResidualVector}，称$\hat{e}^T\hat{e}$为\gls{SSE}，记为$\operatorname{SSE}$。
 \end{definition}
 \begin{property}\label{prop:ehat}
 	对于\cref{model:LinearModel}，$\hat{\beta}$为正则方程的解，则残差向量$\hat{e}$满足：
 	\begin{enumerate}
 		\item $\operatorname{E}(\hat{e})=0,\;\operatorname{Cov}(\hat{e})=\sigma^2(I_n-P_X)$；
-		\item $SSE=y^T(I_n-P_X)y$；
+		\item $\operatorname{SSE}=y^T(I_n-P_X)y$；
 		\item $\operatorname{Cov}(\hat{y},\hat{e})=\mathbf{0}$；
 	\end{enumerate}
 \end{property}
@@ -153,11 +153,11 @@
 	\begin{equation*}
 		\hat{e}=(I_n-P_X)y
 	\end{equation*}
-	且$I_n-P_X$是一个对称幂等阵，于是：
+	且$I_n-P_X$是一个对称幂等阵，于是由\cref{prop:Transpose}(4)可得：
 	\begin{equation*}
 		\hat{e}^T\hat{e}=y^T(I_n-P_X)^T(I_n-P_X)y=y^T(I_n-P_X)(I_n-P_X)y=y^T(I_n-P_X)y
 	\end{equation*}\par
-	(3)由\cref{prop:CovMat}(5)(3)和\cref{prop:OrthogonalProjectionMat}(2)(7)(3)(8)可得
+	(3)由\cref{prop:CovMat}(5)(3)和\cref{prop:OrthogonalProjectionMat}(2)(8)可得
 	\begin{align*}
 		\operatorname{Cov}(\hat{y},\hat{e})&=\operatorname{Cov}(\hat{y},y-\hat{y})=\operatorname{Cov}(\hat{y},y)-\operatorname{Cov}(\hat{y}) \\
 		&=\operatorname{Cov}[X(X^TX)^-X^Ty,y]-\operatorname{Cov}[X(X^TX)^-X^Ty] \\
@@ -169,23 +169,23 @@
 \begin{theorem}\label{theo:VarianceOfErrorTerm}
 	对于\cref{model:LinearModel}，$\hat{\beta}$为正则方程的解，$\operatorname{rank}(X)=r$，则：
 	\begin{equation*}
-		\hat{\sigma}^2=\frac{SSE}{n-r}
+		\hat{\sigma}^2=\frac{\operatorname{SSE}}{n-r}
 	\end{equation*}
 	是$\sigma^2$的无偏估计。
 \end{theorem}
 \begin{proof}
-	注意到$(I_n-P_X)X=X-X=\mathbf{0}$，由\cref{prop:ehat}(2)和\cref{theo:ERVQuadraticForm}可得：
+	注意到$(I_n-P_X)X=X-X=\mathbf{0}$，由\cref{prop:ehat}(2)、\cref{theo:ERVQuadraticForm}和\cref{prop:Transpose}(4)可得：
 	\begin{align*}
-		\operatorname{E}(SSE)&=\operatorname{E}[y^T(I_n-P_X)y] =\beta^TX^T(I_n-P_X)X\beta+\operatorname{tr}[(I_n-P_X)\sigma^2I_n] \\
+		\operatorname{E}(\operatorname{SSE})&=\operatorname{E}[y^T(I_n-P_X)y] =\beta^TX^T(I_n-P_X)X\beta+\operatorname{tr}[(I_n-P_X)\sigma^2I_n] \\
 		&=\sigma^2\operatorname{tr}(I_n-P_X)
 	\end{align*}
-	由\ref{prop:Transpose}(4)、\cref{prop:MatrixMultiplication}(2)、\cref{prop:OrthogonalProjectionMat}(7)(3)、\cref{prop:IdempotentMat}(2)(5)和\cref{prop:OrthogonalProjectionMat}(1)可得：
+	由\cref{prop:OrthogonalProjectionMat}(7)(3)、\cref{prop:IdempotentMat}(2)(5)和\cref{prop:OrthogonalProjectionMat}(1)可得：
 	\begin{equation*}
 		\operatorname{tr}(I_n-P_X)=\operatorname{rank}(I_n-P_X)=n-\operatorname{rank}(P_X)=n-\operatorname{rank}(X)=n-r
 	\end{equation*}
-	即：
+	根据\cref{prop:MeasurableIntegral}(5)即：
 	\begin{equation*}
-		\operatorname{E}\left(\frac{SSE}{n-r}\right)=\sigma^2\qedhere
+		\operatorname{E}\left(\frac{\operatorname{SSE}}{n-r}\right)=\sigma^2\qedhere
 	\end{equation*}
 \end{proof}
 \begin{definition}
@@ -284,7 +284,7 @@
 \begin{theorem}
 	在\cref{theo:ConstraintLinearModel}的假设下，在参数区域$A\beta=b$上，
 	\begin{equation*}
-		\hat{\sigma}_A^2=\frac{||y-X\hat{\beta}_A||^2}{n-r+k}=\frac{SSE_A}{n-r+k}
+		\hat{\sigma}_A^2=\frac{||y-X\hat{\beta}_A||^2}{n-r+k}=\frac{\operatorname{SSE}_A}{n-r+k}
 	\end{equation*}
 	是$\sigma^2$的无偏估计。
 \end{theorem}
@@ -330,14 +330,14 @@
 \begin{theorem}\label{theo:SSESSEACalculate}
 	对于无约束条件以及约束$A\beta=\mathbf{0}$，有：
 	\begin{gather*}
-		SSE=||y-X\hat{\beta}||^2=y^Ty-\hat{\beta}^TX^Ty \\
-		SSE_A=||y-X\hat{\beta}_A||^2=y^Ty-\hat{\beta}_A^TX^Ty
+		\operatorname{SSE}=||y-X\hat{\beta}||^2=y^Ty-\hat{\beta}^TX^Ty \\
+		\operatorname{SSE}_A=||y-X\hat{\beta}_A||^2=y^Ty-\hat{\beta}_A^TX^Ty
 	\end{gather*}
 \end{theorem}
 \begin{proof}
 	由\cref{prop:A-}(6)可知：
 	\begin{align*}
-		SSE&=(y-X\hat{\beta})^T(y-X\hat{\beta})=y^Ty-y^TX\hat{\beta}-\hat{\beta}^TX^Ty+\hat{\beta}^TX^TX\hat{\beta} \\
+		\operatorname{SSE}&=(y-X\hat{\beta})^T(y-X\hat{\beta})=y^Ty-y^TX\hat{\beta}-\hat{\beta}^TX^Ty+\hat{\beta}^TX^TX\hat{\beta} \\
 		&=y^Ty-2\hat{\beta}^TX^Ty+\hat{\beta}^TX^TX(X^TX)^-X^Ty=y^Ty-2\hat{\beta}^TX^Ty+\hat{\beta}^TX^Ty \\
 		&=y^Ty-\hat{\beta}^TX^Ty
 	\end{align*}
@@ -350,16 +350,16 @@
 	\end{equation*}
 	其中$\lambda$为Lagrange乘子，于是有：
 	\begin{align*}
-		SSE_A&=(y-X\hat{\beta}_A)^T(y-X\hat{\beta}_A)=y^Ty-y^TX\hat{\beta}_A-\hat{\beta}_A^TX^Ty+\hat{\beta}_A^TX^TX\hat{\beta}_A \\
+		\operatorname{SSE}_A&=(y-X\hat{\beta}_A)^T(y-X\hat{\beta}_A)=y^Ty-y^TX\hat{\beta}_A-\hat{\beta}_A^TX^Ty+\hat{\beta}_A^TX^TX\hat{\beta}_A \\
 		&=y^Ty-\hat{\beta}_A^TX^Ty+\hat{\beta}_A^TX^TX\hat{\beta}_A-\hat{\beta}^TX^Ty=y^Ty-\hat{\beta}_A^TX^Ty+\hat{\beta}_A^T(X^TX\hat{\beta}_A-X^Ty) \\
 		&=y^Ty-\hat{\beta}_A^TX^Ty-\hat{\beta}_A^TA^T\hat{\lambda}=y^Ty-\hat{\beta}_A^TX^Ty\qedhere
 	\end{align*}
 \end{proof}
 \begin{definition}
-	称$\hat{\beta}^TX^Ty$为\gls{RSS}，记为$RSS(\beta)$。称$\hat{\beta}_A^TX^Ty$为约束条件$A\beta=\mathbf{0}$下的回归平方和，记为$RSS_A(\beta)$。
+	称$\hat{\beta}^TX^Ty$为\gls{RSS}，记为$\operatorname{RSS}(\beta)$。称$\hat{\beta}_A^TX^Ty$为约束条件$A\beta=\mathbf{0}$下的回归平方和，记为$\operatorname{RSS}_A(\beta)$。称$y^Ty$为总平方和，记作$\operatorname{RSS}_{\text{总}}(\beta)$。称$\sqrt{\dfrac{\operatorname{RSS}(\beta)}{\operatorname{RSS}_{\text{总}}}(\beta)}$为$y$与$\seq{X}{p}$之间的\gls{CoefficientOfMultipleCorrelation}，记作$\operatorname{R}$。
 \end{definition}
 \begin{note}
-	回归平方和表示了数据平方和$y^Ty$中能够由因变量$y$与自变量$\seq{X}{p}$的线性关系解释的部分。
+	回归平方和表示了数据平方和$y^Ty$中能够由因变量$y$与自变量$\seq{X}{p}$的线性关系解释的部分，因为它是$y$在$<\seq{X}{p}>$上投影长度的平方。由此可以看出$\operatorname{R}^2\leqslant1$。我们用$\operatorname{R}^2$来度量$\seq{X}{p}$对$y$线性拟合程度的好坏，越接近$1$越好。
 \end{note}
 
 \subsection{预测}
