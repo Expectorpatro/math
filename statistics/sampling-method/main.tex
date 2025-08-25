@@ -1,0 +1,106 @@
+\addcontentsline{toc}{chapter}{符号说明}
+
+\chapter*{符号说明} % 无编号的章节
+\begin{table}[h]
+	\centering
+	\setlength{\tabcolsep}{25pt} % 调整列之间的间距，默认值为6pt
+	\begin{tabular}{ccc}
+		\toprule
+		符号    &  & 说明 \\
+		\midrule
+		$X_k$		& $k=1,2,\dots,N$      & 总体中个体对应的辅助变量值 \\
+		$x_k$		& $k=1,2,\dots,n$      & 样本中样本单元对应的辅助变量值 \\
+		$B$         &                      & 比例估计系数 \\
+		$H$		    &                      & 分层抽样总层数 \\
+		$h$         & $h=1,2,\dots,H$      & 层下标 \\
+		$S_h$       & $h=1,2,\dots,H$      & 某一层中所有个体构成的集合 \\
+		$N_h$		& $h=1,2,\dots,H$	   & 层中个体的总数 \\
+		$n_h$		& $h=1,2,\dots,H$	   & 层中的样本数 \\
+		$Y_{hj}$    & $h=1,2,\dots,H,\;j=1,2,\dots,N_h$ & 层中个体的值 \\
+		$y_{hj}$    & $h=1,2,\dots,H,\;j=1,2,\dots,n_h$ & 层中样本单元的值 \\
+		$c_h$       & $h=1,2,\dots,H$      & 层中抽样的平均成本 \\
+		\bottomrule
+	\end{tabular}
+	\caption{符号说明表}
+\end{table}
+
+\chapter{抽样调查}
+
+\section{基本概念}
+抽样调查往往针对的是有限群体，其最直接的任务，就是根据测得的样本（样本需要能够反应总体的差异）数量指标$\{y_1,y_2,\dots,y_n\}$，对总体$\{Y_1,Y_2,\dots,Y_N\}$的一些数字特征进行估计。如估计：
+\begin{enumerate}
+	\item 总体均值$\mu=\dfrac{1}{N}\sum\limits_{i=1}^NY_i$，总体总量$\tau=\sum\limits_{i=1}^NY_i$。
+	\item 总体方差\footnote{在抽样调查中认为有限总体也相当于一个样本，以样本方差公式计算其方差，协方差、相关系数也一样。}$\sigma^2=\dfrac{1}{N-1}\sum\limits_{i=1}^N(Y_i-\mu)^2$。
+	\item 总体中满足某一特征的单元所占比例$p$。
+	\item 总体分布的分位数。
+\end{enumerate}
+\begin{definition}
+	称研究者希望对其进行描述或推断的群体为\gls{TargetPopulation}，称研究者实际用于抽样的群体为\gls{SourcePopulation}（通常是目标群体的一个子集或一个接近目标群体的群体），也称样本为\gls{StudyGroup}。
+\end{definition}
+\begin{figure}[htbp] 
+	\centering 
+	\includegraphics[width=0.8\textwidth]{statistics/sampling-method/population.png}
+	\caption{群体} 
+\end{figure}
+\begin{definition}
+	选择样本的过程被称为\gls{SamplingDesign}，称对可以选择作为样本单元的群体单位列出的名册或排序编号为\gls{SamplingFrame}。
+\end{definition}
+\begin{note}
+	抽样框架被用来确定总体的抽样范围和结构，还常包含一些辅助信息，例如个体的特征。
+\end{note}
+\begin{center}
+	\begin{equation}
+		\text{抽样设计}
+		\begin{cases}
+			\text{概率抽样} 
+			\begin{cases}
+				\text{简单随机抽样} \\
+				\text{分层抽样} \\
+				\text{整群抽样} \\
+			\end{cases}\\
+			\text{非概率抽样}
+			\begin{cases}
+				\text{方便抽样} \\
+				\text{雪球抽样} \\
+				\text{判断抽样} \\
+			\end{cases}
+		\end{cases}\notag
+	\end{equation}
+\end{center}
+\begin{itemize}
+	\item 概率抽样样本是随机产生的，非概率抽样样本不是随机产生的。
+	\item 非概率抽样无法判断样本是否具备代表性，也就无法确定抽样误差。但在一定程度上可以说明总体的特征。
+	\item 方便抽样是选择最容易获得的样本作为研究对象。
+	\item 雪球抽样是先选择一个较小的样本，再让这个样本中的样本单元去提供一些样本。
+	\item 判断抽样是研究人员从总体中选择自己认为最能代表总体的个体作为样本。
+\end{itemize}
+\begin{definition}
+	设$Y_k$是总体$F$中的一个个体，称当前抽样设计下该个体成为一个样本单元的概率$\pi_k$为\gls{SamplingProbability}，将$w_k=\dfrac{1}{\pi_k}$称为该个体的\gls{SamplingWeight}，它可以表示该个体可以代表总体里的多少个个体。若总体$F$中每个个体的抽样权重都一样，则称产生的样本为\gls{SelfWeighting}样本。
+\end{definition}
+\subsubsection{抽样调查随机性的来源}
+绝大多数统计学课程是基于模型的(model-based approch)，它将总体看作是背后随机变量的实现，随机性来源于随机变量的取值。\par
+抽样调查是基于设计的(design-based approch)，它将总体中个体的值看作为定值，而随机性来源于是否抽到该个体。这将导致我们需要重新证明数理统计中的部分结论，如样本均值与样本方差的无偏性，请引起重视。
+\subsubsection{误差}
+\begin{definition}
+	称由抽样的随机性带来的误差为\gls{RandomError}或\gls{SamplingError}，称因研究群体不能代表目标群体所带来的误差为\gls{SelectionBias}，称测量或资料收集方法产生的误差为\gls{InformationBias}或\gls{MisclassificationBias}，称未考虑变量致使的误差为\gls{ConfoundingBias}，引起混杂偏倚的因素被称为\gls{ConfoundingFactor}。
+\end{definition}
+\begin{center}
+	\begin{equation*}
+		\text{误差}
+		\begin{cases}
+			\text{随机误差} \\
+			\text{系统误差}
+			\begin{cases}
+				\text{选择偏倚} \\
+				\text{错分偏倚} \\
+				\text{混杂偏倚}
+			\end{cases}
+		\end{cases}
+	\end{equation*}
+\end{center}
+
+\input{statistics/sampling-method/SRS.tex}
+\input{statistics/sampling-method/reg-ratio-estimation.tex}
+\input{statistics/sampling-method/stratified-sampling.tex}
+\input{statistics/sampling-method/cluster-sampling.tex}
+

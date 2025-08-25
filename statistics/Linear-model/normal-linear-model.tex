@@ -14,7 +14,7 @@
 	对于\cref{model:NormalLinearModel}，设$c^T\beta$为可估函数，则：
 	\begin{enumerate}
 		\item LS估计$c^T\hat{\beta}$是$c^T\beta$的MLE，$\tilde{\sigma}^2=\dfrac{n-r}{n}\hat{\sigma}^2$是$\sigma^2$的MLE。若模型在\cref{theo:ConstraintLinearModel}的约束下，则LS估计$c^T\hat{\beta}_A$是$c^T\beta$的MLE，$\tilde{\sigma}_A^2=\dfrac{n-r+k}{n}\hat{\sigma}_A^2$是$\sigma^2$的MLE；
-		\item $c^T\hat{\beta}\sim N[c^T\beta,\sigma^2c^T(X^TX)^-c]$，$\dfrac{(n-r)\hat{\sigma}^2}{\sigma^2}=\dfrac{SSE}{\sigma^2}\sim\chi_{n-r}^2$；
+		\item $c^T\hat{\beta}\sim N[c^T\beta,\sigma^2c^T(X^TX)^-c]$，$\dfrac{(n-r)\hat{\sigma}^2}{\sigma^2}=\dfrac{\operatorname{SSE}}{\sigma^2}\sim\chi_{n-r}^2$；
 		\item $c^T\hat{\beta}$与$\hat{\sigma}^2$相互独立；
 		\item $T_1=y^Ty,\;T_2=X^Ty$为$y$的分布族的完全充分统计量；
 		\item 若$c^T\beta$和$\sigma^2$的估计的损失函数是估计量的严格凸函数，则$c^T\hat{\beta}$是$c^T\beta$在几乎处处的意义下唯一的UMRUE，$\hat{\sigma}^2$为$\sigma^2$在几乎处处的意义下唯一的UMRUE；
@@ -69,7 +69,7 @@
 	\begin{equation*}
 		c^T\hat{\beta}\sim\operatorname{N}[c^T\beta,c^T(X^TX)^-c]
 	\end{equation*}\par
-	因为$(I_n-P_X)X=\mathbf{0}$，根据\cref{prop:OrthogonalProjectionMat}(7)(3)可得$I_n-P_X$是对称阵，所以由\cref{prop:ehat}(2)可知：
+	因为$(I_n-P_X)X=\mathbf{0}$，根据\cref{prop:OrthogonalProjectionMat}(7)(3)可得$I_n-P_X$是对称阵，所以由\cref{prop:ehat}(2)、\cref{prop:OrthogonalProjectionMat}(8)和\cref{prop:Transpose}(4)可知：
 	\begin{align*}
 		\frac{n-r}{\sigma^2}\hat{\sigma}^2&=\frac{\hat{e}^T\hat{e}}{\sigma^2}=\frac{y^T(I_n-P_X)y}{\sigma^2} \\
 		&=\frac{(X\beta+\varepsilon)^T(I_n-P_X)(X\beta+\varepsilon)}{\sigma^2} \\
@@ -77,7 +77,7 @@
 		&=\frac{(X\beta+\varepsilon)^T(I_n-P_X)\varepsilon}{\sigma^2}=\frac{\beta^TX^T(I_n-P_X)\varepsilon+\varepsilon^T(I_n-P_X)\varepsilon}{\sigma^2} \\
 		&=\frac{\beta^T[(I_n-P_X)^TX]^T\varepsilon+\varepsilon^T(I_n-P_X)\varepsilon}{\sigma^2}=\frac{\varepsilon^T(I_n-P_X)\varepsilon}{\sigma^2}
 	\end{align*}
-	因为$\varepsilon\sim\operatorname{N}_n(\mathbf{0},\sigma^2I_n)$，由\cref{theo:MatNormalLinearTransform}可知$\dfrac{\varepsilon}{\sigma}\sim\operatorname{N}_n(\mathbf{0},I_n)$。根据\cref{prop:OrthogonalProjectionMat}(7)(3)可知$I_n-P_X$是对称幂等阵，由\cref{prop:IdempotentMat}(5)和\cref{prop:OrthogonalProjectionMat}(1)可得$\operatorname{rank}(I_n-P_X)=n-r$，于是根据\cref{theo:XAXChi2}可得：
+	因为$\varepsilon\sim\operatorname{N}_n(\mathbf{0},\sigma^2I_n)$，由\cref{prop:MultiNormal}(2)可知$\dfrac{\varepsilon}{\sigma}\sim\operatorname{N}_n(\mathbf{0},I_n)$。根据\cref{prop:OrthogonalProjectionMat}(7)(3)可知$I_n-P_X$是对称幂等阵，由\cref{prop:IdempotentMat}(5)和\cref{prop:OrthogonalProjectionMat}(1)可得$\operatorname{rank}(I_n-P_X)=n-r$，于是根据\cref{theo:XAXChi2}可得：
 	\begin{equation*}
 		\frac{n-r}{\sigma^2}\hat{\sigma}^2=\frac{\varepsilon^T(I_n-P_X)\varepsilon}{\sigma^2}\sim\chi_{n-r}^2
 	\end{equation*}\par
@@ -95,11 +95,11 @@
 	\begin{align*}
 		&p(y)=(2\pi\sigma^2)^{-\frac{n}{2}}\exp\left[-\frac{1}{2}(y-X\beta)^T\frac{1}{\sigma^2}(y-X\beta)\right] \\
 		=&(2\pi\sigma^2)^{-\frac{n}{2}}\exp\left[-\frac{1}{2\sigma^2}(y^Ty-y^TX\beta-\beta^TX^Ty-\beta^TX^TX\beta)\right] \\
-		=&(2\pi\sigma^2)^{-\frac{n}{2}}\exp(\beta^TX^TX\beta)\exp\left[-\frac{1}{2\sigma^2}y^Ty-\frac{\beta^T}{\sigma^2}X^Ty\right]
+		=&(2\pi\sigma^2)^{-\frac{n}{2}}\exp(\beta^TX^TX\beta)\exp\left(-\frac{1}{2\sigma^2}y^Ty-\frac{\beta^T}{\sigma^2}X^Ty\right)
 	\end{align*}
-	所以$y$的分布族为指数族，自然参数为$\left(-\dfrac{1}{2\sigma^2},-\dfrac{\beta^T}{\sigma^2}\right)$，自然参数空间为$\mathbb{R}^{-}\times\mathbb{R}^{p}$，所以它是满秩的。由\cref{prop:ExponentialFamily}(7)(8)可知$T_1=y^Ty,T_2=X^Ty$是分布族的完全充分统计量。\par
-	(5)由\cref{prop:EstimableFunction}(4)可知$c^T\hat{\beta}=c^T(X^TX)^-X^Ty$是$c^T\beta$的无偏估计，根据(4)可得$c^T\hat{\beta}$是完全充分统计量$X^Ty$的函数，由\cref{theo:Lehmann-Scheffe}可知$c^T\hat{\beta}$是$c^T\beta$在几乎处处的意义下唯一的UMRUE。由\cref{theo:VarianceOfErrorTerm}和\cref{prop:ehat}(2)可知$\hat{\sigma}^2=\dfrac{SSE}{n-r}=\dfrac{y^Ty-y^TX(X^TX)^-X^Ty}{n-r}$是$\sigma^2$的无偏估计，根据(4)可得$\hat{\sigma}^2$是完全充分统计量$y^Ty$和$X^Ty$的函数，由\cref{theo:Lehmann-Scheffe}可知$\hat{\sigma}^2$是$\sigma^2$在几乎处处的意义下唯一的UMRUE。\par
-	(6)由\cref{prop:ehat}(1)立即可得。
+	所以$y$的分布族为指数族，自然参数为$\left(-\dfrac{1}{2\sigma^2},-\dfrac{\beta^T}{\sigma^2}\right)$，自然参数空间为$\mathbb{R}^{-}\times\mathbb{R}^{p}$，所以它是满秩的。由\cref{prop:ExponentialFamily}(8)可知$T_1=y^Ty,T_2=X^Ty$是分布族的完全充分统计量。\par
+	(5)由\cref{prop:EstimableFunction}(4)可知$c^T\hat{\beta}=c^T(X^TX)^-X^Ty$是$c^T\beta$的无偏估计，根据(4)可得$c^T\hat{\beta}$是完全充分统计量$X^Ty$的函数，由\cref{theo:Lehmann-Scheffe}可知$c^T\hat{\beta}$是$c^T\beta$在几乎处处的意义下唯一的UMRUE。由\cref{theo:VarianceOfErrorTerm}和\cref{prop:ehat}(2)可知$\hat{\sigma}^2=\dfrac{\operatorname{SSE}}{n-r}=\dfrac{y^Ty-y^TX(X^TX)^-X^Ty}{n-r}$是$\sigma^2$的无偏估计，根据(4)可得$\hat{\sigma}^2$是完全充分统计量$y^Ty$和$X^Ty$的函数，由\cref{theo:Lehmann-Scheffe}可知$\hat{\sigma}^2$是$\sigma^2$在几乎处处的意义下唯一的UMRUE。\par
+	(6)由\cref{prop:ehat}(1)和\cref{prop:MultiNormal}(2)立即可得。
 \end{proof}
 
 \subsection{假设检验}
@@ -112,16 +112,16 @@
 	\begin{enumerate}
 		\item 似然比检验$H_0:A\beta=b,\;H_1:A\beta\ne b$的似然比为：
 		\begin{equation*}
-			\lambda(y)=\left(\frac{SSE_A}{SSE}\right)^\frac{n}{2}
+			\lambda(y)=\left(\frac{\operatorname{SSE}_A}{\operatorname{SSE}}\right)^\frac{n}{2}
 		\end{equation*}
-		\item $\dfrac{SSE_A-SSE}{\sigma^2}\sim\chi^2_{k,\alpha}$，其中：
+		\item $\dfrac{\operatorname{SSE}_A-\operatorname{SSE}}{\sigma^2}\sim\chi^2_{k,\alpha}$，其中：
 		\begin{equation*}
 			\alpha=\frac{(A\beta-b)^T[A(X^TX)^-A^T]^{-1}(A\beta-b)}{\sigma^2}
 		\end{equation*}
-		\item $SSE_A-SSE$与$SSE$相互独立；
+		\item $\operatorname{SSE}_A-\operatorname{SSE}$与$\operatorname{SSE}$相互独立；
 		\item 当$A\beta=b$为真时，
 		\begin{equation*}
-			F=\frac{(SSE_A-SSE)/k}{SSE/(n-r)}\sim F_{k,n-r}
+			F=\frac{(\operatorname{SSE}_A-\operatorname{SSE})/k}{\operatorname{SSE}/(n-r)}\sim F_{k,n-r}
 		\end{equation*}
 		且上式左侧为$\lambda(y)$的单调增函数；
 		\item 似然比检验$H_0:A\beta=b,\;H_1:A\beta\ne b$置信度为$1-\alpha$的拒绝域为$\{F:F>F_{k,n-r}(\alpha)\}$。
@@ -139,27 +139,27 @@
 	\end{gather*}
 	于是：
 	\begin{equation*}
-		\lambda(y)=\frac{L(\hat{\beta},\tilde{\sigma}^2;y)}{L(\hat{\beta}_A,\tilde{\sigma}_A^2;y)}=\left(\frac{SSE_A}{SSE}\right)^\frac{n}{2}
+		\lambda(y)=\frac{L(\hat{\beta},\tilde{\sigma}^2;y)}{L(\hat{\beta}_A,\tilde{\sigma}_A^2;y)}=\left(\frac{\operatorname{SSE}_A}{\operatorname{SSE}}\right)^\frac{n}{2}
 	\end{equation*}\par
-	(2)根据\cref{prop:Transpose}(4)、\cref{prop:InvertibleMatrix}(12)、\cref{prop:A-}(5)(7)和\cref{prop:OrthogonalProjectionMat}(7)(3)对$SSE_A$作分解：
+	(2)根据\cref{prop:Transpose}(4)、\cref{prop:InvertibleMatrix}(12)、\cref{prop:A-}(5)(7)和\cref{prop:OrthogonalProjectionMat}(7)(3)对$\operatorname{SSE}_A$作分解：
 	\begin{align*}
-		SSE_A&=||y-X\hat{\beta}_A||^2=\Big\|y-X\{\hat{\beta}-(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)\}\Big\|^2 \\
+		\operatorname{SSE}_A&=||y-X\hat{\beta}_A||^2=\Big\|y-X\{\hat{\beta}-(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)\}\Big\|^2 \\
 		&=\Big\|y-X\hat{\beta}+X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)\Big\|^2 \\
-		&=SSE+2(y-X\hat{\beta})^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=\operatorname{SSE}+2(y-X\hat{\beta})^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
 		&\quad+\{X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)\}^T \\
 		&\quad\cdot X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
-		&=SSE+2[y-X(X^TX)^-X^Ty]^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=\operatorname{SSE}+2[y-X(X^TX)^-X^Ty]^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
 		&\quad+(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^T \\
 		&\quad\cdot X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
-		&=SSE+2[(I_n-P_X)y]^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=\operatorname{SSE}+2[(I_n-P_X)y]^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
 		&\quad+(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
-		&=SSE+2y^T(I_n-P_X)X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		&=\operatorname{SSE}+2y^T(I_n-P_X)X(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
 		&\quad+(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
-		&=SSE+(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
+		&=\operatorname{SSE}+(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
 	\end{align*}
 	所以有：
 	\begin{equation*}
-		SSE_A-SSE=(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
+		\operatorname{SSE}_A-\operatorname{SSE}=(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
 	\end{equation*}
 	由\cref{prop:NormalLinearModel}(2)和\cref{prop:MultiNormal}(2)可知：
 	\begin{equation*}
@@ -171,16 +171,16 @@
 	\end{equation*}
 	于是由$\chi^2$分布的定义可得：
 	\begin{equation*}
-		\frac{SSE_A-SSE}{\sigma^2}=\frac{\{[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\hat{\beta}-b)\}^T[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\hat{\beta}-b)}{\sigma^2}\sim\chi_{k,\alpha}^2
+		\frac{\operatorname{SSE}_A-\operatorname{SSE}}{\sigma^2}=\frac{\{[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\hat{\beta}-b)\}^T[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\hat{\beta}-b)}{\sigma^2}\sim\chi_{k,\alpha}^2
 	\end{equation*}
 	其中：
 	\begin{align*}
 		\alpha&=(\sigma^2)^{-1}\{[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\beta-b)\}^T[A(X^TX)^-A^T]^{-\frac{1}{2}}(A\beta-b) \\
 		&=(\sigma^2)^{-1}(A\beta-b)^T[A(X^TX)^-A^T]^{-1}(A\beta-b)
 	\end{align*}\par
-	(3)由\cref{prop:ehat}(2)可知$SSE=y^T(I_n-P_X)y$，由(2)的过程和\cref{prop:Transpose}(4)可得：
+	(3)由\cref{prop:ehat}(2)可知$\operatorname{SSE}=y^T(I_n-P_X)y$，由(2)的过程和\cref{prop:Transpose}(4)可得：
 	\begin{align*}
-		SSE_A-SSE&=(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
+		\operatorname{SSE}_A-\operatorname{SSE}&=(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
 		&=[A(X^TX)^-X^Ty-b]^T[A(X^TX)^-A^T]^{-1}[A(X^TX)^-X^Ty-b] \\
 		&=y^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^Ty \\
 		&\quad-2b^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-X^Ty+b^T[A(X^TX)^-A^T]^{-1}b \\
@@ -194,14 +194,14 @@
 			=&2b^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-[(I_n-P_X)X]^T=\mathbf{0}
 		\end{aligned}
 	\end{gather*}
-	于是根据\cref{theo:BXXAXIndependent}和\cref{theo:XAXXBXIndependent}可知$SSE_A-SSE$与$SSE$独立。\par
-	(4)当$A\beta=b$为真时，由(2)可知$\dfrac{SSE_A-SSE}{\sigma^2}\sim\chi^2_{k}$。根据(3)和\cref{prop:NormalLinearModel}(2)可得：
+	于是根据\cref{theo:BXXAXIndependent}和\cref{theo:XAXXBXIndependent}可知$\operatorname{SSE}_A-\operatorname{SSE}$与$\operatorname{SSE}$独立。\par
+	(4)当$A\beta=b$为真时，由(2)可知$\dfrac{\operatorname{SSE}_A-\operatorname{SSE}}{\sigma^2}\sim\chi^2_{k}$。根据(3)和\cref{prop:NormalLinearModel}(2)可得：
 	\begin{equation*}
-		\frac{(SSE_A-SSE)/(k\sigma^2)}{SSE/[(n-r)\sigma^2]}=\frac{(SSE_A-SSE)/k}{SSE/(n-r)}\sim F_{k,n-r}\qedhere
+		\frac{(\operatorname{SSE}_A-\operatorname{SSE})/(k\sigma^2)}{\operatorname{SSE}/[(n-r)\sigma^2]}=\frac{(\operatorname{SSE}_A-\operatorname{SSE})/k}{\operatorname{SSE}/(n-r)}\sim F_{k,n-r}\qedhere
 	\end{equation*}
 	由(1)可得：
 	\begin{equation*}
-		\frac{(SSE_A-SSE)/k}{SSE/(n-r)}=\frac{n-r}{k}[\lambda^{\frac{2}{n}}(y)-1]
+		\frac{(\operatorname{SSE}_A-\operatorname{SSE})/k}{\operatorname{SSE}/(n-r)}=\frac{n-r}{k}[\lambda^{\frac{2}{n}}(y)-1]
 	\end{equation*}
 	所以它是$\lambda(y)$的单调增函数。\par
 	(5)由(1)(4)可立即得出。

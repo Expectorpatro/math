@@ -109,7 +109,7 @@
 \begin{theorem}
 	对于\cref{model:NormalLinearRegressionModel}，回归方程的显著性检验的统计量和拒绝域为：
 	\begin{equation*}
-		F=\frac{\hat{\beta}_I^T\tilde{X}_c^Ty/(p-1)}{SSE/(n-p)},\quad \{F:F>F_{p-1,n-p}(\alpha)\}
+		F=\frac{\hat{\beta}_I^T\tilde{X}_c^Ty/(p-1)}{\operatorname{SSE}/(n-p)},\quad \{F:F>F_{p-1,n-p}(\alpha)\}
 	\end{equation*}
 	回归系数$\beta_i$的显著性检验的统计量和拒绝域为：
 	\begin{equation*}
@@ -121,13 +121,13 @@
 	\begin{equation*}
 		y_i=\beta_0+\varepsilon_i,\quad i=1,2,\dots,n
 	\end{equation*}
-	此时设计阵为$\mathbf{1}_n$，正则方程为$n\hat{\beta}_0=n\bar{y}$，$\hat{\beta}=\bar{y}$，由\cref{theo:SSESSEACalculate}可得$SSE_A=y^Ty-\bar{y}\mathbf{1}_n^Ty=y^Ty-\bar{y}n\bar{y}=y^Ty-n\bar{y}^2$。备择假设下根据\cref{theo:CenterStandardLinearModel}(2)可得：
+	此时设计阵为$\mathbf{1}_n$，正则方程为$n\hat{\beta}_0=n\bar{y}$，$\hat{\beta}=\bar{y}$，由\cref{theo:SSESSEACalculate}可得$\operatorname{SSE}_A=y^Ty-\bar{y}\mathbf{1}_n^Ty=y^Ty-\bar{y}n\bar{y}=y^Ty-n\bar{y}^2$。备择假设下根据\cref{theo:CenterStandardLinearModel}(2)可得：
 	\begin{equation*}
-		SSE=y^Ty-\hat{\beta}^TX^Ty=y^Ty-\hat{\gamma}_0n\bar{y}-\hat{\beta}_I^T\tilde{X}_c^Ty=y^Ty-n\bar{y}^2-\hat{\beta}_I^T\tilde{X}_c^Ty
+		\operatorname{SSE}=y^Ty-\hat{\beta}^TX^Ty=y^Ty-\hat{\gamma}_0n\bar{y}-\hat{\beta}_I^T\tilde{X}_c^Ty=y^Ty-n\bar{y}^2-\hat{\beta}_I^T\tilde{X}_c^Ty
 	\end{equation*}
 	于是有：
 	\begin{equation*}
-		SSE_A-SSE=y^Ty-n\bar{y}^2-(y^Ty-n\bar{y}^2-\hat{\beta}_I^T\tilde{X}_c^Ty)=\hat{\beta}_I^T\tilde{X}_c^Ty
+		\operatorname{SSE}_A-\operatorname{SSE}=y^Ty-n\bar{y}^2-(y^Ty-n\bar{y}^2-\hat{\beta}_I^T\tilde{X}_c^Ty)=\hat{\beta}_I^T\tilde{X}_c^Ty
 	\end{equation*}
 	由\cref{theo:NormalLinearModelHypothesisTesting}(5)即可得出结论。\par
 	(2)仿照\cref{prop:NormalLinearModel}(2)的证明过程可知：
@@ -152,8 +152,6 @@
 	\end{equation*}
 \end{proof}
 
-\subsection{复相关系数}
-
 \subsection{模型选择}
 \subsubsection{变量选择}
 \begin{theorem}
@@ -168,6 +166,7 @@
 \subsubsection{AIC准则}
 
 \subsection{回归诊断}
+\subsubsection{残差分析}
 \begin{definition}
 	当模型为\cref{model:NormalLinearRegressionModel}时，将：
 	\begin{equation*}
@@ -176,13 +175,12 @@
 	称为\textbf{学生化残差}。由\cref{prop:ehat}(1)可知它相当于是对$\hat{e}$进行标准化然后用$\sigma^2$的估计$\hat{\sigma}^2$进行替换后得到的值。
 \end{definition}
 \begin{note}
-	应用上可以近似地认为$r_i$相互独立且服从$N(0,1)$。若将$\hat{e}$与$\hat{y}$画作二维散点图，以$\hat{y}$为横坐标、$r_i$为纵坐标，点的纵坐标应大致分布于$[-2,2]$，且由\cref{prop:ehat}(3)可得这些点不应呈现出任何趋势。若不满足上述现象，则此时模型有问题，可能是漏掉了重要的回归自变量，也可能是数据不满足\cref{model:NormalLinearRegressionModel}中的假设。
+	应用上可以近似地认为$r_i$相互独立且服从$N(0,1)$。若将$\hat{e}$与$\hat{y}$画作二维散点图，以$\hat{y}$为横坐标、$r_i$为纵坐标，点的纵坐标应大致分布于$[-2,2]$，且由\cref{prop:ehat}(3)和\cref{prop:MultiNormal}(2)(8)可得这些点不应呈现出任何趋势（$\hat{y}$与$\hat{e}_i$独立）。若不满足上述现象，则此时模型有问题，可能是漏掉了重要的回归自变量，也可能是数据不满足\cref{model:NormalLinearRegressionModel}中的假设。
 \end{note}
 \begin{definition}
 	称以某种残差为纵坐标、其它量为横坐标的散点图为\textbf{残差图}。
 \end{definition}
-
-\subsection{影响分析}
+\subsubsection{影响分析}
 影响分析即为探查对估计或预测有较大影响的数据。
 \begin{definition}
 	定义第$i$个样本\textbf{Cook统计量}为：
