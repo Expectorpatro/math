@@ -13,7 +13,7 @@
 \begin{definition}
 	称方程$X^TX\beta=X^Ty$为\gls{NormalEquation}。
 \end{definition}
-\begin{theorem}
+\begin{theorem}\label{theo:LSELinearModel}
 	对于\cref{model:LinearModel}，$\hat{\beta}=(X^TX)^-X^Ty$是其唯一的最小二乘解。
 \end{theorem}
 \begin{proof}
@@ -21,8 +21,8 @@
 	\begin{gather*}
 		\begin{aligned}
 			Q(\beta)&=||y-X\beta||^2=(y-X\beta)^T(y-X\beta) \\
-			&=y^Ty-y^TX\beta-\beta^TX^Ty-\beta^TX^TX\beta \\
-			&=y^Ty-2y^TX\beta-\beta^TX^TX\beta
+			&=y^Ty-y^TX\beta-\beta^TX^Ty+\beta^TX^TX\beta \\
+			&=y^Ty-2y^TX\beta+\beta^TX^TX\beta
 		\end{aligned}\\
 		\frac{\partial y^TX\beta}{\partial\beta}=X^Ty,\quad
 		\frac{\partial \beta^TX^TX\beta}{\partial\beta}=2X^TX\beta \\
@@ -54,8 +54,11 @@
 	上第二项总是非负的，由范数的定义可知其为$0$当且仅当$X\hat{\beta}=X\beta$，即当且仅当$X^TX\beta=X^TX\hat{\beta}=X^Ty$，所以使$Q(\beta)$达到最小值的$\beta$必为正则方程的解$\hat{\beta}=(X^TX)^-X^Ty$。
 \end{proof}
 \begin{derivation}
-	若$\operatorname{rank}(X)=p$，则$X$的列向量组线性无关。考虑二次型$y^TX^TXy$，$y^TX^TXy=0\Leftrightarrow||Xy||=0\Leftrightarrow Xy=\mathbf{0}$，而$X$的列向量是线性无关的，所以不存在非零向量的$y$使得$Xy=\mathbf{0}$，于是$y^TX^TXy$是一个正定二次型，$X^TX$是一个正定矩阵。由\cref{theo:PositiveDefinite}(3)的第五点和\info{行列式等于特征值的积，行列式大于$0$矩阵可逆}可得$X^TX$可逆。此时$\hat{\beta}=(X^TX)^{-1}X^Ty$，称$\hat{\beta}$为$\beta$的\gls{LSE}。
+	若$\operatorname{rank}(X)=p$，则$X$的列向量组线性无关。考虑二次型$y^TX^TXy$，$y^TX^TXy=0\Leftrightarrow||Xy||=0\Leftrightarrow Xy=\mathbf{0}$，而$X$的列向量是线性无关的，所以不存在非零向量的$y$使得$Xy=\mathbf{0}$，于是$y^TX^TXy$是一个正定二次型，$X^TX$是一个正定矩阵。由\cref{theo:PositiveDefinite}(6)可得$X^TX$可逆。此时$\hat{\beta}=(X^TX)^{-1}X^Ty$，称$\hat{\beta}$为$\beta$的\gls{LSE}。
 \end{derivation}
+\begin{note}
+	接下来我们将涉及到非常多的公式，初学会觉得非常难记，但如果从投影的角度去理解的话，很多公式都是直观上非常显然的，也就更好记忆了。
+\end{note}
 \subsection{参数估计}
 \subsubsection{回归系数}
 \begin{definition}

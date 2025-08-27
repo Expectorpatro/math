@@ -48,51 +48,59 @@
 		y=\mathbf{1}_n\beta_0+\tilde{X}\beta_I+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
 	\end{equation*}
 \end{definition}
-\begin{derivation}
-	由\cref{theo:AATPositiveSemidefinite}可知$X^TX$是一个半正定阵。若存在不为零向量的$\alpha$使得$\alpha^TX^TX\alpha=0$，则有$||X\alpha||=0$，即$X\alpha=\mathbf{0}$。而$\operatorname{rank}(X)=p$，所以$\alpha=\mathbf{0}$，矛盾，于是$X^TX$是一个正定阵，它是可逆的\info{正定阵可逆}。
-\end{derivation}
 \begin{definition}\label{model:NormalLinearRegressionModel}
 	对于\cref{model:LinearRegressionModel}，若$\varepsilon\sim\operatorname{N}_n(\mathbf{0},\sigma^2I_n)$，则称此时的线性回归模型为\textbf{正态线性回归模型}。
 \end{definition}
 \subsubsection{中心化与标准化处理}
-\begin{definition}
+\begin{definition}\label{model:CentralizedStandardizedLinearModel}
 	对于\cref{model:LinearRegressionModel}，记：
 	\begin{equation*}
-		\bar{x}_j=\frac{1}{n}\sum_{i=1}^{n}x_{ij},\quad s_j^2=\sum_{i=1}^{n}(x_{ij}-\bar{x}_j)^2
+		\overline{x}_j=\frac{1}{n}\sum_{i=1}^{n}x_{ij},\quad s_j^2=\sum_{i=1}^{n}(x_{ij}-\overline{x}_j)^2
 	\end{equation*}\par
 	称：
 	\begin{gather*}
-		y_i=\gamma_0+\beta_1(x_{i1}-\bar{x}_1)+\beta_2(x_{i2}-\bar{x}_2)+\cdots+\beta_{p-1}(x_{ip-1}-\bar{x}_{p-1})+\varepsilon_i \\
+		y_i=\gamma_0+\beta_1(x_{i1}-\overline{x}_1)+\beta_2(x_{i2}-\overline{x}_2)+\cdots+\beta_{p-1}(x_{ip-1}-\overline{x}_{p-1})+\varepsilon_i \\
 		y=\gamma_0\mathbf{1}_n+\tilde{X}_c\beta_I+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
 	\end{gather*}
-	为\textbf{中心化线性回归模型}，其中$\gamma_0=\beta_0+\bar{x}^T\beta_I,\;\bar{x}=(\seq{\bar{x}}{p-1})^T$，$\tilde{X}_c=\left(I_n-\dfrac{1}{n}\mathbf{1}_n\mathbf{1}_n^T\right)\tilde{X}$被称为\textbf{中心化设计阵}，第二行是第一行的矩阵表示。\par
+	为\textbf{中心化线性回归模型}，其中$\gamma_0=\beta_0+\overline{x}^T\beta_I,\;\overline{x}=(\seq{\overline{x}}{p-1})^T$，$\tilde{X}_c=\left(I_n-\dfrac{1}{n}\mathbf{1}_n\mathbf{1}_n^T\right)\tilde{X}$被称为\textbf{中心化设计阵}，第二行是第一行的矩阵表示。\par
 	称：
 	\begin{gather*}
-		y_i=\alpha_0+\beta_1^0\frac{x_{i1}-\bar{x}_1}{s_1}+\beta_2^0\frac{x_{i2}-\bar{x}_2}{s_2}+\cdots+\beta^0_{p-1}\frac{x_{ip-1}-\bar{x}_{p-1}}{s_{p-1}}+\varepsilon_i \\
+		y_i=\alpha_0+\beta_1^0\frac{x_{i1}-\overline{x}_1}{s_1}+\beta_2^0\frac{x_{i2}-\overline{x}_2}{s_2}+\cdots+\beta^0_{p-1}\frac{x_{ip-1}-\overline{x}_{p-1}}{s_{p-1}}+\varepsilon_i \\
 		y=\alpha_0\mathbf{1}_n+Z\beta_S+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
 	\end{gather*}
 	为\textbf{标准化线性回归模型}，其中$\alpha_0=\beta_0,\beta_i^0=s_i\beta_i$，$Z$为经过中心化和标准化的设计阵，第二行是第一行的矩阵表示。
 \end{definition}
-\begin{theorem}\label{theo:CenterStandardLinearModel}
-	对于中心化和标准化后的线性回归模型，设$\hat{\beta}=(\seq{\hat{\beta}}{p-1})$为正则方程的解，则有以下结论：
+\begin{theorem}\label{prop:LinearRegressionModel}
+	对于线性回归模型，设$\hat{\beta}=(\seq{\hat{\beta}}{p-1})$为正则方程的解，则有以下结论：
 	\begin{enumerate}
-		\item $\mathbf{1}_n^T\tilde{X_c}=\mathbf{0}$；
-		\item $\hat{\gamma}_0=\bar{y}=\hat{\beta}_0+\bar{x}^T\hat{\beta}_I$；
-		\item $\mathbf{1}_n^TZ=\mathbf{0}$；
-		\item $R=Z^TZ$，其中$R$为回归自变量之间的相关系数矩阵；
-		\item $\hat{\alpha}_0=\bar{y}$；
+		\item $X^TX,\tilde{X}_c^T\tilde{X}_c$和$Z^TZ$都是正定阵，于是都可逆；
+		\item $\mathbf{1}_n^T\tilde{X}_c=\mathbf{1}_n^TZ=\mathbf{0}$；
+		\item $\hat{\gamma}_0=\hat{\alpha}_0=\overline{y}=\hat{\beta}_0+\overline{x}^T\hat{\beta}_I$；
 		\item $\hat{\beta}_i^0=s_i\hat{\beta}_i$；
+		\item $R=Z^TZ$，其中$R$为回归自变量之间的估计的相关系数矩阵；
 		\item 三种模型的经验回归方程分别为：
 		\begin{gather*}
 			\text{一般模型：}\hat{Y}=\hat{\beta}_0+\hat{\beta}_1X_1+\hat{\beta}_2X_2+\cdots+\hat{\beta}_{p-1}X_{p-1} \\
-			\text{中心化模型：}\hat{Y}=\hat{\gamma}_0+\hat{\beta}_1(X_1-\bar{x}_1)+\hat{\beta}_2(X_2-\bar{x}_2)+\cdots+\hat{\beta}_{p-1}(X_{p-1}-\bar{x}_{p-1}) \\
-			\text{标准化模型：}\hat{Y}=\hat{\alpha}_0+\hat{\beta}_1^0\frac{X_1-\bar{x}_1}{s_1}+\hat{\beta}_2^0\frac{X_2-\bar{x}_2}{s_2}+\cdots+\hat{\beta}_{p-1}^0\frac{X_{p-1}-\bar{x}_{p-1}}{s_{p-1}}
+			\text{中心化模型：}\hat{Y}=\hat{\gamma}_0+\hat{\beta}_1(X_1-\overline{x}_1)+\hat{\beta}_2(X_2-\overline{x}_2)+\cdots+\hat{\beta}_{p-1}(X_{p-1}-\overline{x}_{p-1}) \\
+			\text{标准化模型：}\hat{Y}=\hat{\alpha}_0+\hat{\beta}_1^0\frac{X_1-\overline{x}_1}{s_1}+\hat{\beta}_2^0\frac{X_2-\overline{x}_2}{s_2}+\cdots+\hat{\beta}_{p-1}^0\frac{X_{p-1}-\overline{x}_{p-1}}{s_{p-1}}
 		\end{gather*}
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
-	直接代入正则方程观察即可。
+	(1)由\cref{theo:AATPositiveSemidefinite}可知$X^TX$是一个半正定阵。若存在不为零向量的$\alpha$使得$\alpha^TX^TX\alpha=0$，则有$||X\alpha||=0$，即$X\alpha=\mathbf{0}$。而$\operatorname{rank}(X)=p$，所以$\alpha=\mathbf{0}$，矛盾，于是$X^TX$是一个正定阵，由\cref{theo:PositiveDefinite}(6)可知它是可逆的。$\tilde{X}_c^T\tilde{X}_c$和$Z^TZ$类似可得。\par
+	(2)(3)(4)(5)(6)直接代入正则方程观察即可得到。
 \end{proof}
+\begin{note}
+	标准化是为了避免自变量之间单位和取值不同造成的不便，由上述定理第二条又可以看出中心化和标准化能够使得常数项与回归系数的估计被分开，常数项的估计值直接就等于$y$的均值，并且由\cref{prop:EstimableFunction}(5)可知对于中心化（标准化）模型有：
+	\begin{equation*}
+		\operatorname{Cov}(\hat{\beta})=\sigma^2(X^TX)^{-1}=\sigma^2
+		\begin{pmatrix}
+			\frac{1}{n} & \mathbf{0} \\
+			\mathbf{0} & (\tilde{X}_c^T\tilde{X}_c)
+		\end{pmatrix}
+	\end{equation*}
+	也即常数项与回归系数的估计是不相关的，于是在理论分析中我们可以只关注回归系数的估计。
+\end{note}
 
 \subsection{假设检验}
 \begin{definition}
@@ -115,26 +123,27 @@
 	\begin{equation*}
 		t=\frac{\hat{\beta}_i}{\sqrt{c_{ii}}\hat{\sigma}},\quad\{t:|t|>t_{n-p}(\alpha/2)\}
 	\end{equation*}
+	其中$(X^TX)^{-1}=(c_{ij})$。
 \end{theorem}
 \begin{proof}
 	(1)可以发现此时的假设检验即为在\cref{theo:NormalLinearModelHypothesisTesting}中取$A=(\mathbf{0},I_{p-1}),\;b=\mathbf{0}$时的情况。原假设下模型变为：
 	\begin{equation*}
 		y_i=\beta_0+\varepsilon_i,\quad i=1,2,\dots,n
 	\end{equation*}
-	此时设计阵为$\mathbf{1}_n$，正则方程为$n\hat{\beta}_0=n\bar{y}$，$\hat{\beta}=\bar{y}$，由\cref{theo:SSESSEACalculate}可得$\operatorname{SSE}_A=y^Ty-\bar{y}\mathbf{1}_n^Ty=y^Ty-\bar{y}n\bar{y}=y^Ty-n\bar{y}^2$。备择假设下根据\cref{theo:CenterStandardLinearModel}(2)可得：
+	此时设计阵为$\mathbf{1}_n$，正则方程为$n\hat{\beta}_0=n\overline{y}$，$\hat{\beta}=\overline{y}$，由\cref{theo:SSESSEACalculate}可得$\operatorname{SSE}_A=y^Ty-\overline{y}\mathbf{1}_n^Ty=y^Ty-\overline{y}n\overline{y}=y^Ty-n\overline{y}^2$。备择假设下根据\cref{prop:LinearRegressionModel}(3)可得：
 	\begin{equation*}
-		\operatorname{SSE}=y^Ty-\hat{\beta}^TX^Ty=y^Ty-\hat{\gamma}_0n\bar{y}-\hat{\beta}_I^T\tilde{X}_c^Ty=y^Ty-n\bar{y}^2-\hat{\beta}_I^T\tilde{X}_c^Ty
+		\operatorname{SSE}=y^Ty-\hat{\beta}^TX^Ty=y^Ty-\hat{\gamma}_0n\overline{y}-\hat{\beta}_I^T\tilde{X}_c^Ty=y^Ty-n\overline{y}^2-\hat{\beta}_I^T\tilde{X}_c^Ty
 	\end{equation*}
 	于是有：
 	\begin{equation*}
-		\operatorname{SSE}_A-\operatorname{SSE}=y^Ty-n\bar{y}^2-(y^Ty-n\bar{y}^2-\hat{\beta}_I^T\tilde{X}_c^Ty)=\hat{\beta}_I^T\tilde{X}_c^Ty
+		\operatorname{SSE}_A-\operatorname{SSE}=y^Ty-n\overline{y}^2-(y^Ty-n\overline{y}^2-\hat{\beta}_I^T\tilde{X}_c^Ty)=\hat{\beta}_I^T\tilde{X}_c^Ty
 	\end{equation*}
 	由\cref{theo:NormalLinearModelHypothesisTesting}(5)即可得出结论。\par
 	(2)仿照\cref{prop:NormalLinearModel}(2)的证明过程可知：
 	\begin{equation*}
 		\hat{\beta}\sim\operatorname{N}_p[\beta,\sigma^2(X^TX)^{-1}]
 	\end{equation*}
-	记$C=(X^TX)^{-1}=(c_{ij})$，由\cref{prop:MultiNormal}(3)可得：
+	记$(X^TX)^{-1}=(c_{ij})$，由\cref{prop:MultiNormal}(3)可得：
 	\begin{equation*}
 		\hat{\beta}_i\sim\operatorname{N}(\beta_i,\sigma^2c_{ii})
 	\end{equation*}
@@ -144,7 +153,7 @@
 	\end{equation*}
 	由\cref{prop:NormalLinearModel}(2)可知：
 	\begin{equation*}
-		\frac{(n-p)\hat{\sigma}^2}{\sigma^2}\sim\chi_{n-r}^2
+		\frac{(n-p)\hat{\sigma}^2}{\sigma^2}\sim\chi_{n-p}^2
 	\end{equation*}
 	所以：
 	\begin{equation*}
@@ -168,27 +177,125 @@
 \subsection{回归诊断}
 \subsubsection{残差分析}
 \begin{definition}
+	称以某种残差为纵坐标、其它量为横坐标的散点图为\gls{ResidualPlot}。
+\end{definition}
+\begin{definition}
 	当模型为\cref{model:NormalLinearRegressionModel}时，将：
 	\begin{equation*}
-		r_i=\frac{\hat{e}_i}{\sqrt{\hat{\sigma}^2(1-p_{ii})}}
+		r_i=\frac{\hat{\varepsilon}_i}{\sqrt{\hat{\sigma}^2(1-p_{ii})}}
 	\end{equation*}
-	称为\textbf{学生化残差}。由\cref{prop:ehat}(1)可知它相当于是对$\hat{e}$进行标准化然后用$\sigma^2$的估计$\hat{\sigma}^2$进行替换后得到的值。
+	称为\gls{StudentizedResidual}。由\cref{prop:ehat}(1)可知它相当于是对$\hat{\varepsilon}$进行标准化然后用$\sigma^2$的估计$\hat{\sigma}^2$进行替换后得到的值。
 \end{definition}
 \begin{note}
-	应用上可以近似地认为$r_i$相互独立且服从$N(0,1)$。若将$\hat{e}$与$\hat{y}$画作二维散点图，以$\hat{y}$为横坐标、$r_i$为纵坐标，点的纵坐标应大致分布于$[-2,2]$，且由\cref{prop:ehat}(3)和\cref{prop:MultiNormal}(2)(8)可得这些点不应呈现出任何趋势（$\hat{y}$与$\hat{e}_i$独立）。若不满足上述现象，则此时模型有问题，可能是漏掉了重要的回归自变量，也可能是数据不满足\cref{model:NormalLinearRegressionModel}中的假设。
+	应用上可以近似地认为$r_i$相互独立且服从$N(0,1)$。若将$\hat{\varepsilon}$与$\hat{y}$画作二维散点图，以$\hat{y}$为横坐标、$r_i$为纵坐标，点的纵坐标应大致分布于$[-2,2]$，且由\cref{prop:ehat}(3)和\cref{prop:MultiNormal}(2)(8)可得这些点不应呈现出任何趋势（$\hat{y}$与$\hat{\varepsilon}_i$独立）。若不满足上述现象，则此时模型有问题，可能是漏掉了重要的回归自变量，也可能是数据不满足\cref{model:NormalLinearRegressionModel}中的假设。在数据不满足\cref{model:NormalLinearRegressionModel}中的假设时，一个解决方案是对$y$实施变换，使得变换后得到的向量与回归自变量之间存在线性相关关系，同时让误差也符合假设，一个在$y$值全部为正数时使用广泛的变换就是下述的Box-Cox变换。
 \end{note}
+\subsubsection{Box-Cox变换}
 \begin{definition}
-	称以某种残差为纵坐标、其它量为横坐标的散点图为\textbf{残差图}。
+	Box-Cox变换是对各分量都为正数的$y$进行如下变换：
+	\begin{equation*}
+		y_i^{(\lambda)}=
+		\begin{cases}
+			\dfrac{y_i^{\lambda}-1}{\lambda},&\lambda\ne0 \\
+			\ln y_i,&\lambda=0
+		\end{cases}
+	\end{equation*}
+	其中$\lambda$是一个待定的变换参数。
 \end{definition}
+\begin{note}
+	可以看出Box-Cox变换是一个变换族，包括了对数变换、平方根变换和倒数变换等。确定$\lambda$的值的方式为极大似然估计法，选择$\lambda$值使得$y^{(\lambda)}\sim\operatorname{N}(X\beta,\sigma^2I_n)$最有可能发生，这一方法的选择是很直观的。实际操作时若$y$有分量非正，可通过平移将其变换为全部为正值的情况，然后再进行Box-Cox变换。下面解释实际计算。\par
+	对于固定的$\lambda$，$\beta$和$\sigma^2$的似然函数为：
+	\begin{equation*}
+		L(\beta,\sigma^2,\lambda)=\frac{1}{(2\pi)^{\frac{n}{2}}(\sigma^2)^\frac{n}{2}}\exp\left(-\frac{1}{2\sigma^2}||y^{(\lambda)}-X\beta||^2\right)|\mathbf{J}|
+	\end{equation*}
+	$\mathbf{J}$为变换的Jacobi行列式：
+	\begin{equation*}
+		\mathbf{J}=\left|\frac{\dif y_i^{(\lambda)}}{\dif y_i}\right|=\prod_{i=1}^{n}y_i^{\lambda-1}
+	\end{equation*}
+	由\cref{prop:NormalLinearModel}(1)可知此时$\beta$和$\sigma^2$的极大似然估计为：
+	\begin{equation*}
+		\hat{\beta}(\lambda)=(X^TX)^{-1}X^Ty^{(\lambda)},\quad\hat{\sigma}^2(\lambda)=\frac{1}{n}\operatorname{SSE}(\lambda)
+	\end{equation*}
+	对应的对数似然函数最大值为：
+	\begin{equation*}
+		\ln L_{\text{max}}(\lambda)=-\frac{n}{2}\ln2\pi-\frac{n}{2}\ln\frac{\operatorname{SSE}(\lambda)}{n}-\frac{1}{2}\frac{n}{\operatorname{SSE}(\lambda)}\operatorname{SSE}(\lambda)+\ln\mathbf{J}
+	\end{equation*}
+	由\cref{prop:ehat}(2)可知略去与$\lambda$无关的项之后的对数似然函数最大值为：
+	\begin{align*}
+		\ln L_{\text{max}}(\lambda)&=-\frac{n}{2}\ln \operatorname{SSE}(\lambda)+\sum_{i=1}^{n}\ln y_i^{\lambda-1}=-\frac{n}{2}\ln\{[y^{(\lambda)}]^T(I_n-P_X)y^{(\lambda)}\}+\frac{n}{2}\ln\mathbf{J}^{\frac{2}{n}} \\
+		&=-\frac{n}{2}\ln\left\{\frac{[y^{(\lambda)}]^T}{\mathbf{J}^{\frac{1}{n}}}(I_n-P_X)\frac{y^{(\lambda)}}{\mathbf{J}^{\frac{1}{n}}}\right\}
+	\end{align*}
+	可以看出$-\dfrac{n}{2}$也可略去，因为对数函数是单调函数，所以它也可以略去，于是只需解：
+	\begin{equation*}
+		\lambda=\underset{\lambda}{\arg\min}\frac{[y^{(\lambda)}]^T}{\mathbf{J}^{\frac{1}{n}}}(I_n-P_X)\frac{y^{(\lambda)}}{\mathbf{J}^{\frac{1}{n}}}
+	\end{equation*}
+	记$z^{(\lambda)}=\dfrac{y^{(\lambda)}}{\mathbf{J}^{\frac{1}{n}}}$，则：
+	\begin{equation*}
+		z_i^{(\lambda)}=
+		\begin{cases}
+			\dfrac{y_i^{\lambda}-1}{\lambda\left(\prod\limits_{i=1}^{n}y_i\right)^{\frac{\lambda-1}{n}}},&\lambda\ne0 \\
+			\dfrac{\ln y_i}{\left(\prod\limits_{i=1}^{n}y_i\right)^{\frac{\lambda-1}{n}}},&\lambda=0
+		\end{cases}
+	\end{equation*}
+	$\lambda$的解析表达式一般来讲很难得到，但我们可以求解数值解，即对不同的$\lambda$计算$z^{(\lambda)}$和$I_n-P_X$。为了便于计算机计算，可预先计算的量为：
+	\begin{equation*}
+		I_n-P_X,\quad\sqrt[n]{\prod\limits_{i=1}^{n}y_i}
+	\end{equation*}
+\end{note}
+\begin{algorithm}[H]
+	\caption{Box-Cox 变换的计算机求解}
+	\begin{algorithmic}[1]
+		\Require 观测向量 $y = (y_1,\dots,y_n)^T$，设计矩阵 $X$，候选参数集合 $\Lambda$
+		\Ensure 最优参数 $\hat{\lambda}$和变换后的向量$y^{(\lambda)}$
+		
+		\State \textbf{预处理:} 若存在 $y_i \le 0$，则对 $y$ 作平移: $y \gets y + c$，其中 $c > -\min(y_i)$
+		
+		\State \textbf{计算预备量:} 
+		\Statex \quad 1) $I_n - P_X$
+		\Statex \quad 2) 几何平均数 $g = \sqrt[n]{\prod\limits_{i=1}^n y_i}$
+		
+		\For{$\lambda \in \Lambda$}
+		\If{$\lambda \ne 0$}
+		\State 计算变换向量$z^{(\lambda)}$，其中：
+		\begin{equation*}
+			z_i^{(\lambda)}=\dfrac{y_i^\lambda-1}{\lambda g^{\lambda-1}},\;i=1,2,\dots,n
+		\end{equation*}
+		\Else
+		\State 计算变换向量$z^{(\lambda)}$，其中：
+		\begin{equation*}
+			z_i^{(\lambda)}=\dfrac{\ln y_i}{g^{\lambda-1}},\;i=1,2,\dots,n
+		\end{equation*}
+		\EndIf
+		
+		\State 计算误差平方和:
+		\[
+		\operatorname{SSE}(\lambda) = [z^{(\lambda)}]^T (I_n - P_X) z^{(\lambda)}
+		\]
+		\EndFor
+		
+		\State \textbf{选择最优参数:}
+		\[
+		\hat{\lambda} = \arg\min_{\lambda \in \Lambda}\operatorname{SSE}(\lambda)
+		\]
+		\State \Return $\hat{\lambda}, \; y^{(\hat{\lambda})}$
+	\end{algorithmic}
+\end{algorithm}
 \subsubsection{影响分析}
 影响分析即为探查对估计或预测有较大影响的数据。
 \begin{definition}
 	定义第$i$个样本\textbf{Cook统计量}为：
 	\begin{equation*}
-		D_1=\frac{(\hat{\beta}-\hat{\beta}_{(i)})^TX^TX(\hat{\beta}-\hat{\beta}_{(i)})}{p\hat{\sigma}^2},\quad i=1,2,\dots,n
+		D_i=\frac{(\hat{\beta}-\hat{\beta}_{(i)})^TX^TX(\hat{\beta}-\hat{\beta}_{(i)})}{p\hat{\sigma}^2},\quad i=1,2,\dots,n
 	\end{equation*}
 	其中$\hat{\beta}_{(i)}$表示删除第$i$个样本后拟合得到的回归系数。
 \end{definition}
+\begin{note}
+	从\cref{theo:NormalLinearModelConfidenceEllipsoid}可以看出：
+	\begin{equation*}
+		\left\{\beta:\frac{(\hat{\beta}-\beta)X^TX(\hat{\beta}-\beta)}{p\hat{\sigma}^2}\leqslant\operatorname{F}_{p,n-p}(\alpha)\right\}
+	\end{equation*}
+	是拒绝假设$\beta_0=\beta_1=\cdots=\beta_{p-1}=0$后$\beta$置信水平为$1-\alpha$的置信椭球。当$\beta$被换为$\hat{\beta}_{(i)}$时，$D_i$的值就对应着$\hat{\beta}_{(i)}$在$\hat{\beta}$置信椭球上的置信水平，$D_i$的值越大，$\alpha$就越大，置信水平就越小，也就是说$D_i$越大$\hat{\beta}_{(i)}$对应在$\hat{\beta}$的置信水平越小的置信椭球，加入第$i$个样本后得到的$\hat{\beta}$对应的置信水平越大，这往往代表着$\hat{\beta}$离样本中心越远（置信水平越大往往置信域越大，而置信域中心的点一般是均值的估计），即第$i$个样本对估计或预测造成的影响越大。\par
+	上述公式的一个问题是需要计算$n+1$次回归的结果，下面的结论给出了一个非常便捷的Cook统计量的计算公式。
+\end{note}
 \begin{theorem}
 	$D_i$有如下计算公式：
 	\begin{equation*}
@@ -196,6 +303,90 @@
 	\end{equation*}
 	其中$r_i$时学生化残差，$p_{ii}$时矩阵$P_X$的第$i$个主对角元。
 \end{theorem}
+\begin{proof}
+	注意到恒等式（两边同乘$A-uv^T$即可）：
+	\begin{equation*}
+		(A-uv^T)^{-1}=A^{-1}+\frac{A^{-1}uv^TA^{-1}}{1-u^TA^{-1}v}
+	\end{equation*}
+	其中$A\in M_{n}(K)$且可逆，$u,v\in M_{n\times 1}(K)$。记$X_{(i)}$为去除第$i$个样本后的设计阵，$x_i^T$为$X$的第$i$行，由\cref{prop:MatrixMultiplication}(1)的第四种理解可得：
+	\begin{equation*}
+		(X_{(i)}^TX_{(i)})^{-1}=(X^TX-x_ix_i^T)^{-1}=(X^TX)^{-1}+\frac{(X^TX)^{-1}x_ix_i^T(X^TX)^{-1}}{1-p_{ii}}
+	\end{equation*}
+	将上式两边同乘$X^Ty$，记$y_{(i)}$为$y$去掉第$i$个分量后的向量，利用$X^Ty=X_{(i)}^Ty_{(i)}+y_ix_i$可得：
+	\begin{gather*}
+		(X_{(i)}^TX_{(i)})^{-1}X^Ty=(X^TX)^{-1}X^Ty+\frac{(X^TX)^{-1}x_ix_i^T(X^TX)^{-1}X^Ty}{1-p_{ii}} \\
+		(X_{(i)}^TX_{(i)})^{-1}X_{(i)}^Ty_{(i)}+(X_{(i)}^TX_{(i)})^{-1}y_ix_i=\hat{\beta}+\frac{(X^TX)^{-1}x_ix_i^T\hat{\beta}}{1-p_{ii}} \\
+		\hat{\beta}_{(i)}+(X_{(i)}^TX_{(i)})^{-1}y_ix_i=\hat{\beta}+\frac{(X^TX)^{-1}x_ix_i^T\hat{\beta}}{1-p_{ii}}
+	\end{gather*}
+	再将原式两边同乘$x_i$可得：
+	\begin{align*}
+		&(X_{(i)}^TX_{(i)})^{-1}x_i=(X^TX)^{-1}x_i+\frac{(X^TX)^{-1}x_ix_i^T(X^TX)^{-1}x_i}{1-p_{ii}} \\
+		=&\frac{(1-p_{ii})(X^TX)^{-1}x_i+(X^TX)^{-1}x_ix_i^T(X^TX)^{-1}x_i}{1-p_{ii}} \\
+		=&\frac{[1-x_i^T(X^TX)^{-1}x_i](X^TX)^{-1}x_i+(X^TX)^{-1}x_ix_i^T(X^TX)^{-1}x_i}{1-p_{ii}} \\
+		=&\frac{(X^TX)^{-1}x_i-x_i^T(X^TX)^{-1}x_i(X^TX)^{-1}x_i+(X^TX)^{-1}x_ix_i^T(X^TX)^{-1}x_i}{1-p_{ii}}=\frac{(X^TX)^{-1}x_i}{1-p_{ii}}
+	\end{align*}
+	代入到上一组公式中可得：
+	\begin{gather*}
+		\hat{\beta}_{(i)}+\frac{(X^TX)^{-1}x_iy_i}{1-p_{ii}}=\hat{\beta}+\frac{(X^TX)^{-1}x_ix_i^T\hat{\beta}}{1-p_{ii}} \\
+		\hat{\beta}_{(i)}+\frac{(X^TX)^{-1}x_iy_i}{1-p_{ii}}=\hat{\beta}+\frac{(X^TX)^{-1}x_i\hat{y}_i}{1-p_{ii}} \\
+		\hat{\beta}-\hat{\beta}_i=\frac{(X^TX)^{-1}x_i(y_i-\hat{y}_i)}{1-p_{ii}}=\frac{(X^TX)^{-1}x_i\hat{\varepsilon}_i}{1-p_{ii}} 
+	\end{gather*}
+	将上式代入到Cook统计量的定义中，由\cref{prop:Transpose}(4)和\cref{prop:InvertibleMatrix}(12)可得到：
+	\begin{align*}
+		&D_i=\left[\frac{(X^TX)^{-1}x_i\hat{\varepsilon}_i}{1-p_{ii}}\right]^T(X^TX)\left[\frac{(X^TX)x_i\hat{\varepsilon}_i}{1-p_{ii}}\right]\frac{1}{p\hat{\sigma}^2} \\
+		=&\frac{1}{p}\frac{x_i^T(X^TX)^{-1}X^TX(X^TX)^{-1}x_i}{1-p_{ii}}\frac{\hat{\varepsilon}_i^2}{\hat{\sigma}^2(1-p_{ii})} \\
+		=&\frac{1}{p}\frac{x_i^T(X^TX)^{-1}x_i}{1-p_{ii}}r_i^2=\frac{1}{p}\frac{p_{ii}}{1-p_{ii}}r_i^2\qedhere
+	\end{align*}
+\end{proof}
+\subsection{复共线性与解决方案}
 \begin{note}
-	Cook统计量$D_i$越大表示第$i$个样本对估计或预测造成的影响越大。
+	考虑经过中心化的设计阵$\tilde{X}_c$或经过标准化的设计阵$Z$（其实$\tilde{X}$也可以），为了便于叙述，下面统一使用$\tilde{X}_c$和$\beta_I$。由\cref{prop:LinearRegressionModel}(1)可知$\tilde{X}_c^T\tilde{X}_c$正定且可逆，于是存在正交矩阵$Q$和$\seq{\lambda}{p-1}$使得：
+	\begin{equation*}
+		\tilde{X}_c^T\tilde{X}_c=Q^T\operatorname{diag}\{\seq{\lambda}{n}\}Q
+	\end{equation*}
+	其中$\lambda_i>0$。由\cref{prop:MSE}(1)、\cref{prop:EstimableFunction}(4)(5)、\cref{prop:Trace}(2)、\cref{prop:InvertibleMatrix}(11)、\cref{prop:OrthogonalUnitaryMatrix}(1)和\cref{prop:Trace}(3)可得：
+	\begin{align*}
+		\operatorname{MSE}(\hat{\beta}_I)&=\operatorname{tr}[\sigma^2(\tilde{X}_c^T\tilde{X}_c)^{-1}]=\sigma^2\operatorname{tr}(\tilde{X}_c^T\tilde{X}_c)^{-1}=\sigma^2\operatorname{tr}
+		\left(Q^T\operatorname{diag}\left\{\frac{1}{\lambda_1},\frac{1}{\lambda_2},\dots,\frac{1}{\lambda_{p-1}}\right\}Q\right) \\
+		&=\sigma^2\operatorname{tr}
+		\left(\operatorname{diag}\left\{\frac{1}{\lambda_1},\frac{1}{\lambda_2},\dots,\frac{1}{\lambda_{p-1}}\right\}QQ^T\right)=\sigma^2\sum_{i=1}^{p-1}\frac{1}{\lambda_i}
+	\end{align*}
+	当$\tilde{X}_c^T\tilde{X}_c$的一个特征根很小的时候，会导致$\operatorname{MSE}(\hat{\beta}_I)=\operatorname{tr}\operatorname{Cov}(\hat{\beta}_I)$很大。\par
+	从另一个角度来看，由\cref{prop:MSE}(2)可得：
+	\begin{equation*}
+		\operatorname{E}(\hat{\beta}_I^T\hat{\beta}_I)=\beta_I^T\beta_I+\sigma^2\sum_{i=1}^{p-1}\frac{1}{\lambda_i}
+	\end{equation*}
+	当$\tilde{X}_c^T\tilde{X}_c$的一个特征根很小的时候，会导致$\operatorname{E}(\hat{\beta}_I^T\hat{\beta}_I)$比$\beta_I^T\beta_I$大很多，也就是$\hat{\beta}_I$的平均长度比$\beta_I$大很多。\par
+	综上所述，当$\tilde{X}_c^T\tilde{X}_c$的一个特征根很小的时候，线性回归模型的最小二乘估计不再是一个好的估计。\par
+	设$\lambda$是$\tilde{X}_c^T\tilde{X}_c$的一个特征值，$\alpha$是其对应的特征向量。若$\lambda\approx0$，则：
+	\begin{gather*}
+		\tilde{X}_c^T\tilde{X}_c\alpha=\lambda\alpha\approx\mathbf{0} \\
+		\alpha^T\tilde{X}_c^T\tilde{X}_c\alpha=\lambda\alpha^T\alpha\approx0
+	\end{gather*}
+	也即$||\tilde{X}_c\alpha||\approx0$，$\tilde{X}_c\alpha\approx\mathbf{0}$，这等价于$\tilde{X}_c$的各列之间存在近似的线性相关关系，我们称之为\gls{Multicollinearity}关系。度量复共线性严重程度的一个重要量是$ \tilde{X}_c^T\tilde{X}_c$的条件数\info{数值分析条件数}：
+	\begin{enumerate}
+		\item $k<100$：复共线性程度很小；
+		\item $100\leqslant k\leqslant1000$：存在中等程度或较强的复共线性；
+		\item $k>1000$：存在严重的复共线性。
+	\end{enumerate}
 \end{note}
+\subsubsection{岭回归}
+\begin{note}
+	由前述，复共线性程度严重时会导致$\hat{\beta}_I$的平均长度比$\beta_I$大很多，为了缓解这一问题，根据\info{花书模型空间与正则项}，可以将最小二乘法的目标函数$||y-\tilde{X}_c\beta_I||$（思考为什么能省去常数项）修改为：
+	\begin{equation*}
+		Q(\beta)=||y-\tilde{X}_c\beta_I||+\lambda||\beta_I||
+	\end{equation*}
+	其中$\lambda$为正则强度。类似\cref{theo:LSELinearModel}可知此时的正则方程为：
+	\begin{equation*}
+		(\tilde{X}_c^T\tilde{X}_c+\lambda I_{p-1})\beta_I=\tilde{X}_c^Ty
+	\end{equation*}
+	显然$\tilde{X}_c^T\tilde{X}_c+\lambda I_{p-1}$是一个实对称阵，由\info{矩阵多项式的特征值}和\cref{prop:LinearRegressionModel}(1)可知它还是一个正定阵，根据\cref{theo:PositiveDefinite}(6)可得$\tilde{X}_c^T\tilde{X}_c+\lambda I_{p-1}$可逆，于是$\beta_I$的估计值$\hat{\beta}_I=(\tilde{X}_c^T\tilde{X}_c+\lambda I_{p-1})^{-1}\tilde{X}_c^Ty$。\par
+	从这个结果来看，修改后的目标函数将会选择长度更小的估计，同时也增大了$\tilde{X}_c^T\tilde{X}$的特征值，从而缓解复共线性问题。显然此时的$\hat{\beta}_I$已经不再是$\beta_I$的无偏估计，从\cref{prop:MSE}(1)可知，它有可能会选择均方误差更小的估计。
+\end{note}
+\begin{definition}
+	对于\cref{model:CentralizedStandardizedLinearModel}，称：
+	\begin{equation*}
+		\hat{\beta}_I(\lambda)=(\tilde{X}_c^T\tilde{X}_c+\lambda I_{p-1})^{-1}\tilde{X}_c^Ty
+	\end{equation*}
+	为$\beta_I$的\gls{RidgeEstimate}。
+\end{definition}

@@ -381,6 +381,45 @@
 	\end{align*}
 \end{proof}
 
+\subsection{均方误差}
+\begin{definition}
+	设$f$是概率空间$(X,\mathscr{F},P)$上的$n$维随机向量，$g\in\mathbb{R}^{n}$。若$(f-g)^T(f-g)$的积分存在，则称：
+	\begin{equation*}
+		\operatorname{MSE}(f)\coloneq\operatorname{E}[(f-g)^T(f-g)]
+	\end{equation*}
+	为$f$关于$g$的\gls{MSE}。
+\end{definition}
+\begin{property}\label{prop:MSE}
+	设$f$是概率空间$(X,\mathscr{F},P)$上的$n$维随机向量，$g\in\mathbb{R}^{n}$，$(f-g)^T(f-g)$的积分存在。
+	\begin{enumerate}
+		\item 若$\operatorname{E}(f)$存在，则：
+		\begin{equation*}
+			\operatorname{MSE}(f)=\operatorname{tr}\operatorname{Cov}(f)+[\operatorname{E}(f)-g]^T[\operatorname{E}(f)-g]
+		\end{equation*}
+		\item 若$f^Tf$期望存在且$\operatorname{E}(f)=g$，则：
+		\begin{equation*}
+			\operatorname{MSE}(f)=\operatorname{E}(f^Tf)-g^Tg
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由\cref{prop:Trace}(3)和\cref{prop:MeasurableIntegral}(5)可得：
+	\begin{align*}
+		&\operatorname{MSE}(f,g)=\operatorname{E}\{[f-\operatorname{E}(f)+\operatorname{E}(f)-g]^T[f-\operatorname{E}(f)+\operatorname{E}(f)-g]\} \\
+		=&\operatorname{E}\{[f-\operatorname{E}(f)]^T[f-\operatorname{E}(f)]+[f-\operatorname{E}(f)]^T[\operatorname{E}(f)-g]+ \\
+		&[\operatorname{E}(f)-g]^T[f-\operatorname{E}(f)]+[\operatorname{E}(f)-g]^T[\operatorname{E}(f)-g]\} \\
+		=&\operatorname{E}\{\operatorname{tr}[f-\operatorname{E}(f)]^T[f-\operatorname{E}(f)]\}+\operatorname{E}\{[f-\operatorname{E}(f)]^T\}[\operatorname{E}(f)-g] \\
+		&+[\operatorname{E}(f)-g]^T\operatorname{E}[f-\operatorname{E}(f)]+[\operatorname{E}(f)-g]^T[\operatorname{E}(f)-g] \\
+		=&\operatorname{E}\{\operatorname{tr}[f-\operatorname{E}(f)][f-\operatorname{E}(f)]^T\}+[\operatorname{E}(f)-g]^T[\operatorname{E}(f)-g] \\
+		=&\operatorname{tr}[\operatorname{Cov}(f)]+[\operatorname{E}(f)-g]^T[\operatorname{E}(f)-g]
+	\end{align*}\par
+	(2)由\cref{prop:MeasurableIntegral}(5)可得：
+	\begin{align*}
+		\operatorname{MSE}(f)&=\operatorname{E}[(f-g)^T(f-g)]=\operatorname{E}(f^Tf-f^Tg-g^Tf+g^Tg) \\
+		&=\operatorname{E}(f^Tf)-2g^Tg+g^Tg=\operatorname{E}(f^Tf)-g^Tg\qedhere
+	\end{align*}
+\end{proof}
+
 \subsection{二次型}
 \begin{definition}
 	$\mathbf{X}$是一个$n$维随机向量，$A=(a_{ij})$为$n$阶非随机实对称阵，则随机变量：
