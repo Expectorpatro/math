@@ -126,6 +126,28 @@
 	(1)(2)证明过于机械，略去。\par
 	(3)只需注意到$P[i,j]=P[i(-1)]P[i,j(-1)]P[j,i(1)]P[i,j(-1)]$。由(2)即可得到矩阵的第二种初等变换可以由一系列其它两种初等变换得到。
 \end{proof}
+\subsubsection{迹}
+\begin{definition}
+	$A=(a_{ij})\in M_{n}(K)$的主对角线上的元素之和称为$A$的\gls{Trace}，记作$\operatorname{tr}(A)$，即：
+	\begin{equation*}
+		\operatorname{tr}(A)=\sum_{i=1}^{n}a_{ii}
+	\end{equation*}
+\end{definition}
+\begin{property}\label{prop:Trace}
+	设$A,B\in M_{n}(K),\;k\in K$，矩阵的迹具有如下性质：
+	\begin{enumerate}
+		\item $\operatorname{tr}(A+B)=\operatorname{tr}(A)+\operatorname{tr}(B)$；
+		\item $\operatorname{tr}(kA)=k\operatorname{tr}(A)$；
+		\item $\operatorname{tr}(AB)=\operatorname{tr}(BA)$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)(2)是显然的；\par
+	(3)显然：
+	\begin{gather*}
+		\operatorname{tr}(AB)=\sum_{i=1}^{n}\sum_{j=1}^{n}a_{ij}b_{ji}=\sum_{j=1}^{n}\sum_{i=1}^{n}b_{ji}a_{ij}=\operatorname{tr}(BA)\qedhere
+	\end{gather*}
+\end{proof}
 
 \subsection{矩阵的行列式}
 \subsubsection{排列}
@@ -750,6 +772,26 @@
 		\item 设$A\in M_{n}(K)$，则$A$可逆的充要条件为它可以表示为一些初等矩阵的乘积；
 		\item 求解逆矩阵的\textbf{初等变换法}：$(A, I)\overrightarrow{初等行变换}(I,A^{-1})$；
 		\item 设$A\in M_{n}(K)$可逆，$B\in M_{m\times n}(K)$，则$\operatorname{rank}(B)=\operatorname{rank}(BA)=\operatorname{rank}(AB^T)$，即用一个可逆矩阵左（右）乘一个矩阵不会改变该矩阵的秩；
+		\item 设$A=
+		\begin{pmatrix}
+			A_{11} & A_{12} \\
+			A_{21} & A_{22}
+		\end{pmatrix}$可逆。若$A_{11}$可逆，则：
+		\begin{equation*}
+			A^{-1}=
+			\begin{pmatrix}
+				A_{11}^{-1}+A_{11}^{-1}A_{12}(A_{22}-A_{21}A_{11}^{-1}A_{12})^{-1}A_{21}A_{11}^{-1} & -A_{11}^{-1}A_{12}(A_{22}-A_{21}A_{11}^{-1}A_{12})^{-1} \\
+				-(A_{22}-A_{21}A_{11}^{-1}A_{12})^{-1}A_{21}A_{11}^{-1} & (A_{22}-A_{21}A_{11}^{-1}A_{12})^{-1}
+			\end{pmatrix}
+		\end{equation*}
+		若$A_{22}$可逆，则：
+		\begin{equation*}
+			A^{-1}=
+			\begin{pmatrix}
+				(A_{11}-A_{12}A_{22}^{-1}A_{21})^{-1} & -(A_{11}-A_{12}A_{22}^{-1}A_{21})^{-1}A_{12}A_{22}^{-1} \\
+				-A_{22}^{-1}A_{21}(A_{11}-A_{12}A_{22}^{-1}A_{21})^{-1} & A_{22}^{-1}+A_{22}^{-1}A_{21}(A_{11}-A_{12}A_{22}^{-1}A_{21})^{-1}A_{12}A_{22}^{-1}
+			\end{pmatrix}
+		\end{equation*}
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -775,7 +817,60 @@
 	(13)由(12)立即可得。\par
 	(14)由(4)(7)(10)(9)(11)可得必要性，由(9)(7)可得充分性。\par
 	(15)由(4)可知存在一系列单位矩阵$\seq{P}{n}$使得$P_nP_{n-1}\cdots P_1A=I$，根据(7)可得$P_nP_{n-1}\cdots P_1=A^{-1}$，即$P_nP_{n-1}\cdots P_1I=A^{-1}$，由\cref{prop:ElementaryMatrix}(2)可得即可得出结论。\par
-	(16)由(14)和\cref{prop:MatrixRank}(2)立即可得。
+	(16)由(14)和\cref{prop:MatrixRank}(2)立即可得。\par
+	(17)若$A_{11}$可逆，则：
+	\begin{equation*}
+		\begin{pmatrix}
+			I & \mathbf{0} \\
+			-A_{21}A_{11}^{-1} & I
+		\end{pmatrix}
+		\begin{pmatrix}
+			A_{11} & A_{12} \\
+			A_{21} & A_{22}
+		\end{pmatrix}
+		\begin{pmatrix}
+			I & -A_{11}^{-1}A_{12} \\
+			\mathbf{0} & I
+		\end{pmatrix}=
+		\begin{pmatrix}
+			A_{11} & \mathbf{0} \\
+			\mathbf{0} & A_{22}-A_{21}A_{11}^{-1}A_{12}
+		\end{pmatrix}
+	\end{equation*}
+	由\cref{prop:Determinant}(10)(11)和(3.a)可得$A_{22}-A_{21}A_{11}^{-1}A_{12}$和上式左边除了$A$以外的两个矩阵可逆。由(11)即可得到：
+	\begin{gather*}
+		\begin{pmatrix}
+			I & -A_{11}^{-1}A_{12} \\
+			\mathbf{0} & I
+		\end{pmatrix}^{-1}A^{-1}
+		\begin{pmatrix}
+			I & \mathbf{0} \\
+			-A_{21}A_{11}^{-1} & I
+		\end{pmatrix}^{-1}=
+		\begin{pmatrix}
+			A_{11}^{-1} & \mathbf{0} \\
+			\mathbf{0} & (A_{22}-A_{21}A_{11}^{-1}A_{12})^{-1}
+		\end{pmatrix} \\
+		A^{-1}=
+		\begin{pmatrix}
+			I & -A_{11}^{-1}A_{12} \\
+			\mathbf{0} & I
+		\end{pmatrix}
+		\begin{pmatrix}
+			A_{11}^{-1} & \mathbf{0} \\
+			\mathbf{0} & (A_{22}-A_{21}A_{11}^{-1}A_{12})^{-1}
+		\end{pmatrix}
+		\begin{pmatrix}
+			I & \mathbf{0} \\
+			-A_{21}A_{11}^{-1} & I
+		\end{pmatrix} \\
+		A^{-1}=
+		\begin{pmatrix}
+			A_{11}^{-1}+A_{11}^{-1}A_{12}(A_{22}-A_{21}A_{11}^{-1}A_{12})^{-1}A_{21}A_{11}^{-1} & -A_{11}^{-1}A_{12}(A_{22}-A_{21}A_{11}^{-1}A_{12})^{-1} \\
+			-(A_{22}-A_{21}A_{11}^{-1}A_{12})^{-1}A_{21}A_{11}^{-1} & (A_{22}-A_{21}A_{11}^{-1}A_{12})^{-1}
+		\end{pmatrix}
+	\end{gather*}
+	$A_{22}$可逆的情况类似可得。
 \end{proof}
 
 \subsection{正交矩阵与Euclid空间}

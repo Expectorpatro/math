@@ -1,36 +1,40 @@
-\section{广义符号检验}
+\section{单样本位置检验}
 
-\subsubsection{目的}
-给定某样本，检验给定值$q_0$与总体的$\pi$分位点$Q_\pi$之间的关系。
+\begin{method}[Sign Test]
+	设$(X,\mathscr{A},\mathscr{P})$是统计结构，$\mathbf{X}=(\seq{X}{n})$为从总体$F$中抽取的简单样本，$\mathscr{P}\mathbf{X}^{-1}$为连续型随机变量的概率分布族，检验问题为：
+	\begin{equation*}
+		H_0:Q_\pi=q_0,\quad H_1:
+		\begin{cases}
+			Q_\pi>q_0 \\
+			Q_\pi<q_0 \\
+			Q_\pi\ne q_0
+		\end{cases}
+	\end{equation*}
+	记$\mathbf{X}$中大于$q_0$的样本单元的个数为$S^+$，小于$q_0$的个数为$S^-$。令$K\sim\operatorname{Binom}(S^++S^-,\pi)$，则上述检验问题的$p$值分别为：
+	\begin{equation*}
+		P_{H_0}(K\leqslant S^-),\quad P_{H_0}(K\geqslant S^-),\quad 2\min\{P_{H_0}(K\leqslant S^-),\;P_{H_0}(K\geqslant S^-)\}
+	\end{equation*}
+	当$n\to+\infty$时，令$Z=\dfrac{K-(S^++S^-)\pi}{\sqrt{(S^++S^-)\pi(1-\pi)}}$，$u$为标准正态分布y则有如下的近似$p$值：
+	\begin{equation*}
+		P(u)
+	\end{equation*}
+\end{method}
+\begin{derivation}
+	若零假设成立，设$K$为$s^-$的随机变量形式，则应有$K\sim\operatorname{Binom}(S^++S^-,\pi)$。直观上来讲，如果$Q_{\pi}>q_0$，那么理论计算的$K$的实现值将比实际原假设的拒绝域应具有如下形式：
+	\begin{equation*}
+		\{K\leqslant c\},\quad\{K\geqslant c\},\quad
+	\end{equation*}
+\end{derivation}
+
 \subsubsection{适用条件}
 总体是连续型的。离散型分位点的定义会导致下述统计量不服从对应的二项分布。
 \subsubsection{原理}
-记一组样本中大于$q_0$的单元的个数为$s^+$，小于$q_0$的单元的个数为$s^-$。若零假设成立（即$q_0$确实为总体的$\pi$分位点），则从总体中任取一个元素，它小于$q_0$的概率应为$\pi$，那么对于任意一组样本来讲，应有$K\sim\text{Binom}(s^++s^-,\pi)$，其中$K$为$s^-$背后的随机变量。
-\subsubsection{零假设}
-$H_0:Q_\pi=q_0$
-
-\begin{table}[htbp]
-	\centering
-	\begin{tabular}{c>{\centering\arraybackslash}p{6cm}>{\centering\arraybackslash}p{4cm}}
-		\toprule 
-		备择假设 & $p$值 & 解释 \\
-		\midrule 
-		$H_1:Q_\pi>q_0$ & $P_{H_0}(K\leqslant s^-)$ &
-		在零假设下，二项分布变量小于当前样本$s^-$的概率太小，说明$s^-$太小应变大，即分位点的值应比 N大 \\
-		$H_1:Q_\pi<q_0$ & $P_{H_0}(K\geqslant s^-)$ & 略 \\
-		$H_1:Q_\pi\ne q_0$ & 
-		2\text{min}\{$P_{H_0}(K\leqslant s^-)$,\;$P_{H_0}(K\geqslant s^-)$\} & 略 \\
-		\bottomrule 
-	\end{tabular}
-	\caption{对$H_0:Q_\pi=q_0$的检验}
-\end{table}
+。若零假设成立（即$q_0$确实为总体的$\pi$分位点），则从总体中任取一个元素，它小于$q_0$的概率应为$\pi$，那么对于任意一组样本来讲，
 
 \subsubsection{大样本近似}
-当$n$较大时，可认为$Z\sim N(0,1)$，其中$Z=\dfrac{K-n\pi}{\sqrt{n\pi(1-\pi)}}$，其中$n$为样本中不等于$q_0$的单元的个数，由此可在求$p$值时近似计算标准正态分布的累积概率值。
+当$n$较大时，可认为$Z\sim N(0,1)$，其中$n$为样本中不等于$q_0$的单元的个数，由此可在求$p$值时近似计算标准正态分布的累积概率值。
 \subsubsection{注意事项}
 需要去除样本中值为$q_0$的单元，这部分单元对推断没有帮助。
-\subsubsection{尚存疑惑}
-为什么$p$值是这样的呢？
 \subsubsection{代码}
 \label{sec:sign.test.code}
 \inputminted[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines]{r}{nonparametric-statistics/chapter1/sign-test.R}

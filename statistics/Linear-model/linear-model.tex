@@ -8,7 +8,7 @@
 			\operatorname{Cov}(\varepsilon)=\sigma^2I_n
 		\end{cases}
 	\end{equation*}
-	其中$y$为$n\times 1$观测向量，$X$为$n\times p$设计矩阵，$\beta$为$p\times 1$未知参数向量，$\varepsilon$为随机误差，$\sigma^2$为误差方差。
+	其中$y$为$n\times 1$\gls{ObservationVector}，$X$为$n\times p$\gls{DesignMatrix}，$\beta$为$p\times 1$未知参数向量，$\varepsilon$为随机误差，$\sigma^2$为误差方差。
 \end{definition}
 \begin{definition}
 	称方程$X^TX\beta=X^Ty$为\gls{NormalEquation}。
@@ -333,7 +333,7 @@
 \begin{theorem}\label{theo:SSESSEACalculate}
 	对于无约束条件以及约束$A\beta=\mathbf{0}$，有：
 	\begin{gather*}
-		\operatorname{SSE}=||y-X\hat{\beta}||^2=y^Ty-\hat{\beta}^TX^Ty \\
+		\operatorname{SSE}=||y-X\hat{\beta}||^2=y^Ty-\hat{\beta}^TX^Ty,\quad
 		\operatorname{SSE}_A=||y-X\hat{\beta}_A||^2=y^Ty-\hat{\beta}_A^TX^Ty
 	\end{gather*}
 \end{theorem}
@@ -359,8 +359,14 @@
 	\end{align*}
 \end{proof}
 \begin{definition}
-	称$\hat{\beta}^TX^Ty$为\gls{RSS}，记为$\operatorname{RSS}(\beta)$。称$\hat{\beta}_A^TX^Ty$为约束条件$A\beta=\mathbf{0}$下的回归平方和，记为$\operatorname{RSS}_A(\beta)$。称$y^Ty$为总平方和，记作$\operatorname{RSS}_{\text{总}}(\beta)$。称$\sqrt{\dfrac{\operatorname{RSS}(\beta)}{\operatorname{RSS}_{\text{总}}}(\beta)}$为$y$与$\seq{X}{p}$之间的\gls{CoefficientOfMultipleCorrelation}，记作$\operatorname{R}$。
+	称$\hat{\beta}^TX^Ty=y^TP_Xy$为\gls{RSS}，记为$\operatorname{RSS}(\beta)$。称$\hat{\beta}_A^TX^Ty$为约束条件$A\beta=\mathbf{0}$下的回归平方和，记为$\operatorname{RSS}_A(\beta)$。称$y^Ty$为总平方和，记作$\operatorname{RSS}_{\text{总}}$。称$\sqrt{\dfrac{\operatorname{RSS}(\beta)}{\operatorname{RSS}_{\text{总}}}}$为$y$与$\seq{X}{p}$之间的\gls{CoefficientOfMultipleCorrelation}，记作$\operatorname{R}$。
 \end{definition}
+\begin{property}\label{prop:RSS=RSSbeta+SSE}
+	$\operatorname{RSS}_{\text{总}}=\operatorname{RSS}(\beta)+\operatorname{SSE}$。
+\end{property}
+\begin{proof}
+	由\cref{prop:ehat}(2)可得$\operatorname{RSS}(\beta)+\operatorname{SSE}=y^TP_Xy+y^T(I_n-P_X)y=y^Ty=\operatorname{RSS}_{\text{总}}$。
+\end{proof}
 \begin{note}
 	回归平方和表示了数据平方和$y^Ty$中能够由因变量$y$与自变量$\seq{X}{p}$的线性关系解释的部分，因为它是$y$在$<\seq{X}{p}>$上投影长度的平方。由此可以看出$\operatorname{R}^2\leqslant1$。我们用$\operatorname{R}^2$来度量$\seq{X}{p}$对$y$线性拟合程度的好坏，越接近$1$越好。
 \end{note}
