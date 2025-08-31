@@ -349,7 +349,7 @@
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)因为$f\in L_2(X)$，所以$\operatorname{E}(|f|^2)<+\infty$，由\cref{theo:LtLs}和\cref{prop:MeasurableIntegral}(4)可知$\operatorname{E}(f)=\mu\in\mathbb{R}^{}$。根据方差的定义和\cref{prop:MeasurableIntegral}(5)可得：
+	(1)由\cref{prop:Moment}(1)(3)可知$\operatorname{E}(f)=\mu\in\mathbb{R}^{}$。根据方差的定义和\cref{prop:MeasurableIntegral}(5)可得：
 	\begin{align*}
 		\operatorname{Var}(f)
 		=\operatorname{E}[(f-\mu)^2]
@@ -357,7 +357,7 @@
 		=\operatorname{E}(f^2)-2\mu^2+\mu^2
 		=\operatorname{E}(f^2)-\mu^2
 	\end{align*}\par
-	(2)由(1)和\cref{prop:ConditionalExpectation}(3)可得：
+	(2)由\cref{prop:Moment}(1)(3)可知$\operatorname{E}(f)=\mu\in\mathbb{R}^{}$。根据(1)和\cref{prop:ConditionalExpectation}(3)可得：
 	\begin{align*}
 		\operatorname{E}[\operatorname{Var}(f|g)]
 		&=\operatorname{E}\{\operatorname{E}(f^2|g)-[\operatorname{E}(f|g)]^2\} \\
@@ -371,7 +371,7 @@
 	\begin{equation*}
 		\operatorname{E}[\operatorname{Var}(f|g)]+\operatorname{Var}[\operatorname{E}(f|g)]=\operatorname{E}(f^2)-[\operatorname{E}(f)]^2=\operatorname{Var}(f)
 	\end{equation*}\par
-	(3)因为$f\in L_2(X)$，所以$\operatorname{E}(|f|^2)<+\infty$，由\cref{theo:LtLs}和\cref{prop:MeasurableIntegral}(4)可知$\operatorname{E}(f)=\mu\in\mathbb{R}^{}$。同理可得$\operatorname{E}(g)\in\mathbb{R}^{}$。由方差的定义和\cref{prop:MeasurableIntegral}(5)可得：
+	(3)由\cref{prop:Moment}(1)(3)可知$\operatorname{E}(f)=\mu\in\mathbb{R}^{}$。同理可得$\operatorname{E}(g)\in\mathbb{R}^{}$。由方差的定义和\cref{prop:MeasurableIntegral}(5)可得：
 	\begin{align*}
 		\operatorname{Var}(f\pm g)
 		&=\operatorname{E}[f\pm g-\operatorname{E}(f\pm g)]^2 \\
@@ -418,6 +418,70 @@
 		\operatorname{MSE}(f)&=\operatorname{E}[(f-g)^T(f-g)]=\operatorname{E}(f^Tf-f^Tg-g^Tf+g^Tg) \\
 		&=\operatorname{E}(f^Tf)-2g^Tg+g^Tg=\operatorname{E}(f^Tf)-g^Tg\qedhere
 	\end{align*}
+\end{proof}
+
+\subsection{相关系数}
+\begin{definition}
+	设$\mathbf{X}$和$\mathbf{Y}$分别为概率空间$(X,\mathscr{F},P)$上的$m$维随机向量和$n$维随机向量，$\operatorname{Cov}(\mathbf{X},\mathbf{Y})$存在，$\operatorname{Var}(X_1),\operatorname{Var}(X_2),\dots,\operatorname{Var}(X_m),\operatorname{Var}(Y_1),\operatorname{Var}(Y_2),\dots,\operatorname{Var}(Y_n)\in(0,+\infty)$。称：
+	\begin{align*}
+		&\operatorname{Corr}(\mathbf{X},\mathbf{Y})=\operatorname{diag}\left\{\frac{1}{\sqrt{\operatorname{Var}(X_1)}},\frac{1}{\sqrt{\operatorname{Var}(X_2)}},\dots,\frac{1}{\sqrt{\operatorname{Var}(X_m)}}\right\} \\
+		&\quad\cdot\operatorname{Cov}(\mathbf{X},\mathbf{Y})\operatorname{diag}\left\{\frac{1}{\sqrt{\operatorname{Var}(Y_1)}},\frac{1}{\sqrt{\operatorname{Var}(Y_2)}},\dots,\frac{1}{\sqrt{\operatorname{Var}(Y_n)}}\right\}
+	\end{align*}
+	为$\mathbf{X}$和$\mathbf{Y}$之间的\gls{CorrelationCoefficient}矩阵，称$\operatorname{Corr}(\mathbf{X},\mathbf{Y})(i,j)$为$X_i$与$Y_j$之间的相关系数。当$\mathbf{X}=\mathbf{Y}$时，将$\mathbf{X}$与$\mathbf{Y}$之间的相关系数矩阵简记为$\operatorname{Corr}(\mathbf{X})$。
+\end{definition}
+\begin{property}\label{prop:CorrelationCoefficient}
+	相关系数具有如下性质：
+	\begin{enumerate}
+		\item 设$X,Y$为概率空间$(X,\mathscr{F},P)$上的随机变量，$\operatorname{Corr}(X,Y)$存在，则$-1\leqslant\operatorname{Corr}(X,Y)\leqslant1$，等号成立当且仅当存在不全为$0$的常数$a,b$使得$aX+bY=0\;$a.s.成立。；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由\cref{ineq:cauchy-schiwarz-expectations}可得：
+	\begin{equation*}
+		|\operatorname{Cov}(X,Y)|\leqslant\sqrt{\operatorname{Var}(X)\operatorname{Var}(Y)}
+	\end{equation*}
+	所以有$|\operatorname{Corr}(X,Y)|\leqslant1$，取等条件由上式的取等条件得到。
+\end{proof}
+\begin{definition}
+	设$Y$和$\mathbf{X}$分别为概率空间$(X,\mathscr{F},P)$上的随机变量和$n$维随机向量，$\operatorname{Cov}(\mathbf{X},Y),\operatorname{Cov}(\mathbf{X})$存在，$\operatorname{Cov}(\mathbf{X})>\mathbf{0}$，$\operatorname{Var}(Y)<+\infty$。称：
+	\begin{equation*}
+		R^2=\frac{[\operatorname{Cov}(\mathbf{X},Y)]^T[\operatorname{Cov}(\mathbf{X})]^{-1}\operatorname{Cov}(\mathbf{X},Y)}{\operatorname{Var}(Y)}
+	\end{equation*}
+	为$\mathbf{X}$和$Y$之间的\gls{MultipleCorrelationCoefficient}。
+\end{definition}
+\begin{property}\label{prop:MultipleCorrelationCoefficient}
+	设$Y$和$\mathbf{X}$分别为概率空间$(X,\mathscr{F},P)$上的随机变量和$n$维随机向量，$Y$与$\mathbf{X}$的复相关系数$R^2$存在，则：
+	\begin{enumerate}
+		\item 若$\operatorname{Cov}(\mathbf{X})$对角线上各分量都大于$0$，则有：
+		\begin{align*}
+			&R^2=(\operatorname{Corr}(X_1,Y),\operatorname{Corr}(X_2,Y),\dots,\operatorname{Corr}(X_n,Y))^T \\
+			&\quad\cdot[\operatorname{Corr}(\mathbf{X})]^{-1}(\operatorname{Corr}(X_1,Y),\operatorname{Corr}(X_2,Y),\dots,\operatorname{Corr}(X_n,Y))
+		\end{align*}
+		\item $R^2=\max\limits_{\alpha\in\mathbb{R}^{n}}[\operatorname{Corr}(\alpha ^T\mathbf{X},Y)]^2$；
+		\item $R^2\in[0,1]$；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由\cref{theo:PositiveDefinite}(6)可得$[\operatorname{Cov}(\mathbf{X})]^{-1}$的存在性，因为$\operatorname{Cov}(\mathbf{X})$对角线上各分量都大于$0$，所以$\operatorname{diag}\left\{\frac{1}{\sqrt{\operatorname{Var}(Y_1)}},\frac{1}{\sqrt{\operatorname{Var}(Y_2)}},\dots,\frac{1}{\sqrt{\operatorname{Var}(Y_n)}}\right\}$可逆，由\cref{prop:InvertibleMatrix}(11)可得$\operatorname{Corr}(\mathbf{X})$的存在性。根据\cref{prop:InvertibleMatrix}(11)可得：
+	\begin{align*}
+		&R^2=\frac{[\operatorname{Cov}(\mathbf{X},Y)]^T[\operatorname{Cov}(\mathbf{X})]^{-1}\operatorname{Cov}(\mathbf{X},Y)}{\operatorname{Var}(Y)} \\
+		=&\frac{1}{\operatorname{Var}(Y)}[\operatorname{Cov}(\mathbf{X},Y)]^T[\operatorname{diag}\{\operatorname{Var}(X_1),\operatorname{Var}(X_2),\dots,\operatorname{Var}(X_n)\} \\
+		&\quad\cdot\operatorname{Corr}(\mathbf{X})\operatorname{diag}\{\operatorname{Var}(X_1),\operatorname{Var}(X_2),\dots,\operatorname{Var}(X_n)\}]^{-1}\operatorname{Cov}(\mathbf{X},Y) \\
+		=&\frac{1}{\operatorname{Var}(Y)}[\operatorname{Cov}(\mathbf{X},Y)]^T\operatorname{diag}\left\{\frac{1}{\sqrt{\operatorname{Var}(X_1)}},\frac{1}{\sqrt{\operatorname{Var}(X_2)}},\dots,\frac{1}{\sqrt{\operatorname{Var}(X_n)}}\right\} \\
+		&\quad\cdot[\operatorname{Corr}(\mathbf{X})]^{-1}\operatorname{diag}\left\{\frac{1}{\sqrt{\operatorname{Var}(X_1)}},\frac{1}{\sqrt{\operatorname{Var}(X_2)}},\dots,\frac{1}{\sqrt{\operatorname{Var}(X_n)}}\right\}\operatorname{Cov}(\mathbf{X},Y) \\
+		=&(\operatorname{Corr}(X_1,Y),\operatorname{Corr}(X_2,Y),\dots,\operatorname{Corr}(X_n,Y))^T \\
+		&\quad\cdot[\operatorname{Corr}(\mathbf{X})]^{-1}(\operatorname{Corr}(X_1,Y),\operatorname{Corr}(X_2,Y),\dots,\operatorname{Corr}(X_n,Y))^T
+	\end{align*}\par
+	(2)由\cref{prop:CovMat}(3)可得：
+	\begin{align*}
+		\max_{\alpha\in\mathbb{R}^{n}}[\operatorname{Corr}(\alpha ^T\mathbf{X},Y)]^2=\max_{\alpha\in\mathbb{R}^{n}}\frac{[\operatorname{Cov}(\alpha^T\mathbf{X},Y)]^2}{\operatorname{Var}(Y)\operatorname{Var}(\alpha^T\mathbf{X})}=\max_{\alpha\in\mathbb{R}^{n}}\frac{[\alpha^T\operatorname{Cov}(\mathbf{X},Y)]^2}{\operatorname{Var}(Y)\alpha^T\operatorname{Cov}(\mathbf{X})\alpha}
+	\end{align*}
+	根据\cref{prop:CovMat}(2)令$\beta=[\operatorname{Cov}(\mathbf{X})]^{\frac{1}{2}}\alpha$，由$\operatorname{Cov}(\mathbf{X})>\mathbf{0}$可知$[\operatorname{Cov}(\mathbf{X})]^{-\frac{1}{2}}$存在，所以由\cref{prop:SquareRootMat}(3)、\cref{prop:Transpose}(4)、\cref{prop:ReverseSquareRootMat}(3)和\cref{ineq:cauchy-schiwarz-inner-product}可得：
+	\begin{align*}
+		&\max_{\alpha\in\mathbb{R}^{n}}[\operatorname{Corr}(\alpha ^T\mathbf{X},Y)]^2=\max_{\beta\in\mathbb{R}^{n}}\frac{\{\beta^T[\operatorname{Cov}(\mathbf{X})]^{-\frac{1}{2}}\operatorname{Cov}(\mathbf{X},Y)\}^2}{\operatorname{Var}(Y)\beta^T\beta} \\
+		=&\frac{[\operatorname{Cov}(\mathbf{X},Y)]^T[\operatorname{Cov}(\mathbf{X})]^{-1}\operatorname{Cov}(\mathbf{X},Y)}{\operatorname{Var}(Y)}=R^2
+	\end{align*}\par
+	(3)由(2)和\cref{prop:CorrelationCoefficient}(1)即可得到。
 \end{proof}
 
 \subsection{二次型}
