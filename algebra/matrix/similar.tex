@@ -397,16 +397,20 @@
 \subsubsection{实对称矩阵特征值的极值性质}
 \begin{theorem}\label{theo:maxminxAx/xx}
 	设$A\in M_{n}(\mathbb{R})$，$A$的特征值从大到小记作$\seq{\lambda}{n}$，$\seq{\varphi}{n}$为对应的标准正交化特征向量，则：
-	\begin{equation*}
+	\begin{gather*}
 		\max_{x\ne\mathbf{0}}\frac{x^TAx}{x^Tx}=\lambda_1=\varphi_1^TA\varphi_1\quad
-		\min_{x\ne\mathbf{0}}\frac{x^TAx}{x^Tx}=\lambda_n=\varphi_n^TA\varphi_n
-	\end{equation*}
+		\min_{x\ne\mathbf{0}}\frac{x^TAx}{x^Tx}=\lambda_n=\varphi_n^TA\varphi_n \\
+		\max_{x\ne\mathbf{0},\;x\perp\varphi_1,\varphi_2,\varphi_k}\frac{x^TAx}{x^Tx}=\lambda_{k+1}=\varphi_{k+1}^TA\varphi_{k+1}
+	\end{gather*}
 \end{theorem} 
 \begin{proof}
-	由\cref{prop:HermitianMatEigen}(3)可知存在一个正交矩阵$Q$使得$Q^{-1}AQ=\operatorname{diag}\{\seq{\lambda}{n}\}=\varLambda$。对任意的$x\in\mathbb{R}^{n}$，因为$Q$为正交矩阵，$Q$可逆，所以关于$y$的非齐次线性方程组$Qy=x$有唯一解，于是对于这个存在且唯一的$y$，有：
-	\begin{gather*}
-		\frac{x^TAx}{x^Tx}=\frac{y^TQ^TAQy}{y^TQ^TQy}=\frac{y^T\varLambda y}{y^Ty}=\frac{\sum\limits_{i=1}^{n}\lambda_iy_i^2}{\sum\limits_{i=1}^ny_i^2}\leqslant\lambda_1\frac{\sum\limits_{i=1}^{n}y_i^2}{\sum\limits_{i=1}^ny_i^2}=\lambda_1 \\
-		\frac{x^TAx}{x^Tx}=\frac{y^TQ^TAQy}{y^TQ^TQy}=\frac{y^T\varLambda y}{y^Ty}=\frac{\sum\limits_{i=1}^{n}\lambda_iy_i^2}{\sum\limits_{i=1}^ny_i^2}\geqslant\lambda_n\frac{\sum\limits_{i=1}^{n}y_i^2}{\sum\limits_{i=1}^ny_i^2}=\lambda_n
-	\end{gather*}
-	当$y$为$(1,0,0,\dots,0)^T$时第一式取等号，当$y$为$(0,0,\dots,0,1)^T$时第二式取等号，此时$x$分别为$\varphi_1$和$\varphi_n$。
+	由\cref{prop:HermitianMatEigen}(3)可知存在一个正交矩阵$Q$使得$Q^{-1}AQ=\operatorname{diag}\{\seq{\lambda}{n}\}=\varLambda$，其中$Q=(\varphi_1^T;\varphi_2^T;\dots;\varphi_n^T)$。根据\cref{prop:OrthogonalUnitaryMatrix}(1)可得：
+	\begin{equation*}
+		\frac{x^TAx}{x^Tx}=\frac{x^TQ^T\varLambda Qx}{x^TQ^TQx}=\frac{y^T\varLambda y}{y^Ty}=\frac{\sum\limits_{i=1}^{n}\lambda_iy_i^2}{\sum\limits_{i=1}^ny_i^2}\leqslant\lambda_1\frac{\sum\limits_{i=1}^{n}y_i^2}{\sum\limits_{i=1}^ny_i^2}=\lambda_1
+	\end{equation*}
+	当$y$为$(1,0,0,\dots,0)^T$时第一式取等号，由\cref{theo:SolutionOfSLE2}(2.1)可知关于$x$的非齐次线性方程组$Qx=y$有唯一解，解为$x=Q^{-1}y=\varphi_1$。同理可得第二式。由\cref{prop:OrthogonalUnitarySimilarity}(2)可得当$x\perp\varphi_1,\varphi_2,\dots,\varphi_k$时，有：
+	\begin{equation*}
+		\frac{x^TAx}{x^Tx}=\frac{x^TQ^T\varLambda Qx}{x^TQ^TQx}=\frac{y^T\varLambda y}{y^Ty}=\frac{\sum\limits_{i=k+1}^{n}\lambda_iy_i^2}{\sum\limits_{i=k+1}^ny_i^2}\leqslant\lambda_1\frac{\sum\limits_{i=k+1}^{n}y_i^2}{\sum\limits_{i=k+1}^ny_i^2}=\lambda_1
+	\end{equation*}
+	当$y$第$k+1$个分量取$1$其余分量取$0$时等号成立，由\cref{theo:SolutionOfSLE2}(2.1)可知关于$x$的非齐次线性方程组$Qx=y$有唯一解，解为$x=Q^{-1}y=\varphi_{k+1}$。
 \end{proof}
