@@ -45,58 +45,6 @@
 \input{statistics/point-estimation/UMVUE.tex}
 \input{statistics/point-estimation/Moment-Estimator.tex}
 \input{statistics/point-estimation/MLE.tex}
+\input{statistics/point-estimation/common.tex}
 \input{statistics/point-estimation/CI.tex}
-
-\begin{theorem}
-	对于样本方差和样本均值：
-	\begin{enumerate}
-		\item 记：
-		\begin{equation*}
-			\overline{x}_n=\frac{1}{n}\sum_{i=1}^{n}x_i,\quad s_n^2=\frac{1}{n-1}\sum_{i=1}^{n}(x_i-\overline{x}_n)^2
-		\end{equation*}
-		则有：
-		\begin{equation*}
-			\overline{x}_{n+1}=\overline{x}_n+\frac{1}{n+1}(x_{n+1}-\overline{x}_n),\quad s_{n+1}^2=\frac{n-1}{n}s_n^2+\frac{1}{n}(x_{n+1}-\overline{x}_n)^2
-		\end{equation*}
-		\item 从同一总体中抽取两个大小分别为$m$和$n$的样本，样本均值分别记为$\overline{x}_1,\overline{x}_2$，样本方差分别为$s_1^2,s_2^2$，将两组样本合并，其均值和样本方差分别为$\overline{x},s^2$，则有：
-		\begin{equation*}
-			\overline{x}=\frac{m\overline{x}_1+n\overline{x}_2}{m+n},\quad s^2=\frac{(m-1)s_1^2+(n-1)s_2^2}{m+n-1}+\frac{mn(\overline{x}_1-\overline{x}_2)^2}{(m+n)(m+n+1)}
-		\end{equation*}
-	\end{enumerate}
-\end{theorem}
-\begin{proof}
-	(1)对于均值有：
-	\begin{align*}
-		\overline{x}_{n+1}&=\frac{1}{n+1}\sum_{i=1}^{n+1}x_i=\frac{n}{n+1}\frac{1}{n}\left(\sum_{i=1}^{n}x_i+x_{n+1}\right) \\
-		&=\frac{n}{n+1}\overline{x}_n+\frac{1}{n+1}x_{n+1}=\overline{x}_n+\frac{1}{n+1}(x_{n+1}-\overline{x}_n)
-	\end{align*}
-	对于方差有：
-	\begin{align*}
-		s_{n+1}^2&=\frac{1}{n}\sum_{i=1}^{n+1}(x_i-\overline{x}_{n+1})^2=\frac{1}{n}\sum_{i=1}^{n+1}\left[x_i-\overline{x}_n-\frac{1}{n+1}(x_{n+1}-\overline{x}_n)\right]^2 \\
-		&=\frac{1}{n}\sum_{i=1}^{n+1}\left[(x_i-\overline{x}_n)^2+\frac{1}{(n+1)^2}(x_{n+1}-\overline{x}_n)^2-\frac{2}{n+1}(x_i-\overline{x}_n)(x_{n+1}-\overline{x}_n)\right] \\
-		&=\frac{1}{n}\sum_{i=1}^{n}(x_i-\overline{x}_n)^2+\frac{1}{n}(x_{n+1}-\overline{x}_n)^2+\frac{1}{n(n+1)}(x_{n+1}-\overline{x}_n)^2-\frac{2}{n(n+1)}(x_{n+1}-\overline{x}_n)^2 \\
-		&=\frac{n-1}{n}s_n^2+\frac{1}{n}(x_{n+1}-\overline{x}_n)^2-\frac{1}{n(n+1)}(x_{n+1}-\overline{x}_n)^2 \\
-		&=\frac{n-1}{n}s_n^2+\frac{1}{n}(x_{n+1}-\overline{x}_n)^2
-	\end{align*}\par
-	(2)均值的结论是显然的，对于方差有：
-	\begin{align*}
-		s^2&=\frac{1}{m+n-1}\sum_{i=1}^{m+n}(x_i-\overline{x})^2=\frac{1}{m+n-1}\left[\sum_{i=1}^{m}(x_i-\overline{x})^2+\sum_{i=m+1}^{m+n}(x_i-\overline{x})^2\right] \\
-		&=\frac{1}{m+n-1}\left[\sum_{i=1}^{m}(x_i-\overline{x}_1+\overline{x}_1-\overline{x})^2+\sum_{i=m+1}^{m+n}(x_i-\overline{x}_2+\overline{x}_2-\overline{x})^2\right] \\
-		&=\frac{1}{m+n-1}\left[(m-1)s_1^2+m(\overline{x}_1-\overline{x})^2+2\sum_{i=1}^{m}(x_i-\overline{x}_1)(\overline{x_1}-\overline{x})\right. \\
-		&\quad\left.+(n-1)s_2^2+n(\overline{x}_2-\overline{x})^2+2\sum_{i=m+1}^{m+n}(x_i-\overline{x}_2)(\overline{x_2}-\overline{x})\right] \\
-		&=\frac{1}{m+n-1}\left[(m-1)s_1^2+m(\overline{x}_1-\overline{x})^2+(n-1)s_2^2+n(\overline{x}_2-\overline{x})^2\right] \\
-		&=\frac{(m-1)s_1^2+(n-1)s_2^2}{m+n-1}+\frac{m(\overline{x}_1-\overline{x})^2+n(\overline{x}_2-\overline{x})^2}{m+n-1}
-	\end{align*}
-	由于：
-	\begin{gather*}
-		m(\overline{x}_1-\overline{x})^2=m\left(\overline{x}_1-\frac{m\overline{x}_1+n\overline{x}_2}{m+n}\right)^2=m\frac{n^2(\overline{x}_1-\overline{x}_2)^2}{(m+n)^2} \\
-		n(\overline{x}_2-\overline{x})^2=n\left(\overline{x}_2-\frac{m\overline{x}_1+n\overline{x}_2}{m+n}\right)^2=n\frac{m^2(\overline{x}_1-\overline{x}_2)^2}{(m+n)^2}
-	\end{gather*}
-	所以：
-	\begin{align*}
-		s^2&=\frac{(m-1)s_1^2+(n-1)s_2^2}{m+n-1}+\frac{m(\overline{x}_1-\overline{x})^2+n(\overline{x}_2-\overline{x})^2}{m+n-1} \\
-		&=\frac{(m-1)s_1^2+(n-1)s_2^2}{m+n-1}+\frac{(m+n)mn(\overline{x}_1-\overline{x}_2)^2}{(m+n-1)(m+n)^2} \\
-		&=\frac{(m-1)s_1^2+(n-1)s_2^2}{m+n-1}+\frac{mn(\overline{x}_1-\overline{x}_2)^2}{(m+n-1)(m+n)}\qedhere
-	\end{align*}
-\end{proof}
 
