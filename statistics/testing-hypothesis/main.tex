@@ -1,6 +1,6 @@
 \chapter{假设检验理论}
 \begin{definition}
-	设$(X,\mathscr{A},\mathscr{P})$是统计结构，则称$\mathscr{P}$的非空子集为\gls{Hypothesis}。若$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，则$\Theta$的非空子集也被称之为假设。设$\mathbf{X}$是从总体$F$中抽取的简单样本，判断$F$是否服从某一假设的问题是\gls{HypothesisTesting}问题。称要检验的假设$\mathscr{P}_0(\Theta_0)$为\gls{NullHypothesis}，记为$H_0$，$\mathscr{P_1}\subseteq\mathscr{P}\backslash\mathscr{P}_0(\Theta_1\subseteq\Theta\backslash\Theta_0)$被称之为\gls{AlternativeHypothesis}，记为$H_1$。称$(H_0,H_1)$为检验问题。检验指的是：
+	设$(X,\mathscr{A},\mathscr{P})$是统计结构，则称$\mathscr{P}$的非空子集为\gls{Hypothesis}。若$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，则$\Theta$的非空子集也被称之为假设。设$\mathbf{X}$是从总体$F$中抽取的简单样本，判断$F$是否服从某一假设的问题是\gls{HypothesisTesting}问题。称要检验的假设$\mathscr{P}_0(\Theta_0)$为\gls{NullHypothesis}，记为$H_0$，$\mathscr{P_1}\subseteq\mathscr{P}\backslash\mathscr{P}_0(\Theta_1\subseteq\Theta\backslash\Theta_0)$被称之为\gls{AlternativeHypothesis}，记为$H_1$。若某一假设仅包含$\mathscr{P}$中的一个点，则称该假设为\gls{SimpleHypothesis}，否则称之为\gls{CompositeHypothesis}。称$(H_0,H_1)$为检验问题。检验指的是：
 	\begin{enumerate}
 		\item 将$X$划分为互不相交的两个$\mathscr{P}$可测集，即$X=W\cup\overline{W},\;W\cap\overline{W}=\varnothing,\;W,\overline{W}\in\mathscr{A}$；
 		\item 作如下规定，若$\mathbf{X}\in W$，则拒绝原假设$H_0$，接受备择假设$H_1$；若$\mathbf{X}\in\overline{W}$，则接受原假设$H_0$，拒绝备择假设$H_1$。
@@ -21,7 +21,30 @@
 	为检验问题$(H_0,H_1)$的\gls{PowerFunction}。当$F\in H_0$时，$g(F)\leqslant\alpha$的检验被称之为\gls{SignificanceLevel}为$\alpha$的检验。
 \end{definition}
 \begin{note}
-	当$F\in H_0$时，$g(F)$为犯第一类错误的概率；当$F\in H_1$时，$1-g(F)$为犯第二类错误的概率。\par
+	当$F\in H_0$时，$g(F)$为犯第一类错误的概率；当$F\in H_1$时，$1-g(F)$为犯第二类错误的概率。
+\end{note}
+\begin{method}
+	假设检验基本步骤为：
+	\begin{enumerate}
+		\item 建立假设检验问题；
+		\item 选取统计量，由直观得出拒绝域形式；
+		\item 选择检验的显著性水平；
+		\item 确定具体的拒绝域；
+		\item 做出判断。
+	\end{enumerate}
+\end{method}
+\begin{definition}
+	设$(H_0,H_1)$是统计结构$(X,\mathscr{A},\mathscr{P})$上的一个假设检验问题，$\mathbf{X}$是从总体$F$中抽取的简单样本，利用$\mathbf{X}$能够作出拒绝原假设的最小显著性水平被称为检验的\gls{PValue}。
+\end{definition}
+\begin{note}
+	为什么需要$p$值的概念？根据Neyman和Pearson的思想我们需要先降低犯第一类错误的可能性，也就是确定一个具体的拒绝域使得显著性水平$\alpha$小于某个给定值，但此时会出现一个问题，由于不同的人对原假设的保守性程度不一样，他们选择的显著性水平就会不一样，对原假设越保守那所选取的$\alpha$就会越小，只关注是否拒绝原假设这一结论就会引起争议。如果能够给出p值让大家有一个大致的参照，虽然此时还是会有争议，但至少我们有了一个参考值。\par
+	如何求$p$值？为了得到拒绝原假设的最小显著性水平，那必然需要使得当前样本下的统计量值在拒绝域内且在拒绝域的边界上，否则拒绝域还能进一步缩小，即该显著性水平不是最小的。因为此时拒绝域的形式已经确定了，边界值也给出了，那么实际上我们就得到了一个具体的拒绝域，所以有：
+	\begin{equation*}
+		p=\sup_{P\in H_0}g(P)
+	\end{equation*}
+	如果$p$更小，那么就无法保证当$F\in H_0$的时候$g(F)\leqslant\alpha$；如果$p$更大则不最小。
+\end{note}
+\begin{note}
 	实际中我们根本不知道$F$到底是在$H_0$中还是在$H_1$中，假设检验本就是为了判断这个问题才出现的，为了得到显著性为$\alpha$的检验，实际上我们做的是找到$X$的一个划分使得：
 	\begin{equation*}
 		\sup_{P\in H_0}g(P)\leqslant\alpha
@@ -31,6 +54,5 @@
 \begin{definition}
 	设$\varphi$是可测空间$(X,\mathscr{A})$上的可测函数。若$0\leqslant\varphi\leqslant1$，则称$\varphi$是\gls{TestFunction}。当$\varphi$只取$0,1$两个值时，称对应的检验为\gls{NonrandomizedTesting}，否则称为\gls{RandomizedTesting}。$\varphi$的势函数为$\operatorname{E}(\varphi)$。
 \end{definition}
-\begin{definition}
-	设$(H_0,H_1)$是统计结构$(X,\mathscr{A},\mathscr{P})$上的一个假设检验问题，$\mathbf{X}$是从总体$F$中抽取的简单样本，利用$\mathbf{X}$能够作出拒绝原假设的最小显著性水平被称为检验的\gls{PValue}。
-\end{definition}
+
+\input{statistics/testing-hypothesis/nonparametric.tex}

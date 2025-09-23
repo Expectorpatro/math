@@ -1,6 +1,6 @@
 \section{方差分析模型}
 
-方差分析模型是一种特殊的正态线性模型，它的自变量取值只能为$0$或$1$。
+\gls{ANOVA}模型是一种特殊的正态线性模型，它的自变量取值只能为$0$或$1$。
 
 \subsection{单因子方差分析}
 
@@ -31,7 +31,7 @@
 		\end{cases}
 		\qquad i=1,2,\dots,a,\;j=1,2,\dots,n_i
 	\end{equation*}
-	称$\mu$为一般平均（这里表示因子$A$的这$a$个水平对数据的一般影响），$\alpha_i$为水平$A_i$的效应，$\varepsilon_{ij}$为随机误差。于是模型的$y$值向量和对应的设计阵、参数向量可写作：
+	称模型中的约束条件为\gls{BoundaryCondition}，$\mu$为一般平均（这里表示因子$A$的这$a$个水平对数据的一般影响），$\alpha_i$为水平$A_i$的\gls{Effect}，$\varepsilon_{ij}$为随机误差。于是模型的$y$值向量和对应的设计阵、参数向量可写作：
 	\begin{gather*}
 		y=(y_{11},y_{12},\dots,y_{1n_1},y_{21},y_{22},\dots,y_{2n_2},\dots,y_{a1},y_{a2},\dots,y_{an_a})^T \\
 		X=
@@ -53,7 +53,7 @@
 \end{definition}
 \subsubsection{参数估计}
 \begin{definition}
-	对于\cref{model:one-way-anova}，称满足条件$\sum\limits_{i=1}^{a}c_i=0$的函数$\sum\limits_{i=1}^{a}c_i\alpha_i$为一个\textbf{对照}。
+	对于\cref{model:one-way-anova}，称满足条件$\sum\limits_{i=1}^{a}c_i=0$的函数$\sum\limits_{i=1}^{a}c_i\alpha_i$为一个\gls{Contrast}。
 \end{definition}
 \begin{theorem}\label{theo:one-way-anova-estimate}
 	对于\cref{model:one-way-anova}，记：
@@ -68,7 +68,7 @@
 			n\mu+\sum_{i=1}^{a}n_i\alpha_i=y_{..},\quad n_i\mu+n_i\alpha_i=y_{i.},\quad i=1,2,\dots,a
 		\end{equation*}
 		\item $\mu$和$\alpha_i$是不可估的；
-		\item $\mu$和$\alpha_i$的一组解为：
+		\item $\mu$和$\alpha_i$在边界条件下的解为：
 		\begin{equation*}
 			\hat{\mu}=\overline{y}_{..},\quad\hat{\alpha}_i=\overline{y}_{i.}-\overline{y}_{..}
 		\end{equation*}
@@ -93,10 +93,17 @@
 		\begin{pmatrix}
 			\mathbf{1}_{n_1}^T & \mathbf{1}_{n_2}^T & \mathbf{1}_{n_3}^T & \cdots & \mathbf{1}_{n_a}^T \\
 			\mathbf{1}_{n_1}^T & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{0} \\
-			\mathbf{0} & \mathbf{1}_{n_2} & \mathbf{0} & \cdots & \mathbf{0} \\
+			\mathbf{0} & \mathbf{1}_{n_2}^T & \mathbf{0} & \cdots & \mathbf{0} \\
 			\vdots & \vdots & \vdots & \ddots & \vdots \\
 			\mathbf{0} & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{1}_{n_a}^T
-		\end{pmatrix}a=(1,0,0,\dots,0)^T
+		\end{pmatrix}a=
+		\begin{pmatrix}
+			1 \\
+			0 \\
+			0 \\
+			\vdots \\
+			0
+		\end{pmatrix}
 	\end{equation*}
 	有解，但将增广矩阵的第一行依次减去第二行到第$a+1$行，第一行便变为方程$0=1$，由\cref{theo:SolutionOfSLE1}可知该线性方程组无解，于是$\mu$不可估。\par
 	若$\alpha_i$可估，则关于$a$的线性方程组：
@@ -104,7 +111,7 @@
 		\begin{pmatrix}
 			\mathbf{1}_{n_1}^T & \mathbf{1}_{n_2}^T & \mathbf{1}_{n_3}^T & \cdots & \mathbf{1}_{n_a}^T \\
 			\mathbf{1}_{n_1}^T & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{0} \\
-			\mathbf{0} & \mathbf{1}_{n_2} & \mathbf{0} & \cdots & \mathbf{0} \\
+			\mathbf{0} & \mathbf{1}_{n_2}^T & \mathbf{0} & \cdots & \mathbf{0} \\
 			\vdots & \vdots & \vdots & \ddots & \vdots \\
 			\mathbf{0} & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{1}_{n_a}^T
 		\end{pmatrix}a=(0,0,\dots,1,0,0,\dots,0)^T
@@ -113,13 +120,9 @@
 	(4)考虑到模型中增加的约束条件$\sum\limits_{i=1}^{a}n_i\alpha_i=0$，由(2)可直接得到关于$\mu$和$\alpha_i$的结论。由\cref{theo:VarianceOfErrorTerm}和(1)可直接得到关于$\sigma^2$的结论\par
 	(5)类似(3)可得，关于表示方法的结论可由\cref{prop:EstimableFunction}(2)得到。\par
 	(6)由(5)可得。\par
-	(7)由(6)可知此时$\sum\limits_{i=1}^{a}c_i\alpha_i$可估，由\cref{prop:EstimableFunction}(3)可知：
+	(7)由(6)可知此时$\sum\limits_{i=1}^{a}c_i\alpha_i$可估，由\cref{prop:EstimableFunction}(3)可知其最小二乘解与$X^TX\beta=X^Ty$解的选择无关，用(4)代入可得该对照的最小二乘解为：
 	\begin{equation*}
-		\sum_{i=1}^{a}c_i\alpha_i=\mu\sum_{i=1}^{a}c_i+\sum_{i=1}^{a}c_i\alpha_i
-	\end{equation*}
-	的最小二乘解与$X^TX\beta=X^Ty$解的选择无关，用(4)代入可得该对照的最小二乘解为：
-	\begin{equation*}
-		\hat{\mu}\sum_{i=1}^{a}c_i+\sum_{i=1}^{a}c_i\hat{\alpha_i}=	\overline{y}_{..}\sum_{i=1}^{a}c_i+\sum_{i=1}^{a}c_i\overline{y}_{i.}-\sum_{i=1}^{a}c_i\overline{y}_{..}=\sum_{i=1}^{a}c_i\overline{y}_{i.}
+		\sum_{i=1}^{a}c_i\hat{\alpha_i}=\sum_{i=1}^{a}c_i\overline{y}_{i.}-\sum_{i=1}^{a}c_i\overline{y}_{..}=\sum_{i=1}^{a}c_i\overline{y}_{i.}
 	\end{equation*}
 	由\cref{prop:EstimableFunction}(6)可得上式是唯一的BLUE。
 \end{proof}
@@ -143,7 +146,7 @@
 	\end{equation*}
 	的检验统计量和置信水平为$1-\alpha$的拒绝域分别为：
 	\begin{equation*}
-		F=\frac{(\operatorname{SSE}_H-\operatorname{SSE})/(a-1)}{\operatorname{SSE}/(n-a)},\quad\{F:F>F_{a-1,n-a}(\alpha)\}
+		F=\frac{(\operatorname{SSE}_H-\operatorname{SSE})/(a-1)}{\operatorname{SSE}/(n-a)},\quad\{F:F>\operatorname{F}_{a-1,n-a}(\alpha)\}
 	\end{equation*}
 \end{theorem}
 \begin{proof}
@@ -157,7 +160,7 @@
 	\end{equation*}
 	的检验统计量和置信水平为$1-\alpha$的拒绝域分别为：
 	\begin{equation*}
-		F=\frac{\operatorname{SSE}_H-\operatorname{SSE}}{\operatorname{SSE}/(n-a)},\quad\{F:F>F_{1,n-a}(\alpha)\}
+		F=\frac{\operatorname{SSE}_H-\operatorname{SSE}}{\operatorname{SSE}/(n-a)},\quad\{F:F>\operatorname{F}_{1,n-a}(\alpha)\}
 	\end{equation*}
 \end{theorem}
 \begin{proof}
@@ -248,7 +251,7 @@
 \begin{theorem}\label{theo:SSESSEACalculateAOV}
 	$\operatorname{SSE}_H$和$\operatorname{SSE}$有如下计算公式：
 	\begin{equation*}
-		\operatorname{SSE}_H=\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}-\frac{y_{..}^2}{n},\quad \operatorname{SSE}=\sum_{i=1}^{a}\sum_{j=1}^{n_i}y_{ij}^2-\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}
+		\operatorname{SSE}_H-\operatorname{SSE}=\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}-\frac{y_{..}^2}{n},\quad \operatorname{SSE}=\sum_{i=1}^{a}\sum_{j=1}^{n_i}y_{ij}^2-\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}
 	\end{equation*}
 \end{theorem}
 \begin{proof}
@@ -256,7 +259,7 @@
 	\begin{equation*}
 		\operatorname{RSS}_H(\mu)=\hat{\mu}\mathbf{1}_n^Ty=\overline{y}_{..}y_{..}=\frac{y_{..}}{n}y_{..}=\frac{y_{..}^2}{n}
 	\end{equation*}\par
-	在无约束的情况下有：
+	在无约束的情况下由\cref{theo:one-way-anova-estimate}(4)可得：
 	\begin{align*}
 		\operatorname{RSS}(\beta)&=\hat{\beta}^TX^Ty=\hat{\mu}y_{..}+\sum_{i=1}^{a}\hat{\alpha}_iy_{i.} =\frac{y_{..}}{n}y_{..}+\sum_{i=1}^{a}(\overline{y}_{i.}-\overline{y}_{..})y_{i.} \\
 		&=\frac{y_{..}^2}{n}+\sum_{i=1}^{a}\left(\frac{y_{i.}}{n_i}-\frac{y_{..}}{n}\right)y_{i.} =\frac{y_{..}^2}{n}+\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}-\sum_{i=1}^{a}y_{i.}\frac{y_{..}}{n}=\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}
@@ -267,12 +270,11 @@
 	\end{equation*}
 	所以：
 	\begin{align*}
-		\operatorname{SSE}_H&=\operatorname{SSE}_H-\operatorname{SSE}=y^Ty-\operatorname{RSS}_H(\mu)-y^Ty+\operatorname{RSS}(\beta) \\
-		&=\operatorname{RSS}S(\beta)-\operatorname{RSS}_H(\mu)=\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}-\frac{y_{..}^2}{n}\qedhere
+		\operatorname{SSE}_H-\operatorname{SSE}=y^Ty-\operatorname{RSS}_H(\mu)-y^Ty+\operatorname{RSS}(\beta)=\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}-\frac{y_{..}^2}{n}\qedhere
 	\end{align*}
 \end{proof}
 \begin{definition}
-	对于\cref{model:one-way-anova}，令$H=(I_{a-1},-\mathbf{1}_{a-1}),\;\alpha=(\seq{\alpha}{a})^T$。记约束$H\alpha=\mathbf{0}$下的回归平方和$\operatorname{SSE}_A$与无约束条件下的回归平方和$\operatorname{SSE}$的差$\operatorname{SSE}_A-\operatorname{SSE}$为$SSA$，称其为\textbf{因子$A$的平方和}或\textbf{组间平方和}。称$\operatorname{SSE}$为\textbf{组内平方和}。分别称$MSA=SSA/(a-1)$和$MSE=\operatorname{SSE}/(n-a)$为因子$A$和误差的\textbf{均方和}。
+	对于\cref{model:one-way-anova}，令$H=(I_{a-1},-\mathbf{1}_{a-1}),\;\alpha=(\seq{\alpha}{a})^T$。记$\operatorname{SSE}_H-\operatorname{SSE}$为$SSA$，称其为\textbf{因子$A$的平方和}或\textbf{组间平方和}。称$\operatorname{SSE}$为\textbf{组内平方和}。分别称$MSA=SSA/(a-1)$和$MSE=\operatorname{SSE}/(n-a)$为因子$A$和误差的\textbf{均方和}。
 \end{definition}
 \begin{note}
 	下给出上述定义的解释。\par
@@ -281,9 +283,9 @@
 		\operatorname{SSE}=\sum_{i=1}^{a}\sum_{j=1}^{n_i}y_{ij}^2-\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}=\sum_{i=1}^{a}\sum_{j=1}^{n_i}(y_{ij}-\overline{y}_{i.})^2=\sum_{i=1}^{a}\sum_{j=1}^{n_i}(\varepsilon_{ij}-\overline{\varepsilon}_{i.})^2
 	\end{equation*}
 	可见该项完全是由误差引起的。\par
-	对于$\operatorname{SSE}_H$，有：
+	对于$\operatorname{SSA}$，有：
 	\begin{equation*}
-		\operatorname{SSE}_H=\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}-\frac{y_{..}^2}{n}=\sum_{i=1}^{a}n_i(\overline{y}_{i.}-\overline{y}_{..})^2
+		\operatorname{SSA}=\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}-\frac{y_{..}^2}{n}=\sum_{i=1}^{a}n_i(\overline{y}_{i.}-\overline{y}_{..})^2
 	\end{equation*}
 	可见该项是由因子$A$的水平变化所引起的观测数据的变差平方和。
 \end{note}
@@ -294,8 +296,8 @@
 		\toprule
 		来源   &平方和&自由度&均方和             &F值  \\ 
 		\midrule
-		因子A & SSA&$f_A=a-1$ &$\dfrac{SSA}{a-1}$ &$F=\dfrac{MSA}{MSe}$\\
-		误差   &SSe  &$f_e=n-a$ &$\dfrac{SSe}{n-a}$ & \\
+		因子A & SSA&$f_A=a-1$ &$\operatorname{MSA}=\dfrac{\operatorname{SSA}}{a-1}$ &$F=\dfrac{MSA}{MSe}$\\
+		误差   &SSE  &$f_e=n-a$ &$\operatorname{MSe}=\dfrac{\operatorname{SSE}}{n-a}$ & \\
 		总     &SST  &$f_T=n-1$ &                  & \\
 		\bottomrule
 	\end{tabularx}

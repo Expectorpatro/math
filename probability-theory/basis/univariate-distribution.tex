@@ -12,7 +12,8 @@
 	二项分布族具有如下性质：
 	\begin{enumerate}
 		\item 二项分布具有可加性，即若$X_i\sim\operatorname{Binom}(n_i,p)$且$X_i$相互独立，$i=1,2,\dots,m$，则$\sum\limits_{i=1}^{m}X_i\sim\operatorname{Binom}\left(\sum\limits_{i=1}^{m}n_i,p\right)$；
-		\item 若$X\sim\operatorname{Binom}(n,p)$，则$\operatorname{E}(X)=np,\;\operatorname{Var}(X)=np(1-p)$。
+		\item 若$X\sim\operatorname{Binom}(n,p)$，则$\operatorname{E}(X)=np,\;\operatorname{Var}(X)=np(1-p)$；
+		\item 若$X_1\sim\operatorname{Binom}(n,p_1),\;X_2\sim\operatorname{Binom}(n,p_2),\;p_1<p_2$，则$F_{X_1}(x)\geqslant F_{X_2}(x)$；
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -27,8 +28,20 @@
 	\end{align*}
 	由\cref{prop:Variance}(1)可得：
 	\begin{equation*}
-		\operatorname{Var}(X)=\operatorname{E}(X^2)-[\operatorname{E}(X)]^2=n(n-1)p^2+np-n^2p^2=n^2p^2-np^2+np-n^2p^2=np(1-p)\qedhere
+		\operatorname{Var}(X)=\operatorname{E}(X^2)-[\operatorname{E}(X)]^2=n(n-1)p^2+np-n^2p^2=n^2p^2-np^2+np-n^2p^2=np(1-p)
+	\end{equation*}\par
+	(3)设$X\sim\operatorname{Binom}(n,p)$，则其分布函数为：
+	\begin{equation*}
+		F(k)=\sum_{i=0}^{k}\binom{n}{k}p^k(1-p)^{n-k}
 	\end{equation*}
+	求其关于$p$的导数可得：
+	\begin{align*}
+		&F'(k)=\frac{\dif}{\dif p}\sum_{i=0}^{k}\binom{n}{i}p^i(1-p)^{n-i} \\
+		=&\sum_{i=0}^{k}\binom{n}{i}ip^{i-1}(1-p)^{n-i}-\sum_{i=0}^{k}\binom{n}{i}(n-i)p^i(1-p)^{n-i-1} \\
+		=&\sum_{i=0}^{k}n\binom{n-1}{i-1}p^{i-1}(1-p)^{n-i}-\sum_{i=0}^{k}n\binom{n-1}{i}p^i(1-p)^{n-i-1} \\
+		=&\sum_{i=1}^{k}n\binom{n-1}{i-1}p^{i-1}(1-p)^{n-i}-\sum_{i=0}^{k}n\binom{n-1}{i}p^i(1-p)^{n-i-1} \\
+		=&-n\binom{n-1}{k}p^k(1-p)^{n-k-1}<0\qedhere
+	\end{align*}
 \end{proof}
 
 \subsection{负二项分布族}
@@ -959,14 +972,14 @@
 	\begin{equation*}
 		\varphi_{Y}=\prod_{i=1}^n(1-2it)^{-\frac{1}{2}}\exp\left\{\frac{it\mu_i^2}{1-2it}\right\}=(1-2it)^{-\frac{n}{2}}\exp\left\{\frac{it\lambda}{1-2it}\right\}
 	\end{equation*}\par
-	(4)先对$Y=X^2,\;X\sim N(\mu,1)$的情况进行讨论，设$Y$的分布函数为$F(y)$。因为$Y\geqslant0$，所以当$y\leqslant0$时$F(y)=0$。当$y>0$时有：
-	\begin{equation*}
-		F(y)=P(Y\leqslant y)=P(X^2\leqslant y)=P(-\sqrt{y}\leqslant X\leqslant\sqrt{y})=\int_{[-\sqrt{y},\sqrt{y}]}\frac{1}{\sqrt{2\pi}}\exp\left[-\frac{(x-\mu)^2}{2}\right]\dif\mu
-	\end{equation*}
-	根据\info{莱布尼兹法则，分布与密度的关系}可得：
-	\begin{equation*}
-		p(y)=
-	\end{equation*}
+%	(4)先对$Y=X^2,\;X\sim N(\mu,1)$的情况进行讨论，设$Y$的分布函数为$F(y)$。因为$Y\geqslant0$，所以当$y\leqslant0$时$F(y)=0$。当$y>0$时有：
+%	\begin{equation*}
+%		F(y)=P(Y\leqslant y)=P(X^2\leqslant y)=P(-\sqrt{y}\leqslant X\leqslant\sqrt{y})=\int_{[-\sqrt{y},\sqrt{y}]}\frac{1}{\sqrt{2\pi}}\exp\left[-\frac{(x-\mu)^2}{2}\right]\dif\mu
+%	\end{equation*}
+%	根据\info{莱布尼兹法则，分布与密度的关系}可得：
+%	\begin{equation*}
+%		p(y)=
+%	\end{equation*}
 \end{proof}
 
 \subsection{$t$分布}

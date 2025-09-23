@@ -1,7 +1,7 @@
 \chapter{度量空间}
 
 \begin{definition}
-	设$X$为一个非空集合。若对任意的$x,y\in X$，都$\exists\;\rho(x,y)\in\mathbb{R}$与$x,\;y$对应，且满足以下三个条件（即距离公理）：
+	设$X$为一个非空集合。若对任意的$x,y\in X$，都存在$\rho(x,y)\in\mathbb{R}$与$x,\;y$对应，且满足以下三个条件：
 	\begin{enumerate}
 		\item 非负性：$\rho(x,y)\geqslant0$，等号成立当且仅当$x=y$。
 		\item 对称性：$\rho(x,y)=\rho(y,x)$。
@@ -9,11 +9,101 @@
 	\end{enumerate}
 	则称$\rho$是$X$上的一个距离，$X$是以$\rho$为距离的\gls{MetricSpace}，记为$(X,\rho)$。度量空间中的元素又称之为点。
 \end{definition}
+\begin{definition}
+	度量空间$(X,\rho)$中的点集：
+	\begin{equation*}
+		\{P\in X:\rho(P,P_0)<\delta\}\qquad (\delta>0)
+	\end{equation*}
+	被称之为点$P_0$的$\delta\;$\gls{neighbourhood}或开邻域，记为$U(P_0,\delta)$。若在上式中取小于等于号，则称之为闭邻域，用$\bar{U}(P,\delta)$表示\footnote{下面如果不作特殊说明，涉及到邻域时都指开邻域。}。
+\end{definition}
+\begin{property}
+	$(X,\rho)$是一个度量空间，$P\in X$，则有：
+	\begin{enumerate}
+		\item $\forall\;\delta>0,\;P\in U(P,\delta)$。
+		\item $\forall\;\delta_1,\delta_2>0,\;\exists\;\delta_3>0,\;U(P,\delta_3)\subset U(P,\delta_1)\cap U(P,\delta_2)$。
+		\item $\forall\;P_0\in X,\;P_0\ne P,\;\exists\;U(P),U(P_0),\;U(P)\cap U(P_0)=\varnothing$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)显然。(2)取$\delta_3<\min(\delta_1,\delta_2)$即可。(3)取$\delta\in(0,\frac{\rho(P,P_0)}{2})$即可。
+\end{proof}
+\begin{definition}
+	设$(X,\rho)$是一个度量空间，$E\subseteq X$。称：
+	\begin{equation*}
+		\delta_E=\sup_{x,y\in E}\rho(x,y)
+	\end{equation*}
+	为点集$E$的\gls{diameter}。
+\end{definition}
+\begin{definition}
+	$(X,\rho)$是一个度量空间，$E\subset X$。若$\delta_E<+\infty$或$E$包含在$X$中某一点的某一邻域内或$E$包含在$X$中任意一点的某一邻域内，则称$E$是$(X,\rho)$中的\gls{BoundedSet}。
+\end{definition}
+\begin{note}
+	三者的等价性很直观：\par
+	$(1)\to(2)$：任取$x\in E$，取$\delta=\delta_E+\rho(x,y)$构造闭邻域$\bar{U}(x,\delta)$或取$\delta=\delta_E+\rho(x,y)+\varepsilon(\forall\;\varepsilon>0)$构造开邻域$U(x,\delta)$。\par
+	$(2)\to(1)$：设关于该点满足条件的开邻域或闭邻域的直径为$\delta$，显然$\delta_E\leqslant\delta<+\infty$。
+	$(1)\to(3)$：任取$x\in X$和$y\in E$，取$\delta=\delta_E+\rho(x,y)$构造闭邻域$\bar{U}(x,\delta)$或取$\delta=\delta_E+\rho(x,y)+\varepsilon(\forall\;\varepsilon>0)$构造开邻域$U(x,\delta)$。\par
+	$(3)\to(1)$：$(3)\to(2)\to(1)$。
+\end{note}
+
+\section{度量空间上的收敛点列}
+\begin{definition}
+	设$(X,\rho)$是一个度量空间，从正整数集$\mathbb{N}^+$到$X$的一个映射，相当于用正整数编号的$X$中的点$x_1,x_2,\cdots$被称为一个\gls{SeqOfPoints}，记为$\{x_n\}$。
+\end{definition}
+\begin{definition}
+	设$\{x_n\}$是度量空间$(X,\rho)$中的一个点列，而
+	\begin{equation*}
+		n_1<n_2<\cdots<n_k<n_{k+1}<\cdots
+	\end{equation*}
+	是一串严格递增的自然数，则
+	\begin{equation*}
+		x_{n_1}<x_{n_2}<\cdots<x_{n_k}<x_{n_{k+1}}<\cdots
+	\end{equation*}
+	也形成一个$(X,\rho)$中的点列，我们把$\{x_{n_k}\}$称之为点列$\{x_n\}$的一个\gls{subsequence}。
+\end{definition}
+\begin{definition}
+	设$\{x_n\}$是度量空间$(X,\rho)$中的点列，如果对任意的$\varepsilon>0$，$\exists\; N\in\mathbb{N}^+$，当$n>N$时有：
+	\begin{equation*}
+		\rho(x_n,x)<\varepsilon
+	\end{equation*}
+	则称$\{x_n\}$是度量空间$(X,\rho)$中的\gls{ConvergentSeqOfPoints}，$x$是点列$\{x_n\}$的\gls{limit}，记作$x_n\to x$或$\lim\limits_{n\to+\infty}x_n=x$。
+\end{definition}
+\begin{property}
+	设$\{x_n\}$是度量空间$(X,\rho)$中的一个收敛点列，则：
+	\begin{enumerate}
+		\item $\{x_n\}$的极限是唯一的；
+		\item 对任意的$ y\in X$，数列$\{\rho(x_n,y)\}$有界；
+		\item $\{x_n\}$是有界点集；
+		\item $\{x_n\}$是收敛点列的充要条件为$\{x_n\}$的任一子列是收敛点列且极限相同；
+		\item 设$\{x_n\},\{y_n\}\subset X$，$x_n\to x$，若存在$N_0\in\mathbb{N}^+$使得当$n>N_1$时有$\rho(y_n,x)\leqslant\rho(x_n,x)$，则$y_n\to x$；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)假设极限不唯一，$\{x_n\}$既收敛到$a$又收敛到$b$，则对任意的$\varepsilon>0$，$\exists\; N_1\in\mathbb{N}^+$，当$n>N_1$时有$\rho(x_n,a)<\frac{\varepsilon}{2}$；$\exists\; N_2\in\mathbb{N}^+$，当$n>N_2$时有$\rho(x_n,b)<\frac{\varepsilon}{2}$。取$N=\max\{N1,N2\}$，则当$n>N$时，有：
+	\begin{equation*}
+		\rho(a,b)\leqslant\rho(a,x_n)+\rho(x_n,b)<\varepsilon
+	\end{equation*}
+	即$a=b$。\par
+	(2)设$\{x_n\}\to x$，由距离的定义：
+	\begin{equation*}
+		\rho(x_n,y)\leqslant\rho(x_n,x)+\rho(x,y)
+	\end{equation*}
+	由于$\{x_n\}$收敛，所以对$\varepsilon=1$：
+	\begin{equation*}
+		\exists\;N\in\mathbb{N}^+,\;\forall\;n>N,\;\rho(x_n,x)<\varepsilon=1
+	\end{equation*}
+	取$K=\max\{\rho(x_1,x),\rho(x_2,x),\dots,\rho(x_N,x),1\}$，则有：
+	\begin{equation*}
+		\forall\;n\in\mathbb{N}^+,\;\rho(x_n,y)\leqslant K+\rho(x,y)
+	\end{equation*}
+	即数列$\{\rho(x_n,y)\}$有界。\par
+	(3)任取$y\in X$，由(2)数列$\{\rho(x_n,y)\}$有界，即$\exists\;\delta>0,\;\forall\;n\in\mathbb{N}^+,\;\rho(x_n,y)<\delta$，则$\{x_n\}\subseteq U(y,\delta)$，即$\{x_n\}$有界。\par
+	(4)\textbf{必要性：}设$\{x_n\}$的极限为$x$，则对任意的$\varepsilon>0$，$\exists\; N\in\mathbb{N}^+$，当$n>N$时有$\rho(x_n,x)<\varepsilon$，当$k>N$时就有$n_k\geqslant k>N$，也即$\rho(x_{n_k},x)<\varepsilon$。\par
+	\textbf{充分性：}$\;\{x_n\}$也是它自己的一个子列。\par
+	(5)因为$x_n\to x$，所以对任意的$\varepsilon>0$，存在$N_2\in\mathbb{N}^+$使得当$n>N_2$时有$\rho(x_n,x)<\varepsilon$，取$N=\max\{N_1,N_2\}$即有$\rho(y_n,x)\leqslant\rho(x_n,x)<\varepsilon$，于是$y_n\to x$。
+\end{proof}
 
 \input{analysis/metric-space/def-pset.tex}
-\input{analysis/metric-space/property-pset.tex}
 \input{analysis/metric-space/other-property.tex}
-\input{analysis/metric-space/convergent-seq.tex}
 \input{analysis/metric-space/mapping.tex}
 \input{analysis/metric-space/complete.tex}
 \input{analysis/metric-space/property-complete.tex}
