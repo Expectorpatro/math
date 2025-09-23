@@ -1,0 +1,135 @@
+\section{非参数假设检验}
+
+\subsection{位置检验}
+位置检验分为两类：
+\begin{enumerate}
+	\item 单样本位置检验：给定一个数$q_0$，检验它与总体$\pi$分位点$Q_{\pi}$之间的大小关系；
+	\item 多样本位置检验：检验多个总体位置参数的大小关系。
+\end{enumerate}
+\subsubsection{单样本位置检验}
+\begin{method}[Sign Test]
+	设$(X,\mathscr{A},\mathscr{P})$是统计结构，$\mathbf{X}=(\seq{X}{n})$为从总体$F$中抽取的简单样本，$\mathscr{P}\mathbf{X}^{-1}$为连续型随机变量的概率分布族，检验问题为：
+	\begin{equation*}
+		\begin{cases}
+			H_0:Q_\pi\leqslant q_0,\;H_1:Q_\pi>q_0 \\
+			H_0:Q_\pi\geqslant q_0,\;H_1:Q_\pi<q_0 \\
+			H_0:Q_\pi=q_0,\;H_1:Q_\pi\ne q_0
+		\end{cases}
+	\end{equation*}
+	记$\mathbf{X}$中大于$q_0$的样本单元的个数为$S^+$，小于$q_0$的个数为$S^-$。令$K\sim\operatorname{Binom}(S^++S^-,\pi)$，则上述检验问题的$p$值分别为：
+	\begin{equation*}
+		P_{H_0}(K\leqslant S^-),\quad P_{H_0}(K\geqslant S^-),\quad 2\min\{P_{H_0}(K\leqslant S^-),\;P_{H_0}(K\geqslant S^-)\}
+	\end{equation*}
+	当$n\to+\infty$时，令$Z=\dfrac{K-(S^++S^-)\pi}{\sqrt{(S^++S^-)\pi(1-\pi)}}$，$\Phi$为标准正态分布的分布函数，则有如下对应的近似$p$值：
+	\begin{equation*}
+		\Phi(Z),\quad1-\Phi(Z),\quad2\min\{\Phi(Z),1-\Phi(Z)\}
+	\end{equation*}
+\end{method}
+\begin{derivation}
+	直观上来讲，如果$Q_{\pi}>q_0$，那么$K$的实现值$S^-$应偏小，原假设的拒绝域应具有形式$\{S^-\leqslant c\}$。由\cref{prop:Binom}(3)可知对于检验的$p$值可仅考虑$Q_\pi=q_0$，设$K$为$S^-$的随机变量形式，则应有$K\sim\operatorname{Binom}(S^++S^-,\pi)$，于是此时$p$值为：
+	\begin{equation*}
+		p=P_{H_0}(K\leqslant S^-)=\sum_{i=0}^{S^-}\binom{S^++S^-}{i}\pi^{i}(1-\pi)^{S^++S^--i}
+	\end{equation*}
+	同理可得另外两种情况。不对正态近似作解释。\info{双边假设检验p值计算的争议问题}
+\end{derivation}
+\begin{note}
+	符号检验仅对连续型随机变量成立，离散型随机变量无法满足$K\sim\operatorname{Binom}(S^++S^-,\pi)$（分布函数阶梯形，分位点唯一但小于等于该分位点的概率不一定等于对应的分位数，处在该阶梯上的所有点都小于等于该分位点）。\par
+	能否不删除等于$q_0$的数值？实际上可以，甚至我个人觉得从严谨的角度来讲应该不删除，考虑到符号检验的原理$K\sim\operatorname{Binom}$，二项分布的概率$p$实际上是$X_i$小于等于$q_0$的概率呀，但我们约定删除，删除也没影响（连续型随机变量在单点集上测度为$0$）。
+\end{note}
+\inputminted[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines]{r}{statistics/testing-hypothesis/sign-test.R}
+
+\begin{method}[Wilcoxon Signed Rank Test]
+	设$(X,\mathscr{A},\mathscr{P})$是统计结构，$\mathbf{X}=(\seq{X}{n})$为从总体$F$中抽取的简单样本，$\mathscr{P}\mathbf{X}^{-1}$为对称连续型随机变量的概率分布族，检验问题为：
+	\begin{equation*}
+		H_0:M=M_0,\quad H_1:
+		\begin{cases}
+			M>M_0 \\
+			M<M_0 \\
+			M\ne M_0
+		\end{cases}
+	\end{equation*}
+	记$W^+,W^-$为Wilcoxon秩统计量，$W$服从Wilcoxon秩分布，则上述检验问题的$p$值分别为：
+	\begin{equation*}
+		P_{H_0}(W\geqslant W^+),\quad P_{H_0}(W\leqslant W^+)
+	\end{equation*}
+	\begin{enumerate}
+		\item 对$i=1,2,\dots,n$，$d_i=|X_i-M_0|$。
+		\item 对$d_i$进行排序，求对应的秩$R_i$。
+		\item $W^+=\sum\limits_{i\in\{i:X_i-M_0>0\}}R_i,\;W^-=\sum\limits_{i\in\{i:X_i-M_0<0\}}R_i$。
+	\end{enumerate}
+\end{method}
+\begin{derivation}
+	若零假设成立，则$W^+$和$W^-$应相差不大，如果$M>M_0$，则$W^+$应较大，原假设的拒绝域应具有形式$\{W^+\geqslant c\}$，$p$值为$p=P_{H_0}(W\geqslant W^+)$；如果$M<M_0$，则$W^+$应较小，原假设的拒绝域应具有形式$\{W^+\leqslant c\}$，$p$值为$p=P_{H_0}(W\leqslant W^+)$；
+\end{derivation}
+
+\subsection{趋势检验}
+\begin{method}
+	设$F(x)$为某连续型随机变量的分布函数，$\seq{X}{n}$是按一定顺序收集到的样本，$X_i\sim F(x-\theta_i)$。检验问题为：
+	\begin{equation*}
+		\begin{cases}
+			H_0:\text{序列无上升趋势},\;H_1:\text{序列有上升趋势，即}\theta_1\leqslant\theta_2\leqslant\cdots\leqslant\theta_n\text{且至少成立一个严格不等式} \\
+			H_0:\text{序列无下降趋势},\;H_1:\text{序列有下降趋势，即}\theta_1\geqslant\theta_2\geqslant\cdots\geqslant\theta_n\text{且至少成立一个严格不等式} \\
+			H_0:\text{序列无趋势},\;H_1:\text{序列有上升或下降趋势}
+		\end{cases}
+	\end{equation*}
+	取数对$(X_i,X_{i+c})$，其中：
+	\begin{equation*}
+		c=
+		\begin{cases}
+			\dfrac{n}{2},&n\text{为偶数} \\
+			\dfrac{n+1}{2},&n\text{为奇数}
+		\end{cases}
+	\end{equation*}
+	记$D_i=X_{i+c}-X_i$，$D_i$中大于$0$的样本单元的个数为$S^+$，小于$0$的个数为$S^-$。令$K\sim\operatorname{Binom}(S^++S^-,0.5)$，则上述检验问题的$p$值分别为：
+	\begin{equation*}
+		P_{H_0}(K\leqslant S^-),\quad P_{H_0}(K\geqslant S^-),\quad 2\min\{P_{H_0}(K\leqslant S^-),\;P_{H_0}(K\geqslant S^-)\}
+	\end{equation*}
+	当$n\to+\infty$时，令$Z=\dfrac{K-(S^++S^-)\pi}{\sqrt{(S^++S^-)\pi(1-\pi)}}$，$\Phi$为标准正态分布的分布函数，则有如下对应的近似$p$值：
+	\begin{equation*}
+		\Phi(Z),\quad1-\Phi(Z),\quad2\min\{\Phi(Z),1-\Phi(Z)\}
+	\end{equation*}
+\end{method}
+\begin{derivation}
+	原理与符号检验相同，不作解释。但这里的情况其实与符号检验还是有区别的，势函数在$H_0$上的上确界真的是由上述$p$值给出的吗？还是说在这里我们只是考虑一个近似呢？
+\end{derivation}
+\begin{minted}[bgcolor=white, linenos, frame=single, numbersep=5pt, breaklines, mathescape]{r}
+cox.stuart.test <- function(x, exact = FALSE, 
+alternative = c("two.sided", "greater", "less")) {
+    alternative <- match.arg(alternative)
+    n <- length(x)
+    c <- ifelse(n %% 2 == 0, n / 2, (n + 1) / 2)
+    D <- x[(c + 1):n] - x[1:c]
+    D_nonzero <- D[D != 0]
+    if (length(D_nonzero) == 0) {
+        stop("All paired differences are zero; cannot perform Cox–Stuart test.")
+    }
+    RVAL <- sign.test(x = D_nonzero, q0 = 0, pi = 0.5, 
+    exact = exact, alternative = alternative)
+    RVA$method <- if (exact) {
+        "Cox–Stuart Trend Test (Exact via Sign Test)"
+    } else {
+        "Cox–Stuart Trend Test (Approximate via Sign Test)"
+    }
+    RVA$data.name <- deparse(substitute(x))
+    RVA
+}
+\end{minted}
+
+\subsection{随机性检验}
+\begin{definition}
+	设$\seq{X}{n}$是一个序列，若$X_{i},X_{i+1},\dots,X_{j}$满足某条件，而$X_{i-1},X_{j+1}$不满足该条件，则称$X_{i},X_{i+1},\dots,X_{j}$是一个\gls{Run}。
+\end{definition}
+\begin{example}
+	将满足条件的数转换为$1$，不满足的转换为$0$（下面我们将延续该约定），则数据$0,0,0,0,1,1,0,1,1,1,0,0,0$中，一共有$5$个游程（$3$个$0$游程，$2$个$1$游程）。
+\end{example}
+\begin{property}\label{prop:Runs}
+	设$R$为游程数，则\info{有空证明}：
+	\begin{gather*}
+		P(R=2k)=\frac{2\binom{m-1}{k-1}\binom{n-1}{k-1}}{\binom{N}{n}} \\
+		P(R=2k+1)=\frac{\binom{m-1}{k-1}\binom{n-1}{k}+\binom{m-1}{k}\binom{n-1}{k-1}}{\binom{N}{n}} \\
+		E(R) = \frac{2mn}{m+1}+1\quad Var(R)=\dfrac{2mn(2mn-m-n)}{(m+n)^2(m+n-1)}
+	\end{gather*}
+\end{property}
+\begin{method}
+	设$\seq{X}{n}$独立同分布，将满足某条件的样本值转换为$1$，不满足的转换为$0$。
+\end{method}
