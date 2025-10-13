@@ -1,9 +1,9 @@
 \section{集合与集族}
 \begin{definition}
-	一个\textbf{集合}是指具有某种性质的事物的全体。组成集合的每个事物称为该集合的\textbf{元素}。若集合的元素只有有限多个，则称该集合为\textbf{有限集}，否则称为\textbf{无限集}；不含任何元素的集合称为\textbf{空集}，用符号$\varnothing$表示。语境中所有相关元素构成的集合称之为\textbf{全集}，一般用$X$表示，也称为空间或全空间。
+	一个\gls{Set}是指具有某种性质的事物的全体。组成集合的每个事物称为该集合的\gls{Element}。若集合的元素只有有限多个，则称该集合为\gls{FiniteSet}，否则称为\gls{InfiniteSet}；不含任何元素的集合称为\gls{EmptySet}，用符号$\varnothing$表示。语境中所有相关元素构成的集合称之为\gls{UniversalSet}，一般用$X$表示，也称为\textbf{空间}或\textbf{全空间}。
 \end{definition}
 \begin{definition}
-	若集合$A$由集合构成，则称$A$是一个\textbf{集族}。
+	若集合$A$由集合构成，则称$A$是一个\gls{FamilyOfSets}。
 \end{definition}
 
 \subsection{集合相关}
@@ -148,7 +148,7 @@
 \end{proof}
 
 \subsection{重要集族}
-\subsubsection{$\pi$系、半环、环、域}
+\subsubsection{$\pi$系、半环、半代数、环、域}
 \begin{definition}
 	如果$X$上的非空集族$\mathscr{A}$对有限交的运算是封闭的，即：
 	\begin{equation*}
@@ -171,22 +171,31 @@
 \begin{property}\label{prop:Semiring}
 	半环具有如下性质：
 	\begin{enumerate}
-		\item 若$\mathscr{A}$是一个半环，$A,\seq{B}{m}\in\mathscr{A}$，则存在有限个互不相交的$\{C_i\in\mathscr{A}:i=1,2,\dots,n\}$使得：
-		\begin{equation*}
-			A\Big\backslash\left(\underset{i=1}{\overset{m}{\cup}}B_i\right)=\underset{i=1}{\overset{n}{\cup}}C_i
-		\end{equation*}
-		\item 若$X=\mathbb{R}^{}$，则集族$\{(a,b]:a,b\in\mathbb{R}^{}\},\{[a,b):a,b\in\mathbb{R}^{}\}$都是半环。
+		\item 若$\mathscr{A}$是一个半环，$\seq{A}{m},\seq{B}{n}\in\mathscr{A}$，则$\underset{i=1}{\overset{m}{\cup}}A_i,\;\left(\underset{i=1}{\overset{m}{\cup}}A_i\right)\Big\backslash\left(\underset{i=1}{\overset{n}{\cup}}B_i\right)$都可以表示为$\mathscr{A}$中的有限不交并；
+		\item 半环定义中的第三条可修改为：若$A,B\in\mathscr{A},\;B\subseteq A$，则$A\backslash B$可以表示为$\mathscr{A}$中的有限不交并；
+		\item 若$X=\mathbb{R}^{n}$，则集族$\{(a,b]:a,b\in\mathbb{R}^{n}\},\{[a,b):a,b\in\mathbb{R}^{n}\}$都是半环。
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)当$m=1$时由半环的定义即可得出结论。\par
-	当$m=2$时，由\cref{prop:SetOperation}(5)(4)和半环的定义可得存在互不相交的$\seq{C}{k_1}\in\mathscr{A}$和$\seq{D}{k_2}\in\mathscr{A}$使得：
+	(1)先证明$A\backslash\left(\underset{i=1}{\overset{m}{\cup}}B_i\right)$能表示为$\mathscr{A}$中的有限不交并。\par
+	当$m=1$时由半环的定义即可得出结论。假设对$m\in\mathbb{N}^+$成立，下证明对$m+1$成立。\par
+	由归纳假设和\cref{prop:SetOperation}(4)可得存在互不相交的$\seq{C}{n}$和$C_{ij},\;i=1,2,\dots,n,\;j=1,2,\dots,n_i$使得：
 	\begin{equation*}
-		A\backslash(B_1\cup B_2)=(A\backslash B_1)\cap(A\backslash B_2)=\left(\underset{i=1}{\overset{k_1}{\cup}}C_i\right)\bigcap\left(\underset{i=1}{\overset{k_2}{\cup}}D_i\right)=\underset{}{\overset{}{\cup}}(C_i\cap D_j)
+		A\Big\backslash\left(\underset{i=1}{\overset{m+1}{\cup}}B_i\right)=\left[A\Big\backslash\left(\underset{i=1}{\overset{m}{\cup}}B_i\right)\right]\backslash B_{m+1}=\left(\underset{i=1}{\overset{n}{\cup}}C_i\right)\backslash B_{m+1}=\underset{i=1}{\overset{n}{\cup}}(C_i\backslash B_{m+1})=\underset{i=1}{\overset{n}{\cup}}\left(\underset{j=1}{\overset{n_i}{\cup}}C_{ij}\right)
 	\end{equation*}
-	因为半环对交封闭，所以$C_i\cap D_j\in\mathscr{A}$，注意到它们之间是互不相交的，于是结论成立。接下来用数学归纳法就可以了，懒得再继续写了。\par
-	(2)逐条验证定义即可，很简单，略去证明。
+	于是结论成立。\par
+	注意到：
+	\begin{equation*}
+		\underset{i=1}{\overset{m}{\cup}}A_i=\underset{i=1}{\overset{m}{\cup}}\left[A_i\Big\backslash\left(\underset{j=1}{\overset{i-1}{\cup}}A_j\right)\right]
+	\end{equation*}
+	由前面的结论可知$A_i\Big\backslash\left(\underset{j=1}{\overset{i-1}{\cup}}A_j\right)$可以表示为$\mathscr{A}$中的有限不交并，而对于不同的$i$，它们又是不交的，于是结论成立。\par
+	(2)只需证明二者互为充要条件。必要性显然，下证充分性。\par
+	任取$A,B\in\mathscr{A}$，由\cref{prop:SetOperation}(6)可得$A\backslash B=A\backslash(A\cap B)$，因为$A\cap B\subseteq A$且根据半环的定义可得$A\cap B\in\mathscr{A}$，所以$A\backslash B$可以表示为$\mathscr{A}$中的有限不交并，充分性得证。\par
+	(3)逐条验证定义即可，很简单，略去证明。
 \end{proof}
+\begin{definition}
+	如果$X$上的半环$\mathscr{A}$包含$X$，则称$\mathscr{A}$为\gls{SemiAlgebra}。
+\end{definition}
 \begin{definition}
 	如果$X$上的非空集族$\mathscr{A}$对并和差的运算是封闭的，即对任意的$A,B\in\mathscr{A}$：
 	\begin{enumerate}
@@ -204,8 +213,19 @@
 	\end{enumerate}
 	则称$\mathscr{A}$为\gls{FieldOfSets}或\gls{AlgebraOfSets}。
 \end{definition}
+\begin{property}
+	域具有如下性质：
+	\begin{enumerate}
+		\item 域对有限交、并、补、差封闭；
+		\item 域定义中的第一条可修改为：$\forall\;A,B\in\mathscr{A},\;A\cup B\in\mathscr{A}$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)有限交和有限补由定义立即可得。由\cref{prop:SetOperation}(7)可得有限并的封闭性，根据\cref{prop:SetOperation}(6)可得有限差的封闭性。\par
+	(2)只需证明二者互为充要条件，必要性显然，由\cref{prop:SetOperation}(7)即可得到充分习惯。
+\end{proof}
 \begin{theorem}\label{theo:SetNecessarilySet1}
-	半环必是$\pi$系，环必是半环，域必是环。
+	半环必是$\pi$系，环必是半环，域必是环和半代数。
 \end{theorem}
 \begin{proof}
 	(1)半环必是$\pi$系可直接由半环的定义得出。\par
@@ -219,7 +239,8 @@
 	\begin{gather*}
 		A\cup B=(A^c\cap B^c)^c\in\mathscr{A},\quad A\backslash B=A\cap B^c\in\mathscr{A}
 	\end{gather*}
-	即$\mathscr{A}$是一个环。
+	即$\mathscr{A}$是一个环。\par
+	(4)由(3)(2)和域的定义立即可得。
 \end{proof}
 \subsubsection{单调系、$\lambda$系、$\sigma$环、$\sigma$域}
 \begin{definition}
@@ -257,14 +278,15 @@
 	\end{enumerate}
 	则称$\mathscr{A}$为$\sigma$域。
 \end{definition}
+一
 \begin{property}\label{prop:SigmaField}
 	$\sigma$域具有如下性质：
 	\begin{enumerate}
 		\item $\sigma$域是域；
 		\item $\sigma$域对有限交和可列交封闭；
 		\item $\sigma$域对有限并封闭；
-		\item $\sigma$域对有限差封闭；
-		\item 若$\mathscr{A}_i,\;i\in I$都是$\sigma$域，则$\underset{i\in I}{\overset{+\infty}{\cap}}\mathscr{A}_i$也是$\sigma$域；
+		\item $\sigma$域对有限差和可列差封闭；
+		\item 若$\mathscr{A}_i,\;i\in I$都是$\sigma$域，则$\underset{i\in I}{\overset{}{\cap}}\mathscr{A}_i$也是$\sigma$域；
 		\item 设$A\subseteq X$且$A\ne\varnothing$，$\mathscr{A}$是$X$上的$\sigma$域，则$A\cap\mathscr{A}\coloneq\{A\cap E:E\in\mathscr{A}\}$是$A$上的$\sigma$域。
 	\end{enumerate}
 \end{property}
@@ -289,7 +311,8 @@
 	(4)任取$A,B\in\mathscr{A}$，由\cref{prop:SetOperation}(6)、$\sigma$域定义和(2)可得：
 	\begin{equation*}
 		A\backslash B=A\cap B^c\in\mathscr{A}
-	\end{equation*}\par
+	\end{equation*}
+	上述公式也表明差运算可转换为交运算和补运算，由(2)即可得到$\sigma$域对可列差封闭。\par
 	(5)显然。\par
 	(6)因为$X\in\mathscr{A}$，所以$A=A\cap X\in A\cap\mathscr{A}$。\par
 	对任意的$B\in A\cap\mathscr{A}$，有$B=A\cap C$，其中$C\in\mathscr{A}$，于是由\cref{prop:SetOperation}(7)(4)：
@@ -304,6 +327,9 @@
 	因为$\mathscr{A}$是$\sigma$域，所以$\underset{n=1}{\overset{+\infty}{\cup}}C_n\in\mathscr{A}$，于是$\underset{n=1}{\overset{+\infty}{\cup}}B_n\in A\cap\mathscr{A}$。\par
 	综上，$A\cap\mathscr{A}$是$A$上的$\sigma$域。
 \end{proof}
+\begin{definition}
+	称$X$和其上的一个$\sigma$域$\mathscr{A}$为\gls{MeasurableSpace}，记为$(X,\mathscr{A})$，称$\mathscr{A}$中的集合为\gls{MeasurableSet}。
+\end{definition}
 \begin{theorem}\label{theo:SetNecessarilySet2}
 	$\lambda$系是单调系，$\sigma$域是$\lambda$系。
 \end{theorem}
@@ -312,9 +338,9 @@
 	\begin{equation*}
 		\lim_{n\to+\infty}A_n^c=\underset{n=1}{\overset{+\infty}{\cup}}A_n^c\in\mathscr{A}
 	\end{equation*}
-	所以：
+	所以根据\cref{prop:lambda-System}可得：
 	\begin{equation*}
-		\underset{n=1}{\overset{+\infty}{\cap}}A_n=\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n^c\right)^c=X\backslash\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n^c\right)\in\mathscr{A}
+		\underset{n=1}{\overset{+\infty}{\cap}}A_n=\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n^c\right)^c\in\mathscr{A}
 	\end{equation*}
 	即$\{A_n\}$在$\mathscr{A}$中有极限。由$\{A_n\}$的任意性，$\mathscr{A}$中单调递减的集合序列也必在$\mathscr{A}$中有极限。综上，$\mathscr{A}$是一个单调系。由$\mathscr{A}$的任意性，$\lambda$系是单调系。\par
 	(2)由\cref{prop:SigmaField}(1)可得$\sigma$域是域，所以$\sigma$域是环，因此对差的运算封闭。根据$\sigma$域的定义即可得出结论。
@@ -372,11 +398,11 @@
 	由任何集族$\mathscr{A}$生成的环、单调系、$\lambda$系和$\sigma$域都存在。
 \end{theorem}
 \begin{proof}
-	设$\mathscr{B}$为$X$的所有子集构成的集族，则$\mathscr{B}$是一个$\sigma$域，所以$\mathscr{B}$是一个环（或单调系，或$\lambda$系）并且有$\mathscr{A}\subseteq\mathscr{B}$。把所有包含集族$\mathscr{A}$的环（或单调系，或$\lambda$系，或$\sigma$域）的全体记为$\mathbf{A}$，则$\mathscr{B}\in \mathbf{A}$，于是$\mathbf{A}$非空。记：
+	设$\mathscr{B}$为$X$的所有子集构成的集族，则$\mathscr{B}$是一个$\sigma$域，所以由\cref{prop:SigmaField}(1)和\cref{theo:SetNecessarilySet1}可得$\mathscr{B}$是一个环（根据\cref{theo:SetNecessarilySet2}可知或单调系，或$\lambda$系）并且有$\mathscr{A}\subseteq\mathscr{B}$。把所有包含集族$\mathscr{A}$的环（或单调系，或$\lambda$系，或$\sigma$域）的全体记为$\mathbf{A}$，则$\mathscr{B}\in \mathbf{A}$，于是$\mathbf{A}$非空。记：
 	\begin{equation*}
 		\mathscr{C}=\underset{\mathscr{D}\in \mathbf{A}}{\cap}\mathscr{D}
 	\end{equation*}
-	下证$\mathscr{C}$是一个环（或单调系，或$\lambda$系，或$\sigma$域）。\par
+	下只需证$\mathscr{C}$是一个环（或单调系，或$\lambda$系，或$\sigma$域）。\par
 	(1)任取$A,B\in\mathscr{C}$，则对任意的$\mathscr{D}\in\mathbf{A}$，有$A,B\in\mathscr{D}$。因为$\mathscr{D}$是一个环，所以$A\cup B\in\mathscr{D},\;A\backslash B\in\mathscr{D}$。由$\mathscr{D}$的任意性，$A\cup B\in\mathscr{C},\;A\backslash B\in\mathscr{C}$，所以$\mathscr{C}$是一个环。\par
 	(2)任取单调集合序列$\{A_n\}\subseteq\mathscr{C}$，则对任意的$\mathscr{D}\in\mathbf{A}$，有$\{A_n\}\subseteq\mathscr{D}$。因为$\mathscr{D}$是单调系，所以$\lim\limits_{n\to+\infty}A_n\in\mathscr{D}$。由$\mathscr{D}$的任意性，$\lim\limits_{n\to+\infty}A_n\in\mathscr{C}$。由$\{A_n\}$的任意性，$\mathscr{C}$是一个单调系。\par
 	(3)因为任意的$\mathscr{D}\in\mathbf{A}$都是$\lambda$系，所以$X\in\mathscr{C}$。任取$A,B\in\mathscr{C},\;B\subseteq A$，则对任意的$\mathscr{D}\in\mathbf{A}$，有$A\backslash B\in\mathscr{D}$。由$\mathscr{D}$的任意性，$A\backslash B\in\mathscr{C}$。由$A,B$的任意性，$\mathscr{C}$对包含关系的差运算封闭。任取单调递增集合序列$\{A_n\}\subseteq\mathscr{C}$，则对任意的$\mathscr{D}\in\mathbf{A}$，有$\{A_n\}\subseteq\mathscr{D}$。因为$\mathscr{D}$是$\lambda$系，所以$\mathscr{D}$是单调系，于是$\lim\limits_{n\to+\infty}A_n\in\mathscr{D}$。由$\mathscr{D}$的任意性，$\lim\limits_{n\to+\infty}A_n\in\mathscr{C}$。由$\{A_n\}$的任意性，$\mathscr{C}$对单调递增集合序列的极限是封闭的。综上，$\mathscr{C}$是一个$\lambda$系。\par
@@ -589,10 +615,10 @@
 	称$\sigma(\{(a,b):a,b\in\mathbb{R}\})$为\gls{BorelSigmaField}，记作$\mathcal{B}$。$\mathcal{B}$中的元素被称为\gls{BorelSet}。
 \end{definition}
 \begin{lemma}\label{lem:OpenSet=CountableFiniteOpenSetUnion}
-	$\mathbb{R}$上任意开集可以表示为至多可列个有限开区间的并集。
+	$\mathbb{R}$上任意非空开集可以表示为至多可列个有限开区间的并集。
 \end{lemma}
 \begin{proof}
-	设$E$是$\mathbb{R}$上的一个开集，取$E$的一个构成区间$(\alpha,\beta)$。\par
+	设$E$是$\mathbb{R}$上的一个非空开集，取$E$的一个构成区间$(\alpha,\beta)$。\par
 	\textbf{(1)$\;\alpha,\beta\in\mathbb{R}$：}此时其自身即为有限开区间。\par
 	\textbf{(2)$\;\alpha=-\infty,\beta\in\mathbb{R}$：}此时有：
 	\begin{equation*}
@@ -620,6 +646,7 @@
 			\item $\mathcal{B}=\sigma(\{(a,b]:a,b\in\mathbb{R}\})=\sigma(\{[a,b):a,b\in\mathbb{R}\})$；
 			\item $\mathcal{B}=\sigma(\{[a,b]:a,b\in\mathbb{R}\})$；
 		\end{enumerate}
+		且将c、d、e中的$\mathbb{R}$换成$\mathbb{R}^{}$中任一稠密子集$D$也成立；
 		\item $\mathbb{R}$中的开集、闭集、区间（有限或无穷）、单点集都是Borel集。
 	\end{enumerate}
 \end{property}
@@ -641,10 +668,8 @@
 		(a,b)=[a,b]\Big\backslash\left\{\underset{n=1}{\overset{+\infty}{\bigcap}}\left[a,a+\frac{1}{n}\right]\right\}\Big\backslash\left\{\underset{n=1}{\overset{+\infty}{\bigcap}}\left[b,b+\frac{1}{n}\right]\right\}\in\sigma(\{[a,b]:a,b\in\mathbb{R}\}) \\
 		[a,b]=\underset{n=1}{\overset{+\infty}{\bigcap}}\left(a-\frac{1}{n},b+\frac{1}{n}\right)\in\sigma(\{(a,b):a,b\in\mathbb{R}\})
 	\end{gather*}\par
-	(2)开集、闭集、区间的结论由(1)立即可得。对于单点集只需注意到：
-	\begin{equation*}
-		\forall\;a\in\mathbb{R},\;\underset{n=1}{\overset{+\infty}{\cup}}\left(a-\frac{1}{n},a+\frac{1}{n}\right)\in\mathcal{B}\qedhere
-	\end{equation*}
+	稠密子集时的情况由\cref{theo:Density}即可得到。\par
+	(2)由(1)立即可得。
 \end{proof}
 \begin{definition}
 	定义$\mathcal{B}_{\overline{\mathbb{R}}}=\sigma(\{\mathcal{B},\{-\infty\},\{+\infty\}\})$。
@@ -658,6 +683,7 @@
 		&=\sigma(\{(a,+\infty]:a\in\mathbb{R}\}) \\
 		&=\sigma(\{[a,+\infty]:a\in\mathbb{R}\})
 	\end{align*}
+	且将其中的$\mathbb{R}$换成$\mathbb{R}^{}$中任一稠密子集$D$也成立。
 \end{theorem}
 \begin{proof}
 	下给出构造公式，利用\cref{prop:BorelSigmaField}(1)和\cref{theo:GeneratedSigmaFieldEqual}即可得出结论。注意到1和4是补集的关系，2和3也是补集的关系，所以只需证明1和2。
@@ -667,8 +693,9 @@
 		(-\infty, a)=[-\infty,a)\backslash\{-\infty\}\in\sigma(\{[-\infty,a):a\in\mathbb{R}\}) \\
 		[-\infty,a]=\{-\infty\}\cup(-\infty,a]\in\mathcal{B}_{\overline{\mathbb{R}}} \\
 		\{-\infty\}=\underset{n=1}{\overset{+\infty}{\cap}}[-\infty,-n],\{+\infty\}=\underset{n=1}{\overset{+\infty}{\cap}}[-\infty,n]^c\in\sigma(\{[-\infty,a]:a\in\mathbb{R}\}) \\
-		(-\infty,a]=[-\infty,a]\backslash\{-\infty\}\in\sigma(\{[-\infty,a):a\in\mathbb{R}\}) \qedhere
+		(-\infty,a]=[-\infty,a]\backslash\{-\infty\}\in\sigma(\{[-\infty,a):a\in\mathbb{R}\})
 	\end{gather*}
+	稠密子集时的情况由\cref{theo:Density}即可得到。
 \end{proof}
 
 
