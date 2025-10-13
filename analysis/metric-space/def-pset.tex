@@ -1,5 +1,6 @@
 \section{度量空间上的点集}
-\subsubsection{内、外、界点定义}
+\subsection{基础知识}
+\subsubsection{点的定义}
 \begin{definition}
 	$(X,\rho)$是一个度量空间，$E\subseteq X$。若对于点$P\in X$，存在$U(P)\subseteq E$，则称点$P$为$E$的\gls{InteriorP}。
 \end{definition}
@@ -9,25 +10,24 @@
 \begin{definition}
 	$(X,\rho)$是一个度量空间，$E\subseteq X$。若对于点$P\in X$，它的任意邻域中都既有$E$中的点，又有$E^c$中的点，则称点$P$为$E$的\gls{BoundaryP}。
 \end{definition}
-\subsubsection{聚点与孤立点定义}
 \begin{definition}
 	$(X,\rho)$是一个度量空间，$E\subseteq X$。若点$P\in X$满足以下任一条件：
 	\begin{enumerate}
 		\item $P$的任何邻域内都存在无穷个$E$中的点。
 		\item $P$的任何邻域内都存在一个$E$中异于$P$的点。
-		\item $E$中有一个极限为$P$的点列。
+		\item $E$中有一个不包含$P$且极限为$P$的点列。
 	\end{enumerate}
 	则$P$是$E$的一个\gls{LimitP}。
 \end{definition}
 这三个条件实际上是等价的：
 \begin{proof}
 	$(1)\to(2)$显然，$(3)\to(1)$显然，下证$(2)\to(3)$。
-	取$\delta_n=\frac{1}{n}$，在$U(P,\delta_n)$中至少有一点$P_n$，$P_n\in E$且$P_n\ne P$，显然$\{P_n\}\to P$。
+	取$\delta_n=\dfrac{1}{n}$，在$U(P,\delta_n)$中至少有一点$P_n$，$P_n\in E$且$P_n\ne P$，显然$\{P_n\}\to P$。
 \end{proof}
 \begin{definition}
 	$(X,\rho)$是一个度量空间，$E\subseteq X$。若点$P\in E$但不是$E$的聚点，即存在$P$的邻域$U(P)$，使得$E\cap U(P)=\{P\}$，则称$P$为$E$的\gls{IsolatedP}。
 \end{definition}
-\subsubsection{开核、导集、边界、闭包的定义}
+\subsubsection{点集的定义}
 \begin{definition}
 	$(X,\rho)$是一个度量空间，$E\subseteq X$。$E$的全体内点所组成的集合称为$E$的\gls{interior}，记为$\mathring{E}$。
 \end{definition}
@@ -40,23 +40,17 @@
 \begin{definition}
 	$(X,\rho)$是一个度量空间，$E\subseteq X$。$E\cup E'$称为$E$的\gls{closure}，记为$\overline{E}$。
 \end{definition}
-\subsubsection{开集、闭集的定义}
 \begin{definition}
 	$(X,\rho)$是一个度量空间，$E\subseteq X$。若$E=\mathring{E}$，则称E是一个\gls{OpenSet}。
 \end{definition}
 \begin{definition}
-	$(X,\rho)$是一个度量空间，$E\subseteq X$。若$E'\subset E$，则称E是一个\gls{ClosedSet}。
+	$(X,\rho)$是一个度量空间，$E\subseteq X$。若$E'\subseteq E$，则称E是一个\gls{ClosedSet}。
 \end{definition}
-\subsubsection{子空间}
-\begin{definition}
-	$(X,\rho_X)$是一个度量空间。若$E\subset X$，且在$E$上定义距离$\rho_E$使得$E$中任意点对$x,y$之间的距离$\rho_E(x,y)=\rho_X(x,y)$，则称$E$是$X$的一个\gls{subspace}。若$E$是一个开集，则称$E$是$X$的一个\gls{OpenSubspace}；$E$是一个闭集，则称$E$是$X$的一个\gls{ClosedSubspace}。
-\end{definition}
-
 \begin{property}\label{prop:OpenClosedSet}
 	$(X,\rho)$是一个度量空间，$P\in X,\;E\subseteq X$，则有：
 	\begin{enumerate}
 		\item $\forall\;P_0\in U(P),\;\exists\;U(P_0)\subset U(P)$，即开邻域是开集。
-		\item $\forall\;P_0\in\left(\bar{U}(P)\right)',\;P_0\in \bar{U}(P_0)$，即闭邻域是闭集；
+		\item $\forall\;P_0\in[\bar{U}(P)]',\;P_0\in \bar{U}(P_0)$，即闭邻域是闭集；
 		\item $\mathring{E}$是开集，$E'$和$\overline{E}$是闭集；
 		\item $X$和$\varnothing$是唯二既开又闭的集合；
 		\item 若$E$是开集，则$E^c$是闭集；若$E$是闭集，则$E^c$是开集；
@@ -64,18 +58,21 @@
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)要使得$U(P_0)\subset U(P)$，则$\forall\;x\in U(P_0),\;\rho(x,P)<\delta_P$，而$\rho(x,P)<\rho(x,P_0)+\rho(P_0,P)<\delta_{P_0}+\rho(P_0,P)$，故只要使$\delta_{P_0}+\rho(P_0,P)<\delta_P$即可。 \par
+	(1)要使得$U(P_0)\subseteq U(P)$，则$\forall\;x\in U(P_0),\;\rho(x,P)<\delta_P$，而$\rho(x,P)<\rho(x,P_0)+\rho(P_0,P)<\delta_{P_0}+\rho(P_0,P)$，故只要使$\delta_{P_0}+\rho(P_0,P)<\delta_P$即可。注意到$\rho(P_0,P)<\delta_P$，由\info{实数的稠密性}可知这样的$\delta_{P_0}$总是存在的，于是结论成立。 \par
 	(2)对任意的$P_0\in\left(\bar{U}(P)\right)'$，$\exists\;\bar{U}(P)$中的点列$\{P_n\}\to P_0$。若$P_0\notin \bar{U}(P)$，则$\rho(P_0,P)>\delta_P$。取$\varepsilon=\rho(P_0,P)-\delta_P$，则必然$\exists\;N\in\mathbb{N}^+$，当$n>N$时，有$\rho(P_n,P_0)<\varepsilon$，那么$\rho(P_n,P)>\delta_P$，即$P_n\notin U(P)$，矛盾。因此$P_0\in \bar{U}(P)$。由$P_0$的任意性，闭邻域是闭集。\par
-	(3)$\mathring{E}$是开集：对任意的$ P\in\mathring{E}$，存在$U(P)\subset E$，对任意的$ Q\in U(P)$，存在$U(Q)\subset U(P)\subset E$，因此$Q\in\mathring{E}$，即存在$U(P)\subset\mathring{E}$，$P$是$\mathring{E}$的内点。由$P$的任意性，$\mathring{E}$是开集。\par
-	$E'$是闭集：对任意的$ P\in (E')'$，由聚点定义，任意$U(P)$中都含有$E'$中的点，任取$Q\in U(P)\cap E'$，任意$U(Q)$都含$E$中的点，而$Q\in U(P)$，由邻域的性质，存在$U(Q)\subset U(P)$，因此任意$U(P)$中都含有$E$中的点，即$P$是$E$的聚点，$P\in E'$。由$P$的任意性与$P$的选取方式，$E'$是闭集。\par
-	$\overline{E}$是闭集：$\overline{E}=E\cup E'$，由\cref{theo:cuplimitset eq2 limitsetcup}，$(\overline{E})'=E'\cup (E')'$，显然$E'\subset \overline{E}$，而$E'$是闭集，$(E')'\subset E'\subset\overline{E}$。因此，$(\overline{E})'\subset\overline{E}$，即$\overline{E}$是闭集。\par
+	(3)\textbf{$\;\mathring{E}$是开集：}对任意的$P\in\mathring{E}$，存在$U(P)\subseteq E$，对任意的$Q\in U(P)$，由(1)可得存在$U(Q)\subseteq U(P)\subseteq E$，因此$Q\in\mathring{E}$，即存在$U(P)\subseteq\mathring{E}$，$P$是$\mathring{E}$的内点。由$P$的任意性，$\mathring{E}$是开集。\par
+	\textbf{$\;E'$是闭集：}对任意的$P\in (E')'$，由聚点定义，任意$U(P)$中都含有$E'$中的点，任取$Q\in U(P)\cap E'$，任意$U(Q)$都含$E$中的点，而$Q\in U(P)$，由(1)可知存在$U(Q)\subset U(P)$，因此任意$U(P)$中都含有$E$中的点，即$P$是$E$的聚点，$P\in E'$。由$P$的任意性，$E'$是闭集。\par
+	\textbf{$\;\overline{E}$是闭集：}$\overline{E}=E\cup E'$，由\cref{theo:cuplimitset eq2 limitsetcup}，$(\overline{E})'=E'\cup (E')'$，显然$E'\subseteq \overline{E}$，而$E'$是闭集，$(E')'\subseteq E'\subset\overline{E}$。因此，$(\overline{E})'\subseteq\overline{E}$，即$\overline{E}$是闭集。\par
 	(4)\par
-	(5)$E$是开集：$\forall\; P\in (E^c)'$，应有$P\notin E$，即$P$不会是$E$的内点。否则由内点定义，存在$U(P)$使得$U(P)\subset E$，即$U(P)$中不含$E^c$中的点，这与点$P\in (E^c)'$矛盾。由$P$的任意性有$E'\subset E$，即$E^c$是闭集。\par
-	$E$是闭集：$\forall\; P\in E^c$，应有$P$是$E^c$的一个内点。否则任意$U(P)$中都存在$E$中的点，则$P$应该是$E$的一个聚点，而此时$P\in E^c$，与$E$是闭集矛盾。由$P$的任意性有$E^c=\mathring{(E^c)}$，即$E^c$是开集。\par
+	(5)$\;E$是开集：$\forall\; P\in (E^c)'$，应有$P\notin E$，即$P$不会是$E$的内点。否则由内点定义，存在$U(P)$使得$U(P)\subseteq E$，即$U(P)$中不含$E^c$中的点，这与点$P\in (E^c)'$矛盾。由$P$的任意性有$(E^c)'\subseteq E^c$，即$E^c$是闭集。\par
+	$E$是闭集：$\forall\; P\in E^c$，应有$P$是$E^c$的一个内点。否则任意$U(P)$中都存在$E$中的点，则$P$应该是$E$的一个聚点，而此时$P\in E^c$，与$E$是闭集矛盾。由$P$的任意性可得$E^c$是开集。\par
 	(6)\textbf{任意个开集的并是开集：}对于在任意个开集的并集中的点$P$，$P$必属于其中一个开集，因而存在一个邻域$U(P)$使得其中的点都在那个开集中，进而$U(P)$都在任意个开集的并集中，即$P$是任意个开集的并集的内点。由$P$的任意性，任意个开集的并集是开集。\par
-	\textbf{有限个开集的交是开集：}设这有限个开集为$A_i,i=1,2,\dots,n$。对任意的$ P\in\underset{i=1}{\overset{n}{\cap}}A_i$，则$P$是所有$A_i$的内点，因此存在$U_i(P)\subset A_i$。由邻域的性质，存在$U(P)$满足$U(P)\subset\underset{i=1}{\overset{n}{\cap}}U_i(P)\subset\underset{i=1}{\overset{n}{\cap}}A_i$，因此$P$是$\underset{i=1}{\overset{n}{\cap}}A_i$的内点。由$P$的任意性，$\underset{i=1}{\overset{n}{\cap}}A_i$是开集。\par
-	\textbf{任意个闭集的交是闭集，有限个闭集的并是闭集：}可由(5)以及\info{De-morgan law}在(1)(2)的基础上直接得出。
+	\textbf{有限个开集的交是开集：}设这有限个开集为$A_i,i=1,2,\dots,n$。对任意的$ P\in\underset{i=1}{\overset{n}{\cap}}A_i$，则$P$是所有$A_i$的内点，因此存在$U_i(P)\subseteq A_i$。由\cref{prop:Neighbourhood}(2)可知存在$U(P)$满足$U(P)\subseteq\underset{i=1}{\overset{n}{\cap}}U_i(P)\subseteq\underset{i=1}{\overset{n}{\cap}}A_i$，因此$P$是$\underset{i=1}{\overset{n}{\cap}}A_i$的内点。由$P$的任意性，$\underset{i=1}{\overset{n}{\cap}}A_i$是开集。\par
+	\textbf{任意个闭集的交是闭集，有限个闭集的并是闭集：}可由(5)以及\cref{prop:SetOperation}(7)在开集的基础上直接得出。
 \end{proof}
+\begin{definition}
+	$(X,\rho_X)$是一个度量空间。若$E\subseteq X$，且在$E$上定义距离$\rho_E$使得$E$中任意点对$x,y$之间的距离$\rho_E(x,y)=\rho_X(x,y)$，则称$(E,\rho_E)$是$(X,\rho_X)$的一个\gls{subspace}。若$E$是一个开集，则称$E$是$X$的一个\gls{OpenSubspace}；$E$是一个闭集，则称$E$是$X$的一个\gls{ClosedSubspace}。
+\end{definition}
 \subsubsection{内外界聚孤立五点的性质}
 \begin{theorem}
 	$(X,\rho)$是一个度量空间，$E\subset X$。$E$的界点不是聚点就是孤立点。
@@ -144,3 +141,122 @@
 		=\overline{A\cup B}\qedhere
 	\end{equation*}
 \end{proof}
+\subsection{稠密、稀疏、可分性}
+\begin{definition}
+	$(X,\rho)$是一个度量空间，$A,B\subseteq X$。若$A\subseteq\overline{B}$，则称$B$在$A$中\gls{dense}。
+\end{definition}
+\begin{theorem}\label{theo:Density}
+	$(X,\rho)$是一个度量空间，$A,B\subseteq X$。以下四个命题等价：
+	\begin{enumerate}
+		\item $B$在$A$中稠密。
+		\item 对任意的$ x\in A$，$x$的任意邻域中都存在$B$中的点。
+		\item 对任意的$ x\in A$，$B$中存在一个点列$\{x_n\}$收敛于$x$。
+		\item 对任意的$\varepsilon>0$，$B$中每个点的$\varepsilon$开球邻域的并包含了$A$。
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	$(1)\to(2)$因为$\overline{B}=B\cup B'$，所以若$x\in A$，则$x\in B$或$x\in B'$，此时显然(2)成立。\par
+	$(2)\to(3)$显然。\par
+	$(3)\to(4)$若此时(4)不成立，即存在$x\in A$对于某个$\varepsilon$，满足条件$x$不在任何$B$中点的$\varepsilon$开球邻域内，则存在$U(x)$使得$U(x)$中不含$B$中的点，那么(3)也不可能成立，矛盾。\par
+	$(4)\to(1)$对任意的$ x\in A$，如果$x\notin \overline{B}$，那么存在$U(x,\delta)$使得$U(x,\delta)$中不含$B$中的点，记$x$与$B$中点之间的最小距离为$\rho$，此时只要取$\varepsilon<\rho$，$x$就不在那些邻域的并集中了，矛盾。由$x$的任意性，$A\subseteq\overline{B}$。
+\end{proof}
+\begin{definition}
+	$(X,\rho)$是一个度量空间，$A$是$X$的一个子集。若$A$在$X$的任何一个非空开集中均不稠密，则称$A$为$X$中的\gls{NowhereDenseSet}。
+\end{definition}
+下述定理中的邻域既可以是开邻域也可以是闭邻域：
+\begin{theorem}
+	度量空间$(X,\rho)$的子集$A$为稀疏集的充分必要条件是：对任意的$x\in X$和$x$的任意邻域$U(x)$，存在一个包含于邻域$U(x)$的邻域$U(y)$使得$A\cap U(y)=\varnothing$。
+\end{theorem}
+\begin{proof}
+	\textbf{(1)开邻域：}\par
+	充分性：假设此时$A$在$X$中的某非空开集$B$中稠密，则$B\subseteq\overline{A}$。任取$x\in B$和$U(x)\subseteq B$，则$x\in\overline{A}$。如果此时存在包含于$U(x)$的$U(y)$使得条件成立，则$y\notin\overline{A}$，这与$y\in U(y)\subset U(x)\subset B\subset\overline{A}$矛盾。\par
+	必要性：若$A$是稀疏集，由\cref{prop:OpenClosedSet}(1)可得$A$在$U(x)$中不稠密。由\cref{theo:Density}(2)可知$\exists\;y\in U(x),\;\exists\;U(y)\subseteq U(x)$使得$A\cap U(y)=\varnothing$。\par
+	\textbf{(2)闭邻域：}\par
+	充分性：\par
+	必要性：\info{有空证明}
+\end{proof}
+\begin{definition}
+	$(X,\rho)$是一个度量空间，$A\subseteq X$。若存在可列集$B\subset X$使得$B$在$A$中稠密，则称$A$是\gls{separable}。若$X$中存在一个在$X$中稠密的可列子集，则称$X$是可分的度量空间。
+\end{definition}
+\subsection{完备的度量空间}
+\subsubsection{Cauchy点列}
+\begin{definition}
+	$(X,\rho)$是一个度量空间，$\{x_n\}$是$X$中的点列。若对任意的$\varepsilon>0$，$\exists\;N\in\mathbb{N}^+$，当$n,m>N$时，有：
+	\begin{equation*}
+		\rho(x_n,x_m)<\varepsilon
+	\end{equation*}
+	则称点列$\{x_n\}$是一个\gls{CauchySeq}或\gls{FoundamentalSeq}。
+\end{definition}
+\begin{property}\label{prop:CauchySeq}
+	设$(X,\rho_X)$是一个度量空间。Cauchy点列具有如下性质：
+	\begin{enumerate}
+		\item 若$\{x_n\}$是$X$中的收敛点列，则$\{x_n\}$是一个Cauchy点列；
+		\item 若$\{x_n\}$是$X$中的Cauchy点列，它的一个子列$\{x_{n_k}\}$收敛，则其本身也收敛，并且极限相同；
+		\item Cauchy点列是有界的。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)令$n<m$。因为$\{x_n\}$是$X$中的收敛点列，假设其极限为$x$，则对任意的$\varepsilon>0$，$\exists\; N_1\in\mathbb{N}^+$，当$n>N_1$时有$\rho(x_n,x)<\frac{\varepsilon}{2}$；$\exists\; N_2\in\mathbb{N}^+$，当$m>N_2$时有$\rho(x_m,x)<\frac{\varepsilon}{2}$。取$N=\max\{N_1,N_2\}$，则当$n>N$时，有
+	\begin{equation*}
+		\rho(x_n,x_m)\leqslant\rho(x_n,x)+\rho(x_m,x)<\frac{\varepsilon}{2}+\frac{\varepsilon}{2}=\varepsilon
+	\end{equation*}
+	即点列$\{x_n\}$是一个Cauchy点列。\par
+	(2)设$\{x_{n_k}\}$极限为$x$，则
+	\begin{equation*}
+		\rho(x_n,x)\leqslant\rho(x_n,x_{n_k})+\rho(x_{n_k},x)
+	\end{equation*}
+	对任意的$\varepsilon>0$，因为$x_{n_k}$收敛于$x$，所以$\exists\;N_1\in\mathbb{N}^+$，使得当$k>N_1$时，有$\rho(x_{n_k},x)<\frac{\varepsilon}{2}$。又因$\{x_n\}$是$X$中的Cauchy点列，因此$\exists\;N_2\in\mathbb{N}^+$，使得当$n,k>N_2$时，有$\rho(x_n,x_{n_k})<\frac{\varepsilon}{2}$。取$N=\max\{N_1,N_2\}$，当$n,k>N$时，即有
+	\begin{equation*}
+		\rho(x_n,x)\leqslant\rho(x_n,x_{n_k})+\rho(x_{n_k},x)<\frac{\varepsilon}{2}+\frac{\varepsilon}{2}=\varepsilon
+	\end{equation*}\par
+	(3)设$(X,\rho)$是一个度量空间，$\{x_n\}$是$X$中的Cauchy点列，则对任意的$\varepsilon>0$，$\exists\;N\in\mathbb{N}^+$，当$n,m>N$时，有：
+	\begin{equation*}
+		\rho(x_n,x_m)<\varepsilon
+	\end{equation*}
+	取$m=N+1$，令$\alpha=\max\limits_{i=1,2,\dots,N}\rho(x_m,x_i)$，$\delta=\max\{\varepsilon,\alpha\}$，则$\{x_n\}$中的所有点都在闭邻域$\overline{U}(x_m,\delta)$中，所以$\{x_n\}$有界。
+\end{proof}
+\subsubsection{完备度量空间}
+\begin{definition}
+	$(X,\rho)$是一个度量空间。若$X$中的任意Cauchy点列$\{x_n\}$都收敛到$X$中的某一点，则称$X$是一个\gls{complete}度量空间。
+\end{definition}
+\begin{theorem}[闭球套定理]
+	$(X,\rho)$是一个度量空间。$X$完备的充分必要条件为对任何满足下列条件的一列闭邻域$\{E_n=\overline{U}(x_n,\delta_n)\}$：
+	\begin{enumerate}
+		\item $E_1\supset E_2\supset\cdots\supset E_n\supset\cdots$
+		\item $\{\delta_n\}\to0$
+	\end{enumerate}
+	$X$中都存在唯一的$x$满足$x\in\underset{n\in\mathbb{N}^+}{\cap}E_n$。
+\end{theorem}
+\begin{proof}
+	充分性：任取$X$中的一个Cauchy点列$\{x_n\}$。因为$\{x_n\}$是一个Cauchy点列，所以对任意的$\varepsilon>0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m>N,\;\rho(x_m,x_n)<\varepsilon$。取$\{N_k\}$使得$N_k$是使得$\rho(x_m,x_n)<\dfrac{1}{2^k}$的临界条件，取$x_{n_k}>N_k,\;x_{n_k+1}>N_{k+1}$，即可产生一个子列 $\{x_{n_k}\}$，满足：
+	\begin{equation*}
+		\rho(x_{n_k},x_{n_{k+1}})<\frac{1}{2^k}
+	\end{equation*}
+	取闭邻域列：
+	\begin{equation*}
+		\left\{E_k=\bar{U}\left(x_{n_k},\frac{1}{2^{k-1}}\right)\right\}
+	\end{equation*}
+	显然：
+	\begin{equation*}
+		\forall\;y\in E_{k+1},\;\rho(y,x_{n_k})\leqslant\rho(y,x_{n_{k+1}})+\rho(x_{n_{k+1}},x_{n_k})<\frac{1}{2^k}+\frac{1}{2^k}=\frac{1}{2^{k-1}}
+	\end{equation*}
+	所以$E_k\supset E_{k+1}$。由题目条件，此时存在唯一的$x\in X$满足$x\in E_k,\;\forall\;k\in\mathbb{N}^+$。下证$\{x_n\}\to x$。
+	\begin{equation*}
+		\rho(x_n,x)\leqslant\rho(x_n,x_{n_k})+\rho(x_{n_k},x)\leqslant\rho(x_n,x_{n_k})+\frac{1}{2^{k-1}}
+	\end{equation*}
+	因为$\{x_n\}$是一个Cauchy点列，因此当$n$和$k$足够大时，上式右端两项均趋于$0$。因此$\{x_n\}\to x$。由$\{x_n\}$的任意性，$X$是一个完备的度量空间。\par
+	必要性中的存在性：在每个$E_n$中取一点$y_n$构成点列$\{y_n\}$。设$m>n$，因为$E_m\subset E_n$，所以$y_m\in E_n$，于是有：
+	\begin{equation*}
+		\rho(y_n,y_m)\leqslant\delta_n\to0
+	\end{equation*}
+	因此$\{y_n\}$是一个Cauchy点列。因为$X$完备，所以$\{y_n\}\to x\in X$。对任意的$n_0\in\mathbb{N}^+$，当$n>n_0$时，$y_n\in E_n\subset E_{n_0}$。又因为闭邻域$E_{n_0}$是闭集，因此$x\in E_{n_0}$。由$n_0$的任意性，$x\in E_n,\;\forall\;n\in\mathbb{N}^+$。\par
+	必要性中的唯一性：若还有一点$y$满足上述条件，则：
+	\begin{equation*}
+		\rho(x,y)\leqslant\rho(x,y_n)+\rho(y_n,y)\to0
+	\end{equation*}
+	唯一性显然得证。
+\end{proof}
+\begin{theorem}
+	$(X,\rho_X)$是一个度量空间，则一定存在一个完备度量空间$(Y,\rho_Y)$，使得$X$与$Y$的一个稠密子空间等距同构，并且$Y$在等距同构的意义下是唯一的\footnote{这里的唯一性是指，如果存在另一个完备度量空间$(Z,\rho_Z)$使得$X$与$Z$的一个稠密子空间等距同构，则$Y$与$Z$等距同构。}。
+\end{theorem}
+证明太复杂，不提供。
