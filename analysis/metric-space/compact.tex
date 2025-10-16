@@ -1,50 +1,32 @@
 \section{紧集与紧度量空间}
 \begin{definition}
-	$(X,\rho)$是一个度量空间，$A$是$X$的一个子集。如果$A$的每个点列都有一个收敛子列收敛于$A$中的某一点，则称$A$是\gls{CompactSet}。若$X$是紧集，则称$X$是\gls{CompactMetricSpace}。
+	设$(X,\rho)$是一个度量空间，$A$是$X$的一个子集。如果$A$的每个点列都有一个子列收敛于$A$中的某一点，则称$A$是\gls{CompactSet}。若$X$是紧集，则称$X$是\gls{CompactMetricSpace}。
 \end{definition}
 
-\subsection{紧集的性质}
-\begin{theorem}
-	度量空间中的紧集是有界且可分的。
-\end{theorem}
+\begin{property}
+	设$(X,\rho)$是一个度量空间。紧集具有如下性质：
+	\begin{enumerate}
+		\item 紧集是准紧集；
+		\item 紧集是有界且可分的；
+		\item 紧集是完备的，紧度量空间是完备度量空间；
+		\item 若$\{E_n\}$是$X$中的一列非空紧集，满足$E_1\supseteq E_2\supseteq\dots\supseteq E_n\supseteq\dots$，则$\underset{n=1}{\overset{+\infty}{\cap}}E_n\ne\varnothing$。
+	\end{enumerate}
+\end{property}
 \begin{proof}
-	因为准紧集是有界可分的，且紧集必然是准紧集，所以紧集也是有界可分的。
+	(1)由定义立即可得。\par
+	(2)由(1)、\cref{prop:PrecompactSet}(2)和\cref{prop:TotallyBoundedSet}(4)立即可得。\par
+	(3)设$X$是紧集，$\{x_n\}$是$X$中的一个Cauchy点列。由紧集定义和\cref{prop:CauchySeq}(2)立即可得。\par
+	(4)在每个$E_n$中选择一点$x_n$，构成序列$\{x_n\}$。因为$\forall\;n\in\mathbb{N}^+,\;x_n\in E_n\subseteq E_1$，又$E_1$是紧集，所以$\{x_n\}$存在子列$\{x_{n_k}\}\rightarrow x_0\in E_1$。对任意的$n\in\mathbb{N}^+$，当$n_k>n$时，有$x_{n_k}\in E_{n_k}\subseteq E_n$，又由\cref{prop:CauchySeq}(1)、(3)，所以$x_0\in E_n$。由$n$的任意性，$x_0\in\underset{n=1}{\overset{+\infty}{\cap}}E_n$，所以$\underset{n=1}{\overset{+\infty}{\cap}}E_n\ne\varnothing$。
 \end{proof}
-
-\subsection{紧度量空间的性质}
-\subsubsection{完备性}
-\begin{theorem}
-	任一度量空间中的紧集都是完备的。紧度量空间是完备度量空间。
-\end{theorem}
-\begin{proof}
-	设$X$是一个紧集，$\{x_n\}$是$X$中的一个Cauchy点列。由紧集定义可得出$\{x_n\}$存在收敛的子列$\{x_{n_k}\}$，设$\{x_{n_k}\}\to a$，则：
-	\begin{equation*}
-		\rho(x_n,a)\leqslant\rho(x_n,x_{n_k})+\rho(x_{n_k},a)\to0
-	\end{equation*}
-	于是$\{x_n\}\to a$。由$\{x_n\}$的任意性，$X$是完备的。
-\end{proof}
-\begin{theorem}
-	$(X,\rho)$是一个度量空间，$\{E_n\}$是$X$中的一列非空紧集，满足：
-	\begin{equation*}
-		E_1\supset E_2\supset\dots\supset E_n\supset\dots
-	\end{equation*}
-	则$\underset{n=1}{\overset{+\infty}{\cap}}E_n\ne\varnothing$。
-\end{theorem}
-\begin{proof}
-	在每个$E_n$中选择一点$x_n$，构成序列$\{x_n\}$。因为$\forall\;n\in\mathbb{N}^+,\;x_n\in E_n\subset E_1$，又$E_1$是紧集，所以$\{x_n\}$存在子列$\{x_{n_k}\}\rightarrow x_0\in E_1$。对任意的$n\in\mathbb{N}^+$，当$n_k>n$时，有$x_{n_k}\in E_{n_k}\subset E_n$，又因收敛点列必为Cauchy点列、$E_n$完备，所以$x_0\in E_n$。由$n$的任意性，$x_0\in\underset{n=1}{\overset{+\infty}{\cap}}E_n$，所以$\underset{n=1}{\overset{+\infty}{\cap}}E_n\ne\varnothing$。
-\end{proof}
-
-\subsection{紧集的充要条件}
-\subsubsection{有限覆盖}
 \begin{definition}
-	$(X,\rho)$是一个度量空间，$A$是$X$的子集，$\{G_i\}_{i\in I}$（其中$I$是一个指标集）是$X$中某些开集组成的集族。如果：
+	$(X,\rho)$是一个度量空间，$A$是$X$的子集，$\{G_i:i\in I\}$（其中$I$是一个指标集）是$X$中某些开集组成的集族。如果：
 	\begin{equation*}
 		A\subset\underset{i\in I}{\cup}G_i
 	\end{equation*}
-	则称$\{G_i\}_{i\in I}$为$A$的\gls{OpenCover}。如果$I$是有限集，则称$\{G_i\}_{i\in I}$为$A$的\gls{FiniteOpenCover}。
+	则称$\{G_i:i\in I\}$为$A$的\gls{OpenCover}。如果$I$是有限集，则称$\{G_i:i\in I\}$为$A$的\gls{FiniteOpenCover}。
 \end{definition}
 \begin{theorem}[有限覆盖定理]
-	度量空间$(X,\rho)$的子集$A$是紧集的充分必要条件是从$A$的任一开覆盖$\{G_i\}_{i\in I}$中必可选出一个有限子覆盖。
+	度量空间$(X,\rho)$的子集$A$是紧集的充分必要条件是从$A$的任一开覆盖$\{G_i:i\in I\}$中必可选出一个有限子覆盖。
 \end{theorem}
 \begin{proof}
 	(1)必要性：先来证明$\exists\;\varepsilon>0,\;\forall\;x\in A,\;\exists\;i\in I,\;U(x,\varepsilon)\in G_i$。若不成立，则：
