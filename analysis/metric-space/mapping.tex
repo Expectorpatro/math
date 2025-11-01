@@ -92,7 +92,10 @@
 	则称$T$是一个\gls{ContractionMap}。
 \end{definition}
 \begin{theorem}[Contraction Mapping Theorem]\label{theo:ContractionMapTheorem}
-	设$(X,\rho)$是一个完备的度量空间，$T$是$X$到$X$的一个压缩映射，那么$T$有且只有一个不动点。
+	设$(X,\rho)$是一个完备的度量空间，$T$是$X$到$X$的一个压缩映射，那么$T$有且只有一个不动点，该不动点为任取$x_0\in X$序列$\{x_n=T^nx_0\}$的极限$x\in X$，并有误差估计：
+	\begin{equation*}
+		\rho(x_n,x)\leqslant\frac{\alpha^n}{1-\alpha}\rho(x_0,x_1)
+	\end{equation*}
 \end{theorem}
 \begin{proof}
 	\textbf{存在性：}任取$x_0\in X$，令$x_n=T^nx_0$，由此产生一个点列$\{x_n\}$。下面我们来证明这个点列是一个Cauchy点列，它的极限就是一个不动点。\par
@@ -107,13 +110,20 @@
 		&\leqslant\rho(x_m,x_{m+1})+\cdots+\rho(x_{n-1},x_n) \\
 		&\leqslant(\alpha^m+\alpha^{m+1}+\cdots+\alpha^{n-1})\rho(x_0,x_1) \\
 		&=\alpha^m\frac{1-\alpha^{n-m}}{1-\alpha}\rho(x_0,x_1) \\
-		&<\frac{\alpha^m}{1-\alpha}\rho(x_0,x_1)
+		&\leqslant\frac{\alpha^m}{1-\alpha}\rho(x_0,x_1)
 	\end{align*}
 	因为$0\leqslant\alpha<1$，所以当$m$足够大的时候，$\rho(x_m,x_n)\rightarrow 0$，即$\{x_n\}$是$X$中的Cauchy点列。又因为$X$完备，所以$\{x_n\}\rightarrow x\in X$。由三角不等式：
 	\begin{equation*}
 		\rho(x,Tx)\leqslant\rho(x,x_m)+\rho(x_m,Tx)\leqslant\rho(x,x_m)+\alpha\rho(x_{m-1},x)
 	\end{equation*}
-	当$m\to+\infty$时上式右端趋于0，因此$\rho(x,Tx)=0$，即$Tx=x$，$T$存在一个不动点。\par
+	当$m\to+\infty$时上式右端趋于0，因此$\rho(x,Tx)=0$，即$Tx=x$，$T$存在一个不动点。由上上式可得：
+	\begin{equation*}
+		\rho(x_m,x_{m+k})\leqslant\frac{\alpha^m}{1-\alpha}\rho(x_0,x_1)
+	\end{equation*}
+	令$k\to+\infty$，由\info{极限的不等式性}可得：
+	\begin{equation*}
+		\rho(x_m,x)\leqslant\frac{\alpha^m}{1-\alpha}\rho(x_0,x_1)
+	\end{equation*}\par
 	\textbf{唯一性：}假设$T$还有一个不动点$y$，则
 	\begin{equation*}
 		\rho(x,y)=\rho(Tx,Ty)\leqslant\alpha\rho(x,y)
