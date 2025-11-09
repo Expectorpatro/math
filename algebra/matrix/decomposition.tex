@@ -1,12 +1,248 @@
 \section{矩阵的分解}
 
+\subsection{LU分解}
+\begin{definition}
+	若下三角矩阵$L\in M_{n}(K)$的主对角线元素均为$1$，其余非零元素仅出现在主对角线下方的某一列（或某一行）中，则称$L$为\gls{GaussMatrix}，也称为\gls{GaussTransformation}。
+\end{definition}
+一
+\begin{lemma}\label{lem:LU}
+	设$A\in M_n(K)$。在不进行任何行交换的Gauss消元过程中，前$k$个主元都不为$0$的充要条件是$A$的前$k$阶主子阵$A_1,A_2,\dots,A_k$均可逆。
+\end{lemma}
+\begin{proof}
+	由\cref{prop:Determinant}(7)(12)和\cref{prop:InvertibleMatrix}(3.a)立即可得。
+\end{proof}
+\begin{theorem}\label{theo:LU}
+	设$A\in M_{n}(K)$为可逆矩阵，则存在一个单位下三角矩阵$L$和一个上三角矩阵$U$，使得：
+	\begin{equation*}
+		PA = LU
+	\end{equation*}
+	如果约定消去法每步选取第一个非零元为主元，则上述分解是唯一的。不对$A$作行交换，即$P=I_n$时，$A$存在$LU$分解当且仅当所有顺序主子阵$A_1,\dots,A_n$都可逆。
+\end{theorem}
+\begin{proof}
+	\textbf{(1)存在性：} 对$n$进行数学归纳证明。对于$n=1$时，结论显然成立。假设对于任意$(n-1)\times(n-1)$的可逆矩阵都存在$P,L,U$使$P A = L U$成立，下面证明对$n\times n$矩阵也成立。由于$A$可逆，$A$的第一列中必定存在非零元素，设$a_{p1}$是第一个非零元素（位于第$p$行）。通过左乘首行交换矩阵交换第$1$行和第$p$行（这对应一个置换矩阵$P_1$），可以使$A$的$(1,1)$位置成为非零的主元。记变换后的矩阵仍为$A$。接下来，对$i=2,3,\dots,n$，令$l_{i1}=\dfrac{a_{i1}}{a_{11}}$，并用第1行的$l_{i1}$倍消去第$i$行的第1列元素，对应的初等矩阵记为$L_{1i}$。经过这一系列初等行变换，可得到一个新的矩阵$A^{(1)}$：
+	\[ A^{(1)} = L_{1n}L_{1(n-1)} \cdots L_{12}P_1 A = 
+	\begin{pmatrix}
+		a_{11} & u^T \\
+		\mathbf{0} & A_1
+	\end{pmatrix} \] 
+	其中$A_1$是$(n-1)\times(n-1)$矩阵，$\mathbf{0}$表示$(n-1)\times 1$的零向量。由\cref{prop:Rank}(2)可知$A_1$也是可逆的。根据归纳假设，对$A_1$存在置换矩阵$P_2$、单位下三角矩阵$L'$和上三角矩阵$U'$使$P_2 A_1 = L' U'$。构造出分块矩阵：
+	\[ 
+	P = \begin{pmatrix}
+		1 & \mathbf{0} \\
+		\mathbf{0} & P_2
+	\end{pmatrix}, \qquad 
+	L = \begin{pmatrix}
+		1 & \mathbf{0} \\
+		l & L'
+	\end{pmatrix}, \qquad 
+	U = \begin{pmatrix}
+		a_{11} & u^T \\
+		\mathbf{0} & U'
+	\end{pmatrix}
+	\] 
+	其中$l=(l_{21},l_{31},\dots,l_{n1})^T$。则由上述构造和归纳假设可验证：
+	\begin{align*}
+		&PA = \begin{pmatrix} 1 & \mathbf{0} \\ \mathbf{0} & P_2 \end{pmatrix}
+		\begin{pmatrix} a_{11} & u^T \\ \mathbf{0} & A_1 \end{pmatrix}
+		= \begin{pmatrix} a_{11} & u^T \\ \mathbf{0} & P_2 A_1 \end{pmatrix} \\
+		=&\begin{pmatrix} a_{11} & u^T \\ \mathbf{0} & L' U' \end{pmatrix} 
+		= \begin{pmatrix} 1 & \mathbf{0} \\ l & L' \end{pmatrix}
+		\begin{pmatrix} a_{11} & u^T \\ \mathbf{0} & U' \end{pmatrix} = L U
+	\end{align*} 
+	从而完成$PA=LU$的构造。\par
+	\textbf{(2)唯一性：}由主元的选取规则可知$P$是不变的，假设还有另一组分解$PA=\tilde{L}\tilde{U}$，其中$\tilde{L}$为单位下三角矩阵、$\tilde{U}$为上三角矩阵，而且满足与$L,U$相同的主元选取规则。因为$A$可逆，由\cref{prop:InvertibleMatrix}(3.a)和\cref{prop:Determinant}(11)可知$L,\tilde{L}$都是可逆的下三角矩阵且$U,\tilde{U}$都是可逆的上三角矩阵，根据$PA=LU=\tilde{L}\tilde{U}$可得：
+	\[ L^{-1}\tilde{L} = U \tilde{U}^{-1}\] 
+	由\cref{prop:InvertibleMatrix}(18)可知$L^{-1}$和$\tilde{U}^{-1}$分别为单位下三角矩阵和上三角矩阵，根据\cref{prop:MatrixMultiplication}(6)可知上式左侧为一个下三角矩阵，右侧为一个上三角矩阵，因此这个等式两侧实际上都是对角矩阵。因为$\tilde{L}$和$L^{-1}$是单位下三角矩阵，于是$L^{-1}\tilde{L}=I_n$，即$\tilde{L}=L$且$\tilde{U}=U$，所以分解是唯一的。\par
+	不对$A$作行交换时的结论由上述分析和\cref{lem:LU}立即可得。
+\end{proof}
+\begin{method}
+	设$PA=(a_{ij})$，因为$L^{-1}PA=U$，由\cref{alg:gauss}和\cref{prop:ElementaryMatrix}(2)可知：
+	\begin{equation*}
+		L^{-1}=
+		\begin{pmatrix}
+			1 & & & &  \\
+			-l_{21} & 1 & & &  \\
+			-l_{31}& -l_{32} & 1 & &  \\
+			\vdots & \vdots & \ddots &  &  \\
+			-l_{n1} & -l_{n2} & \cdots &-l_{n(n-1)} & 1 \\
+		\end{pmatrix},\quad
+		l_{ij}=\frac{a_{ij}}{a_{kk}},\;i=2,3,\dots,n,\;j=1,2,\dots,n-1
+	\end{equation*}
+	根据\cref{prop:InvertibleMatrix}(18)可得：
+	\begin{equation*}
+		L=
+		\begin{pmatrix}
+			1 & & & &  \\
+			l_{21} & 1 & & &  \\
+			l_{31}& l_{32} & 1 & &  \\
+			\vdots & \vdots & \ddots &  &  \\
+			l_{n1} & l_{n2} & \cdots & l_{n(n-1)} & 1 \\
+		\end{pmatrix}
+	\end{equation*}
+	由\cref{alg:gauss}可知对第$k$列进行消元后，第$k$行的前$k-1$个数都是$0$，不会在后续过程中再使用到它们，于是$L$矩阵中的元素可以直接存储在$A$的下三角区域（除了主对角线），$U$矩阵即为消元后所剩下的上三角矩阵。
+	\begin{algorithm}[H]
+		\caption{In-place LU Factorization (without pivoting)}
+		\begin{algorithmic}[1]
+			\Require $A=(a_{ij})\in M_{n}(K)$
+			\Ensure The lower triangular part of $A$ (excluding the diagonal) stores $L$,
+			and the upper triangular part (including the diagonal) stores $U$
+			
+			\For{$k = 1$ \textbf{to} $n-1$}
+				\For{$i = k+1$ \textbf{to} $n$}
+					\State $a_{ik} \gets a_{ik} / a_{kk}$ \Comment{$l_{ik}$}
+					\For{$j = k+1$ \textbf{to} $n$}
+						\State $a_{ij} \gets a_{ij} - a_{ik} \cdot a_{kj}$
+					\EndFor
+				\EndFor
+			\EndFor
+		\end{algorithmic}
+	\end{algorithm}
+	该方法的计算复杂度为：
+	\begin{align*}
+		&\sum_{k=1}^{n-1}[2(n-k)\times(n-k)+(n-k)]=\sum_{k=1}^{n-1}[2n^2-4nk+2k^2+n-k] \\
+		=&(n-1)2n^2+(n-1)n-(4n+1)\sum_{k=1}^{n-1}k+2\sum_{k=1}^{n-1}k^2 \\
+		=&(n-1)2n^2+(n-1)n-(4n+1)\frac{(n-1+1)(n-1)}{2}+2\frac{(n-1)(n-1+1)(2n-2+1)}{6} \\
+		=&\frac{2}{3}n^3+\operatorname{O}(n^2)
+	\end{align*}
+\end{method}
+\subsubsection{应用}
+\begin{method}
+	设矩阵$A\in M_{n}(K)$，计算$A$的行列式只需对$A$作LU分解，令$U=(u_{ij})$，由\cref{prop:Determinant}(11)(12)即可得到$\det A=\prod\limits_{i=1}^{n}u_{ii}$。为了避免$n$较大时出现数值溢出的情况，实际上我们一般计算的是$\ln|\det A|=\sum\limits_{i=1}^{n}\ln|u_{ii}|$，记录下符号再通过对数值作变换即可恢复原始数值。
+\end{method}
+\begin{method}
+	设可逆矩阵$A\in M_{n}(K)$，使用LU分解和\cref{prop:InvertibleMatrix}(15)即可计算得到$A^{-1}$。
+\end{method}
+\begin{method}
+	对于关于可逆矩阵$A\in M_{n}(K)$的线性方程组$Ax=b$，若将$A$分解为$A=LU$，即一个下三角矩阵$L$和一个上三角矩阵$U$的乘积，那么上述线性方程组可由如下方法得到：
+	\begin{enumerate}
+		\item 用前代法解$Ly=b$；
+		\item 用回代法解$Ux=y$。
+	\end{enumerate}\par
+	关于数域$K$上可逆$n$阶上三角矩阵或下三角矩阵：
+	\begin{equation*}
+		L=
+		\begin{pmatrix}
+			l_{11} & & & &  \\
+			l_{21} & l_{22} & & &  \\
+			l_{31} & l_{32} & l_{33} & &  \\
+			\vdots & \vdots & \vdots & \ddots &  \\
+			l_{n1} & l_{n2} & l_{n3} & \cdots & l_{nn}
+		\end{pmatrix},\quad
+		U=
+		\begin{pmatrix}
+			u_{11} & u_{12} & u_{13} & \cdots & u_{1n} \\
+			& u_{22} & u_{23} & \cdots & u_{2n} \\
+			&       & u_{33} & \cdots & u_{3n} \\
+			&  &  & \ddots & \vdots \\
+			&       &       &  & u_{nn}
+		\end{pmatrix}
+	\end{equation*}
+	的线性方程组$Lx=b$或$Ux=b$，有下述两种求解算法：
+	\begin{algorithm}
+		\caption{Forward Substitution for Lower Triangular Systems}
+		\begin{algorithmic}[1]
+			\Require Lower triangular matrix $L=(l_{ij})\in M_{n}(\mathbb{K})$, right-hand side vector $b\in\mathbb{K}^n$
+			\Ensure Solution vector $x\in\mathbb{K}^n$ satisfying $Lx=b$
+			
+			\For{$i=1$ \textbf{to} $n$}
+				\State $x_i \gets \dfrac{b_i - \sum\limits_{j=1}^{i-1} l_{ij}x_j}{l_{ii}}$
+			\EndFor
+		\end{algorithmic}
+	\end{algorithm}
+	\begin{algorithm}
+		\caption{Backward Substitution for Upper Triangular Systems}
+		\begin{algorithmic}[1]
+			\Require Upper triangular matrix $U=(u_{ij})\in M_{n}(K)$, right-hand side vector $b\in\mathbb{K}^n$
+			\Ensure Solution vector $x\in\mathbb{K}^n$ satisfying $Ux=b$
+			
+			\For{$i=n$ \textbf{downto} $1$}
+				\State $x_i \gets \dfrac{b_i - \sum\limits_{j=i+1}^{n} u_{ij}x_j}{u_{ii}}$
+			\EndFor
+		\end{algorithmic}
+	\end{algorithm}\par
+	上述两种算法的计算复杂度分别为：
+	\begin{gather*}
+		\sum_{i=1}^{n}(1+i-1+i-1-1+1)=\sum_{i=1}^{n}(2i-1)=\frac{(1+2n-1)n}{2}=n^2 \\
+		\sum_{i=1}^{n}(1+n-i+n-i-1+1)=\sum_{i=1}^{n}(2n-2i+1)=2n^2-n^2=n^2
+	\end{gather*}
+\end{method}
+
+\subsection{Cholesky分解}
+\begin{theorem}\label{theo:Cholesky}
+	设$A\in M_{n}(\mathbb{R}^{})$是对称正定矩阵，则存在唯一一个下三角矩阵$L$使得$A=LL^T$，其中$L$的对角线元素均为正数。
+\end{theorem}
+\begin{proof}
+	由\cref{theo:PositiveDefinite}(3.6)、\cref{prop:InvertibleMatrix}(3.a)和\cref{theo:LU}可知$A$存在唯一的LU分解$A=LU$。令$U=(u_{ij})$，由\cref{theo:PositiveDefinite}(5)、\cref{prop:Determinant}(11)(12)、\cref{theo:LU}可知存在$D=\operatorname{diag}\{u_{11},u_{22},\dots,u_{nn}\}$的逆矩阵$D^{-1}$。令$\tilde{U}=D^{-1}U$，于是由\cref{prop:Transpose}(4)可得：
+	\begin{equation*}
+		\tilde{U}^TDL^T=A^T=A=LD\tilde{U}
+	\end{equation*}
+	由\cref{prop:Determinant}(11)(12)和\cref{prop:InvertibleMatrix}(3.a)可知$\tilde{U}$可逆，于是：
+	\begin{equation*}
+		L^T\tilde{U}^{-1}=D^{-1}(\tilde{U}^T)^{-1}LD
+	\end{equation*}
+	根据\cref{prop:InvertibleMatrix}(18)和\cref{prop:MatrixMultiplication}(6)可知上式左侧为一个单位上三角矩阵，上式右侧为一个下三角矩阵，所以有：
+	\begin{equation*}
+		L^T\tilde{U}^{-1}=D^{-1}(\tilde{U}^T)^{-1}LD=I_n
+	\end{equation*}
+	于是$L^T=\tilde{U}$，即：
+	\begin{equation*}
+		A=LDL^T
+	\end{equation*}
+	因为$A$正定，所以$D$主对角线上的元素都为正数。令$\tilde{L}=L\operatorname{diag}\{\sqrt{u_{11}},\sqrt{u_{22}},\dots,\sqrt{u_{nn}}\}$，则$A=\tilde{L}\tilde{L}^T$。
+\end{proof}
+\begin{method}
+	为求$L=(l_{ij})$使得$A=(a_{ij})=LL^T$，将等式两边展开：
+	\begin{equation*}
+		a_{ij}=\sum_{k=1}^{\min(i,j)}l_{ik}l_{jk}
+	\end{equation*}
+	当$i=j$时有：
+	\begin{equation*}
+		a_{ii}=\sum_{k=1}^{i}l_{ik}^2=l_{ii}^2+\sum_{k=1}^{i-1}l_{ik}^2
+	\end{equation*}
+	故有：
+	\begin{equation*}
+		l_{ii}=\sqrt{a_{ii}-\sum_{k=1}^{i-1}l_{ik}^2}
+	\end{equation*}
+	当$i>j$时有：
+	\begin{equation*}
+		a_{ij}=\sum_{k=1}^{j}l_{ik}l_{jk}=\sum_{k=1}^{j-1}l_{ik}l_{jk}+l_{ij}l_{jj}
+	\end{equation*}
+	由此得：
+	\begin{equation*}
+		l_{ij}=\frac{1}{l_{jj}}\left(a_{ij}-\sum_{k=1}^{j-1}l_{ik}l_{jk}\right)
+	\end{equation*}
+	根据上面的公式我们可以逐列求解$L$。
+	\begin{algorithm}[H]
+		\caption{Cholesky Factorization (Comparison Method)}
+		\begin{algorithmic}[1]
+			\Require $A=(a_{ij})\in M_{n}(\mathbb{R})$, symmetric and positive definite
+			\Ensure The lower triangular part of $A$ stores $L$
+			\For{$j = 1$ \textbf{to} $n$}
+				\State $l_{jj}\gets\sqrt{a_{jj}-\sum\limits_{k=1}^{j-1}l_{jk}^2}$
+				\For{$i = j+1$ \textbf{to} $n$}
+						\State $l_{ij}\gets\dfrac{1}{l_{jj}}\left(a_{ij}-\sum\limits_{k=1}^{j-1}l_{ik}l_{jk}\right)$
+				\EndFor
+			\EndFor
+		\end{algorithmic}
+	\end{algorithm}
+	在程序实现中，可直接在$A$的下三角部分存储$L$的元素，上三角部分不再使用。\par
+	上述方法的计算复杂度（不考虑开方运算）为：
+	\begin{align*}
+		&\sum_{j=1}^{n}\left[1+j-1+j-2+\sum_{i=j+1}^{n}(2+j-1+j-2)\right]=\sum_{j=1}^{n}\left[2j-2+\sum_{i=j+1}^{n}(2j-1)\right] \\
+		=&\sum_{j=1}^{n}(2j-2)+\sum_{j=1}^{n}(n-j)(2j-1)=\sum_{j=1}^{n}[-2j^2+(2n+1)j-n]+\sum_{j=1}^{n}(2j-2) \\
+		=&\frac{1}{3}n^3+\operatorname{O}(n^2)
+	\end{align*}
+	由\info{计算机求根号，牛顿公式}可知即使算上开方运算，也只是再加上$\operatorname{O}(n)$次运算，所以Cholesky分解计算量约为LU分解的一半。
+\end{method}
+
+
 \subsection{QR分解}
 \begin{theorem}\label{theo:QR}
 	设$A\in M_{n}(\mathbb{R}^{})$为可逆矩阵则存在正交矩阵$Q$和上三角矩阵$R$使得$A=QR$。当$R$的对角元素都为正数时，分解是唯一的。
 \end{theorem}
 \begin{proof}
 	\textbf{(1)存在性：}下面给出两种存在性的证明。\par
-	\textbf{Givens变换：}由\cref{theo:Givens}和\cref{prop:OrthogonalUnitaryMatrix}(4)可知存在正交矩阵$Q$使得$QA=R$，其中$R$是上三角矩阵，由\cref{prop:OrthogonalUnitaryMatrix}(1)可得$A=Q^{-1}R$。\par
+	\textbf{Givens变换：}由\cref{theo:Givens}、\cref{prop:Givens}(1)和\cref{prop:OrthogonalUnitaryMatrix}(4)可知存在正交矩阵$Q$使得$QA=R$，其中$R$是上三角矩阵，由\cref{prop:OrthogonalUnitaryMatrix}(1)可得$A=Q^{-1}R$。\par
 	\textbf{Householder变换：}由\cref{theo:Householder}可知存在正交矩阵$H_1$使得$H_1A$的第一列仅有第一个元素非$0$。将$H_1A$分块为：
 	\begin{equation*}
 		H_1A=
@@ -24,7 +260,7 @@
 		\end{pmatrix}
 	\end{equation*}
 	即可得$H_2H_1$使得$A$的前两列变为上三角的状态。依次重复可得到矩阵序列$\{H_n\}$与$\{A_n\}$，由\cref{prop:OrthogonalUnitaryMatrix}(4)可知存在正交矩阵$Q$使得$QA=R$，其中$R$是上三角矩阵，所以$A=Q^{-1}R$。\par
-	\textbf{(2)唯一性：}\info{正定矩阵的楚列斯基分解}
+	\textbf{(2)唯一性：}如果$A=QR=Q'R'$是两种QR分解，其中$Q,Q'$都是正交矩阵，$R,R'$都是上三角矩阵。由\cref{prop:OrthogonalUnitaryMatrix}(1)可得$Q'^{-1}=Q'^T$，根据$R$的对角元素都为正数、\cref{prop:Determinant}(12)和\cref{prop:InvertibleMatrix}(3.a)可得$Q'^TQ=R'R^{-1}$。由\cref{prop:OrthogonalUnitaryMatrix}(4)可知$Q'^TQ$是正交矩阵，根据\cref{prop:InvertibleMatrix}(18)和\cref{prop:MatrixMultiplication}(6)可知$R'R^{-1}$是上三角矩阵，由\cref{prop:OrthogonalUnitaryMatrix}(6)可知$Q'^TQ$为对角矩阵且主对角线元素模为$1$，也即存在一个对角矩阵$D=(\pm1,\pm1,\dots,\pm1)$使得$R'R^{-1}=D$，所以$R'=DR$。当$R$的对角元素均为正值时，上述$D$只能取单位矩阵，因此$Q'=Q,\;R'=R$，唯一性得证。
 \end{proof}
 \begin{note}
 	计算得到$A=QR$后，因为$A$可逆，所以$R$主对角线上的元素都不为$0$。设$R=(r_{ij})$，令：
