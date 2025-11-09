@@ -57,49 +57,6 @@
 \end{proof}
 
 \section{矩阵的分解}
-
-\subsection{LU分解（含主元）}
-\begin{theorem}\label{theo:LU}
-	设$A\in M_{n}(\mathbb{R})$为可逆矩阵，则存在一个单位下三角矩阵$L$（即$L$的对角线元素均为$1$）和一个上三角矩阵$U$，使得
-	\[PA = LU.\] 
-	如果约定$L$的对角线元素为$1$且按消去法每步选取第一个非零元为主元，则上述分解是唯一的。
-\end{theorem}
-\begin{proof}
-	\textbf{(1)存在性：} 对$n$进行数学归纳证明。对于$n=1$时，结论显然成立。假设对于任意$(n-1)\times(n-1)$的可逆矩阵都存在$P,L,U$使$P A = L U$成立，下面证明对$n\times n$矩阵也成立。由于$A$可逆，$A$的第一列中必定存在非零元素，设$a_{p1}$是第一个非零元素（位于第$p$行）。通过左乘首行交换矩阵交换第$1$行和第$p$行（这对应一个置换矩阵$P_1$），可以使$A$的$(1,1)$位置成为非零的主元。记变换后的矩阵仍为$A$。接下来，对$i=2,3,\dots,n$，令$l_{i1}=\frac{a_{i1}}{a_{11}}$，并用第1行的$l_{i1}$倍消去第$i$行的第1列元素（这相当于左乘一个消去矩阵$E_{i1}(-l_{i1})$）。经过这一系列初等行变换，我们得到一个新的矩阵$A^{(1)}$：
-	\[ A^{(1)} = E_{n1}(-l_{n1}) \cdots E_{21}(-l_{21}) P_1 A = 
-	\begin{pmatrix}
-		a_{11} & u^T \\
-		\mathbf{0} & A_1
-	\end{pmatrix}, \] 
-	其中$A_1$是$(n-1)\times(n-1)$矩阵，$\mathbf{0}$表示$(n-1)\times 1$的零向量。由于行变换不改变矩阵的秩且$a_{11}\neq0$，可知$A_1$也是可逆的。根据归纳假设，对$A_1$存在置换矩阵$P_2$、单位下三角矩阵$L'$和上三角矩阵$U'$使$P_2 A_1 = L' U'$。构造出分块矩阵：
-	\[ 
-	P = \begin{pmatrix}
-		1 & \mathbf{0} \\
-		\mathbf{0} & P_2
-	\end{pmatrix}, \qquad 
-	L = \begin{pmatrix}
-		1 & \mathbf{0} \\
-		l & L'
-	\end{pmatrix}, \qquad 
-	U = \begin{pmatrix}
-		a_{11} & u^T \\
-		\mathbf{0} & U'
-	\end{pmatrix},
-	\] 
-	其中$l=(l_{21},l_{31},\dots,l_{n1})^T$为先前消去过程中得到的消去因子列向量。则由上述构造和归纳假设可验证：
-	\[ P A = \begin{pmatrix} 1 & \mathbf{0} \\ \mathbf{0} & P_2 \end{pmatrix}
-	\begin{pmatrix} a_{11} & u^T \\ \mathbf{0} & A_1 \end{pmatrix}
-	= \begin{pmatrix} a_{11} & u^T \\ \mathbf{0} & P_2 A_1 \end{pmatrix}
-	= \begin{pmatrix} a_{11} & u^T \\ \mathbf{0} & L' U' \end{pmatrix}
-	= \begin{pmatrix} 1 & \mathbf{0} \\ l & L' \end{pmatrix}
-	\begin{pmatrix} a_{11} & u^T \\ \mathbf{0} & U' \end{pmatrix} = L U, \] 
-	从而完成$PA=LU$的构造。
-	
-	\textbf{(2)~唯一性：} 假设还有另一组分解$PA=\tilde{L}\tilde{U}$，其中$\tilde{L}$为单位下三角矩阵、$\tilde{U}$为上三角矩阵，而且满足与$L,U$相同的主元选取规则。由于$L,\tilde{L}$都是可逆的下三角矩阵，且$U,\tilde{U}$都是可逆的上三角矩阵，我们有
-	\[ L^{-1}\tilde{L} = U \tilde{U}^{-1}. \] 
-	左侧为一个下三角矩阵，右侧为一个上三角矩阵，因此这个等式两侧实际上都是对角矩阵。又因为$L^{-1}\tilde{L}$和$U\tilde{U}^{-1}$的对角线元素全为$1$（所有单位下三角矩阵和单位上三角矩阵的对角线元素均为1），可知$L^{-1}\tilde{L}=I$，于是$\tilde{L}=L$且$\tilde{U}=U$。因此在约定的规范下分解是唯一的。
-\end{proof}
-
 %\begin{algorithm}[!ht]
 %	\caption{LU分解的高斯消去法（部分主元）}\label{alg:LU}
 %	\begin{algorithmic}[1]
@@ -122,55 +79,7 @@
 %	\end{algorithmic}
 %\end{algorithm}
 
-\begin{note}
-	LU分解的高斯消去算法的数值稳定性通常通过选择主元来提升。部分主元策略（每列选最大元素）能够避免除数过小导致的舍入误差放大，大多数情况下是数值后向稳定的。尽管存在构造的反例使误差增长因子达到$2^{n-1}$，但在实际应用中高斯消去配合部分主元选取可以可靠地求解线性方程组。对于一般的$n\times n$矩阵$A$，算法计算得到的$\tilde{L},\tilde{U}$满足$(L+\Delta L)(U+\Delta U) = A$，其中相对误差$\|\Delta A\|/\|A\|$通常在$\mathcal{O}(n\epsilon)$级别（$\epsilon$为机器精度），如果不存在异常的主元增长则误差很小。
-\end{note}
 
-\begin{proposition}\label{prop:LU-det}
-	设$PA=LU$是$A$的LU分解，其中$P$为置换矩阵，$L$为单位下三角矩阵，$U$为上三角矩阵，则$\det(A) = \det(P)\prod_{i=1}^n u_{ii}$。特别地，由于置换矩阵$\det(P)=\pm1$且$L$的对角线全为$1$，矩阵$A$的行列式等于$U$对角线元素的乘积（当$A$不可逆时，上述乘积为$0$）。
-\end{proposition}
-\begin{proof}
-	因为$\det(P)\neq0$且$\det(L)=1$，对$PA=LU$两侧取行列式，得到$\det(P)\det(A)=\det(L)\det(U)$，即$\det(P)\det(A)=\det(U)$。由于$U$是上三角矩阵，其行列式为对角线元素之积$\prod_{i=1}^n u_{ii}$。因此$\det(A) = \det(P)^{-1}\det(U) = \det(P)\prod_{i=1}^n u_{ii}$（因为$\det(P)=\pm1$是自身的逆）。
-\end{proof}
-
-\begin{note}
-	LU分解可用于高效地求解线性方程组和计算矩阵的逆等问题。对于方程$Ax=b$，先计算$PA=LU$，然后解$Ly=Pb$（前代入求$y$），再解$Ux=y$（回代求$x$），即可在$\mathcal{O}(n^2)$时间内得到解$x$。类似地，要计算$A^{-1}$，只需将单位矩阵$I$的列依次作为右端项$b$求解$Ax=e_i$，即可构造出$A^{-1}$。这些操作利用了$L,U$的三角结构，使得计算复杂度远小于直接求解或计算伴随矩阵。
-\end{note}
-
-\subsection{Cholesky分解（及$LDL^T$分解）}
-\begin{theorem}\label{theo:Cholesky}
-	设$A\in M_{n}(\mathbb{R})$是对称正定矩阵（即$\forall x\neq 0,\;x^T A x>0$），则存在唯一一个下三角矩阵$L$使得$A=LL^T$，其中$L$的对角线元素均为正数。该分解称为$A$的Cholesky分解。
-\end{theorem}
-\begin{proof}
-	\textbf{存在性：} 同样采用数学归纳法。对于$n=1$时，$A=[a_{11}]$正定意味着$a_{11}>0$，则取$L=[\sqrt{a_{11}}]$即可。假设对任意$(n-1)\times(n-1)$的对称正定矩阵都存在Cholesky分解，考虑$n\times n$情形。将$A$分块：
-	\[ A = \begin{pmatrix} 
-		a_{11} & r^T \\[6pt]
-		r & A_1 
-	\end{pmatrix},\] 
-	其中$a_{11}>0$（因为$A$正定）且$r\in \mathbb{R}^{n-1}$为$A$第一列除去$a_{11}$后的部分，$A_1$为$(n-1)\times(n-1)$的子矩阵。令$l_{11}=\sqrt{a_{11}}$，并定义$c=\frac{1}{l_{11}}\,r$为长度为$n-1$的列向量。构造
-	\[ L = \begin{pmatrix}
-		l_{11} & \mathbf{0}^T \\
-		c & L_1
-	\end{pmatrix}, \] 
-	其中$L_1$是递归假设下$A_1 - cc^T$的Cholesky分解矩阵。下面证明$A_1-cc^T$也是对称正定矩阵，从而$L_1$存在。对任意非零向量$y\in \mathbb{R}^{n-1}$，考虑扩充向量$\tilde{x}=\begin{pmatrix}-\frac{y^T r}{a_{11}} \\[3pt] y\end{pmatrix}\in \mathbb{R}^n$，由$A$正定知$\tilde{x}^T A\, \tilde{x}>0$。展开该二次型：
-	\[
-	\tilde{x}^T A\,\tilde{x} = \begin{pmatrix} -\frac{y^T r}{a_{11}} & y^T \end{pmatrix} 
-	\begin{pmatrix} a_{11} & r^T \\ r & A_1 \end{pmatrix} 
-	\begin{pmatrix} -\frac{y^T r}{a_{11}} \\[4pt] y \end{pmatrix}
-	= -2\frac{y^T r}{a_{11}}y^T r + y^T (A_1)y + \frac{(y^T r)^2}{a_{11}}. 
-	\] 
-	整理得$y^T (A_1 - \frac{1}{a_{11}} r\,r^T)y = \tilde{x}^T A\,\tilde{x} > 0$。注意$\frac{1}{a_{11}}r\,r^T = cc^T$，故对任意$y\neq 0$有$y^T(A_1 - cc^T)y>0$，说明$A_1-cc^T$是$(n-1)\times(n-1)$的对称正定矩阵。根据归纳假设，$A_1-cc^T$存在Cholesky分解$A_1-cc^T = L_1 L_1^T$。由此$L$得以构造完成，并满足：
-	\[ LL^T = \begin{pmatrix} l_{11} & \mathbf{0}^T \\ c & L_1 \end{pmatrix}
-	\begin{pmatrix} l_{11} & c^T \\ \mathbf{0} & L_1^T \end{pmatrix}
-	= \begin{pmatrix} l_{11}^2 & l_{11} c^T \\ l_{11} c & cc^T + L_1 L_1^T \end{pmatrix}
-	= \begin{pmatrix} a_{11} & r^T \\ r & cc^T + (A_1 - cc^T) \end{pmatrix}
-	= \begin{pmatrix} a_{11} & r^T \\ r & A_1 \end{pmatrix} = A.
-	\]
-	
-	\textbf{唯一性：} 假设$A=L L^T=\tilde{L}\tilde{L}^T$是两种Cholesky分解，其中$L,\tilde{L}$都是下三角且对角线元素为正。考虑$M=L^{-1}\tilde{L}$，则
-	\[ M M^T = L^{-1} \tilde{L}\,\tilde{L}^T (L^{-1})^T = L^{-1} A (L^{-1})^T = I. \] 
-	这说明$M$是正交矩阵。但$M$还是下三角矩阵且对角线元素为正实数，下三角正交矩阵只能是恒等矩阵（因为正交矩阵满足$M^T M=I$，而$M$下三角则$M$必须为对角线全$1$的矩阵）。因此$M=I$，即$\tilde{L}=L$。
-\end{proof}
 
 %\begin{algorithm}[!ht]
 %	\caption{Cholesky分解算法}\label{alg:Cholesky}
@@ -191,14 +100,6 @@
 	Cholesky分解的数值计算非常稳定。如果$A$正定，算法每一步都从当前子矩阵的对角元开方，这些对角元始终为正且不会受到消去误差的影响。实际计算中，即使考虑舍入误差，所得$\tilde{L}$满足$(A+\Delta A) = \tilde{L}\tilde{L}^T$，其中$\|\Delta A\|$相对于$\|A\|$的大小在机器误差阶上。与直接求$A^{-1}$或者使用$A^TA$求解正规方程相比，Cholesky分解避免了误差的放大，是求解对称正定线性系统的首选方法。
 \end{note}
 
-\begin{corollary}[主子式判定准则]\label{cor:Sylvester}
-	对称矩阵$A$是正定矩阵的充要条件是$A$的所有顺序主子式（即左上角$k\times k$子式，$k=1,2,\dots,n$）均为正数。
-\end{corollary}
-\begin{proof}
-	\textbf{正定$\Rightarrow$主子式全正：} 若$A=LL^T$是$A$的Cholesky分解，其中$L$对角线元素$l_{ii}>0$。则对于每个$k$，$A$的前$k$阶主子矩阵可表示为$L_k L_k^T$，其中$L_k$是$L$取前$k$行、前$k$列的主要部分。因此该$k$阶主子矩阵的行列式$\det(A_k) = \det(L_k)^2 = \prod_{i=1}^k l_{ii}^2>0$。
-	
-	\textbf{主子式全正$\Rightarrow$正定：} 此方向可通过反证证明。若$A$不是正定的，则存在非零$x$使$x^T A x \le 0$。令$x=(x_1,\dots,x_n)^T$，设$x_m$是最后一个非零分量（$m$存在且$\le n$）。考虑$A$的前$m$行$m$列的主子矩阵$A_m$。因为$x_m\neq0$且$x_i=0$对$i>m$，有$x^T A x = x_{1:m}^T A_m x_{1:m} \le 0$，其中$x_{1:m}$是$x$的前$m$维截断向量。这表明$A_m$不是正定的，从而存在$A_m$的顺序主子式不满足正值（根据主子式判定正定的充分条件部分）。这与假设$A$所有顺序主子式均正相矛盾。因此$A$必为正定矩阵。
-\end{proof}
 
 \begin{note}
 	对于任意实对称矩阵$A$，都可以通过有限步初等变换将其分解为$A=P^T L D L^T P$，其中$P$是置换矩阵，$L$是单位下三角矩阵，$D$是对角块矩阵（其对角元可能出现负数或$2\times 2$实块）。这称为$A$的$LDL^T$分解。当$A$正定时，可取$P=I$且$D$为正对角矩阵即退化为Cholesky分解。一般情况下，$D$对角元的正负号个数与$A$特征值正负个数相对应，这就是矩阵的惯性定理（Sylvester惯性定理）：无论经过怎样的相似变换，$A$正负特征值的数量不变。在惯性定理的意义下，$LDL^T$分解提供了一种计算矩阵正负惯性的途径。
@@ -214,16 +115,8 @@
 	\textbf{(1)~存在性：}我们介绍三种构造正交矩阵$Q$的方法来证明QR分解的存在性。\par
 	\textbf{Gram-Schmidt正交化：} 将$A$的列向量依次进行正交归一化处理。设$A=[a_1, a_2, \dots, a_n]$，其中$a_j$表示$A$的第$j$列。因为$A$可逆，各列向量线性无关。令$q_1=\frac{a_1}{\|a_1\|}$作为$Q$的第一列，取$r_{11}=\|a_1\|$。对于$j=2$到$n$，令$q_j'$为$a_j$在前$j-1$个已正交列的正交补部分：计算$r_{ij}=q_i^T a_j$对于$i=1,2,\dots,j-1$，并令 
 	\[ q_j' = a_j - \sum_{i=1}^{j-1} r_{ij}\,q_i. \] 
-	由于$\{a_1,\dots,a_{j-1}\}$线性无关可保证$q_j'\neq 0$。然后令$r_{jj}=\|q_j'\|$并归一化$q_j = q_j'/r_{jj}$作为$Q$的第$j$列。如此递推下去，我们得到$Q=[q_1,\dots,q_n]$是一个正交矩阵，而对应的$R=[r_{ij}]$是上三角矩阵，其中$r_{ij}=q_i^T a_j$（当$i\le j$）或$r_{ij}=0$（当$i>j$）。由上述构造可以验证$A=QR$。这种方法即为Gram-Schmidt正交化算法。\par
-	\textbf{Givens旋转：} Givens变换通过二维平面内的旋转将矩阵中某个元素消去为零。对于$A$的任意一个非零的下三角元素$a_{ij}$（$i>j$），存在一个Givens旋转矩阵$G_{ij}$（是一个单位正交矩阵，只在第$i$和$j$行（列）的$2\times 2$子块为$\begin{pmatrix}c & s\\ -s & c\end{pmatrix}$，其它为单位阵）能够将$A$左乘后把该元素消去，即$G_{ij} A$的$(i,j)$位置变为$0$。通过顺次选取合适的$(i,j)$对并左乘相应的Givens矩阵，可以依次将$A$下三角区域的元素逐个消去为零。当所有$i>j$处的元素都被消去后，我们得到$R$是上三角矩阵，同时左乘的Givens矩阵累乘形成了一个正交矩阵$Q$，满足$Q A = R$，即得到$A=Q^T R$（因为Givens旋转是对称正交的）。取$Q^T$代替原来的$Q$，同样可以表示出$A=Q R$形式。\par 
-	\textbf{Householder变换：} Householder变换使用反射矩阵一次性将一列中若干项同时消为零。首先，对于$A$的第一列$a_1$，构造第一个Householder矩阵$H_1=I - 2uu^T$，其中$u$为合适的单位向量，使得$H_1 a_1$仅在第1行有非零元素（即$H_1 a_1 = [\alpha,0,0,\dots,0]^T$）。将$H_1$作用于$A$的左侧，可以将$A$的第一列除首元素外的元素全部反射到零，得到$H_1A=\begin{pmatrix}\alpha & * \\ \mathbf{0} & A_1\end{pmatrix}$，其中$A_1$是剩余的$(n-1)\times(n-1)$子块矩阵，$\alpha\neq0$。然后对$A_1$重复上述过程：存在第二个Householder矩阵$H_2'$使得$H_2' A_1$的第一列仅第一行非零。将$H_2'$扩大嵌入为$n\times n$矩阵$H_2=\begin{pmatrix}1 & \mathbf{0}\\ \mathbf{0} & H_2'\end{pmatrix}$，它只作用于$A$的后$n-1$行。于是$H_2H_1 A$使$A$的前两列除了主对角元外均为零。如此继续构造$H_3,H_4,\dots,H_n$，最终得到$H_n \cdots H_2 H_1 A = R$为上三角矩阵。令$Q = (H_n \cdots H_2 H_1)^T$（注意Householder矩阵也是对称的，即$H_i^T = H_i$），则$Q$是正交矩阵且满足$Q A = R$，即$A=Q^T R$，同样取$Q^T$重新记作$Q$即可得到$A=QR$。以上过程证明了QR分解的存在性。
-	\par
-	\textbf{(2)~唯一性：} 如果$A=Q R = Q' R'$是两种QR分解，其中$Q,Q'$都是正交矩阵，$R,R'$都是上三角矩阵。由于$Q^{-1} = Q^T$，比较得$Q'^T Q = R' R^{-1}$。左边是正交矩阵，右边是上三角矩阵，因此$Q'^T Q$必为对角矩阵。也就是说，存在一个对角矩阵$D=(\pm1,\pm1,\dots,\pm1)$使$Q' = QD$和$R' = D^{-1} R$。当我们规定$R$的对角元素均为正值时，上述$D$只能取单位矩阵$I$，因此$Q'=Q,\;R'=R$，唯一性得证。
+	由于$\{a_1,\dots,a_{j-1}\}$线性无关可保证$q_j'\neq 0$。然后令$r_{jj}=\|q_j'\|$并归一化$q_j = q_j'/r_{jj}$作为$Q$的第$j$列。如此递推下去，我们得到$Q=[q_1,\dots,q_n]$是一个正交矩阵，而对应的$R=[r_{ij}]$是上三角矩阵，其中$r_{ij}=q_i^T a_j$（当$i\le j$）或$r_{ij}=0$（当$i>j$）。由上述构造可以验证$A=QR$。这种方法即为Gram-Schmidt正交化算法。
 \end{proof}
-
-\begin{note}
-	通过以上证明可见，QR分解只有在对$R$的对角线作出适当正符号约定时才唯一。例如，如果$A=Q R$是一个QR分解，那么令$D=\{\,\frac{r_{11}}{|r_{11}|},\frac{r_{22}}{|r_{22}|},\dots,\frac{r_{nn}}{|r_{nn}|}\}$，可以发现$Q'=QD$仍为正交矩阵，而$R'=D^{-1}R$成为对角元非负的上三角矩阵，且$A=Q'R'$。这种$R'$称为$A$的标准形QR分解，在此规范下$Q,R$由$A$唯一确定。
-\end{note}
 
 %\begin{algorithm}[!ht]
 %	\caption{Gram-Schmidt正交化QR分解算法}\label{alg:GS-QR}
@@ -261,19 +154,6 @@
 %		\RETURN $Q,\;R$。\quad // 输出使$A=QR$的$Q$（$m\times m$正交）和$R$（$m\times n$上三角）
 %	\end{algorithmic}
 %\end{algorithm}
-
-\begin{note}
-	在QR分解的计算中，不同的方法有不同的数值稳定性。Householder变换法和Givens旋转法都具有良好的数值稳定性，通常是后向稳定的，意味着求得的$\tilde{Q},\tilde{R}$满足$\tilde{Q}\tilde{R} = A + E$且$\|E\|$相对$\|A\|$很小。在实际实现中，Householder法由于效率和稳定性的平衡，被广泛采用。相比之下，经典Gram-Schmidt正交化在处理病态矩阵（列向量接近线性相关）时容易因舍入误差导致正交性丧失。改进的Gram-Schmidt算法通过在减去投影后重新正交一次来缓解这一问题，但其稳定性仍不及Householder法。一般而言，当矩阵的条件数较大时，推荐使用Householder或Givens方法来计算QR分解，以确保得到高精度的正交基。
-\end{note}
-
-\begin{proposition}
-	如果$A=QR$是$m\times n$矩阵（$\operatorname{rank}(A)=n$）的QR分解，其中$Q=[q_1,\dots,q_m]\in \mathbb{R}^{m\times m}$是正交矩阵（取列满空间的延拓形式），$R=\begin{pmatrix}R_{11}\\ \mathbf{0}\end{pmatrix}\in \mathbb{R}^{m\times n}$，其中$R_{11}\in \mathbb{R}^{n\times n}$是可逆的上三角矩阵，那么对任意向量$b\in \mathbb{R}^m$，最小二乘问题$\min_{x\in \mathbb{R}^n}\|Ax-b\|_2$的解为 
-	\[x^* = R_{11}^{-1}(Q^T b)_{1:n},\] 
-	其中$(Q^T b)_{1:n}$表示向量$Q^T b$的前$n$个分量。换言之，$x^* = R^{-1} Q^T b$。
-\end{proposition}
-\begin{proof}
-	由于$Q$正交，$\|Ax-b\|_2 = \|Q^T(Ax-b)\|_2 = \|Q^T Ax - Q^T b\|_2 = \|Rx - Q^T b\|_2$。记$Q^T b = \begin{pmatrix} c_1 \\ c_2 \end{pmatrix}$，其中$c_1\in \mathbb{R}^n$由前$n$个分量组成，$c_2\in \mathbb{R}^{m-n}$由剩余分量组成，则$\|Rx-Q^T b\|_2^2 = \|R_{11}x - c_1\|_2^2 + \|c_2\|_2^2$。对给定$b$，$\|c_2\|_2^2$是常数。为了最小化上述范数，必须令$R_{11}x = c_1$，因为$R_{11}$可逆，此方程有唯一解$x = R_{11}^{-1} c_1$。此时残差范数为$\|c_2\|_2$达到最小，故$x^* = R_{11}^{-1} c_1$即为最小二乘解。
-\end{proof}
 
 \begin{note}
 	QR分解的一个重要应用是用于计算矩阵的特征值，即著名的QR算法。具体做法是不断将矩阵分解并迭代：给定$A^{(0)}=A$，计算$A^{(0)}=Q_1 R_1$，然后令$A^{(1)}=R_1 Q_1$；再对$A^{(1)}$进行QR分解$A^{(1)}=Q_2 R_2$，令$A^{(2)}=R_2 Q_2$，以此类推。适当的位移策略可加速收敛。当迭代收敛时，$A^{(k)}$趋近于一个上三角矩阵$T$，其中$T$的对角元即为初始矩阵$A$的特征值。这种算法在数值上表现出极好的稳定性，是通用计算特征值的高效方法。

@@ -3,17 +3,24 @@
 	由$m\times n$个数排成$m$行、$n$列的一张表称为一个$m\times n$\gls{Matrix}，其中的每一个数称为这个矩阵的一个元素，第$i$行与第$j$列交叉位置的元素称为矩阵的$(i,j)$元，记作$A(i;j)$。一个$m\times n$矩阵可以简单地记作$A_{m\times n}$。如果矩阵$A$的$(i,j)$元是$a_{ij}$，那么可以记作$A=(a_{ij})$。如果一个矩阵的行数和列数相同，则称它为\gls{SquareMatrix}，$n$行$n$列的方阵也成为$n$阶矩阵。对于两个矩阵$A$和$B$，如果它们的行数都等于$m$且列数都等于$n$，同时还有$A(i;j)=B(i;j),i=1,2,\dots,m,\;j=1,2,\dots,n$，那么称$A$和$B$相等，记作$A=B$。
 \end{definition}
 \begin{definition}
-	称主对角线元素都为$1$其他位置元素都为$0$的$n$阶方阵为$n$阶\gls{IdentitMatrix}，记为$I_n$。
+	称元素全为$0$的矩阵为\gls{ZeroMatrix}，记作$\mathbf{0}$。
 \end{definition}
+\begin{definition}
+	称主对角线元素都为$1$其他位置元素都为$0$的$n$阶方阵为$n$阶\gls{IdentityMatrix}，记为$I_n$。
+\end{definition}
+\begin{definition}
+	若一个$n$阶方阵的主对角线下方的元素全为$0$，即$a_{ij}=0(i>j)$，称该矩阵为$n$阶\gls{UpperTriangularMatrix}。对角线元素均为$1$的上三角矩阵被称为\textbf{单位上三角矩阵}。若一个$n$阶方阵的主对角线上方的元素全为$0$，即$a_{ij}=0(i<j)$，称该矩阵为$n$阶\gls{LowerTriangularMatrix}。对角线元素均为$1$的下三角矩阵被称为\textbf{单位下三角矩阵}。
+\end{definition}
+
 
 \subsection{矩阵的运算}
 \subsubsection{加减法与数量乘法}
 \begin{definition}
-	将数域$K$上所有$m\times n$矩阵组成的集合记作$M_{m\times n}(K)$，当$m=n$时，$M_{m\times m}(K)$可以简记作$M_m(K)$。在$M_{s\times m}(K)$中定义如下运算：
+	将数域$K$上所有$m\times n$矩阵组成的集合记作$M_{m\times n}(K)$，当$m=n$时，$M_{m\times m}(K)$可以简记作$M_m(K)$。在$M_{m\times n}(K)$中定义如下运算：
 	\begin{enumerate}
 		\item \textbf{加法：} 
 		\begin{equation*}
-			\forall\;A=(a_{ij}),B=(b_{ij})\in M_{s\times m}(K),\;A+B=(a_{ij}+b_{ij})
+			\forall\;A=(a_{ij}),B=(b_{ij})\in M_{m\times n}(K),\;A+B=(a_{ij}+b_{ij})
 		\end{equation*}
 		\item \textbf{纯量乘法：}
 		\begin{equation*}
@@ -27,7 +34,7 @@
 	接下来证明如上定义的加法和纯量乘法满足线性空间中的8条运算法则：
 	\begin{enumerate}
 		\item 因为数域内的数满足加法交换律与加法结合律，所以$M_{m\times n}(K)$上的加法满足线性空间运算法则(1)(2)；
-		\item 取一个元素全为$0$的$m\times n$矩阵，将其记作$\mathbf{0}$，显然对$\forall\;A\in M_{m\times n}(K)$，有$A+\mathbf{0}=A$，因此$M_{m\times n}(K)$中存在零元且它就是$\mathbf{0}$，称其为\gls{ZeroMatrix}。因此，$M_{m\times n}(K)$上的加法满足线性空间运算法则(3)；
+		\item 显然对$\forall\;A\in M_{m\times n}(K)$，有$A+\mathbf{0}=A$，因此$M_{m\times n}(K)$中存在零元且它就是$\mathbf{0}$。因此，$M_{m\times n}(K)$上的加法满足线性空间运算法则(3)；
 		\item 对任意的$A\in M_{m\times n}(K)$，取$-A=(-a_{ij})$，则有$A+(-A)=(a_{ij}-a_{ij})=\mathbf{0}$。由$A$的任意性，$M_{m\times n}(K)$中的每个元素都具有负元，将$A$的负元就记作$-A$。因此，$M_{m\times n}(K)$上的加法满足线性空间运算法则(4)；
 		\item 因为数域内的数满足乘法结合律和乘法分配律，同时它们乘$1$的积是自身，所以$M_{m\times n}$上的纯量乘法满足线性空间运算法则(5)(6)(7)(8)。
 	\end{enumerate}
@@ -52,7 +59,7 @@
 	\begin{enumerate}
 		\item 设$A=(a_{ij})\in M_{m\times n}(K),\;B=(b_{ij})\in M_{n\times p}(K)$，则$AB$有如下四种理解：
 		\begin{gather*}
-			A=(\alpha_1^T;\alpha_2^T;\dots;\alpha_m^T),\;B=(\seq{\beta}{p})\longrightarrow AB=(a_i^Tb_j) \\
+			A=(\alpha_1^T;\alpha_2^T;\dots;\alpha_m^T),\;B=(\seq{\beta}{p})\longrightarrow AB=(\alpha_i^T\beta_j) \\
 			A=(\seq{\alpha}{n})\longrightarrow AB=\left(\sum_{i=1}^{n}b_{i1}\alpha_i,\sum_{i=1}^{n}b_{i2}\alpha_i,\dots,\sum_{i=1}^{n}b_{ip}\alpha_i\right) \\
 			B=(\beta_1^T;\beta_2^T;\beta_n^T)\longrightarrow AB=\left(\sum_{j=1}^{n}a_{1i}\beta_i^T;\sum_{j=1}^{n}a_{2i}\beta_i^T;\dots;\sum_{j=1}^{n}a_{mi}\beta_i^T\right) \\
 			A=(\seq{\alpha}{n}),\;B=(\beta_1^T;\beta_2^T;\beta_n^T)\longrightarrow AB=\sum_{i=1}^{n}\alpha_i\beta_i^T
@@ -60,7 +67,8 @@
 		\item \textbf{结合律：}设$A\in M_{m\times n}(K),\;B\in M_{n\times p}(K),\;C\in M_{p\times q}(K)$，则$(AB)C=A(BC)$；
 		\item \textbf{分配律：}设$A\in M_{m\times n}(K),\;B\in M_{n\times p}(K),\;C\in M_{n\times p}(K),\;D\in M_{p\times q}(K)$，则$A(B+C)=AB+AC,\;(B+C)D=BD+CD$；
 		\item 设$A\in M_{m\times n}(K),\;B\in M_{n\times p}(K),\;k\in K$，则$k(AB)=(kA)B=A(kB)$；
-		\item 设$A\in M_{m\times n}(K)$，则$AI_n=I_mA=A$。
+		\item 设$A\in M_{m\times n}(K)$，则$AI_n=I_mA=A$；
+		\item 两个上三角矩阵的乘积还是上三角矩阵，两个下三角矩阵的乘积还是下三角矩阵。
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -125,6 +133,15 @@
 \begin{proof}
 	(1)(2)证明过于机械，略去。\par
 	(3)只需注意到$P[i,j]=P[i(-1)]P[i,j(-1)]P[j,i(1)]P[i,j(-1)]$。由(2)即可得到矩阵的第二种初等变换可以由一系列其它两种初等变换得到。
+\end{proof}
+\begin{definition}
+	若一个$n$阶方阵的每一行与每一列中恰有一个元素为$1$，其余元素均为$0$，称该矩阵为$n$阶\gls{PermutationMatrix}。
+\end{definition}
+\begin{property}\label{prop:PermutationMatrix}
+	用置换矩阵乘上一个矩阵表示对该矩阵作矩阵的第二类初等变换，即互换行、列的位置。
+\end{property}
+\begin{proof}
+	置换矩阵只能由初等矩阵经矩阵的第二类初等变换得到，由\cref{prop:ElementaryMatrix}(2)即可得出结论。
 \end{proof}
 \subsubsection{迹}
 \begin{definition}
@@ -234,7 +251,7 @@
 		\{i_1',i_2',\dots,i_{n-k}'\}=\{1,2,\dots,n\}\backslash\{i_1,i_2,\dots,i_k\} \\
 		\{j_1',j_2',\dots,j_{n-k}'\}=\{1,2,\dots,n\}\backslash\{j_1,j_2,\dots,j_k\}
 	\end{gather*}
-	特别的，$A$的$(i,j)$元的余子式记作$M_{ij}$，代数余子式记作$A_{ij}$。若选取的行和列是前$k$行与前$k$列，则称这些行和列交叉处的$k^2$个元素按原来的次序组成的$k$阶矩阵的行列式为$A$的一个\gls{PrincipalKMinor}。
+	特别的，$A$的$(i,j)$元的余子式记作$M_{ij}$，代数余子式记作$A_{ij}$。若选取的行和列是前$k$行与前$k$列，则称这些行和列交叉处的$k^2$个元素按原来的次序组成的$k$阶矩阵为$k$阶\gls{LeadingPrincipalSubmatrix}，其行列式为$A$的\gls{PrincipalKMinor}。
 \end{definition}
 \begin{property}\label{prop:Determinant}
 	矩阵$A=(a_{ij})\in M_{n}(K)$的行列式$\det A$具有如下性质：
@@ -424,7 +441,7 @@
 			\end{array} \right\}
 		\end{align*}
 		\item 设$B\in M_{n}(K)$，则$\det(AB)=\det A\det B$；
-		\item 若$A$是上三角矩阵\info{特殊矩阵}，则$\det A=\prod\limits_{i=1}^na_{ii}$；
+		\item 若$A$是上三角矩阵或下三角矩阵，则$\det A=\prod\limits_{i=1}^na_{ii}$；
 		\item 称下述行列式为\textbf{Vandermonde行列式}：
 		\begin{equation*}
 			\begin{vmatrix}
@@ -527,7 +544,7 @@
 			-I_n & B
 		\end{vmatrix}=|A||B|
 	\end{equation*}
-	由(10)和(3)，利用矩阵的初等行变换将$A$矩阵化为$\mathbf{0}$又可得到：
+	由(10)和(3)，利用矩阵的初等行变换将$A$化为$\mathbf{0}$又可得到：
 	\begin{align*}
 		&\begin{vmatrix}
 			A & \mathbf{0} \\
@@ -792,6 +809,41 @@
 				-A_{22}^{-1}A_{21}(A_{11}-A_{12}A_{22}^{-1}A_{21})^{-1} & A_{22}^{-1}+A_{22}^{-1}A_{21}(A_{11}-A_{12}A_{22}^{-1}A_{21})^{-1}A_{12}A_{22}^{-1}
 			\end{pmatrix}
 		\end{equation*}
+		\item 若下（上）三角矩阵$L$可逆，则$L^{-1}$仍为下（上）三角矩阵。特别的，单位下（上）三角矩阵的逆矩阵仍为单位下（上）三角矩阵，且有：
+		\begin{gather*}
+			L=
+			\begin{pmatrix}
+				1 & & & &  \\
+				l_{21} & 1 & & &  \\
+				l_{31} & l_{32} & 1 & &  \\
+				\vdots & \vdots & \vdots & \ddots &  \\
+				l_{n1} & l_{n2} & l_{n3} & \cdots & 1
+			\end{pmatrix},\quad
+			L^{-1}=
+			\begin{pmatrix}
+				1 & & & &  \\
+				-l_{21} & 1 & & &  \\
+				-l_{31} & -l_{32} & 1 & &  \\
+				\vdots & \vdots & \vdots & \ddots &  \\
+				-l_{n1} & -l_{n2} & -l_{n3} & \cdots & 1 \\
+			\end{pmatrix} \\
+			U=
+			\begin{pmatrix}
+				1 & u_{12} & u_{13} & \cdots & u_{1n} \\
+				& 1 & u_{23} & \cdots & u_{2n} \\
+				&       & 1 & \cdots & u_{3n} \\
+				&  &  & \ddots & \vdots \\
+				&       &       &  & 1
+			\end{pmatrix},\quad
+			U^{-1}=
+			\begin{pmatrix}
+				1 & -u_{12} & -u_{13} & \cdots & -u_{1n} \\
+				& 1 & -u_{23} & \cdots & -u_{2n} \\
+				&       & 1 & \cdots & -u_{3n} \\
+				&  &  & \ddots & \vdots \\
+				&       &       &  & 1
+			\end{pmatrix}
+		\end{gather*}
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -801,7 +853,7 @@
 	\end{equation*}
 	矛盾。\par
 	(2)由可逆矩阵的定义即可得到。\par
-	(3)\textbf{a：}当$A$可逆时有$AA^{-1}=I_n$，所以由\cref{prop:Determinant}(11)可得$|AA^{-1}|=|A||A^{-1}|=1$，于是$\det A\ne0$。当$\det A\ne0$时，由\cref{prop:Determinant}(8)(9)可知$AA^*=A^*A=|A|E$，所以$A^{-1}=|A|^{-1}A^*$，$A$可逆。\par
+	(3)\textbf{ a：}当$A$可逆时有$AA^{-1}=I_n$，所以由\cref{prop:Determinant}(11)可得$|AA^{-1}|=|A||A^{-1}|=1$，于是$\det A\ne0$。当$\det A\ne0$时，由\cref{prop:Determinant}(8)(9)可知$AA^*=A^*A=|A|E$，所以$A^{-1}=|A|^{-1}A^*$，$A$可逆。\par
 	\textbf{b：}由(a)和\cref{prop:MatrixRank}(3)立即可得。\par
 	\textbf{c：}由(b)和矩阵秩的定义立即可得。\par
 	\textbf{d：}由(c)、\cref{prop:nDimensionalLinearSpace}和\info{$K^n$的维数为$n$}立即可得。\par
@@ -814,7 +866,7 @@
 	(10)由可逆矩阵的定义立即可得。\par
 	(11)代入定义验证即可得到。\par
 	(12)由\cref{prop:Transpose}(4)可得$(AA^{-1})^T=(A^{-1})^TA^T=I,\;(AA^{-1})^H=(A^{-1})^HA^H=I$，根据(7)结论成立。\par
-	(13)由(12)立即可得。\par
+	(13)对称矩阵和Hermitian矩阵的结论由(12)立即可得。\par
 	(14)由(4)(7)(10)(9)(11)可得必要性，由(9)(7)可得充分性。\par
 	(15)由(4)可知存在一系列单位矩阵$\seq{P}{n}$使得$P_nP_{n-1}\cdots P_1A=I$，根据(7)可得$P_nP_{n-1}\cdots P_1=A^{-1}$，即$P_nP_{n-1}\cdots P_1I=A^{-1}$，由\cref{prop:ElementaryMatrix}(2)可得即可得出结论。\par
 	(16)由(14)和\cref{prop:MatrixRank}(2)立即可得。\par
@@ -870,7 +922,24 @@
 			-(A_{22}-A_{21}A_{11}^{-1}A_{12})^{-1}A_{21}A_{11}^{-1} & (A_{22}-A_{21}A_{11}^{-1}A_{12})^{-1}
 		\end{pmatrix}
 	\end{gather*}
-	$A_{22}$可逆的情况类似可得。
+	$A_{22}$可逆的情况类似可得。\par
+	(18)设下三角矩阵$L\in M_{n}(K)$可逆，由(3.a)和\cref{prop:Determinant}(12)可知$L$的对角线元素均不为$0$。对$L$的阶数作归纳假设。当$n=1$时结论显然成立，假设矩阵阶数为$n-1$时结论成立，下面证明矩阵阶数为$n$时结论也成立。将$L$分块为：
+	\begin{equation*}
+		L=
+		\begin{pmatrix}
+			A & b \\
+			\mathbf{0} & \alpha
+		\end{pmatrix}
+	\end{equation*}
+	其中$A$为$n-1$阶上三角矩阵矩阵，由(3.a)和\cref{prop:Determinant}(12)可知$A$可逆。根据(17)可得：
+	\begin{equation*}
+		L^{-1}=
+		\begin{pmatrix}
+			A^{-1} & -A^{-1}b\alpha^{-1} \\
+			\mathbf{0} & \alpha^{-1}
+		\end{pmatrix}
+	\end{equation*}
+	由归纳假设可知$A^{-1}$是下三角矩阵，于是$L^{-1}$是下三角矩阵。类似可得上三角矩阵时的情况。
 \end{proof}
 
 \subsection{正交矩阵与Euclid空间}
@@ -902,6 +971,7 @@
 		\item 单位矩阵是正交（酉）矩阵；
 		\item 若$A,B$是正交（酉）矩阵，则$AB$也是正交（酉）矩阵；
 		\item 若$A$是正交（酉）矩阵，则$A^{-1}$也是正交（酉）矩阵；
+		\item 若$A$是正交（酉）矩阵且为上（下）三角矩阵，则$A$是对角矩阵且主对角线元素模为$1$；
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -912,5 +982,25 @@
 	\end{equation*}\par
 	(3)显然。\par
 	(4)根据\cref{prop:Transpose}(4)代入验证即可。\par
-	(5)由\cref{prop:Transpose}(2)和正交矩阵、酉矩阵的定义即可得到。
+	(5)由\cref{prop:Transpose}(2)和正交矩阵、酉矩阵的定义即可得到。\par
+	(6)设$A\in M_{n}(K)$为上三角矩阵且$A$是酉矩阵。当$n=1$时，由$A^HA=|a_{11}|^2=1$可知$|a_{11}|=1$，命题成立。假设当矩阵阶数为$n$时结论成立，即若$A\in M_{n-1}(K)$为上三角且$A^HA=I_{n-1}$，则$A$为对角矩阵且$|a_{ii}|=1$，下证明矩阵阶数为$n$时结论也成立。\par
+	由于$A$是上三角矩阵，其第$n$行只有一个可能非零的元素$a_{nn}$，因此：
+	\begin{equation*}
+		AA^H(n;n)=\sum_{j=1}^{n} |a_{nj}|^2=|a_{nn}|^2=1
+	\end{equation*}
+	从而$|a_{nn}|=1$。\par
+	当$n>k$时有：
+	\begin{equation*}
+		0=AA^H(n;k)=\sum_{j=1}^{n}a_{nj}\overline{a_{kj}}=a_{nn}\overline{a_{kn}}
+	\end{equation*}
+	由于$|a_{nn}|=1$，所以$a_{kn}=0,\;\forall k<n$。因此，第$n$列除$a_{nn}$外全为零，所以：
+	\begin{equation*}
+		A= 
+		\begin{pmatrix}
+			B & 0 \\
+			0 & a_{nn}
+		\end{pmatrix}
+	\end{equation*}
+	其中$B\in M_{n-1}(K)$为上三角矩阵。因为$A$是酉矩阵，所以$B$也是酉矩阵，由归纳假设可知$B$是对角矩阵且主对角线模为$1$，从而$A$也是对角矩阵且主对角线模为$1$。\par
+	当$A$是下三角矩阵时可知$A^T$是对角矩阵且主对角线元素模为$1$，也即$A$是对角矩阵且主对角线元素模为$1$。
 \end{proof}
