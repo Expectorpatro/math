@@ -1,0 +1,288 @@
+---
+title: "Active Learning"
+author: "Xingcheng Ni"
+date: "`r Sys.Date()`"
+description: "A review on active learning."
+format:
+  html:
+    embed-resources: true      # 将 CSS/JS 等嵌入到单个文件中
+    code-fold: true            # 默认折叠所有代码块
+    code-tools: true           # 显示复制按钮等工具
+    toc: true                  # 显示目录（Table of Contents）
+    toc-depth: 3               # 目录显示层级
+    toc-location: left         # 目录在左侧浮动
+    number-sections: true      # 标题自动编号
+    theme: cosmo               # Bootswatch 主题，可选：cosmo, flatly, lumen, yeti...
+    fig-width: 6               # 全局图宽度
+    fig-height: 4              # 全局图高度
+    fig-align: center          # 图居中
+    code-line-numbers: true    # 显示代码行号
+    self-contained: true       # 完全单文件 HTML
+    navbar:
+      title: "Analysis Report"
+      left:
+        - text: "Home"
+          href: "#"
+        - text: "Data"
+          href: "#data"
+        - text: "Analysis"
+          href: "#analysis"
+      right:
+        - icon: "github"
+          href: "https://github.com/your-repo" # 替换成你项目地址
+editor: visual                 # 启用可视化编辑器
+execute:
+  echo: true                    # 默认显示代码
+  warning: false
+  message: false
+  error: false
+  cache: true
+fontsize: 12pt                 # 全局字体大小
+mainfont: "Arial"               # 主字体
+monofont: "Fira Code"           # 等宽字体
+linkcolor: "#1a73e8"            # 链接颜色
+highlight-style: tango          # 代码高亮样式，可选：tango, pygments, kate, etc.
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE,
+  collapse = FALSE,
+  prompt = TRUE,
+  warning = FALSE,
+  error = TRUE,
+  message = FALSE
+)
+
+library(knitr)
+library(kableExtra)
+library(reticulate)
+
+options(kableExtra.html.bsTable = TRUE)
+# use_python("/opt/homebrew/Caskroom/miniconda/base/envs/thesis/bin/python", required = TRUE)
+```
+
+# Active Learning(AL)
+
+| **Symbol** | **Meaning** | **Description** |
+|:--------------------:|:---------------------|:---------------------------|
+| $\mathcal{D}_L$ | Labeled dataset | A small set of samples with known labels, used to train the model. |
+| $\mathcal{D}_U$ | Unlabeled dataset | A large pool of samples without labels, from which the learner selects new points to query. |
+| $f$ | Learner model | The current trained model. |
+| $\theta$ | Model parameters | Parameters of the classifier or regressor being trained. ｜ |
+| $m$ | Number of classes | Total number of classes in the classification task. |
+| $x_i$ | Input feature vector | The $i$-th sample in the dataset. |
+| $y_i$ | True label | The corresponding label of $x_i$. |
+| $\hat{y}_i = f_{\theta}(x_i)$ | Predicted label | The model prediction for sample $x_i$ under parameters $\theta$. |
+| $p(y=j\mid x, \theta)$ | Predictive distribution | Probability of the sample belonging to class $j$ ($j=1,2,\dots,m$) given the input $x$ and model parameters $\theta$. ｜ |
+| $q(x)$ | Query strategy | Function determining how uncertain or informative a sample is. |
+| $x^{*}$ | Queried sample | The sample chosen by the query strategy for annotation . |
+| $n$ | Number of queried samples | Number of instances selected during each query iteration. |
+| $t$ | Iteration index | The current active learning round. |
+| $V(y=j)$ | Number of votes | The number of votes that label $j$ receives from the prediction of all classifiers. |
+| $M$ | Number of classifiers | The number of committee members. |
+
+-   myopic active learning
+
+    Single instance is queried at a time.
+
+-   batch mode active learing
+
+    A batch of samples is selected and labeled simultaneously.
+
+Challenges for Batch Mode AL:
+
+-   computational complications as the number of possible batches $\binom{n}{k}$ can be very large
+-   It’s difficult to formulate an appropriate criterion to measure the overall information carried by of  a batch of samples
+
+Batch mode active learning algorithms:
+
+-   clustering-based methods
+
+-   optimal experimental design
+
+-   exploration-exploitation approaches
+
+    achieve a balance between informativeness and representativeness by using a trade-off parameter
+
+-   combinatorial optimization problems
+
+## Myopic Active Learning
+
+### Information-based
+
+-   Uncertainty sampling
+
+    Select the instances for which the current classifer is least certain. Querying these least certain instances can help the model refine the decision boundary.
+
+    -   Maximum entropy
+    -   Margin sampling
+    -   Least confident
+
+-   Query by committee
+
+    In the Query-by-Committee (QBC) framework, a committee of models is trained on different subsets of the labeled dataset. The informativeness of unlabeled samples is then assessed based on the level of disagreement among the committee members. Points for which the committee exhibits the highest disagreement are considered the most informative and are subsequently selected for labeling.
+
+    -   Committee by bagging
+    -   Committee by boosting
+
+#### Uncertainty Sampling
+
+##### Least Confident
+
+$$
+x^{*} = \underset{x\in\mathcal{D}_U}{\arg\max}\left[1-\max_{j}p(y=j\mid x, \theta)\right]
+$$
+
+```{python, python.reticulate=FALSE}
+class LeastConfidentSampling(BaseSampler):
+    """
+    Least Confident Sampling Strategy for Active Learning (multi-class classification).
+
+    Main Idea:
+        Select samples for which the model has the lowest confidence in its top predicted class.
+    """
+    def __init__(self):
+        pass
+    
+    def query(self, model, X_unlabeled, n_instances=1):
+        """
+        Query n_instances samples from X_unlabeled based on least confident predictions.
+
+        Parameters:
+        ----------
+        - model: Trained classification model with predict_proba method.
+        - X_unlabeled: np.ndarray, shape (num_samples, num_features)
+        - n_instances: int, number of samples to query
+
+        Returns:
+        -------
+        - selected_indices: list of int, indices of selected samples
+        """
+        probs = model.predict_proba(X_unlabeled)
+        lc_scores = 1 - np.max(probs, axis=1)
+        selected_indices = np.argsort(-lc_scores)[:n_instances]
+
+        return selected_indices
+```
+
+##### Margin Sampling
+
+$$
+x^{*} = \underset{x\in\mathcal{D}_U}{\arg\min}\left[p(y=j_1\mid x, \theta) - p(y=j_2\mid x, \theta)\right] \\
+j_1=\underset{j}{\arg\max}\;p(y=j\mid x, \theta),\;j_2=\underset{j\in\{1,2,\dots,m\}\backslash\{j_1\}}{\arg\max}\;p(y=j\mid x, \theta)
+$$
+
+```{python, python.reticulate=FALSE}
+class MarginSampling(BaseSampler):
+    """
+    Margin Sampling Strategy for Active Learning (multi-class classification).
+
+    Main Idea:
+        Select samples where the difference (margin) between the two most probable classes is smallest,
+        indicating the most ambiguous predictions.
+    """
+    def __init__(self):
+        pass
+
+    def query(self, model, X_unlabeled, n_instances=1):
+        """
+        Query n_instances samples from X_unlabeled based on margin sampling.
+
+        Parameters:
+        ----------
+        - model: Trained classification model, must have predict_proba method.
+        - X_unlabeled: np.ndarray, shape (num_samples, num_features)
+        - n_instances: int, number of samples to query
+
+        Returns:
+        -------
+        - selected_indices: list of int, indices of selected samples
+        """
+        probs = model.predict_proba(X_unlabeled)
+        sorted_probs = -np.sort(-probs, axis=1)
+        margins = sorted_probs[:, 0] - sorted_probs[:, 1]
+        selected_indices = np.argsort(margins)[:n_instances]
+
+        return selected_indices
+```
+
+##### Max Entropy
+
+$$
+x^{*} = \underset{x\in\mathcal{D}_U}{\arg\max}\;-\sum_{j=1}^{m}p(y=j\mid x,\theta)\ln[p(y=j\mid x,\theta)]
+$$
+
+```{python, python.reticulate=FALSE}
+class MaxEntropySampling(BaseSampler):
+    """
+    Maximum Entropy Sampling Strategy for Active Learning (multi-class classification).
+
+    Main Idea:
+        Select samples with the highest predictive entropy, indicating the most uncertain predictions.
+    """
+    def __init__(self):
+        pass
+    
+    def query(self, model, X_unlabeled, n_instances=1):
+        """
+        Query n_instances samples from X_unlabeled based on max entropy.
+
+        Parameters:
+        ----------
+        - model: Trained classification model, must have predict_proba method.
+        - X_unlabeled: np.ndarray, shape (num_samples, num_features)
+        - n_instances: int, number of samples to query
+
+        Returns:
+        -------
+        - selected_indices: list of int, indices of selected samples
+        """
+        probs = model.predict_proba(X_unlabeled)
+        entropy = np.sum(probs * np.log(probs + 1e-12), axis=1)
+        selected_indices = np.argsort(entropy)[:n_instances]
+
+        return selected_indices
+```
+
+#### Query by Committee
+
+The level of disagreement among committee members can be measured by many different methods.
+
+$$
+x^{*} = \underset{x\in\mathcal{D}_U}{\arg\max}\;-\sum_{j=1}^{m}\frac{V(y=j)}{M}\ln\left[\frac{V(y=j)}{M}\right]
+$$
+
+##### Committee by Boosting
+
+##### Committee by Bagging
+
+## Classification
+
+1.  Membership Query Synthesis The activate learner generates synthetic instances in the space and then request labels for them. But it can artificially generate instaces that are not impossible to reasonably label.
+2.  Stream-based Selective Sampling Select one sample at a time. May not be suitable in nonstationary data environments due to the potential for data drift?
+3.  Pool-based Selective Sampling Measure the informativeness of some/all instances in the large set of available unlabeled data to query some of them.
+
+## Sampling Method
+
+1.  Random
+2.  Information-based(Redundancy, outliers, error caused by initial ML model)
+    -   Uncertainty Sampling(Least, confident, Margin, Entropy)
+    -   Expected Model/Prediction Change
+3.  Representation-based(low convergence speed, more easily to select outliers, but no redundant points)
+    -   Density-based
+    -   Diversity-based
+    -   Cluster-based
+4.  Meta-active Learning
+
+Several studies have combined the two aforementioned strategies (i.e., the informativebased and the representative-based) to obtain high-quality labeled data (i.e., the utility function will be u = fu × qu)
+
+## Problems to be Solved
+
+1.  How to effectively combine several sampling method?
+2.  How could active learner be more flexible to adapt possibly unbalanced dataset?
+3.  Small query budget.
+4.  How could AL be implemented with no(or little) initial knowledge?
+5.  Multilabel.
+6.  High-Dimensional Environments
