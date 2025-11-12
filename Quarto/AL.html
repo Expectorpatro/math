@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Xingcheng Ni">
+<meta name="dcterms.date" content="2025-10-18">
+<meta name="description" content="A review on active learning.">
+
+<title>Active Learning</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="AL_files/libs/clipboard/clipboard.min.js"></script>
+<script src="AL_files/libs/quarto-html/quarto.js"></script>
+<script src="AL_files/libs/quarto-html/popper.min.js"></script>
+<script src="AL_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="AL_files/libs/quarto-html/anchor.min.js"></script>
+<link href="AL_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="AL_files/libs/quarto-html/quarto-syntax-highlighting-0de45b8b5f35a93596f1d788d60c4c11.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="AL_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="AL_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="AL_files/libs/bootstrap/bootstrap-fcbf4cb0144a2d66ee3fcd3b3ee4c927.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  
+  <script>
+    (function () {
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src  = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js";
+      document.getElementsByTagName("head")[0].appendChild(script);
+    })();
+  </script>
+
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#active-learningal" id="toc-active-learningal" class="nav-link active" data-scroll-target="#active-learningal"><span class="header-section-number">1</span> Active Learning(AL)</a>
+  <ul class="collapse">
+  <li><a href="#myopic-active-learning" id="toc-myopic-active-learning" class="nav-link" data-scroll-target="#myopic-active-learning"><span class="header-section-number">1.1</span> Myopic Active Learning</a>
+  <ul class="collapse">
+  <li><a href="#uncertainty-sampling" id="toc-uncertainty-sampling" class="nav-link" data-scroll-target="#uncertainty-sampling"><span class="header-section-number">1.1.1</span> Uncertainty Sampling</a></li>
+  </ul></li>
+  <li><a href="#classification" id="toc-classification" class="nav-link" data-scroll-target="#classification"><span class="header-section-number">1.2</span> Classification</a></li>
+  <li><a href="#sampling-method" id="toc-sampling-method" class="nav-link" data-scroll-target="#sampling-method"><span class="header-section-number">1.3</span> Sampling Method</a></li>
+  <li><a href="#problems-to-be-solved" id="toc-problems-to-be-solved" class="nav-link" data-scroll-target="#problems-to-be-solved"><span class="header-section-number">1.4</span> Problems to be Solved</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Active Learning</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+<div>
+  <div class="description">
+    A review on active learning.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Xingcheng Ni </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 18, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="active-learningal" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Active Learning(AL)</h1>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 30%">
+<col style="width: 38%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;"><strong>Symbol</strong></th>
+<th style="text-align: left;"><strong>Meaning</strong></th>
+<th style="text-align: left;"><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\(\mathcal{D}_L\)</span></td>
+<td style="text-align: left;">Labeled dataset</td>
+<td style="text-align: left;">A small set of samples with known labels, used to train the model.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(\mathcal{D}_U\)</span></td>
+<td style="text-align: left;">Unlabeled dataset</td>
+<td style="text-align: left;">A large pool of samples without labels, from which the learner selects new points to query.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\(f\)</span></td>
+<td style="text-align: left;">Learner model</td>
+<td style="text-align: left;">The current trained model.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(\theta\)</span></td>
+<td style="text-align: left;">Model parameters</td>
+<td style="text-align: left;">Parameters of the classifier or regressor being trained. ｜</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\(m\)</span></td>
+<td style="text-align: left;">Number of classes</td>
+<td style="text-align: left;">Total number of classes in the classification task.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(x_i\)</span></td>
+<td style="text-align: left;">Input feature vector</td>
+<td style="text-align: left;">The <span class="math inline">\(i\)</span>-th sample in the dataset.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\(y_i\)</span></td>
+<td style="text-align: left;">True label</td>
+<td style="text-align: left;">The corresponding label of <span class="math inline">\(x_i\)</span>.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(\hat{y}_i = f_{\theta}(x_i)\)</span></td>
+<td style="text-align: left;">Predicted label</td>
+<td style="text-align: left;">The model prediction for sample <span class="math inline">\(x_i\)</span> under parameters <span class="math inline">\(\theta\)</span>.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\(p(y=j\mid x, \theta)\)</span></td>
+<td style="text-align: left;">Predictive distribution</td>
+<td style="text-align: left;">Probability of the sample belonging to class <span class="math inline">\(j\)</span> (<span class="math inline">\(j=1,2,\dots,m\)</span>) given the input <span class="math inline">\(x\)</span> and model parameters <span class="math inline">\(\theta\)</span>. ｜</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(q(x)\)</span></td>
+<td style="text-align: left;">Query strategy</td>
+<td style="text-align: left;">Function determining how uncertain or informative a sample is.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\(x^{*}\)</span></td>
+<td style="text-align: left;">Queried sample</td>
+<td style="text-align: left;">The sample chosen by the query strategy for annotation .</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(n\)</span></td>
+<td style="text-align: left;">Number of queried samples</td>
+<td style="text-align: left;">Number of instances selected during each query iteration.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\(t\)</span></td>
+<td style="text-align: left;">Iteration index</td>
+<td style="text-align: left;">The current active learning round.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>myopic active learning</p>
+<p>Single instance is queried at a time.</p></li>
+<li><p>batch mode active learing</p>
+<p>A batch of samples is selected and labeled simultaneously.</p></li>
+</ul>
+<p>Challenges for Batch Mode AL:</p>
+<ul>
+<li>computational complications as the number of possible batches <span class="math inline">\(\binom{n}{k}\)</span> can be very large</li>
+<li>It’s difficult to formulate an appropriate criterion to measure the overall information carried by of &nbsp;a batch of samples</li>
+</ul>
+<p>Batch mode active learning algorithms:</p>
+<ul>
+<li><p>clustering-based methods</p></li>
+<li><p>optimal experimental design</p></li>
+<li><p>exploration-exploitation approaches</p>
+<p>achieve a balance between informativeness and representativeness by using a trade-off parameter</p></li>
+<li><p>combinatorial optimization problems</p></li>
+</ul>
+<section id="myopic-active-learning" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="myopic-active-learning"><span class="header-section-number">1.1</span> Myopic Active Learning</h2>
+<ul>
+<li><p>Uncertainty sampling</p>
+<p>Select the instances for which the current classifer is least certain. Querying these least certain instances can help the model refine the decision boundary.</p>
+<ul>
+<li>Maximum entropy</li>
+<li>Margin sampling</li>
+<li>Least confident</li>
+</ul></li>
+<li></li>
+</ul>
+<section id="uncertainty-sampling" class="level3" data-number="1.1.1">
+<h3 data-number="1.1.1" class="anchored" data-anchor-id="uncertainty-sampling"><span class="header-section-number">1.1.1</span> Uncertainty Sampling</h3>
+<section id="least-confident" class="level4" data-number="1.1.1.1">
+<h4 data-number="1.1.1.1" class="anchored" data-anchor-id="least-confident"><span class="header-section-number">1.1.1.1</span> Least Confident</h4>
+<p><span class="math display">\[
+x^{*} = \underset{x\in\mathcal{D}_U}{\arg\max}\left[1-\max_{j}p(y=j\mid x, \theta)\right]
+\]</span></p>
+<div class="cell" data-python.reticulate="false">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="op">&gt;</span> <span class="kw">class</span> LeastConfidentSampling(BaseSampler):</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="op">+</span>     <span class="st">"""</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="st">+     Least Confident Sampling Strategy for Active Learning (multi-class classification).</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="st">+ </span></span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="st">+     Main Idea:</span></span>
+<span id="cb1-6"><a href="#cb1-6"></a><span class="st">+         Select samples for which the model has the lowest confidence in its top predicted class.</span></span>
+<span id="cb1-7"><a href="#cb1-7"></a><span class="st">+     """</span></span>
+<span id="cb1-8"><a href="#cb1-8"></a><span class="op">+</span>     <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb1-9"><a href="#cb1-9"></a><span class="op">+</span>         <span class="cf">pass</span></span>
+<span id="cb1-10"><a href="#cb1-10"></a><span class="op">+</span>     </span>
+<span id="cb1-11"><a href="#cb1-11"></a><span class="op">+</span>     <span class="kw">def</span> query(<span class="va">self</span>, model, X_unlabeled, n_instances<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb1-12"><a href="#cb1-12"></a><span class="op">+</span>         <span class="st">"""</span></span>
+<span id="cb1-13"><a href="#cb1-13"></a><span class="st">+         Query n_instances samples from X_unlabeled based on least confident predictions.</span></span>
+<span id="cb1-14"><a href="#cb1-14"></a><span class="st">+ </span></span>
+<span id="cb1-15"><a href="#cb1-15"></a><span class="st">+         Parameters:</span></span>
+<span id="cb1-16"><a href="#cb1-16"></a><span class="st">+         ----------</span></span>
+<span id="cb1-17"><a href="#cb1-17"></a><span class="st">+         - model: Trained classification model with predict_proba method.</span></span>
+<span id="cb1-18"><a href="#cb1-18"></a><span class="st">+         - X_unlabeled: np.ndarray, shape (num_samples, num_features)</span></span>
+<span id="cb1-19"><a href="#cb1-19"></a><span class="st">+         - n_instances: int, number of samples to query</span></span>
+<span id="cb1-20"><a href="#cb1-20"></a><span class="st">+ </span></span>
+<span id="cb1-21"><a href="#cb1-21"></a><span class="st">+         Returns:</span></span>
+<span id="cb1-22"><a href="#cb1-22"></a><span class="st">+         -------</span></span>
+<span id="cb1-23"><a href="#cb1-23"></a><span class="st">+         - selected_indices: list of int, indices of selected samples</span></span>
+<span id="cb1-24"><a href="#cb1-24"></a><span class="st">+         """</span></span>
+<span id="cb1-25"><a href="#cb1-25"></a><span class="op">+</span>         probs <span class="op">=</span> model.predict_proba(X_unlabeled)</span>
+<span id="cb1-26"><a href="#cb1-26"></a><span class="op">+</span>         lc_scores <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> np.<span class="bu">max</span>(probs, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb1-27"><a href="#cb1-27"></a><span class="op">+</span>         selected_indices <span class="op">=</span> np.argsort(<span class="op">-</span>lc_scores)[:n_instances]</span>
+<span id="cb1-28"><a href="#cb1-28"></a><span class="op">+</span> </span>
+<span id="cb1-29"><a href="#cb1-29"></a><span class="op">+</span>         <span class="cf">return</span> selected_indices</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Error in running command python</code></pre>
+</div>
+</div>
+</section>
+<section id="margin-sampling" class="level4" data-number="1.1.1.2">
+<h4 data-number="1.1.1.2" class="anchored" data-anchor-id="margin-sampling"><span class="header-section-number">1.1.1.2</span> Margin Sampling</h4>
+<p><span class="math display">\[
+x^{*} = \underset{x\in\mathcal{D}_U}{\arg\min}\left[p(y=j_1\mid x, \theta) - p(y=j_2\mid x, \theta)\right] \\
+j_1=\underset{j}{\arg\max}\;p(y=j\mid x, \theta),\;j_2=\underset{j\in\{1,2,\dots,m\}\backslash\{j_1\}}{\arg\max}\;p(y=j\mid x, \theta)
+\]</span></p>
+<div class="cell" data-python.reticulate="false">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a><span class="op">&gt;</span> <span class="kw">class</span> MarginSampling(BaseSampler):</span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="op">+</span>     <span class="st">"""</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="st">+     Margin Sampling Strategy for Active Learning (multi-class classification).</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="st">+ </span></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="st">+     Main Idea:</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="st">+         Select samples where the difference (margin) between the two most probable classes is smallest,</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="st">+         indicating the most ambiguous predictions.</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a><span class="st">+     """</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a><span class="op">+</span>     <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb3-10"><a href="#cb3-10"></a><span class="op">+</span>         <span class="cf">pass</span></span>
+<span id="cb3-11"><a href="#cb3-11"></a><span class="op">+</span> </span>
+<span id="cb3-12"><a href="#cb3-12"></a><span class="op">+</span>     <span class="kw">def</span> query(<span class="va">self</span>, model, X_unlabeled, n_instances<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="op">+</span>         <span class="st">"""</span></span>
+<span id="cb3-14"><a href="#cb3-14"></a><span class="st">+         Query n_instances samples from X_unlabeled based on margin sampling.</span></span>
+<span id="cb3-15"><a href="#cb3-15"></a><span class="st">+ </span></span>
+<span id="cb3-16"><a href="#cb3-16"></a><span class="st">+         Parameters:</span></span>
+<span id="cb3-17"><a href="#cb3-17"></a><span class="st">+         ----------</span></span>
+<span id="cb3-18"><a href="#cb3-18"></a><span class="st">+         - model: Trained classification model, must have predict_proba method.</span></span>
+<span id="cb3-19"><a href="#cb3-19"></a><span class="st">+         - X_unlabeled: np.ndarray, shape (num_samples, num_features)</span></span>
+<span id="cb3-20"><a href="#cb3-20"></a><span class="st">+         - n_instances: int, number of samples to query</span></span>
+<span id="cb3-21"><a href="#cb3-21"></a><span class="st">+ </span></span>
+<span id="cb3-22"><a href="#cb3-22"></a><span class="st">+         Returns:</span></span>
+<span id="cb3-23"><a href="#cb3-23"></a><span class="st">+         -------</span></span>
+<span id="cb3-24"><a href="#cb3-24"></a><span class="st">+         - selected_indices: list of int, indices of selected samples</span></span>
+<span id="cb3-25"><a href="#cb3-25"></a><span class="st">+         """</span></span>
+<span id="cb3-26"><a href="#cb3-26"></a><span class="op">+</span>         probs <span class="op">=</span> model.predict_proba(X_unlabeled)</span>
+<span id="cb3-27"><a href="#cb3-27"></a><span class="op">+</span>         sorted_probs <span class="op">=</span> <span class="op">-</span>np.sort(<span class="op">-</span>probs, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb3-28"><a href="#cb3-28"></a><span class="op">+</span>         margins <span class="op">=</span> sorted_probs[:, <span class="dv">0</span>] <span class="op">-</span> sorted_probs[:, <span class="dv">1</span>]</span>
+<span id="cb3-29"><a href="#cb3-29"></a><span class="op">+</span>         selected_indices <span class="op">=</span> np.argsort(margins)[:n_instances]</span>
+<span id="cb3-30"><a href="#cb3-30"></a><span class="op">+</span> </span>
+<span id="cb3-31"><a href="#cb3-31"></a><span class="op">+</span>         <span class="cf">return</span> selected_indices</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Error in running command python</code></pre>
+</div>
+</div>
+</section>
+<section id="max-entropy" class="level4" data-number="1.1.1.3">
+<h4 data-number="1.1.1.3" class="anchored" data-anchor-id="max-entropy"><span class="header-section-number">1.1.1.3</span> Max Entropy</h4>
+<p><span class="math display">\[
+x^{*} = \underset{x\in\mathcal{D}_U}{\arg\max}\;-\sum_{j=1}^{m}p(y=j\mid x,\theta)\ln[p(y=j\mid x,\theta)]
+\]</span></p>
+<div class="cell" data-python.reticulate="false">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="op">&gt;</span> <span class="kw">class</span> MaxEntropySampling(BaseSampler):</span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="op">+</span>     <span class="st">"""</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="st">+     Maximum Entropy Sampling Strategy for Active Learning (multi-class classification).</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="st">+ </span></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="st">+     Main Idea:</span></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="st">+         Select samples with the highest predictive entropy, indicating the most uncertain predictions.</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a><span class="st">+     """</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a><span class="op">+</span>     <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb5-9"><a href="#cb5-9"></a><span class="op">+</span>         <span class="cf">pass</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a><span class="op">+</span>     </span>
+<span id="cb5-11"><a href="#cb5-11"></a><span class="op">+</span>     <span class="kw">def</span> query(<span class="va">self</span>, model, X_unlabeled, n_instances<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb5-12"><a href="#cb5-12"></a><span class="op">+</span>         <span class="st">"""</span></span>
+<span id="cb5-13"><a href="#cb5-13"></a><span class="st">+         Query n_instances samples from X_unlabeled based on max entropy.</span></span>
+<span id="cb5-14"><a href="#cb5-14"></a><span class="st">+ </span></span>
+<span id="cb5-15"><a href="#cb5-15"></a><span class="st">+         Parameters:</span></span>
+<span id="cb5-16"><a href="#cb5-16"></a><span class="st">+         ----------</span></span>
+<span id="cb5-17"><a href="#cb5-17"></a><span class="st">+         - model: Trained classification model, must have predict_proba method.</span></span>
+<span id="cb5-18"><a href="#cb5-18"></a><span class="st">+         - X_unlabeled: np.ndarray, shape (num_samples, num_features)</span></span>
+<span id="cb5-19"><a href="#cb5-19"></a><span class="st">+         - n_instances: int, number of samples to query</span></span>
+<span id="cb5-20"><a href="#cb5-20"></a><span class="st">+ </span></span>
+<span id="cb5-21"><a href="#cb5-21"></a><span class="st">+         Returns:</span></span>
+<span id="cb5-22"><a href="#cb5-22"></a><span class="st">+         -------</span></span>
+<span id="cb5-23"><a href="#cb5-23"></a><span class="st">+         - selected_indices: list of int, indices of selected samples</span></span>
+<span id="cb5-24"><a href="#cb5-24"></a><span class="st">+         """</span></span>
+<span id="cb5-25"><a href="#cb5-25"></a><span class="op">+</span>         probs <span class="op">=</span> model.predict_proba(X_unlabeled)</span>
+<span id="cb5-26"><a href="#cb5-26"></a><span class="op">+</span>         entropy <span class="op">=</span> np.<span class="bu">sum</span>(probs <span class="op">*</span> np.log(probs <span class="op">+</span> <span class="fl">1e-12</span>), axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb5-27"><a href="#cb5-27"></a><span class="op">+</span>         selected_indices <span class="op">=</span> np.argsort(entropy)[:n_instances]</span>
+<span id="cb5-28"><a href="#cb5-28"></a><span class="op">+</span> </span>
+<span id="cb5-29"><a href="#cb5-29"></a><span class="op">+</span>         <span class="cf">return</span> selected_indices</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Error in running command python</code></pre>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="classification" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="classification"><span class="header-section-number">1.2</span> Classification</h2>
+<ol type="1">
+<li>Membership Query Synthesis The activate learner generates synthetic instances in the space and then request labels for them. But it can artificially generate instaces that are not impossible to reasonably label.</li>
+<li>Stream-based Selective Sampling Select one sample at a time. May not be suitable in nonstationary data environments due to the potential for data drift?</li>
+<li>Pool-based Selective Sampling Measure the informativeness of some/all instances in the large set of available unlabeled data to query some of them.</li>
+</ol>
+</section>
+<section id="sampling-method" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="sampling-method"><span class="header-section-number">1.3</span> Sampling Method</h2>
+<ol type="1">
+<li>Random</li>
+<li>Information-based(Redundancy, outliers, error caused by initial ML model)
+<ul>
+<li>Uncertainty Sampling(Least, confident, Margin, Entropy)</li>
+<li>Expected Model/Prediction Change</li>
+</ul></li>
+<li>Representation-based(low convergence speed, more easily to select outliers, but no redundant points)
+<ul>
+<li>Density-based</li>
+<li>Diversity-based</li>
+<li>Cluster-based</li>
+</ul></li>
+<li>Meta-active Learning</li>
+</ol>
+<p>Several studies have combined the two aforementioned strategies (i.e., the informativebased and the representative-based) to obtain high-quality labeled data (i.e., the utility function will be u = fu × qu)</p>
+</section>
+<section id="problems-to-be-solved" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="problems-to-be-solved"><span class="header-section-number">1.4</span> Problems to be Solved</h2>
+<ol type="1">
+<li>How to effectively combine several sampling method?</li>
+<li>How could active learner be more flexible to adapt possibly unbalanced dataset?</li>
+<li>Small query budget.</li>
+<li>How could AL be implemented with no(or little) initial knowledge?</li>
+<li>Multilabel.</li>
+<li>High-Dimensional Environments</li>
+</ol>
+<!-- -->
+
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb7" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">---</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="an">title:</span><span class="co"> "Active Learning"</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="an">author:</span><span class="co"> "Xingcheng Ni"</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="an">date:</span><span class="co"> "`r Sys.Date()`"</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="an">description:</span><span class="co"> "A review on active learning."</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="an">format:</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a><span class="co">  html:</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="co">    embed-resources: true      # 将 CSS/JS 等嵌入到单个文件中</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a><span class="co">    code-fold: true            # 默认折叠所有代码块</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a><span class="co">    code-tools: true           # 显示复制按钮等工具</span></span>
+<span id="cb7-11"><a href="#cb7-11"></a><span class="co">    toc: true                  # 显示目录（Table of Contents）</span></span>
+<span id="cb7-12"><a href="#cb7-12"></a><span class="co">    toc-depth: 3               # 目录显示层级</span></span>
+<span id="cb7-13"><a href="#cb7-13"></a><span class="co">    toc-location: left         # 目录在左侧浮动</span></span>
+<span id="cb7-14"><a href="#cb7-14"></a><span class="co">    number-sections: true      # 标题自动编号</span></span>
+<span id="cb7-15"><a href="#cb7-15"></a><span class="co">    theme: cosmo               # Bootswatch 主题，可选：cosmo, flatly, lumen, yeti...</span></span>
+<span id="cb7-16"><a href="#cb7-16"></a><span class="co">    fig-width: 6               # 全局图宽度</span></span>
+<span id="cb7-17"><a href="#cb7-17"></a><span class="co">    fig-height: 4              # 全局图高度</span></span>
+<span id="cb7-18"><a href="#cb7-18"></a><span class="co">    fig-align: center          # 图居中</span></span>
+<span id="cb7-19"><a href="#cb7-19"></a><span class="co">    code-line-numbers: true    # 显示代码行号</span></span>
+<span id="cb7-20"><a href="#cb7-20"></a><span class="co">    self-contained: true       # 完全单文件 HTML</span></span>
+<span id="cb7-21"><a href="#cb7-21"></a><span class="co">    navbar:</span></span>
+<span id="cb7-22"><a href="#cb7-22"></a><span class="co">      title: "Analysis Report"</span></span>
+<span id="cb7-23"><a href="#cb7-23"></a><span class="co">      left:</span></span>
+<span id="cb7-24"><a href="#cb7-24"></a><span class="co">        - text: "Home"</span></span>
+<span id="cb7-25"><a href="#cb7-25"></a><span class="co">          href: "#"</span></span>
+<span id="cb7-26"><a href="#cb7-26"></a><span class="co">        - text: "Data"</span></span>
+<span id="cb7-27"><a href="#cb7-27"></a><span class="co">          href: "#data"</span></span>
+<span id="cb7-28"><a href="#cb7-28"></a><span class="co">        - text: "Analysis"</span></span>
+<span id="cb7-29"><a href="#cb7-29"></a><span class="co">          href: "#analysis"</span></span>
+<span id="cb7-30"><a href="#cb7-30"></a><span class="co">      right:</span></span>
+<span id="cb7-31"><a href="#cb7-31"></a><span class="co">        - icon: "github"</span></span>
+<span id="cb7-32"><a href="#cb7-32"></a><span class="co">          href: "https://github.com/your-repo" # 替换成你项目地址</span></span>
+<span id="cb7-33"><a href="#cb7-33"></a><span class="an">editor:</span><span class="co"> visual                 # 启用可视化编辑器</span></span>
+<span id="cb7-34"><a href="#cb7-34"></a><span class="an">execute:</span></span>
+<span id="cb7-35"><a href="#cb7-35"></a><span class="co">  echo: true                    # 默认显示代码</span></span>
+<span id="cb7-36"><a href="#cb7-36"></a><span class="co">  warning: false</span></span>
+<span id="cb7-37"><a href="#cb7-37"></a><span class="co">  message: false</span></span>
+<span id="cb7-38"><a href="#cb7-38"></a><span class="co">  error: false</span></span>
+<span id="cb7-39"><a href="#cb7-39"></a><span class="co">  cache: true</span></span>
+<span id="cb7-40"><a href="#cb7-40"></a><span class="an">fontsize:</span><span class="co"> 12pt                 # 全局字体大小</span></span>
+<span id="cb7-41"><a href="#cb7-41"></a><span class="an">mainfont:</span><span class="co"> "Arial"               # 主字体</span></span>
+<span id="cb7-42"><a href="#cb7-42"></a><span class="an">monofont:</span><span class="co"> "Fira Code"           # 等宽字体</span></span>
+<span id="cb7-43"><a href="#cb7-43"></a><span class="an">linkcolor:</span><span class="co"> "#1a73e8"            # 链接颜色</span></span>
+<span id="cb7-44"><a href="#cb7-44"></a><span class="an">highlight-style:</span><span class="co"> tango          # 代码高亮样式，可选：tango, pygments, kate, etc.</span></span>
+<span id="cb7-45"><a href="#cb7-45"></a><span class="co">---</span></span>
+<span id="cb7-46"><a href="#cb7-46"></a></span>
+<span id="cb7-47"><a href="#cb7-47"></a><span class="in">```{r setup, include=FALSE}</span></span>
+<span id="cb7-48"><a href="#cb7-48"></a><span class="in">knitr::opts_chunk$set(</span></span>
+<span id="cb7-49"><a href="#cb7-49"></a><span class="in">  eval = TRUE,</span></span>
+<span id="cb7-50"><a href="#cb7-50"></a><span class="in">  echo = TRUE,</span></span>
+<span id="cb7-51"><a href="#cb7-51"></a><span class="in">  collapse = FALSE,</span></span>
+<span id="cb7-52"><a href="#cb7-52"></a><span class="in">  prompt = TRUE,</span></span>
+<span id="cb7-53"><a href="#cb7-53"></a><span class="in">  warning = FALSE,</span></span>
+<span id="cb7-54"><a href="#cb7-54"></a><span class="in">  error = TRUE,</span></span>
+<span id="cb7-55"><a href="#cb7-55"></a><span class="in">  message = FALSE</span></span>
+<span id="cb7-56"><a href="#cb7-56"></a><span class="in">)</span></span>
+<span id="cb7-57"><a href="#cb7-57"></a></span>
+<span id="cb7-58"><a href="#cb7-58"></a><span class="in">library(knitr)</span></span>
+<span id="cb7-59"><a href="#cb7-59"></a><span class="in">library(kableExtra)</span></span>
+<span id="cb7-60"><a href="#cb7-60"></a><span class="in">library(reticulate)</span></span>
+<span id="cb7-61"><a href="#cb7-61"></a></span>
+<span id="cb7-62"><a href="#cb7-62"></a><span class="in">options(kableExtra.html.bsTable = TRUE)</span></span>
+<span id="cb7-63"><a href="#cb7-63"></a><span class="in"># use_python("/opt/homebrew/Caskroom/miniconda/base/envs/thesis/bin/python", required = TRUE)</span></span>
+<span id="cb7-64"><a href="#cb7-64"></a><span class="in">```</span></span>
+<span id="cb7-65"><a href="#cb7-65"></a></span>
+<span id="cb7-66"><a href="#cb7-66"></a><span class="fu"># Active Learning(AL)</span></span>
+<span id="cb7-67"><a href="#cb7-67"></a></span>
+<span id="cb7-68"><a href="#cb7-68"></a>| **Symbol** | **Meaning** | **Description** |</span>
+<span id="cb7-69"><a href="#cb7-69"></a>|:--------------------:|:---------------------|:---------------------------|</span>
+<span id="cb7-70"><a href="#cb7-70"></a>| $\mathcal{D}_L$ | Labeled dataset | A small set of samples with known labels, used to train the model. |</span>
+<span id="cb7-71"><a href="#cb7-71"></a>| $\mathcal{D}_U$ | Unlabeled dataset | A large pool of samples without labels, from which the learner selects new points to query. |</span>
+<span id="cb7-72"><a href="#cb7-72"></a>| $f$ | Learner model | The current trained model. |</span>
+<span id="cb7-73"><a href="#cb7-73"></a>| $\theta$ | Model parameters | Parameters of the classifier or regressor being trained. ｜</span>
+<span id="cb7-74"><a href="#cb7-74"></a>| $m$ | Number of classes | Total number of classes in the classification task. |</span>
+<span id="cb7-75"><a href="#cb7-75"></a>| $x_i$ | Input feature vector | The $i$-th sample in the dataset. |</span>
+<span id="cb7-76"><a href="#cb7-76"></a>| $y_i$ | True label | The corresponding label of $x_i$. |</span>
+<span id="cb7-77"><a href="#cb7-77"></a>| $\hat{y}_i = f_{\theta}(x_i)$ | Predicted label | The model prediction for sample $x_i$ under parameters $\theta$. |</span>
+<span id="cb7-78"><a href="#cb7-78"></a>| $p(y=j\mid x, \theta)$ | Predictive distribution | Probability of the sample belonging to class $j$ ($j=1,2,\dots,m$) given the input $x$ and model parameters $\theta$. ｜</span>
+<span id="cb7-79"><a href="#cb7-79"></a>| $q(x)$ | Query strategy | Function determining how uncertain or informative a sample is. |</span>
+<span id="cb7-80"><a href="#cb7-80"></a>| $x^{*}$ | Queried sample | The sample chosen by the query strategy for annotation . |</span>
+<span id="cb7-81"><a href="#cb7-81"></a>| $n$ | Number of queried samples | Number of instances selected during each query iteration. |</span>
+<span id="cb7-82"><a href="#cb7-82"></a>| $t$ | Iteration index | The current active learning round. |</span>
+<span id="cb7-83"><a href="#cb7-83"></a></span>
+<span id="cb7-84"><a href="#cb7-84"></a><span class="ss">-   </span>myopic active learning</span>
+<span id="cb7-85"><a href="#cb7-85"></a></span>
+<span id="cb7-86"><a href="#cb7-86"></a>    Single instance is queried at a time.</span>
+<span id="cb7-87"><a href="#cb7-87"></a></span>
+<span id="cb7-88"><a href="#cb7-88"></a><span class="ss">-   </span>batch mode active learing</span>
+<span id="cb7-89"><a href="#cb7-89"></a></span>
+<span id="cb7-90"><a href="#cb7-90"></a>    A batch of samples is selected and labeled simultaneously.</span>
+<span id="cb7-91"><a href="#cb7-91"></a></span>
+<span id="cb7-92"><a href="#cb7-92"></a>Challenges for Batch Mode AL:</span>
+<span id="cb7-93"><a href="#cb7-93"></a></span>
+<span id="cb7-94"><a href="#cb7-94"></a><span class="ss">-   </span>computational complications as the number of possible batches $\binom{n}{k}$ can be very large</span>
+<span id="cb7-95"><a href="#cb7-95"></a><span class="ss">-   </span>It’s difficult to formulate an appropriate criterion to measure the overall information carried by of &nbsp;a batch of samples</span>
+<span id="cb7-96"><a href="#cb7-96"></a></span>
+<span id="cb7-97"><a href="#cb7-97"></a>Batch mode active learning algorithms:</span>
+<span id="cb7-98"><a href="#cb7-98"></a></span>
+<span id="cb7-99"><a href="#cb7-99"></a><span class="ss">-   </span>clustering-based methods</span>
+<span id="cb7-100"><a href="#cb7-100"></a></span>
+<span id="cb7-101"><a href="#cb7-101"></a><span class="ss">-   </span>optimal experimental design</span>
+<span id="cb7-102"><a href="#cb7-102"></a></span>
+<span id="cb7-103"><a href="#cb7-103"></a><span class="ss">-   </span>exploration-exploitation approaches</span>
+<span id="cb7-104"><a href="#cb7-104"></a></span>
+<span id="cb7-105"><a href="#cb7-105"></a>    achieve a balance between informativeness and representativeness by using a trade-off parameter</span>
+<span id="cb7-106"><a href="#cb7-106"></a></span>
+<span id="cb7-107"><a href="#cb7-107"></a><span class="ss">-   </span>combinatorial optimization problems</span>
+<span id="cb7-108"><a href="#cb7-108"></a></span>
+<span id="cb7-109"><a href="#cb7-109"></a><span class="fu">## Myopic Active Learning</span></span>
+<span id="cb7-110"><a href="#cb7-110"></a></span>
+<span id="cb7-111"><a href="#cb7-111"></a><span class="ss">-   </span>Uncertainty sampling</span>
+<span id="cb7-112"><a href="#cb7-112"></a></span>
+<span id="cb7-113"><a href="#cb7-113"></a>    Select the instances for which the current classifer is least certain. Querying these least certain instances can help the model refine the decision boundary.</span>
+<span id="cb7-114"><a href="#cb7-114"></a></span>
+<span id="cb7-115"><a href="#cb7-115"></a><span class="ss">    -   </span>Maximum entropy</span>
+<span id="cb7-116"><a href="#cb7-116"></a><span class="ss">    -   </span>Margin sampling</span>
+<span id="cb7-117"><a href="#cb7-117"></a><span class="ss">    -   </span>Least confident</span>
+<span id="cb7-118"><a href="#cb7-118"></a></span>
+<span id="cb7-119"><a href="#cb7-119"></a><span class="ss">-   </span></span>
+<span id="cb7-120"><a href="#cb7-120"></a></span>
+<span id="cb7-121"><a href="#cb7-121"></a><span class="fu">### Uncertainty Sampling</span></span>
+<span id="cb7-122"><a href="#cb7-122"></a></span>
+<span id="cb7-123"><a href="#cb7-123"></a><span class="fu">#### Least Confident</span></span>
+<span id="cb7-124"><a href="#cb7-124"></a></span>
+<span id="cb7-125"><a href="#cb7-125"></a>$$</span>
+<span id="cb7-126"><a href="#cb7-126"></a>x^{*} = \underset{x\in\mathcal{D}_U}{\arg\max}\left[1-\max_{j}p(y=j\mid x, \theta)\right]</span>
+<span id="cb7-127"><a href="#cb7-127"></a>$$</span>
+<span id="cb7-128"><a href="#cb7-128"></a><span class="in">```{python, python.reticulate=FALSE}</span></span>
+<span id="cb7-129"><a href="#cb7-129"></a><span class="in">class LeastConfidentSampling(BaseSampler):</span></span>
+<span id="cb7-130"><a href="#cb7-130"></a><span class="in">    """</span></span>
+<span id="cb7-131"><a href="#cb7-131"></a><span class="in">    Least Confident Sampling Strategy for Active Learning (multi-class classification).</span></span>
+<span id="cb7-132"><a href="#cb7-132"></a></span>
+<span id="cb7-133"><a href="#cb7-133"></a><span class="in">    Main Idea:</span></span>
+<span id="cb7-134"><a href="#cb7-134"></a><span class="in">        Select samples for which the model has the lowest confidence in its top predicted class.</span></span>
+<span id="cb7-135"><a href="#cb7-135"></a><span class="in">    """</span></span>
+<span id="cb7-136"><a href="#cb7-136"></a><span class="in">    def __init__(self):</span></span>
+<span id="cb7-137"><a href="#cb7-137"></a><span class="in">        pass</span></span>
+<span id="cb7-138"><a href="#cb7-138"></a><span class="in">    </span></span>
+<span id="cb7-139"><a href="#cb7-139"></a><span class="in">    def query(self, model, X_unlabeled, n_instances=1):</span></span>
+<span id="cb7-140"><a href="#cb7-140"></a><span class="in">        """</span></span>
+<span id="cb7-141"><a href="#cb7-141"></a><span class="in">        Query n_instances samples from X_unlabeled based on least confident predictions.</span></span>
+<span id="cb7-142"><a href="#cb7-142"></a></span>
+<span id="cb7-143"><a href="#cb7-143"></a><span class="in">        Parameters:</span></span>
+<span id="cb7-144"><a href="#cb7-144"></a><span class="in">        ----------</span></span>
+<span id="cb7-145"><a href="#cb7-145"></a><span class="in">        - model: Trained classification model with predict_proba method.</span></span>
+<span id="cb7-146"><a href="#cb7-146"></a><span class="in">        - X_unlabeled: np.ndarray, shape (num_samples, num_features)</span></span>
+<span id="cb7-147"><a href="#cb7-147"></a><span class="in">        - n_instances: int, number of samples to query</span></span>
+<span id="cb7-148"><a href="#cb7-148"></a></span>
+<span id="cb7-149"><a href="#cb7-149"></a><span class="in">        Returns:</span></span>
+<span id="cb7-150"><a href="#cb7-150"></a><span class="in">        -------</span></span>
+<span id="cb7-151"><a href="#cb7-151"></a><span class="in">        - selected_indices: list of int, indices of selected samples</span></span>
+<span id="cb7-152"><a href="#cb7-152"></a><span class="in">        """</span></span>
+<span id="cb7-153"><a href="#cb7-153"></a><span class="in">        probs = model.predict_proba(X_unlabeled)</span></span>
+<span id="cb7-154"><a href="#cb7-154"></a><span class="in">        lc_scores = 1 - np.max(probs, axis=1)</span></span>
+<span id="cb7-155"><a href="#cb7-155"></a><span class="in">        selected_indices = np.argsort(-lc_scores)[:n_instances]</span></span>
+<span id="cb7-156"><a href="#cb7-156"></a></span>
+<span id="cb7-157"><a href="#cb7-157"></a><span class="in">        return selected_indices</span></span>
+<span id="cb7-158"><a href="#cb7-158"></a><span class="in">```</span></span>
+<span id="cb7-159"><a href="#cb7-159"></a></span>
+<span id="cb7-160"><a href="#cb7-160"></a><span class="fu">#### Margin Sampling</span></span>
+<span id="cb7-161"><a href="#cb7-161"></a></span>
+<span id="cb7-162"><a href="#cb7-162"></a>$$</span>
+<span id="cb7-163"><a href="#cb7-163"></a>x^{*} = \underset{x\in\mathcal{D}_U}{\arg\min}\left<span class="co">[</span><span class="ot">p(y=j_1\mid x, \theta) - p(y=j_2\mid x, \theta)\right</span><span class="co">]</span> <span class="sc">\\</span></span>
+<span id="cb7-164"><a href="#cb7-164"></a>j_1=\underset{j}{\arg\max}\;p(y=j\mid x, \theta),\;j_2=\underset{j\in<span class="sc">\{</span>1,2,\dots,m<span class="sc">\}</span>\backslash<span class="sc">\{</span>j_1<span class="sc">\}</span>}{\arg\max}\;p(y=j\mid x, \theta)</span>
+<span id="cb7-165"><a href="#cb7-165"></a>$$</span>
+<span id="cb7-166"><a href="#cb7-166"></a><span class="in">```{python, python.reticulate=FALSE}</span></span>
+<span id="cb7-167"><a href="#cb7-167"></a><span class="in">class MarginSampling(BaseSampler):</span></span>
+<span id="cb7-168"><a href="#cb7-168"></a><span class="in">    """</span></span>
+<span id="cb7-169"><a href="#cb7-169"></a><span class="in">    Margin Sampling Strategy for Active Learning (multi-class classification).</span></span>
+<span id="cb7-170"><a href="#cb7-170"></a></span>
+<span id="cb7-171"><a href="#cb7-171"></a><span class="in">    Main Idea:</span></span>
+<span id="cb7-172"><a href="#cb7-172"></a><span class="in">        Select samples where the difference (margin) between the two most probable classes is smallest,</span></span>
+<span id="cb7-173"><a href="#cb7-173"></a><span class="in">        indicating the most ambiguous predictions.</span></span>
+<span id="cb7-174"><a href="#cb7-174"></a><span class="in">    """</span></span>
+<span id="cb7-175"><a href="#cb7-175"></a><span class="in">    def __init__(self):</span></span>
+<span id="cb7-176"><a href="#cb7-176"></a><span class="in">        pass</span></span>
+<span id="cb7-177"><a href="#cb7-177"></a></span>
+<span id="cb7-178"><a href="#cb7-178"></a><span class="in">    def query(self, model, X_unlabeled, n_instances=1):</span></span>
+<span id="cb7-179"><a href="#cb7-179"></a><span class="in">        """</span></span>
+<span id="cb7-180"><a href="#cb7-180"></a><span class="in">        Query n_instances samples from X_unlabeled based on margin sampling.</span></span>
+<span id="cb7-181"><a href="#cb7-181"></a></span>
+<span id="cb7-182"><a href="#cb7-182"></a><span class="in">        Parameters:</span></span>
+<span id="cb7-183"><a href="#cb7-183"></a><span class="in">        ----------</span></span>
+<span id="cb7-184"><a href="#cb7-184"></a><span class="in">        - model: Trained classification model, must have predict_proba method.</span></span>
+<span id="cb7-185"><a href="#cb7-185"></a><span class="in">        - X_unlabeled: np.ndarray, shape (num_samples, num_features)</span></span>
+<span id="cb7-186"><a href="#cb7-186"></a><span class="in">        - n_instances: int, number of samples to query</span></span>
+<span id="cb7-187"><a href="#cb7-187"></a></span>
+<span id="cb7-188"><a href="#cb7-188"></a><span class="in">        Returns:</span></span>
+<span id="cb7-189"><a href="#cb7-189"></a><span class="in">        -------</span></span>
+<span id="cb7-190"><a href="#cb7-190"></a><span class="in">        - selected_indices: list of int, indices of selected samples</span></span>
+<span id="cb7-191"><a href="#cb7-191"></a><span class="in">        """</span></span>
+<span id="cb7-192"><a href="#cb7-192"></a><span class="in">        probs = model.predict_proba(X_unlabeled)</span></span>
+<span id="cb7-193"><a href="#cb7-193"></a><span class="in">        sorted_probs = -np.sort(-probs, axis=1)</span></span>
+<span id="cb7-194"><a href="#cb7-194"></a><span class="in">        margins = sorted_probs[:, 0] - sorted_probs[:, 1]</span></span>
+<span id="cb7-195"><a href="#cb7-195"></a><span class="in">        selected_indices = np.argsort(margins)[:n_instances]</span></span>
+<span id="cb7-196"><a href="#cb7-196"></a></span>
+<span id="cb7-197"><a href="#cb7-197"></a><span class="in">        return selected_indices</span></span>
+<span id="cb7-198"><a href="#cb7-198"></a><span class="in">```</span></span>
+<span id="cb7-199"><a href="#cb7-199"></a></span>
+<span id="cb7-200"><a href="#cb7-200"></a><span class="fu">#### Max Entropy</span></span>
+<span id="cb7-201"><a href="#cb7-201"></a></span>
+<span id="cb7-202"><a href="#cb7-202"></a>$$</span>
+<span id="cb7-203"><a href="#cb7-203"></a>x^{*} = \underset{x\in\mathcal{D}_U}{\arg\max}\;-\sum_{j=1}^{m}p(y=j\mid x,\theta)\ln<span class="co">[</span><span class="ot">p(y=j\mid x,\theta)</span><span class="co">]</span></span>
+<span id="cb7-204"><a href="#cb7-204"></a>$$</span>
+<span id="cb7-205"><a href="#cb7-205"></a><span class="in">```{python, python.reticulate=FALSE}</span></span>
+<span id="cb7-206"><a href="#cb7-206"></a><span class="in">class MaxEntropySampling(BaseSampler):</span></span>
+<span id="cb7-207"><a href="#cb7-207"></a><span class="in">    """</span></span>
+<span id="cb7-208"><a href="#cb7-208"></a><span class="in">    Maximum Entropy Sampling Strategy for Active Learning (multi-class classification).</span></span>
+<span id="cb7-209"><a href="#cb7-209"></a></span>
+<span id="cb7-210"><a href="#cb7-210"></a><span class="in">    Main Idea:</span></span>
+<span id="cb7-211"><a href="#cb7-211"></a><span class="in">        Select samples with the highest predictive entropy, indicating the most uncertain predictions.</span></span>
+<span id="cb7-212"><a href="#cb7-212"></a><span class="in">    """</span></span>
+<span id="cb7-213"><a href="#cb7-213"></a><span class="in">    def __init__(self):</span></span>
+<span id="cb7-214"><a href="#cb7-214"></a><span class="in">        pass</span></span>
+<span id="cb7-215"><a href="#cb7-215"></a><span class="in">    </span></span>
+<span id="cb7-216"><a href="#cb7-216"></a><span class="in">    def query(self, model, X_unlabeled, n_instances=1):</span></span>
+<span id="cb7-217"><a href="#cb7-217"></a><span class="in">        """</span></span>
+<span id="cb7-218"><a href="#cb7-218"></a><span class="in">        Query n_instances samples from X_unlabeled based on max entropy.</span></span>
+<span id="cb7-219"><a href="#cb7-219"></a></span>
+<span id="cb7-220"><a href="#cb7-220"></a><span class="in">        Parameters:</span></span>
+<span id="cb7-221"><a href="#cb7-221"></a><span class="in">        ----------</span></span>
+<span id="cb7-222"><a href="#cb7-222"></a><span class="in">        - model: Trained classification model, must have predict_proba method.</span></span>
+<span id="cb7-223"><a href="#cb7-223"></a><span class="in">        - X_unlabeled: np.ndarray, shape (num_samples, num_features)</span></span>
+<span id="cb7-224"><a href="#cb7-224"></a><span class="in">        - n_instances: int, number of samples to query</span></span>
+<span id="cb7-225"><a href="#cb7-225"></a></span>
+<span id="cb7-226"><a href="#cb7-226"></a><span class="in">        Returns:</span></span>
+<span id="cb7-227"><a href="#cb7-227"></a><span class="in">        -------</span></span>
+<span id="cb7-228"><a href="#cb7-228"></a><span class="in">        - selected_indices: list of int, indices of selected samples</span></span>
+<span id="cb7-229"><a href="#cb7-229"></a><span class="in">        """</span></span>
+<span id="cb7-230"><a href="#cb7-230"></a><span class="in">        probs = model.predict_proba(X_unlabeled)</span></span>
+<span id="cb7-231"><a href="#cb7-231"></a><span class="in">        entropy = np.sum(probs * np.log(probs + 1e-12), axis=1)</span></span>
+<span id="cb7-232"><a href="#cb7-232"></a><span class="in">        selected_indices = np.argsort(entropy)[:n_instances]</span></span>
+<span id="cb7-233"><a href="#cb7-233"></a></span>
+<span id="cb7-234"><a href="#cb7-234"></a><span class="in">        return selected_indices</span></span>
+<span id="cb7-235"><a href="#cb7-235"></a><span class="in">```</span></span>
+<span id="cb7-236"><a href="#cb7-236"></a></span>
+<span id="cb7-237"><a href="#cb7-237"></a></span>
+<span id="cb7-238"><a href="#cb7-238"></a><span class="fu">## Classification</span></span>
+<span id="cb7-239"><a href="#cb7-239"></a></span>
+<span id="cb7-240"><a href="#cb7-240"></a><span class="ss">1.  </span>Membership Query Synthesis The activate learner generates synthetic instances in the space and then request labels for them. But it can artificially generate instaces that are not impossible to reasonably label.</span>
+<span id="cb7-241"><a href="#cb7-241"></a><span class="ss">2.  </span>Stream-based Selective Sampling Select one sample at a time. May not be suitable in nonstationary data environments due to the potential for data drift?</span>
+<span id="cb7-242"><a href="#cb7-242"></a><span class="ss">3.  </span>Pool-based Selective Sampling Measure the informativeness of some/all instances in the large set of available unlabeled data to query some of them.</span>
+<span id="cb7-243"><a href="#cb7-243"></a></span>
+<span id="cb7-244"><a href="#cb7-244"></a><span class="fu">## Sampling Method</span></span>
+<span id="cb7-245"><a href="#cb7-245"></a></span>
+<span id="cb7-246"><a href="#cb7-246"></a><span class="ss">1.  </span>Random</span>
+<span id="cb7-247"><a href="#cb7-247"></a><span class="ss">2.  </span>Information-based(Redundancy, outliers, error caused by initial ML model)</span>
+<span id="cb7-248"><a href="#cb7-248"></a><span class="ss">    -   </span>Uncertainty Sampling(Least, confident, Margin, Entropy)</span>
+<span id="cb7-249"><a href="#cb7-249"></a><span class="ss">    -   </span>Expected Model/Prediction Change</span>
+<span id="cb7-250"><a href="#cb7-250"></a><span class="ss">3.  </span>Representation-based(low convergence speed, more easily to select outliers, but no redundant points)</span>
+<span id="cb7-251"><a href="#cb7-251"></a><span class="ss">    -   </span>Density-based</span>
+<span id="cb7-252"><a href="#cb7-252"></a><span class="ss">    -   </span>Diversity-based</span>
+<span id="cb7-253"><a href="#cb7-253"></a><span class="ss">    -   </span>Cluster-based</span>
+<span id="cb7-254"><a href="#cb7-254"></a><span class="ss">4.  </span>Meta-active Learning</span>
+<span id="cb7-255"><a href="#cb7-255"></a></span>
+<span id="cb7-256"><a href="#cb7-256"></a>Several studies have combined the two aforementioned strategies (i.e., the informativebased and the representative-based) to obtain high-quality labeled data (i.e., the utility function will be u = fu × qu)</span>
+<span id="cb7-257"><a href="#cb7-257"></a></span>
+<span id="cb7-258"><a href="#cb7-258"></a><span class="fu">## Problems to be Solved</span></span>
+<span id="cb7-259"><a href="#cb7-259"></a></span>
+<span id="cb7-260"><a href="#cb7-260"></a><span class="ss">1.  </span>How to effectively combine several sampling method?</span>
+<span id="cb7-261"><a href="#cb7-261"></a><span class="ss">2.  </span>How could active learner be more flexible to adapt possibly unbalanced dataset?</span>
+<span id="cb7-262"><a href="#cb7-262"></a><span class="ss">3.  </span>Small query budget.</span>
+<span id="cb7-263"><a href="#cb7-263"></a><span class="ss">4.  </span>How could AL be implemented with no(or little) initial knowledge?</span>
+<span id="cb7-264"><a href="#cb7-264"></a><span class="ss">5.  </span>Multilabel.</span>
+<span id="cb7-265"><a href="#cb7-265"></a><span class="ss">6.  </span>High-Dimensional Environments</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

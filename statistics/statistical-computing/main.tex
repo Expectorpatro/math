@@ -1,0 +1,140 @@
+\chapter{统计计算方法}
+
+\section{非线性方程的求解}
+
+\subsubsection{二分法}
+\begin{method}
+	content
+\end{method}
+
+\subsubsection{不动点迭代法}
+\begin{method}[Fixed-point Iteration Method]
+	为求解非线性方程$f(x)=0$，可将其改写为等价的形式$x=T(x)$，若$T$是一个压缩映射，由\cref{theo:ContractionMapTheorem}可求得非线性方程的根。对于迭代次数问题，可用\cref{theo:ContractionMapTheorem}中的第二种误差估计公式来控制精度。
+\end{method}
+\begin{definition}
+	设映射$T:\mathbb{R}^{}\rightarrow\mathbb{R}^{}$有不动点$x$。若存在$x$的邻域$\bar{U}(x,\delta)$满足对任意的$x_0\in\bar{U}(x,\delta)$，序列$\{x_n=T^nx_0\}\to x$，则称此时的迭代法\textbf{局部收敛}。
+\end{definition}
+\begin{definition}
+	设映射$T:\mathbb{R}^{}\rightarrow\mathbb{R}^{}$有不动点$x$，$T'$在$x$的。
+\end{definition}
+
+\paragraph{设定与记号}
+固定 \(a>0\)。定义迭代
+\[
+x_{n+1}=\tfrac12\!\left(x_n+\frac{a}{x_n}\right),\qquad n=0,1,2,\dots
+\]
+设真值 \(r=\sqrt a>0\)，误差 \(e_n:=x_n-r\)。
+
+\begin{theorem}[Heron 法是 Newton--Raphson 的特例]
+	令 \(f(x)=x^2-a\)。对方程 \(f(x)=0\) 应用 Newton 法
+	\[
+	x_{n+1}=x_n-\frac{f(x_n)}{f'(x_n)}=x_n-\frac{x_n^2-a}{2x_n}
+	=\frac12\!\left(x_n+\frac{a}{x_n}\right),
+	\]
+	即为所给迭代。
+\end{theorem}
+
+\begin{theorem}[不变性、单调性与收敛]
+	若 \(x_0>0\)，则对所有 \(n\) 都有 \(x_n>0\)。进一步：
+	\begin{enumerate}
+		\item 若 \(x_0>r\)，则 \(x_{n+1}\in(r,x_n)\)，序列严格单调递减并下有界，极限为 \(r\)。
+		\item 若 \(0<x_0<r\)，则 \(x_{n+1}\in(x_n,r)\)，序列严格单调递增并上有界，极限为 \(r\)。
+	\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+	首先 \(x_n>0\Rightarrow x_{n+1}=\frac12(x_n+a/x_n)>0\)，故正性不变。
+	
+	设 \(x_n>r\)。则
+	\[
+	x_{n+1}-r=\frac{x_n^2+a}{2x_n}-r
+	=\frac{x_n^2-2rx_n+r^2}{2x_n}=\frac{(x_n-r)^2}{2x_n}>0,
+	\]
+	且
+	\[
+	x_n-x_{n+1}=x_n-\frac12\!\left(x_n+\frac{a}{x_n}\right)
+	=\frac{x_n^2-a}{2x_n}=\frac{(x_n-r)(x_n+r)}{2x_n}>0,
+	\]
+	故 \(x_{n+1}\in(r,x_n)\) 并单调递减。由下界 \(r\) 与单调性知收敛，极限必为 \(f\) 的正根 \(r\)。
+	
+	当 \(0<x_n<r\) 时同理得
+	\[
+	x_{n+1}-r=\frac{(x_n-r)^2}{2x_n}<0,\qquad
+	x_{n+1}-x_n=\frac{a-x_n^2}{2x_n}>0,
+	\]
+	故 \(x_{n+1}\in(x_n,r)\) 并单调递增，极限同为 \(r\)。
+\end{proof}
+
+\begin{theorem}[误差精确递推与二次收敛]
+	令 \(e_n=x_n-r\)。对任意 \(x_n>0\) 有
+	\[
+	e_{n+1}=x_{n+1}-r=\frac{(x_n-r)^2}{2x_n}=\frac{e_n^2}{2x_n}.
+	\]
+	因此当 \(x_n\to r\) 时
+	\[
+	e_{n+1}=\frac{e_n^2}{2r}\,(1+o(1)),
+	\]
+	即误差二次收敛，渐近误差常数为 \(1/(2r)\)。
+\end{theorem}
+
+\begin{proof}
+	代数恒等式直接给出
+	\(
+	x_{n+1}-r=\frac{(x_n-r)^2}{2x_n}.
+	\)
+	当 \(x_n\to r>0\) 时，\(\frac{1}{2x_n}\to \frac{1}{2r}\)，得所述渐近式。
+\end{proof}
+
+\begin{remark}[相对误差形式]
+	相对误差 \(\delta_n:=\frac{x_n-r}{r}\) 满足
+	\[
+	\delta_{n+1}=\frac{\delta_n^2}{2(1+\delta_n)}=\frac12\delta_n^2+O(\delta_n^3),
+	\]
+	同样显示二次收敛。
+\end{remark}
+
+\begin{theorem}[倒数平方根的牛顿迭代与一次修正]
+	为求 \(y=1/\sqrt a\)，考虑
+	\(
+	\phi(y)=y^{-2}-a=0
+	\)。
+	Newton 法给出
+	\[
+	y_{k+1}=y_k-\frac{\phi(y_k)}{\phi'(y_k)}
+	=y_k-\frac{y_k^{-2}-a}{-2y_k^{-3}}
+	=y_k\!\left(\frac32-\frac{a y_k^2}{2}\right).
+	\]
+	设初值 \(y_0\) 来自硬件 \texttt{rsqrt} 指令（粗近似）。则该迭代二次收敛到 \(1/\sqrt a\)。
+	得到 \(y_m\) 后，可令
+	\(
+	x=a\,y_m
+	\)
+	作为 \(\sqrt a\) 的近似；若需再提高精度，对 \(x\) 再做一次 Heron 步
+	\[
+	x\ \leftarrow\ \frac12\!\left(x+\frac{a}{x}\right),
+	\]
+	误差继续二次缩小。
+\end{theorem}
+
+\begin{proof}
+	\(\phi'(y)=-2y^{-3}\neq0\) 于 \(y>0\)。标准 Newton 收敛定理表明在真根邻域二次收敛。误差递推可直接线化得到
+	\(
+	\varepsilon_{k+1}\approx \tfrac{3}{2}\,a\,\varepsilon_k^2
+	\)
+	（此处 \(\varepsilon_k\) 为 \(y_k\) 的绝对误差），从而二次收敛。令 \(x=a\,y\) 则
+	\(x=\sqrt a\,(1+\eta)\)
+	的相对误差与 \(y\) 的相对误差一致；随后的 Heron 一步按前述定理使相对误差平方级下降。
+\end{proof}
+
+\begin{corollary}[一次修正的效果评估]
+	若 \(\tilde y=\frac{1}{\sqrt a}(1+\epsilon)\) 为倒数平方根的相对误差近似，则
+	\(
+	\tilde x=a\tilde y=\sqrt a(1+\epsilon)
+	\)
+	为平方根近似。对 \(\tilde x\) 做一轮 Heron：
+	\[
+	x^+=\tfrac12\!\left(\tilde x+\frac{a}{\tilde x}\right)
+	=\sqrt a\left(1+\frac{\epsilon^2}{2}+O(\epsilon^3)\right),
+	\]
+	相对误差由 \(O(\epsilon)\) 降为 \(O(\epsilon^2)\)。
+\end{corollary}
