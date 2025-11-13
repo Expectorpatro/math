@@ -41,7 +41,7 @@
 	设$T$是一个$X$到$Y$的映射。$T$存在逆映射的充要条件是$T$是一个双射。
 \end{theorem}
 \begin{definition}
-	设$T_1$是一个$X$到$Y$的映射，$T_2$是一个$Y$到$Z$的映射。定义映射$T_3$满足$T_3x=T_2(T_1x)$，其中$x\in X$，则称映射$T_3$是映射$T_1$和映射$T_2$的\gls{CompositeMap}，记作$T_2\circ T_1$。
+	设$T_1$是一个$X$到$Y$的映射，$T_2$是一个$Y$到$Z$的映射。定义映射$T_3$满足$T_3x=T_2(T_1x)$，其中$x\in X$，则称映射$T_3$是映射$T_1$和映射$T_2$的\gls{CompositeMap}，记作$T_2\circ T_1$或$T_2T_1$。
 \end{definition}
 \begin{definition}
 	设$(X,\rho_X)$和$(Y,\rho_Y)$都是度量空间，$T$是一个$X$到$Y$的双射。若对任意的$x,y\in X$，有$\rho_X(x,y)=\rho_Y(Tx,Ty)$，则称$T$是$X$到$Y$上的\gls{isometry}。如果存在一个$X$到$Y$上的等距映射，则称$X$和$Y$\gls{isometric}。
@@ -52,34 +52,61 @@
 证明太复杂，不提供。
 \subsection{映射的极限}
 \begin{definition}
-	设$(X,\rho_X)$和$(Y,\rho_Y)$都是度量空间，$T$是一个$E\subseteq X$到$Y$的映射，$x_0\in X,y\in Y$。若对任意的$\varepsilon>0$，存在$\delta>0$，使得对$E\backslash\{x_0\}$中一切满足条件$\rho(x_0,x)<\delta$的$x$，都有$\rho_Y(Tx,y)<\varepsilon$，则称$T$沿$E$趋于$x_0$时，$T$的极限为$y$，记为：
+	设$(X,\rho_X)$和$(Y,\rho_Y)$都是度量空间，$T$是一个$E\subseteq X$到$Y$的映射，$x_0\in X$是$E$的一个聚点，$y\in Y$。若对任意的$\varepsilon>0$，存在$\delta>0$，使得对$E\backslash\{x_0\}$中一切满足条件$\rho(x,x_0)<\delta$的$x$，都有$\rho_Y(Tx,y)<\varepsilon$，则称$T$沿$E$趋于$x_0$时，$T$的极限为$y$，记为：
 	\begin{equation*}
 		\underset{E}{\lim_{x\to x_0}}Tx=y
 	\end{equation*}
 \end{definition}
-\begin{theorem}[Sequential Characterization of Limits]\label{theo:SequentialCharacterizationOfLimits}
-	设$(X,\rho_X)$和$(Y,\rho_Y)$都是度量空间，$T$是一个$E\subseteq X$到$Y$的映射，$x_0\in X,y\in Y$。$T$沿$E$趋于$x_0$时$T$的极限为$y$的充分必要条件为：对于任意满足$\{x_n\}\to x_0$的点列$\{x_n\}\subseteq E\backslash\{x_0\}$都有$\{Tx_n\}\to y$。
+\begin{theorem}[Sequential Characterization of Function Limits]\label{theo:SequentialCharacterizationOfFunctionLimits}
+	设$(X,\rho_X)$和$(Y,\rho_Y)$都是度量空间，$T$是一个$E\subseteq X$到$Y$的映射，$x_0\in X$是$E$的一个聚点，$y\in Y$。$T$沿$E$趋于$x_0$时$T$的极限为$y$的充分必要条件为：对于任意满足$\{x_n\}\to x_0$的点列$\{x_n\}\subseteq E\backslash\{x_0\}$都有$\{Tx_n\}\to y$。
 \end{theorem}
 \begin{proof}
 	\textbf{必要性：}若存在满足$\{x_n\}\to x_0$的点列$\{x_n\}\subseteq E\backslash\{x_0\}$不满足$\{Tx_n\}\to y$，则存在$\varepsilon>0$对任意的$N_1\in\mathbb{N}^+$都存在$n>N_1$使得$\rho_Y(Tx_n,y)\geqslant\varepsilon$。取定一个满足上述条件的$\varepsilon$，因为$T$沿$E$趋于$x_0$时极限为$y$，所以存在$\delta>0$，当$\rho_X(x,x_0)<\delta$时（$x\in E\backslash\{x_0\}$）有$\rho_Y(Tx,y)<\varepsilon$。因为$\{x_n\}\to x_0$，所以存在$N_2\in\mathbb{N}^+$满足当$n>N_2$时有$\rho_X(x_n,x_0)<\delta$，此时就有$\rho_Y(Tx_n,y)<\varepsilon$。取$N_1=N_2$，矛盾，所以必要性成立。\par
-	\textbf{充分性：}若此时$T$沿$E$趋于$x_0$时极限不为$y$，那么$\exists\;\varepsilon>0$，$\forall\;\delta>0$，都存在满足条件$\rho_X(x,x_0)<\delta$的点$x\in E\backslash\{x_0\}$使得$\rho_Y(Tx,Tx_0)\geqslant\varepsilon$，因此可取一个点列$\{x_n\}$，满足$\rho_X(x_n,x_0)<\dfrac{1}{n}$。注意到此时满足$\{x_n\}\to x$但不满足$T\{x_n\}\to y$，矛盾。
+	\textbf{充分性：}若此时$T$沿$E$趋于$x_0$时极限不为$y$，那么存在$\varepsilon>0$对任意的$\delta>0$都存在满足条件$\rho_X(x,x_0)<\delta$的点$x\in E\backslash\{x_0\}$使得$\rho_Y(Tx,Tx_0)\geqslant\varepsilon$，因此可取一个点列$\{x_n\}$，满足$\rho_X(x_n,x_0)<\dfrac{1}{n}$。注意到此时满足$\{x_n\}\to x$但不满足$\{Tx_n\}\to y$，矛盾。
+\end{proof}
+\begin{theorem}[Cauchy-Type Condition for Function Limits]\label{theo:Cauchy-TypeConditionForFunctionLimits}
+	设$(X,\rho_X)$是度量空间，$(Y,\rho_Y)$是完备的度量空间，$T$是一个$E\subseteq X$到$Y$的映射，$x_0\in X$是$E$的一个聚点。$T$沿$E$趋于$x_0$时存在极限的充要条件为：对任意的$\varepsilon>0$，存在$\delta>0$使得对于任意满足条件$\rho_X(x,x_0)<\delta,\rho_X(x',x_0)<\delta$的$x,x'\in E\backslash\{x_0\}$有$\rho_Y(Tx,Tx')<\varepsilon$。
+\end{theorem}
+\begin{proof}
+	\textbf{必要性：}设$T$沿$E$趋于$x_0$时极限为$y\in Y$，则对于任意的$\varepsilon>0$，存在$\delta_1$使得当$\rho_X(x,x_0)<\delta_1$时有$\rho_Y(Tx,y)<\dfrac{\varepsilon}{2}$，存在$\delta_1$使得当$\rho_X(x',x_0)<\delta_2$时有$\rho_Y(Tx',y)<\dfrac{\varepsilon}{2}$。取$\delta=\min\{\delta_1,\delta_2\}$则当$\rho_X(x,x_0)<\delta$且$\rho_X(x',x_0)<\delta$时有$\rho_Y(Tx,y)<\dfrac{\varepsilon}{2}$和$\rho_Y(Tx',y)<\dfrac{\varepsilon}{2}$，于是：
+	\begin{equation*}
+		\rho_Y(Tx,Tx')\leqslant\rho_Y(Tx,y)+\rho_Y(Tx',y)<\varepsilon
+	\end{equation*}\par
+	\textbf{充分性：}因为$x_0$是$E$的聚点，所以存在$\{x_n\}\subseteq E\backslash\{x_0\}$满足$\{x_n\}\to x_0$。对于任意的$\varepsilon>0$，取任意一个满足上述条件的$\{x_n\}$，则对于条件中给定的$\delta>0$，存在$N\in\mathbb{N}^+$使得当$n>N$时有$\rho_X(x_n,x_0)<\delta$，于是当$m,n>N$时就有$\rho_Y(Tx_n,Tx_m)<\varepsilon$。因为$(Y,\rho_Y)$是完备的度量空间，所以$\{Tx_n\}$有极限。下面证明所有$\{Tx_n\}$的极限都相同。假设存在不同的$\{x_n'\}$和$\{x_n''\}$满足：
+	\begin{equation*}
+		\{x_n'\},\{x_n''\}\subseteq E\backslash\{x_0\},\quad\{x_n'\},\{x_n''\}\to x_0,\quad\lim_{n\to+\infty}Tx_n'\ne\lim_{n\to+\infty}Tx_n''
+	\end{equation*}
+	定义$\{x_n\}$：
+	\begin{equation*}
+		x_n=
+		\begin{cases}
+			x_n',&n\text{为奇数} \\
+			x_n'',&n\text{为偶数}
+		\end{cases}
+	\end{equation*}
+	则$\{x_n\}\subseteq E\backslash\{x_0\}$且$\{x_n\}\to x_0$，但由\cref{prop:ConvergentSeqOfPoints}可知$\{Tx_n\}$不收敛，矛盾，所以所有$\{Tx_n\}$的极限都相同，充分性得证。
 \end{proof}
 \begin{property}\label{prop:MappingLimits}
 	设$(X,\rho_X)$和$(Y,\rho_Y)$都是度量空间，$T$是一个$E\subseteq X$到$Y$的映射，则：
 	\begin{enumerate}
-		\item 若$T$沿某个集合趋于某一点时有极限，则极限唯一；
-		\item 设$(Z,\rho_Z)$是度量空间，$f$是$F\subseteq Y$到$Z$的映射，$TE\subseteq F$。若$T$沿$E$趋于$x\in$时极限为
+		\item 若$T$沿$E$趋于某一点时有极限，则极限唯一；
+		\item 若$x_0$是$E$的聚点，$T$沿$E$趋于$x_0$时极限为$y\in Y$，则存在$\delta>0$使得$T[U(x_0,\delta)\backslash\{x_0\}]$有界；
+		\item 设$(Z,\rho_Z)$是度量空间，$f$是$F\subseteq Y$到$Z$的映射，$x_0\in X$是$E$的聚点，$y\in Y$是$T(E\backslash\{x_0\})$的聚点，$T(E\backslash\{x_0\})\subseteq F\backslash\{y\}$，$z\in Z$。若$T$沿$E$趋于$x_0$时极限为$y$，$f$沿$F$趋于$y$时极限为$z$，则：
+		\begin{equation*}
+			\underset{E}{\lim_{x\to x_0}}f[T(x)]=z
+		\end{equation*}
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)由\cref{theo:SequentialCharacterizationOfLimits}和\cref{prop:ConvergentSeqOfPoints}(1)立即可得。\par
-	(2)
+	(1)由\cref{theo:SequentialCharacterizationOfFunctionLimits}和\cref{prop:ConvergentSeqOfPoints}(1)立即可得。\par
+	(2)由定义立即可得。\par
+	(3)由映射极限的定义，$E\backslash x_0$中任意满足$\{x_n\}\to x_0$的点列$\{x_n\}$都有$\{Tx_n\}\subseteq F\backslash\{y\}$且$\{Tx_n\}\to y$，根据\cref{theo:SequentialCharacterizationOfFunctionLimits}可知$\{f(Tx_n)\}\to z$，于是结论成立。
 \end{proof}
 \subsection{映射的连续性}
 \begin{definition}
-	设$(X,\rho_X)$和$(Y,\rho_Y)$都是度量空间，$T$是一个$X$到$Y$的映射，$x_0\in X$。若对任意的$\varepsilon>0$，存在$\delta>0$使得对$X$中一切满足条件$\rho(x,x_0)<\delta$的$x$都有$\rho_Y(Tx,Tx_0)<\varepsilon$，或对于任意满足$\{x_n\}\to x_0$的点列$\{x_n\}\subseteq X$都有$\{Tx_n\}\to Tx_0$，则称$T$在$x_0$处是\gls{continuous}。
+	设$(X,\rho_X)$和$(Y,\rho_Y)$都是度量空间，$T$是一个$X$到$Y$的映射，$x_0\in X$是$X$的一个聚点。若对任意的$\varepsilon>0$，存在$\delta>0$使得对$X$中一切满足条件$\rho(x,x_0)<\delta$的$x$都有$\rho_Y(Tx,Tx_0)<\varepsilon$，或对于任意满足$\{x_n\}\to x_0$的点列$\{x_n\}\subseteq X$都有$\{Tx_n\}\to Tx_0$，则称$T$在$x_0$处是\gls{continuous}。
 \end{definition}
-两个条件的等价性由\cref{theo:SequentialCharacterizationOfLimits}即可得到。
+两个条件的等价性类似\cref{theo:SequentialCharacterizationOfFunctionLimits}即可得到。
 \begin{definition}
 	设$T$是一个$(X,\rho_X)$到$(Y,\rho_Y)$的映射，若$T$在$X$的每一点都连续，则称$T$是$X$上的\gls{ContinuousMap}。
 \end{definition}
@@ -94,6 +121,12 @@
 	(1)\textbf{必要性：}设$T$是连续映射，$E\subseteq Y$是一个开集，如果$T^{-1}E=\varnothing$，则$T^{-1}E$是开集；若$T^{-1}E\ne\varnothing$，任取$x\in T^{-1}E$，令$Tx=y$，则$y\in E$，因为$E$是开集，所以存在$y$的$\varepsilon$邻域$U$，使得$U\subseteq E$，由$T$的连续性，存在$x$的$\delta$邻域$V$，使得$TV\subseteq U$，因此$V\subseteq T^{-1}U\subseteq T^{-1}E$，即$x$是$T^{-1}E$的内点。由$x$的任意性，$T^{-1}E$是$X$中的开集。\par
 	\textbf{充分性：}对任意的$x\in X$及$Tx$的任意$\varepsilon$邻域$U$，由\cref{prop:OpenClosedSet}(1)可知$U$是一个开集，因此$T^{-1}U$是$X$中的开集，所以$x$是$T^{-1}U$的内点，于是存在$x$的某个$\delta$邻域$V$，使得$V\subseteq T^{-1}U$，因此$TV\subseteq U$，即$T$在$x$处连续。由$x$的任意性，$T$是$X$上的连续映射。\par
 	(2)由(1)、\cref{theo:PropertyOfPreimage}(3)和\cref{prop:OpenClosedSet}(5)立即可得。
+\end{proof}
+\begin{theorem}
+	设$(X,\rho_X),(Y,\rho_Y),(Z,\rho_Z)$都是度量空间，$T$是一个$E\subseteq X$到$Y$的映射，$f$是$F\subseteq Y$到$Z$的映射。若$T$在$E$上连续、$f$在$F$上连续且$TE\subseteq F$，则$fT$在$E$上连续。
+\end{theorem}
+\begin{proof}
+	任取$x\in E$和$\{x_n\}\subseteq E$满足$\{x_n\}\to x$，因为$T$在$E$上连续，所以$\{Tx_n\}\to Tx$。由$TE\subseteq F$和$f$在$F$上连续可得$\{fTx_n\}\to fTx$，即$fT$在$x$处连续。根据$x$的任意性可得$fT$在$E$上连续。
 \end{proof}
 \begin{definition}
 	设$(X,\rho_X)$和$(Y,\rho_Y)$都是度量空间，$T$是一个$X$到$Y$的双射。若$T$和$T^{-1}$都是连续映射，则称$T$是$X$到$Y$上的\gls{HomeoMap}。如果存在一个$X$到$Y$上的同胚映射，则称$X$和$Y$\gls{homeomorphic}。
