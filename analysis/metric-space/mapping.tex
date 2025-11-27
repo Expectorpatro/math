@@ -1,7 +1,7 @@
 \section{度量空间上的映射}
 \subsection{映射的定义与性质}
 \begin{definition}
-	设$X,Y$是任意给定的集合。如果对于任意的$x\in X$，都存在唯一地$f(x)\in Y$与之对应，则称对应关系$f$是一个从$X$到$Y$的\gls{mapping}。对任何$E\subseteq Y$，称：
+	设$X,Y$是任意给定的集合。如果对于任意的$x\in X$，都存在唯一的$f(x)\in Y$与之对应，则称对应关系$f$是一个从$X$到$Y$的\gls{mapping}。对任何$E\subseteq Y$，称：
 	\begin{equation*}
 		f^{-1}(E)=\{x:f(x)\in E\}
 	\end{equation*}
@@ -105,14 +105,14 @@
 \end{proof}
 \subsection{映射的连续性}
 \begin{definition}
-	设$(X,\rho_X)$和$(Y,\rho_Y)$都是度量空间，$T$是一个$X$到$Y$的映射，$x_0\in X$是$X$的一个聚点。若对任意的$\varepsilon>0$，存在$\delta>0$使得对$X$中一切满足条件$\rho(x,x_0)<\delta$的$x$都有$\rho_Y(Tx,Tx_0)<\varepsilon$，或对于任意满足$\{x_n\}\to x_0$的点列$\{x_n\}\subseteq X$都有$\{Tx_n\}\to Tx_0$，则称$T$在$x_0$处是\gls{continuous}。
+	设$(X,\rho_X)$和$(Y,\rho_Y)$都是度量空间，$T$是一个$E\subseteq X$到$Y$的映射，$x_0\in E$是$E$的一个聚点。若对任意的$\varepsilon>0$，存在$\delta>0$使得对$E$中一切满足条件$\rho(x,x_0)<\delta$的$x$都有$\rho_Y(Tx,Tx_0)<\varepsilon$，或对于任意满足$\{x_n\}\to x_0$的点列$\{x_n\}\subseteq E$都有$\{Tx_n\}\to Tx_0$，则称$T$沿$E$在$x_0$处\gls{continuous}。
 \end{definition}
 两个条件的等价性类似\cref{theo:SequentialCharacterizationOfFunctionLimits}即可得到。
 \begin{definition}
-	设$T$是一个$(X,\rho_X)$到$(Y,\rho_Y)$的映射，若$T$在$X$的每一点都连续，则称$T$是$X$上的\gls{ContinuousMap}。
+	设$T$是一个$(X,\rho_X)$到$(Y,\rho_Y)$的映射，若$T$在$E\subseteq X$的每一点都连续，则称$T$是$E$上的\gls{ContinuousMap}。
 \end{definition}
 \begin{theorem}\label{theo:ContinousMapO2OC2C}
-	度量空间$(X,\rho_X)$到$(Y,\rho_Y)$上的映射$T$是$X$上连续映射的充要条件为：
+	度量空间$(X,\rho_X)$到$(Y,\rho_Y)$上的映射$T$是$X$上的连续映射的充要条件为：
 	\begin{enumerate}
 		\item $Y$中任意开集$E$的原像$T^{-1}E$是$X$中的开集。
 		\item $Y$中任意闭集$E$的原像$T^{-1}E$是$X$中的闭集。
@@ -214,8 +214,18 @@
 
 \subsection{紧集上的连续映射}
 \begin{definition}
-	设$(X,\rho_X)$和$(Y,\rho_Y)$为度量空间，$T$是$X$到$Y$上的映射。若对于任意的$\varepsilon>0$，存在只与$\varepsilon$有关的$\delta>0$，使得对任意的$x,y\in X$，只要$\rho_X(x,y)<\delta$，就有$\rho_Y(Tx,Ty)<\varepsilon$，则称$T$在$X$上\gls{UnifContinuous}。
+	设$(X,\rho_X)$和$(Y,\rho_Y)$为度量空间，$T$是$E\subseteq X$到$Y$上的映射。若对于任意的$\varepsilon>0$，存在只与$\varepsilon$有关的$\delta>0$，使得对任意的$x,y\in E$，只要$\rho_X(x,y)<\delta$，就有$\rho_Y(Tx,Ty)<\varepsilon$，则称$T$在$E$上\gls{UniformlyContinuous}。
 \end{definition}
+\begin{theorem}[Sequential Characterization of Uniformly Continuous]
+	设$(X,\rho_X)$和$(Y,\rho_Y)$为度量空间，$T$是$E\subseteq X$到$Y$上的映射。$T$在$E$上一致连续的充分必要条件为：对于任意满足条件$\lim\limits_{n\to+\infty}\rho_X(x_n,y_n)$的点列$\{x_n\},\{y_n\}\subseteq E$，都有：
+	\begin{equation*}
+		\lim_{n\to+\infty}\rho_Y(Tx_n,Ty_n)=0
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	\textbf{必要性：}设$T$在$E$上一致连续，则对于任意的$\varepsilon>0$，存在只与$\varepsilon$有关的$\delta>0$，使得对任意的$x,y\in E$，只要$\rho_X(x,y)<\delta$，就有$\rho_Y(Tx,Ty)<\varepsilon$。因为$\lim\limits_{n\to+\infty}\rho_X(x_n,y_n)=0$，所以存在$N\in\mathbb{N}^+$，当$n>N$时有$\rho_X(x_n,y_n)<\delta$，于是$\rho_Y(Tx_n,Ty_n)<\varepsilon$，即$\{\rho_Y(Tx_n,Ty_n)\}\to 0$。\par
+	\textbf{充分性：}若此时$T$不在$E$上一致连续，则存在$\varepsilon>0$，无论$\delta=\dfrac{1}{n}$多小，总存在满足$\rho_X(x_n,y_n)<\delta$的$x_n,y_n\in E$使得$\rho_Y(Tx_n,Ty_n)\geqslant\varepsilon$。此时满足$\lim\limits_{n\to+\infty}\rho_X(x_n,y_n)$，但没有$\lim\limits_{n\to+\infty}\rho_Y(Tx_n,Ty_n)=0$，矛盾。
+\end{proof}
 \begin{property}
 	设$(X,\rho_X)$为度量空间，$A$是$X$中的紧集，$T$是$A$到$\mathbb{R}^{}$上的映射，则：
 	\begin{enumerate}
@@ -252,11 +262,12 @@
 	与第一个式子中的第二部分矛盾，所以$T$一致连续。
 \end{proof}
 
-\subsection{值域为$\mathbb{R}^{n}$的映射}
+\subsection{值域为$\mathbb{R}^{},\mathbb{R}^{n},\overline{\mathbb{R}^{}}^n$的映射}
+请自行给出定义在$\mathbb{R}^{}$且值域为$\mathbb{R}^{}$的映射极限的32个定义（趋于的点为实数、负无穷、正无穷、无穷，极限为实数、负无穷、正无穷、无穷，组合共16种，再考虑序列式与$\varepsilon-\delta$语言，一共32种）。
 \begin{property}\label{prop:RMap}
-	对于定义在度量空间$(X,\rho_X)$上取值在$\mathbb{R}^{n}$中的函数$T$，有：
+	对于定义在度量空间$(X,\rho_X)$或$\overline{\mathbb{R}^{}}^m$上取值在$\mathbb{R}^{n}$中的函数$T$，有：
 	\begin{enumerate}
-		\item 若$T$沿$E\subseteq X$趋于$x_0\in X$时有极限，则其极限唯一；
+		\item 若$T$趋于某点时有极限，则其极限唯一；
 		\item (Squeeze Theorem) 设$f$和$g$是定义在度量空间$(X,\rho_X)$上取值在$\mathbb{R}^{n}$中的函数，
 		\begin{enumerate}
 			\item 若在$E\subseteq X$上满足对任意的$x\in E$有$f(x)\leqslant T(x)\leqslant g(x)$，且$\lim\limits_{\substack{x\to x_0 \\ E}}f(x)=\lim\limits_{\substack{x\to x_0 \\ E}}T(x)=a$，则$\lim\limits_{\substack{x\to x_0 \\ E}}T(x)=a$；
@@ -275,3 +286,6 @@
 		\end{enumerate}
 	\end{enumerate}
 \end{property}
+\begin{proof}
+	(1)由\cref{theo:SequentialCharacterizationOfFunctionLimits}和
+\end{proof}

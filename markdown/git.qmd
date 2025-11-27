@@ -1,0 +1,1290 @@
+---
+title: "Git Workflow Guide"
+author: "Xingcheng NI"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    toc-expand: 1
+    toc-title: Contents
+    toc-location: left
+    number-sections: true
+  pdf:
+    toc: true
+    number-sections: true
+lang: en
+execute:
+  echo: false
+editor: visual
+---
+
+# Introduction
+
+In modern software engineering and research environments, source code is a core asset. Git is the de facto standard for version control and collaboration. This guide explains how to use Git in a company setting, including individual development, team collaboration, and release management.
+
+The target audience:
+
+- Developers who already know how to `commit` and `push`.
+- New hires joining an existing project.
+- Researchers collaborating on code and experiments.
+
+The objectives:
+
+- Standardize how Git is used in projects.
+- Reduce merge conflicts and integration pain.
+- Enable traceable, reviewable, and reproducible development.
+
+---
+
+# Git Fundamentals and Core Commands
+
+## Key concepts
+
+- **Repository (repo)**: A directory tracked by Git, containing source code and full history.
+- **Local repository**: The copy on your machine.
+- **Remote repository**: The copy hosted on GitHub, GitLab, Bitbucket, or an internal Git server.
+- **Working directory**: The files you see and edit on disk.
+- **Staging area (index)**: A buffer where you prepare changes for a commit.
+- **Commit**: A snapshot of the staged changes, with a message and metadata (author, date, hash).
+- **Branch**: A named line of development (e.g., `main`, `develop`, `feature/login-api`).
+- **Remote**: A named reference to a remote repository (commonly `origin`).
+
+## Creating and Obtaining a Project
+
+Git allows you to start a new project under version control or obtain an existing one from a remote source. These are the two primary ways to begin working with Git.
+
+### Initialize a New Project Locally
+
+To start tracking an existing folder with Git, run:
+
+```bash
+git init
+```
+
+This creates a `.git` directory inside the current folder, which stores the complete version history and configuration for the project.  
+Use this when you are beginning a project from scratch or turning an existing directory into a Git-managed project.
+
+### Clone an Existing Project
+
+To obtain a copy of a remote repository:
+
+```bash
+git clone git@github.com:company/project.git
+# or
+git clone https://github.com/company/project.git
+```
+
+Cloning downloads the entire history of the repository and sets up a default remote called `origin`. Use the SSH URL if you have SSH keys configured; otherwise, HTTPS is universally compatible.
+
+## Git Configuration
+
+Git configuration controls how Git behaves on your system, for your user account, and within individual repositories. There are **three configuration levels**, each stored in a different file, and they follow a strict priority order.
+
+| Level   | File Path                            | Description                           |
+|---------|---------------------------------------|---------------------------------------|
+| System  | `/etc/gitconfig`                      | Lowest priority, applied system-wide to all users on the machine.
+           |
+| Global  | `~/.gitconfig` or `~/.config/git/config` | Applies to the current user          |
+| Local   | `.git/config` inside the repo         | Highest priority, repo-specific       |
+
+
+### Set Global User Identity
+
+Global identity is required in most engineering environments to ensure commit authorship is consistent.
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "you@company.com"
+```
+
+### View Configuration
+
+Use the following commands to inspect configuration values at different levels:
+
+```bash
+git config --local --list
+git config --global --list
+git config --system --list
+```
+
+To view a specific key:
+
+```bash
+git config user.name
+git config user.email
+```
+
+To show where each setting comes from:
+
+```bash
+git config --list --show-origin
+```
+
+Output includes file paths such as:
+
+```
+file:/Users/you/.gitconfig      user.name=Your Name
+file:.git/config                remote.origin.url=git@github.com/company/project.git
+```
+
+## Staging and Committing
+
+Staging selects which changes will be included in your next commit, and committing records those changes permanently in the project history. Together, `git add` and `git commit` form the core workflow for tracking edits.
+
+### Stage Changes
+
+Use `git add` to place modifications into the staging area.
+
+**General Syntax**
+
+---
+
+```bash
+git add <path>
+```
+
+- `path`  
+Files or directories you want to stage. Multiple paths can be listed by separating them with spaces. You may also use patterns such as `.` (current directory), wildcard globs like `*.py`, or nested paths.
+
+
+**Notes**
+
+---
+
+`git add` does **not** create a commit; it only prepares the files.
+
+**Examples**
+
+---
+
+```bash
+# Stage a single file
+git add path/to/file.py
+
+# Stage multiple files
+git add file1.py file2.py
+
+# Stage all modified and untracked changes under current directory
+git add .
+```
+
+### Commit Changes
+
+Once the desired changes are staged, create a commit to save them to history.
+
+**General Syntax**
+
+---
+
+```bash
+git commit -m <message>
+```
+
+- `message`  
+A clear, descriptive explanation of the change. 
+
+**Examples**
+
+---
+
+```bash
+git commit -m "Fix login token refresh logic"
+git commit -m "Add data validation step in preprocessing"
+```
+
+### Amend the Previous Commit
+
+Sometimes you need to adjust the most recent commit — for example, fix the message or include missing files.
+
+**General Syntax**
+
+```bash
+git commit --amend
+```
+
+**Notes**
+
+---
+
+Safe **only if the commit has not been pushed**.  
+
+**Examples**
+
+---
+
+```bash
+# Stage a forgotten file, then amend
+git add missing_file.py
+git commit --amend
+```
+
+This updates the previous commit to include the additional changes.
+
+## Status and History
+
+Git provides several commands to inspect the current state of your working directory and to review the project’s commit history. These tools help you understand what has changed, what is staged, and how the codebase has evolved over time.
+
+### Check Working Directory and Staging Area
+
+Use `git status` to see which files are modified, staged, or untracked.
+
+**General Syntax**
+
+---
+
+```bash
+git status
+```
+
+**Notes**
+
+---
+
+`git status` Shows four key sections:  
+
+  - **Changes not staged for commit** — modified but not yet added with `git add`.
+  - **Changes to be committed** — staged changes that will be included in the next commit.
+  - **Untracked files** — newly created files not yet tracked by Git.  
+  - whether your local branch is ahead of/behind the remote.
+
+### View Commit History
+
+`git log` displays the commit history of your repository and can be used in different ways depending on what you want to inspect.
+
+**General Syntax**
+
+---
+
+```bash
+git log [--oneline] [--graph] [--decorate] [--all]
+git log -- <path/to/file>
+```
+
+**Options**
+
+- `--oneline`  
+  Shows each commit in a single line for a compact overview.
+
+- `--graph`  
+  Draws an ASCII representation of branches and merges.
+
+- `--decorate`  
+  Displays references such as branch names and tags next to commits.
+
+- `--all`  
+  Includes all branches in the output instead of only the current one.
+
+- `-- <path/to/file>`  
+  Restricts the history to commits that affected a specific file.  
+  Useful for tracing changes, identifying when a bug was introduced, or understanding the evolution of a file.
+
+**Examples**
+
+---
+
+```bash
+# Compact, visual representation of the full repository history
+git log --oneline --graph --decorate --all
+
+# Show only the history of a specific file
+git log -- path/to/file.py
+```
+
+## Branch management
+
+Branches in Git are lightweight movable pointers that track lines of development.
+They allow parallel workstreams, feature isolation, experiments, bug fixes, and collaborative workflows without interfering with the main codebase.
+
+Git provides two major command families for branch management:
+
+- `git branch` — create, delete, list, and inspect branches.  
+- `git switch` — move between branches or create branches while switching.
+
+### Create a Branch
+
+Creating a branch records a new pointer to the current commit, allowing you to work independently from the main branch.
+
+**General Syntax**
+
+```bash
+git branch <branch-name>
+```
+
+- `<branch-name>`  
+The name for the new branch.
+
+**Notes**
+
+---
+
+Git allows almost any text as a branch name. However, for safety and compatibility, you should avoid:  
+
+- whitespace (spaces, tabs)  
+- names starting or ending with `/`  
+- characters such as `~`, `^`, `:`, `?`, `*`, `[`, `\`  
+- names that look like commit hashes
+
+Basic branch naming conventions:
+
+1. Use clearly structured branch names to indicate purpose:
+
+    - **`main` (or `master`)** — production-ready code  
+    - **`develop`** (optional) — shared integration branch  
+    - **`feature/*`** — new features  
+    - **`bugfix/*`** — routine fixes  
+    - **`hotfix/*`** — urgent production fixes  
+
+2. Branch names should be **lowercase, hyphen-separated for readability**.
+
+Examples include:
+
+- `feature/user-authentication`  
+- `feature/report-export-csv`  
+- `bugfix/api-timezone-offset`  
+- `hotfix/payment-timeout`  
+
+Creating a branch does **not** switch to it; the working directory stays unchanged. 
+
+**Examples**
+
+---
+
+```bash
+git branch feature/user-login
+git branch hotfix/crash-fix 4a9d3f1
+```
+
+### List Branches
+
+List all branches in your local repository or include remote branches as well.
+
+**General Syntax**
+
+---
+
+```bash
+# Lists only local branches
+git branch
+# Lists local and remote-tracking branches
+git branch -a
+# Lists remote-tracking branches only
+git branch -r
+# Lists all branches whose history has hash 'commit'
+git branch --contains <commit>
+# Lists branches that have already been fully merged into your current branch
+git branch --merged
+# Lists branches that have not been merged into your current branch
+git branch --no-merged
+```
+
+- `commit`
+It can be **any identifier that refers to a specific commit**, including:
+
+  1. **Full or short commit hash**  
+   Lists all branches whose history contains that exact commit.
+
+  2. **Branch name**  
+   Lists all branches whose history includes the *latest commit* pointed to by the specified branch.
+
+  3. **Tag name**  
+   Lists all branches that include the commit associated with that tag.
+
+  
+**Notes**
+
+---
+
+The currently checked-out branch is marked with `*`.
+
+### Switch Branches
+
+Switching moves your `HEAD` pointer to the specified branch and updates your working directory to match that branch.
+
+**General Syntax**
+
+---
+
+```bash
+git switch <branch-name>
+```
+
+**Notes**
+
+---
+
+When you switch branches, Git must rewrite your working directory to match the target branch. If a file you modified also exists in the target branch with different content, Git would need to overwrite your uncommitted change. Once overwritten, Git cannot recover your uncommitted version simply by switching back. To protect your work, Git therefore stops the switch instead of overwriting anything.
+
+As a result, **your working directory must be clean** before switching branches.  
+To proceed safely, you need to do *one* of the following:
+
+- **Commit** your changes  
+- **Stash** them temporarily using `git stash`  
+- **Discard** them if they are no longer needed
+
+This ensures that switching branches will not overwrite or lose any uncommitted work.
+
+**Examples**
+
+---
+
+```bash
+git switch main
+```
+
+### Create and Switch in One Step
+
+This is the most common pattern: create a branch and immediately switch to it.
+
+**General Syntax**
+
+---
+
+```bash
+git switch -c <branch-name> <base-branch>
+```
+
+- `-c`  
+  Create a new branch and switch too it immediately.
+  
+- `base-branch`
+The base branch from which the new branch is created defaults to the current `HEAD` unless explicitly specified.
+
+**Examples**
+
+---
+
+```bash
+git switch -c experiment/new-loss-function main
+```
+
+### Rename a Branch
+
+Rename a branch while keeping its commit history unchanged.
+
+**General Syntax**
+
+---
+
+```bash
+git branch -m <old-name> <new-name>
+```
+
+- `old-name`  
+Defaults to the name of the branch currently checked out.
+
+**Examples**
+
+---
+
+```bash
+git branch -m feature/login feature/auth-login
+```
+
+### Delete a Branch
+
+Delete a branch locally after it has been merged or is no longer needed.
+
+**General Syntax**
+
+---
+
+```bash
+git branch -d <branch-name>
+git branch -D <branch-name>
+```
+
+- `-d` — delete only if merged  
+- `-D` — force delete even if unmerged  
+
+**Notes**
+
+---
+
+To delete a remote branch:
+
+```bash
+git push <remote-name> --delete <branch-name>
+```
+
+**Examples**
+
+---
+
+```bash
+git branch -d feature/user-login
+git branch -D experiment/test-idea
+git push origin --delete old-feature
+```
+
+### Set Upstream Branch
+
+Configure a local branch to track a remote branch.
+
+**General Syntax**
+
+---
+
+```bash
+git branch --set-upstream-to=<remote>/<remote-branch> <local-branch>
+```
+
+- `local-branch`  
+Default to the current branch.
+
+**Examples**
+
+---
+
+```bash
+git branch --set-upstream-to=origin/main feature/user-login
+```
+
+## Remote Synchronization
+
+A remote is a named reference to another Git repository’s URL.
+A single local repository can have any number of remotes, each serving a different purpose (fork upstream, mirrors, collaborators, deployment targets, etc.). The Git command used to manage remote repositories is `git remote`.
+
+### Add Remote
+
+**General Syntax**
+
+---
+
+```bash
+git remote add <remote-name> <url>
+git remote remove <remote-name>
+```
+
+- `add`  
+Register a new remote inside your local `.git` configuration.
+
+- `remove`  
+Delete the specified remote from your local Git configuration.
+
+- `<remote-name>`  
+A human-friendly label you choose for the remote.  
+It does NOT need to match anything on GitHub.  It is simply a local alias so you do not need to type the full URL every time. 
+
+- `<url>`  
+The actual location of the remote repository. Valid formats include **https, ssh and local filesystem path**.
+
+**Examples**
+
+---
+
+```bash
+git remote add upstream https://github.com/someone/someproject.git
+git remote add backup git@myserver:repo.git
+```
+
+### List Remotes
+
+**General Syntax**
+
+---
+
+```bash
+git remote -v
+```
+
+**Notes**
+
+---
+
+When you run the command, Git prints each remote name twice:
+```bash
+<remote-name>    <url>    (fetch)
+<remote-name>    <url>    (push)
+```
+`(fetch) / (push)` indicates which URL Git uses for downloading updates and for uploading commits, respectively.
+
+**Examples**
+
+---
+
+```bash
+origin  git@github.com:Expectorpatro/math.git (fetch)
+origin  git@github.com:Expectorpatro/math.git (push)
+```
+
+### Change Remote URL
+
+**General Syntax**
+
+---
+
+```bash
+git remote set-url <remote-name> <new-url>
+```
+
+- `set-url`  
+Updates the existing URL of a remote without removing or re-adding it.
+
+- `new-url`  
+A new URL.
+
+**Examples**
+
+---
+
+```bash
+git remote set-url origin git@github.com:Expectorpatro/math.git
+git remote set-url origin https://github.com/Expectorpatro/math.git
+```
+
+### Push to Remote
+
+Pushing sends your local commits to a remote repository so others (or servers) can access them. A push updates a remote branch, meaning a branch stored on the remote server (e.g., origin/main).
+
+**General Syntax**
+
+---
+
+```bash
+git push <remote-name> <local-branch>:<remote-branch>
+```
+- `<local-branch>`  
+The branch in your local repository whose commits you want to upload.
+- `<remote-branch>`  
+The branch name that will be created or updated on the remote. 
+
+::: {.callout-tip}
+If the remote branch does not already exist, Git will automatically create it when you push.
+If `<remote-branch>` is omitted, Git reuses the local branch name as the remote branch name.
+:::
+
+**Notes**
+
+---
+
+You can add `-u` (or `--set-upstream`) to set an upstream branch:
+```bash
+git push -u <remote-name> <local-branch>:<remote-branch>
+git push --set-upstream <remote-name> <local-branch>:<remote-branch>
+```
+This links the local branch to the remote one, so future commands can simply use:
+```bash
+git push
+```
+
+**Examples**
+
+---
+
+```bash
+git push origin main
+```
+This uploads the local `main` branch to `origin/main`.
+
+### Fetch
+
+Fetching retrieves updates from a remote repository **without modifying your working directory or your local branches**. It updates only the *remote-tracking branches*. Fetching does **not** merge changes into your current branch; it only updates references inside `.git/refs/remotes/`.
+
+**General Syntax**  
+
+---
+
+```bash
+git fetch <remote-name> <remote-branch>
+```
+
+**Examples**
+
+---
+
+```bash
+git fetch upstream main
+```
+
+### Merge
+
+Merging integrates changes from one branch into **into your current branch**.  
+
+**General Syntax**
+
+---
+
+```bash
+git merge <branch-name>
+```
+::: {.callout-tip}
+Git always merges *into the branch you have checked out*. Therefore, the merge command requires only **one argument**, the branch you want to merge **from**.
+:::
+
+**Notes**
+
+---
+
+The command above does not specify whether the branch to be merged is a local branch or a remote-tracking branch. The following section explains how Git decides which reference is used and how to avoid ambiguity.
+
+
+Git resolves the given name using a fixed lookup order:
+
+1. **Local branches** — `refs/heads/<branch-name>`  
+2. **Tags** — `refs/tags/<branch-name>`  
+3. **Remote-tracking branches** — `refs/remotes/<remote>/<branch-name>`
+
+As a result:
+
+- If a local branch and a remote-tracking branch have the same name,  **the local branch is always chosen**.
+- A remote-tracking branch is used only if there is no matching local branch or tag.
+
+A confusing situation may occur when:
+
+- A local branch is named `feature/login`, and  
+- There exists a remote named `feature`, which contains a branch named `login`.
+
+This produces two references:
+
+- Local: `refs/heads/feature/login`  
+- Remote-tracking: `refs/remotes/feature/login`  
+
+Both appear as `feature/login`. In such cases, Git still selects the **local** branch because it appears first in the resolution order.
+
+To ensure that Git uses a remote-tracking branch, the full reference must be specified:
+
+```bash
+git merge refs/heads/<branch-name>
+git merge refs/tags/<branch-name>
+git merge refs/remotes/<remote>/<branch-name>
+```
+
+**Examples**
+
+--- 
+
+```bash
+git merge feature
+```
+
+### Pull
+
+Pulling updates your current branch by combining **fetch** and **merge** in a single command.
+
+**General Syntax**
+
+---
+
+```bash
+git pull <remote-name> <remote-branch>
+```
+
+**Notes**
+
+---
+
+If an upstream branch is configured—for example, by running:
+```bash
+git push -u <remote> <branch>
+```
+then future pulls can simply use:
+```bash
+git pull
+```
+
+**Examples**
+
+---
+
+```bash
+git pull origin main
+git pull upstream dev
+```
+
+<!--# 4. Pull Request / Merge Request Workflow
+
+## 4.1 Why use PR/MR
+
+In a company, merging directly to `main` or `develop` should be restricted. Instead, use Pull Requests (GitHub) or Merge Requests (GitLab):
+
+- Enforce code review.
+- Trigger CI (tests, linting, security checks).
+- Provide discussion history for design decisions.
+- Protect critical branches via branch protection rules.
+
+## 4.2 Typical PR workflow
+
+1. Create a feature branch from `develop` (or `main`).
+2. Implement changes and commit them.
+3. Push the branch to remote.
+4. Open a PR/MR on the platform.
+5. Request review from teammates.
+6. Address feedback and push updates.
+7. Wait for CI to pass.
+8. Once approved, merge via the platform.
+
+## 4.3 PR content checklist
+
+A good PR should:
+
+- Have a clear title describing the change.
+- Include a description with:
+  - Background or problem statement.
+  - What has been changed.
+  - How it was tested.
+  - Any breaking changes or migration steps.
+- Be small enough to review (avoid giant PRs if possible).
+
+Example PR description:
+
+```markdown
+## Summary
+
+Implement user profile editing page with client-side validation.
+
+## Changes
+
+- Add `/profile` route and page
+- Create `ProfileForm` component with validation
+- Integrate API calls for updating user info
+
+## Testing
+
+- Unit tests for form validation
+- Manual tests in Chrome and Firefox
+
+## Notes
+
+This PR does not include avatar upload; that will be a separate PR.
+```
+
+## 4.4 Merge strategies
+
+Most platforms support:
+
+- **Merge commit**: Preserve both histories and create a merge commit.
+- **Squash and merge**: Compress all commits in the PR into a single commit.
+- **Rebase and merge**: Rebase branch onto target and fast-forward.
+
+Company policy might specify one default. Common practice:
+
+- Use **squash and merge** to keep history clean for small/medium features.
+- Use **merge commit** for larger branches where keeping structure is useful.
+
+---
+
+# 5. Handling Merge Conflicts
+
+## 5.1 When conflicts occur
+
+Conflicts arise when:
+
+- Two branches modify the same lines in a file.
+- One branch modifies and the other deletes the same file.
+- Git cannot automatically decide which change to keep.
+
+You see something like:
+
+```bash
+Auto-merging src/app.py
+CONFLICT (content): Merge conflict in src/app.py
+Automatic merge failed; fix conflicts and then commit the result.
+```
+
+## 5.2 Conflict markers
+
+In the file:
+
+```text
+<<<<<<< HEAD
+current branch content
+=======
+incoming branch content
+>>>>>>> feature/new-api
+```
+
+- `<<<<<<< HEAD`: your current branch version.
+- `=======`: separator.
+- `>>>>>>> feature/new-api`: the other branch version.
+
+You must decide:
+
+- Keep one side.
+- Merge both logically.
+- Rewrite a new version.
+
+## 5.3 Resolving conflicts
+
+General steps:
+
+1. Open conflicted files (preferably in an editor with Git integration such as VS Code or JetBrains IDEs).
+2. Resolve conflicts by editing.
+3. Mark the file as resolved:
+
+```bash
+git add path/to/conflicted-file.py
+```
+
+4. Complete the merge or rebase:
+
+```bash
+git commit      # if merging
+git rebase --continue  # if rebasing
+```
+
+## 5.4 Best practices to reduce conflicts
+
+- Pull latest changes frequently before starting work and before pushing.
+- Keep feature branches short-lived.
+- Avoid touching unrelated files.
+- Communicate with teammates when modifying shared modules.
+
+---
+
+# 6. Branching Models: Git Flow and Trunk-Based Development
+
+## 6.1 Git Flow (classic model)
+
+Key branches:
+
+- `main`: production releases.
+- `develop`: integration branch for next release.
+- `feature/*`: features, branched from `develop`.
+- `release/*`: release preparation branches.
+- `hotfix/*`: urgent fixes starting from `main`.
+
+Pros:
+
+- Clear separation between stable and development code.
+- Good for projects with formal release cycles.
+
+Cons:
+
+- More branches to manage.
+- Overhead for small or fast-moving teams.
+
+## 6.2 Trunk-Based Development (TBD)
+
+Key idea:
+
+- Work is integrated into a single main branch (trunk) frequently.
+- Feature branches are short-lived, often merged within a day or two.
+- Heavy reliance on feature flags to avoid exposing incomplete features.
+
+Pros:
+
+- Simplifies branching.
+- Encourages continuous integration.
+- Reduces long-lived branch divergence.
+
+Cons:
+
+- Requires discipline and strong CI.
+- Not ideal if manual release management is complex or heavily regulated.
+
+## 6.3 Choosing a model
+
+Typical choices:
+
+- **Product teams**: often use Trunk-Based or a simplified Git Flow (only `main` + `develop` + `feature/*`).
+- **Enterprise / regulated environments**: more likely to use full Git Flow with `release/*` and `hotfix/*`.
+- **Research code**: a lightweight model with `main` + `experiment/*` branches may be sufficient.
+
+---
+
+# 7. Versioning, Tags, and Releases
+
+## 7.1 Semantic versioning (SemVer)
+
+Use `MAJOR.MINOR.PATCH`:
+
+- `MAJOR`: incompatible changes.
+- `MINOR`: backward-compatible new features.
+- `PATCH`: backward-compatible bug fixes.
+
+Examples:
+
+- `1.2.3`
+- `2.0.0`
+
+## 7.2 Tags
+
+Tags mark specific commits, typically for releases.
+
+```bash
+# Create a lightweight tag
+git tag v1.2.0
+
+# Create an annotated tag (recommended)
+git tag -a v1.2.0 -m "Release v1.2.0"
+
+# Push tags
+git push origin v1.2.0
+# or push all tags
+git push origin --tags
+```
+
+## 7.3 Releases on hosting platforms
+
+Most platforms support “Releases”, which:
+
+- Reference a tag.
+- Provide release notes.
+- Attach binary artifacts if needed.
+
+Release notes should include:
+
+- New features.
+- Bug fixes.
+- Breaking changes.
+- Upgrade notes.
+
+Example release note outline:
+
+```markdown
+## Features
+
+- Add bulk user import via CSV
+- Support dark mode UI
+
+## Bug Fixes
+
+- Fix logout redirect for expired tokens
+- Resolve timezone issue for EU users
+
+## Breaking Changes
+
+- Deprecate `/v1/orders` API in favor of `/v2/orders`
+
+## Upgrade Notes
+
+- Run database migration `2025_01_add_order_index`
+```
+
+---
+
+# 8. Research Code Collaboration: Data, Models, and Experiments
+
+## 8.1 Special requirements in research
+
+Research and data science projects often involve:
+
+- Large datasets (GB–TB).
+- Experiment configurations and logs.
+- Model artifacts (checkpoints, binaries).
+- Notebooks and exploratory scripts.
+
+Git alone is not ideal for huge binary data. Combine Git with:
+
+- **Git LFS** for large files if necessary.
+- Internal object storage (S3, MinIO) referenced via configuration.
+- Experiment tracking tools (MLflow, Weights & Biases, or custom logs).
+
+## 8.2 Repository layout recommendations
+
+A typical layout:
+
+```text
+project/
+  src/            # core library code
+  scripts/        # entry-point scripts, CLIs
+  notebooks/      # Jupyter/Quarto notebooks
+  configs/        # YAML/JSON config files
+  tests/          # tests
+  data/           # usually gitignored for large raw data
+  models/         # model artifacts (often gitignored)
+  docs/           # documentation
+```
+
+Example `.gitignore` snippet:
+
+```gitignore
+data/
+models/
+outputs/
+logs/
+```
+
+## 8.3 Versioning experiments
+
+- Store configuration files (`configs/*.yaml`) in Git.
+- Include config hash or Git commit hash in experiment logs.
+- Tag commits corresponding to published results, e.g., `paper-abc-final`.
+
+Example in an experiment log:
+
+```text
+git_commit: 3f9a7c2
+config_file: configs/exp1.yaml
+dataset_version: 2025-01-10
+```
+
+This allows others to reproduce experiments later.
+
+---
+
+# 9. Enterprise Requirements and Git-Based Solutions
+
+## 9.1 Code review and quality gates
+
+Use PR/MR to enforce:
+
+- Mandatory code review by at least one peer.
+- Required status checks (CI passes, code coverage thresholds).
+- Static analysis tools (linters, security scanners).
+
+Configure branch protection rules:
+
+- Disallow direct pushes to `main`/`develop`.
+- Require PR for every change.
+- Require all checks to pass before merge.
+
+## 9.2 CI/CD integration
+
+CI/CD pipelines are usually triggered on:
+
+- Push to certain branches (e.g., `main`, `develop`).
+- Opening or updating a PR/MR.
+- Tag creation (for releases).
+
+Common pipeline stages:
+
+- Lint & static analysis.
+- Unit tests & integration tests.
+- Build artifacts (Docker image, binary).
+- Deploy to staging or production.
+
+Git provides the commit and branch structure that CI/CD uses to decide **what** to build and **when**.
+
+## 9.3 Permissions and access control
+
+Typical patterns:
+
+- Developers have read/write access to non-protected branches.
+- Only maintainers / leads can override checks or merge into `main`.
+- Fine-grained permissions applied per repository or per team.
+
+Best practices:
+
+- Use teams and groups to manage permissions centrally.
+- Avoid sharing personal credentials; use SSH keys or SSO.
+- Rotate keys and tokens as required by company policy.
+
+## 9.4 Auditability and compliance
+
+Git history provides:
+
+- Who changed what, and when.
+- Which code was deployed to production (tied to tags and releases).
+- Context for changes via PR discussions.
+
+For regulated environments, enforce:
+
+- Signed commits or signed tags (GPG, SSH signatures).
+- Mandatory code review with recorded approvals.
+- Immutable logs for deployment events.
+
+---
+
+# 10. Command and Workflow Summary
+
+## 10.1 Daily workflow (developer)
+
+```bash
+# Sync base branch
+git checkout develop
+git pull origin develop
+
+# Create feature branch
+git checkout -b feature/short-description
+
+# Implement changes
+# ...
+
+# Stage and commit
+git add .
+git commit -m "Implement X"
+
+# Push feature branch
+git push -u origin feature/short-description
+
+# Open PR/MR on platform and request review
+```
+
+## 10.2 Handling conflicts in a feature branch
+
+```bash
+# While on your feature branch
+git fetch origin
+git merge origin/develop   # or rebase: git rebase origin/develop
+
+# Resolve conflicts in editor
+git add path/to/resolved-file
+git commit   # or: git rebase --continue if rebasing
+
+# Push updates (may require force push if rebased)
+git push
+# or if rebased
+git push --force-with-lease
+```
+
+## 10.3 Creating a release
+
+```bash
+# On main with all changes merged
+git checkout main
+git pull origin main
+
+# Decide new version, e.g., v1.3.0
+git tag -a v1.3.0 -m "Release v1.3.0"
+git push origin v1.3.0
+
+# Create a Release in GitHub/GitLab based on v1.3.0
+# Fill in release notes.
+```
+
+## 10.4 Quick reference of core commands
+
+```bash
+# Repo and config
+git init
+git clone <url>
+git config --global user.name "Name"
+git config --global user.email "you@company.com"
+
+# Status and history
+git status
+git log --oneline --graph --decorate --all
+
+# Staging and commit
+git add <file>
+git add .
+git commit -m "Message"
+git commit --amend
+
+# Branches
+git branch
+git branch -a
+git checkout <branch>
+git checkout -b <branch>
+
+# Remotes
+git remote -v
+git fetch
+git pull
+git push
+git push -u origin <branch>
+
+# Tags
+git tag
+git tag -a v1.0.0 -m "Release v1.0.0"
+git push origin v1.0.0
+
+# Merging and rebasing
+git merge <branch>
+git rebase <branch>
+git rebase --continue
+git rebase --abort
+```
+
+---
+
+# Conclusion
+
+This document describes a company-grade approach to using Git for engineering and research collaboration. It explains:
+
+- How to work locally with clean commits.
+- How to collaborate using branches and PRs.
+- How to manage conflicts, releases, and enterprise requirements.
+
+Teams should adapt these guidelines to their specific needs, but any deviations should be explicit and documented so that new members can quickly understand and follow the project workflow.-->

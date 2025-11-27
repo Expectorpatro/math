@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Xingcheng NI">
+
+<title>Git Workflow Guide</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="git_files/libs/clipboard/clipboard.min.js"></script>
+<script src="git_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="git_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="git_files/libs/quarto-html/popper.min.js"></script>
+<script src="git_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="git_files/libs/quarto-html/anchor.min.js"></script>
+<link href="git_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="git_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="git_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="git_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="git_files/libs/bootstrap/bootstrap-81267100e462c21b3d6c0d5bf76a3417.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="1">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#git-fundamentals-and-core-commands" id="toc-git-fundamentals-and-core-commands" class="nav-link" data-scroll-target="#git-fundamentals-and-core-commands"><span class="header-section-number">2</span> Git Fundamentals and Core Commands</a>
+  <ul class="collapse">
+  <li><a href="#key-concepts" id="toc-key-concepts" class="nav-link" data-scroll-target="#key-concepts"><span class="header-section-number">2.1</span> Key concepts</a></li>
+  <li><a href="#creating-and-obtaining-a-project" id="toc-creating-and-obtaining-a-project" class="nav-link" data-scroll-target="#creating-and-obtaining-a-project"><span class="header-section-number">2.2</span> Creating and Obtaining a Project</a></li>
+  <li><a href="#git-configuration" id="toc-git-configuration" class="nav-link" data-scroll-target="#git-configuration"><span class="header-section-number">2.3</span> Git Configuration</a></li>
+  <li><a href="#staging-and-committing" id="toc-staging-and-committing" class="nav-link" data-scroll-target="#staging-and-committing"><span class="header-section-number">2.4</span> Staging and Committing</a></li>
+  <li><a href="#status-and-history" id="toc-status-and-history" class="nav-link" data-scroll-target="#status-and-history"><span class="header-section-number">2.5</span> Status and History</a></li>
+  <li><a href="#branch-management" id="toc-branch-management" class="nav-link" data-scroll-target="#branch-management"><span class="header-section-number">2.6</span> Branch management</a></li>
+  <li><a href="#remote-synchronization" id="toc-remote-synchronization" class="nav-link" data-scroll-target="#remote-synchronization"><span class="header-section-number">2.7</span> Remote Synchronization</a></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="git.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Git Workflow Guide</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Xingcheng NI </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>In modern software engineering and research environments, source code is a core asset. Git is the de facto standard for version control and collaboration. This guide explains how to use Git in a company setting, including individual development, team collaboration, and release management.</p>
+<p>The target audience:</p>
+<ul>
+<li>Developers who already know how to <code>commit</code> and <code>push</code>.</li>
+<li>New hires joining an existing project.</li>
+<li>Researchers collaborating on code and experiments.</li>
+</ul>
+<p>The objectives:</p>
+<ul>
+<li>Standardize how Git is used in projects.</li>
+<li>Reduce merge conflicts and integration pain.</li>
+<li>Enable traceable, reviewable, and reproducible development.</li>
+</ul>
+<hr>
+</section>
+<section id="git-fundamentals-and-core-commands" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Git Fundamentals and Core Commands</h1>
+<section id="key-concepts" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="key-concepts"><span class="header-section-number">2.1</span> Key concepts</h2>
+<ul>
+<li><strong>Repository (repo)</strong>: A directory tracked by Git, containing source code and full history.</li>
+<li><strong>Local repository</strong>: The copy on your machine.</li>
+<li><strong>Remote repository</strong>: The copy hosted on GitHub, GitLab, Bitbucket, or an internal Git server.</li>
+<li><strong>Working directory</strong>: The files you see and edit on disk.</li>
+<li><strong>Staging area (index)</strong>: A buffer where you prepare changes for a commit.</li>
+<li><strong>Commit</strong>: A snapshot of the staged changes, with a message and metadata (author, date, hash).</li>
+<li><strong>Branch</strong>: A named line of development (e.g., <code>main</code>, <code>develop</code>, <code>feature/login-api</code>).</li>
+<li><strong>Remote</strong>: A named reference to a remote repository (commonly <code>origin</code>).</li>
+</ul>
+</section>
+<section id="creating-and-obtaining-a-project" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="creating-and-obtaining-a-project"><span class="header-section-number">2.2</span> Creating and Obtaining a Project</h2>
+<p>Git allows you to start a new project under version control or obtain an existing one from a remote source. These are the two primary ways to begin working with Git.</p>
+<section id="initialize-a-new-project-locally" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="initialize-a-new-project-locally"><span class="header-section-number">2.2.1</span> Initialize a New Project Locally</h3>
+<p>To start tracking an existing folder with Git, run:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> init</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This creates a <code>.git</code> directory inside the current folder, which stores the complete version history and configuration for the project.<br>
+Use this when you are beginning a project from scratch or turning an existing directory into a Git-managed project.</p>
+</section>
+<section id="clone-an-existing-project" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="clone-an-existing-project"><span class="header-section-number">2.2.2</span> Clone an Existing Project</h3>
+<p>To obtain a copy of a remote repository:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone git@github.com:company/project.git</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/company/project.git</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Cloning downloads the entire history of the repository and sets up a default remote called <code>origin</code>. Use the SSH URL if you have SSH keys configured; otherwise, HTTPS is universally compatible.</p>
+</section>
+</section>
+<section id="git-configuration" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="git-configuration"><span class="header-section-number">2.3</span> Git Configuration</h2>
+<p>Git configuration controls how Git behaves on your system, for your user account, and within individual repositories. There are <strong>three configuration levels</strong>, each stored in a different file, and they follow a strict priority order.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 44%">
+<col style="width: 44%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Level</th>
+<th>File Path</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>System</td>
+<td><code>/etc/gitconfig</code></td>
+<td>Lowest priority, applied system-wide to all users on the machine.</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Global</td>
+<td><code>~/.gitconfig</code> or <code>~/.config/git/config</code></td>
+<td>Applies to the current user</td>
+</tr>
+<tr class="even">
+<td>Local</td>
+<td><code>.git/config</code> inside the repo</td>
+<td>Highest priority, repo-specific</td>
+</tr>
+</tbody>
+</table>
+<section id="set-global-user-identity" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="set-global-user-identity"><span class="header-section-number">2.3.1</span> Set Global User Identity</h3>
+<p>Global identity is required in most engineering environments to ensure commit authorship is consistent.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--global</span> user.name <span class="st">"Your Name"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--global</span> user.email <span class="st">"you@company.com"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="view-configuration" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="view-configuration"><span class="header-section-number">2.3.2</span> View Configuration</h3>
+<p>Use the following commands to inspect configuration values at different levels:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--local</span> <span class="at">--list</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--global</span> <span class="at">--list</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--system</span> <span class="at">--list</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>To view a specific key:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config user.name</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config user.email</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>To show where each setting comes from:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--list</span> <span class="at">--show-origin</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Output includes file paths such as:</p>
+<pre><code>file:/Users/you/.gitconfig      user.name=Your Name
+file:.git/config                remote.origin.url=git@github.com/company/project.git</code></pre>
+</section>
+</section>
+<section id="staging-and-committing" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="staging-and-committing"><span class="header-section-number">2.4</span> Staging and Committing</h2>
+<p>Staging selects which changes will be included in your next commit, and committing records those changes permanently in the project history. Together, <code>git add</code> and <code>git commit</code> form the core workflow for tracking edits.</p>
+<section id="stage-changes" class="level3" data-number="2.4.1">
+<h3 data-number="2.4.1" class="anchored" data-anchor-id="stage-changes"><span class="header-section-number">2.4.1</span> Stage Changes</h3>
+<p>Use <code>git add</code> to place modifications into the staging area.</p>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add <span class="op">&lt;</span>path<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><code>path</code><br>
+Files or directories you want to stage. Multiple paths can be listed by separating them with spaces. You may also use patterns such as <code>.</code> (current directory), wildcard globs like <code>*.py</code>, or nested paths.</li>
+</ul>
+<p><strong>Notes</strong></p>
+<hr>
+<p><code>git add</code> does <strong>not</strong> create a commit; it only prepares the files.</p>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Stage a single file</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add path/to/file.py</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Stage multiple files</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add file1.py file2.py</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Stage all modified and untracked changes under current directory</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add .</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="commit-changes" class="level3" data-number="2.4.2">
+<h3 data-number="2.4.2" class="anchored" data-anchor-id="commit-changes"><span class="header-section-number">2.4.2</span> Commit Changes</h3>
+<p>Once the desired changes are staged, create a commit to save them to history.</p>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="op">&lt;</span>message<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><code>message</code><br>
+A clear, descriptive explanation of the change.</li>
+</ul>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">"Fix login token refresh logic"</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">"Add data validation step in preprocessing"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="amend-the-previous-commit" class="level3" data-number="2.4.3">
+<h3 data-number="2.4.3" class="anchored" data-anchor-id="amend-the-previous-commit"><span class="header-section-number">2.4.3</span> Amend the Previous Commit</h3>
+<p>Sometimes you need to adjust the most recent commit — for example, fix the message or include missing files.</p>
+<p><strong>General Syntax</strong></p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">--amend</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Notes</strong></p>
+<hr>
+<p>Safe <strong>only if the commit has not been pushed</strong>.</p>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Stage a forgotten file, then amend</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add missing_file.py</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">--amend</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This updates the previous commit to include the additional changes.</p>
+</section>
+</section>
+<section id="status-and-history" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="status-and-history"><span class="header-section-number">2.5</span> Status and History</h2>
+<p>Git provides several commands to inspect the current state of your working directory and to review the project’s commit history. These tools help you understand what has changed, what is staged, and how the codebase has evolved over time.</p>
+<section id="check-working-directory-and-staging-area" class="level3" data-number="2.5.1">
+<h3 data-number="2.5.1" class="anchored" data-anchor-id="check-working-directory-and-staging-area"><span class="header-section-number">2.5.1</span> Check Working Directory and Staging Area</h3>
+<p>Use <code>git status</code> to see which files are modified, staged, or untracked.</p>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> status</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Notes</strong></p>
+<hr>
+<p><code>git status</code> Shows four key sections:</p>
+<ul>
+<li><strong>Changes not staged for commit</strong> — modified but not yet added with <code>git add</code>.</li>
+<li><strong>Changes to be committed</strong> — staged changes that will be included in the next commit.</li>
+<li><strong>Untracked files</strong> — newly created files not yet tracked by Git.<br>
+</li>
+<li>whether your local branch is ahead of/behind the remote.</li>
+</ul>
+</section>
+<section id="view-commit-history" class="level3" data-number="2.5.2">
+<h3 data-number="2.5.2" class="anchored" data-anchor-id="view-commit-history"><span class="header-section-number">2.5.2</span> View Commit History</h3>
+<p><code>git log</code> displays the commit history of your repository and can be used in different ways depending on what you want to inspect.</p>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> log <span class="pp">[--</span><span class="ss">oneline</span><span class="pp">]</span> <span class="pp">[--</span><span class="ss">graph</span><span class="pp">]</span> <span class="pp">[--</span><span class="ss">decorate</span><span class="pp">]</span> <span class="pp">[--</span><span class="ss">all</span><span class="pp">]</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> log <span class="at">--</span> <span class="op">&lt;</span>path/to/file<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Options</strong></p>
+<ul>
+<li><p><code>--oneline</code><br>
+Shows each commit in a single line for a compact overview.</p></li>
+<li><p><code>--graph</code><br>
+Draws an ASCII representation of branches and merges.</p></li>
+<li><p><code>--decorate</code><br>
+Displays references such as branch names and tags next to commits.</p></li>
+<li><p><code>--all</code><br>
+Includes all branches in the output instead of only the current one.</p></li>
+<li><p><code>-- &lt;path/to/file&gt;</code><br>
+Restricts the history to commits that affected a specific file.<br>
+Useful for tracing changes, identifying when a bug was introduced, or understanding the evolution of a file.</p></li>
+</ul>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compact, visual representation of the full repository history</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> log <span class="at">--oneline</span> <span class="at">--graph</span> <span class="at">--decorate</span> <span class="at">--all</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Show only the history of a specific file</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> log <span class="at">--</span> path/to/file.py</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="branch-management" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="branch-management"><span class="header-section-number">2.6</span> Branch management</h2>
+<p>Branches in Git are lightweight movable pointers that track lines of development. They allow parallel workstreams, feature isolation, experiments, bug fixes, and collaborative workflows without interfering with the main codebase.</p>
+<p>Git provides two major command families for branch management:</p>
+<ul>
+<li><code>git branch</code> — create, delete, list, and inspect branches.<br>
+</li>
+<li><code>git switch</code> — move between branches or create branches while switching.</li>
+</ul>
+<section id="create-a-branch" class="level3" data-number="2.6.1">
+<h3 data-number="2.6.1" class="anchored" data-anchor-id="create-a-branch"><span class="header-section-number">2.6.1</span> Create a Branch</h3>
+<p>Creating a branch records a new pointer to the current commit, allowing you to work independently from the main branch.</p>
+<p><strong>General Syntax</strong></p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="op">&lt;</span>branch-name<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><code>&lt;branch-name&gt;</code><br>
+The name for the new branch.</li>
+</ul>
+<p><strong>Notes</strong></p>
+<hr>
+<p>Git allows almost any text as a branch name. However, for safety and compatibility, you should avoid:</p>
+<ul>
+<li>whitespace (spaces, tabs)<br>
+</li>
+<li>names starting or ending with <code>/</code><br>
+</li>
+<li>characters such as <code>~</code>, <code>^</code>, <code>:</code>, <code>?</code>, <code>*</code>, <code>[</code>, <code>\</code><br>
+</li>
+<li>names that look like commit hashes</li>
+</ul>
+<p>Basic branch naming conventions:</p>
+<ol type="1">
+<li><p>Use clearly structured branch names to indicate purpose:</p>
+<ul>
+<li><strong><code>main</code> (or <code>master</code>)</strong> — production-ready code<br>
+</li>
+<li><strong><code>develop</code></strong> (optional) — shared integration branch<br>
+</li>
+<li><strong><code>feature/*</code></strong> — new features<br>
+</li>
+<li><strong><code>bugfix/*</code></strong> — routine fixes<br>
+</li>
+<li><strong><code>hotfix/*</code></strong> — urgent production fixes</li>
+</ul></li>
+<li><p>Branch names should be <strong>lowercase, hyphen-separated for readability</strong>.</p></li>
+</ol>
+<p>Examples include:</p>
+<ul>
+<li><code>feature/user-authentication</code><br>
+</li>
+<li><code>feature/report-export-csv</code><br>
+</li>
+<li><code>bugfix/api-timezone-offset</code><br>
+</li>
+<li><code>hotfix/payment-timeout</code></li>
+</ul>
+<p>Creating a branch does <strong>not</strong> switch to it; the working directory stays unchanged.</p>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch feature/user-login</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch hotfix/crash-fix 4a9d3f1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="list-branches" class="level3" data-number="2.6.2">
+<h3 data-number="2.6.2" class="anchored" data-anchor-id="list-branches"><span class="header-section-number">2.6.2</span> List Branches</h3>
+<p>List all branches in your local repository or include remote branches as well.</p>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb19"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Lists only local branches</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Lists local and remote-tracking branches</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="at">-a</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Lists remote-tracking branches only</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="at">-r</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Lists all branches whose history has hash 'commit'</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="at">--contains</span> <span class="op">&lt;</span>commit<span class="op">&gt;</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Lists branches that have already been fully merged into your current branch</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="at">--merged</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Lists branches that have not been merged into your current branch</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="at">--no-merged</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><p><code>commit</code> It can be <strong>any identifier that refers to a specific commit</strong>, including:</p>
+<ol type="1">
+<li><p><strong>Full or short commit hash</strong><br>
+Lists all branches whose history contains that exact commit.</p></li>
+<li><p><strong>Branch name</strong><br>
+Lists all branches whose history includes the <em>latest commit</em> pointed to by the specified branch.</p></li>
+<li><p><strong>Tag name</strong><br>
+Lists all branches that include the commit associated with that tag.</p></li>
+</ol></li>
+</ul>
+<p><strong>Notes</strong></p>
+<hr>
+<p>The currently checked-out branch is marked with <code>*</code>.</p>
+</section>
+<section id="switch-branches" class="level3" data-number="2.6.3">
+<h3 data-number="2.6.3" class="anchored" data-anchor-id="switch-branches"><span class="header-section-number">2.6.3</span> Switch Branches</h3>
+<p>Switching moves your <code>HEAD</code> pointer to the specified branch and updates your working directory to match that branch.</p>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb20"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> switch <span class="op">&lt;</span>branch-name<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Notes</strong></p>
+<hr>
+<p>When you switch branches, Git must rewrite your working directory to match the target branch. If a file you modified also exists in the target branch with different content, Git would need to overwrite your uncommitted change. Once overwritten, Git cannot recover your uncommitted version simply by switching back. To protect your work, Git therefore stops the switch instead of overwriting anything.</p>
+<p>As a result, <strong>your working directory must be clean</strong> before switching branches.<br>
+To proceed safely, you need to do <em>one</em> of the following:</p>
+<ul>
+<li><strong>Commit</strong> your changes<br>
+</li>
+<li><strong>Stash</strong> them temporarily using <code>git stash</code><br>
+</li>
+<li><strong>Discard</strong> them if they are no longer needed</li>
+</ul>
+<p>This ensures that switching branches will not overwrite or lose any uncommitted work.</p>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb21"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> switch main</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="create-and-switch-in-one-step" class="level3" data-number="2.6.4">
+<h3 data-number="2.6.4" class="anchored" data-anchor-id="create-and-switch-in-one-step"><span class="header-section-number">2.6.4</span> Create and Switch in One Step</h3>
+<p>This is the most common pattern: create a branch and immediately switch to it.</p>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb22"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> switch <span class="at">-c</span> <span class="op">&lt;</span>branch-name<span class="op">&gt;</span> <span class="op">&lt;</span>base-branch<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><p><code>-c</code><br>
+Create a new branch and switch too it immediately.</p></li>
+<li><p><code>base-branch</code> The base branch from which the new branch is created defaults to the current <code>HEAD</code> unless explicitly specified.</p></li>
+</ul>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb23"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> switch <span class="at">-c</span> experiment/new-loss-function main</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="rename-a-branch" class="level3" data-number="2.6.5">
+<h3 data-number="2.6.5" class="anchored" data-anchor-id="rename-a-branch"><span class="header-section-number">2.6.5</span> Rename a Branch</h3>
+<p>Rename a branch while keeping its commit history unchanged.</p>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb24"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="at">-m</span> <span class="op">&lt;</span>old-name<span class="op">&gt;</span> <span class="op">&lt;</span>new-name<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><code>old-name</code><br>
+Defaults to the name of the branch currently checked out.</li>
+</ul>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb25"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="at">-m</span> feature/login feature/auth-login</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="delete-a-branch" class="level3" data-number="2.6.6">
+<h3 data-number="2.6.6" class="anchored" data-anchor-id="delete-a-branch"><span class="header-section-number">2.6.6</span> Delete a Branch</h3>
+<p>Delete a branch locally after it has been merged or is no longer needed.</p>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb26"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="at">-d</span> <span class="op">&lt;</span>branch-name<span class="op">&gt;</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="at">-D</span> <span class="op">&lt;</span>branch-name<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><code>-d</code> — delete only if merged<br>
+</li>
+<li><code>-D</code> — force delete even if unmerged</li>
+</ul>
+<p><strong>Notes</strong></p>
+<hr>
+<p>To delete a remote branch:</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push <span class="op">&lt;</span>remote-name<span class="op">&gt;</span> --delete <span class="op">&lt;</span>branch-name<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb28"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="at">-d</span> feature/user-login</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="at">-D</span> experiment/test-idea</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push origin <span class="at">--delete</span> old-feature</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="set-upstream-branch" class="level3" data-number="2.6.7">
+<h3 data-number="2.6.7" class="anchored" data-anchor-id="set-upstream-branch"><span class="header-section-number">2.6.7</span> Set Upstream Branch</h3>
+<p>Configure a local branch to track a remote branch.</p>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb29"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="at">--set-upstream-to</span><span class="op">=&lt;</span>remote<span class="op">&gt;</span>/<span class="op">&lt;</span>remote-branch<span class="op">&gt;</span> <span class="op">&lt;</span>local-branch<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><code>local-branch</code><br>
+Default to the current branch.</li>
+</ul>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb30"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> branch <span class="at">--set-upstream-to</span><span class="op">=</span>origin/main feature/user-login</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="remote-synchronization" class="level2" data-number="2.7">
+<h2 data-number="2.7" class="anchored" data-anchor-id="remote-synchronization"><span class="header-section-number">2.7</span> Remote Synchronization</h2>
+<p>A remote is a named reference to another Git repository’s URL. A single local repository can have any number of remotes, each serving a different purpose (fork upstream, mirrors, collaborators, deployment targets, etc.). The Git command used to manage remote repositories is <code>git remote</code>.</p>
+<section id="add-remote" class="level3" data-number="2.7.1">
+<h3 data-number="2.7.1" class="anchored" data-anchor-id="add-remote"><span class="header-section-number">2.7.1</span> Add Remote</h3>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb31"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote add <span class="op">&lt;</span>remote-name<span class="op">&gt;</span> <span class="op">&lt;</span>url<span class="op">&gt;</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote remove <span class="op">&lt;</span>remote-name<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><p><code>add</code><br>
+Register a new remote inside your local <code>.git</code> configuration.</p></li>
+<li><p><code>remove</code><br>
+Delete the specified remote from your local Git configuration.</p></li>
+<li><p><code>&lt;remote-name&gt;</code><br>
+A human-friendly label you choose for the remote.<br>
+It does NOT need to match anything on GitHub. It is simply a local alias so you do not need to type the full URL every time.</p></li>
+<li><p><code>&lt;url&gt;</code><br>
+The actual location of the remote repository. Valid formats include <strong>https, ssh and local filesystem path</strong>.</p></li>
+</ul>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb32"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote add upstream https://github.com/someone/someproject.git</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote add backup git@myserver:repo.git</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="list-remotes" class="level3" data-number="2.7.2">
+<h3 data-number="2.7.2" class="anchored" data-anchor-id="list-remotes"><span class="header-section-number">2.7.2</span> List Remotes</h3>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb33"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote <span class="at">-v</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Notes</strong></p>
+<hr>
+<p>When you run the command, Git prints each remote name twice:</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>remote-name<span class="op">&gt;</span>    <span class="op">&lt;</span>url<span class="op">&gt;</span>    <span class="kw">(</span><span class="ex">fetch</span><span class="kw">)</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>remote-name<span class="op">&gt;</span>    <span class="op">&lt;</span>url<span class="op">&gt;</span>    <span class="kw">(</span><span class="ex">push</span><span class="kw">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>(fetch) / (push)</code> indicates which URL Git uses for downloading updates and for uploading commits, respectively.</p>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb35"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="ex">origin</span>  git@github.com:Expectorpatro/math.git <span class="er">(</span><span class="ex">fetch</span><span class="kw">)</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="ex">origin</span>  git@github.com:Expectorpatro/math.git <span class="er">(</span><span class="ex">push</span><span class="kw">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="change-remote-url" class="level3" data-number="2.7.3">
+<h3 data-number="2.7.3" class="anchored" data-anchor-id="change-remote-url"><span class="header-section-number">2.7.3</span> Change Remote URL</h3>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb36"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote set-url <span class="op">&lt;</span>remote-name<span class="op">&gt;</span> <span class="op">&lt;</span>new-url<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><p><code>set-url</code><br>
+Updates the existing URL of a remote without removing or re-adding it.</p></li>
+<li><p><code>new-url</code><br>
+A new URL.</p></li>
+</ul>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb37"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote set-url origin git@github.com:Expectorpatro/math.git</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote set-url origin https://github.com/Expectorpatro/math.git</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="push-to-remote" class="level3" data-number="2.7.4">
+<h3 data-number="2.7.4" class="anchored" data-anchor-id="push-to-remote"><span class="header-section-number">2.7.4</span> Push to Remote</h3>
+<p>Pushing sends your local commits to a remote repository so others (or servers) can access them. A push updates a remote branch, meaning a branch stored on the remote server (e.g., origin/main).</p>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb38"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push <span class="op">&lt;</span>remote-name<span class="op">&gt;</span> <span class="op">&lt;</span>local-branch<span class="op">&gt;</span>:<span class="op">&lt;</span>remote-branch<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><code>&lt;local-branch&gt;</code><br>
+The branch in your local repository whose commits you want to upload.</li>
+<li><code>&lt;remote-branch&gt;</code><br>
+The branch name that will be created or updated on the remote.</li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>If the remote branch does not already exist, Git will automatically create it when you push. If <code>&lt;remote-branch&gt;</code> is omitted, Git reuses the local branch name as the remote branch name.</p>
+</div>
+</div>
+<p><strong>Notes</strong></p>
+<hr>
+<p>You can add <code>-u</code> (or <code>--set-upstream</code>) to set an upstream branch:</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push <span class="at">-u</span> <span class="op">&lt;</span>remote-name<span class="op">&gt;</span> <span class="op">&lt;</span>local-branch<span class="op">&gt;</span>:<span class="op">&lt;</span>remote-branch<span class="op">&gt;</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push <span class="at">--set-upstream</span> <span class="op">&lt;</span>remote-name<span class="op">&gt;</span> <span class="op">&lt;</span>local-branch<span class="op">&gt;</span>:<span class="op">&lt;</span>remote-branch<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This links the local branch to the remote one, so future commands can simply use:</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb41"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push origin main</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This uploads the local <code>main</code> branch to <code>origin/main</code>.</p>
+</section>
+<section id="fetch" class="level3" data-number="2.7.5">
+<h3 data-number="2.7.5" class="anchored" data-anchor-id="fetch"><span class="header-section-number">2.7.5</span> Fetch</h3>
+<p>Fetching retrieves updates from a remote repository <strong>without modifying your working directory or your local branches</strong>. It updates only the <em>remote-tracking branches</em>. Fetching does <strong>not</strong> merge changes into your current branch; it only updates references inside <code>.git/refs/remotes/</code>.</p>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb42"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> fetch <span class="op">&lt;</span>remote-name<span class="op">&gt;</span> <span class="op">&lt;</span>remote-branch<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb43"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> fetch upstream main</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="merge" class="level3" data-number="2.7.6">
+<h3 data-number="2.7.6" class="anchored" data-anchor-id="merge"><span class="header-section-number">2.7.6</span> Merge</h3>
+<p>Merging integrates changes from one branch into <strong>into your current branch</strong>.</p>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb44"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> merge <span class="op">&lt;</span>branch-name<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Git always merges <em>into the branch you have checked out</em>. Therefore, the merge command requires only <strong>one argument</strong>, the branch you want to merge <strong>from</strong>.</p>
+</div>
+</div>
+<p><strong>Notes</strong></p>
+<hr>
+<p>The command above does not specify whether the branch to be merged is a local branch or a remote-tracking branch. The following section explains how Git decides which reference is used and how to avoid ambiguity.</p>
+<p>Git resolves the given name using a fixed lookup order:</p>
+<ol type="1">
+<li><strong>Local branches</strong> — <code>refs/heads/&lt;branch-name&gt;</code><br>
+</li>
+<li><strong>Tags</strong> — <code>refs/tags/&lt;branch-name&gt;</code><br>
+</li>
+<li><strong>Remote-tracking branches</strong> — <code>refs/remotes/&lt;remote&gt;/&lt;branch-name&gt;</code></li>
+</ol>
+<p>As a result:</p>
+<ul>
+<li>If a local branch and a remote-tracking branch have the same name, <strong>the local branch is always chosen</strong>.</li>
+<li>A remote-tracking branch is used only if there is no matching local branch or tag.</li>
+</ul>
+<p>A confusing situation may occur when:</p>
+<ul>
+<li>A local branch is named <code>feature/login</code>, and<br>
+</li>
+<li>There exists a remote named <code>feature</code>, which contains a branch named <code>login</code>.</li>
+</ul>
+<p>This produces two references:</p>
+<ul>
+<li>Local: <code>refs/heads/feature/login</code><br>
+</li>
+<li>Remote-tracking: <code>refs/remotes/feature/login</code></li>
+</ul>
+<p>Both appear as <code>feature/login</code>. In such cases, Git still selects the <strong>local</strong> branch because it appears first in the resolution order.</p>
+<p>To ensure that Git uses a remote-tracking branch, the full reference must be specified:</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> merge refs/heads/<span class="op">&lt;</span>branch-name<span class="op">&gt;</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> merge refs/tags/<span class="op">&lt;</span>branch-name<span class="op">&gt;</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> merge refs/remotes/<span class="op">&lt;</span>remote<span class="op">&gt;</span>/<span class="op">&lt;</span>branch-name<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb46"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> merge feature</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="pull" class="level3" data-number="2.7.7">
+<h3 data-number="2.7.7" class="anchored" data-anchor-id="pull"><span class="header-section-number">2.7.7</span> Pull</h3>
+<p>Pulling updates your current branch by combining <strong>fetch</strong> and <strong>merge</strong> in a single command.</p>
+<p><strong>General Syntax</strong></p>
+<hr>
+<div class="sourceCode" id="cb47"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> pull <span class="op">&lt;</span>remote-name<span class="op">&gt;</span> <span class="op">&lt;</span>remote-branch<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Notes</strong></p>
+<hr>
+<p>If an upstream branch is configured—for example, by running:</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push <span class="at">-u</span> <span class="op">&lt;</span>remote<span class="op">&gt;</span> <span class="op">&lt;</span>branch<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>then future pulls can simply use:</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> pull</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Examples</strong></p>
+<hr>
+<div class="sourceCode" id="cb50"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> pull origin main</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> pull upstream dev</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<!--# 4. Pull Request / Merge Request Workflow
+
+## 4.1 Why use PR/MR
+
+In a company, merging directly to `main` or `develop` should be restricted. Instead, use Pull Requests (GitHub) or Merge Requests (GitLab):
+
+- Enforce code review.
+- Trigger CI (tests, linting, security checks).
+- Provide discussion history for design decisions.
+- Protect critical branches via branch protection rules.
+
+## 4.2 Typical PR workflow
+
+1. Create a feature branch from `develop` (or `main`).
+2. Implement changes and commit them.
+3. Push the branch to remote.
+4. Open a PR/MR on the platform.
+5. Request review from teammates.
+6. Address feedback and push updates.
+7. Wait for CI to pass.
+8. Once approved, merge via the platform.
+
+## 4.3 PR content checklist
+
+A good PR should:
+
+- Have a clear title describing the change.
+- Include a description with:
+  - Background or problem statement.
+  - What has been changed.
+  - How it was tested.
+  - Any breaking changes or migration steps.
+- Be small enough to review (avoid giant PRs if possible).
+
+Example PR description:
+
+```markdown
+## Summary
+
+Implement user profile editing page with client-side validation.
+
+## Changes
+
+- Add `/profile` route and page
+- Create `ProfileForm` component with validation
+- Integrate API calls for updating user info
+
+## Testing
+
+- Unit tests for form validation
+- Manual tests in Chrome and Firefox
+
+## Notes
+
+This PR does not include avatar upload; that will be a separate PR.
+```
+
+## 4.4 Merge strategies
+
+Most platforms support:
+
+- **Merge commit**: Preserve both histories and create a merge commit.
+- **Squash and merge**: Compress all commits in the PR into a single commit.
+- **Rebase and merge**: Rebase branch onto target and fast-forward.
+
+Company policy might specify one default. Common practice:
+
+- Use **squash and merge** to keep history clean for small/medium features.
+- Use **merge commit** for larger branches where keeping structure is useful.
+
+---
+
+# 5. Handling Merge Conflicts
+
+## 5.1 When conflicts occur
+
+Conflicts arise when:
+
+- Two branches modify the same lines in a file.
+- One branch modifies and the other deletes the same file.
+- Git cannot automatically decide which change to keep.
+
+You see something like:
+
+```bash
+Auto-merging src/app.py
+CONFLICT (content): Merge conflict in src/app.py
+Automatic merge failed; fix conflicts and then commit the result.
+```
+
+## 5.2 Conflict markers
+
+In the file:
+
+```text
+<<<<<<< HEAD
+current branch content
+=======
+incoming branch content
+>>>>>>> feature/new-api
+```
+
+- `<<<<<<< HEAD`: your current branch version.
+- `=======`: separator.
+- `>>>>>>> feature/new-api`: the other branch version.
+
+You must decide:
+
+- Keep one side.
+- Merge both logically.
+- Rewrite a new version.
+
+## 5.3 Resolving conflicts
+
+General steps:
+
+1. Open conflicted files (preferably in an editor with Git integration such as VS Code or JetBrains IDEs).
+2. Resolve conflicts by editing.
+3. Mark the file as resolved:
+
+```bash
+git add path/to/conflicted-file.py
+```
+
+4. Complete the merge or rebase:
+
+```bash
+git commit      # if merging
+git rebase --continue  # if rebasing
+```
+
+## 5.4 Best practices to reduce conflicts
+
+- Pull latest changes frequently before starting work and before pushing.
+- Keep feature branches short-lived.
+- Avoid touching unrelated files.
+- Communicate with teammates when modifying shared modules.
+
+---
+
+# 6. Branching Models: Git Flow and Trunk-Based Development
+
+## 6.1 Git Flow (classic model)
+
+Key branches:
+
+- `main`: production releases.
+- `develop`: integration branch for next release.
+- `feature/*`: features, branched from `develop`.
+- `release/*`: release preparation branches.
+- `hotfix/*`: urgent fixes starting from `main`.
+
+Pros:
+
+- Clear separation between stable and development code.
+- Good for projects with formal release cycles.
+
+Cons:
+
+- More branches to manage.
+- Overhead for small or fast-moving teams.
+
+## 6.2 Trunk-Based Development (TBD)
+
+Key idea:
+
+- Work is integrated into a single main branch (trunk) frequently.
+- Feature branches are short-lived, often merged within a day or two.
+- Heavy reliance on feature flags to avoid exposing incomplete features.
+
+Pros:
+
+- Simplifies branching.
+- Encourages continuous integration.
+- Reduces long-lived branch divergence.
+
+Cons:
+
+- Requires discipline and strong CI.
+- Not ideal if manual release management is complex or heavily regulated.
+
+## 6.3 Choosing a model
+
+Typical choices:
+
+- **Product teams**: often use Trunk-Based or a simplified Git Flow (only `main` + `develop` + `feature/*`).
+- **Enterprise / regulated environments**: more likely to use full Git Flow with `release/*` and `hotfix/*`.
+- **Research code**: a lightweight model with `main` + `experiment/*` branches may be sufficient.
+
+---
+
+# 7. Versioning, Tags, and Releases
+
+## 7.1 Semantic versioning (SemVer)
+
+Use `MAJOR.MINOR.PATCH`:
+
+- `MAJOR`: incompatible changes.
+- `MINOR`: backward-compatible new features.
+- `PATCH`: backward-compatible bug fixes.
+
+Examples:
+
+- `1.2.3`
+- `2.0.0`
+
+## 7.2 Tags
+
+Tags mark specific commits, typically for releases.
+
+```bash
+# Create a lightweight tag
+git tag v1.2.0
+
+# Create an annotated tag (recommended)
+git tag -a v1.2.0 -m "Release v1.2.0"
+
+# Push tags
+git push origin v1.2.0
+# or push all tags
+git push origin --tags
+```
+
+## 7.3 Releases on hosting platforms
+
+Most platforms support “Releases”, which:
+
+- Reference a tag.
+- Provide release notes.
+- Attach binary artifacts if needed.
+
+Release notes should include:
+
+- New features.
+- Bug fixes.
+- Breaking changes.
+- Upgrade notes.
+
+Example release note outline:
+
+```markdown
+## Features
+
+- Add bulk user import via CSV
+- Support dark mode UI
+
+## Bug Fixes
+
+- Fix logout redirect for expired tokens
+- Resolve timezone issue for EU users
+
+## Breaking Changes
+
+- Deprecate `/v1/orders` API in favor of `/v2/orders`
+
+## Upgrade Notes
+
+- Run database migration `2025_01_add_order_index`
+```
+
+---
+
+# 8. Research Code Collaboration: Data, Models, and Experiments
+
+## 8.1 Special requirements in research
+
+Research and data science projects often involve:
+
+- Large datasets (GB–TB).
+- Experiment configurations and logs.
+- Model artifacts (checkpoints, binaries).
+- Notebooks and exploratory scripts.
+
+Git alone is not ideal for huge binary data. Combine Git with:
+
+- **Git LFS** for large files if necessary.
+- Internal object storage (S3, MinIO) referenced via configuration.
+- Experiment tracking tools (MLflow, Weights & Biases, or custom logs).
+
+## 8.2 Repository layout recommendations
+
+A typical layout:
+
+```text
+project/
+  src/            # core library code
+  scripts/        # entry-point scripts, CLIs
+  notebooks/      # Jupyter/Quarto notebooks
+  configs/        # YAML/JSON config files
+  tests/          # tests
+  data/           # usually gitignored for large raw data
+  models/         # model artifacts (often gitignored)
+  docs/           # documentation
+```
+
+Example `.gitignore` snippet:
+
+```gitignore
+data/
+models/
+outputs/
+logs/
+```
+
+## 8.3 Versioning experiments
+
+- Store configuration files (`configs/*.yaml`) in Git.
+- Include config hash or Git commit hash in experiment logs.
+- Tag commits corresponding to published results, e.g., `paper-abc-final`.
+
+Example in an experiment log:
+
+```text
+git_commit: 3f9a7c2
+config_file: configs/exp1.yaml
+dataset_version: 2025-01-10
+```
+
+This allows others to reproduce experiments later.
+
+---
+
+# 9. Enterprise Requirements and Git-Based Solutions
+
+## 9.1 Code review and quality gates
+
+Use PR/MR to enforce:
+
+- Mandatory code review by at least one peer.
+- Required status checks (CI passes, code coverage thresholds).
+- Static analysis tools (linters, security scanners).
+
+Configure branch protection rules:
+
+- Disallow direct pushes to `main`/`develop`.
+- Require PR for every change.
+- Require all checks to pass before merge.
+
+## 9.2 CI/CD integration
+
+CI/CD pipelines are usually triggered on:
+
+- Push to certain branches (e.g., `main`, `develop`).
+- Opening or updating a PR/MR.
+- Tag creation (for releases).
+
+Common pipeline stages:
+
+- Lint & static analysis.
+- Unit tests & integration tests.
+- Build artifacts (Docker image, binary).
+- Deploy to staging or production.
+
+Git provides the commit and branch structure that CI/CD uses to decide **what** to build and **when**.
+
+## 9.3 Permissions and access control
+
+Typical patterns:
+
+- Developers have read/write access to non-protected branches.
+- Only maintainers / leads can override checks or merge into `main`.
+- Fine-grained permissions applied per repository or per team.
+
+Best practices:
+
+- Use teams and groups to manage permissions centrally.
+- Avoid sharing personal credentials; use SSH keys or SSO.
+- Rotate keys and tokens as required by company policy.
+
+## 9.4 Auditability and compliance
+
+Git history provides:
+
+- Who changed what, and when.
+- Which code was deployed to production (tied to tags and releases).
+- Context for changes via PR discussions.
+
+For regulated environments, enforce:
+
+- Signed commits or signed tags (GPG, SSH signatures).
+- Mandatory code review with recorded approvals.
+- Immutable logs for deployment events.
+
+---
+
+# 10. Command and Workflow Summary
+
+## 10.1 Daily workflow (developer)
+
+```bash
+# Sync base branch
+git checkout develop
+git pull origin develop
+
+# Create feature branch
+git checkout -b feature/short-description
+
+# Implement changes
+# ...
+
+# Stage and commit
+git add .
+git commit -m "Implement X"
+
+# Push feature branch
+git push -u origin feature/short-description
+
+# Open PR/MR on platform and request review
+```
+
+## 10.2 Handling conflicts in a feature branch
+
+```bash
+# While on your feature branch
+git fetch origin
+git merge origin/develop   # or rebase: git rebase origin/develop
+
+# Resolve conflicts in editor
+git add path/to/resolved-file
+git commit   # or: git rebase --continue if rebasing
+
+# Push updates (may require force push if rebased)
+git push
+# or if rebased
+git push --force-with-lease
+```
+
+## 10.3 Creating a release
+
+```bash
+# On main with all changes merged
+git checkout main
+git pull origin main
+
+# Decide new version, e.g., v1.3.0
+git tag -a v1.3.0 -m "Release v1.3.0"
+git push origin v1.3.0
+
+# Create a Release in GitHub/GitLab based on v1.3.0
+# Fill in release notes.
+```
+
+## 10.4 Quick reference of core commands
+
+```bash
+# Repo and config
+git init
+git clone <url>
+git config --global user.name "Name"
+git config --global user.email "you@company.com"
+
+# Status and history
+git status
+git log --oneline --graph --decorate --all
+
+# Staging and commit
+git add <file>
+git add .
+git commit -m "Message"
+git commit --amend
+
+# Branches
+git branch
+git branch -a
+git checkout <branch>
+git checkout -b <branch>
+
+# Remotes
+git remote -v
+git fetch
+git pull
+git push
+git push -u origin <branch>
+
+# Tags
+git tag
+git tag -a v1.0.0 -m "Release v1.0.0"
+git push origin v1.0.0
+
+# Merging and rebasing
+git merge <branch>
+git rebase <branch>
+git rebase --continue
+git rebase --abort
+```
+
+---
+
+# Conclusion
+
+This document describes a company-grade approach to using Git for engineering and research collaboration. It explains:
+
+- How to work locally with clean commits.
+- How to collaborate using branches and PRs.
+- How to manage conflicts, releases, and enterprise requirements.
+
+Teams should adapt these guidelines to their specific needs, but any deviations should be explicit and documented so that new members can quickly understand and follow the project workflow.-->
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
