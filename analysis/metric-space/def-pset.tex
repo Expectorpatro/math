@@ -27,6 +27,12 @@
 \begin{definition}
 	设$(X,\rho)$是一个度量空间，$E\subseteq X$。若点$P\in E$但不是$E$的聚点，即存在$P$的邻域$U(P)$，使得$E\cap U(P)=\{P\}$，则称$P$为$E$的\gls{IsolatedP}。
 \end{definition}
+\begin{theorem}
+	设$(X,\rho)$是一个度量空间，$E\subseteq X$。$E$的界点不是聚点就是孤立点。
+\end{theorem}
+\begin{proof}
+	若$P$是$E$的一个界点，则它的任意邻域中都既有$E$中的点，又有$E^c$中的点。若它的任意邻域中都只含有有限个$E$中的点，则一定存在一个邻域，使得只有自身属于$E$，那么它是一个孤立点；若它的任意邻域中都含有无限个$E$中的点，由聚点定义，它是一个聚点。
+\end{proof}
 \subsubsection{点集的定义}
 \begin{definition}
 	设$(X,\rho)$是一个度量空间，$E\subseteq X$。$E$的全体内点所组成的集合称为$E$的\gls{interior}，记为$\mathring{E}$。
@@ -40,6 +46,35 @@
 \begin{definition}
 	设$(X,\rho)$是一个度量空间，$E\subseteq X$。$E\cup E'$称为$E$的\gls{closure}，记为$\overline{E}$。
 \end{definition}
+\begin{property}\label{prop:PointSet}
+	设$(X,\rho)$是一个度量空间，$E\subseteq X$，$A\cup B\subseteq X$，则：
+	\begin{enumerate}
+		\item $(\mathring{E})^c=\overline{E^c}$；
+		\item $\partial E = \partial E^c$；
+		\item $\overline{\overline E}=\overline{E}$；
+		\item 若$A\subseteq B$，则$\mathring{A}\subseteq\mathring{B}$，$A'\subseteq B'$，$\overline{A}\subseteq\overline{B}$；
+		\item $(A\cup B)'=A'\cup B'$；
+		\item $\overline{A\cup B}=\overline{A}\cup \overline{B}$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)$\;\overline{E^c}=E^c\cup (E^c)'$。\par
+	对任意的$ P\in\overline{E^c}\cap\mathring{E}$，应有$P\in(E^c)'$，即$P$的任意邻域中都有$E^c$中的点，而这与$P\in\mathring{E}$矛盾，由$P$的任意性有$\overline{E^c}\cap\mathring{E}=\varnothing$，即$\overline{E^c}\subseteq(\mathring{E})^c$；\par
+	对任意的$ P\in(\mathring{E})^c$，应有$P\in\mathring{(E^c)}\cup\partial E$。若$P\in\mathring{(E^c)}$，显然$P\in\mathring{(E^c)}\subseteq E^c\subseteq\overline{E^c}$；若$P\in\partial E$，要么$P\in E$，要么$P\notin E$，如果此时$P\in E$，则由界点定义它必然是$E^c$的聚点，即$P\in \overline{E^c}$；如果此时$P\notin E$，则$P\in E^c$，即$P\in \overline{E^c}$。由$P$的任意性有$(\mathring{E})^c\subseteq\overline{E^c}$。\par
+	综上$(\mathring{E})^c=\overline{E^c}$。\par
+	(2)由定义直接可得。\par
+	(3)$\;\overline{\overline E}=\overline{E}\cup (\overline{E})'$，由\cref{prop:OpenClosedSet}(3)，$\overline{E}$是闭集，因此$(\overline{E})'\subseteq\overline{E}$，即$\overline{\overline E}=\overline{E}$。\par
+	(4)由内点、聚点的定义直接可得。\par
+	(5)$\;A\subseteq (A\cup B)$，$B\subseteq (A\cup B)$，由(4)可知，$A'\subseteq(A\cup B)'$，$B'\subseteq(A\cup B)'$，因此$A'\cup B'\subset(A\cup B)'$。\par
+	另一方面，对任意的$ P\in (A\cup B)'$，应有$P\in A'\cup B'$。否则就有$P\notin A'$且$P\notin B'$，因此存在$U_1(P)$和$U_2(P)$使得$U_1(P)$中不含除了$P$以外的$A$中的点、$U_2(P)$中不含除了$P$以外的$B$中的点，由\cref{prop:Neighbourhood}(2)，存在$U_3(P)$使得其内不含除了$P$以外$A\cup B$中的点，而这与$P\in (A\cup B)'$矛盾。由$P$的任意性有$(A\cup B)'\subseteq A'\cup B'$。\par
+	综上$(A\cup B)'=A'\cup B'$。\par
+	(6)由(5)可知：
+	\begin{equation*}
+		\overline{A}\cup \overline{B}=A\cup A'\cup B\cup B'
+		=(A\cup B)\cup(A'\cup B')=(A\cup B)\cup(A\cup B)'
+		=\overline{A\cup B}\qedhere
+	\end{equation*}
+\end{proof}
 \begin{definition}
 	设$(X,\rho)$是一个度量空间，$E\subseteq X$。若$E=\mathring{E}$，则称E是一个\gls{OpenSet}。
 \end{definition}
@@ -49,7 +84,7 @@
 \begin{property}\label{prop:OpenClosedSet}
 	设$(X,\rho)$是一个度量空间，$P\in X,\;E\subseteq X$，则有：
 	\begin{enumerate}
-		\item $\forall\;P_0\in U(P),\;\exists\;U(P_0)\subset U(P)$，即开邻域是开集。
+		\item $\forall\;P_0\in U(P),\;\exists\;U(P_0)\subseteq U(P)$，即开邻域是开集。
 		\item $\forall\;P_0\in[\bar{U}(P)]',\;P_0\in \bar{U}(P_0)$，即闭邻域是闭集；
 		\item $\mathring{E}$是开集，$E'$和$\overline{E}$是闭集；
 		\item $X$和$\varnothing$是唯二既开又闭的集合；
@@ -62,8 +97,8 @@
 	(2)对任意的$P_0\in\left(\bar{U}(P)\right)'$，$\exists\;\bar{U}(P)$中的点列$\{P_n\}\to P_0$。若$P_0\notin \bar{U}(P)$，则$\rho(P_0,P)>\delta_P$。取$\varepsilon=\rho(P_0,P)-\delta_P$，则必然$\exists\;N\in\mathbb{N}^+$，当$n>N$时，有$\rho(P_n,P_0)<\varepsilon$，那么$\rho(P_n,P)>\delta_P$，即$P_n\notin U(P)$，矛盾。因此$P_0\in \bar{U}(P)$。由$P_0$的任意性，闭邻域是闭集。\par
 	(3)\textbf{$\;\mathring{E}$是开集：}对任意的$P\in\mathring{E}$，存在$U(P)\subseteq E$，对任意的$Q\in U(P)$，由(1)可得存在$U(Q)\subseteq U(P)\subseteq E$，因此$Q\in\mathring{E}$，即存在$U(P)\subseteq\mathring{E}$，$P$是$\mathring{E}$的内点。由$P$的任意性，$\mathring{E}$是开集。\par
 	\textbf{$\;E'$是闭集：}对任意的$P\in (E')'$，由聚点定义，任意$U(P)$中都含有$E'$中的点，任取$Q\in U(P)\cap E'$，任意$U(Q)$都含$E$中的点，而$Q\in U(P)$，由(1)可知存在$U(Q)\subset U(P)$，因此任意$U(P)$中都含有$E$中的点，即$P$是$E$的聚点，$P\in E'$。由$P$的任意性，$E'$是闭集。\par
-	\textbf{$\;\overline{E}$是闭集：}$\overline{E}=E\cup E'$，由\cref{theo:cuplimitset eq2 limitsetcup}，$(\overline{E})'=E'\cup (E')'$，显然$E'\subseteq \overline{E}$，而$E'$是闭集，$(E')'\subseteq E'\subset\overline{E}$。因此，$(\overline{E})'\subseteq\overline{E}$，即$\overline{E}$是闭集。\par
-	(4)\par
+	\textbf{$\;\overline{E}$是闭集：}$\overline{E}=E\cup E'$，由\cref{prop:PointSet}(5)可知$(\overline{E})'=E'\cup (E')'$，显然$E'\subseteq \overline{E}$，而$E'$是闭集，$(E')'\subseteq E'\subset\overline{E}$。因此，$(\overline{E})'\subseteq\overline{E}$，即$\overline{E}$是闭集。\par
+	(4)\info{未完成}\par
 	(5)$\;E$是开集：$\forall\; P\in (E^c)'$，应有$P\notin E$，即$P$不会是$E$的内点。否则由内点定义，存在$U(P)$使得$U(P)\subseteq E$，即$U(P)$中不含$E^c$中的点，这与点$P\in (E^c)'$矛盾。由$P$的任意性有$(E^c)'\subseteq E^c$，即$E^c$是闭集。\par
 	$E$是闭集：$\forall\; P\in E^c$，应有$P$是$E^c$的一个内点。否则任意$U(P)$中都存在$E$中的点，则$P$应该是$E$的一个聚点，而此时$P\in E^c$，与$E$是闭集矛盾。由$P$的任意性可得$E^c$是开集。\par
 	(6)\textbf{任意个开集的并是开集：}对于在任意个开集的并集中的点$P$，$P$必属于其中一个开集，因而存在一个邻域$U(P)$使得其中的点都在那个开集中，进而$U(P)$都在任意个开集的并集中，即$P$是任意个开集的并集的内点。由$P$的任意性，任意个开集的并集是开集。\par
@@ -73,74 +108,7 @@
 \begin{definition}
 	设$(X,\rho_X)$是一个度量空间。若$E\subseteq X$，且在$E$上定义距离$\rho_E$使得$E$中任意点对$x,y$之间的距离$\rho_E(x,y)=\rho_X(x,y)$，则称$(E,\rho_E)$是$(X,\rho_X)$的一个\gls{subspace}。若$E$是一个开集，则称$E$是$X$的一个\gls{OpenSubspace}；$E$是一个闭集，则称$E$是$X$的一个\gls{ClosedSubspace}。
 \end{definition}
-\subsubsection{内外界聚孤立五点的性质}
-\begin{theorem}
-	设$(X,\rho)$是一个度量空间，$E\subset X$。$E$的界点不是聚点就是孤立点。
-\end{theorem}
-\begin{proof}
-	若$P$是$E$的一个界点，则它的任意邻域中都既有$E$中的点，又有$E^c$中的点。若它的任意邻域中都只含有有限个$E$中的点，则一定存在一个邻域，使得只有自身属于$E$，那么它是一个孤立点；若它的任意邻域中都含有无限个$E$中的点，由聚点定义，它是一个聚点。
-\end{proof}
-\subsubsection{关于内外界聚孤立五点的总结}
-\begin{equation*}
-	\text{度量空间}(X,\rho)\text{中的点与$E$的关系可分为}
-	\begin{cases}
-		\text{内点} \\
-		\text{界点} \\
-		\text{外点}    
-	\end{cases}\;\text{或}
-	\begin{cases}
-		\text{聚点}   \\
-		\text{孤立点} \\
-		\text{外点}    
-	\end{cases}
-\end{equation*}
-\subsubsection{开核、导集、边界、闭包的性质}
-\begin{theorem}
-	设$(X,\rho)$是一个度量空间，$E\subset X$。$(\mathring{E})^c=\overline{E^c}$。
-\end{theorem}
-\begin{proof}
-	$\overline{E^c}=E^c\cup (E^c)'$。\par
-	对任意的$ P\in\overline{E^c}\cap\mathring{E}$，应有$P\in(E^c)'$，即$P$的任意邻域中都有$E^c$中的点，而这与$P\in\mathring{E}$矛盾，由$P$的任意性有$\overline{E^c}\cap\mathring{E}=\varnothing$，即$\overline{E^c}\subset(\mathring{E})^c$；\par
-	对任意的$ P\in(\mathring{E})^c$，应有$P\in\mathring{(E^c)}\cup\partial E$。若$P\in\mathring{(E^c)}$，显然$P\in\mathring{(E^c)}\subset E^c\subset\overline{E^c}$；若$P\in\partial E$，要么$P\in E$，要么$P\notin E$，如果此时$P\in E$，则由界点定义它必然是$E^c$的聚点，即$P\in \overline{E^c}$；如果此时$P\notin E$，则$P\in E^c$，即$P\in \overline{E^c}$。由$P$的任意性有$(\mathring{E})^c\subset\overline{E^c}$。\par
-	综上$(\mathring{E})^c=\overline{E^c}$。
-\end{proof}
-\begin{theorem}
-	设$(X,\rho)$是一个度量空间，$E\subset X$。$\partial E = \partial E^c$。
-\end{theorem}
-\begin{proof}
-	由定义直接可得。
-\end{proof}
-\begin{theorem}
-	设$(X,\rho)$是一个度量空间，$E\subset X$。$\overline{\overline E}=\overline{E}$。
-\end{theorem}
-\begin{proof}
-	$\overline{\overline E}=\overline{E}\cup (\overline{E})'$，由\cref{prop:OpenClosedSet}(3)，$\overline{E}$是闭集，因此$(\overline{E})'\subset\overline{E}$，即$\overline{\overline E}=\overline{E}$。
-\end{proof}
-\begin{theorem}\label{theo:subsetilc}
-	设$(X,\rho)$是一个度量空间，$A\cup B\subset X$。若$A\subset B$，则$\mathring{A}\subset\mathring{B}$，$A'\subset B'$，$\overline{A}\subset\overline{B}$。
-\end{theorem}
-\begin{proof}
-	由内点、聚点的定义直接可得。
-\end{proof}
-\begin{theorem}\label{theo:cuplimitset eq2 limitsetcup}
-	设$(X,\rho)$是一个度量空间，$A\cup B\subset X$。$(A\cup B)'=A'\cup B'$。
-\end{theorem}
-\begin{proof}
-	$A\subset (A\cup B)$，$B\subset (A\cup B)$，由\cref{theo:subsetilc}可知，$A'\subset(A\cup B)'$，$B'\subset(A\cup B)'$，因此$A'\cup B'\subset(A\cup B)'$。\par
-	另一方面，对任意的$ P\in (A\cup B)'$，应有$P\in A'\cup B'$。否则就有$P\notin A'$且$P\notin B'$，因此存在$U_1(P)$和$U_2(P)$使得$U_1(P)$中不含除了$P$以外的$A$中的点、$U_2(P)$中不含除了$P$以外的$B$中的点，由邻域的性质，存在$U_3(P)$使得其内不含除了$P$以外$A\cup B$中的点，而这与$P\in (A\cup B)'$矛盾。由$P$的任意性有$(A\cup B)'\subset A'\cup B'$。\par
-	综上$(A\cup B)'=A'\cup B'$。
-\end{proof}
-\begin{theorem}
-	设$(X,\rho)$是一个度量空间，$A\cup B\subset X$。$\overline{A\cup B}=\overline{A}\cup \overline{B}$。
-\end{theorem}
-\begin{proof}
-	由\cref{theo:cuplimitset eq2 limitsetcup}：
-	\begin{equation*}
-		\overline{A}\cup \overline{B}=A\cup A'\cup B\cup B'
-		=(A\cup B)\cup(A'\cup B')=(A\cup B)\cup(A\cup B)'
-		=\overline{A\cup B}\qedhere
-	\end{equation*}
-\end{proof}
+
 \subsection{稠密、稀疏、可分、全有界、准紧性}
 \subsubsection{稠密性}
 \begin{definition}
@@ -171,7 +139,7 @@
 \end{theorem}
 \begin{proof}
 	\textbf{(1)开邻域：}\par
-	充分性：假设此时$A$在$X$中的某非空开集$B$中稠密，则$B\subseteq\overline{A}$。任取$x\in B$和$U(x)\subseteq B$，则$x\in\overline{A}$。如果此时存在包含于$U(x)$的$U(y)$使得条件成立，则$y\notin\overline{A}$，这与$y\in U(y)\subset U(x)\subset B\subset\overline{A}$矛盾。\par
+	充分性：假设此时$A$在$X$中的某非空开集$B$中稠密，则$B\subseteq\overline{A}$。任取$x\in B$和$U(x)\subseteq B$，则$x\in\overline{A}$。如果此时存在包含于$U(x)$的$U(y)$使得条件成立，则$y\notin\overline{A}$，这与$y\in U(y)\subseteq U(x)\subseteq B\subseteq\overline{A}$矛盾。\par
 	必要性：若$A$是稀疏集，由\cref{prop:OpenClosedSet}(1)可得$A$在$U(x)$中不稠密。由\cref{theo:Density}(2)可知$\exists\;y\in U(x),\;\exists\;U(y)\subseteq U(x)$使得$A\cap U(y)=\varnothing$。\par
 	\textbf{(2)闭邻域：}\par
 	充分性：\par
@@ -383,7 +351,7 @@
 	\end{equation*}
 	则称$\{G_i:i\in I\}$为$A$的\gls{OpenCover}。如果$I$是有限集，则称$\{G_i:i\in I\}$为$A$的\gls{FiniteOpenCover}。
 \end{definition}
-\begin{theorem}[有限覆盖定理]
+\begin{theorem}[有限覆盖定理]\label{theo:FiniteOpenCover}
 	度量空间$(X,\rho)$的子集$A$是紧集的充分必要条件是从$A$的任一开覆盖$\{G_i:i\in I\}$中必可选出一个有限子覆盖。
 \end{theorem}
 \begin{proof}
@@ -391,14 +359,14 @@
 	\begin{equation*}
 		\forall\;\varepsilon>0,\;\exists\;x\in A,\;\forall\;i\in I,\;U(x,\varepsilon)\notin G_i
 	\end{equation*}
-	依次选择$\varepsilon_n=\frac{1}{2^n},\;n\in\mathbb{N}^+$，即可构造出序列$\{x_n\}$满足其中的每个元素都不在任何$G_i$中。因为$A$是紧集，所以$\{x_n\}$存在收敛于$A$中某点$x_0$的子列$\{x_{n_k}\}$。又因为$A\subseteq\underset{i\in I}{\cup}G_i$，所以$\exists\;i\in I,\;x_0\in G_i$。于是可取充分大的$k$使得$U\left(x_{n_k},\dfrac{1}{2^{n_k}}\right)\subset G_i$，这与$x_{n_k}$的取法矛盾。\par
+	依次选择$\varepsilon_n=\dfrac{1}{2^n},\;n\in\mathbb{N}^+$，即可构造出序列$\{x_n\}$满足其中的每个元素都不在任何$G_i$中。因为$A$是紧集，所以$\{x_n\}$存在收敛于$A$中某点$x_0$的子列$\{x_{n_k}\}$。又因为$A\subseteq\underset{i\in I}{\cup}G_i$，所以$\exists\;i\in I,\;x_0\in G_i$。因为$G_i$是开集，所以$x_0$是$G_i$的内点，由\cref{prop:OpenClosedSet}(1)可知可取充分大的$k$使得$U\left(x_{n_k},\dfrac{1}{2^{n_k}}\right)\subseteq U(x_0)\subseteq G_i$，这与$x_{n_k}$的取法矛盾。\par
 	记使上述命题成立的$\varepsilon=\varepsilon_0$。因为$A$是紧集，则$A$也是全有界集，故能选择$A$中有限个点，使得对任意的$\varepsilon>0$，这有限个点的开$\varepsilon$邻域能够包含整个$A$。取$\varepsilon=\varepsilon_0$，此时只要对这有限个点的开邻域选择对应的$G_i$，即可选出有限子覆盖。\par
 	(2)充分性：设$\{x_n\}$是$A$中的一个点列。如果$\{x_n\}$没有子列在$A$中收敛，则：
 	\begin{equation*}
-		\forall\;y\in A,\;\exists\;\delta_y>0,\;\exists\;n_y\in\mathbb{N}^+,\;\forall\;n>n_y,\;x_n\notin U(y,\delta_y)
+		\forall\;y\in A,\;\exists\;\varepsilon_y>0,\;\exists\;n_y\in\mathbb{N}^+,\;\forall\;n>n_y,\;x_n\notin U(y,\varepsilon_y)
 	\end{equation*}
-	显然$\{U(y,\delta_y):y\in A\}\supset A$，因此可以选择$A$中有限个点，分别记为$y_1,y_2,\dots,y_{n_0}$，使得$\{U(y_i,\delta_y):i=1,2,\dots,n_0\}\supset A$。则当$n\geqslant
-	\max\{n_{y_1},\;n_{y_2},\dots,n_{y_{n_0}}\}$时，$x_n\notin A$，与$\{x_n\}\in A$矛盾。
+	因为$\{U(y,\varepsilon_y):y\in A\}\supseteq A$，所以可以选择$A$中有限个点，分别记为$y_1,y_2,\dots,y_{n_0}$，使得$\{U(y_i,\varepsilon_y):i=1,2,\dots,n_0\}\supseteq A$。当$n\geqslant
+	\max\{n_{y_1},\;n_{y_2},\dots,n_{y_{n_0}}\}$时，$x_n\notin A$，与$\{x_n\}\subseteq A$矛盾。
 \end{proof}
 \subsubsection{有限交}
 \begin{definition}
@@ -409,24 +377,24 @@
 \end{theorem}
 \begin{proof}
 	设$\mathscr{F}=\{F_i\}_{i\in I}$是一个具有有限交性质的闭子集族。\par
-	(1)必要性：假设该闭子集族的交集为空集。令$G_i=X\backslash F_i$，则$\{G_i\}_{i\in I}$为开集族。由：
+	(1)必要性：假设该闭子集族的交集为空集。令$G_i=X\backslash F_i$，由\cref{prop:OpenClosedSet}(5)可知$\{G_i\}_{i\in I}$为开集族。由\cref{prop:SetOperation}(6)(4)(7)可得：
 	\begin{equation*}
 		\underset{i\in I}{\overset{}{\cup}}G_i=\underset{i\in I}{\overset{}{\cup}}(X\backslash F_i)=X\backslash \underset{i\in I}{\overset{}{\cap}}F_i=X
 	\end{equation*}
-	可知$\{G_i\}_{i\in I}\supset A$。因为$A$是紧集，所以可从$\{G_i\}_{i\in I}$中选择出$A$的有限子覆盖$\{G_{i_j}\}_{j=1}^n$。所以：
+	所以$\{G_i\}_{i\in I}\supseteq A$。因为$A$是紧集，所以可从$\{G_i\}_{i\in I}$中选择出$A$的有限子覆盖$\{G_{i_j}\}_{j=1}^n$。由\cref{prop:SetOperation}(6)(2)(7)可得：
 	\begin{equation*}
-		\underset{j=1}{\overset{n}{\cap}}F_{j}=\underset{j=1}{\overset{n}{\cap}}(X\backslash G_{i_j})=X\backslash\underset{j=1}{\overset{n}{\cup}}G_{i_j}\subset X\backslash A
+		\underset{j=1}{\overset{n}{\cap}}F_{i_j}=\underset{j=1}{\overset{n}{\cap}}(X\backslash G_{i_j})=X\backslash\underset{j=1}{\overset{n}{\cup}}G_{i_j}\subseteq X\backslash A
 	\end{equation*}
-	又因为$F_{i_j}\subset A$，所以：
+	又因为$F_{i_j}\subseteq A$，所以：
 	\begin{equation*}
-		\underset{j=1}{\overset{n}{\cap}}F_{i_j}\subset A
+		\underset{j=1}{\overset{n}{\cap}}F_{i_j}\subseteq A
 	\end{equation*}
 	综合上两式可得：
 	\begin{equation*}
-		\underset{j=1}{\overset{n}{\cap}}F_{i_j}\subset(X\backslash A)\cap A=\varnothing
+		\underset{j=1}{\overset{n}{\cap}}F_{i_j}\subseteq(X\backslash A)\cap A=\varnothing
 	\end{equation*}
 	这与$\mathscr{F}$具有有限交性质矛盾。\par
-	(2)充分性：设闭集$A$中任一具有有限交性质的闭子集族具有非空的交。我们用有限覆盖定理来证明$A$是一个紧集。设$\{G_i\}_{i\in I}$为$A$的任一开覆盖，令$F_i=A\backslash G_i$，因为$A$是闭集，所以$F_i$也是闭集。因为：
+	(2)充分性：设闭集$A$中任一具有有限交性质的闭子集族具有非空的交。设$\{G_i\}_{i\in I}$为$A$的任一开覆盖，令$F_i=A\backslash G_i$，因为$A$是闭集，由\cref{prop:SetOperation}(6)和\cref{prop:OpenClosedSet}(5)(6)可知$F_i$也是闭集。由\cref{prop:SetOperation}(6)(2)(7)可得：
 	\begin{equation*}
 		\underset{i\in I}{\overset{}{\cap}}F_i=\underset{i\in I}{\overset{}{\cap}}(A\backslash G_i)=A\backslash\underset{i\in I}{\overset{}{\cup}}G_i=\varnothing
 	\end{equation*}
@@ -434,11 +402,11 @@
 	\begin{equation*}
 		\underset{j=1}{\overset{n}{\cap}}F_{i_j}=\varnothing
 	\end{equation*}
-	它对应的开集族$\{F_{i_j}\}_{j=1}^n$则满足：
+	由\cref{prop:SetOperation}(6)(4)(7)可得它对应的开集族$\{F_{i_j}\}_{j=1}^n$则满足：
 	\begin{equation*}
 		\underset{j=1}{\overset{n}{\cup}}G_{i_j}=\underset{j=1}{\overset{n}{\cup}}(A\backslash F_{i_j})=A\backslash\underset{j=1}{\overset{n}{\cap}}F_{i_j}=A
 	\end{equation*}
-	即$\{G_{i_j}\}$是$A$的一个有限开覆盖，于是$A$是紧集。
+	即$\{G_{i_j}\}$是$A$的一个有限开覆盖，由$\{G_i\}_{i\in I}$的任意性和\cref{theo:FiniteOpenCover}可知$A$是紧集。
 \end{proof}
 
 \subsection{$\mathbb{R}^{},\overline{\mathbb{R}^{}}$与$\mathbb{R}^n$}

@@ -115,7 +115,26 @@
 	\end{enumerate}
 \end{definition}
 \begin{definition}
-	将由单位矩阵经过一次初等行（列）变换后得到的矩阵称为\gls{ElemetaryMatrix}。
+	一个矩阵被称为\gls{REF}，如果它满足以下条件：
+	\begin{enumerate}
+		\item 所有零行（全为零的行）位于非零行的下方；
+		\item 若某一行非零，则该行的首个非零元素（称为\gls{Pivot}）位于该行之前所有行的主元右侧。
+	\end{enumerate}
+	一个矩阵被称为\gls{RREF}，如果满足以下条件：
+	\begin{enumerate}
+		\item 它是阶梯形矩阵；
+		\item 每个非零行的主元都是$1$；
+		\item 每个主元所在列的其他元素均为$0$。
+	\end{enumerate}
+\end{definition}
+\begin{theorem}\label{theo:RREFExistence}
+	任意一个矩阵都可以经过一系列初等行变换化成行阶梯形矩阵，进而可以经过一系列初等行变换化成简化行阶梯形矩阵。
+\end{theorem}
+\begin{proof}
+	数学归纳法，化为行阶梯形矩阵只需经过前两种初等变换，由行阶梯形矩阵化为简化行阶梯形矩阵只需经过后两种初等变换。
+\end{proof}
+\begin{definition}
+	将由单位矩阵经过一次初等行（列）变换后得到的矩阵称为\gls{ElementaryMatrix}。
 \end{definition}
 \begin{property}\label{prop:ElementaryMatrix}
 	$n$阶初等矩阵具有如下性质：
@@ -141,7 +160,7 @@
 	用置换矩阵乘上一个矩阵表示对该矩阵作矩阵的第二类初等变换，即互换行、列的位置。
 \end{property}
 \begin{proof}
-	置换矩阵只能由初等矩阵经矩阵的第二类初等变换得到，由\cref{prop:ElementaryMatrix}(2)即可得出结论。
+	置换矩阵可由单位矩阵经矩阵的第二类初等变换得到，由\cref{prop:ElementaryMatrix}(2)即可得出结论。
 \end{proof}
 \subsubsection{迹}
 \begin{definition}
@@ -234,24 +253,26 @@
 \begin{definition}
 	设$A\in M_{n}(K)$。在$A$中任意取定$k(1\leqslant k<n)$行（$i_1,i_2,\dots,i_k$）、$k$列（$j_1,j_2,\dots,j_k$），位于这些行和列交叉处的$k^2$个元素按原来的次序组成的$k$阶矩阵的行列式称为$A$的一个\gls{KMinor}，记作：
 	\begin{equation*}
-		A\left\{ \begin{array}{l}
-			i_1,i_2,\dots,i_k \\
-			j_1,j_2,\dots,j_k
-		\end{array} \right\}
+		A\left\{
+		\begin{array}{*{4}{c}}
+			i_1 & i_2 & \dots & i_k \\
+			j_1 & j_2 & \dots & j_k
+		\end{array}\right\}
 	\end{equation*}
 	其余元素按原来的次序组成的$n-k$阶矩阵的行列式称为上式的\gls{Minor}，称：
 	\begin{equation*}
-		(-1)^{(i_1+i_2+\cdots+i_k)+(j_1+j_2+\cdots+j_k)}A\left\{ \begin{array}{l}
-			i_1',i_2',\dots,i_{n-k}' \\
-			j_1',j_2',\dots,j_{n-k}'
-		\end{array} \right\}
+		(-1)^{(i_1+i_2+\cdots+i_k)+(j_1+j_2+\cdots+j_k)}A\left\{
+		\begin{array}{*{4}{c}}
+			i_1' & i_2' & \dots & i_{n-k}' \\
+			j_1' & j_2' & \dots & j_{n-k}'
+		\end{array}\right\}
 	\end{equation*}
 	为其\gls{Cofactor}，其中：
 	\begin{gather*}
 		\{i_1',i_2',\dots,i_{n-k}'\}=\{1,2,\dots,n\}\backslash\{i_1,i_2,\dots,i_k\} \\
 		\{j_1',j_2',\dots,j_{n-k}'\}=\{1,2,\dots,n\}\backslash\{j_1,j_2,\dots,j_k\}
 	\end{gather*}
-	特别的，$A$的$(i,j)$元的余子式记作$M_{ij}$，代数余子式记作$A_{ij}$。若选取的行和列是前$k$行与前$k$列，则称这些行和列交叉处的$k^2$个元素按原来的次序组成的$k$阶矩阵为$k$阶\gls{LeadingPrincipalSubmatrix}，其行列式为$A$的\gls{PrincipalKMinor}。
+	特别的，$A$的$(i,j)$元的余子式记作$M_{ij}$，代数余子式记作$A_{ij}$。若选取的行号和列号相同，则称这些行和列交叉处的$k^2$个元素按原来的次序组成的$k$阶矩阵为\gls{PrincipalKSubmatrix}，其行列式为$A$的\gls{PrincipalKMinor}；若选取的行和列是前$k$行与前$k$列，则称这些行和列交叉处的$k^2$个元素按原来的次序组成的$k$阶矩阵为\gls{LeadingPrincipalKSubmatrix}，其行列式为$A$的\gls{LeadingPrincipalKMinor}。对于非方阵的矩阵，可类似定义。
 \end{definition}
 \begin{property}\label{prop:Determinant}
 	矩阵$A=(a_{ij})\in M_{n}(K)$的行列式$\det A$具有如下性质：
@@ -315,27 +336,24 @@
 				\vdots & \vdots & \ddots & \vdots \\
 				a_{n1} & a_{n2} & \cdots & a_{nn}
 			\end{vmatrix} \\
-			\begin{aligned}
-				&\begin{vmatrix}
-					a_{11} & \cdots & a_{1j}+a_{1j}' & \cdots & a_{1n} \\
-					a_{21} & \cdots & a_{2j}+a_{2j}' & \cdots & a_{2n} \\
-					\vdots & \ddots & \vdots & \ddots & \vdots \\
-					a_{n1} & \cdots & a_{nj}+a_{nj}' & \cdots & a_{nn}
-				\end{vmatrix} \\
-				=&
-				\begin{vmatrix}
-					a_{11} & \cdots & a_{1j} & \cdots & a_{1n} \\
-					a_{21} & \cdots & a_{2j} & \cdots & a_{2n} \\
-					\vdots & \ddots & \vdots & \ddots & \vdots \\
-					a_{n1} & \cdots & a_{nj} & \cdots & a_{nn}
-				\end{vmatrix}+
-				\begin{vmatrix}
-					a_{11} & \cdots & a_{1j}' & \cdots & a_{1n} \\
-					a_{21} & \cdots & a_{2j}' & \cdots & a_{2n} \\
-					\vdots & \ddots & \vdots & \ddots & \vdots \\
-					a_{n1} & \cdots & a_{nj}' & \cdots & a_{nn}
-				\end{vmatrix}
-			\end{aligned}
+			\begin{vmatrix}
+				a_{11} & \cdots & a_{1j}+a_{1j}' & \cdots & a_{1n} \\
+				a_{21} & \cdots & a_{2j}+a_{2j}' & \cdots & a_{2n} \\
+				\vdots & \ddots & \vdots & \ddots & \vdots \\
+				a_{n1} & \cdots & a_{nj}+a_{nj}' & \cdots & a_{nn}
+			\end{vmatrix}=
+			\begin{vmatrix}
+				a_{11} & \cdots & a_{1j} & \cdots & a_{1n} \\
+				a_{21} & \cdots & a_{2j} & \cdots & a_{2n} \\
+				\vdots & \ddots & \vdots & \ddots & \vdots \\
+				a_{n1} & \cdots & a_{nj} & \cdots & a_{nn}
+			\end{vmatrix}+
+			\begin{vmatrix}
+				a_{11} & \cdots & a_{1j}' & \cdots & a_{1n} \\
+				a_{21} & \cdots & a_{2j}' & \cdots & a_{2n} \\
+				\vdots & \ddots & \vdots & \ddots & \vdots \\
+				a_{n1} & \cdots & a_{nj}' & \cdots & a_{nn}
+			\end{vmatrix}
 		\end{gather*}
 		\item 行列式两行（列）互换，行列式反号：
 		\begin{gather*}
@@ -429,18 +447,41 @@
 		\begin{equation*}
 			\sum_{k=1}^{n}a_{ik}A_{jk}=\sum_{k=1}^{n}a_{ki}A_{kj}=0
 		\end{equation*}
-		\item \textbf{Laplace Theorem:} 取定$A$的第$i_1,i_2,\dots,i_k(i_1<i_2<\cdots<i_k)$行，则这$k$行元素构成的所有$k$阶子式与它们自己的代数余子式的乘积之和等于$\det A$，即：
+		\item (Laplace Theorem) 取定$A$的第$i_1,i_2,\dots,i_k(i_1<i_2<\cdots<i_k)$行，则这$k$行元素构成的所有$k$阶子式与它们自己的代数余子式的乘积之和等于$\det A$，即：
 		\begin{align*}
-			\det A&=\sum_{1\leqslant j_1<j_2<\cdots<j_k\leqslant n}A\left\{ \begin{array}{l}
-				i_1,i_2,\dots,i_k \\
-				j_1,j_2,\ \dots,j_k
-			\end{array} \right\} \\
-			&\quad(-1)^{(i_1+i_2+\cdots+i_k)+(j_1+j_2+\cdots+j_k)}A\left\{ \begin{array}{l}
-				i_1',i_2',\dots,i_{n-k}' \\
-				j_1',j_2',\ \dots,j_{n-k}'
-			\end{array} \right\}
+			\det A&=\sum_{1\leqslant j_1<j_2<\cdots<j_k\leqslant n}A\left\{
+			\begin{array}{*{4}{c}}
+				i_1 & i_2,\dots & i_k \\
+				j_1 & j_2,\dots & j_k
+			\end{array}\right\} \\
+			&\quad(-1)^{(i_1+i_2+\cdots+i_k)+(j_1+j_2+\cdots+j_k)}A\left\{
+			\begin{array}{*{4}{c}}
+				i_1' & i_2' & \dots & i_{n-k}' \\
+				j_1' & j_2' & \dots & j_{n-k}'
+			\end{array}\right\}
 		\end{align*}
-		\item 设$B\in M_{n}(K)$，则$\det(AB)=\det A\det B$；
+		\item (Cauchy-Binet Formula) 设$P=(p_{ij})\in M_{m\times n}(K),Q=(q_{ij})\in M_{n\times m}(K)$，$r\in\mathbb{N}^+$且$r\leqslant m$。
+		\begin{enumerate}
+			\item 若$r>n$，则$PQ$的任意一个$r$阶子式为$0$；
+			\item 若$r\leqslant n$，则：
+			\begin{align*}
+				(PQ)\left\{
+				\begin{array}{*{4}{c}}
+					i_1 & i_2 & \dots & i_r \\
+					j_1 & j_2 & \dots & j_r
+				\end{array}\right\}&=\sum_{1\leqslant k_1<k_2<\cdots<k_r\leqslant n}^{}P\left\{
+				\begin{array}{*{4}{c}}
+					i_1 & i_2 & \dots & i_r \\
+					k_1 & k_2 & \dots & k_r
+				\end{array}\right\} \\
+				&\quad Q\left\{
+				\begin{array}{*{4}{c}}
+					k_1 & k_2 & \dots & k_r \\
+					j_1 & j_2 & \dots & j_r
+				\end{array}\right\}
+			\end{align*}
+		\end{enumerate}
+		上述结论内含当$m=n$时，$\det(PQ)=\det P\det Q$；
 		\item 若$A$是上三角矩阵或下三角矩阵，则$\det A=\prod\limits_{i=1}^na_{ii}$；
 		\item 称下述行列式为\textbf{Vandermonde行列式}：
 		\begin{equation*}
@@ -529,37 +570,151 @@
 		&\quad\sum_{\mu_1\mu_2\cdots\mu_k}^{}(-1)^{\tau(\mu_1\mu_2\cdots\mu_k)}a_{i_1\mu_1}a_{i_2\mu_2}\cdots a_{i_k\mu_k} \\
 		&\quad\sum_{\nu_1\nu_2\cdots\nu_{n-k}}^{}(-1)^{\tau(\nu_1\nu_2\cdots\nu_{n-k})}a_{i_1'\nu_1}a_{i_2'\nu_2}\cdots a_{i_{n-k}'\nu_{n-k}} \\
 		&=\sum_{1\leqslant j_1<j_2<\cdots<j_k\leqslant n}(-1)^{(i_1+i_2+\cdots+i_k)+(j_1+j_2+\cdots+j_k)} \\
-		&\quad A\left\{ \begin{array}{l}
-			i_1,i_2,\dots,i_k \\
-			j_1,j_2,\ \dots,j_k
-		\end{array} \right\}A\left\{ \begin{array}{l}
-			i_1',i_2',\dots,i_{n-k}' \\
-			j_1',j_2',\ \dots,j_{n-k}'
-		\end{array} \right\}
+		&\quad A\left\{
+		\begin{array}{*{4}{c}}
+			i_1 & i_2 & \dots & i_k \\
+			j_1 & j_2 & \dots & j_k
+		\end{array}\right\}A\left\{
+		\begin{array}{*{4}{c}}
+			i_1' & i_2' & \dots & i_{n-k}' \\
+			j_1' & j_2' & \dots & j_{n-k}'
+		\end{array}\right\}
 	\end{align*}\par
-	(11)由(10)可得：
+	(11)先证明：
+	\begin{enumerate}
+		\item 若$m>n$，则$\det(PQ)=0$；
+		\item 若$m\leqslant n$，则：
+		\begin{equation*}
+			\det(PQ)=\sum_{1\leqslant j_1<j_2<\cdots<j_m\leqslant n}^{}P
+			\left\{\begin{array}{*{4}{c}}
+				1 & 2 & \dots & m \\
+				j_1 & j_2 & \dots & j_m
+			\end{array} \right\}Q
+			\left\{\begin{array}{*{4}{c}}
+				j_1 & j_2 & \dots & j_m \\
+				1 & 2 & \dots & m
+			\end{array}\right\}
+		\end{equation*}
+	\end{enumerate}\par
+	令：
 	\begin{equation*}
-		\begin{vmatrix}
-			A & \mathbf{0} \\
-			-I_n & B
-		\end{vmatrix}=|A||B|
+		C=
+		\begin{pmatrix}
+			P & \mathbf{0} \\
+			-I_n & Q
+		\end{pmatrix}
 	\end{equation*}
-	由(10)和(3)，利用矩阵的初等行变换将$A$化为$\mathbf{0}$又可得到：
+	由(7)、(10)和(3)可得：
 	\begin{align*}
-		&\begin{vmatrix}
-			A & \mathbf{0} \\
-			-I_n & B
+		&\det C=\begin{vmatrix}
+			P & \mathbf{0} \\
+			-I_n & Q
 		\end{vmatrix}=
 		\begin{vmatrix}
-		\mathbf{0} & AB \\
-		-I_n & B
+			\mathbf{0} & PQ \\
+			-I_n & Q
 		\end{vmatrix} \\
-		=&|AB|(-1)^{(1+2+\cdots+n)+[(n+1)+(n+2)+\cdots+2n]}|-I_n| \\
-		=&|AB|(-1)^{(2n+1)n}(-1)^n|I_n|=|AB|
+		=&\det(PQ)(-1)^{(1+2+\cdots+m)+[(n+1)+(n+2)+\cdots+(n+m)]}\det(-I_n) \\
+		=&\det(PQ)(-1)^{2(1+2+\cdots+m)+mn}(-1)^n=\det(PQ)(-1)^{mn+n}=\det(PQ)(-1)^{n(m+1)}
+	\end{align*}\par
+	当$m>n$时，$C$的前$m$行中的所有$m$阶子式至少有一列全为$0$，由(10)可得$\det C=0$，于是$\det(PQ)=0$。\par
+	当$m\leqslant n$时，由(10)可得：
+	\begin{align*}
+		\det C&=\sum_{1\leqslant j_1<j_2<\cdots<j_m\leqslant m+n}C\left\{ \begin{array}{*{4}{c}}
+			1 & 2 & \dots & m \\
+			j_1 & j_2 & \dots & j_m
+		\end{array}\right\} \\
+		&\quad(-1)^{(1+2+\cdots+m)+(j_1+j_2+\cdots+j_m)}C\left\{
+		\begin{array}{*{4}{c}}
+			m+1 & m+2 & \dots & m+n \\
+			j_1' & j_2' & \dots & j_{n}'
+		\end{array}\right\} \\
+		&=\sum_{1\leqslant j_1<j_2<\cdots<j_m\leqslant n}P\left\{
+		\begin{array}{*{4}{c}}
+			1 & 2 & \dots & m \\
+			j_1 & j_2 & \dots & j_m
+		\end{array}\right\} \\
+		&\quad(-1)^{(1+2+\cdots+m)+(j_1+j_2+\cdots+j_m)}C\left\{
+		\begin{array}{*{4}{c}}
+			m+1 & m+2 & \dots & m+n \\
+			j_1' & j_2' & \dots & j_{n}'
+		\end{array}\right\}
 	\end{align*}
-	所以$|A||B|=|AB|$。\par
-	(12)由行列式的定义立即可得。\par
-	(13)当$n=2$时结论显然成立。\par
+	令$\{\seq{i}{n-m}\}=\{1,2,\dots,n\}\backslash\{	j_1,j_2,\dots,j_m\}$，$e_{i_k}$为第$i_k$维为$1$其余维度元素都为$0$的$n$维列向量，由(2)(10)可得：
+	\begin{align*}
+		&C\left\{
+		\begin{array}{*{4}{c}}
+			m+1 & m+2 & \dots & m+n \\
+			j_1' & j_2' & \dots & j_{n}'
+		\end{array}\right\}=
+		\begin{vmatrix}
+			-e_{i_1} & -e_{i_2} & \cdots & -e_{i_{n-m}} & Q
+		\end{vmatrix} \\
+		=&(-1)^{n-m}(-1)^{(1+2+\cdots+n-m)+(i_1+i_2+\cdots+i_{n-m})}Q\left\{ \begin{array}{*{4}{c}}
+			j_1 & j_2 & \dots & j_m \\
+			1   & 2   & \dots & m
+		\end{array}\right\}
+	\end{align*}
+	所以：
+	\begin{align*}
+		\det C&=\sum_{1\leqslant j_1<j_2<\cdots<j_m\leqslant n}P\left\{ \begin{array}{*{4}{c}}
+			1 & 2 & \dots & m \\
+			j_1 & j_2 & \dots & j_m
+		\end{array}\right\}Q\left\{
+		\begin{array}{*{4}{c}}
+			j_1 & j_2 & \dots & j_m \\
+			1 & 2 & \dots & m
+		\end{array}\right\}  \\
+		&\quad(-1)^{(1+2+\cdots+m)+(j_1+j_2+\cdots+j_m)}(-1)^{n-m}(-1)^{(1+2+\cdots+n-m)+(i_1+i_2+\cdots+i_{n-m})} \\
+		&=\sum_{1\leqslant j_1<j_2<\cdots<j_m\leqslant n}P\left\{
+		\begin{array}{*{4}{c}}
+			1 & 2 & \dots & m \\
+			j_1 & j_2 & \dots & j_m
+		\end{array}\right\}Q\left\{\begin{array}{*{4}{c}}
+			j_1 & j_2 & \dots & j_m \\
+			1 & 2 & \dots & m
+		\end{array}\right\}  \\
+		&\quad(-1)^{(1+2+\cdots+m)+(1+2+\cdots+n)+(1+2+\cdots+n-m)+n-m}
+	\end{align*}
+	于是：
+	\begin{align*}
+		\det(PQ)&=\sum_{1\leqslant j_1<j_2<\cdots<j_m\leqslant n}P\left\{
+		\begin{array}{*{4}{c}}
+			1 & 2 & \dots & m \\
+			j_1 & j_2 & \dots & j_m
+		\end{array}\right\}Q\left\{\begin{array}{*{4}{c}}
+			j_1 & j_2 & \dots & j_m \\
+			1 & 2 & \dots & m
+		\end{array}\right\}  \\
+		&\quad(-1)^{(1+2+\cdots+m)+(1+2+\cdots+n)+(1+2+\cdots+n-m)+n-m+n(m+1)}
+	\end{align*}
+	因为：
+	\begin{align*}
+		&(-1)^{(1+2+\cdots+m)+(1+2+\cdots+n)+(1+2+\cdots+n-m)+n-m+n(m+1)} \\
+		=&(-1)^{m^2+n^2+3n-m}=(-1)^{m(m-1)+n(n+3)}=1
+	\end{align*}
+	所以：
+	\begin{equation*}
+		\det(PQ)=\sum_{1\leqslant j_1<j_2<\cdots<j_m\leqslant n}P\left\{
+		\begin{array}{*{4}{c}}
+			1 & 2 & \dots & m \\
+			j_1 & j_2 & \dots & j_m
+		\end{array}\right\}Q\left\{\begin{array}{*{4}{c}}
+			j_1 & j_2 & \dots & j_m \\
+			1 & 2 & \dots & m
+		\end{array}\right\}
+	\end{equation*}\par
+	对于$PQ$的$r$阶子式，只需注意到：
+	\begin{equation*}
+		(PQ)\left\{
+		\begin{array}{*{4}{c}}
+			i_1 & i_2 & \dots & i_r \\
+			j_1 & j_2 & \dots & j_r
+		\end{array}\right\}
+	\end{equation*}
+	是由$P$的$i_1,i_2,\dots,i_r$行构成的矩阵和$Q$的$j_1,j_2,\dots,j_r$列构成的矩阵的乘积，直接由前面已经证明过的结论即可得出最终结论。\par
+	(13)由行列式的定义立即可得。\par
+	(14)当$n=2$时结论显然成立。\par
 	假设对$n-1$阶Vandermonde行列式结论成立，对于$n$阶Vandermonde行列式从最后一行到第二行将上一行的$-x_1$倍加到下一行上，由(7)(3)(8)和归纳假设可得：
 	\begin{align*}
 		&
@@ -621,6 +776,9 @@
 \begin{lemma}\label{lem:REFRankColumnRow}
 	阶梯形矩阵$J$的行秩与等于列秩且都等于非零行数，$J$的主元所在的行构成行向量组的一个极大线性无关组，主元所在列构成列向量组的一个极大线性无关组。
 \end{lemma}
+\begin{proof}
+	先证明后两句结论（这是显然的），即可得到第一句结论。
+\end{proof}
 \begin{lemma}\label{lem:ElementaryRowColumnTransRank}
 	矩阵的初等行变换不改变行秩，初等列变换不改变列秩。
 \end{lemma}
@@ -635,8 +793,8 @@
 	\end{enumerate}
 \end{lemma}
 \begin{proof}
-	(1)将矩阵$A,B$看作齐次线性方程组的矩阵，由\info{初等行变换不改变线性方程组的解}可知$Ax=\mathbf{0}$和$Bx=\mathbf{0}$同解，于是$Ax=\mathbf{0}$有非零解当且仅当$Bx=\mathbf{0}$有非零解，即$A$的列向量组线性相关当且仅当$B$的列向量组线性相关。\par
-	(2)$A$的第$\seq{j}{r}$列经过初等行变换构成$B$的第$\seq{j}{r}$列，由(1)可知它们线性无关。任取其它列第$l$列，则$A$的第$\seq{j}{r},l$列经过初等行变换构成$B$的第$\seq{j}{r},l$列，因为$B$的第$\seq{j}{r}$列构成$B$的列向量组的一个极大线性无关组，所以$B$的第$\seq{j}{r},l$列线性相关，由(1)可知$A$的第$\seq{j}{r},l$列也线性相关，所以$A$的第$\seq{j}{r},l$列构成$A$的一个极大线性无关组。
+	(1)将矩阵$A,B$看作齐次线性方程组的矩阵，因为$Ax=\mathbf{0}$和$Bx=\mathbf{0}$同解，于是$Ax=\mathbf{0}$有非零解当且仅当$Bx=\mathbf{0}$有非零解，即$A$的列向量组线性相关当且仅当$B$的列向量组线性相关。\par
+	(2)$\;A$的第$\seq{j}{r}$列经过初等行变换构成$B$的第$\seq{j}{r}$列，由(1)可知它们线性无关。任取其它列第$l$列，则$A$的第$\seq{j}{r},l$列经过初等行变换构成$B$的第$\seq{j}{r},l$列，因为$B$的第$\seq{j}{r}$列构成$B$的列向量组的一个极大线性无关组，所以$B$的第$\seq{j}{r},l$列线性相关，由(1)可知$A$的第$\seq{j}{r},l$列也线性相关，所以$A$的第$\seq{j}{r},l$列构成$A$的一个极大线性无关组。
 \end{proof}
 \begin{property}\label{prop:MatrixRank}
 	矩阵的秩具有如下性质：
@@ -679,7 +837,7 @@
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)任取矩阵$A$，记$A$的阶梯形矩阵为$J$。由\cref{lem:ElementaryRowColumnTransRank}可知则$A$的行秩等于$J$的行秩，由\cref{lem:REFRankColumnRow}可知$J$的行秩等于$J$的列秩，由\cref{lem:ElementaryRowSameColumn}(2)可知$J$的列秩等于$A$的列秩，于是$A$的行秩等于$A$的列秩。由$A$的任意性，结论成立。\par
+	(1)任取矩阵$A$，根据\cref{theo:RREFExistence}，记$A$的阶梯形矩阵为$J$。由\cref{lem:ElementaryRowColumnTransRank}可知则$A$的行秩等于$J$的行秩，由\cref{lem:REFRankColumnRow}可知$J$的行秩等于$J$的列秩，由\cref{lem:ElementaryRowSameColumn}(2)可知$J$的列秩等于$A$的列秩，于是$A$的行秩等于$A$的列秩。由$A$的任意性，结论成立。\par
 	(2)由\cref{lem:ElementaryRowColumnTransRank}和(1)立即得到。\par
 	(3)设矩阵$A\in M_{m\times n}(K),\;\operatorname{rank}(A)=r$，由(1)可得$A$有$r$行、$r$列线性无关，将其对应的$r^2$个元素按原本的顺序排成的矩阵记为$A_1$，由(2)、\cref{lem:REFRankColumnRow}可知$|A_1|\ne0$，所以$A$存在一个$r$阶子式。\par
 	设$s>r$且$s\leqslant\min\{m,n\}$，任取$A$的一个$s$阶子式：
@@ -696,7 +854,7 @@
 	(6)显然。\par
 	(7)转置由(1)可得，Hermitian转置只需注意到若虚部线性无关则乘上$-1$也线性无关。\par
 	(8)只需要证明Hermitian转置的情况，转置是Hermitian转置在实数域上的特例。\par
-	由\cref{prop:HomogeneousSLESolution}(3)\info{这里已经不可避免的用到线性方程组的结论了}可知只需证明方程$A^HAx=\mathbf{0}$与$Ax=\mathbf{0}$同解。注意到$Ax=\mathbf{0}$则必然有$A^HAx=\mathbf{0}$，而若$A^HAx=\mathbf{0}$，则必有$x^HA^HAx=||Ax||=0$，所以$Ax=\mathbf{0}$。于是：
+	由\cref{prop:HomogeneousSLESolution}(3)可知只需证明方程$A^HAx=\mathbf{0}$与$Ax=\mathbf{0}$同解。注意到$Ax=\mathbf{0}$则必然有$A^HAx=\mathbf{0}$，而若$A^HAx=\mathbf{0}$，则必有$x^HA^HAx=||Ax||=0$，所以$Ax=\mathbf{0}$。于是：
 	\begin{equation*}
 		n-\operatorname{rank}(A^HA)=n-\operatorname{rank}(A)
 	\end{equation*}
@@ -713,7 +871,7 @@
 		\operatorname{rank}(AA^H)=\operatorname{rank}(A^HA)=\operatorname{rank}(A)
 	\end{equation*}\par
 	(9)由\cref{prop:MatrixMultiplication}(1)的第二种理解方式，$AB$的列向量组可以由$A$的列向量组线性表出，由\cref{prop:Rank}(2)可得$\operatorname{rank}(AB)\leqslant\operatorname{rank}(A)$。由(7)同理可得$\operatorname{rank}(AB)=\operatorname{rank}(B^TA^T)\leqslant\operatorname{rank}(B^T)=\operatorname{rank}(B)$，所以结论成立。\par
-	(10)将矩阵$\begin{pmatrix}
+	(10)根据\cref{theo:RREFExistence}，将矩阵$\begin{pmatrix}
 		A & \mathbf{0} \\
 		\mathbf{0} & B
 	\end{pmatrix}$通过初等变换化作阶梯形矩阵，由(2)和\cref{lem:REFRankColumnRow}即可得到结论。\par
@@ -760,6 +918,12 @@
 	\end{equation*}
 	为$A$的\gls{AdjointMatrix}，其中$A_{ij}$为$a_{ij}$的代数余子式。
 \end{definition}
+\begin{property}\label{prop:AdjointMatrix}
+	设$A=(a_{ij})\in M_{n}(K)$，则$AA^*=|A|I_n$。
+\end{property}
+\begin{proof}
+	由\cref{prop:Determinant}(8)(9)立即可得。
+\end{proof}
 \begin{property}\label{prop:InvertibleMatrix}
 	关于矩阵的逆有如下结论：
 	\begin{enumerate}
@@ -781,7 +945,7 @@
 		\item $\det A^{-1}=(\det A)^{-1}$；
 		\item 若$A,B\in M_{n}(K)$且$AB=I_n$，则$A,B$都可逆，且$A^{-1}=B,\;B^{-1}=A$；
 		\item 单位矩阵可逆；
-		\item 初等矩阵可逆且逆矩阵仍为初等矩阵；
+		\item 初等矩阵可逆且逆矩阵仍为同类初等矩阵；
 		\item 若$A$可逆，则$A^{-1}$可逆且$(A^{-1})^{-1}=A$；
 		\item 若$A,B\in M_{n}(K)$都可逆，则$AB$也可逆，且$(AB)^{-1}=B^{-1}A^{-1}$；
 		\item 若$A$可逆，则$A^T$可逆且$(A^T)^{-1}=(A^{-1})^T$，$A^H$也可逆且$(A^H)^{-1}=(A^{-1})^H$；
@@ -856,7 +1020,7 @@
 	(3)\textbf{ a：}当$A$可逆时有$AA^{-1}=I_n$，所以由\cref{prop:Determinant}(11)可得$|AA^{-1}|=|A||A^{-1}|=1$，于是$\det A\ne0$。当$\det A\ne0$时，由\cref{prop:Determinant}(8)(9)可知$AA^*=A^*A=|A|E$，所以$A^{-1}=|A|^{-1}A^*$，$A$可逆。\par
 	\textbf{b：}由(a)和\cref{prop:MatrixRank}(3)立即可得。\par
 	\textbf{c：}由(b)和矩阵秩的定义立即可得。\par
-	\textbf{d：}由(c)、\cref{prop:nDimensionalLinearSpace}和\info{$K^n$的维数为$n$}立即可得。\par
+	\textbf{d：}由(c)、\cref{prop:nDimensionalLinearSpace}和$\dim(K^n)=n$立即可得。\par
 	(4)由(3.b)、\cref{lem:REFRankColumnRow}和\cref{prop:MatrixRank}(2)立即可得。\par
 	(5)由(3.b)立即可得。\par
 	(6)当$A$可逆时有$AA^{-1}=I_n$，所以由\cref{prop:Determinant}(11)可得$|AA^{-1}|=|A||A^{-1}|=1$，即$\det A^{-1}=(\det A)^{-1}$。\par
@@ -967,7 +1131,7 @@
 	正交矩阵与酉矩阵具有如下性质：
 	\begin{enumerate}
 		\item 若$A$是一个正交（酉）矩阵，则$A$可逆且$A^T=A^{-1}$（$A^H=A^{-1}$）；
-		\item 若$A$是一个正交（酉）矩阵，则$\det A=\pm1$（$|det A|=1$）；
+		\item 若$A$是一个正交（酉）矩阵，则$\det A=\pm1$（$|\det A|=1$）；
 		\item 单位矩阵是正交（酉）矩阵；
 		\item 若$A,B$是正交（酉）矩阵，则$AB$也是正交（酉）矩阵；
 		\item 若$A$是正交（酉）矩阵，则$A^{-1}$也是正交（酉）矩阵；
