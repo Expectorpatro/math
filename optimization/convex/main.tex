@@ -1,11 +1,110 @@
-\chapter{凸}
+\chapter{凸集}
 
+\subsubsection{直线}
 \begin{definition}
-	设$E\subseteq\mathbb{R}^{n}$。若对任意的$m\in\mathbb{N}^+$、任意不同的$\seq{x}{m}\in E$和任意的$\seq{\theta}{m}\in\mathbb{R}^{}$有$\sum\limits_{i=1}^{m}\theta_ix_i\in E$，其中$\sum\limits_{i=1}^{m}\theta_i=1$，则称$E$为\gls{AffineSet}。
+	设$x_1,x_2\in\mathbb{R}^{n}$且$x_1\ne x_2$。若$\theta\in[0,1]$，称所有满足形式：
+	\begin{equation*}
+		y=\theta x_1+(1-\theta)x_2
+	\end{equation*}
+	的点$y$构成的集合为\gls{LineSegment}。若$\theta\in\mathbb{R}^{}$，称所有满足上述形式的点$y$构成的集合为\gls{Line}。
+\end{definition}
+\begin{note}
+	上述形式等价于：
+	\begin{equation*}
+		y=x_2+\theta(x_1-x_2)
+	\end{equation*}
+	这给出了另一种直观：$y$是基$x_2$和被$\theta$缩放的方向$x_1-x_2$的和。
+\end{note}
+\subsubsection{凸集}
+\begin{definition}
+	设$E\subseteq\mathbb{R}^{n}$。若对于任意不同的$x_1,x_2\in E$，由$x_1,x_2$确定的线段都在$E$中，则称$E$是一个\gls{ConvexSet}。
 \end{definition}
 \begin{definition}
-	设$E$是欧氏空间$X$中的一个点集，若任意两点$x_1,x_2\in E$的连线上的所有点$\alpha x_1+(1-\alpha)x_2\in E,\;0\leqslant\alpha\leqslant1$，则称$E$为\gls{ConvexSet}。
+	设$n\in\mathbb{N}^+$，$\seq{\theta}{n}\in\mathbb{R}^{+}$且$\sum\limits_{i=1}^{n}\theta_i=1$，$\seq{x}{n}\in\mathbb{R}^{n}$。称：
+	\begin{equation*}
+		\theta_1x_1+\theta_2x_2+\cdots+\theta_nx_n
+	\end{equation*}
+	为$\seq{x}{n}$构成的一个\gls{ConvexCombination}。
 \end{definition}
+\begin{property}\label{prop:ConvexSet}
+	设$E\subseteq\mathbb{R}^{n}$。凸集具有如下性质：
+	\begin{enumerate}
+		\item $E$是凸集当且仅当$E$中任意有限个元素的凸组合都在$E$中；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)\textbf{必要性：}当$n=2$时，由凸集的定义可知$E$中任意$2$个元素的凸组合都在$E$中。假设结论对$n-1$成立，下面证明对$n$个也成立。\par
+	任取$\seq{\theta}{n}\in\mathbb{R}^{+}$且$\sum\limits_{i=1}^{n}\theta_i=1$，$\seq{x}{n}\in E$，则：
+	\begin{equation*}
+		\sum_{i=1}^{n}\theta_ix_i=\sum_{i=1}^{n-1}\theta_ix_i+\theta_nx_n=\sum_{i=1}^{n-1}\theta_ix_i+\left(1-\sum_{i=1}^{n-1}\theta_i\right)x_i
+	\end{equation*}
+	若$\sum\limits_{i=1}^{n-1}\theta_i=0$，则上式退化为$x_n$，结论成立。若$\sum\limits_{i=1}^{n-1}\theta_i\ne0$，则：
+	\begin{equation*}
+		y=\sum_{i=1}^{n-1}\frac{\theta_i}{\sum\limits_{j=1}^{n-1}\theta_j}x_i
+	\end{equation*}
+	是关于$\seq{x}{n-1}$的一个凸组合，由归纳假设可知$y\in E$。变形可得：
+	\begin{equation*}
+		\sum_{i=1}^{n}\theta_ix_i=\sum_{i=1}^{n-1}\theta_ix_i+\left(1-\sum_{i=1}^{n-1}\theta_i\right)x_i=\sum\limits_{j=1}^{n-1}\theta_jy+\left(1-\sum_{i=1}^{n-1}\theta_i\right)x_i\in E
+	\end{equation*}
+	必要性得证。\par
+	\textbf{充分性：}任意有限个包含$2$个。
+\end{proof}
+\begin{definition}
+	设$E\subseteq\mathbb{R}^{n}$。定义：
+	\begin{equation*}
+		\left\{\sum_{i=1}^{n}\theta_ix_i:x_i\in E,\;\theta_i\geqslant0,\;\sum_{i=1}^{n}\theta_i=1,\;n\in\mathbb{N}^+\right\}
+	\end{equation*}
+	为$E$的\gls{ConvexHull}，记作$\operatorname{Conv}(E)$。
+\end{definition}
+\subsubsection{仿射集}
+\begin{definition}
+	设$E\subseteq\mathbb{R}^{n}$。若对于任意不同的$x_1,x_2\in E$，由$x_1,x_2$确定的直线都在$E$中，则称$E$是一个\gls{AffineSet}。
+\end{definition}
+\begin{definition}
+	设$n\in\mathbb{N}^+$，$\seq{\theta}{n}\in\mathbb{R}^{}$且$\sum\limits_{i=1}^{n}\theta_i=1$，$\seq{x}{n}\in\mathbb{R}^{n}$。称：
+	\begin{equation*}
+		\theta_1x_1+\theta_2x_2+\cdots+\theta_nx_n
+	\end{equation*}
+	为$\seq{x}{n}$构成的一个\gls{AffineCombination}。
+\end{definition}
+\begin{property}
+	设$E\subseteq\mathbb{R}^{n}$。仿射集具有如下性质：
+	\begin{enumerate}
+		\item $E$是仿射集当且仅当对任意的$n\in\mathbb{N}^+$，$\seq{\theta}{n}\in\mathbb{R}^{}$且$\sum\limits_{i=1}^{n}\theta_i=1$，$\seq{x}{n}\in\mathbb{R}^{n}$，元素：
+		\begin{equation*}
+			\theta_1x_1+\theta_2x_2+\cdots+\theta_nx_n
+		\end{equation*}
+		都在$E$中；
+		\item $E$是仿射集当且仅当存在一个$\mathbb{R}^{n}$的子空间$V$，使得$E=\{x+x_0:x\in V,\;x_0\in E\}$，并且表达式与$x_0$的选择无关；
+		\item 仿射集是凸集；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)完全类似于\cref{prop:ConvexSet}(1)。\par
+	(2)\textbf{必要性：}设$E$是一个仿射集，任取$x_0\in E$，令$V=\{x-x_0:x\in E\}$，则$E=\{x+x_0:x\in V,\;x_0\in E\}$。\par
+	任取$\alpha,\beta\in\mathbb{R}^{}$和$x_1,x_2\in V$，则：
+	\begin{equation*}
+		\alpha x_1+\beta x_2+x_0=\alpha(x_1+x_0)+\beta(x_2+x_0)+(1-\alpha-\beta)x_0\in E
+	\end{equation*}
+	于是$\alpha x_1+\beta x_2\in V$。由\cref{theo:Subspace}可知$V$是一个子空间。\par
+	取不同于$x_0$的$x_1\in E$构成集合$V'=\{x-x_1:x\in C\}$。任取$V'$中的元素$\alpha=x-x_1$，则$\alpha=x+x_1-x_0$是$x,x_1,x_0$构成的一个仿射组合，于是$\alpha\in V$。由$\alpha$的任意性可知$V'\subseteq V$。同理可得$V\subseteq V'$，于是有$V=V'$，即表达式与$x_0$的选择无关。\par
+	\textbf{充分性：}任取$E$中不同的两点$x_1+x_0,x_2+x_0$和$\theta\in\mathbb{R}^{}$，有：
+	\begin{equation*}
+		\theta(x_1+x_0)+(1-\theta)(x_2+x_0)=\theta x_1+(1-\theta)x_2+x_0
+	\end{equation*}
+	因为$V$是一个子空间，由\cref{theo:Subspace}可知$\theta x_1+(1-\theta)x_2\in V$，所以$\theta x_1+(1-\theta)x_2+x_0\in E$。由$x_1+x_0,x_2+x_0$和$\theta$的任意性可知$E$是一个仿射集。\par
+	(3)由定义立即可得。
+\end{proof}
+\begin{definition}
+	设$E\subseteq\mathbb{R}^{n}$。定义：
+	\begin{equation*}
+		\left\{\sum_{i=1}^{n}\theta_ix_i:x_i\in E,\;\theta_i\in\mathbb{R}^{},\;\sum_{i=1}^{n}\theta_i=1,\;n\in\mathbb{N}^+\right\}
+	\end{equation*}
+	为$E$的\gls{AffineHull}，记作$\operatorname{Aff}(E)$。
+\end{definition}
+\subsubsection{锥}
+
+
 \begin{definition}
 	设$X$是一个欧氏空间，$x_1,x_2\in X$。若存在$\alpha_1,\alpha_2$满足$\alpha_1+\alpha_2=1,\;0\leqslant\alpha_i\leqslant1,\;i=1,2$，使得$x=\alpha_1x_1+\alpha_2x_2$，则称$x$为$x_1,x_2$的\gls{ConvexCombination}。若$0<\alpha_i<1,\;i=1,2$，称其为\gls{StrictlyConvexCombination}。
 \end{definition}
