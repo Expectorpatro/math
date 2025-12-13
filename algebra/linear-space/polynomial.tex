@@ -17,7 +17,7 @@
 		\item $\forall\;\alpha,\beta,\gamma\in X,\;(\alpha\beta)\gamma=\alpha(\beta\gamma)$；
 		\item $\forall\;\alpha,\beta,\gamma\in X,\;(\alpha+\beta)\gamma=\alpha\gamma+\beta\gamma,\;\alpha(\beta+\gamma)=\alpha\gamma+\alpha\gamma$。
 	\end{enumerate}
-	那么称$X$是一个\gls{Xing}。
+	那么称$X$是一个\gls{Ring}。
 \end{definition}
 \begin{property}\label{prop:RingAlgebra}
 	环$X$具有如下性质：
@@ -107,17 +107,17 @@
 
 \subsection{一元多项式}
 \begin{definition}
-	数域$K$上的\textbf{一元多项式}指的是如下形式的表达式：
+	数域$K$上的\gls{UnivariatePolynomial}指的是如下形式的表达式：
 	\begin{equation*}
 		a_nx^n+a_{n-1}x^{n-1}+\cdots+a_1x+a_0
 	\end{equation*}
-	其中$x$是一个符号，$n\in\mathbb{N}^+$，$a_i\in K,\;i=0,1,\dots,n$。规定$x^0=1$，称$x$为\textbf{不定元}，$a_i$为\textbf{系数}，$a_ix^i$为\textbf{i次项}，$a_0$也称为\textbf{常数项}。两个这种形式的表达式相等当且仅当它们在除去系数为$0$的项后含有完全相同的项。系数全为$0$的一元多项式称为\textbf{零多项式}，记作$0$。
+	其中$x$是一个符号，$n\in\mathbb{N}^+$，$a_i\in K,\;i=0,1,\dots,n$。规定$x^0=1$，称$x$为\gls{Indeterminate}，$a_i$为\gls{Coefficient}，$a_ix^i$为\gls{TermOfDegreeI}，$a_0$也称为\gls{ConstantTerm}或\textbf{零次项}。两个这种形式的表达式相等当且仅当它们在除去系数为$0$的项后含有完全相同的项。系数全为$0$的一元多项式称为\gls{ZeroPolynomial}，记作$0$。
 \end{definition}
 \begin{definition}
 	将数域$K$上所有一元多项式组成的集合记作$K[x]$。设$m>n$，对于任意的$f(x)=\sum\limits_{i=0}^{m}a_ix_i,g(x)=\sum\limits_{i=0}^{n}b_ix_i\in K[x]$，在$K[x]$中定义如下运算：
 	\begin{enumerate}
 		\item \textbf{加法：}$f(x)+g(x)=\sum\limits_{i=0}^{m}(a_i+b_i)x_i$；
-		\item \textbf{纯量乘法：}$f(x)g(x)=\sum\limits_{k=0}^{m+n}\left(\sum_{i+j=k}^{}a_ib_j\right)x^k$；
+		\item \textbf{乘法：}$f(x)g(x)=\sum\limits_{k=0}^{m+n}\left(\sum\limits_{i+j=k}^{}a_ib_j\right)x^k$；
 	\end{enumerate}
 	那么$K[x]$构成一个环。
 \end{definition}
@@ -132,9 +132,123 @@
 	\end{enumerate}
 	证明完毕。
 \end{proof}
-\begin{property}
+\begin{definition}
+	设$f(x)=a_nx^n+a_{n-1}x^{n-1}+\cdots+a_1x+a_0$。若$a_n\ne0$，那么称$a_nx^n$是$f(x)$的\gls{LeadingTerm}，称$n$是$f(x)$的\gls{Degree}，记作$\deg f(x)$。零多项式的次数定义为$-\infty$。
+\end{definition}
+\begin{property}\label{prop:UnivariatePolynomialRing}
 	$K[x]$具有如下性质：
 	\begin{enumerate}
+		\item 若$f(x),g(x)\in K[x]$，则：
+		\begin{equation*}
+			\deg[(f(x)\pm g(x))]\leqslant\max\{\deg f(x)+\deg g(x)\},\quad\deg[f(x)g(x)]=\deg f(x)+\deg g(x)
+		\end{equation*}
+		\item 若$f(x),g(x)\in K[x]$且$f(x)g(x)=0$，则$f(x)=0$或$g(x)=0$；
+		\item $K[x]$中的乘法适合消去率，即若$f(x)g(x)=f(x)h(x)$且$f(x)\ne0$，则有$g(x)=h(x)$；
 		\item $K[x]$是一个整环；
 	\end{enumerate}
 \end{property}
+\begin{proof}
+	(1)设$\deg f(x)\geqslant\deg g(x)$。\par
+	\begin{enumerate}
+		\item 若$g(x)\ne0$，则$f(x),g(x)$存在首项，设$f(x)$的首项为$a_mx^m$，$g(x)$的首项为$b_nx^n$。
+		\begin{enumerate}
+			\item 当$m>n$时，$f(x)\pm g(x)$的首项为$a_mx^m$，所以$\deg[f(x)\pm g(x)]=m\leqslant\max\{\deg f(x)+\deg g(x)\}$；$f(x)g(x)$的首项为$a_mb_nx^{m+n}$，所以$\deg[f(x)g(x)]=m+n=\deg f(x)+\deg g(x)$；
+			\item 当$m=n$时，$f(x)g(x)$的首项为$a_mb_nx^{m+n}$，所以$\deg[f(x)g(x)]=m+n=\deg f(x)+\deg g(x)$。
+			\begin{enumerate}
+				\item 若$a_m\pm b_m\ne0$，则$f(x)\pm g(x)$的首项为$(a_m\pm b_m)x^m$，所以$\deg[f(x)\pm g(x)]=m\leqslant\max\{\deg f(x)+\deg g(x)\}$；
+				\item 若$a_m\pm b_m=0$，则$f(x)\pm g(x)$的首项为更低次的项或不存在首项，所以$\deg[f(x)\pm g(x)]<m\leqslant\max\{\deg f(x)+\deg g(x)\}$；
+			\end{enumerate}
+		\end{enumerate}
+		\item 若$g(x)=0$，则$f(x)\pm g(x)=f(x)$，$f(x)g(x)=0$，结论成立。
+	\end{enumerate}\par
+	(2)由(1)可知$\deg f(x)+\deg g(x)=-\infty$，所以$f(x)=0$或$g(x)=0$。\par
+	(3)由环运算法则(6)可得$f(x)[g(x)-h(x)]=0$，根据(2)可知$g(x)=h(x)$。\par
+	(4)$K[x]$有单位元$1$，根据(2)可知$K[x]$无非平凡零因子，由$K[x]$中乘法的定义可知$K[x]$是一个交换环，所以$K[x]$是整环。
+\end{proof}
+
+\subsubsection{除法}
+\begin{definition}
+	设$f(x),g(x)\in K[x]$。若存在$h(x)\in K[x]$使得$f(x)=h(x)g(x)$，则称$g(x)$\gls{Divide}$f(x)$，记作$g(x)\mid f(x)$；否则称$g(x)$不能整除$f(x)$，记作$g(x)\nmid f(x)$。当$g(x)\mid f(x)$时，称$g(x)$是$f(x)$的一个\gls{Factor}，称$f(x)$是$g(x)$的一个\gls{Multiple}。
+\end{definition}
+\begin{definition}
+	设$f(x),g(x)\in K[x]$。若$f(x)\mid g(x)$且$g(x)\mid f(x)$，则称$f(x)$与$g(x)$\gls{Associate}，记作$f(x)\sim g(x)$。
+\end{definition}
+\begin{property}
+	整除具有如下性质：
+	\begin{enumerate}
+		\item 对任意的$f(x)\in K[x]$，$f(x)\mid0$；
+		\item 对任意的$f(x)\in K[x]$，$0\mid f(x)$当且仅当$f(x)=0$；
+		\item 对任意的$f(x)\in K[x]$，任取不为$0$的$a\in K$，有$a\mid f(x)$；
+		\item 对任意的$f(x)\in K[x]$，$f(x)\mid f(x)$；
+		\item 若$f(x),g(x),h(x)\in K[x]$，$f(x)\mid g(x),\;g(x)\mid h(x)$，则有$f(x)\mid h(x)$；
+		\item 若$f(x),g(x),h(x),u(x),v(x)\in K[x]$，$f(x)\mid g(x)$且$f(x)\mid h(x)$，则$f(x)\mid u(x)g(x)+v(x)h(x)$；
+		\item 若$f(x),g(x)\in K[x]$，则$f(x)\sim g(x)$当且仅当存在不为$0$的$a\in K$使得$f(x)=cg(x)$；
+		\item 若$f(x),g(x)\in K[x]$且$g(x)\ne0$，则在$K[x]$中存在唯一的一对$h(x),r(x)$使得$f(x)=h(x)g(x)+r(x)$，且有$\deg r(x)<\deg g(x)$；
+		\item 若$f(x),g(x)\in K[x]$，数域$F\supseteq K$，则在$K[x]$中有$g(x)\mid f(x)$的充分必要条件为在$F[x]$中有$g(x)\mid f(x)$；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由$0=0f(x)$立即可得。\par
+	(2)对任意的$g(x)\in K[x]$，有$0g(x)=0$。\par
+	(3)对任意的$f(x)\in K[x]$，当$a\ne0$时有$f(x)=a\dfrac{1}{a}f(x)$。\par
+	(4)$\;f(x)=1f(x)$。\par
+	(5)由整除的定义可知存在$p(x),q(x)\in K[x]$使得$g(x)=p(x)f(x),h(x)=q(x)g(x)$，于是$h(x)=q(x)p(x)f(x)$，所以$f(x)\mid h(x)$。\par
+	(6)由整除的定义可知存在$p(x),q(x)\in K[x]$使得$g(x)=p(x)f(x),h(x)=q(x)f(x)$，于是：
+	\begin{equation*}
+		u(x)g(x)+v(x)h(x)=u(x)p(x)f(x)+v(x)q(x)f(x)=[u(x)p(x)+v(x)q(x)]f(x)
+	\end{equation*}\par
+	(7)\textbf{充分性：}代入验证即可。\par
+	\textbf{必要性：}设$f(x)\sim g(x)$，则$f(x)\mid g(x)$且$g(x)\mid f(x)$，于是存在$h_1(x),h_2(x)$使得$g(x)=h_1(x)f(x),f(x)=h_2(x)g(x)$，所以有：
+	\begin{equation*}
+		f(x)=h_2(x)h_1(x)f(x)
+	\end{equation*}\par
+	当$f(x)=0$时，$g(x)=0$，满足条件。当$f(x)\ne0$时，由\cref{prop:UnivariatePolynomialRing}(3)可得$h_2(x)h_1(x)=1$，根据\cref{prop:UnivariatePolynomialRing}(1)可知$\deg h_1(x)=\deg h_2(x)=0$，于是$h_1(x),h_2(x)\in K\backslash\{0\}$，令$a=h_2(x)$即可。\par
+	(8)\textbf{存在性：}若$\deg f(x)<\deg g(x)$，取$h(x)=0,r(x)=f(x)$即可。当$\deg f(x)\geqslant\deg g(x)$时，对$f(x)$的次数作数学归纳法。若$\deg f(x)=0$，则$\deg g(x)=0$，注意到：
+	\begin{equation*}
+		f(x)=\frac{f(x)}{g(x)}g(x)+0
+	\end{equation*}
+	即可。假设当$\deg f(x)=m-1$时结论成立，接下来证明$\deg f(x)=m$时结论也成立。\par
+	设：
+	\begin{gather*}
+		f(x)=a_mx^m+a_{m-1}x^{m-1}+\cdots+a_1x+a_0,\quad a_m\ne0 \\
+		g(x)=b_nx^n+b_{n-1}x^{n-1}+\cdots+b_1x+b_0,\quad b_n\ne0
+	\end{gather*}
+	因为$m\geqslant n$，所以可以令：
+	\begin{equation*}
+		p(x)=f(x)-a_mb_n^{-1}x^{m-n}g(x)
+	\end{equation*}
+	则$\deg p(x)<m$。由归纳假设，存在唯一的一对$h_1(x),r_1(x)$使得：
+	\begin{equation*}
+		p(x)=h_1(x)g(x)+r_1(x)
+	\end{equation*}
+	且$\deg r_1(x)<\deg g(x)$。变形可得：
+	\begin{gather*}
+		h_1(x)g(x)+r_1(x)=f(x)-a_mb_n^{-1}x^{m-n}g(x) \\
+		f(x)=[h_1(x)+a_mb_n^{-1}x^{m-n}]g(x)+r_1(x)
+	\end{gather*}
+	存在性得证。\par
+	\textbf{唯一性：}假设还有一对不同于$h(x),r(x)$的$u(x),v(x)$使得$f(x)=u(x)g(x)+v(x)$，且有$\deg v(x)<\deg g(x)$，则：
+	\begin{gather*}
+		u(x)g(x)+v(x)=h(x)g(x)+r(x) \\
+		[h(x)-u(x)]g(x)=v(x)-r(x)
+	\end{gather*}
+	由\cref{prop:UnivariatePolynomialRing}(1)可知$v(x)=r(x)$，否则无法满足$\deg v(x)<\deg g(x)$。因为$g(x)\ne0$，根据\cref{prop:UnivariatePolynomialRing}(2)可知$h(x)=u(x)$，唯一性得证。\par
+	(9)\textbf{必要性：}因为在$K[x]$中有$g(x)\mid f(x)$，所以存在$h(x)\in K[x]$使得$f(x)=h(x)g(x)$。因为$K\subseteq F$，所以$f(x),g(x),h(x)\in F[x]$，于是在$F[x]$中有$g(x)\mid f(x)$。\par
+	\textbf{充分性：}设在$F[x]$中有$g(x)\mid f(x)$。\par
+	当$g(x)=0$时，由(2)可知$f(x)=0$，所以在$K[x]$中有$g(x)\mid f(x)$。\par
+	当$g(x)\ne0$时，由(8)可得在$K[x]$中存在唯一的一对$h(x),r(x)$使得$f(x)=h(x)g(x)+r(x)$，且$\deg r(x)<\deg g(x)$。因为$K\subseteq F$，所以$f(x),g(x),h(x),r(x)\in F[x]$。考虑到在$F[x]$中有$g(x)\mid f(x)$，所以$r(x)=0$，于是在$K[x]$中有$g(x)\mid f(x)$。
+\end{proof}
+\begin{definition}
+		设$f(x),g(x),h(x),r(x)\in K[x]$。若$f(x)=h(x)g(x)+r(x)$，称$f(x)$为\gls{Dividend}，$g(x)$为\gls{Divisor}，$h(x)$为\gls{Quotient}，$r(x)$为\gls{Remainder}。
+\end{definition}
+\subsubsection{最大公因式}
+\begin{definition}
+	设$f(x),g(x),c(x)\in K[x]$。若$c(x)\mid f(x)$且$c(x)\mid g(x)$，则称$c(x)$是$f(x)$和$g(x)$的一个\gls{CommonDivisor}。
+\end{definition}
+\begin{definition}
+	设$f(x),g(x)\in K[x]$，$d(x)$是$f(x)$和$g(x)$的一个公因式。若对于$f(x)$和$g(x)$的任一公因式$c(x)$，都有$c(x)\mid d(x)$，则称$d(x)$是$f(x)$和$g(x)$的\gls{GCD}。用$(f(x),g(x))$表示$f(x)$和$g(x)$首项系数为$1$的最大公因式。
+\end{definition}
+\begin{note}
+	引入$(f(x),g(x))$的原因在于$f(x)$和$g(x)$的最大公因式是不唯一的，可以由一个非零的常数因子进行缩放。$(f(x),g(x))$是唯一的。
+\end{note}
+
