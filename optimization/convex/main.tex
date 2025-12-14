@@ -38,6 +38,7 @@
 	\begin{enumerate}
 		\item $E$是凸集当且仅当$E$中任意有限个元素的凸组合都在$E$中；
 		\item $E$的凸包是包含$E$的最小凸集；
+		\item 凸集的交集是凸集；
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -56,7 +57,8 @@
 	\end{equation*}
 	必要性得证。\par
 	\textbf{充分性：}任意有限个包含$2$个。\par
-	(2)由(1)立即可得。
+	(2)由(1)立即可得。\par
+	(3)任取指标集$I$和凸集$C_i,i\in I$，令$C=\underset{i\in I}{\overset{}{\cap}}C_i$。任取$x_1,x_2\in C$和$\theta\geqslant0$，则$x_1,x_2\in C_i$。因为$C_i$是凸集，所以$\theta x_1+(1-\theta)x_2\in C_i$，于是$\theta x_1+(1-\theta)x_2\in C$，$C$是凸集。
 \end{proof}
 \subsubsection{仿射集}
 \begin{definition}
@@ -76,7 +78,7 @@
 	\end{equation*}
 	为$E$的\gls{AffineHull}，记作$\operatorname{Aff}(E)$。
 \end{definition}
-\begin{property}
+\begin{property}\label{prop:AffineSet}
 	设$E\subseteq\mathbb{R}^{n}$。仿射集具有如下性质：
 	\begin{enumerate}
 		\item $E$是仿射集当且仅当$E$中任意有限个元素的仿射组合都在$E$中；
@@ -131,7 +133,77 @@
 	(1)完全类似于\cref{prop:ConvexSet}(1)。\par
 	(2)由(1)立即可得。
 \end{proof}
-
+\subsubsection{超平面与半空间}
+\begin{definition}
+	设$a\in\mathbb{R}^{n},\;b\in\mathbb{R}^{}$。称$\{x\in\mathbb{R}^{n}:a^Tx=b\}$为\gls{Hyperplane}，$\{x\in\mathbb{R}^{n}:a^Tx\leqslant b\}$为闭\gls{Halfspace}，$\{x\in\mathbb{R}^{n}:a^Tx< b\}$为开半空间。
+\end{definition}
+\begin{property}\label{prop:HyperplaneHalfspace}
+	超平面与半空间具有如下性质：
+	\begin{enumerate}
+		\item 超平面是仿射集；
+		\item 半空间是凸集；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)任取超平面$\{x\in\mathbb{R}^{n}:a^Tx=b\}$和其中任意两点$x_1,x_2$，再任取$\theta\in\mathbb{R}^{}$，有：
+	\begin{equation*}
+		a^T[\theta x_1+(1-\theta)x_2]=\theta b+(1-\theta)b=b
+	\end{equation*}
+	所以$\theta x_1+(1-\theta)x_2\in\{x\in\mathbb{R}^{n}:a^Tx=b\}$，超平面是仿射集。\par
+	(2)任取闭半空间$\{x\in\mathbb{R}^{n}:a^Tx\leqslant b\}$和其中任意两点$x_1,x_2$，再任取$\theta\geqslant0$，有：
+	\begin{equation*}
+		a^T[\theta x_1+(1-\theta)x_2]\leqslant\theta b+(1-\theta)b=b
+	\end{equation*}
+	所以$\theta x_1+(1-\theta)x_2\in\{x\in\mathbb{R}^{n}:a^Tx\leqslant b\}$，闭半空间是凸集。开半空间同理可得。
+\end{proof}
+\subsubsection{多面体}
+\begin{definition}
+	设$A\in M_{m\times n}(\mathbb{R}^{}),\;b\in\mathbb{R}^{n},\;C\in M_{p\times q}(\mathbb{R}^{}),\;d\in\mathbb{R}^{q}$。称$\{x\in\mathbb{R}^{n}:Ax\leqslant b,\;Cx=d\}$为\gls{Polyhedron}。
+\end{definition}
+\begin{property}
+	多面体是凸集。
+\end{property}
+\begin{proof}
+	由\cref{prop:ConvexSet}(3)、\cref{prop:HyperplaneHalfspace}(1)、\cref{prop:AffineSet}(4)和\cref{prop:HyperplaneHalfspace}(2)立即可得。
+\end{proof}
+\subsubsection{球与椭球}
+\begin{definition}
+	设$||\cdot||$是$\mathbb{R}^{n}$上的一个范数，$x_c\in\mathbb{R}^{n},\;r\in\mathbb{R}^{}$。称$\{x\in\mathbb{R}^{n}:||x-x_c||\leqslant r\}$为\gls{Ball}。
+\end{definition}
+\begin{definition}
+	设$P\in M_{n}(\mathbb{R}^{})$是正定矩阵，$x_c\in\mathbb{R}^{n}$。由\cref{theo:PositiveDefinite}(6)可得$P$的可逆性，称$\{x\in\mathbb{R}^{n}:(x-x_c)^TP^{-1}(x-x_c)\leqslant1\}$为\gls{Elliposid}。
+\end{definition}
+\begin{property}
+	球与椭球具有如下性质：
+	\begin{enumerate}
+		\item 球是凸集；
+		\item 椭球$\{x\in\mathbb{R}^{n}:(x-x_c)^TP^{-1}(x-x_c)\leqslant1\}$等价于$\{x_c+P^{\frac{1}{2}}u:u\in\mathbb{R}^{n},\;||u||_2\leqslant1\}$，由$P$的正定性可得$P^{\frac{1}{2}}$的存在性；
+		\item 椭球是凸集；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)任取球$\{x\in\mathbb{R}^{n}:||x-x_c||\leqslant r\}$和其中任意两点$x_1,x_2$，再任取$\theta\geqslant0$，有：
+	\begin{equation*}
+		||\theta x_1+(1-\theta)x_2-x_c||=||\theta(x_1-x_c)+(1-\theta)(x_2-x_c)||\leqslant\theta||x_1-x_c||+(1-\theta)||x_2-x_c||\leqslant\theta r+(1-\theta)r=r
+	\end{equation*}
+	所以$\theta x_1+(1-\theta)x_2\in\{x\in\mathbb{R}^{n}:||x-x_c||\leqslant r\}$，球是凸集。\par
+	(2)任取$x\in\{x_c+P^{\frac{1}{2}}u:u\in\mathbb{R}^{n},\;||u||_2\leqslant1\}$，由\cref{prop:Transpose}(4)可得：
+	\begin{equation*}
+		(x-x_c)^TP^{-1}(x-x_c)=(P^{\frac{1}{2}}u)^TP^{-1}P^{\frac{1}{2}}u=||u||_2\leqslant1
+	\end{equation*}
+	所以$\{x_c+P^{\frac{1}{2}}u:u\in\mathbb{R}^{n},\;||u||_2\leqslant1\}\subseteq\{x\in\mathbb{R}^{n}:(x-x_c)^TP^{-1}(x-x_c)\leqslant1\}$。\par
+	任取$x\in\{x\in\mathbb{R}^{n}:(x-x_c)^TP^{-1}(x-x_c)\leqslant1\}$。由$P$的正定性可得$P^{-\frac{1}{2}}$的存在性，取$u=P^{-\frac{1}{2}}(x-x_c)$，根据\cref{prop:Transpose}(4)可得：
+	\begin{equation*}
+		||u||_2=[P^{-\frac{1}{2}}(x-x_c)]^TP^{-\frac{1}{2}}(x-x_c)=(x-x_c)^TP^{-1}(x-x_c)\leqslant1
+	\end{equation*}
+	所以$\{x\in\mathbb{R}^{n}:(x-x_c)^TP^{-1}(x-x_c)\leqslant1\}\subseteq\{x_c+P^{\frac{1}{2}}u:u\in\mathbb{R}^{n},\;||u||_2\leqslant1\}$。\par
+	综上，$\{x\in\mathbb{R}^{n}:(x-x_c)^TP^{-1}(x-x_c)\leqslant1\}=\{x_c+P^{\frac{1}{2}}u:u\in\mathbb{R}^{n},\;||u||_2\leqslant1\}$。\par
+	(3)任取椭球$\{x\in\mathbb{R}^{n}:(x-x_c)^TP^{-1}(x-x_c)\leqslant1\}$和其中任意两点$x_1=x_c+P^{\frac{1}{2}}u_1,x_2=x_c+P^{\frac{1}{2}}u_2$，再任取$\theta\geqslant0$，有：
+	\begin{equation*}
+		\theta x_1+(1-\theta)x_2=x_c+P^{\frac{1}{2}}[\theta u_1+(1-\theta)u_2]
+	\end{equation*}
+	由(1)可知$||\theta u_1+(1-\theta)u_2||_2\leqslant1$，所以$\theta x_1+(1-\theta)x_2\in\{x\in\mathbb{R}^{n}:(x-x_c)^TP^{-1}(x-x_c)\leqslant1\}$，椭球是凸集。
+\end{proof}
 
 \begin{definition}
 	设$X$是一个欧氏空间，$x_1,x_2\in X$。若存在$\alpha_1,\alpha_2$满足$\alpha_1+\alpha_2=1,\;0\leqslant\alpha_i\leqslant1,\;i=1,2$，使得$x=\alpha_1x_1+\alpha_2x_2$，则称$x$为$x_1,x_2$的\gls{ConvexCombination}。若$0<\alpha_i<1,\;i=1,2$，称其为\gls{StrictlyConvexCombination}。
