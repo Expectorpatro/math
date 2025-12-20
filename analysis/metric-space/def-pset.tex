@@ -682,7 +682,7 @@
 		\item $\lim\limits_{n\to+\infty}l(I_n)=0$。
 	\end{enumerate}
 \end{definition}
-\begin{theorem}
+\begin{theorem}\label{theo:RnComplete}
 	$\mathbb{R}^{},\mathbb{R}^{m}$是完备的度量空间。
 \end{theorem}
 \begin{proof}
@@ -716,4 +716,605 @@
 \end{theorem}
 \begin{proof}
 	坐标由有理数构成的点的全体是$\mathbb{R}^{n}$的一个可列稠密子集\info{未完成}。
+\end{proof}
+
+\subsubsection{极限点}
+\begin{definition}
+	设$\{x_n\}\subseteq\mathbb{R}^{}$，$a\in\overline{\mathbb{R}^{}}$。若存在$\{x_n\}$的子列$\{x_{n_k}\}$使得$\{x_{n_k}\}\to a$，则称$a$是$\{x_n\}$的\gls{ClusterPoint}。
+\end{definition}
+\begin{definition}
+	设$\{x_n\}\subseteq\mathbb{R}^{}$。根据\cref{prop:RSeq}(7)，将：
+	\begin{gather*}
+		\varliminf x_n=\lim_{n\to+\infty}\inf_{k\geqslant n}x_k=\sup_n\inf_{k\geqslant n}x_k \\
+		\varlimsup x_n=\lim_{n\to+\infty}\sup_{k\geqslant n}x_k=\inf_n\sup_{k\geqslant n}x_k
+	\end{gather*}
+	分别称之为$\{x_n\}$的\gls{LLimit}和\gls{ULimit}。
+\end{definition}
+\begin{property}\label{prop:LowerUpperLimit}
+	设$\{x_n\},\{y_n\}\subseteq\mathbb{R}^{}$。上下极限具有如下性质：
+	\begin{enumerate}
+		\item $\{x_n\}$的任何极限点$\xi$都介于$\eta=\varliminf x_n$和$\zeta=\varlimsup x_n$之间；
+		\item $\{x_n\}$的下极限$\eta=\varliminf x_n$和上极限$\zeta=\varlimsup x_n$是其自身的两个极限点；
+		\item 以下三条陈述互相等价：
+		\begin{enumerate}
+			\item $\varliminf x_n=\varlimsup x_n=\xi$；
+			\item $\lim\limits_{n\to+\infty}x_n=\xi$；
+			\item $\{x_n\}$只有一个极限点；
+		\end{enumerate}
+		\item 若$a\in\overline{\mathbb{R}^{}}$，则：
+		\begin{enumerate}
+			\item 如果$\varliminf x_n>\lambda$，则$\exists\;N\in\mathbb{N}^+,\;\forall\;n>N,\;x_n>\lambda$。
+			\item 如果$\varliminf x_n<\rho$，则$\forall\;N\in\mathbb{N}^+,\;\exists\;n>N,\;x_n<\rho$。
+			\item 如果$\varlimsup x_n<\rho$，则$\exists\;N\in\mathbb{N}^+,\;\forall\;n>N,\;x_n<\rho$。
+			\item 如果$\varlimsup x_n>\lambda$，则$\forall\;N\in\mathbb{N}^+,\;\exists\;n>N,\;x_n>\lambda$。
+		\end{enumerate}
+		\item 只要以下各式等号或不等号两侧的都有意义，则结论成立：
+		\begin{enumerate}
+			\item 上下极限的加法运算：
+			\begin{align*}
+				\varliminf x_n+\varliminf y_n &\leqslant\varliminf(x_n+y_n) \\
+				&\leqslant
+				\begin{cases}
+					\varlimsup x_n+\varliminf v_k \\
+					\varliminf x_n+\varlimsup v_k
+				\end{cases} \\
+				&\leqslant\varlimsup(x_n+y_n) \\
+				&\leqslant\varlimsup x_n+\varlimsup y_n
+			\end{align*}
+			\item 上下极限的减法运算：
+			\begin{gather*}
+				-\varliminf x_n=\varlimsup(-x_n) \\
+				-\varlimsup x_n=\varliminf(-x_n)
+			\end{gather*}
+			\item 上下极限的乘法运算：
+			\begin{align*}
+				\varliminf x_n\cdot\varliminf y_n &\leqslant\varliminf(x_n\cdot y_n) \\
+				&\leqslant
+				\begin{cases}
+					\varlimsup x_n\cdot\varliminf v_k \\
+					\varliminf x_n\cdot\varlimsup v_k
+				\end{cases} \\
+				&\leqslant\varlimsup(x_n\cdot y_n) \\
+				&\leqslant\varlimsup x_n\cdot\varlimsup y_n
+			\end{align*}
+			\item 上下极限的分式运算（$\varliminf x_n>0$）：
+			\begin{gather*}
+				\frac{1}{\varliminf x_n}=\varlimsup\frac{1}{x_n} \\
+				\frac{1}{\varlimsup x_n}=\varliminf\frac{1}{x_n}
+			\end{gather*}
+			\item 上下极限与极限混合的加法运算（$\lim\limits_{n\to+\infty}x_n=u$）：
+			\begin{gather*}
+				\varliminf(x_n+y_n)=u+\varliminf y_n \\
+				\varlimsup(x_n+y_n)=u+\varlimsup y_n
+			\end{gather*}
+			\item 上下极限与极限混合的乘法运算（$\lim\limits_{n\to+\infty}x_n=u>0,\;y_n\geqslant0,\;\forall\;n\in\mathbb{N}^+$）：
+			\begin{gather*}
+				\varliminf(x_n\cdot y_n)=u\cdot\varliminf y_n \\
+				\varlimsup(x_n\cdot y_n)=u\cdot\varlimsup y_n
+			\end{gather*}
+			\item 上下极限的不等式性（$x_n\leqslant y_n$）：
+			\begin{gather*}
+				\varliminf x_n\leqslant\varliminf y_n \\
+				\varlimsup x_n\leqslant\varlimsup y_n
+			\end{gather*}
+		\end{enumerate}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)任取$\{x_n\}$的一个极限点$\xi$，由极限点定义可知，$\{x_n\}$中存在一个子列$\{x_{n_k}\}$满足：
+	\begin{equation*}
+		\lim_{k\to+\infty}x_{n_k}=\xi
+	\end{equation*}
+	令：
+	\begin{equation*}
+		y_k=\inf_{n\geqslant k}x_n,\quad
+		z_k=\sup_{n\geqslant k}x_n
+	\end{equation*}
+	于是有$y_k\leqslant x_{n_k}\leqslant z_k$，由\cref{prop:RSeq}(4)即可得到$\eta\leqslant\xi\leqslant\zeta$。\par
+	(2)下给出下极限的证明，上极限可类似得出。\par
+	若$\{x_n\}$下方无界，则对于$M=1$，存在$n_1\geqslant1$使得$x_{n_1}<-1$，否则$\{x_n\}$下方有界；对于$M=2$，存在$n_2\geqslant n_1$使得$x_{n_2}<-2$，否则$\{x_n\}$下方有界，依次可构造出子列$\{x_{n_k}\}$使得：
+	\begin{equation*}
+		\lim_{k\to+\infty}x_{n_k}=-\infty
+	\end{equation*}
+	于是$-\infty$是$\{x_n\}$的一个极限点。如果$\varliminf x_n\ne-\infty$，则存在$M\in\mathbb{R}^{+}$对任意的$N\in\mathbb{N}^+$存在$n>N$使得$\inf_{k\geqslant n}x_k\geqslant-M$，此时$\{x_n\}$下方有界，矛盾，所以$\varliminf  x_n=-\infty$，即$\{x_n\}$的下极限是自身的极限点。\par
+	当$\{x_n\}$下方有界时，记：
+	\begin{equation*}
+		y_m=\inf_{n\geqslant m}x_n
+	\end{equation*}
+	设$n_0=0$，对$n_{k-1}$选取$m_k\in\mathbb{N}^+$满足$m_k>n_{k-1}$，再由下确界的定义选取$n_k\geqslant m_k$使得：
+	\begin{equation*}
+		y_{m_k}\leqslant x_{n_k}\leqslant y_{m_k}+\frac{1}{k}
+	\end{equation*}
+	由\cref{prop:RSeq}(4)和\cref{prop:ConvergentSeqOfPoints}(4)可得：
+	\begin{equation*}
+		\lim_{k\to+\infty}x_{n_k}=\lim_{k\to+\infty}y_{m_k}=\eta
+	\end{equation*}
+	所以$\eta$是$\{x_n\}$的极限点。\par
+	(3)\textbf{$\;(a)\rightarrow(b)$：}令：
+	\begin{equation*}
+		y_n=\inf_{k\geqslant n}x_k,\quad
+		z_n=\sup_{k\geqslant n}x_k
+	\end{equation*}
+	则有$y_n\leqslant x_n\leqslant z_n$。又因为：
+	\begin{equation*}
+		\lim_{n\to+\infty}y_n=\lim_{n\to+\infty}z_n=\xi
+	\end{equation*}
+	由\cref{prop:RSeq}(4)可得：
+	\begin{equation*}
+		\lim_{n\to+\infty}x_n=\xi
+	\end{equation*}\par
+	\textbf{$\;(b)\rightarrow(c)$：}由\cref{prop:ConvergentSeqOfPoints}(4)立即可得。\par
+	\textbf{$\;(c)\rightarrow(a)$：}反证法，由(2)立即可得。\par
+	(4)利用上下极限定义中的$\sup$和$\inf$即可。
+\end{proof}
+
+\subsection{数项级数}
+\begin{definition}
+	设$a_n\in\mathbb{R},\;\forall\;n\in\mathbb{N}^+$。称：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}a_n=a_1+a_2+\cdots+a_n+\cdots
+	\end{equation*}
+	为以$\seq{a}{n},\dots$为项的\gls{series}。称：
+	\begin{equation*}
+		\left\{S_n=\sum_{i=1}^na_i\right\}
+	\end{equation*}
+	为级数$\sum\limits_{n=1}^{+\infty}a_n$的\gls{SeqOfPartialSum}。如果$\{S_n\}$收敛，则称级数$\sum\limits_{n=1}^{+\infty}a_n$收敛，同时将级数的值记为$\{S_n\}$的极限。
+\end{definition}
+\begin{definition}
+	对级数的收敛做如下划分：\par
+	(1)如果级数$\sum\limits_{n=1}^{+\infty}|a_n|$收敛，则称级数$\sum\limits_{n=1}^{+\infty}a_n$\gls{AbsoluteConvergence}。\par
+	(2)如果级数$\sum\limits_{n=1}^{+\infty}|a_n|$发散，但级数$\sum\limits_{n=1}^{+\infty}a_n$收敛，则称级数$\sum\limits_{n=1}^{+\infty}a_n$\gls{ConditionalConvergence}。
+\end{definition}
+\begin{property}\label{prop:Series}
+	级数具有如下性质：
+	\begin{enumerate}
+		\item 级数和实数序列在收敛性上是相通的：
+		\begin{enumerate}
+			\item 序列$\{a_n\}$的敛散性与级数$a_1+\sum\limits_{n=1}^{+\infty}(a_{n+1}-a_n)$的敛散性相同；
+			\item 序列$\{a_n\}\to a$可以转化为级数$a_1+\sum\limits_{n=1}^{+\infty}(a_{n+1}-a_n)=a$；
+		\end{enumerate}
+		\item 级数$\sum\limits_{n=1}^{+\infty}a_n$收敛的必要条件为：
+		\begin{equation*}
+			\lim_{n\to+\infty}a_n=0
+		\end{equation*}
+		\item 级数$\sum\limits_{n=1}^{+\infty}a_n$收敛的充分必要条件为：
+		\begin{equation*}
+			\forall\;\varepsilon>0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m>N,\;m>n,\;\left|\sum_{i=n}^ma_i\right|<\varepsilon
+		\end{equation*}
+		\item 级数的运算满足线性性，即：若$\alpha,\beta\in\mathbb{R}^{}$，$\sum\limits_{n=1}^{+\infty}a_n,\sum\limits_{n=1}^{+\infty}b_n\in\overline{\mathbb{R}^{}}$，如果下式右侧有定义，则公式成立：
+		\begin{equation*}
+			\sum_{n=1}^{+\infty}(\alpha a_n+\beta b_n)=\alpha\sum_{n=1}^{+\infty}a_n+\beta\sum_{n=1}^{+\infty}b_n
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)只需注意到所述级数满足$S_n=a_{n+1}$即可。\par
+	(2)因为级数收敛，所以部分和序列$\{S_n\}$收敛。由\cref{prop:RSeq}(8.b)可得：
+	\begin{equation*}
+		\lim_{n\to+\infty}a_n=\lim_{n\to+\infty}(S_n-S_{n-1})=\lim_{n\to+\infty}S_n-\lim_{n\to+\infty}S_{n-1}=0
+	\end{equation*}\par
+	(3)由\cref{theo:RnComplete}立即可得。\par
+	(4)利用部分和序列以及无穷的运算性质进行分类讨论即可得到。
+\end{proof}
+\subsubsection{正项级数}
+\begin{definition}
+	如果级数$\sum\limits_{n=1}^{+\infty}a_n$的每一项都是非负数，则称该级数为\gls{PosSeries}；若每一项都严格为正，则称该级数为\gls{SPosSeries}。
+\end{definition}
+\begin{property}\label{prop:PositiveSeries}
+	正项级数$\sum\limits_{n=1}^{+\infty}a_n$收敛的充分必要条件为它的部分和序列$\{S_n\}$有上界。
+\end{property}
+\begin{proof}
+	由\cref{prop:RSeq}(7)立即可得。
+\end{proof}
+\begin{theorem}[Comparison Test]\label{theo:ComparisonTest}
+	设$\sum\limits_{n=1}^{+\infty}a_n$和$\sum\limits_{n=1}^{+\infty}b_n$都是正项级数。
+	\begin{enumerate}
+		\item （一般形式）
+		\begin{enumerate}
+			\item 若$\sum\limits_{n=1}^{+\infty}b_n$收敛，且$\exists\;N\in\mathbb{N}^+,\;\forall\;n>N,\;a_n\leqslant cb_n,\;c\in[0,+\infty)$，那么$\sum\limits_{n=1}^{+\infty}a_n$也收敛；
+			\item 若$\sum\limits_{n=1}^{+\infty}b_n$发散，且$\exists\;N\in\mathbb{N}^+,\;\forall\;n>N,\;a_n\geqslant cb_n,\;c\in(0,+\infty]$，那么$\sum\limits_{n=1}^{+\infty}a_n$也发散。
+		\end{enumerate}
+		\item （上下极限形式）
+		\begin{enumerate}
+			\item 若$\sum\limits_{n=1}^{+\infty}b_n$收敛且$\varlimsup\frac{a_n}{b_n}=\gamma\in[0,+\infty)$，则$\sum\limits_{n=1}^{+\infty}a_n$收敛；
+			\item 若$\sum\limits_{n=1}^{+\infty}b_n$发散且$\varliminf\frac{a_n}{b_n}=\gamma\in(0,+\infty]$，则$\sum\limits_{n=1}^{+\infty}a_n$发散。
+		\end{enumerate}
+		\item （极限形式）
+		\begin{enumerate}
+			\item 若$\sum\limits_{n=1}^{+\infty}b_n$收敛且$\lim\limits_{n\to+\infty}\frac{a_n}{b_n}=\gamma\in[0,+\infty)$，则$\sum\limits_{n=1}^{+\infty}a_n$收敛；
+			\item 若$\sum\limits_{n=1}^{+\infty}b_n$发散且$\lim_{n\to+\infty}\frac{a_n}{b_n}=\gamma\in(0,+\infty]$，则$\sum\limits_{n=1}^{+\infty}a_n$发散。
+		\end{enumerate}
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1.a)若条件得到满足，则：
+	\begin{align*}
+		\sum_{n=1}^{+\infty}a_n&=\sum_{n=1}^Na_n+\sum_{n=N+1}^{+\infty}a_n\leqslant\sum_{n=1}^Na_n+\sum_{n=N+1}^{+\infty}cb_n \\
+		&\leqslant\sum_{n=1}^Na_n+\sum_{n=1}^{+\infty}cb_n =\sum_{n=1}^Na_n+c\sum_{n=1}^{+\infty}b_n
+	\end{align*}
+	于是$\sum\limits_{n=1}^{+\infty}a_n$有上界，由\cref{prop:PositiveSeries}可知其收敛。\par
+	(1.b)若此时$a_n$收敛，则：
+	\begin{equation*}
+		\exists\;N\in\mathbb{N}^+,\;\forall\;n>N,\;b_n\leqslant\frac{1}{c}a_n,\;\frac{1}{c}\in[0,+\infty)
+	\end{equation*}
+	由(1.a)可知$\sum\limits_{n=1}^{+\infty}b_n$收敛，矛盾。\par
+	(2)由\cref{prop:LowerUpperLimit}(4)即可得到。\par
+	(3)由(2)即可得到。
+\end{proof}
+\begin{lemma}\label{lem:ConvergenceOfGeometricSeries}
+	若$0\leqslant r<1$，则$\sum\limits_{n=1}^{+\infty}r^{n-1}$收敛。
+\end{lemma}
+\begin{proof}
+	由等比数列求和公式和\cref{prop:RSeq}(8.c)可得：
+	\begin{equation*}
+		\lim_{n\to+\infty}S_n=\lim_{n\to+\infty}\sum_{i=1}^{n}r^n=\lim_{n\to+\infty}\frac{r(1-r^n)}{1-r}=\frac{r}{1-r}\qedhere
+	\end{equation*}
+\end{proof}
+\begin{note}
+	基于\cref{theo:ComparisonTest}和\cref{lem:ConvergenceOfGeometricSeries}，衍生出了Cauchy 根式判别法和比值判别法。\par
+	\textbf{Cauchy 根式判别法（Root Test）：}\par
+	\begin{enumerate}
+		\item 若$\exists\;r<1,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n>N,\;\sqrt[n]{a_n}<r$，则$\sum\limits_{n=1}^{+\infty}a_n$收敛；
+		\item 若对于无穷个$n$有$\sqrt[n]{a_n}\geqslant1$，则$\sum\limits_{n=1}^{+\infty}a_n$发散。
+	\end{enumerate}\par
+	(1)若条件满足，则$\forall\;n>N,\;a_n<r^n$。由\cref{theo:ComparisonTest}(1.a)和\cref{lem:ConvergenceOfGeometricSeries}可得$\sum\limits_{n=1}^{+\infty}a_n$收敛。\par
+	(2)由条件可知$S_n-S_{n-1}$不以$0$为极限，根据\cref{prop:Series}(2)可知$\sum\limits_{n=1}^{+\infty}a_n$不收敛。\par
+	\textbf{比值判别法（Ratio Test）：}\par
+	设$\sum\limits_{n=1}^{+\infty}a_n$和$\sum\limits_{n=1}^{+\infty}b_n$是严格正项级数。
+	\begin{enumerate}
+		\item 若$\sum\limits_{n=1}^{+\infty}b_n$收敛，且$\exists\;N\in\mathbb{N}^+$，当$n>N$时满足：
+		\begin{equation*}
+			\frac{a_{n+1}}{a_n}\leqslant\frac{b_{n+1}}{b_n}
+		\end{equation*}
+		则$\sum\limits_{n=1}^{+\infty}a_n$也收敛。
+		\item 若$\sum\limits_{n=1}^{+\infty}b_n$发散，且$\exists\;N\in\mathbb{N}^+$，当$n>N$时满足：
+		\begin{equation*}
+			\frac{a_{n+1}}{a_n}\geqslant\frac{b_{n+1}}{b_n}
+		\end{equation*}
+		则$\sum\limits_{n=1}^{+\infty}a_n$也发散。
+	\end{enumerate}\par
+	(1)由条件可得：
+	\begin{equation*}
+		\frac{a_{N+2}}{a_{N+1}}\leqslant\frac{b_{N+2}}{b_{N+1}},\;
+		\frac{a_{N+3}}{a_{N+2}}\leqslant\frac{b_{N+3}}{b_{N+2}},\;
+		\cdots,\;
+		\frac{a_{n+1}}{a_n}\leqslant\frac{b_{n+1}}{b_n}
+	\end{equation*}
+	作乘法即可得：
+	\begin{equation*}
+		\frac{a_{n+1}}{a_{N+1}}\leqslant\frac{b_{n+1}}{b_{N+1}}
+	\end{equation*}
+	即：
+	\begin{equation*}
+		a_{n+1}\leqslant\frac{a_{N+1}}{b_{N+1}}b_{n+1},\;\forall\;n>N
+	\end{equation*}
+	由\cref{theo:ComparisonTest}(1.a)即可得出$\sum\limits_{n=1}^{+\infty}a_n$收敛。\par
+	(2)类似(1)。
+\end{note}
+\subsubsection{任意项级数}
+\begin{definition}
+	称不对各项的正负性做出要求的级数为\gls{ArbitrarySeries}。
+\end{definition}
+\begin{lemma}\label{lem:Abel}
+	设$\alpha_i,\beta_i,\;i=1,2,\dots,p$是实数，且：
+	\begin{equation*}
+		B_k=\sum_{i=1}^k\beta_i,\;k=1,2,\dots,p
+	\end{equation*}
+	则有：
+	\begin{enumerate}
+		\item $\sum\limits_{i=1}^p\alpha_i\beta_i=\sum\limits_{i=1}^{p-1}(\alpha_i-\alpha_{i+1})B_i+\alpha_pB_p$
+		\item 如果$\{\alpha_i\}$单调，并且有：
+		\begin{equation*}
+			|B_k|\leqslant L,\;k=1,2,\dots,p
+		\end{equation*}
+		那么就有：
+		\begin{equation*}
+			\left|\sum_{i=1}^p\alpha_i\beta_i\right|\leqslant L\left(|\alpha_1|+2|\alpha_p|\right)
+		\end{equation*}
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	记$B_0=0$。\par
+	(1)注意到：
+	\begin{align*}
+		\sum_{i=1}^p\alpha_i\beta_i
+		&=\sum_{i=1}^p\alpha_i(B_i-B_{i-1})=\sum_{i=1}^p\alpha_iB_i-\sum_{i=1}^p\alpha_iB_{i-1} \\
+		&=\sum_{i=1}^p\alpha_iB_i-\sum_{i=0}^{p-1}\alpha_{i+1}B_{i}=\sum_{i=1}^p\alpha_iB_i-\sum_{i=1}^{p-1}\alpha_{i+1}B_{i} \\
+		&=\sum_{i=1}^{p-1}(\alpha_i-\alpha_{i+1})B_i+\alpha_pB_p
+	\end{align*}\par
+	(2)下第三行到第四行利用了$\{\alpha_i\}$的单调性。
+	\begin{align*}
+		\left|\sum_{i=1}^p\alpha_i\beta_i\right|
+		&=\left|\sum_{i=1}^{p-1}(\alpha_i-\alpha_{i+1})B_i+\alpha_pB_p\right|\leqslant\sum_{i=1}^{p-1}|\alpha_i-\alpha_{i+1}|\;|B_i|+|\alpha_p|\;|B_p| \\
+		&\leqslant L\left(\sum_{i=1}^{p-1}|\alpha_i-\alpha_{i+1}|+|\alpha_p|\right)=L\left(|\alpha_1-\alpha_p|+|\alpha_p|\right)\leqslant L\left(|\alpha_1|+2|\alpha_p|\right)\qedhere
+	\end{align*}
+\end{proof}
+\begin{note}
+	(1)这个公式又称为\gls{AbelTrans}、\gls{SumByParts}。之所以被称之为分部求和公式，是因为它可以写为如下形式：
+	\begin{equation*}
+		\sum_{i=1}^p\alpha_i\Delta B_i = \alpha_jB_j\Big|_{j=0}^p-\sum_{i=1}^{p-1}B_i\Delta\alpha_i
+	\end{equation*}
+	其中：
+	\begin{gather*}
+		a_0=0,\quad B_0=0 \\
+		\Delta B_k=B_k-B_{k-1}=\beta_k,\quad k=1,2,\dots,p, \\
+		\Delta\alpha_i=\alpha_{i+1}-\alpha_i,\quad i=1,2,\dots,p-1
+	\end{gather*}
+\end{note}
+\begin{theorem}[Dirichlet Test]\label{theo:DirichletTest}
+	对于级数$\sum\limits_{n=1}^{+\infty}a_nb_n$，如果：
+	\begin{enumerate}
+		\item 序列$\{a_n\}$单调收敛于$0$；
+		\item 序列$\left\{\sum\limits_{i=1}^nb_i\right\}$有界；
+	\end{enumerate}
+	那么级数收敛。
+\end{theorem}
+\begin{proof}
+	我们来估计：
+	\begin{equation*}
+		\left|\sum_{i=n+1}^{n+p}a_ib_i\right|
+	\end{equation*}
+	令：
+	\begin{equation*}
+		B_k=\sum_{i=1}^{n+p}b_i
+	\end{equation*}
+	因为序列$\{\sum\limits_{i=1}^nb_i\}$有界，因此有：
+	\begin{equation*}
+		\left|\sum\limits_{i=1}^nb_i\right|\leqslant L,\;n\in\mathbb{N}^+
+	\end{equation*}
+	也就有：
+	\begin{equation*}
+		|B_k|=\left|\sum_{i=1}^{n+p}b_i-\sum_{i=1}^nb_i\right|\leqslant 2L
+	\end{equation*}
+	因为$\{\alpha_i\}$单调，于是：
+	\begin{equation*}
+		\left|\sum_{i=n+1}^{n+p}a_ib_i\right|\leqslant 2L(|\alpha_{n+1}|+2|\alpha_{n+p}|)
+	\end{equation*}
+	又因为$\{\alpha_i\}\rightarrow0$，所以对任意的$\varepsilon>0$，当$n$足够大时可以有：
+	\begin{equation*}
+		\left|\sum_{i=n+1}^{n+p}a_ib_i\right|<\varepsilon
+	\end{equation*}
+	由\cref{theo:RnComplete}可知级数$\sum\limits_{n=1}^{+\infty}a_nb_n$收敛。
+\end{proof}
+\begin{theorem}[Abel Test]\label{theo:AbelTest}
+	对于级数$\sum\limits_{n=1}^{+\infty}a_nb_n$，如果：
+	\begin{enumerate}
+		\item 序列$\{a_n\}$单调有界；
+		\item 级数$\sum\limits_{n=1}^{+\infty}b_n$收敛；
+	\end{enumerate}
+	那么级数收敛。
+\end{theorem}
+\begin{proof}
+	因为$\{a_n\}$单调有界，由\cref{prop:RSeq}(7)可知可以设：
+	\begin{equation*}
+		\lim_{n\to+\infty}a_n=a
+	\end{equation*}
+	则序列$\{a_n-a\}$单调趋于$0$。又因级数$\sum\limits_{n=1}^{+\infty}b_n$收敛，所以序列$\left\{\sum\limits_{i=1}^nb_i\right\}$有界。由\cref{theo:DirichletTest}可知$\sum\limits_{n=1}^{+\infty}(a_n-a)b_n$收敛。根据\cref{prop:Series}(4)可知$\sum\limits_{n=1}^{+\infty}ab_n$收敛且：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}a_nb_n=\sum_{n=1}^{+\infty}\left[(a_n-a)b_n+ab_n\right]=\sum_{n=1}^{+\infty}\left[(a_n-a)b_n\right]+\sum_{n=1}^{+\infty}ab_n
+	\end{equation*}
+	因此级数$\sum\limits_{n=1}^{+\infty}a_nb_n$收敛。
+\end{proof}
+\subsubsection{收敛级数的性质}
+\begin{property}\label{prop:ConvergentSeries}
+	设$\sum\limits_{n=1}^{+\infty}$收敛，则：
+	\begin{enumerate}
+		\item 若把$\sum\limits_{n=1}^{+\infty}$的若干个相继的项归并为一项，即将该级数变为如下形式：
+		\begin{equation*}
+			(a_1+a_2+\cdots+a_{n_1})+(a_{n_1+1}+a_{n_1+2}+\cdots+a_{n_2})+\cdots+(a_{n_k+1}+a_{n_k+2}+\cdots+a_{n_{k+1}})+\cdots
+		\end{equation*}
+		则结合后的级数仍然收敛，且与原级数有相等的和。如果原级数为定号级数（即正项级数或负项级数），逆命题也成立；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)结合后级数的部分和序列是原级数部分和序列的子列，根据\cref{prop:ConvergentSeqOfPoints}(4)即可得出结论。
+\end{proof}
+若不定号，考虑级数：
+\begin{equation*}
+	(1-1)+(1-1)+\cdots+(1-1)+\cdots
+\end{equation*}
+这个级数当然是收敛的，但级数：
+\begin{equation*}
+	1-1+1-1+\cdots+(-1)^{n-1}+\cdots
+\end{equation*}
+显然还是发散的。
+\subsubsection{可交换性}
+设$\sum\limits_{n=1}^{+\infty}a_n$是一个级数，我们对其进行重排，即把该序列中的所有项无重复、无遗漏地改变一个顺序重新排出来。用符号表示即为：
+\begin{equation*}
+	\alpha^{'}_n=\alpha_{\varphi(n)}
+\end{equation*}
+其中$\varphi$是一个从$\mathbb{N}^+$到$\mathbb{N}^+$的双射。
+\begin{theorem}
+	若级数$\sum\limits_{n=1}^{+\infty}a_n$绝对收敛，则重排后的级数$\sum\limits_{n=1}^{+\infty}a^{'}_n$也绝对收敛，并且二者值相等。
+\end{theorem}
+\begin{proof}
+	我们先来讨论正项级数，再来讨论任意项级数：\par
+	(1)正项级数：\par
+	设级数$\sum\limits_{n=1}^{+\infty}a_n$为绝对收敛的正项级数，则级数$\sum\limits_{n=1}^{+\infty}a^{'}_n$也是一个正项级数。由题目条件，显然可得：
+	\begin{equation*}
+		\sum_{n=1}^Na^{'}_n\leqslant\sum_{n=1}^{+\infty}a_n,\;\forall\;N\in\mathbb{N}^+
+	\end{equation*}
+	由正项级数的收敛原理，级数$\sum\limits_{n=1}^{+\infty}a^{'}_n$收敛。由\cref{prop:RSeq}(6)也有：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}a^{'}_n\leqslant\sum_{n=1}^{+\infty}a_n
+	\end{equation*}
+	反之，可认为级数$\sum\limits_{n=1}^{+\infty}a_n$是由级数$\sum\limits_{n=1}^{+\infty}a^{'}_n$重排后的结果，因此也可得到：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}a_n\leqslant\sum_{n=1}^{+\infty}a^{'}_n
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}a_n=\sum_{n=1}^{+\infty}a^{'}_n
+	\end{equation*}
+	(2)任意项级数：
+	设级数$\sum\limits_{n=1}^{+\infty}a_n$为绝对收敛的任意项级数。令：
+	\begin{equation*}
+		p_n=\frac{|a_n|+a_n}{2},\;q_n=\frac{|a_n|-a_n}{2},\;n\in\mathbb{N}^+
+	\end{equation*}
+	显然有：
+	\begin{equation*}
+		0\leqslant p_n\leqslant|a_n|,\;0\leqslant q_n\leqslant|a_n|,\;n\in\mathbb{N}^+
+	\end{equation*}
+	取比较级数$\sum\limits_{n=1}^{+\infty}|a_n|$，由正项级数的比较判别法，$\sum\limits_{n=1}^{+\infty}p_n$与$\sum\limits_{n=1}^{+\infty}q_n$都是正项收敛级数。由(1)，任意重排后的级数$\sum\limits_{n=1}^{+\infty}p^{'}_n$和$\sum\limits_{n=1}^{+\infty}q^{'}_n$也都收敛，并且有：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}p^{'}_n=\sum_{n=1}^{+\infty}p_n,\quad
+		\sum_{n=1}^{+\infty}q^{'}_n=\sum_{n=1}^{+\infty}q_n
+	\end{equation*}
+	因此级数：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}|a^{'}_n|=\sum_{n=1}^{+\infty}(p^{'}_n-q^{'}_n)
+	\end{equation*}
+	由级数的线性运算也收敛，即级数$\sum\limits_{n=1}^{+\infty}a^{'}_n$绝对收敛，并且有：
+	\begin{align*}
+		\sum_{n=1}^{+\infty}a^{'}_n
+		&=\sum_{n=1}^{+\infty}(p^{'}_n-q^{'}_n) \\
+		&=\sum_{n=1}^{+\infty}p^{'}_n-\sum_{n=1}^{+\infty}q^{'}_n \\
+		&=\sum_{n=1}^{+\infty}p_n-\sum_{n=1}^{+\infty}q_n \\
+		&=\sum_{n=1}^{+\infty}(p_n-q_n) \\
+		&=\sum_{n=1}^{+\infty}a_n
+	\end{align*}
+	第一行到第二行利用级数的线性运算，第二行到第三行利用(1)的结果，第三行到第四行再次利用级数的线性运算。
+\end{proof}
+\begin{theorem}
+	设$\sum\limits_{n=1}^{+\infty}a_n$是一个条件收敛级数，则对任意的$\xi\in\overline{\mathbb{R}}$，都存在$\sum\limits_{n=1}^{+\infty}a_n$的一个重排级数$\sum\limits_{n=1}^{+\infty}a^{'}_n$，使：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}a^{'}_n=\xi
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	(1)对于$\xi\in\mathbb{R}$：\par
+	令：
+	\begin{equation*}
+		p_n=\frac{|a_n|+a_n}{2},\;q_n=\frac{|a_n|-a_n}{2},\;n\in\mathbb{N}^+
+	\end{equation*}
+	显然$\sum\limits_{n=1}^{+\infty}p_n$与$\sum\limits_{n=1}^{+\infty}q_n$都是正项级数，并且有：
+	\begin{gather*}
+		\lim_{n\to+\infty}p_n=\lim_{n\to+\infty}\frac{|a_n|+a_n}{2}=0 \\
+		\lim_{n\to+\infty}q_n=\lim_{n\to+\infty}\frac{|a_n|-a_n}{2}=0 \\
+		\sum_{n=1}^{+\infty}p_n=\sum_{n=1}^{+\infty}\frac{|a_n|+a_n}{2}=\frac{1}{2}\sum_{n=1}^{+\infty}|a_n|+\frac{1}{2}\sum_{n=1}^{+\infty}a_n=+\infty \\
+		\sum_{n=1}^{+\infty}q_n=\sum_{n=1}^{+\infty}\frac{|a_n|-a_n}{2}=\frac{1}{2}\sum_{n=1}^{+\infty}|a_n|-\frac{1}{2}\sum_{n=1}^{+\infty}a_n=+\infty
+	\end{gather*}
+	前两个公式可由Cauchy收敛准则的必要性推得。接下来来考察序列：
+	\begin{equation*}
+		a_1,a_2,\cdots,a_n,\cdots
+	\end{equation*}
+	令$P_n$表示这个序列中第$n$个非负项，以$Q_n$表示其中第$n$个负项的绝对值。则$\{P_n\}$是$\{p_n\}$去除一部分值为$0$的项后剩下的子序列（去除的是$a_n\leqslant0$导致$p_n=0$的项），$\{Q_n\}$是$\{q_n\}$去除所有值为$0$的项后剩下的子序列（即$a_n\geqslant0$导致$q_n=0$的项）。由$\{p_n\}$和$\{q_n\}$作为实数序列与作为级数项的收敛性，可得到：
+	\begin{gather*}
+		\lim_{n\to+\infty}P_n=\lim_{n\to+\infty}Q_n=0 \\
+		\sum_{n=1}^{+\infty}P_n=\sum_{n=1}^{+\infty}Q_n=+\infty
+	\end{gather*}
+	同时注意到，$\{P_n\}$与$\{-Q_n\}$的各项其实都是原本$\{a_n\}$中的某项。我们依次考察$P_1,P_2,\dots$中的各项，设$P_{m_1}$是第一个满足以下条件的项（存在性由$\sum\limits_{n=1}^{+\infty}P_n=+\infty$保证）：
+	\begin{equation*}
+		P_1+P_2+\cdots+P_{m_1}>\xi
+	\end{equation*}
+	再依次考察$Q_1,Q_2,\dots$中的各项，设$Q_{n_1}$是第一个满足以下条件的项（存在性由$\sum\limits_{n=1}^{+\infty}Q_n=+\infty$保证）：
+	\begin{equation*}
+		P_1+P_2+\cdots+P_{m_1}-Q_1-Q_2-\cdots-Q_{n_1}<\xi
+	\end{equation*}
+	再考虑考察$P_{m_1+1},P_{m_1+2},\dots$中的各项，设$P_{m_2}$是第一个满足以下条件的项：
+	\begin{gather*}
+		P_1+P_2+\cdots+P_{m_1}-Q_1-Q_2-\cdots-Q_{n_1} \\
+		+P_{m_1+1}+P_{m_1+2}+\cdots+P_{m_2}>\xi
+	\end{gather*}
+	不断重复下去，我们可以得到$\sum\limits_{n=1}^{+\infty}a_n$的一个重排级数$\sum\limits_{n=1}^{+\infty}a^{'}_n$：
+	\begin{gather*}
+		P_1+P_2+\cdots+P_{m_1}-Q_1-Q_2-\cdots-Q_{n_1} \\
+		+P_{m_1+1}+P_{m_1+2}+\cdots+P_{m_2}-Q_{n_1+1}-Q_{n_1+2}-\cdots-Q_{n_2} \\
+		\vdots
+	\end{gather*}
+	令$R_k$和$L_k$分别表示级数$\sum\limits_{n=1}^{+\infty}a^{'}_n$末项为$P_{m_k}$的部分和与末项为$Q_{n_k}$的部分和，则由：
+	\begin{gather*}
+		|R_k-\xi|\leqslant P_{m_k},\;k=2,3,\dots, \\
+		|L_k-\xi|\leqslant Q_{n_k},\;k=1,2,3,\dots,
+	\end{gather*}
+	而：
+	\begin{equation*}
+		\lim_{n\to+\infty}P_{m_k}=\lim_{n\to+\infty}Q_{n_k}=0
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\lim_{n\to+\infty}R_k=\lim_{n\to+\infty}L_k=\xi
+	\end{equation*}
+	因为级数$\sum\limits_{n=1}^{+\infty}a^{'}_n$的任意一个部分和$S^{'}_n$必定介于一对$R_k$和$L_k$之间（因为$P_{m_k}$和$Q_{n_k}$都是取的第一个满足条件的），且随着$n$的增大，可以让$k$也随之增大直至无穷。因此由\cref{prop:RSeq}(4)：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}a^{'}_n=\xi
+	\end{equation*}
+	(2)对于$\xi$为正无穷或负无穷的情况，仅对正无穷情况进行讨论，负无穷类似：\par
+	任取一个单调上升且趋于无穷的实数数列$\{\xi_n\}$。沿用(1)中的记号。
+	设$P_{m_1}$是第一个满足以下条件的项（存在性由$\sum\limits_{n=1}^{+\infty}P_n=+\infty$保证）：
+	\begin{equation*}
+		P_1+P_2+\cdots+P_{m_1}>\xi_1
+	\end{equation*}
+	再依次考察$Q_1,Q_2,\dots$中的各项，设$Q_{n_1}$是第一个满足以下条件的项（存在性由$\sum\limits_{n=1}^{+\infty}Q_n=+\infty$保证）：
+	\begin{equation*}
+		P_1+P_2+\cdots+P_{m_1}-Q_1-Q_2-\cdots-Q_{n_1}<\xi_1
+	\end{equation*}
+	再考虑考察$P_{m_1+1},P_{m_1+2},\dots$中的各项，设$P_{m_2}$是第一个满足以下条件的项：
+	\begin{gather*}
+		P_1+P_2+\cdots+P_{m_1}-Q_1-Q_2-\cdots-Q_{n_1} \\
+		+P_{m_1+1}+P_{m_1+2}+\cdots+P_{m_2}>\xi_2
+	\end{gather*}
+	不断重复下去，我们可以得到$\sum\limits_{n=1}^{+\infty}a_n$的一个重排级数$\sum\limits_{n=1}^{+\infty}a^{'}_n$：
+	\begin{gather*}
+		P_1+P_2+\cdots+P_{m_1}-Q_1-Q_2-\cdots-Q_{n_1} \\
+		+P_{m_1+1}+P_{m_1+2}+\cdots+P_{m_2}-Q_{n_1+1}-Q_{n_1+2}-\cdots-Q_{n_2} \\
+		\vdots
+	\end{gather*}
+	而这个重排级数显然满足：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}a^{'}_n=+\infty
+	\end{equation*}
+\end{proof}
+
+\subsection{级数乘法}
+
+本节介绍\gls{SeriesMulti}。\par
+对于两个无穷级数：
+\begin{equation*}
+	\sum_{n=1}^{+\infty}a_n,\quad\sum_{n=1}^{+\infty}b_n
+\end{equation*}
+它们的乘积可以写作如下形式：
+\begin{equation*}
+	\begin{aligned}
+		&a_1b_1	 &&a_1b_2	&&a_1b_3	&&\cdots\\
+		&a_2b_1	 &&a_2b_2	&&a_2b_3	&&\cdots\\
+		&\vdots	 &&\vdots	&&\vdots\\
+		&a_ib_1	 &&a_ib_2	&&a_ib_3	&&\cdots\\
+		&\vdots	 &&\vdots	&&\vdots
+	\end{aligned}
+\end{equation*}
+这些数可以用很多种方式排成数列。\par
+我们称以下排列方式为三角形排列：
+\begin{equation*}
+	a_1b_1,a_1b_2,a_2b_1,a_1b_3,a_2b_2,a_3b_1,a_1b_4\dots
+\end{equation*}
+称以下排列方式为正方形排列：
+\begin{equation*}
+	a_1b_1,a_1b_2,a_2b_2,a_2b_1,a_1b_3,a_2b_3,a_3b_3\dots
+\end{equation*}
+\begin{theorem}
+	如果级数$\sum\limits_{n=1}^{+\infty}a_n$和级数$\sum\limits_{n=1}^{+\infty}b_n$绝对收敛，并且：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}a_n=A,\quad\sum_{n=1}^{+\infty}b_n=B
+	\end{equation*}
+	则这两个级数的无穷乘积中的元素$a_ib_j$按任意方式排列成的级数都是绝对收敛的，并且其和为$AB$。
+\end{theorem}
+\begin{proof}
+	设$a_{i_k}b_{j_k},\;k\in\mathbb{N}^+$是$a_ib_j,\;i,j\in\mathbb{N}^+$的任意一种排列。把$i_1,i_2,\dots,i_n,\;j_1,j_2,\dots,j_n$中最大的记为$N$，则：
+	\begin{align*}
+		\sum_{k=1}^n|a_{i_k}b_{j_k}|
+		&\leqslant\sum_{i=1}^N|a_i|\sum_{j=1}^N|b_j| \\
+		&\leqslant\sum_{i=1}^{+\infty}|a_i|\sum_{j=1}^{+\infty}|b_j|
+	\end{align*}
+	由\cref{prop:RSeq}(6)：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}a_{i_k}b_{j_k}
+	\end{equation*}
+	绝对收敛。按正方形形式重排该级数可得到：
+	\begin{align*}
+		\sum_{n=1}^{+\infty}a_{i_k}b_{j_k}
+		&=\lim_{n\to+\infty}\left(\sum_{i=1}^na_i\right)\left(\sum_{i=1}^nb_i\right) \\
+		&=\left(\sum_{i=1}^{+\infty}a_i\right)\left(\sum_{i=1}^{+\infty}b_i\right) \\
+		&=AB\qedhere
+	\end{align*}
 \end{proof}
