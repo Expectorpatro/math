@@ -1,0 +1,502 @@
+---
+title: "Regular Expression"
+date: "Sys.Date()"
+author: "Xingcheng Ni"
+description: "A guide to understanding regular expressions"
+format:
+  html:
+    embed-resources: true
+    code-fold: false
+    code-tools: true
+    toc: true 
+    toc-depth: 3
+    toc-location: left
+    number-sections: true
+    theme: cosmo
+    fig-width: 6
+    fig-height: 4
+    fig-align: center
+    code-line-numbers: true
+    self-contained: true
+    navbar:
+      title: "Analysis Report"
+      left:
+        - text: "Home"
+          href: "#"
+        - text: "Data"
+          href: "#data"
+        - text: "Analysis"
+          href: "#analysis"
+      right:
+editor: visual
+fontsize: 12pt
+mainfont: "Arial"
+monofont: "Fira Code"
+linkcolor: "#1a73e8"
+highlight-style: tango
+---
+
+# 1. Mental Model & Core Ideas
+
+Regex is a tiny, declarative language for describing text patterns. A regex engine attempts to **match** your pattern against text. Most modern engines (including Python's) are **backtracking** engines.
+
+**Key mental model**:
+
+-   A pattern is a sequence of *atoms* (characters, classes) modified by *quantifiers* and *operators* (grouping, alternation, anchors).
+-   The engine tries paths; on failure, it **backtracks** to earlier decision points and tries alternatives.
+-   Quantifiers are **greedy by default**; add `?` to make them **lazy** (non-greedy).
+
+``` python
+import re
+
+text = "abc123def456"
+
+# Greedy: match as many digits as possible
+re.findall(r"\d+", text)  # -> ['123', '456']
+
+# Lazy: match as few digits as possible
+re.findall(r"\d+?", text) # -> ['1','2','3','4','5','6']
+```
+
+> Practical takeaway: prefer **specific** patterns over `.*` to reduce backtracking and improve performance.
+
+# 2. Syntax Reference (Portable Core)
+
+## 2.1 Character Matching
+
+| Syntax | Meaning | Notes |
+|----|----|----|
+| `.` | Any single char (except newline, by default) | In Python, add `re.S` to let `.` match newlines |
+| `\d` / `\D` | Digit / non-digit | Often `[0-9]` and its complement |
+| `\w` / `\W` | Word char / non-word | Typically `[A-Za-z0-9_]` |
+| `\s` / `\S` | Whitespace / non-whitespace | Space, tab, newline… |
+| `[abc]` | One of a, b, c | Character class |
+| `[^abc]` | Not a, b, c | Negated class |
+| `[a-z]` | Range | Use `\-` or put `-` first/last to match literal hyphen |
+
+## 2.2 Anchors & Boundaries
+
+| Syntax    | Meaning                                           |
+|-----------|---------------------------------------------------|
+| `^` / `$` | Start / end of string (or line in multiline mode) |
+| `` / `\B` | Word boundary / non-boundary                      |
+
+## 2.3 Quantifiers (greedy by default)
+
+| Quantifier | Meaning         | Lazy variant |
+|------------|-----------------|--------------|
+| `*`        | 0 or more       | `*?`         |
+| `+`        | 1 or more       | `+?`         |
+| `?`        | 0 or 1          | `??`         |
+| `{n}`      | exactly n       | —            |
+| `{n,}`     | at least n      | `{n,}?`      |
+| `{n,m}`    | between n and m | `{n,m}?`     |
+
+## 2.4 Grouping, Naming, Alternation, Escapes
+
+| Syntax              | Meaning                                 |
+|---------------------|-----------------------------------------|
+| `(pattern)`         | Capturing group                         |
+| `(?:pattern)`       | Non-capturing group                     |
+| `(?P<name>pattern)` | Named group (Python)                    |
+| ``, `` …            | Backreference by index                  |
+| `(?P=name)`         | Backreference by name (Python)          |
+| `a|b`               | Alternation (match a or b; left-biased) |
+| `\.`                | Escape a special char (literal dot)     |
+
+> Tip: prefer **non-capturing groups** when you do not need backreferences.
+
+# 3. Accurate Classes & Quantifiers (with Pitfalls)
+
+## 3.1 Character Classes — Safer Construction
+
+``` regex
+[abc]        # 'a' or 'b' or 'c'
+[^abc]       # anything except a/b/c
+[a-z]        # lowercase letters
+[A-Za-z0-9_] # word-ish set
+[\-./]      # include literal '-' safely
+```
+
+**Pitfall**: `-` inside `[]` denotes a range unless escaped or placed first/last.
+
+## 3.2 Greedy vs Lazy — Real-World Example
+
+``` python
+import re
+s = "<tag>123</tag><tag>456</tag>"
+
+# Greedy: over-captures across tags
+re.findall(r"<tag>.*</tag>", s)    # -> ['<tag>123</tag><tag>456</tag>']
+
+# Lazy: minimal capture between pairs
+re.findall(r"<tag>.*?</tag>", s)   # -> ['<tag>123</tag>', '<tag>456</tag>']
+```
+
+**Heuristic**: If you are matching *bounded regions* (like tags), use **lazy** + **tight subpatterns** instead of `.*`.
+
+# 4. Grouping, Backreferences, and Boundaries
+
+## 4.1 Capturing vs Non-Capturing
+
+``` python
+import re
+
+m = re.search(r"(ab)+", "zzababxx")
+m.group(0)  # 'abab' (whole match)
+m.groups()  # ('ab',) (last capture of the group)
+
+# Named groups
+m = re.search(r"(?P<user>\w+)@(?P<host>\w+)\.\w+", "a@b.com")
+m.group("user"), m.group("host")  # -> ('a','b')
+```
+
+## 4.2 Backreferences
+
+``` python
+import re
+s = "cat and cat"
+
+# re.sub with backreference to first group
+re.sub(r"(cat)", r"s", s)   # -> 'cats and cats'
+```
+
+## 4.3 Boundaries
+
+``` python
+import re
+txt = "cat scat category"
+
+# Match standalone 'cat' only
+re.findall(r"cat", txt)  # -> ['cat']
+```
+
+# 5. Canonical Patterns (Explained)
+
+> These are **pragmatic** patterns — good default trade-offs. Real-world validation may require more rules.
+
+## 5.1 Email (common practical)
+
+**Pattern**
+
+``` regex
+^[A-Za-z0-9_.+-]+@[A-Za-z0-9-]+\.[A-Za-z0-9.-]+$
+```
+
+**Why it works**
+
+-   **Local-part**: alphanumerics plus `_ . + -`
+-   **Domain**: alphanumerics and `-`
+-   **TLD part**: one or more segments with `.` separators
+
+**Python demo**
+
+``` python
+import re
+EMAIL = re.compile(r'^[A-Za-z0-9_.+-]+@[A-Za-z0-9-]+\.[A-Za-z0-9.-]+$')
+def is_email(s: str) -> bool:
+    """
+    Return True if s looks like an email address.
+    Notes:
+    - Pragmatic, not RFC-complete.
+    """
+    return bool(EMAIL.match(s))
+```
+
+## 5.2 China Mainland Mobile Number (basic)
+
+``` regex
+^1\d{10}$
+```
+
+-   Anchored with `^` and `$` for full-string validation.
+-   Refine with prefixes if you need carrier-range rules.
+
+## 5.3 IPv4
+
+``` regex
+^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$
+```
+
+-   Each octet must be 0–255; careful alternation controls ranges.
+
+## 5.4 URL (http/https)
+
+``` regex
+^https?://[A-Za-z0-9.-]+\.[A-Za-z]{2,}(/\S*)?$
+```
+
+-   Matches `http` or `https`, domain, and optional path.\
+-   Expand as needed (ports, query, IPv6, punycode, etc.).
+
+## 5.5 Date (YYYY-MM-DD)
+
+``` regex
+^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$
+```
+
+-   Ranges ensure valid-looking months/days; leap-year rules need extra logic.
+
+## 5.6 Hex Color
+
+``` regex
+^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$
+```
+
+## 5.7 Currency w/ thousands separators (simple)
+
+``` regex
+^[+-]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?$
+```
+
+# 6. Python `re` — Complete Walkthrough
+
+## 6.1 API Overview
+
+| Function                   | Purpose                                |
+|----------------------------|----------------------------------------|
+| `re.match(p, s)`           | Match at start only                    |
+| `re.search(p, s)`          | Find first match anywhere              |
+| `re.findall(p, s)`         | Return all matches (strings or tuples) |
+| `re.finditer(p, s)`        | Iterator of `Match` objects            |
+| `re.sub(p, repl, s)`       | Replace matches (string or callable)   |
+| `re.split(p, s)`           | Split by pattern                       |
+| `re.compile(p, flags=...)` | Compile once, reuse often              |
+
+**Flags**: `re.I`(IGNORECASE), `re.M`(MULTILINE), `re.S`(DOTALL), `re.X`(VERBOSE), `re.A`(ASCII), `re.U`(UNICODE, default).
+
+## 6.2 Verbose Patterns (Highly Recommended)
+
+``` python
+import re
+
+EMAIL = re.compile(r"""
+    ^[A-Za-z0-9_.+-]+   # local part
+    @
+    [A-Za-z0-9-]+       # domain
+    \.
+    [A-Za-z0-9.-]+$     # TLD & subdomains
+""", re.VERBOSE | re.IGNORECASE)
+
+# English note: VERBOSE allows spaces/comments for maintainability.
+```
+
+## 6.3 Match Object Essentials
+
+``` python
+import re
+m = re.search(r"(?P<year>\d{4})-(?P<mon>\d{2})-(?P<day>\d{2})", "2025-10-19")
+m.group(0)            # whole match
+m.group("year")       # '2025'
+m.groups()            # ('2025','10','19')
+m.span()              # (0,10)
+m.groupdict()         # {'year': '2025', 'mon': '10', 'day': '19'}
+```
+
+## 6.4 Replacement with Functions
+
+``` python
+import re
+
+def square_digits(m: "re.Match") -> str:
+    """
+    Replace the matched integer with its square.
+    Example: 'a12 b3' -> 'a144 b9'
+    """
+    n = int(m.group(0))
+    return str(n * n)
+
+re.sub(r"\d+", square_digits, "a12 b3")  # -> 'a144 b9'
+```
+
+## 6.5 Precompilation & Reuse (Performance)
+
+``` python
+import re
+
+DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+def has_date(line: str) -> bool:
+    """
+    Use a compiled pattern in hot loops to avoid reparsing the regex.
+    """
+    return bool(DATE.search(line))
+```
+
+## 6.6 Useful Idioms
+
+``` python
+import re
+
+# 1) Anchored full validation
+bool(re.fullmatch(r"\d{4}-\d{2}-\d{2}", "2025-10-19"))
+
+# 2) Capturing named parts then format
+m = re.fullmatch(r"(?P<y>\d{4})-(?P<m>\d{2})-(?P<d>\d{2})", "2025-10-19")
+f"{m['m']}/{m['d']}/{m['y']}"  # -> '10/19/2025'
+
+# 3) Compile + flags together
+re.compile(r"pat", flags=re.I | re.M)
+```
+
+# 7. C / POSIX Regex — Practical Recipes
+
+> POSIX regex is simpler: **no** lookarounds, **no** named groups, **no** possessive quantifiers. Good for basic validation on Unix-like systems.
+
+## 7.1 Minimal Match
+
+``` c
+// Compile -> Execute -> Free (POSIX ERE)
+// All comments are in English for clarity.
+
+#include <regex.h>
+#include <stdio.h>
+
+int main(void) {
+    regex_t rx;
+    const char *pat = "^[0-9]+$";   // digits only
+    const char *ok  = "12345";
+    const char *bad = "12a45";
+
+    int rc = regcomp(&rx, pat, REG_EXTENDED); // use ERE
+    if (rc != 0) { puts("regcomp failed"); return 1; }
+
+    puts(regexec(&rx, ok, 0, NULL, 0) == 0 ? "MATCH" : "NO MATCH");
+    puts(regexec(&rx, bad, 0, NULL, 0) == 0 ? "MATCH" : "NO MATCH");
+
+    regfree(&rx);
+    return 0;
+}
+```
+
+## 7.2 Capture Groups via `regmatch_t`
+
+``` c
+#include <regex.h>
+#include <stdio.h>
+
+int main(void) {
+    regex_t rx;
+    regmatch_t pm[3]; // [0]=whole, [1]=year, [2]=month
+    const char *pat = "^([0-9]{4})-([0-9]{2})$";
+    const char *s   = "2025-10";
+
+    if (regcomp(&rx, pat, REG_EXTENDED) != 0) return 1;
+    if (regexec(&rx, s, 3, pm, 0) == 0) {
+        printf("whole: %.*s
+", (int)(pm[0].rm_eo - pm[0].rm_so), s + pm[0].rm_so);
+        printf("year : %.*s
+", (int)(pm[1].rm_eo - pm[1].rm_so), s + pm[1].rm_so);
+        printf("month: %.*s
+", (int)(pm[2].rm_eo - pm[2].rm_so), s + pm[2].rm_so);
+    }
+    regfree(&rx);
+    return 0;
+}
+```
+
+## 7.3 Error Reporting
+
+``` c
+#include <regex.h>
+#include <stdio.h>
+
+static void print_error(int code, const regex_t *rx) {
+    char buf[256];
+    regerror(code, rx, buf, sizeof(buf));
+    fprintf(stderr, "regex error: %s
+", buf);
+}
+```
+
+> Tip: Use `REG_NOSUB` when you do not need captures; may be slightly faster.
+
+# 8. Lookarounds, Conditionals, Recursion
+
+## 8.1 Lookarounds (Python: yes; POSIX: no)
+
+| Type                | Syntax   | Meaning                       |
+|---------------------|----------|-------------------------------|
+| Positive lookahead  | `(?=p)`  | Right side must match `p`     |
+| Negative lookahead  | `(?!p)`  | Right side must not match `p` |
+| Positive lookbehind | `(?<=p)` | Left side must match `p`      |
+| Negative lookbehind | `(?<!p)` | Left side must not match `p`  |
+
+``` python
+import re
+re.findall(r"\d+(?=px)", "20px 15pt 33px")   # -> ['20','33']
+re.findall(r"(?<=USD)\d+", "USD30 EUR40")    # -> ['30']
+```
+
+## 8.2 Conditionals & Possessive Quantifiers
+
+-   **Conditionals**: `(?(cond)yes|no)` — available in PCRE/Oniguruma; **not** in Python `re`.
+-   **Possessive quantifiers**: `*+`, `++`, `?+`, `{m,n}+` — prevent backtracking; not in Python `re`, available in Java/PCRE.
+
+## 8.3 Recursion / Balancing (advanced)
+
+-   PCRE: `(?R)` or subroutine calls can parse nested structures: `\((?:[^()]+|(?R))*\)`\
+-   Python stdlib `re` lacks recursion; third-party `regex` module supports it.
+
+# 9. Engine Behavior & Performance Tuning
+
+## 9.1 Catastrophic Backtracking (how it happens)
+
+``` python
+import re
+# Pathological: overlapping greedy groups + late failure
+pat = re.compile(r"(a+)+$")
+txt = "a" * 30 + "X"
+# This can take very long because the engine tries many ways to apportion 'a+' groups before failing at 'X'.
+bool(pat.match(txt))  # -> False (but after lots of backtracking)
+```
+
+## 9.2 How to Fix / Prevent
+
+1)  **Constrain with boundaries** (e.g., ``, anchors `^$`).\
+2)  **Avoid nested greedy groups**; prefer **atomic** or **possessive** forms when available.\
+3)  **Replace `.*` with specific classes/ranges**.\
+4)  **Use lazy quantifiers with guards** (e.g., `.*?` followed by a literal delimiter).\
+5)  **Prevalidation** (e.g., length checks) before regex.
+
+``` python
+import re
+# Safer alternative: force a delimiter
+pat = re.compile(r"a+(?:,a+)*$")   # 'a' groups separated by commas
+bool(pat.match("a,a,a"))           # True quickly
+```
+
+## 9.3 Python Profiling & Debugging
+
+``` python
+import re
+
+pat = re.compile(r"\d{4}-\d{2}-\d{2}", re.DEBUG)
+# re.DEBUG prints the compiled opcode plan (useful for understanding parsing)
+pat.match("2025-10-19")
+```
+
+**External tools**: regex101, regexr — great for testing with explanations; remember engine differences.
+
+# 10. Testing, Maintenance, and Style
+
+-   Keep patterns **readable** with `re.VERBOSE`.\
+-   Write **unit tests** for tricky cases, include **negative tests**.\
+-   Document **invariants** and **assumptions** (e.g., ASCII vs Unicode word chars).\
+-   Prefer **named groups** for clarity in large patterns.
+
+# 11. Cheat Sheet (Quick Picks)
+
+-   **Email**: `^[A-Za-z0-9_.+-]+@[A-Za-z0-9-]+\.[A-Za-z0-9.-]+$`\
+-   **CN mobile**: `^1\d{10}$`\
+-   **IPv4**: `^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$`\
+-   **URL (http/https)**: `^https?://[A-Za-z0-9.-]+\.[A-Za-z]{2,}(/\S*)?$`\
+-   **Date**: `^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$`\
+-   **Hex color**: `^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$`\
+-   **Currency**: `^[+-]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?$`
+
+# Appendix — Version Notes & Portability
+
+-   Python `re`: no possessive quantifiers, no conditional subpatterns; has lookarounds, named groups.\
+-   POSIX (C): ERE is simpler — no lookarounds, no named groups; portable & stable.\
+-   If you need recursion/conditionals/possessive: consider PCRE/Oniguruma or Python `regex` (third-party).
