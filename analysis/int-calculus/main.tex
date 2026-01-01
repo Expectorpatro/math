@@ -1,4 +1,103 @@
-\chapter{不定积分与定积分}
+\chapter{微积分}
+
+接下来我们所讨论的函数都是定义在$\mathbb{R}^{m}$上并且取值在$\mathbb{R}^{n}$上的函数。
+
+函数在某点附近有定义意味着在该点的某个邻域内有定义。
+
+\section{微分}
+\begin{definition}
+	设开集$E\subseteq\mathbb{R}^{m}$，$x_0\in E$，$f:E\to\mathbb{R}^{n}$是一个映射。若存在$A\in\hom(\mathbb{R}^{m},\mathbb{R}^{n})$满足：
+	\begin{equation*}
+		\lim_{h\to\mathbf{0}}\frac{||f(x_0+h)-f(x_0)-Ah||}{||h||}=0
+	\end{equation*}
+	则称向量值函数$f$在点$x_0$处\gls{Differentiable}，称$A$是$f$在点$x_0$处的\gls{Differential}，记作$\operatorname{D}f(x_0)=A$。若$f$在$E$中的每一个点都可微，则称$f$在$E$上可微。
+\end{definition}
+\begin{property}
+	设开集$E\subseteq\mathbb{R}^{m}$，$x_0\in E$，$f:E\to\mathbb{R}^{n}$是一个映射，则：
+	\begin{enumerate}
+		\item 若$f$在$x_0$处可微，则$f$在$x_0$处的微分是唯一的；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)若存在一个不同于$A$的$B\in\hom(\mathbb{R}^{m},\mathbb{R}^{n})$满足：
+	\begin{equation*}
+		\lim_{h\to\mathbf{0}}\frac{||f(x_0+h)-f(x_0)-Bh||}{||h||}=0
+	\end{equation*}
+	则对于任意取定的$h\in\mathbb{R}^{m}\backslash\{\mathbf{0}\}$有：
+	\begin{equation*}
+		||(B-A)h||=||f(x_0+h)-f(x_0)-Ah-[f(x_0+h)-f(x_0)-Bh]||\leqslant||f(x_0+h)-f(x_0)-Ah||+||f(x_0+h)-f(x_0)-Bh||
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\frac{||(B-A)h||}{||h||}\leqslant\frac{||f(x_0+h)-f(x_0)-Ah||}{||h||}+\frac{||f(x_0+h)-f(x_0)-Bh||}{||h||}
+	\end{equation*}
+	对于任意的$\varepsilon>0$有：
+	\begin{equation*}
+		\frac{||(B-A)\varepsilon h||}{||\varepsilon h||}=\frac{||(B-A)h||}{||h||}\leqslant\frac{||f(x_0+\varepsilon h)-f(x_0)-A\varepsilon h||}{||\varepsilon h||}+\frac{||f(x_0+\varepsilon h)-f(x_0)-B\varepsilon h||}{||\varepsilon h||}
+	\end{equation*}
+	由\cref{prop:RMap}(4)(5.b)可得：
+	\begin{equation*}
+		\frac{||(B-A)h||}{||h||}\leqslant\lim_{\varepsilon\to0}\left[\frac{||f(x_0+\varepsilon h)-f(x_0)-A\varepsilon h||}{||\varepsilon h||}+\frac{||f(x_0+\varepsilon h)-f(x_0)-B\varepsilon h||}{||\varepsilon h||}\right]=\lim_{\varepsilon\to0}\frac{||f(x_0+\varepsilon h)-f(x_0)-A\varepsilon h||}{||\varepsilon h||}+\lim_{\varepsilon\to0}\frac{||f(x_0+\varepsilon h)-f(x_0)-B\varepsilon h||}{||\varepsilon h||}=0
+	\end{equation*}
+	所以$||(B-A)h||=0$对任意的$h\in\mathbb{R}^{m}\backslash\{\mathbf{0}\}$都成立，即$A=B$。
+\end{proof}
+\begin{definition}
+	设$n$元函数$f(x)=f(x^1,x^2,\dots,x^n)$在点$x_0=(x^1_0,x^2_0,\dots,x^n_0)$附近有定义，$e=(e^1,e^2,\dots,e^n)$是一个单位向量。若存在极限：
+	\begin{equation*}
+		\lim_{t\to0}\frac{f(x_0+te)-f(x_0)}{t}
+	\end{equation*}
+	则称该极限为函数$f$在点$x_0$沿方向$e$的\gls{DirectionalDerivative}，记为$\dfrac{\partial f}{\partial e}(x_0)$。特别的，对于标准单位向量：
+	\begin{equation*}
+		e_1=(1,0,0,\dots,0),\quad e_2=(0,1,0,\dots,0),\quad,\dots,\quad e_n=(0,0,0,\dots,1)
+	\end{equation*}
+	称$f(x)$在$x_0$处对$e_i$的方向导数为函数$f$在点$x_0$对变元$x^i$的\gls{PartialDerivative}，也将其记作$f_{x^i}'(x_0)$或$f_{x_i}(x_0)$。
+\end{definition}
+\begin{definition}
+	设$n$元函数$f(x)=f(x^1,x^2,\dots,x^n)$在点$x_0=(x^1_0,x^2_0,\dots,x^n_0)$附近有定义。若存在$A_i\in\mathbb{R}^{},\;i=1,2,\dots,n$，使得对于各分量充分小的：
+	\begin{equation*}
+		\Delta x=(\Delta x^1,\Delta x^2,\dots,\Delta x^n)
+	\end{equation*}
+	有：
+	\begin{equation*}
+		f(x_0+\Delta x)-f(x_0)=\sum_{i=1}^{n}A_i\Delta x^i+o(||\Delta x||)\quad(||\Delta x||\to0)
+	\end{equation*}
+	则称函数$f$在点$x_0$处可微，并将表达式$\sum\limits_{i=1}^{n}A_i\Delta x^i$称作函数$f$在点$x_0$处的\gls{TotalDifferential}，记作：
+	\begin{equation*}
+		\dif f(x_0)=\sum_{i=1}^{n}A_i\Delta x^i=\sum_{i=1}^{n}A_i\dif x^i
+	\end{equation*}
+\end{definition}
+\begin{property}\label{prop:Differential}
+	设$f$是一个$n$元函数，则：
+	\begin{enumerate}
+		\item 若$f$在$x_0$处可微，则$f$在$x_0$处连续；
+		\item 若$f$在$x_0$处可微，则它在$x_0$处沿任何方向的方向导数都存在；
+		\item 若$f$在$x_0$处可微，其全微分为$\dif f(x_0)=\sum\limits_{i=1}^{n}A_i\dif x^i$，则：
+		\begin{equation*}
+			\frac{\partial f}{\partial x^i}(x_0)=A_i,\quad i=1,2,\dots,n
+		\end{equation*}
+		\item 若$f$在点$x_0$附近的所有偏导数$f_{x^i}'$都存在且所有$f_{x^i}'(x)$作为$n$元函数都在$x_0$处连续，则$f$在$x_0$处可微；
+		\item 设$g^i(t)$是$m$元函数，$i=1,2,\dots,n$，其中每个函数在$t_0=(t_0^1,t_0^1,\dots,t_0^m)$
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)因为$f$在$x_0$处可微，由\cref{prop:RSeq}(8.b)和\cref{prop:RmConvergence}(2)可得：
+	\begin{equation*}
+		\lim_{x\to x_0}f(x)=\lim_{||\Delta x||\to0}f(x_0+\Delta x)=\lim_{||\Delta x||\to0}\left[f(x_0)+\sum_{i=1}^{n}A_i\Delta x^i+o(||\Delta x||)\right]=f(x_0)
+	\end{equation*}\par
+	(2)对于任意的单位向量$e$，因为$f$在$x_0$处可微，所以对足够小的$t$有：
+	\begin{equation*}
+		f(x_0+te)-f(x_0)=\sum_{i=1}^{n}A_i\Delta te^i+o(||te||)\quad(||te||\to0)
+	\end{equation*}
+	于是由\cref{prop:RSeq}(8.b)可得：
+	\begin{align*}
+		\lim_{t\to0}\frac{f(x_0+te)-f(x_0)}{t}&=\lim_{t\to0}\left[\sum_{i=1}^{n}A_i e^i+\frac{o(||te||)}{t}\right]=\lim_{t\to0}\left[\sum_{i=1}^{n}A_ie^i\right]+\lim_{t\to0}\frac{o(|t|\;||e||)}{t} \\
+		&=\sum_{i=1}^{n}A_ie^i+\lim_{t\to0}\frac{o(|t|)}{t}=\sum_{i=1}^{n}A_ie^i
+	\end{align*}
+	根据定义即可得到$f$在$x_0$处沿任何方向的方向导数都存在。\par
+	(3)由(2)立即可得。\par
+	(4)
+\end{proof}
+
 
 \section{定积分}
 \begin{definition}
