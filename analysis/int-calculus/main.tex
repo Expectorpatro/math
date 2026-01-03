@@ -1,101 +1,125 @@
 \chapter{微积分}
 
-接下来我们所讨论的函数都是定义在$\mathbb{R}^{m}$上并且取值在$\mathbb{R}^{n}$上的函数。
-
-函数在某点附近有定义意味着在该点的某个邻域内有定义。
-
 \section{微分}
+\subsection{Fr\'echet微分}
 \begin{definition}
-	设开集$E\subseteq\mathbb{R}^{m}$，$x_0\in E$，$f:E\to\mathbb{R}^{n}$是一个映射。若存在$A\in\hom(\mathbb{R}^{m},\mathbb{R}^{n})$满足：
+	设$X,Y$为数域$K$上的赋范线性空间，$E\subseteq X$是一个开集，$x_0\in E$，$T:E\to Y$是一个映射。若存在有界线性算子$A\in\mathcal{L}(X,Y)$满足：
 	\begin{equation*}
-		\lim_{h\to\mathbf{0}}\frac{||f(x_0+h)-f(x_0)-Ah||}{||h||}=0
+		\lim_{||h||_X\to0}\frac{||T(x_0+h)-Tx_0-Ah||_Y}{||h||_X}=0
 	\end{equation*}
-	则称向量值函数$f$在点$x_0$处\gls{Differentiable}，称$A$是$f$在点$x_0$处的\gls{Differential}，记作$\operatorname{D}f(x_0)=A$。若$f$在$E$中的每一个点都可微，则称$f$在$E$上可微。
+	则称映射$T$在点$x_0$处Fr\'{e}chet \gls{Differentiable}，称$A$是$T$在点$x_0$处的Fr\'{e}chet \gls{Differential}，记作$\operatorname{D}Tx_0=A$。若$T$在$E$中的每一个点处都可微，则称$T$在$E$上可微。若$\operatorname{D}T$在$x_0$处Fr\'echet可微，将其Fr\'echet微分记作$\operatorname{D}^2T$，更高阶的情况可依此类推。
 \end{definition}
-\begin{property}
-	设开集$E\subseteq\mathbb{R}^{m}$，$x_0\in E$，$f:E\to\mathbb{R}^{n}$是一个映射，则：
+\begin{property}\label{prop:FrechetDifferential}
+	设$X,Y$为数域$K$上的赋范线性空间，$E\subseteq X$是一个开集，$x_0\in E$，$T:E\to Y$和$S:E\to Y$是两个映射，则：
 	\begin{enumerate}
-		\item 若$f$在$x_0$处可微，则$f$在$x_0$处的微分是唯一的；
+		\item 若$T$在$x_0$处Fr\'echet可微，则$T$在$x_0$处的Fr\'echet微分是唯一的；
+		\item 若$T$在$x_0$处Fr\'echet可微，则存在$x_0$的邻域$U$和$\alpha>0$使得：
+		\begin{equation*}
+			||Tx-Tx_0||_Y\leqslant\alpha||x-x_0||_X,\quad\forall\;x\in U
+		\end{equation*}
+		\item 若$T$在$x_0$处Fr\'echet可微，则$T$在$x_0$处连续；
+		\item 若$T,S$在$x_0$处Fr\'echet可微，则对于任意的$\alpha,\beta\in K$，有：
+		\begin{equation*}
+			\operatorname{D}(\alpha Tx_0+\beta Sx_0)=\alpha \operatorname{D}Tx_0+\beta\operatorname{D}Sx_0
+		\end{equation*}
+		\item 设$Z$是数域$K$上的赋范线性空间，$F\subseteq Y$是一个开集，$R:F\to Z$是一个映射。若$T$在$x_0$处Fr\'echet可微，$TE\subseteq F$，$R$在$Tx_0$处Fr\'echet可微，则$RT:E\to Z$也在$x_0$处可微，且有：
+		\begin{equation*}
+			\operatorname{D}(RT)x_0=\operatorname{D}R(Tx_0)\operatorname{D}Tx_0
+		\end{equation*}
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)若存在一个不同于$A$的$B\in\hom(\mathbb{R}^{m},\mathbb{R}^{n})$满足：
+	(1)若存在一个不同于$A$的$B\in\mathcal{L}(X,Y)$满足：
 	\begin{equation*}
-		\lim_{h\to\mathbf{0}}\frac{||f(x_0+h)-f(x_0)-Bh||}{||h||}=0
+		\lim_{||h||_X\to0}\frac{||T(x_0+h)-Tx_0-Bh||_Y}{||h||_X}=0
 	\end{equation*}
-	则对于任意取定的$h\in\mathbb{R}^{m}\backslash\{\mathbf{0}\}$有：
-	\begin{equation*}
-		||(B-A)h||=||f(x_0+h)-f(x_0)-Ah-[f(x_0+h)-f(x_0)-Bh]||\leqslant||f(x_0+h)-f(x_0)-Ah||+||f(x_0+h)-f(x_0)-Bh||
-	\end{equation*}
+	则对于任意的$h\in X\backslash\{\mathbf{0}\}$有：
+	\begin{align*}
+		&||(B-A)h||_Y=||T(x_0+h)-Tx_0-Ah-[T(x_0+h)-Tx_0-Bh]||_Y \\
+		\leqslant&||T(x_0+h)-Tx_0-Ah||_Y+||T(x_0+h)-Tx_0-Bh||_Y
+	\end{align*}
 	于是：
 	\begin{equation*}
-		\frac{||(B-A)h||}{||h||}\leqslant\frac{||f(x_0+h)-f(x_0)-Ah||}{||h||}+\frac{||f(x_0+h)-f(x_0)-Bh||}{||h||}
-	\end{equation*}
-	对于任意的$\varepsilon>0$有：
-	\begin{equation*}
-		\frac{||(B-A)\varepsilon h||}{||\varepsilon h||}=\frac{||(B-A)h||}{||h||}\leqslant\frac{||f(x_0+\varepsilon h)-f(x_0)-A\varepsilon h||}{||\varepsilon h||}+\frac{||f(x_0+\varepsilon h)-f(x_0)-B\varepsilon h||}{||\varepsilon h||}
+		\frac{||(B-A)h||_Y}{||h||_X}\leqslant\frac{||T(x_0+h)-Tx_0-Ah||_Y}{||h||_X}+\frac{||T(x_0+h)-Tx_0-Bh||_Y}{||h||_X}
 	\end{equation*}
 	由\cref{prop:RMap}(4)(5.b)可得：
+	\begin{align*}
+		&\frac{||(B-A)h||_Y}{||h||_X}\leqslant\lim_{||h||_X\to0}\left[\frac{||T(x_0+h)-Tx_0-Ah||_Y}{||h||_X}+\frac{||T(x_0+h)-Tx_0-Bh||_Y}{||h||_X}\right] \\
+		=&\lim_{||h||_X\to0}\frac{||T(x_0+h)-Tx_0-Ah||_Y}{||h||_X}+\lim_{||h||_X\to0}\frac{||T(x_0+h)-Tx_0-Bh||_Y}{||h||_X}=0
+	\end{align*}
+	所以$||(B-A)h||=0$对任意的$h\in X\backslash\{\mathbf{0}\}$都成立，即$A=B$。\par
+	(2)设$\operatorname{D}Tx_0=A$。因为$T$在$x_0$处Fr\'echet可微，所以对于任意的$\varepsilon>0$，存在$\delta>0$使得当$0<||x-x_0||_X<\delta$时有：
 	\begin{equation*}
-		\frac{||(B-A)h||}{||h||}\leqslant\lim_{\varepsilon\to0}\left[\frac{||f(x_0+\varepsilon h)-f(x_0)-A\varepsilon h||}{||\varepsilon h||}+\frac{||f(x_0+\varepsilon h)-f(x_0)-B\varepsilon h||}{||\varepsilon h||}\right]=\lim_{\varepsilon\to0}\frac{||f(x_0+\varepsilon h)-f(x_0)-A\varepsilon h||}{||\varepsilon h||}+\lim_{\varepsilon\to0}\frac{||f(x_0+\varepsilon h)-f(x_0)-B\varepsilon h||}{||\varepsilon h||}=0
+		||Tx-Tx_0-A(x-x_0)||_Y<\varepsilon||x-x_0||_X
 	\end{equation*}
-	所以$||(B-A)h||=0$对任意的$h\in\mathbb{R}^{m}\backslash\{\mathbf{0}\}$都成立，即$A=B$。
+	于是\info{算子范数}：
+	\begin{align*}
+		&||Tx-Tx_0||_Y\leqslant||Tx-Tx_0-A(x-x_0)||_Y+||A(x-x_0)||_Y \\
+		<&\varepsilon||x-x_0||_X+||A||\;||x-x_0||_X=(\varepsilon+||A||)||x-x_0||_X
+	\end{align*}
+	取$\alpha=\varepsilon+||A||$即可。\par
+	(3)由(2)立即可得。\par
+	(4)令$A=\operatorname{D}Tx_0,\;B=\operatorname{D}Sx_0$。对于任意的$h\in X\backslash\{\mathbf{0}\}$有：
+	\begin{align*}
+		&\frac{||[\alpha T(x_0+h)+\beta S(x_0+h)-\alpha Tx_0-\beta Sx]-(\alpha A+\beta B)h||_Y}{||h||_X} \\
+		=&\frac{1}{||h||_X}\{||\alpha[T(x_0+h)-Tx_0-Ah]+\beta[S(x_0+h)-Sx-Bh]||_Y\} \\
+		\leqslant&\frac{1}{||h||_X}\{||\alpha[T(x_0+h)-Tx_0-Ah]||_Y+||\beta[S(x_0+h)-Sx-Bh]||_Y\} \\
+		=&|\alpha|\frac{||T(x_0+h)-Tx_0-Ah||_Y}{||h||_X}+|\beta|\frac{||S(x_0+h)-Sx-Bh||_Y}{||h||_X}
+	\end{align*}
+	于是由\cref{prop:RMap}(4)(5.b)(5.c)可得：
+	\begin{align*}
+		&0\leqslant\lim_{||h||_X\to0}\frac{||[\alpha T(x_0+h)+\beta S(x_0+h)-\alpha Tx_0-\beta Sx]-(\alpha A+\beta B)h||_Y}{||h||_X} \\
+		\leqslant&|\alpha|\lim_{||h||_X\to0}\frac{||T(x_0+h)-Tx_0-Ah||_Y}{||h||_X}+|\beta|\lim_{||h||_X\to0}\frac{||S(x_0+h)-Sx-Bh||_Y}{||h||_X}=0
+	\end{align*}
+	所以：
+	\begin{equation*}
+		\lim_{||h||_X\to0}\frac{||[\alpha T(x_0+h)+\beta S(x_0+h)-\alpha Tx_0-\beta Sx]-(\alpha A+\beta B)h||_Y}{||h||_X}=0
+	\end{equation*}
+	结论成立。\par
+	(5)对于任意的$h\in X\backslash\{\mathbf{0}\}$有：
+	\begin{align*}
+		&||RT(x_0+h)-R(Tx_0)-\operatorname{D}R(Tx_0)(\operatorname{D}Tx_0)h||_Y \\
+		=&||R[T(x_0+h)-Tx_0+Tx_0]-R(Tx_0)-\operatorname{D}R(Tx_0)(\operatorname{D}Tx_0)h \\
+		&+\operatorname{D}R(Tx_0)[T(x_0+h)-Tx_0]-\operatorname{D}R(Tx_0)[T(x_0+h)-Tx_0]||_Y \\
+		\leqslant&||R[Tx_0+T(x_0+h)-Tx_0]-R(Tx_0)-\operatorname{D}R(Tx_0)[T(x_0+h)-Tx_0]||_Y \\
+		&+||\operatorname{D}R(Tx_0)[T(x_0+h)-Tx_0]-\operatorname{D}R(Tx_0)(\operatorname{D}Tx_0)h||_Y \\
+		=&||R[Tx_0+T(x_0+h)-Tx_0]-R(Tx_0)-\operatorname{D}R(Tx_0)[T(x_0+h)-Tx_0]||_Y \\
+		&+||\operatorname{D}R(Tx_0)[T(x_0+h)-Tx_0-(\operatorname{D}Tx_0)h]||_Y \\
+		\leqslant&||R[Tx_0+T(x_0+h)-Tx_0]-R(Tx_0)-\operatorname{D}R(Tx_0)[T(x_0+h)-Tx_0]||_Y \\
+		&+||\operatorname{D}R(Tx_0)||\;||T(x_0+h)-Tx_0-(\operatorname{D}Tx_0)h||_Y
+	\end{align*}
+	由(2)可知对于充分接近$\mathbf{0}$的$h$，存在$\alpha>0$使得：
+	\begin{equation*}
+		||T(x_0+h)-Tx_0||_Y\leqslant\alpha||h||_X
+	\end{equation*}
+	所以根据\cref{prop:RMap}(4)(5.b)(5.c)可知：
+	\begin{align*}
+		&0\leqslant\lim_{||h||_X\to0}\frac{||RT(x_0+h)-R(Tx_0)-\operatorname{D}R(Tx_0)(\operatorname{D}Tx_0)h||_Y}{||h||_X} \\
+		\leqslant&\lim_{||h||_X\to0}\frac{||R[Tx_0+T(x_0+h)-Tx_0]-R(Tx_0)-\operatorname{D}R(Tx_0)[T(x_0+h)-Tx_0]||_Y }{||h||_X} \\
+		&+\lim_{||h||_X\to0}\frac{||\operatorname{D}R(Tx_0)||\;||T(x_0+h)-Tx_0-(\operatorname{D}Tx_0)h||_Y}{||h||_X} \\
+		=&\lim_{||h||_X\to0}\frac{||R[Tx_0+T(x_0+h)-Tx_0]-R(Tx_0)-\operatorname{D}R(Tx_0)[T(x_0+h)-Tx_0]||_Y }{||h||_X} \\
+		&+||\operatorname{D}R(Tx_0)||\lim_{||h||_X\to0}\frac{||T(x_0+h)-Tx_0-(\operatorname{D}Tx_0)h||_Y}{||h||_X}=0
+	\end{align*}
+	结论成立。
 \end{proof}
+\subsection{G\^ateaux微分}
 \begin{definition}
-	设$n$元函数$f(x)=f(x^1,x^2,\dots,x^n)$在点$x_0=(x^1_0,x^2_0,\dots,x^n_0)$附近有定义，$e=(e^1,e^2,\dots,e^n)$是一个单位向量。若存在极限：
+	设$X,Y$为数域$K$上的赋范线性空间，$E\subseteq X$，$x_0\in X$，$T:E\to Y$是一个映射。给定$h\in X$，若存在$\delta>0$使得$x_0+th\in E$对一切$|t|<\delta$成立，
+	并且存在极限：
 	\begin{equation*}
-		\lim_{t\to0}\frac{f(x_0+te)-f(x_0)}{t}
+		\lim_{t\to0}\frac{T(x_0+th)-Tx_0}{t}
 	\end{equation*}
-	则称该极限为函数$f$在点$x_0$沿方向$e$的\gls{DirectionalDerivative}，记为$\dfrac{\partial f}{\partial e}(x_0)$。特别的，对于标准单位向量：
+	则称该极限为映射$T$在点$x_0$沿方向$h$的G\^ateaux \gls{DirectionalDerivative}，记为$\dif T(x_0;h)$。特别的，若$X$是有限维的，设$X$的维数为$n$，取$X$的一组标准正交基$\{\seq{e}{n}\}$，称$T$在$x_0$处对$e_i$的G\^ateaux方向导数为$T$在点$x_0$对$e_i$的\gls{PartialDerivative}，也将其记作$T_{x^i}'(x_0)$或$T_{x_i}(x_0)$。若$\dif T(x_0;h)$存在点$x_0$处沿方向$h_1$的G\^ateaux方向导数，则将其记作$\dif^2 T(x_0;h,h_1)$，更高阶的情况可依此类推。若存在有界线性算子$A\in\mathcal{L}(X,Y)$满足：
 	\begin{equation*}
-		e_1=(1,0,0,\dots,0),\quad e_2=(0,1,0,\dots,0),\quad,\dots,\quad e_n=(0,0,0,\dots,1)
+		\dif T(x_0;h)=Ah
 	\end{equation*}
-	称$f(x)$在$x_0$处对$e_i$的方向导数为函数$f$在点$x_0$对变元$x^i$的\gls{PartialDerivative}，也将其记作$f_{x^i}'(x_0)$或$f_{x_i}(x_0)$。
+	则称$T$在$x_0$处G\^ateaux可微。
 \end{definition}
-\begin{definition}
-	设$n$元函数$f(x)=f(x^1,x^2,\dots,x^n)$在点$x_0=(x^1_0,x^2_0,\dots,x^n_0)$附近有定义。若存在$A_i\in\mathbb{R}^{},\;i=1,2,\dots,n$，使得对于各分量充分小的：
-	\begin{equation*}
-		\Delta x=(\Delta x^1,\Delta x^2,\dots,\Delta x^n)
-	\end{equation*}
-	有：
-	\begin{equation*}
-		f(x_0+\Delta x)-f(x_0)=\sum_{i=1}^{n}A_i\Delta x^i+o(||\Delta x||)\quad(||\Delta x||\to0)
-	\end{equation*}
-	则称函数$f$在点$x_0$处可微，并将表达式$\sum\limits_{i=1}^{n}A_i\Delta x^i$称作函数$f$在点$x_0$处的\gls{TotalDifferential}，记作：
-	\begin{equation*}
-		\dif f(x_0)=\sum_{i=1}^{n}A_i\Delta x^i=\sum_{i=1}^{n}A_i\dif x^i
-	\end{equation*}
-\end{definition}
-\begin{property}\label{prop:Differential}
-	设$f$是一个$n$元函数，则：
-	\begin{enumerate}
-		\item 若$f$在$x_0$处可微，则$f$在$x_0$处连续；
-		\item 若$f$在$x_0$处可微，则它在$x_0$处沿任何方向的方向导数都存在；
-		\item 若$f$在$x_0$处可微，其全微分为$\dif f(x_0)=\sum\limits_{i=1}^{n}A_i\dif x^i$，则：
-		\begin{equation*}
-			\frac{\partial f}{\partial x^i}(x_0)=A_i,\quad i=1,2,\dots,n
-		\end{equation*}
-		\item 若$f$在点$x_0$附近的所有偏导数$f_{x^i}'$都存在且所有$f_{x^i}'(x)$作为$n$元函数都在$x_0$处连续，则$f$在$x_0$处可微；
-		\item 设$g^i(t)$是$m$元函数，$i=1,2,\dots,n$，其中每个函数在$t_0=(t_0^1,t_0^1,\dots,t_0^m)$
-	\end{enumerate}
+\begin{property}\label{prop:FrechetGateaux}
+	设$X,Y$为数域$K$上的赋范线性空间，$E\subseteq X$是一个开集，$x_0\in E$，$T:E\to Y$是一个映射。若$f$在$x_0$处Fr\'echet可微，则它在$x_0$处沿任何方向$h$的G\^ateaux方向导数都存在，且$\dif T(x_0;h)=(\operatorname{D}Tx_0)h$。
 \end{property}
 \begin{proof}
-	(1)因为$f$在$x_0$处可微，由\cref{prop:RSeq}(8.b)和\cref{prop:RmConvergence}(2)可得：
-	\begin{equation*}
-		\lim_{x\to x_0}f(x)=\lim_{||\Delta x||\to0}f(x_0+\Delta x)=\lim_{||\Delta x||\to0}\left[f(x_0)+\sum_{i=1}^{n}A_i\Delta x^i+o(||\Delta x||)\right]=f(x_0)
-	\end{equation*}\par
-	(2)对于任意的单位向量$e$，因为$f$在$x_0$处可微，所以对足够小的$t$有：
-	\begin{equation*}
-		f(x_0+te)-f(x_0)=\sum_{i=1}^{n}A_i\Delta te^i+o(||te||)\quad(||te||\to0)
-	\end{equation*}
-	于是由\cref{prop:RSeq}(8.b)可得：
-	\begin{align*}
-		\lim_{t\to0}\frac{f(x_0+te)-f(x_0)}{t}&=\lim_{t\to0}\left[\sum_{i=1}^{n}A_i e^i+\frac{o(||te||)}{t}\right]=\lim_{t\to0}\left[\sum_{i=1}^{n}A_ie^i\right]+\lim_{t\to0}\frac{o(|t|\;||e||)}{t} \\
-		&=\sum_{i=1}^{n}A_ie^i+\lim_{t\to0}\frac{o(|t|)}{t}=\sum_{i=1}^{n}A_ie^i
-	\end{align*}
-	根据定义即可得到$f$在$x_0$处沿任何方向的方向导数都存在。\par
-	(3)由(2)立即可得。\par
-	(4)
+	由Fr\'echet可微和G\^teaux方向导数的定义立即可得。
 \end{proof}
 
 
