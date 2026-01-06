@@ -7,7 +7,11 @@
 	\begin{equation*}
 		\lim_{||h||_X\to0}\frac{||T(x_0+h)-Tx_0-Ah||_Y}{||h||_X}=0
 	\end{equation*}
-	则称映射$T$在点$x_0$处Fr\'{e}chet \gls{Differentiable}，称$A$是$T$在点$x_0$处的Fr\'{e}chet \gls{Differential}，记作$\operatorname{D}Tx_0=A$。若$T$在$E$中的每一个点处都可微，则称$T$在$E$上可微。若$\operatorname{D}T$在$x_0$处Fr\'echet可微，将其Fr\'echet微分记作$\operatorname{D}^2T$，更高阶的情况可依此类推。
+	则称映射$T$在点$x_0$处Fr\'{e}chet \gls{Differentiable}，称$A$是$T$在点$x_0$处的Fr\'{e}chet \gls{Differential}，记作$\operatorname{D}Tx_0=A$。若$T$在$E$中的每一个点处都可微，则称$T$在$E$上可微。若$\operatorname{D}T$在$x_0$处Fr\'echet可微，将其Fr\'echet微分记作$\operatorname{D}^2T$，更高阶的情况可依此类推。称：
+	\begin{equation*}
+		T(x_0+h)=Tx_0+Ah+\operatorname{o}(h)
+	\end{equation*}
+	为\textbf{无穷小增量公式}。
 \end{definition}
 \begin{property}\label{prop:FrechetDifferential}
 	设$X,Y$为数域$K$上的赋范线性空间，$E\subseteq X$是一个开集，$x_0\in E$，$T:E\to Y$和$S:E\to Y$是两个映射，则：
@@ -18,9 +22,9 @@
 			||Tx-Tx_0||_Y\leqslant\alpha||x-x_0||_X,\quad\forall\;x\in U
 		\end{equation*}
 		\item 若$T$在$x_0$处Fr\'echet可微，则$T$在$x_0$处连续；
-		\item 若$T,S$在$x_0$处Fr\'echet可微，则对于任意的$\alpha,\beta\in K$，有：
+		\item 若$T,S$在$x_0$处Fr\'echet可微，则对于任意的$\alpha,\beta\in K$，$\alpha T+\beta S$在$x_0$处Fr\'echet可微，且有：
 		\begin{equation*}
-			\operatorname{D}(\alpha Tx_0+\beta Sx_0)=\alpha \operatorname{D}Tx_0+\beta\operatorname{D}Sx_0
+			\operatorname{D}(\alpha T+\beta S)x_0=\alpha \operatorname{D}Tx_0+\beta\operatorname{D}Sx_0
 		\end{equation*}
 		\item 设$Z$是数域$K$上的赋范线性空间，$F\subseteq Y$是一个开集，$R:F\to Z$是一个映射。若$T$在$x_0$处Fr\'echet可微，$TE\subseteq F$，$R$在$Tx_0$处Fr\'echet可微，则$RT:E\to Z$也在$x_0$处可微，且有：
 		\begin{equation*}
@@ -116,12 +120,121 @@
 	则称$T$在$x_0$处G\^ateaux可微。
 \end{definition}
 \begin{property}\label{prop:FrechetGateaux}
-	设$X,Y$为数域$K$上的赋范线性空间，$E\subseteq X$是一个开集，$x_0\in E$，$T:E\to Y$是一个映射。若$f$在$x_0$处Fr\'echet可微，则它在$x_0$处沿任何方向$h$的G\^ateaux方向导数都存在，且$\dif T(x_0;h)=(\operatorname{D}Tx_0)h$。
+	Fr\'echet可微和G\^ateaux可微具有如下关系：
+	\begin{enumerate}
+		\item 设$X,Y$为数域$K$上的赋范线性空间，$E\subseteq X$是一个开集，$x_0\in E$，$T:E\to Y$是一个映射。若$T$在$x_0$处Fr\'echet可微，则它在$x_0$处沿任何方向$h$的G\^ateaux方向导数都存在，且$\dif T(x_0;h)=(\operatorname{D}Tx_0)h$，即$T$在$x_0$处G\^ateaux可微；
+		\item 设$X$为$\mathbb{R}^{}$上的赋范线性空间，$E\subseteq X$是一个开集，$x_0\in E$，$T:E\mathbb{R}^{}$是一个映射。$T$在$x_0$处Fr\'echet可微的充分必要条件为$T$在$x_0$处G\^ateaux可微；
+	\end{enumerate}
 \end{property}
 \begin{proof}
-	由Fr\'echet可微和G\^teaux方向导数的定义立即可得。
+	(1)由Fr\'echet可微和G\^teaux方向导数的定义立即可得。\par
+	(2)必要性由(1)即可得到，下证充分性。\par
+	因为$T$在$x_0$处G\^ateaux可微，所以存在有界线性算子$A\in\mathcal{L}(X,\mathbb{R}^{})$使得对任意的$h\in X$：
+	\begin{equation*}
+		\lim_{t\to0}\frac{T(x_0+th)-Tx_0}{t}=Ah
+	\end{equation*}
+	即：
+	\begin{align*}
+		&\lim_{t\to0}\left\|\frac{T(x_0+th)-Tx_0}{t}-Ah\right\|=\lim_{t\to0}\left\|\frac{T(x_0+th)-Tx_0-Ath}{t}\right\| \\
+		=&\lim_{t\to0}||h||_X\frac{||T(x_0+th)-Tx_0-Ath||}{||th||_X}=0
+	\end{align*}
+	要使得上式成立，必须有：
+	\begin{equation*}
+		\lim_{||h||_X\to0}\frac{||T(x_0+h)-Tx_0-Ah||_Y}{||h||_X}=0
+	\end{equation*}
 \end{proof}
-
+\begin{note}
+	根据\cref{prop:FrechetGateaux}(2)，对于从实赋范线性空间到$\mathbb{R}^{}$上的映射的$T$，若$T$ Fr\'echet可微，我们也称$T$ 可微、G\^ateaux可微或可导；若$T$ G\^ateaux可微，我们也称$T$ 可导、Fr\'echet可微或可微。
+\end{note}
+\subsection{$\mathbb{R}^{n}$上的微分}
+\subsubsection{有限增量公式}
+为了得到有限增量公式，我们需要先来讨论$\mathbb{R}^{}\to\mathbb{R}^{}$的函数的极值，更一般情况下关于极值的讨论将放在后面。
+\begin{definition}
+	设函数$f:I\to\mathbb{R}^{}$，开区间$I\subseteq\mathbb{R}^{}$，$x_0\in I$。若存在$x_0$的邻域$U(x_0,\delta)$使得对任意的$x\in U(x_0,\delta)$有：
+	\begin{equation*}
+		f(x)\leqslant f(x_0)\text{或}f(x)\geqslant f(x_0)
+	\end{equation*}
+	则称$f(x)$在$x_0$处取到\textbf{极大值}或\textbf{极小值}。若上述不等号严格地成立，则称$f(x)$在$x_0$处取到\textbf{严格的极大值}或\textbf{严格的极小值}。函数的极大值与极小值统称为\textbf{极值}，使函数取到极值的点$x$被称为函数的\textbf{极值点}。
+\end{definition}
+\begin{lemma}\label{lem:SmallOSignPreservation}
+	设$A\in\mathbb{R}^{}\backslash\{0\}$。若$f(h)=Ah+\operatorname{o}(h\to0)$，那么对于充分小的$h\ne0$，$f(h)$与$Ah$同号。
+\end{lemma}
+\begin{proof}
+	由\cref{prop:RSeq}(8.b)(8.c)可得：
+	\begin{equation*}
+		\lim_{h\to0}\frac{f(h)}{Ah}=\lim_{h\to0}\frac{Ah}{Ah}+\lim_{h\to0}\frac{\operatorname{o}(h)}{Ah}=1
+	\end{equation*}
+	根据\cref{prop:RSeq}(5)即可得到结论。
+\end{proof}
+\begin{theorem}[Fermat Theorem]\label{theo:FermatTheorem}
+	设函数$f:I\to\mathbb{R}^{}$，开区间$I\subseteq\mathbb{R}^{}$，$f$在$x_0\in I$处取得极值。若$f$在$x_0$处可导，则有$f'(x_0)=0$。
+\end{theorem}
+\begin{proof}
+	由无穷小增量公式可得：
+	\begin{equation*}
+		f(x)-f(x_0)=f'(x_0)(x-x_0)+o(x-x_0)
+	\end{equation*}
+	根据\cref{lem:SmallOSignPreservation}即可得出结论。
+\end{proof}
+\begin{theorem}[Rolle Theorem]\label{theo:RolleTheorem}
+	设函数$f$在$[a,b]$上连续，$(a,b)$上可导，$f(a)=f(b)$，则存在$c\in(a,b)$使得$f'(c)=0$。
+\end{theorem}
+\begin{proof}
+	由\cref{prop:OpenClosedSet}(2)、\cref{theo:CompactRn}和\cref{prop:CompactMap}(3)可知$f$在$[a,b]$上取到最小值$m\in\mathbb{R}^{}$和最大值$M\in\mathbb{R}^{}$。若$M=m$，则$f$在$[a,b]$上是常值函数，由\cref{theo:FermatTheorem}可知对任意的$c\in(a,b)$都有$f'(c)=0$。若$M\ne m$，则存在$c\in(a,b)$使得$f$在$c$处取得极值。由\cref{theo:FermatTheorem}即可得出结论。
+\end{proof}
+\begin{theorem}[Lagrange Mean Value Theorem]\label{theo:LagrangeMeanValueTheorem}
+	设函数$f$在$[a,b]$上连续，$(a,b)$上可导，则存在$c\in(a,b)$使得：
+	\begin{equation*}
+		f'(c)=\frac{f(b)-f(a)}{b-a}
+	\end{equation*}
+	即存在$\theta\in(0,1)$使得：
+	\begin{equation*}
+		f(b)-f(a)=f'[a+\theta(b-a)](b-a)
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	作辅助函数：
+	\begin{equation*}
+		F(x)=f(x)-f(a)-\frac{f(b)-f(a)}{b-a}(x-a)
+	\end{equation*}
+	由\cref{prop:RMap}(5.b)(5.c)和\cref{prop:FrechetDifferential}(4)可知$F(x)$在$[a,b]$上连续，$(a,b)$上可导，$F(a)=F(b)=0$。根据\cref{theo:RolleTheorem}可知存在$c\in(a,b)$使得：
+	\begin{equation*}
+		0=F'(c)=f'(c)-\frac{f(b)-f(a)}{b-a}\qedhere
+	\end{equation*}
+\end{proof}
+\begin{theorem}[$\mathbb{R}^{n}\to\mathbb{R}^{}$上的有限增量公式]\label{theo:FiniteIncrementRnR}
+	设$E\subseteq\mathbb{R}^{n}$是开集，$f:E\to\mathbb{R}^{}$在$\overline{E}$上连续且在$E$上可微，$a,b\in\overline{E}$且对任意的$\theta\in(0,1)$有$a+\theta(b-a)\in E$，则存在$\theta\in(0,1)$使得：
+	\begin{equation*}
+		f(b)-f(a)=\sum_{i=1}^{n}f_{x_i}'[a+\theta(b-a)](b_i-a_i)
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	考察函数：
+	\begin{equation*}
+		\varphi(t)=f[a+t(b-a)]
+	\end{equation*}
+	$\varphi(t)$在$[0,1]$上连续，在$(0,1)$上可导，由\cref{theo:LagrangeMeanValueTheorem}可得：
+	\begin{equation*}
+		\varphi(1)-\varphi(0)=\varphi'(\theta),\;\theta\in(0,1)
+	\end{equation*}
+	根据\cref{prop:FrechetDifferential}(5)可知：
+	\begin{equation*}
+		\varphi'(t)=\sum_{i=1}^{n}f_{x_i}'[a+t(b-a)](b_i-a_i)
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\varphi(1)-\varphi(0)=f(b)-f(a)=\sum_{i=1}^{n}f_{x_i}'[a+\theta(b-a)](b_i-a_i)\qedhere
+	\end{equation*}
+\end{proof}
+%\begin{theorem}[$\mathbb{R}^{n}\to\mathbb{R}^{m}$上的有限增量公式]\label{theo:FiniteIncrementRnRm}
+%	设$E\subseteq\mathbb{R}^{n}$是开集，$f:E\to\mathbb{R}^{m}$在$E$上Fr\'echet可微，$a,b\in E$且对任意的$\theta\in[0,1]$有$a+\theta(b-a)\in E$，则存在$\theta\in(0,1)$使得：
+%	\begin{equation*}
+%		||f(b)-f(a)||\leqslant||\operatorname{D}f[a+\theta(b-a)]||\;||b-a||
+%	\end{equation*}
+%\end{theorem}
+%\begin{proof}
+%	
+%\end{proof}
 
 \section{定积分}
 \begin{definition}
@@ -515,7 +628,7 @@
 	\begin{equation*}
 		\delta=\frac{\varepsilon}{f(a)-f(b)+1}
 	\end{equation*}\par
-	(3)因为$f$在$[a,b]$上连续，由\info{连续则一致连续}可得$f$在$[a,b]$上一致连续，所以对任意的$\varepsilon>0$，存在$\delta>0$，当$|x-y|<\delta$时就有$|f(x)-f(y)|<\varepsilon$。取$|P|<\delta$，于是：
+	(3)因为$f$在$[a,b]$上连续，由\cref{prop:OpenClosedSet}(2)、\cref{theo:CompactRn}和\cref{prop:CompactMap}(4)可得$f$在$[a,b]$上一致连续，所以对任意的$\varepsilon>0$，存在$\delta>0$，当$|x-y|<\delta$时就有$|f(x)-f(y)|<\varepsilon$。取$|P|<\delta$，于是：
 	\begin{equation*}
 		\Omega(f,P)=\sum_{i=1}^{n}\omega_i\Delta x_i<\varepsilon\sum_{i=1}^{n}\Delta x_i=(b-a)\varepsilon
 	\end{equation*}
@@ -528,7 +641,7 @@
 	\begin{equation*}
 		J_j=(c_j-\eta,c_j+\eta),\quad j=1,2,\dots,l
 	\end{equation*}
-	在$[a,b]$减去$\seq{J}{l}$后所余下的有限个闭子区间上，$f$是连续的，由\info{连续则一致连续}可得$f$在其上一致连续，所以存在$\delta>0$，使得只要：
+	在$[a,b]$减去$\seq{J}{l}$后所余下的有限个闭子区间上，$f$是连续的，由\cref{prop:OpenClosedSet}(2)、\cref{theo:CompactRn}和\cref{prop:CompactMap}(4)可得$f$在其上一致连续，所以存在$\delta>0$，使得只要：
 	\begin{equation*}
 		x_,y\in[a,b]\Big\backslash\left(\underset{j=1}{\overset{l}{\cup}}J_j\right),\;|x-y|<\delta
 	\end{equation*}
@@ -602,7 +715,7 @@
 	\begin{equation*}
 		\sigma(f,P',\xi')=\sigma(f,P_1,\varphi)+\sigma(f,P_2,\psi),\quad|P'|\to0\longrightarrow|P_1|,|P_2|\to0
 	\end{equation*}
-	由\info{极限的运算法则}可得：
+	由\cref{prop:RMap}(5.b)可得：
 	\begin{equation*}
 		\lim_{|P'|\to0}\sigma(f,P',\xi)=\lim_{|P_1|\to0}\sigma(f,P_1,\varphi)+\lim_{|P_2|\to0}\sigma(f,P_2,\psi)=\int_{a}^bf(x)\dif x+\int_{b}^cf(x)\dif x
 	\end{equation*}
