@@ -152,7 +152,7 @@
 \begin{definition}
 	设函数$f:I\to\mathbb{R}^{}$，开区间$I\subseteq\mathbb{R}^{}$，$x_0\in I$。若存在$x_0$的邻域$U(x_0,\delta)$使得对任意的$x\in U(x_0,\delta)$有：
 	\begin{equation*}
-		f(x)\leqslant f(x_0)\text{或}f(x)\geqslant f(x_0)
+		f(x)\leqslant f(x_0)\quad\text{或}\quad f(x)\geqslant f(x_0)
 	\end{equation*}
 	则称$f(x)$在$x_0$处取到\textbf{极大值}或\textbf{极小值}。若上述不等号严格地成立，则称$f(x)$在$x_0$处取到\textbf{严格的极大值}或\textbf{严格的极小值}。函数的极大值与极小值统称为\textbf{极值}，使函数取到极值的点$x$被称为函数的\textbf{极值点}。
 \end{definition}
@@ -238,191 +238,222 @@
 
 \section{定积分}
 \begin{definition}
-	定义闭区间$[a,b]\subseteq\mathbb{R}^{}$的一个\textbf{分割}为插入在$a$和$b$之间的有限个分点：
+	设$Q_i=[a_i,b_i]\subseteq\mathbb{R}^{},\;i=1,2,\dots,n$，$Q=Q_1\times Q_2\times\cdots\times Q_n\subseteq\mathbb{R}^{n}$是一个闭方块。称$Q_i$为$Q$的\gls{Edge}，定义$Q$的\gls{Volume}为：
+	\begin{equation*}
+		\operatorname{Vol}(Q)=\prod_{i=1}^{n}(b_i-a_i)
+	\end{equation*}
+	对于$G_i=(a_i,b_i)\subseteq\mathbb{R}^{},\;i=1,2,\dots,n$，称$G=G_1\times G_2\times\cdots\times G_n\subseteq\mathbb{R}^{n}$是一个开方块，同样称$G_i$为$G$的棱，定义$G$的体积为：
+	\begin{equation*}
+		\operatorname{Vol}(G)=\prod_{i=1}^{n}(b_i-a_i)
+	\end{equation*}
+\end{definition}
+\begin{definition}
+	定义闭区间$[a,b]\subseteq\mathbb{R}^{}$的一个\gls{Partition}为插入在$a$和$b$之间的有限个分点：
 	\begin{equation*}
 		P:\;a=x_0<x_1<\cdots<x_n=b
 	\end{equation*}
-	这些分点把$[a,b]$分成$n$个闭子区间$[x_{i-1},x_{i}],\;i=1,2,\dots,n$，其中第$i$个闭子区间的长度为$\Delta x_i=x_i-x_{i-1}$，称$|P|=\max\{\Delta x_i:i=1,2,\dots,n\}$为分割$P$的\textbf{模}。在分割$P$的每一个闭子区间上任取一点：
+	这些分点把$[a,b]$分成$n$个闭子区间$[x_{i-1},x_{i}],\;i=1,2,\dots,n$，其中第$i$个闭子区间的长度为$\Delta x_i=x_i-x_{i-1}$，称$|P|=\max\{\Delta x_i:i=1,2,\dots,n\}$为分割$P$的\gls{Mesh}。在分割$P$的每一个闭子区间上任取一点：
 	\begin{equation*}
 		\xi_i\in[x_{i-1},x_i],\quad i=1,2,\dots,n
 	\end{equation*}
-	称这$n$个点$\seq{\xi}{n}$为对应于分割$P$的一组\textbf{标志点}，用$\xi$来表示它们。
+	称这$n$个点$\seq{\xi}{n}$为对应于分割$P$的一组\gls{Tag}，用$\xi$来表示它们。
 \end{definition}
 \begin{definition}
-	如果闭区间$[a,b]\subseteq\mathbb{R}^{}$上的分割序列$\{P_n\}$满足：
+	设$Q^i=[a^i,b^i]\subseteq\mathbb{R}^{},\;i=1,2,\dots,n$，$Q=Q^1\times Q^2\times\cdots\times Q^n\subseteq\mathbb{R}^{n}$是一个闭方块，$Q^i$的分割为：
+	\begin{equation*}
+		P^i:\;a^i=x_0^i<x_1^i<\cdots<x_{N_i}^i=b^i
+	\end{equation*}
+	称$P=\{P^1,P^2,\dots,P^n\}$为$Q$的一个分割，称$|P|=\max\{|P_i|:i=1,2,\dots,n\}$为分割$P$的模。设$x_{i_j}^i$为$Q^i$的一个分点，记：
+	\begin{equation*}
+		L_{i_j}^i=\{x=(x^1,x^2,\dots,x^n)\in Q:x^i=x^i_{i_j}\}
+	\end{equation*}
+	为分割$P$的一个\gls{PartitionHyperplane}。分割$P$的各分界：
+	\begin{equation*}
+		L_{i_j}^i,\quad i=1,2,\dots,n,\;i_j=1,2,\dots,N_i
+	\end{equation*}
+	将$Q$分成了$\prod\limits_{i=1}^{n}N_i$个闭子方块，记：
+	\begin{gather*}
+		Q_{i_j}^i=[x_{i_j-1}^i,x_{i_j}^i],\quad Q_J=\prod_{i=1}^{n}Q_{i_j}^i,\;J=\{1_j,2_j,\dots,n_j\} \\
+		\operatorname{Vol}(Q_J)=\Delta x_J=\prod_{i=1}^{n}(x_{i_j}^i-x_{i_j-1}^i)
+	\end{gather*}
+	在每一个闭子方块$Q_J$上任取一点$\xi_J$，称$\{\xi_J\}$为对应于分割$P$的一组标志点，记为$\xi$。
+\end{definition}
+\begin{definition}
+	如果闭方块$Q\subseteq\mathbb{R}^{}$上的分割序列$\{P_n\}$满足：
 	\begin{equation*}
 		\lim_{n\to+\infty}|P_n|=0
 	\end{equation*}
-	则称$\{P_n\}$是一个\textbf{无穷细分割序列}。
+	则称$\{P_n\}$是一个\gls{SequenceOfPartitionsWithMeshTendingToZero}。
 \end{definition}
 \begin{definition}
-	设函数$f$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上有定义，对于$[a,b]$的任意一个分割：
+	设$Q\subseteq\mathbb{R}^{n}$是一个闭方块，$f:Q\to\mathbb{R}^{}$是一个函数，对于$Q$的任意一个分割：
 	\begin{equation*}
-		P:\;a=x_0<x_1<\cdots<x_n=b
+		P=\{P^1,P^2,\dots,P^n\}
 	\end{equation*}
 	和对应于这一分割的任意一组标志点$\xi$，可以作和：
 	\begin{equation*}
-		\sigma(f,P,\xi)=\sum_{i=1}^{n}f(\xi_i)\Delta x_i
+		\sigma(f,P,\xi)=\sum_{J}^{}f(\xi_J)\Delta x_J
 	\end{equation*}
-	称和$\sigma(f,P,\xi)$为函数$f$在闭区间$[a,b]$上的\textbf{Riemann和}。
+	称和$\sigma(f,P,\xi)$为函数$f$在闭方块$Q$上的\gls{RiemannSum}。
 \end{definition}
 \begin{definition}
-	设函数$f$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上有定义，$I\in\mathbb{R}^{}$。若对任意的$\varepsilon>0$，存在$\delta>0$使得只要$|P|<\delta$，不论分割$P$对应的标志点组$\xi$如何选择，都有：
+	设$Q\subseteq\mathbb{R}^{n}$是一个闭方块，$f:Q\to\mathbb{R}^{}$是一个函数，$I\in\mathbb{R}^{}$。若对任意的$\varepsilon>0$，存在$\delta>0$使得只要$|P|<\delta$，不论分割$P$对应的标志点组$\xi$如何选择，都有：
 	\begin{equation*}
 		|\sigma(f,P,\xi)-I|<\varepsilon
 	\end{equation*}
-	则称$f$在区间$[a,b]$上\textbf{Riemann可积}，并且把$I$称为函数$f$在区间$[a,b]$上的\textbf{积分}，记为：
+	则称$f$在闭方块$Q$上\gls{RiemannIntegrable}，并且把$I$称为函数$f$在$Q$上的\gls{RiemannIntegral}，记为：
 	\begin{equation*}
-		\int_{a}^{b}f(x)\dif x=\lim_{|P|\to0}\sigma(f,P,\xi)=I
+		\mathop{\int\!\!\cdots\!\!\int}\limits_{Q}f(x^1,x^2,\dots,x^n)\dif (x^1,x^2,\dots,x^n)=\lim_{|P|\to0}\sigma(f,P,\xi)=I
+	\end{equation*}
+	在不至于混淆的情况下也可以简记为：
+	\begin{equation*}
+		\int_{Q}f(x^1,x^2,\dots,x^n)\dif (x^1,x^2,\dots,x^n)\quad\text{或}\quad\int_{Q}f(x)\dif x
 	\end{equation*}
 \end{definition}
 
 \subsection{定积分存在的一般条件}
 \begin{theorem}\label{theo:RiemannIntegrableBounded}
-	设函数$f$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上可积，则$f$在$[a,b]$上有界。
+	设函数$f$在闭方块$Q\subseteq\mathbb{R}^{}$上可积，则$f$在$Q$上有界。
 \end{theorem}
 \begin{proof}
-	设$f$在$[a,b]$上无界。因为$f$在闭区间$[a,b]$上可积，所以对于$\varepsilon=1$，存在$\delta>0$使得只要$|P|<\delta$，不论分割$P$对应的标志点组$\xi$如何选择，都有$|\sigma(f,P,\xi)-I|<1$，即
+	设$f$在$Q$上无界。因为$f$在$Q$上可积，所以对于$\varepsilon=1$，存在$\delta>0$使得只要$|P|<\delta$，不论分割$P$对应的标志点组$\xi$如何选择，都有$|\sigma(f,P,\xi)-I|<1$，即
 	\begin{equation*}
 		|\sigma(f,P,\xi)|=|\sigma(f,P,\xi)-I+I|\leqslant|\sigma(f,P,\xi)-I|+|I|<1+|I|
 	\end{equation*}
-	取上述满足$|P|<\delta$的分割$P$。因为$f$在$[a,b]$上无界，所以$f$至少在分割$P$的一个闭子区间$[x_{j-1},x_j]$上无界。任意选定$\xi_i\in[x_{i-1},x_i],\;\forall\;i\ne j$，则可以选择$\xi_j\in[x_{j-1},x_j]$使得：
+	任取上述满足$|P|<\delta$的分割$P$。因为$f$在$Q$上无界，所以$f$至少$Q$的一个闭子方块$Q_{J'}$上无界，于是可以选择$\xi_{J'}\in Q_{J'}$使得：
 	\begin{equation*}
-		|f(\xi_j)\Delta x_j|>\sum_{i\ne j}|f(\xi_i)\Delta x_i|+1+|I|
+		|f(\xi_{J'})\Delta x_{J'}|>\sum_{J\ne {J'}}|f(\xi_{J'})\Delta x_{J'}|+1+|I|
 	\end{equation*}
 	注意到$|a|-|b|=|a+b-b|-|b|\leqslant|a+b|+|-b|-|b|=|a+b|$，于是就有：
 	\begin{equation*}
-		1+|I|>|\sigma(f,P,\xi)|=\left|\sum_{i=1}^{n}f(\xi_i)\Delta x_i\right|\geqslant|f(\xi_j)\Delta x_j|-\left|\sum_{i\ne j}^{}f(\xi_i)\Delta x_i\right|>1+|I|
+		1+|I|>|\sigma(f,P,\xi)|=\left|\sum_{J}f(\xi_J)\Delta x_J\right|\geqslant|f(\xi_{J'})\Delta x_{J'}|-\left|\sum_{J\ne J'}^{}f(\xi_J)\Delta x_J\right|>1+|I|
 	\end{equation*}
-	矛盾，所以$f$在$[a,b]$上有界。
+	矛盾，所以$f$在$Q$上有界。
 \end{proof}
 \begin{definition}
-	设函数$f$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上有定义且有界，对于$[a,b]$的一个分割：
+	设函数$f$在闭方块$Q\subseteq\mathbb{R}^{}$上有定义且有界。由\info{确界原理}可知，对于$Q$的一个分割$P$，$f$在$Q$的任一闭子方块$Q_J$上都有有限的下确界和上确界，记为：
 	\begin{equation*}
-		P:\;a=x_0<x_1<\cdots<x_n=b
+		m_J=\inf_{x\in Q_j}f(x),\quad M_J=\sup_{x\in Q_j}f(x),\quad\omega_J=M_J-m_J
 	\end{equation*}
-	$f$在任一子区间$[x_{i-1},x_i]$上都有有限的下确界和上确界，记为：
-	\begin{equation*}
-		m_i=\inf_{x\in[x_{i-1},x_i]}f(x),\quad M_i=\sup_{x\in[x_{i-1},x_i]}f(x),\quad\omega_i=M_i-m_i
-	\end{equation*}
-	记1：
-	\begin{equation*}
-		m=\inf_{x\in[a,b]}f(x),\quad M=\sup_{x\in[a,b]}f(x),\quad\omega=M-m
-	\end{equation*}
-\end{definition}
-\begin{definition}
-	设函数$f$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上有定义且有界，$P$是$[a,b]$上的一个分割，分别称：
-	\begin{equation*}
-		L(f,P)=\sum_{i=1}^{n}m_i\Delta x_i,\quad U(f,P)=\sum_{i=1}^{n}M_i\Delta x_i,\quad\Omega(f,P)=U(f,P)-L(f,P)
-	\end{equation*}
-	为$f$关于$P$的\textbf{下和}与\textbf{上和}。
-\end{definition}
-\begin{definition}
 	记：
+	\begin{equation*}
+		m=\inf_{x\in Q}f(x),\quad M=\sup_{x\in Q}f(x),\quad\omega=M-m
+	\end{equation*}
+\end{definition}
+\begin{definition}
+	设函数$f$在闭方块$Q\subseteq\mathbb{R}^{}$上有定义且有界，$P$是$Q$上的一个分割，分别称：
+	\begin{equation*}
+		L(f,P)=\sum_{J}^{}m_J\Delta x_J,\quad U(f,P)=\sum_{J}^{}M_J\Delta x_J,\quad\Omega(f,P)=U(f,P)-L(f,P)
+	\end{equation*}
+	为$f$关于$P$的\gls{LowerDarbouxSum}、\gls{UpperDarbouxSum}和\gls{DarbouxSum}。记：
 	\begin{equation*}
 		\underline{I}=\sup_PL(f,P),\quad\overline{I}=\inf_PU(f,P)
 	\end{equation*}
 \end{definition}
 \begin{property}\label{prop:DarbouxSum}
-	设函数$f$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上有定义且有界，$P$是$[a,b]$上的一个分割，$f$关于$P$的下和$L(f,P)$和上和$U(f,P)$具有如下性质：
+	设函数$f$在闭方块$Q\subseteq\mathbb{R}^{}$上有定义且有界，$P$是$Q$上的一个分割，$f$关于$P$的Darboux下和$L(f,P)$和Darboux上和$U(f,P)$具有如下性质：
 	\begin{enumerate}
 		\item $-L(-f,P)=U(f,P)$；
 		\item $L(f,P)\leqslant\sigma(f,P,\xi)\leqslant U(f,P),\;\inf\limits_{\xi}\sigma(f,P,\xi)=L(f,P),\;\sup\limits_{\xi}\sigma(f,P,\xi)=U(f,P)$；
-		\item 设分割$P'$是由分割$P$添加$l$个分点构成的分割，则：
+		\item 设分割$P'$是由分割$P$添加$l$个分界构成的分割，则：
 		\begin{align*}
-			L(f,P)\leqslant L(f,P')\leqslant L(f,P)+l\omega|P| \\
-			U(f,P)\geqslant U(f,P')\geqslant U(f,P)-l\omega|P|
+			L(f,P)\leqslant L(f,P')\leqslant L(f,P)+l\omega C|P| \\
+			U(f,P)\geqslant U(f,P')\geqslant U(f,P)-l\omega C|P| \\
+			C=\max\left\{\frac{\operatorname{Vol}(Q)}{b^i-a^i}:i=1,2,\dots,n\right\}
 		\end{align*}
-		\item 设$P_1,P_2$是$[a,b]$的任意两个分割，则有$L(f,P_1)\leqslant U(f,P_2)$；
+		\item 设$P_1,P_2$是$Q$的任意两个分割，则有$L(f,P_1)\leqslant U(f,P_2)$；
 		\item $\lim\limits_{|P|\to0}L(f,P)=\underline{I},\;\lim\limits_{|P|\to0}U(f,P)=\overline{I}$。
 	\end{enumerate}
 \end{property}
 \begin{proof}
 	(1)注意到：
 	\begin{equation*}
-		-L(-f,P)=-\sum_{i=1}^{n}-M_i\Delta x_i=\sum_{i=1}^{n}M_i\Delta x_i=U(f,P)
+		-L(-f,P)=-\sum_{J}^{}-M_J\Delta x_J=\sum_{J}^{}M_J\Delta x_J=U(f,P)
 	\end{equation*}\par
 	(2)由定义即可得出结论。\par
-	(3)只证明在子区间$[x_{i-1},x_{i}]$上添加一个分点$x'$的情况，多个分点的结论可直接由此推出。此时$L(f,P)$和$L(f,P')$的区别仅在于前者的$m_i(x_i-x_{i-1})$被$m_i'(x'-x_{i-1})+m_i''(x_i-x')$替代，于是：
+	(3)只证明添加一个分界的情况，多个分界的结论可直接由此推出。设添加的分界为：
+	\begin{equation*}
+		\{x=(x^1,x^2,\dots,x^n)\in Q:x^i=\alpha,\;\alpha\in(x^h_{k-1},x^h_k)\}
+	\end{equation*}
+	注意到：
 	\begin{align*}
-		L(f,P')-L(f,P)&=m_i'(x'-x_{i-1})+m_i''(x_i-x')-m_i(x_i-x_{i-1}) \\
-		&=m_i'(x'-x_{i-1})+m_i''(x_i-x')-m_i(x_i-x'+x'-x_{i-1}) \\
-		&=(m_i''-m_i)(x_i-x')+(m_i'-m_i)(x'-x_{i-1})
+	L(f,P)=\sum_{J:i_j\ne k}^{}m_J\Delta x_J+\sum_{J:i_j=k}^{}m_J\Delta x_J
 	\end{align*}
-	注意到$m_i\leqslant m_i',m_i''\leqslant M_i$，所以有：
+	添加分界后改变的部分仅为后一项，且添加分界后，后一项中的每一个部分为：
 	\begin{equation*}
-		0\leqslant L(f,P')-L(f,P)\leqslant(M_i-m_i)(x_i-x'+x'-x_{i-1})=\omega_i\Delta x_i\leqslant\omega|P|
+		m_{J'}\left(\frac{\gamma-x^h_{k-1}}{\Delta x_J}\right)\Delta x_J+m_{J''}\left(\frac{x^h_k-\gamma}{\Delta x_J}\right)\Delta x_J
+	\end{equation*}
+	于是：
+	\begin{align*}
+		&L(f,P')-L(f,P)=\sum_{J:i_j=k}^{}\left[m_{J'}\left(\frac{\gamma-x^h_{k-1}}{\Delta x_J}\right)\Delta x_J+m_{J''}\left(\frac{x^h_k-\gamma}{\Delta x_J}\right)\Delta x_J-m_J\Delta x_J\right] \\
+		=&\sum_{J:i_j=k}^{}\left[m_{J'}\left(\frac{\gamma-x^h_{k-1}}{\Delta x_J}\right)\Delta x_J+m_{J''}\left(\frac{x^h_k-\gamma}{\Delta x_J}\right)\Delta x_J-m_J\left(\frac{\gamma-x^h_{k-1}+x^h_k-\gamma}{\Delta x_J}\right)\Delta x_J\right] \\
+		=&\sum_{J:i_j=k}^{}\left[(m_{J'}-m_J)\left(\frac{\gamma-x^h_{k-1}}{\Delta x_J}\right)\Delta x_J+(m_{J''}-m_J)\left(\frac{x^h_k-\gamma}{\Delta x_J}\right)\Delta x_J\right]
+	\end{align*}
+	注意到$m_J\leqslant m_{J'},m_{J''}\leqslant M_J$，所以有：
+	\begin{equation*}
+		0\leqslant L(f,P')-L(f,P)\leqslant\sum_{J:i_j=k}^{}\omega_J\Delta x_J\leqslant\omega_J\sum_{J:i_j=k}^{}\Delta x_J=\omega\frac{\Delta x^h_k}{b^h-a^h}\operatorname{Vol}(Q)\leqslant\omega C|P|
 	\end{equation*}
 	即：
 	\begin{equation*}
-		L(f,P)\leqslant L(f,P')\leqslant L(f,P)+\omega|P|
+		L(f,P)\leqslant L(f,P')\leqslant L(f,P)+\omega C|P|
 	\end{equation*}\par
-	由(1)可得：
+	由(1)和上述结论可得：
 	\begin{equation*}
-		0\leqslant U(f,P)-U(f,P')=-L(-f,P)+L(-f,P')\leqslant-\omega|P|
+		0\leqslant L(-f,P')-L(-f,P)\leqslant-\omega C|P|
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		0\leqslant -U(f,P')+U(f,P)\leqslant-\omega C|P|
 	\end{equation*}
 	即：
 	\begin{equation*}
-		U(f,P)\geqslant U(f,P')\geqslant U(f,P)-\omega|P|
+		U(f,P)\geqslant U(f,P')\geqslant U(f,P)-\omega C|P|
 	\end{equation*}\par
 	(4)设$P'$为$P_1$和$P_2$的分点合并在一起构成的分割，则由(3)(2)可得：
 	\begin{equation*}
 		L(f,P_1)\leqslant L(f,P')\leqslant U(f,P')\leqslant U(f,P_2)
 	\end{equation*}\par
-	(5)由上确界的定义可得对任意的$\varepsilon>0$，存在$[a,b]$上的分割：
-	\begin{equation*}
-		P_0:\;a=x_0<x_1<\cdots<x_n=b
-	\end{equation*}
-	使得：
+	(5)只证明第一个结论，第二个完全类似。由上确界的定义可得对任意的$\varepsilon>0$，存在$Q$上的分割$P_0$使得：
 	\begin{equation*}
 		\underline{I}-\frac{\varepsilon}{2}<L(f,P_0)<\underline{I}
 	\end{equation*}
-	取$[a,b]$上的分割$P$满足：
+	设$P_0$的分界数为$l$。取$Q$上的分割$P$满足：
 	\begin{equation*}
-		|P|<\delta=\frac{\varepsilon}{2l\omega+1}
+		|P|<\delta=\frac{\varepsilon}{2l\omega C+1}
 	\end{equation*}
-	将$P_0,P$得分点合在一起得到分割$P'$，则由(3)可得：
+	将$P_0,P$的分界合在一起得到分割$P'$，则由(3)可得：
 	\begin{equation*}
-		\underline{I}\geqslant L(f,P)\geqslant L(f,P')-l\omega|P|\geqslant L(f,P_0)-l\omega|P|>\underline{I}-\frac{\varepsilon}{2}-\frac{\varepsilon}{2}=\underline{I}-\varepsilon
+		\underline{I}\geqslant L(f,P)\geqslant L(f,P')-l\omega C|P|\geqslant L(f,P_0)-l\omega C|P|>\underline{I}-\frac{\varepsilon}{2}-\frac{\varepsilon}{2}=\underline{I}-\varepsilon
 	\end{equation*}
-	即对任意的$\varepsilon>0$，只要$|P|<\delta=\dfrac{\varepsilon}{2l\omega+1}$，就有$|L(f,P)-\underline{I}|<\varepsilon$，所以：
+	即对任意的$\varepsilon>0$，只要$|P|<\delta=\dfrac{\varepsilon}{2l\omega C+1}$，就有$|L(f,P)-\underline{I}|<\varepsilon$，所以：
 	\begin{equation*}
-		\lim_{|P|\to0}L(f,P)=\underline{I}
-	\end{equation*}\par
-	由(1)、\cref{prop:RSeq}(8.c)和\info{上下确界的数乘}可得：
-	\begin{align*}
-		\lim_{|P|\to0}U(f,P)&=\lim_{|P|\to0}-L(-f,P)=-\lim_{|P|\to0}L(-f,P)=-\sup_PL(-f,P) \\
-		&=-\sup_P[-U(f,P)]=\inf_PU(f,P)=\overline{I}\qedhere
-	\end{align*}
+		\lim_{|P|\to0}L(f,P)=\underline{I}\qedhere
+	\end{equation*}
 \end{proof}
 \begin{theorem}\label{theo:RiemannIntegrableIff}
-	设函数$f$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上有定义并且有界，则下述三条结论等价：
+	设函数$f$在方块$Q\subseteq\mathbb{R}^{}$上有定义并且有界，则下述三条结论等价：
 	\begin{enumerate}
-		\item 对任意的$\varepsilon>0$，存在$[a,b]$上的分割$P$使得$\Omega(f,P)=U(f,P)-L(f,P)<\varepsilon$；
-		\item $f$在$[a,b]$上满足$\underline{I}=\overline{I}$，也即$\lim\limits_{|P|\to0}\Omega(f,P)=0$；
-		\item $f$在$[a,b]$上可积且$\int_{a}^{b}f(x)\dif x=\overline{I}=\underline{I}$。
+		\item 对任意的$\varepsilon>0$，存在$Q$上的分割$P$使得$\Omega(f,P)=U(f,P)-L(f,P)<\varepsilon$；
+		\item $f$在$Q$上满足$\underline{I}=\overline{I}$，也即$\lim\limits_{|P|\to0}\Omega(f,P)=0$；
+		\item $f$在$Q$上可积且$\int_{Q}f(x)\dif x=\overline{I}=\underline{I}$。
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
-	\textbf{(1)$\Rightarrow$(2)：}由\cref{prop:RSeq}(8.b)(8.c)可得：
-	\begin{equation*}
-		\overline{I}-\underline{I}=\lim_{|P|\to0}U(f,P)-\lim_{|P|\to0}L(f,P)=\lim_{|P|\to0}[U(f,P)-L(f,P)]=\lim_{|P|\to0}\Omega(f,P)
-	\end{equation*}
-	因为对$[a,b]$上的任意分割$P$都有$U(f,P)-L(f,P)\geqslant0$和$U(f,P)-L(f,P)\geqslant\overline{I}-\underline{I}$，所以由\cref{prop:RSeq}(6)可得：
+	\textbf{(1)$\to$(2)：}因为对任意的分割$P$都有：
 	\begin{equation*}
 		0\leqslant\overline{I}-\underline{I}\leqslant U(f,P)-L(f,P)
 	\end{equation*}
-	对任意的$\varepsilon>0$，令$P$为使得$U(f,P)-L(f,P)<\varepsilon$成立的分割，就有$\overline{I}-\underline{I}<\varepsilon$，即$\overline{I}=\underline{I}$。\par
-	\textbf{(2)$\Rightarrow$(3)：}记$\overline{I}=\underline{I}=I$，所以：
+	根据条件即可得到对任意的$\varepsilon>0$有$0\leqslant\overline{I}-\underline{I}<\varepsilon$，所以$\overline{I}-\underline{I}$。\par
+	\textbf{(2)$\to$(3)：}记$\overline{I}=\underline{I}=I$，由\cref{prop:DarbouxSum}(5)可得：
 	\begin{equation*}
 		\lim_{|P|\to0}L(f,P)=\lim_{|P|\to0}U(f,P)=I
 	\end{equation*}
-	由\cref{prop:DarbouxSum}(2)和\cref{prop:RSeq}(4)可得：
+	根据\cref{prop:DarbouxSum}(2)和\cref{prop:RMap}(3.a)可得：
 	\begin{equation*}
 		\lim_{|P|\to0}\sigma(f,P,\xi)=I
 	\end{equation*}
-	即$f$在$[a,b]$上可积且积分值为$I$。\par
-	\textbf{(3)$\Rightarrow$(1)：}由可积的定义，对任意的$\varepsilon>0$，存在$\delta>0$使得只要$|P|<\delta$，就有：
+	即$f$在$Q$上可积且积分值为$I$。\par
+	\textbf{(3)$\to$(1)：}由可积的定义，对任意的$\varepsilon>0$，存在$\delta>0$使得只要$|P|<\delta$，就有：
 	\begin{equation*}
 		I-\frac{\varepsilon}{3}<\sigma(f,P,\xi)<I+\frac{\varepsilon}{3}
 	\end{equation*}
@@ -438,7 +469,7 @@
 
 \subsection{可积函数类}
 \begin{lemma}\label{lem:omega=SupVari}
-	设函数$f$在区间$J$上有定义，记：
+	设函数$f$在闭方块$J$上有定义，记：
 	\begin{equation*}
 		M=\sup_{x\in J}f(x),\quad m=\inf_{x\in J}f(x),\quad\omega=M-m
 	\end{equation*}
@@ -449,7 +480,7 @@
 \end{lemma}
 \begin{proof}
 	若$\omega=0$，则结论显然成立，下对$\omega>0$的情况进行证明。\par
-	对任意的$x_1,x_2\in J$，显然有：
+	对任意的$x_1,x_2\in J$有：
 	\begin{equation*}
 		|f(x_1)-f(x_2)|\leqslant\omega
 	\end{equation*}
@@ -459,7 +490,7 @@
 	\end{equation*}
 	对于任意的$0<\varepsilon<\omega$，由上确界和下确界的定义可得存在$x_1,x_2\in J$使得：
 	\begin{equation*}
-		f(x_1)>M-\frac{\varepsilon}{2}>m+\frac{\varepsilon}{2}>f(x_2)
+		M>f(x_1)>M-\frac{\varepsilon}{2}>m+\frac{\varepsilon}{2}>f(x_2)>m
 	\end{equation*}
 	于是：
 	\begin{equation*}
@@ -475,15 +506,15 @@
 	\end{equation*}
 \end{proof}
 \begin{theorem}\label{theo:RiemannIntegrable4ArithmeticOperation}
-	设函数$f,g$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上可积，$\alpha,\beta\in\mathbb{R}^{}$，则：
+	设函数$f,g$在闭方块$Q\subseteq\mathbb{R}^{}$上可积，$\alpha,\beta\in\mathbb{R}^{}$，则：
 	\begin{enumerate}
-		\item $\alpha f+\beta g$在$[a,b]$上可积且：
+		\item $\alpha f+\beta g$在$Q$上可积且：
 		\begin{equation*}
-			\int_{a}^b[\alpha f(x)+\beta g(x)]\dif x=\alpha\int_{a}^bf(x)\dif x+\beta\int_{a}^bg(x)\dif x
+			\int_Q[\alpha f(x)+\beta g(x)]\dif x=\alpha\int_Qf(x)\dif x+\beta\int_Qg(x)\dif x
 		\end{equation*}
-		\item $fg$在$[a,b]$上可积；
-		\item 若存在常数$c>0$使得$|f(x)|\geqslant c,\;\forall\;x\in[a,b]$，则$\dfrac{1}{f}$在$[a,b]$上可积；
-		\item $|f|$在$[a,b]$上可积。
+		\item $fg$在$Q$上可积；
+		\item 若存在常数$c>0$使得$|f(x)|\geqslant c,\;\forall\;x\in Q$，则$\dfrac{1}{f}$在$Q$上可积；
+		\item $|f|$在$Q$上可积。
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
@@ -491,7 +522,7 @@
 	\begin{equation*}
 		\lim_{|P|\to0}\sigma(f,P,\xi)=I_1\in\mathbb{R}^{},\quad\lim_{|P|\to0}\sigma(g,P,\xi)=I_2\in\mathbb{R}^{}
 	\end{equation*}
-	由\cref{prop:RSeq}(8.b)(8.c)可得：
+	由\cref{prop:RMap}(5.b)(5.c)可得：
 	\begin{align*}
 		\lim_{|P|\to0}\sigma(\alpha f+\beta g,P,\xi)&=\lim_{|P|\to0}[\alpha\sigma(f,P,\xi)+\beta\sigma(g,P,\xi)] \\
 		&=\alpha\lim_{|P|\to0}\sigma(f,P,\xi)+\beta\lim_{|P|\to0}\sigma(g,P,\xi) \\
@@ -499,32 +530,32 @@
 	\end{align*}
 	由定义可得$\alpha f+\beta g$可积，所以：
 	\begin{equation*}
-		\int_{a}^b[\alpha f(x)+\beta g(x)]\dif x=\alpha\int_{a}^bf(x)\dif x+\beta\int_{a}^bg(x)\dif x
+		\int_Q[\alpha f(x)+\beta g(x)]\dif x=\alpha\int_Qf(x)\dif x+\beta\int_Qg(x)\dif x
 	\end{equation*}\par
-	(2)由\cref{theo:RiemannIntegrableBounded}可知$f,g$在$[a,b]$上有界，设：
+	(2)由\cref{theo:RiemannIntegrableBounded}可知$f,g$在$Q$上有界，设：
 	\begin{equation*}
-		|f(x)|\leqslant K,\;|g(x)|\leqslant L,\quad\forall\;x\in[a,b]
+		|f(x)|\leqslant K,\;|g(x)|\leqslant L,\quad\forall\;x\in Q
 	\end{equation*}
-	对于任意的$x,y\in[x_{i-1},x_i]$有：
+	对于任意的$x,y\in Q_J$有：
 	\begin{align*}
 		|f(x)g(x)-f(y)g(y)|&=|f(x)g(x)-f(y)g(x)+f(y)g(x)-f(y)g(y)| \\
 		&=|[f(x)-f(y)]g(x)+[g(x)-g(y)]f(y)| \\
 		&\leqslant|f(x)-f(y)||g(x)|+|g(x)-g(y)||f(y)| \\
-		&\leqslant|f(x)-f(y)|L+|g(x)-g(y)|K\leqslant\omega_i(f)L+\omega_i(g)K
+		&\leqslant|f(x)-f(y)|L+|g(x)-g(y)|K\leqslant\omega_J(f)L+\omega_J(g)K
 	\end{align*}
 	于是由\cref{lem:omega=SupVari}和上确界的不等式性有：
 	\begin{equation*}
-		\omega_i(fg)=\sup_{x,y\in[x_{i-1},x_i]}|f(x)g(x)-f(y)g(y)|\leqslant L\omega_i(f)+K\omega_i(g)
+		\omega_J(fg)=\sup_{x,y\in Q_J}|f(x)g(x)-f(y)g(y)|\leqslant L\omega_J(f)+K\omega_J(g)
 	\end{equation*}
-	因为$\Omega_i(fg)=\omega_i(fg)\Delta x_i$，所以对$P$有：
+	因为$\Omega_J(fg)=\omega_J(fg)\Delta x_J$，所以对$P$有：
 	\begin{equation*}
-		\Omega(fg,P)=\sum_{i=1}^{n}\omega_i(fg)\Delta x_i\leqslant L\sum_{i=1}^{n}\omega_i(f)\Delta x_i+K\sum_{i=1}^{n}\omega_i(g)\Delta x_i=L\Omega(f,P)+K\Omega(g,P)
+		\Omega(fg,P)=\sum_{J}^{}\omega_J(fg)\Delta x_J\leqslant L\sum_{J}^{}\omega_J(f)\Delta x_J+K\sum_{J}^{}\omega_J(g)\Delta x_J=L\Omega(f,P)+K\Omega(g,P)
 	\end{equation*}
 	因为$f,g$可积，由\cref{theo:RiemannIntegrableIff}(2)可得：
 	\begin{equation*}
 		\lim_{|P|\to0}\Omega(f,P)=\lim_{|P|\to0}\Omega(g,P)=0
 	\end{equation*}
-	由\cref{prop:RSeq}(6)\cref{prop:RSeq}(8.b)(8.c)可得：
+	由\cref{prop:RMap}(5.b)(5.c)和\cref{prop:RMap}(3.a)可得：
 	\begin{equation*}
 		0\leqslant\lim_{|P|\to0}\Omega(fg,P)\leqslant L\lim_{|P|\to0}\Omega(f,P)+K\lim_{|P|\to0}\Omega(g,P)=0
 	\end{equation*}
@@ -532,64 +563,56 @@
 	\begin{equation*}
 		\lim_{|P|\to0}\Omega(fg,P)=0
 	\end{equation*}
-	由\cref{theo:RiemannIntegrableIff}(2)可得$fg$在$[a,b]$上可积。\par
-	(3)对任意的$x,y\in[x_{i-1},x_i]$，有：
+	由\cref{theo:RiemannIntegrableIff}(2)可得$fg$在$Q$上可积。\par
+	(3)对任意的$x,y\in Q_J$有：
 	\begin{equation*}
 		\left|\frac{1}{f(x)}-\frac{1}{f(y)}\right|=\left|\frac{f(y)-f(x)}{f(x)f(y)}\right|\leqslant\frac{|f(y)-f(x)|}{c^2}
 	\end{equation*}
-	由\cref{lem:omega=SupVari}和上确界的不等式性可得：
+	由\cref{lem:omega=SupVari}、上确界的不等式性和上确界的线性运算可得：
 	\begin{equation*}
-		\omega_i\left(\frac{1}{f}\right)=\sup_{x,y\in[x_{i-1},x_i]}\left|\frac{1}{f(x)}-\frac{1}{f(y)}\right|\leqslant\sup_{x,y\in[x_{i-1},x_i]}\frac{|f(y)-f(x)|}{c^2}=\frac{\omega_i(f)}{c^2}
+		\omega_J\left(\frac{1}{f}\right)=\sup_{x,y\in Q_J}\left|\frac{1}{f(x)}-\frac{1}{f(y)}\right|\leqslant\sup_{x,y\in Q_J}\frac{|f(y)-f(x)|}{c^2}=\frac{\omega_J(f)}{c^2}
 	\end{equation*}
-	因为$\Omega_i\left(\dfrac{1}{f}\right)=\omega_i\left(\dfrac{1}{f}\right)\Delta x_i$，所以对$P$有：
+	因为$\Omega_J\left(\dfrac{1}{f}\right)=\omega_J\left(\dfrac{1}{f}\right)\Delta x_J$，所以对$P$有：
 	\begin{equation*}
-		\Omega\left(\dfrac{1}{f},P\right)=\sum_{i=1}^{n}\omega_i\left(\dfrac{1}{f}\right)\Delta x_i\leqslant\sum_{i=1}^{n}\frac{\omega_i(f)\Delta x_i}{c^2}=\frac{\Omega(f,P)}{c^2}
+		\Omega\left(\dfrac{1}{f},P\right)=\sum_{J}^{}\omega_J\left(\dfrac{1}{f}\right)\Delta x_J\leqslant\sum_{J}^{}\frac{\omega_J(f)\Delta x_J}{c^2}=\frac{\Omega(f,P)}{c^2}
 	\end{equation*}
 	因为$f$可积，由\cref{theo:RiemannIntegrableIff}(2)可得：
 	\begin{equation*}
 		\lim_{|P|\to0}\Omega(f,P)=0
 	\end{equation*}
-	由\cref{prop:RSeq}(6)和\cref{prop:RSeq}(8.c)可得：
-	\begin{equation*}
-		0\leqslant\lim_{|P|\to0}\Omega\left(\frac{1}{f},P\right)\leqslant\lim_{|P|\to0}\frac{\Omega(f,P)}{c^2}=0
-	\end{equation*}
-	即：
+	由\cref{prop:RMap}(5.c)和\cref{prop:RMap}(3.a)可得：
 	\begin{equation*}
 		\lim_{|P|\to0}\Omega\left(\frac{1}{f},P\right)=0
 	\end{equation*}
-	由\cref{theo:RiemannIntegrableIff}(2)可得$\dfrac{1}{f}$在$[a,b]$上可积。\par
-	(4)对任意的$x,y\in[x_{i-1},x_i]$有：
+	由\cref{theo:RiemannIntegrableIff}(2)可得$\dfrac{1}{f}$在$Q$上可积。\par
+	(4)对任意的$x,y\in Q$有：
 	\begin{equation*}
 		\Big||f(x)|-|f(y)|\Big|\leqslant|f(x)-f(y)|
 	\end{equation*}
 	所以由\cref{lem:omega=SupVari}和上确界的不等式性可得：
 	\begin{equation*}
-		\omega_i(|f|)=\sup_{x,y\in[x_{i-1},x_i]}\Big||f(x)-f(y)|\Big|\leqslant\sup_{x,y\in[x_{i-1},x_i]}|f(x)-f(y)|=\omega_i(f)
+		\omega_J(|f|)=\sup_{x,y\in Q_J}\Big||f(x)-f(y)|\Big|\leqslant\sup_{x,y\in Q_J}|f(x)-f(y)|=\omega_J(f)
 	\end{equation*}
-	因为$\Omega_i(|f|)=\omega_i(|f|)\Delta x_i$，所以对$P$有：
+	因为$\Omega_J(|f|)=\omega_J(|f|)\Delta x_J$，所以对$P$有：
 	\begin{equation*}
-		\Omega(|f|,P)=\sum_{i=1}^{n}\omega_i(|f|)\Delta x_i\leqslant\sum_{i=1}^{m}\omega_i(f)\Delta x_i=\Omega(f,P)
+		\Omega(|f|,P)=\sum_{J}^{}\omega_J(|f|)\Delta x_J\leqslant\sum_{J}^{}\omega_J(f)\Delta x_J=\Omega(f,P)
 	\end{equation*}
 	因为$f$可积，由\cref{theo:RiemannIntegrableIff}(2)可得：
 	\begin{equation*}
 		\lim_{|P|\to0}\Omega(f,P)=0
 	\end{equation*}
-	由\cref{prop:RSeq}(6)可得：
-	\begin{equation*}
-		0\leqslant\lim_{|P|\to0}\Omega(|f|,P)\leqslant\lim_{|P|\to0}\Omega(f,P)=0
-	\end{equation*}
-	即：
+	由\cref{prop:RMap}(2.a)可得：
 	\begin{equation*}
 		\lim_{|P|\to0}\Omega\left(|f|,P\right)=0
 	\end{equation*}
-	由\cref{theo:RiemannIntegrableIff}(2)可得$|f|$在$[a,b]$上可积。
+	由\cref{theo:RiemannIntegrableIff}(2)可得$|f|$在$Q$上可积。
 \end{proof}
 \begin{theorem}\label{theo:RiemannIntegrable}
 	关于函数的可积性，有如下结论：
 	\begin{enumerate}
-		\item 设$[a_1,b_1]\subseteq[a,b]\subseteq\mathbb{R}^{}$，若函数$f$在$[a,b]$上可积，则$f$在$[a_1,b_1]$上可积；
+		\item 设$Q_1\subseteq Q\subseteq\mathbb{R}^{n}$，$Q_1,Q$为闭方块。若函数$f$在$Q$上可积，则$f$在$Q_1$上可积；
 		\item 若函数$f$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上有定义且单调有界，则$f$在$[a,b]$上可积；
-		\item 若函数$f$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上连续，则$f$在$[a,b]$上可积；
+		\item 若函数$f$在闭方块$Q\subseteq\mathbb{R}^{}$上连续，则$f$在$Q$上可积；
 		\item 若函数$f$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上有界且除了有限个间断点外在其它各点连续，则$f$在$[a,b]$上可积；
 		\item 若函数$f,g$在闭区间$[a,b]\subseteq\mathbb{R}^{}$上有定义且有界，除了有限个点$\seq{c}{l}$以外有$f=g$，此时如果$f$可积，则$g$也可积，且有：
 		\begin{equation*}
@@ -598,19 +621,15 @@
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
-	(1)因为$f$在$[a,b]$上可积，所以对任意的$\varepsilon>0$，存在$\delta>0$使得只要$[a,b]$上的分割$P_1$满足$|P_1|<\delta$就有$\Omega(f,P_1)<\varepsilon$。为$P_1$再增加两个分点$a_1,b_1$得到分割$P_2$（若原本就是分点则不作改变），由\cref{prop:DarbouxSum}(3)可知$\Omega(f,P_2)<\Omega(f,P_1)$，对于$P_2$中$[a_1,b_1]$上的子分割$P$有：
+	(1)因为$f$在$Q$上可积，所以对任意的$\varepsilon>0$，存在$\delta>0$使得只要$Q$上的分割$P_1$满足$|P_1|<\delta$就有$\Omega(f,P_1)<\varepsilon$。为$P_1$再增加分界得到$P_2$使得$P_2$的子分割$P$构成$Q_1$的一个分割（若原本就是则不增加分界），由\cref{prop:DarbouxSum}(3)可知$\Omega(f,P_2)<\Omega(f,P_1)$。对于$P$有：
 	\begin{equation*}
-		0<\Omega(f,P)<\Omega(f,P_2)<\Omega(f,P_1)<\varepsilon
+		0<\Omega(f,P)<\Omega(f,P_2)\leqslant\Omega(f,P_1)<\varepsilon
 	\end{equation*}
-	而$|P|<|P_1|<\delta$，所以由\cref{prop:RSeq}(4.a)(6)可得：
+	而$|P|\leqslant|P_2|\leqslant|P_1|<\delta$，所以由\cref{prop:RMap}(2.a)可得：
 	\begin{equation*}
-		0\leqslant\lim_{|P|\to0}\Omega(f,P)=\lim_{|P_1|\to0}\Omega(f,P)\leqslant\lim_{|P_1|\to0}\Omega(f,P_1)=0
+		\lim_{|P|\to0}\Omega(f,P)=\lim_{|P_1|\to0}\Omega(f,P_1)=0
 	\end{equation*}
-	于是：
-	\begin{equation*}
-		\lim_{|P|\to0}\Omega(f,P)=0
-	\end{equation*}
-	由\cref{theo:RiemannIntegrableIff}(2)可得$f$在$[a_1,b_1]$上可积。\par
+	由\cref{theo:RiemannIntegrableIff}(2)可得$f$在$Q_1$上可积。\par
 	(2)设$f$单调增。$P$是$[a,b]$上的分割，对任意的$\varepsilon>0$，取：
 	\begin{equation*}
 		\delta=\frac{\varepsilon}{f(b)-f(a)+1}
@@ -628,15 +647,15 @@
 	\begin{equation*}
 		\delta=\frac{\varepsilon}{f(a)-f(b)+1}
 	\end{equation*}\par
-	(3)因为$f$在$[a,b]$上连续，由\cref{prop:OpenClosedSet}(2)、\cref{theo:CompactRn}和\cref{prop:CompactMap}(4)可得$f$在$[a,b]$上一致连续，所以对任意的$\varepsilon>0$，存在$\delta>0$，当$|x-y|<\delta$时就有$|f(x)-f(y)|<\varepsilon$。取$|P|<\delta$，于是：
+	(3)因为$f$在$Q$上连续，由\cref{theo:CompactRn}和\cref{prop:CompactMap}(4)可得$f$在$[a,b]$上一致连续，所以对任意的$\varepsilon>0$，存在$\delta>0$，当$|x-y|<\delta$时就有$|f(x)-f(y)|<\varepsilon$。取$|P|<\delta$，于是：
 	\begin{equation*}
-		\Omega(f,P)=\sum_{i=1}^{n}\omega_i\Delta x_i<\varepsilon\sum_{i=1}^{n}\Delta x_i=(b-a)\varepsilon
+		\Omega(f,P)=\sum_{J}^{}\omega_J\Delta x_J<\varepsilon\sum_{J}^{}\Delta x_J=\operatorname{Vol}(Q)\varepsilon
 	\end{equation*}
 	所以：
 	\begin{equation*}
 		\lim_{|P|\to0}\Omega(f,P)=0
 	\end{equation*}
-	由\cref{theo:RiemannIntegrableIff}(2)可得$f$在$[a,b]$上可积。\par
+	由\cref{theo:RiemannIntegrableIff}(2)可得$f$在$Q$上可积。\par
 	(4)设$f$的间断点为$\seq{c}{l}$，对任意给定的充分小的$\eta$，取$l$个开区间：
 	\begin{equation*}
 		J_j=(c_j-\eta,c_j+\eta),\quad j=1,2,\dots,l
@@ -686,14 +705,22 @@
 		\begin{equation*}
 			\int_{a}^cf(x)\dif x=\int_{a}^bf(x)\dif x+\int_{b}^cf(x)\dif x
 		\end{equation*}
-		\item 若函数$f,g$在闭区间$[a,b]\in\mathbb{R}^{}$上可积且$f\leqslant g$在$[a,b]$上恒成立，则：
+		\item 若函数$f,g$在闭方块$Q\subseteq\mathbb{R}^{}$上可积且$f\leqslant g$在$Q$上恒成立，则：
 		\begin{equation*}
-			\int_{a}^bf(x)\dif x\leqslant\int_{a}^bg(x)\dif x
+			\int_Qf(x)\dif x\leqslant\int_Qg(x)\dif x
+		\end{equation*}
+		\item 设函数$f$在闭方块$Q$上可积，由\cref{theo:RiemannIntegrableBounded}可知$f$在闭方块上有界。若$f$在$Q$上满足$m\leqslant f\leqslant M$，则：
+		\begin{equation*}
+			m\operatorname{Vol}(Q)\leqslant\int_Qf(x)\dif x\leqslant M\operatorname{Vol}(Q)
+		\end{equation*}
+		\item 若$f$在闭方块$Q$上连续，则存在$c\in Q$使得：
+		\begin{equation*}
+			\int_Qf(x)\dif x=f(c)\operatorname{Vol}(Q)
 		\end{equation*}
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)因为，由\cref{theo:RiemannIntegrableBounded}可知$f$在$[a,c]$上有界，即存在$M>0$使得$|f(x)|\leqslant M$对任意的$x\in[a,c]$成立。\par
+	(1)由\cref{theo:RiemannIntegrableBounded}可知$f$在$[a,c]$上有界，即存在$M>0$使得$|f(x)|\leqslant M$对任意的$x\in[a,c]$成立。\par
 	取$[a,c]$上的一个分割$P$，若$b$在$P$的标志点集$\xi$中，则令$P'=P,\xi'=\xi$，其中$\xi'$是$P'$的标志点集。若$b$不在$\xi$中，则令：
 	\begin{equation*}
 		P':\;a=x_0<x_1<x_2<\cdots<x_j<b<x_{j+1}<\cdots<x_n=c,\quad \xi'=\xi\cup{b}
@@ -727,18 +754,34 @@
 	\begin{equation*}
 		\int_{a}^cf(x)\dif x=\int_{a}^bf(x)\dif x+\int_{b}^cf(x)\dif x
 	\end{equation*}\par
-	(2)因为$f\leqslant g$在$[a,b]$上恒成立，所以$\varphi=g-f\geqslant0$在$[a,b]$上恒成立。因为$f,g$在$[a,b]$上可积，由\cref{theo:RiemannIntegrable4ArithmeticOperation}(1)可知$\varphi$在$[a,b]$上可积且：
+	(2)因为$f\leqslant g$在$Q$上恒成立，所以$\varphi=g-f\geqslant0$在$Q$上恒成立。因为$f,g$在$Q$上可积，由\cref{theo:RiemannIntegrable4ArithmeticOperation}(1)可知$\varphi$在$Q$上可积且：
 	\begin{equation*}
-		\int_{a}^b\varphi(x)\dif x=\int_{a}^bg(x)\dif x-\int_{a}^bf(x)\dif x
+		\int_Q\varphi(x)\dif x=\int_Qg(x)\dif x-\int_Qf(x)\dif x
 	\end{equation*}
-	因为$\varphi$在$[a,b]$上非负，所以对$[a,b]$上任意的分割$P$及其标志点组$\xi$都有$\sigma(\varphi,P,\xi)\geqslant0$，由\cref{prop:RSeq}(6)可得：
+	因为$\varphi$在$Q$上非负，所以对$Q$上任意的分割$P$及其标志点组$\xi$都有$\sigma(\varphi,P,\xi)\geqslant0$，由\cref{prop:RMap}(4)可得：
 	\begin{equation*}
-		\int_{a}^b\varphi(x)\dif x=\lim_{|P|\to0}\sigma(\varphi,P,\xi)\geqslant0
+		\int_Q\varphi(x)\dif x=\lim_{|P|\to0}\sigma(\varphi,P,\xi)\geqslant0
 	\end{equation*}
 	所以：
 	\begin{equation*}
-		\int_{a}^bg(x)\dif x-\int_{a}^bf(x)\dif x\geqslant0
+		\int_Qg(x)\dif x-\int_Qf(x)\dif x\geqslant0
 	\end{equation*}\par
+	(3)由定积分的定义和(2)可知：
+	\begin{equation*}
+		\int_Qm\dif x=m\operatorname{Vol}(Q)\leqslant\int_Qf(x)\dif x\leqslant\int_QM\dif x=M\operatorname{Vol}(Q)
+	\end{equation*}\par
+	(4)由\cref{theo:RiemannIntegrable}(3)可知$f$在$Q$上可积。由\cref{theo:CompactRn}和\cref{prop:CompactMap}(3)可知$f$在$Q$上可以取到下确界$m$和上确界$M$，根据(3)可得：
+	\begin{equation*}
+		m\operatorname{Vol}(Q)\leqslant\int_Qf(x)\dif x\leqslant M\operatorname{Vol}(Q)
+	\end{equation*}
+	即：
+	\begin{equation*}
+		m\leqslant\frac{1}{\operatorname{Vol}(Q)}\int_Qf(x)\dif x\leqslant M
+	\end{equation*}
+	由\cref{theo:IntermediateValue}可知存在$c\in Q$使得：
+	\begin{equation*}
+		f(c)=\frac{1}{\operatorname{Vol}(Q)}\int_Qf(x)\dif x\qedhere
+	\end{equation*}
 \end{proof}
 
 %\chapter{Lebesgue积分}
