@@ -303,6 +303,45 @@
 \begin{theorem}
 	初等函数在其定义域内连续。
 \end{theorem}
+\subsubsection{连通性与介值性}
+\begin{definition}
+	设$(X,\rho)$是一个度量空间，$E\subseteq X$，$x_0,x_1\in E$。若连续映射$\gamma:[0,1]\to E$满足$\gamma(0)=x_0,\;\gamma(1)=x_1$，则称$\gamma$为$E$中联结$x_0$和$x_1$的一条\gls{Path}。
+\end{definition}
+\begin{definition}
+	设$(X,\rho)$是一个度量空间，$E\subseteq X$。若对于任意的$x_0,x_1\in E$，都存在一条联结它们的路径，则称$E$\gls{PathConnected}。定义$\varnothing$也是路径连通的。
+\end{definition}
+\begin{lemma}\label{lem:IntermediateValueR}
+	设函数$f:\mathbb{R}^{}\to\mathbb{R}^{}$在区间$[a,b]$上连续。
+	\begin{enumerate}
+		\item 若$f(a)f(b)<0$，则存在$c\in(a,b)$使得$f(c)=0$；
+		\item 若$f(a)\ne f(b)$，则$f$在$[a,b]$上能取到介于$f(a)$和$f(b)$之间的所有值。
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	(1)仅讨论$f(a)<0<f(b)$时的情况，$f(b)<0<f(a)$时完全类似。\par
+	取$c_0=\dfrac{a+b}{2}$，则$f(c_0)=0$或$f(c_0)$与$f(a),f(b)$中的一个异号。若$f(c_0)$与$f(a)$异号，则设$a_1=a,\;b_1=c_0$；若$f(c_0)$与$f(b)$异号，则设$a_1=c_0,\;b_1=b$。取$c_1=\dfrac{a_1+b_1}{2}$，则$f(c_1)=0$或$f(c_1)$与$f(a_1),f(b_1)$中的一个异号。若$f(c_1)$与$f(a_1)$异号，则设$a_2=a_1,\;b_2=c_1$；若$f(c_1)$与$f(b_1)$异号，则设$a_2=c_1,\;b_2=b_1$。\par
+	不断重复上述讨论，要么存在一个$c_n$使得$f(c_n)=0$，结论成立，要么得到一个闭区间套$\{[a_n,b_n]\}$和一个点列$\{c_n\}$，满足$a_n\leqslant c_n\leqslant b_n$。由\cref{theo:ClosedCubeTheorem}和\cref{prop:RSeq}(4.a)可得：
+	\begin{equation*}
+		\lim_{n\to+\infty}a_n=\lim_{n\to+\infty}c_n=\lim_{n\to+\infty}b_n\coloneq c\in(a,b)
+	\end{equation*}
+	因为$f$在区间$[a,b]$上连续，由\cref{prop:RSeq}(6)可得：
+	\begin{equation*}
+		f(c)=\lim_{n\to+\infty}f(a_n)\leqslant0\leqslant\lim_{n\to+\infty}f(b_n)=f(c)
+	\end{equation*}
+	所以$f(c)=0$。\par
+	(2)对任意介于$f(a),f(b)$之间的$\alpha$，取辅助函数$f(x)-\alpha$。由\cref{prop:RMap}(5.b)可得$f(x)-\alpha$是区间$[a,b]$上的连续函数，由(1)即可得出结论。
+\end{proof}
+\begin{theorem}[Intermidiate Value Theorem]\label{theo:IntermediateValue}
+	设$(X,\rho)$是一个度量空间，$E\subseteq X$路径连通，$f:E\to\mathbb{R}^{}$是一个连续函数，则$f(E)$是一个区间（允许退化为单点）。
+\end{theorem}
+\begin{proof}
+	任取$y_0,y_1\in f(E)$，设$f(x_0)=y_0,\;f(x_1)=y_1$。因为$E$路径连通，所以存在连续映射$\gamma:[0,1]\to E$满足$\gamma(0)=x_0,\;\gamma(1)=x_1$。考虑复合映射$f\circ\gamma$，由\cref{theo:CompositeContinuousMap}可知$f\circ\gamma$在$[0,1]$上连续。因为：
+	\begin{equation*}
+		f\circ\gamma(0)=f(x_0)=y_0,\quad f\circ\gamma(1)=f(x_1)=y_1
+	\end{equation*}
+	由\cref{lem:IntermediateValueR}可知$f\circ\gamma$在$[0,1]$上可以取到介于$y_0$和$y_1$之间的所有值，即$f$在$E$上可以取到介于$y_0$和$y_1$之间的所有值。由$y_0,y_1$的任意性，结论成立。
+\end{proof}
+
 \subsubsection{无穷小与有界记号}
 \begin{definition}
 	设$f(x)$是在$U(a,\delta)$上有定义，$a\in\overline{\mathbb{R}^{}},\;\delta>0$。若$\lim\limits_{x\to a}f(x)=0$，则称$f(x)$是$x\to a$时的\gls{Infinitesimal}；若$\lim\limits_{x\to a}f(x)=\infty$，则称$f(x)$是$x\to a$时的\gls{InfiniteQuantity}。
