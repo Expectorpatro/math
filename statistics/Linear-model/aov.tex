@@ -33,7 +33,7 @@
 	\end{equation*}
 	称模型中的约束条件为\gls{BoundaryCondition}，$\mu$为一般平均（这里表示因子$A$的这$a$个水平对数据的一般影响），$\alpha_i$为水平$A_i$的\gls{Effect}，$\varepsilon_{ij}$为随机误差。于是模型的$y$值向量和对应的设计阵、参数向量可写作：
 	\begin{gather*}
-		y=(y_{11},y_{12},\dots,y_{1n_1},y_{21},y_{22},\dots,y_{2n_2},\dots,y_{a1},y_{a2},\dots,y_{an_a})^T \\
+		y=(y_{11},y_{12},\dots,y_{1n_1},y_{21},y_{22},\dots,y_{2n_2},\dots,y_{a1},y_{a2},\dots,y_{an_a})^{\top} \\
 		X=
 		\begin{pmatrix}
 			\mathbf{1}_{n_1} & \mathbf{1}_{n_1} & \mathbf{0} & \cdots & \mathbf{0} \\
@@ -64,7 +64,7 @@
 	则有如下结论：
 	\begin{enumerate}
 		\item $\operatorname{rank}(X)=a$；
-		\item 正则方程$X^TX\beta=X^Ty$为：
+		\item 正则方程$X^{\top}X\beta=X^{\top}y$为：
 		\begin{equation*}
 			n\mu+\sum_{i=1}^{a}n_i\alpha_i=y_{..},\quad n_i\mu+n_i\alpha_i=y_{i.},\quad i=1,2,\dots,a
 		\end{equation*}
@@ -87,16 +87,16 @@
 	(2)将$X$和$\beta$带入运算即可得到。\par
 	(3)由可估函数的定义，若$\mu$可估，则存在$\alpha$使得：
 	\begin{equation*}
-		\operatorname{E}(\alpha^Ty)=\mu=(1,0,0,\dots,0)^T\beta
+		\operatorname{E}(\alpha^{\top}y)=\mu=(1,0,0,\dots,0)^{\top}\beta
 	\end{equation*}
 	由\cref{prop:EstimableFunction}(1)可知此时关于$a$的线性方程组：
 	\begin{equation*}
 		\begin{pmatrix}
-			\mathbf{1}_{n_1}^T & \mathbf{1}_{n_2}^T & \mathbf{1}_{n_3}^T & \cdots & \mathbf{1}_{n_a}^T \\
-			\mathbf{1}_{n_1}^T & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{0} \\
-			\mathbf{0} & \mathbf{1}_{n_2}^T & \mathbf{0} & \cdots & \mathbf{0} \\
+			\mathbf{1}_{n_1}^{\top} & \mathbf{1}_{n_2}^{\top} & \mathbf{1}_{n_3}^{\top} & \cdots & \mathbf{1}_{n_a}^{\top} \\
+			\mathbf{1}_{n_1}^{\top} & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{0} \\
+			\mathbf{0} & \mathbf{1}_{n_2}^{\top} & \mathbf{0} & \cdots & \mathbf{0} \\
 			\vdots & \vdots & \vdots & \ddots & \vdots \\
-			\mathbf{0} & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{1}_{n_a}^T
+			\mathbf{0} & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{1}_{n_a}^{\top}
 		\end{pmatrix}a=
 		\begin{pmatrix}
 			1 \\
@@ -110,18 +110,18 @@
 	若$\alpha_i$可估，则关于$a$的线性方程组：
 	\begin{equation*}
 		\begin{pmatrix}
-			\mathbf{1}_{n_1}^T & \mathbf{1}_{n_2}^T & \mathbf{1}_{n_3}^T & \cdots & \mathbf{1}_{n_a}^T \\
-			\mathbf{1}_{n_1}^T & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{0} \\
-			\mathbf{0} & \mathbf{1}_{n_2}^T & \mathbf{0} & \cdots & \mathbf{0} \\
+			\mathbf{1}_{n_1}^{\top} & \mathbf{1}_{n_2}^{\top} & \mathbf{1}_{n_3}^{\top} & \cdots & \mathbf{1}_{n_a}^{\top} \\
+			\mathbf{1}_{n_1}^{\top} & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{0} \\
+			\mathbf{0} & \mathbf{1}_{n_2}^{\top} & \mathbf{0} & \cdots & \mathbf{0} \\
 			\vdots & \vdots & \vdots & \ddots & \vdots \\
-			\mathbf{0} & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{1}_{n_a}^T
-		\end{pmatrix}a=(0,0,\dots,1,0,0,\dots,0)^T
+			\mathbf{0} & \mathbf{0} & \mathbf{0} & \cdots & \mathbf{1}_{n_a}^{\top}
+		\end{pmatrix}a=(0,0,\dots,1,0,0,\dots,0)^{\top}
 	\end{equation*}
 	有解，其中等式右边向量第$i+1$个分量为$1$，其它分量都为$0$。将增广矩阵的第一行依次减去除了$i+1$行的所有行，再用第$i+1$行减去第一行，第$i+1$行便变为$0=1$，由\cref{theo:SolutionOfSLE1}可知该线性方程组无解，于是$\alpha_i$不可估。\par
 	(4)考虑到模型中增加的约束条件$\sum\limits_{i=1}^{a}n_i\alpha_i=0$，由(2)可直接得到关于$\mu$和$\alpha_i$的结论。由\cref{theo:VarianceOfErrorTerm}和(1)可直接得到关于$\sigma^2$的结论\par
 	(5)类似(3)可得，关于表示方法的结论可由\cref{prop:EstimableFunction}(2)得到。\par
 	(6)由(5)可得。\par
-	(7)由(6)可知此时$\sum\limits_{i=1}^{a}c_i\alpha_i$可估，由\cref{prop:EstimableFunction}(3)可知其最小二乘解与$X^TX\beta=X^Ty$解的选择无关，用(4)代入可得该对照的最小二乘解为：
+	(7)由(6)可知此时$\sum\limits_{i=1}^{a}c_i\alpha_i$可估，由\cref{prop:EstimableFunction}(3)可知其最小二乘解与$X^{\top}X\beta=X^{\top}y$解的选择无关，用(4)代入可得该对照的最小二乘解为：
 	\begin{equation*}
 		\sum_{i=1}^{a}c_i\hat{\alpha_i}=\sum_{i=1}^{a}c_i\overline{y}_{i.}-\sum_{i=1}^{a}c_i\overline{y}_{..}=\sum_{i=1}^{a}c_i\overline{y}_{i.}
 	\end{equation*}
@@ -138,10 +138,10 @@
 	\begin{equation*}
 		H_0:\alpha_1-\alpha_a=\alpha_2-\alpha_a=\alpha_{a-1}-\alpha_a=\mathbf{0}
 	\end{equation*}
-	令$H=(I_{a-1},-\mathbf{1}_{a-1}),\;\alpha=(\seq{\alpha}{a})^T$，则上述原假设可写作矩阵形式$H\alpha=\mathbf{0}$。
+	令$H=(I_{a-1},-\mathbf{1}_{a-1}),\;\alpha=(\seq{\alpha}{a})^{\top}$，则上述原假设可写作矩阵形式$H\alpha=\mathbf{0}$。
 \end{note}
 \begin{theorem}\label{theo:AOVHypothesisTesting}
-	对于\cref{model:one-way-anova}，设$H=(I_{a-1},-\mathbf{1}_{a-1}),\;\alpha=(\seq{\alpha}{a})^T$，则假设检验问题：
+	对于\cref{model:one-way-anova}，设$H=(I_{a-1},-\mathbf{1}_{a-1}),\;\alpha=(\seq{\alpha}{a})^{\top}$，则假设检验问题：
 	\begin{equation*}
 		H_0:\alpha_1=\alpha_2=\cdots=\alpha_a
 	\end{equation*}
@@ -151,11 +151,11 @@
 	\end{equation*}
 \end{theorem}
 \begin{proof}
-	由\cref{theo:one-way-anova-estimate}(1)可知$\operatorname{rank}(X)=a$，由$H$的定义可知$\operatorname{rank}(H)=a-1$，根据\cref{theo:one-way-anova-estimate}(6)可知$\mathcal{M}(H^T)\subseteq\mathcal{M}(X^T)$，所以由\cref{theo:NormalLinearModelHypothesisTesting}(5)直接可得出结论。
+	由\cref{theo:one-way-anova-estimate}(1)可知$\operatorname{rank}(X)=a$，由$H$的定义可知$\operatorname{rank}(H)=a-1$，根据\cref{theo:one-way-anova-estimate}(6)可知$\mathcal{M}(H^{\top})\subseteq\mathcal{M}(X^{\top})$，所以由\cref{theo:NormalLinearModelHypothesisTesting}(5)直接可得出结论。
 \end{proof}
 \subsubsection{对比的假设检验}
 \begin{theorem}
-	对于\cref{model:one-way-anova}，设$H=(\seq{c}{a}),\;\alpha=(\seq{\alpha}{a})^T$，则对比$\sum\limits_{i=1}^{a}c_i\alpha_i$的假设检验问题：
+	对于\cref{model:one-way-anova}，设$H=(\seq{c}{a}),\;\alpha=(\seq{\alpha}{a})^{\top}$，则对比$\sum\limits_{i=1}^{a}c_i\alpha_i$的假设检验问题：
 	\begin{equation*}
 		H_0:\sum_{i=1}^{a}c_i\alpha_i=0,\quad H_1:\sum_{i=1}^{a}c_i\alpha_i\ne0
 	\end{equation*}
@@ -211,16 +211,16 @@
 \begin{note}
 	Duncan多重比较的检验步骤为：将$\overline{y}_{1.},\overline{y}_{2.},\dots,\overline{y}_{a.}$从小到大排序为$\overline{y}^1,\overline{y}^2,\dots,\overline{y}^a$。令：
 	\begin{equation*}
-		r_{p,n-a}(\alpha)\sqrt{\frac{MSe}{m}}=R_p^*
+		r_{p,n-a}(\alpha)\sqrt{\frac{MSe}{m}}=R_p^{\star}
 	\end{equation*}
 	按以下顺序进行比较：
 	\begin{gather*}
-		\overline{y}^a-\overline{y}^1\text{与$R_a^*$进行比较} \\
-		\overline{y}^a-\overline{y}^2\text{与$R_{a-1}^*$进行比较} \\
+		\overline{y}^a-\overline{y}^1\text{与$R_a^{\star}$进行比较} \\
+		\overline{y}^a-\overline{y}^2\text{与$R_{a-1}^{\star}$进行比较} \\
 		\cdots\cdots \\
-		\overline{y}^a-\overline{y}^{a-1}\text{与$R_2^*$进行比较} \\
-		\overline{y}^{a-1}-\overline{y}^1\text{与$R_{a-1}^*$进行比较} \\
-		\overline{y}^{a-1}-\overline{y}^2\text{与$R_{a-2}^*$进行比较} \\
+		\overline{y}^a-\overline{y}^{a-1}\text{与$R_2^{\star}$进行比较} \\
+		\overline{y}^{a-1}-\overline{y}^1\text{与$R_{a-1}^{\star}$进行比较} \\
+		\overline{y}^{a-1}-\overline{y}^2\text{与$R_{a-2}^{\star}$进行比较} \\
 		\cdots\cdots
 	\end{gather*}
 	若前者大于后者，则拒绝原假设，直到全部$\binom{a}{2}$对水平均值比较完为止。因为$r_{p_n-a}$的分布不好求解，使用Monte Carlo方法求$r_{p,n-a}(\alpha)$的近似值。
@@ -258,24 +258,24 @@
 \begin{proof}
 	在约束$H\alpha=\mathbf{0}$的情况下，因为$\alpha_1=\alpha_2=\cdots=\alpha_a$，所以可将它们并入$\mu$，于是$\mu$的估计为$\overline{y}_{..}$，此时：
 	\begin{equation*}
-		\operatorname{RSS}_H(\mu)=\hat{\mu}\mathbf{1}_n^Ty=\overline{y}_{..}y_{..}=\frac{y_{..}}{n}y_{..}=\frac{y_{..}^2}{n}
+		\operatorname{RSS}_H(\mu)=\hat{\mu}\mathbf{1}_n^{\top}y=\overline{y}_{..}y_{..}=\frac{y_{..}}{n}y_{..}=\frac{y_{..}^2}{n}
 	\end{equation*}\par
 	在无约束的情况下由\cref{theo:one-way-anova-estimate}(4)可得：
 	\begin{align*}
-		\operatorname{RSS}(\beta)&=\hat{\beta}^TX^Ty=\hat{\mu}y_{..}+\sum_{i=1}^{a}\hat{\alpha}_iy_{i.} =\frac{y_{..}}{n}y_{..}+\sum_{i=1}^{a}(\overline{y}_{i.}-\overline{y}_{..})y_{i.} \\
+		\operatorname{RSS}(\beta)&=\hat{\beta}^{\top}X^{\top}y=\hat{\mu}y_{..}+\sum_{i=1}^{a}\hat{\alpha}_iy_{i.} =\frac{y_{..}}{n}y_{..}+\sum_{i=1}^{a}(\overline{y}_{i.}-\overline{y}_{..})y_{i.} \\
 		&=\frac{y_{..}^2}{n}+\sum_{i=1}^{a}\left(\frac{y_{i.}}{n_i}-\frac{y_{..}}{n}\right)y_{i.} =\frac{y_{..}^2}{n}+\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}-\sum_{i=1}^{a}y_{i.}\frac{y_{..}}{n}=\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}
 	\end{align*}
 	于是由\cref{theo:SSESSEACalculate}可得：
 	\begin{equation*}
-		\operatorname{SSE}=y^Ty-\operatorname{RSS}(\beta)=\sum_{i=1}^{a}\sum_{j=1}^{n_i}y_{ij}^2-\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}
+		\operatorname{SSE}=y^{\top}y-\operatorname{RSS}(\beta)=\sum_{i=1}^{a}\sum_{j=1}^{n_i}y_{ij}^2-\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}
 	\end{equation*}
 	所以：
 	\begin{align*}
-		\operatorname{SSE}_H-\operatorname{SSE}=y^Ty-\operatorname{RSS}_H(\mu)-y^Ty+\operatorname{RSS}(\beta)=\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}-\frac{y_{..}^2}{n}\qedhere
+		\operatorname{SSE}_H-\operatorname{SSE}=y^{\top}y-\operatorname{RSS}_H(\mu)-y^{\top}y+\operatorname{RSS}(\beta)=\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}-\frac{y_{..}^2}{n}\qedhere
 	\end{align*}
 \end{proof}
 \begin{definition}
-	对于\cref{model:one-way-anova}，令$H=(I_{a-1},-\mathbf{1}_{a-1}),\;\alpha=(\seq{\alpha}{a})^T$。记$\operatorname{SSE}_H-\operatorname{SSE}$为$SSA$，称其为\textbf{因子$A$的平方和}或\textbf{组间平方和}。称$\operatorname{SSE}$为\textbf{组内平方和}。分别称$MSA=SSA/(a-1)$和$MSE=\operatorname{SSE}/(n-a)$为因子$A$和误差的\textbf{均方和}。
+	对于\cref{model:one-way-anova}，令$H=(I_{a-1},-\mathbf{1}_{a-1}),\;\alpha=(\seq{\alpha}{a})^{\top}$。记$\operatorname{SSE}_H-\operatorname{SSE}$为$SSA$，称其为\textbf{因子$A$的平方和}或\textbf{组间平方和}。称$\operatorname{SSE}$为\textbf{组内平方和}。分别称$MSA=SSA/(a-1)$和$MSE=\operatorname{SSE}/(n-a)$为因子$A$和误差的\textbf{均方和}。
 \end{definition}
 \begin{note}
 	下给出上述定义的解释。\par
@@ -320,10 +320,10 @@
 \begin{proof}
 	根据\cref{theo:BonferroniCI}和\cref{theo:ScheffeCI}，只需证明：
 	\begin{gather*}
-		\left(0,\seq{c}{a}\right)^T(X^TX)^-\left(0,\seq{c}{a}\right)=\sum_{i=1}^{a}\frac{(c_i^{(j)})^2}{n_i} \\
-		(e_i-e_j)^T(X^TX)^-(e_i-e_j)=\frac{1}{n_i}+\frac{1}{n_j}
+		\left(0,\seq{c}{a}\right)^{\top}(X^{\top}X)^-\left(0,\seq{c}{a}\right)=\sum_{i=1}^{a}\frac{(c_i^{(j)})^2}{n_i} \\
+		(e_i-e_j)^{\top}(X^{\top}X)^-(e_i-e_j)=\frac{1}{n_i}+\frac{1}{n_j}
 	\end{gather*}
-	其中$e_i,e_j$分别是第$i$个分量和第$j$各分量为$1$的单位向量，\info{搞明白$A(X^TX)^-A^T$后回来补充}
+	其中$e_i,e_j$分别是第$i$个分量和第$j$各分量为$1$的单位向量，\info{搞明白$A(X^{\top}X)^-A^{\top}$后回来补充}
 \end{proof}
 
 \subsection{可加效应的两因子方差分析}
@@ -355,8 +355,8 @@
 	\end{equation*}
 	称$\mu$为一般平均，表示$ab$个总体的均值的平均值；称$\tau_i$为因子A第$i$个水平$A_i$的主效应；称$\beta_j$为因子B第$j$个水平$B_j$的主效应。$\varepsilon_{ij}$为随机误差。于是模型的$y$值向量和对应的设计阵、参数向量可写作：
 	\begin{gather*}
-		y=(y_{11},y_{12},\dots,y_{1b},y_{21},y_{22},\dots,y_{2b},\dots,y_{a1},y_{a2},\dots,y_{ab})^T \\
-		\beta=(\mu,\alpha_1,\alpha_2,\dots,\alpha_a,\beta_1,\beta_2,\dots,\beta_b)^T \\
+		y=(y_{11},y_{12},\dots,y_{1b},y_{21},y_{22},\dots,y_{2b},\dots,y_{a1},y_{a2},\dots,y_{ab})^{\top} \\
+		\beta=(\mu,\alpha_1,\alpha_2,\dots,\alpha_a,\beta_1,\beta_2,\dots,\beta_b)^{\top} \\
 		X=
 		\begin{pmatrix}
 			\mathbf{1}_b & \mathbf{1}_b & \mathbf{0} & \cdots & \mathbf{0} & I_b \\
