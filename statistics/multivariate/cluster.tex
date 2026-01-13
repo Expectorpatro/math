@@ -1,0 +1,200 @@
+\section{聚类分析}
+
+\gls{ClusteringAnalysis}是一类在\textbf{不依赖任何先验标签信息}的前提下，根据样本之间的相似性或距离关系，对数据进行划分的方法。形式上，聚类算法为每个样本分配一个簇标签，但从方法论角度看，\textbf{聚类分析并不以标签本身为研究终点}，而是试图通过这些标签揭示数据中潜在的结构性特征。
+
+更准确地说，聚类分析的本质是一种\textbf{结构发现（structure discovery）}方法。它旨在回答如下问题：数据是否可以被视为由若干相对同质的子群体构成？这些子群体在统计特征、生成机制或行为模式上是否存在系统性差异？因此，聚类标签应被理解为对数据结构的一种\textbf{抽象描述}，而非具有直接语义的分类结果。
+
+在统计学习与数据分析框架下，聚类的目的可以从以下几个相互关联的层面来理解。
+
+\begin{enumerate}
+	\item \textbf{结构发现与探索性分析：}通过样本间相似性关系揭示数据中潜在的分组结构与异质性特征，例如多模态、分层或局部聚集等现象。从方法论上看，聚类属于典型的探索性数据分析手段，其结果主要用于辅助理解数据结构、生成研究假设并为后续建模提供依据，而非作为最终分析结论；
+	\item \textbf{数据抽象与降低复杂度：}在高维或大规模数据情形下，直接以单个样本为分析对象往往会带来计算和解释上的困难。聚类通过将大量样本映射为有限个簇，实现了从“个体层面”到“群体层面”的抽象。这种抽象使得研究者可以以簇为基本单元，对数据进行更高层次的描述、比较与总结。例如，可以利用簇的中心、分布特征或代表性样本来刻画原始数据，从而提高分析的可解释性与可操作性；
+	\item \textbf{异质性刻画与分群建模：}在许多应用场景中，整体数据往往并非来自单一同质总体，而是由多个具有不同统计特性或生成机制的子群体混合而成。如果忽略这种异质性而直接建立统一的全局模型，往往会导致模型拟合能力下降，甚至产生误导性的结论。此时聚类分析可以帮助识别潜在的异质子群体，并为后续的分群建模提供依据。例如，可以在不同簇内分别建立回归模型、风险模型或预测模型，比较模型参数在不同簇之间的差异，从而揭示不同子群体可能遵循的不同机制；
+\end{enumerate}
+
+\subsection{评价指标}
+聚类评价指标的核心目标是量化：
+\begin{itemize}
+	\item \textbf{簇内紧凑性（compactness）}：同一簇里的点是否彼此接近；
+	\item \textbf{簇间分离性（separation）}：不同簇之间是否彼此远离；
+	\item \textbf{与外部标签一致性（agreement with ground truth）}：当存在真实标签时，聚类是否复现了真实分组。
+\end{itemize}
+具体而言，聚类评价指标可以分为下述几类：
+\begin{enumerate}
+	\item \textbf{内部指标（Internal Validation）}：只依赖数据与聚类标签（不需要真实标签）；
+	\item \textbf{外部指标（External Validation）}：需要真实标签。
+\end{enumerate}
+设数据集$X=\{x_i\}_{i=1}^n,\ x_i\in\mathbb{R}^m$，聚类输出标签$y_i\in\{1,\dots,K\}$（或包含噪声$-1$），第$k$簇为$C_k=\{i:y_i=k\}$，簇大小$n_k=|C_k|$，簇中心和总体均值定义为：
+\begin{equation*}
+	\mu_k=\frac{1}{n_k}\sum_{i\in C_k}x_i,\quad
+	\bar{x}=\frac{1}{n}\sum_{i=1}^n x_i
+\end{equation*}
+\subsubsection{内部指标}
+\begin{definition}
+	称$\operatorname{WCSS}=\sum\limits_{k=1}^{K}\sum\limits_{i\in C_k}\|x_i-\mu_k\|^2$为\gls{WCSS}。
+\end{definition}
+\begin{property}[最优WCSS关于簇数的单调性]\label{prop:WCSSMonotonicity}
+	定义：
+	\begin{equation*}
+		\operatorname{WCSS}^\star(K)
+		\coloneq\min_{\{C_1,\dots,C_K\}}
+		\;\sum_{k=1}^K \min_{\mu_k\in\mathbb{R}^m}\sum_{i\in C_k}\|x_i-\mu_k\|^2
+	\end{equation*}
+	则对任意$K\geqslant1$有$\operatorname{WCSS}^\star(K+1)\leqslant \operatorname{WCSS}^\star(K)$。
+\end{property}
+\begin{proof}
+	取任意一个划分$C=\{C_1,\dots,C_K\}$和一个非空簇（如 $C_1\ne\varnothing$），将其拆成两个非空子集$A,B$：
+	\begin{equation*}
+		C_1=A\cup B,\;A\ne\varnothing,\;B\ne\varnothing
+	\end{equation*}
+	并令新划分为$C'=\{A,B,C_2,\dots,C_K\}$。对新划分的目标值有：
+	\begin{equation*}
+		\Phi(C')
+		= \min_{\alpha}\sum_{i\in A}\|x_i-\alpha\|^2
+		+\min_{\beta}\sum_{i\in B}\|x_i-\beta\|^2
+		+\sum_{k=2}^K \min_{\mu_k\in\mathbb{R}^{m}}\sum_{i\in C_k}\|x_i-\mu_k\|^2
+	\end{equation*}
+	对任意给定向量$\gamma\in\mathbb{R}^m$有：
+	\begin{equation*}
+		\min_{\alpha}\sum_{i\in A}\|x_i-\alpha\|^2 \leqslant\sum_{i\in A}\|x_i-\gamma\|^2,\quad
+		\min_{\beta}\sum_{i\in B}\|x_i-\beta\|^2 \leqslant\sum_{i\in B}\|x_i-\gamma\|^2
+	\end{equation*}
+	取$\gamma$为原簇 $C_1$ 的最优中心，记为 $\mu_1^\star$，得到：
+	\begin{equation*}
+		\min_{\alpha}\sum_{i\in A}\|x_i-\alpha\|^2
+		+\min_{\beta}\sum_{i\in B}\|x_i-\beta\|^2
+		\leqslant
+		\sum_{i\in A}\|x_i-\mu_1^\star\|^2 + \sum_{i\in B}\|x_i-\mu_1^\star\|^2
+		=
+		\sum_{i\in C_1}\|x_i-\mu_1^\star\|^2
+	\end{equation*}
+	因此：
+	\begin{equation*}
+		\Phi(C')\leqslant
+		\sum_{i\in C_1}\|x_i-\mu_1^\star\|^2
+		+\sum_{k=2}^K \min_{\mu_k\in\mathbb{R}^{m}}\sum_{i\in C_k}\|x_i-\mu_k\|^2
+		= \Phi(\mathcal{C})
+	\end{equation*}
+	由最小值的不等式性可得：
+	\begin{equation*}
+		\operatorname{WCSS}^\star(K+1)\leqslant\operatorname{WCSS}^\star(K)\qedhere
+	\end{equation*}
+\end{proof}
+\begin{note}
+	$\operatorname{WCSS}$是以欧氏距离为基础的簇内紧凑性度量，其数值大小直接反映了样本在各自簇内围绕质心的离散程度。一般而言，$\operatorname{WCSS}$越小，表示簇内样本越集中、聚类结果越紧凑，因而在同一簇数$K$下聚类质量越好。需要注意的是：
+	\begin{enumerate}
+		\item 对固定数据集和以$\operatorname{WCSS}$为目标函数的算法，由\cref{prop:WCSSMonotonicity}可知$\operatorname{WCSS}$随簇数$K$的增大单调下降；极端情况下，当$K=n$时，每个样本单独成簇，$\operatorname{WCSS}=0$，因此$\operatorname{WCSS}$本身不能直接用于比较不同$K$下的聚类优劣。尽管$\operatorname{WCSS}$随$K$单调下降，但其下降幅度通常在某一$K$值之后显著减缓。通过考察$\operatorname{WCSS}$随$K$变化的曲线，并选取曲线由“陡降”转为“平缓”的拐点，可以在模型复杂度与聚类紧凑性之间取得平衡，从而确定一个合理的簇数，这一方法被称之为\gls{ElbowMethod}；
+		\item 由于$\operatorname{WCSS}$基于质心与距离定义，其隐含假设簇内样本呈近似球形或凸形分布，对非凸结构或密度差异较大的簇刻画能力有限；
+		\item $\operatorname{WCSS}$对特征量纲高度敏感，不同尺度的特征会不均衡地影响距离计算，因此在实际应用中通常需要对特征进行标准化或归一化处理。
+	\end{enumerate}
+\end{note}
+\begin{definition}
+	称：
+	\begin{equation*}
+		\operatorname{CH}=\frac{\operatorname{tr}(B)/(K-1)}{\operatorname{tr}(W)/(n-K)}
+	\end{equation*}
+	为\gls{CH}，其中：
+	\begin{equation*}
+		W=\sum_{k=1}^K\sum_{i\in C_k}(x_i-\mu_k)(x_i-\mu_k)^\top,\quad
+		B=\sum_{k=1}^K n_k(\mu_k-\bar{x})(\mu_k-\bar{x})^\top
+	\end{equation*}
+\end{definition}
+\begin{note}
+	$\operatorname{CH}$指数本质上与单因素方差分析中的$F$统计量高度一致。在几何意义上，当簇中心彼此远离且簇内样本高度集中时，$\operatorname{tr}(B)$ 相对较大而 $\operatorname{tr}(W)$ 相对较小，从而$\operatorname{CH}$取得较大值，表明聚类结构清晰。
+\end{note}
+\begin{definition}
+	对样本$x_i$，定义：
+	\begin{gather*}
+		a_i\coloneq\frac{1}{|C_{y_i}|-1}\sum_{\substack{j\in C_{y_i}\\ j\neq i}} d(x_i,x_j),\quad b_i\coloneq\min_{\ell\neq y_i}\frac{1}{|C_{\ell}|}\sum_{j\in C_{\ell}} d(x_i,x_j) \\
+		s_i\coloneq
+		\begin{cases}
+			\dfrac{b_i-a_i}{\max\{a_i,b_i\}},&\max\{a_i,b_i\}\ne0 \\
+			0,&\max\{a_i,b_i\}=0
+		\end{cases},\quad\operatorname{Silhouette}=\frac{1}{n}\sum_{i=1}^ns_i
+	\end{gather*}
+\end{definition}
+\begin{property}[轮廓系数的取值范围]\label{prop:Silhouette}
+	$\operatorname{Silhouette}$轮廓系数的取值范围为$[-1,1]$。
+\end{property}
+\begin{proof}
+	若$\max\{a_i,b_i\}=0$，则$a_i=b_i=0$，此时$s_i=0$。下面假设$\max\{a_i,b_i\}>0$。分两种情形讨论：
+	\begin{enumerate}
+		\item 若$b_i\geqslant a_i$，则$\max\{a_i,b_i\}=b_i$，从而：
+		\begin{equation*}
+			s_i=\frac{b_i-a_i}{b_i}=1-\frac{a_i}{b_i}
+		\end{equation*}
+		由于$0\leqslant a_i\leqslant b_i$，可得$0\leqslant \dfrac{a_i}{b_i}\leqslant 1$，因此$0\leqslant s_i\leqslant 1$。		
+		\item 若$a_i>b_i$，则$\max\{a_i,b_i\}=a_i$，从而：
+		\begin{equation*}
+			s_i=\frac{b_i-a_i}{a_i}=\frac{b_i}{a_i}-1
+		\end{equation*}
+		由于$0\leqslant b_i<a_i$，可得$0\leqslant\dfrac{b_i}{a_i}<1$，因此$-1\leqslant s_i<0.$
+	\end{enumerate}
+	综上，$s_i\in[-1,1]$，即$\operatorname{Silhouette}\in[-1,1]$。
+\end{proof}
+\begin{note}[Silhouette 的几何解释]
+	轮廓系数从几何角度刻画了单个样本在其所属簇中的相对位置。其中，$a_i$衡量样本$x_i$到其所在簇$C_k$内部的平均距离，反映簇内的局部紧凑性；而$b_i$刻画样本$x_i$到最近其他簇的平均距离，反映其与邻近簇之间的分离程度。由定义可以看出，$s_i$本质上是簇内距离与最近簇间距离之间的\emph{相对差异}。当$a_i\ll b_i$时，样本$x_i$位于簇的内部区域，与其他簇之间存在明显间隔，此时$s_i$接近$1$；当$a_i\approx b_i$时，样本$x_i$位于簇的边界附近，对不同簇的归属不具有明显偏好，此时$s_i$接近$0$；当$a_i>b_i$时，样本$x_i$在几何意义上更接近其他簇而非当前簇，通常意味着该样本可能被错误分配，此时$s_i<0$。\par	
+	因此，Silhouette 系数可被视为一种基于距离比值的局部几何判别准则，它同时综合了簇内紧凑性与簇间分离性，并能够在样本层面反映聚类结构的合理性。
+\end{note}
+\subsubsection{外部指标}
+\begin{definition}
+	考虑所有样本对$(i,j)$，定义：
+	\begin{itemize}
+		\item $a$：在真实标签同类，且聚类也同簇的样本对个数；
+		\item $b$：在真实标签不同类，且聚类也不同簇的样本对个数；
+	\end{itemize}
+	称：
+	\begin{equation*}
+		\operatorname{RI}=\frac{a+b}{\binom{n}{2}}\in[0,1]
+	\end{equation*}
+	为\gls{RI}，称：
+	\begin{equation*}
+		\operatorname{ARI}=\frac{\mathrm{RI}-\operatorname{E}(\operatorname{RI})}{1-\operatorname{E}(\operatorname{RI})}\in[-1,1]
+	\end{equation*}
+	为\gls{ARI}。
+\end{definition}
+\begin{property}
+	
+\end{property}
+\begin{note}
+	$\operatorname{RI}$基于样本对一致性来评价聚类结果，$\operatorname{RI}$ 越大表示聚类划分与真实标签的一致性越强；若 $\operatorname{RI}$ 接近 $1$，说明聚类结果与真实划分高度一致；若接近 $0$，说明一致性极弱。\par
+	为了理解$\operatorname{RI}$的统计行为，需要引入\textbf{随机聚类模型}：在该模型中，真实类别个数与各簇规模均被视为固定，而聚类标签在所有满足给定簇规模约束的分配方式中等概率随机生成。该模型刻画了“聚类结果与真实标签在统计意义上相互独立”的基准情形。\par
+	在这一随机模型下，$\operatorname{RI}$往往具有非零且相对较大的期望值。其根本原因在于样本对中真实不同类的情形通常占据主导地位，而这类样本对在随机聚类中被分配到不同簇的概率本身较高。例如，设$n=100$，真实标签包含$10$个类别、每类$10$个样本，则共有$\binom{100}{2}=4950$个样本对，其中真实不同类的样本对数为$4500$。即使聚类结果完全随机，只要簇规模与真实类别规模相近，大多数真实异类样本对仍会落入不同簇，从而使得 $\operatorname{RI}$取得看似较好的数值。这表明$\operatorname{RI}$对随机一致性并不敏感。\par
+	在固定边际（列联表个数统计值）的随机聚类模型下，样本对计数的期望可以由组合概率精确计算。设：
+	\begin{table}[htbp]
+		\centering
+		\caption{真实类别与聚类簇的列联表}
+		\begin{tabular}{c|cccc|c}
+			\hline
+			& $L_1$ & $L_2$ & $\cdots$ & $L_r$ & 合计 \\ \hline
+			$C_1$ & $N_{11}$ & $N_{12}$ & $\cdots$ & $N_{1r}$ & $n_1$ \\
+			$C_2$ & $N_{21}$ & $N_{22}$ & $\cdots$ & $N_{2r}$ & $n_2$ \\
+			$\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ & $\vdots$ \\
+			$C_K$ & $N_{K1}$ & $N_{K2}$ & $\cdots$ & $N_{Kr}$ & $n_K$ \\ \hline
+			合计 & $m_1$ & $m_2$ & $\cdots$ & $m_r$ & $n$ \\ \hline
+		\end{tabular}
+	\end{table}\par
+	其中$C_i$表示第$i$个聚类簇，$L_j$表示第$j$个真实类别，$N_{ij}=|C_i\cap L_j|$为同时属于簇$C_i$且属于类别$L_j$的样本个数，并满足行边际与列边际约束：
+	\begin{equation*}
+		\sum_{j=1}^rN_{ij}=n_i,\quad
+		\sum_{i=1}^KN_{ij}=m_j,\quad
+		\sum_{i=1}^K\sum_{j=1}^rN_{ij}=n
+	\end{equation*}
+	同类同簇样本对数$a$的期望为：
+	\begin{equation*}
+		\operatorname{E}(a)=\operatorname{E}\left[\sum_{i=1}^{K}\sum_{j=1}^{r}\binom{N_{ij}}{2}\right]=\frac{\sum\limits_{i=1}^K\binom{n_i}{2}\sum\limits_{j=1}^r \binom{m_j}{2}}{\binom{n}{2}}
+	\end{equation*}
+	由此可得 Rand 指数在随机聚类下的期望值
+	\[
+	\operatorname{E}(\operatorname{RI})
+	=\frac{\operatorname{E}(a)+\operatorname{E}(b)}{\binom{n}{2}},
+	\]
+	其中 $\operatorname{E}(b)$ 由边际约束唯一确定，通常导致 $\operatorname{E}(\operatorname{RI})$ 明显大于 $0$。
+	
+	$\operatorname{ARI}$正是基于上述随机模型对$\operatorname{RI}$进行期望校正，该校正保证了随机聚类的期望$\operatorname{ARI}$为$0$，完美一致时取值为$1$，并允许在一致性劣于随机时取负值。因此，$\operatorname{ARI}$相较于$\operatorname{RI}$提供了一个以随机一致性为基准的、更为稳健的外部聚类评价指标。
+\end{note}
+\paragraph{定义}
+用样本对计数：$TP=a$（同类同簇），$FP=d$（不同类同簇），$FN=c$（同类不同簇）：
+\begin{equation*}
+	\mathrm{FMI}=\sqrt{\frac{TP}{TP+FP}\cdot\frac{TP}{TP+FN}}\in[0,1]
+\end{equation*}

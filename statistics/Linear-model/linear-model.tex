@@ -11,50 +11,50 @@
 	其中$y$为$n\times 1$\gls{ObservationVector}，$X$为$n\times p$\gls{DesignMatrix}，$\beta$为$p\times 1$未知参数向量，$\varepsilon$为随机误差，$\sigma^2$为误差方差。
 \end{definition}
 \begin{definition}
-	称方程$X^TX\beta=X^Ty$为\gls{NormalEquation}。
+	称方程$X^{\top}X\beta=X^{\top}y$为\gls{NormalEquation}。
 \end{definition}
 \begin{theorem}\label{theo:LSELinearModel}
-	对于\cref{model:LinearModel}，$\hat{\beta}=(X^TX)^-X^Ty$是其唯一的最小二乘解。
+	对于\cref{model:LinearModel}，$\hat{\beta}=(X^{\top}X)^-X^{\top}y$是其唯一的最小二乘解。
 \end{theorem}
 \begin{proof}
 	注意到：
 	\begin{gather*}
 		\begin{aligned}
-			Q(\beta)&=||y-X\beta||^2=(y-X\beta)^T(y-X\beta) \\
-			&=y^Ty-y^TX\beta-\beta^TX^Ty+\beta^TX^TX\beta \\
-			&=y^Ty-2y^TX\beta+\beta^TX^TX\beta
+			Q(\beta)&=||y-X\beta||^2=(y-X\beta)^{\top}(y-X\beta) \\
+			&=y^{\top}y-y^{\top}X\beta-\beta^{\top}X^{\top}y+\beta^{\top}X^{\top}X\beta \\
+			&=y^{\top}y-2y^{\top}X\beta+\beta^{\top}X^{\top}X\beta
 		\end{aligned}\\
-		\frac{\partial y^TX\beta}{\partial\beta}=X^Ty,\quad
-		\frac{\partial \beta^TX^TX\beta}{\partial\beta}=2X^TX\beta \\
-		\frac{\partial Q(\beta)}{\partial\beta}=2X^Ty-2X^TX\beta=0 \\
-		X^TX\beta=X^Ty
+		\frac{\partial y^{\top}X\beta}{\partial\beta}=X^{\top}y,\quad
+		\frac{\partial \beta^{\top}X^{\top}X\beta}{\partial\beta}=2X^{\top}X\beta \\
+		\frac{\partial Q(\beta)}{\partial\beta}=2X^{\top}y-2X^{\top}X\beta=0 \\
+		X^{\top}X\beta=X^{\top}y
 	\end{gather*}
-	由\cref{theo:VectorSpaceAAAT}和\cref{theo:SolutionOfSLE2}(1)可知方程$X^TX\beta=X^Ty$是相容的，根据\cref{theo:InhomogeneousLinearEq'sGeneralSolution2}可知其通解为：
+	由\cref{theo:VectorSpaceAAAT}和\cref{theo:SolutionOfSLE2}(1)可知方程$X^{\top}X\beta=X^{\top}y$是相容的，根据\cref{theo:InhomogeneousLinearEq'sGeneralSolution2}可知其通解为：
 	\begin{equation*}
-		\hat{\beta}=(X^TX)^-X^Ty
+		\hat{\beta}=(X^{\top}X)^-X^{\top}y
 	\end{equation*}
-	其中$(X^TX)^-$是$X^TX$的任意一个广义逆矩阵。\par
+	其中$(X^{\top}X)^-$是$X^{\top}X$的任意一个广义逆矩阵。\par
 	对任意的$\beta$，有：
 	\begin{align*}
 		Q(\beta)&=||y-X\beta||^2=||y-X\hat{\beta}+X\hat{\beta}-X\beta||^2=||y-X\hat{\beta}+X(\hat{\beta}-\beta)||^2 \\
-		&=||y-X\hat{\beta}||^2+||X(\hat{\beta}-\beta)||^2+2(y-X\hat{\beta})^TX(\hat{\beta}-\beta)
+		&=||y-X\hat{\beta}||^2+||X(\hat{\beta}-\beta)||^2+2(y-X\hat{\beta})^{\top}X(\hat{\beta}-\beta)
 	\end{align*}
 	注意到正则方程即为：
 	\begin{equation*}
-		X^T(y-X\beta)=\mathbf{0}
+		X^{\top}(y-X\beta)=\mathbf{0}
 	\end{equation*}
 	于是：
 	\begin{equation*}
-		2(y-X\hat{\beta})^TX(\hat{\beta}-\beta)=2[X^T(y-X\hat{\beta})]^T(\hat{\beta}-\beta)=0
+		2(y-X\hat{\beta})^{\top}X(\hat{\beta}-\beta)=2[X^{\top}(y-X\hat{\beta})]^{\top}(\hat{\beta}-\beta)=0
 	\end{equation*}
 	所以：
 	\begin{equation*}
 		Q(\beta)=||y-X\hat{\beta}||^2+||X(\hat{\beta}-\beta)||^2
 	\end{equation*}
-	上第二项总是非负的，由范数的定义可知其为$0$当且仅当$X\hat{\beta}=X\beta$，即当且仅当$X^TX\beta=X^TX\hat{\beta}=X^Ty$，所以使$Q(\beta)$达到最小值的$\beta$必为正则方程的解$\hat{\beta}=(X^TX)^-X^Ty$。
+	上第二项总是非负的，由范数的定义可知其为$0$当且仅当$X\hat{\beta}=X\beta$，即当且仅当$X^{\top}X\beta=X^{\top}X\hat{\beta}=X^{\top}y$，所以使$Q(\beta)$达到最小值的$\beta$必为正则方程的解$\hat{\beta}=(X^{\top}X)^-X^{\top}y$。
 \end{proof}
 \begin{derivation}
-	若$\operatorname{rank}(X)=p$，则$X$的列向量组线性无关。考虑二次型$y^TX^TXy$，$y^TX^TXy=0\Leftrightarrow||Xy||=0\Leftrightarrow Xy=\mathbf{0}$，而$X$的列向量是线性无关的，所以不存在非零向量的$y$使得$Xy=\mathbf{0}$，于是$y^TX^TXy$是一个正定二次型，$X^TX$是一个正定矩阵。由\cref{theo:PositiveDefinite}(6)可得$X^TX$可逆。此时$\hat{\beta}=(X^TX)^{-1}X^Ty$，称$\hat{\beta}$为$\beta$的\gls{LSE}。
+	若$\operatorname{rank}(X)=p$，则$X$的列向量组线性无关。考虑二次型$y^{\top}X^{\top}Xy$，$y^{\top}X^{\top}Xy=0\Leftrightarrow||Xy||=0\Leftrightarrow Xy=\mathbf{0}$，而$X$的列向量是线性无关的，所以不存在非零向量的$y$使得$Xy=\mathbf{0}$，于是$y^{\top}X^{\top}Xy$是一个正定二次型，$X^{\top}X$是一个正定矩阵。由\cref{theo:PositiveDefinite}(6)可得$X^{\top}X$可逆。此时$\hat{\beta}=(X^{\top}X)^{-1}X^{\top}y$，称$\hat{\beta}$为$\beta$的\gls{LSE}。
 \end{derivation}
 \begin{note}
 	接下来我们将涉及到非常多的公式，初学会觉得非常难记，但如果从投影的角度去理解的话，很多公式都是直观上非常显然的，也就更好记忆了。
@@ -62,93 +62,93 @@
 \subsection{参数估计}
 \subsubsection{回归系数}
 \begin{definition}
-	若存在$n\times 1$向量$\alpha$使得$\operatorname{E}(\alpha^Ty)=c^T\beta$对一切的$\beta$成立，则称$c^T\beta$为\gls{EstimableFunction}。
+	若存在$n\times 1$向量$\alpha$使得$\operatorname{E}(\alpha^{\top}y)=c^{\top}\beta$对一切的$\beta$成立，则称$c^{\top}\beta$为\gls{EstimableFunction}。
 \end{definition}
 \begin{property}\label{prop:EstimableFunction}
-	对于\cref{model:LinearModel}，$c^T\beta$和$d^T\beta$是可估函数，$\hat{\beta}$是正则方程的解，则：
+	对于\cref{model:LinearModel}，$c^{\top}\beta$和$d^{\top}\beta$是可估函数，$\hat{\beta}$是正则方程的解，则：
 	\begin{enumerate}
-		\item 使$c^T\beta$成为可估函数的全体向量$c$构成$\mathcal{M}(X^T)$；
+		\item 使$c^{\top}\beta$成为可估函数的全体向量$c$构成$\mathcal{M}(X^{\top})$；
 		\item 可估函数的全体构成一个$\operatorname{rank}(X)$维线性空间；
-		\item $c^T\hat{\beta}$与$(X^TX)^-$的选择无关；
-		\item $c^T\hat{\beta}$为$c^T\beta$的无偏估计；
-		\item  $\operatorname{Cov}(c^T\hat{\beta},d^T\hat{\beta})=\sigma^2c^T(X^TX)^-d$，且与$(X^TX)^-$的选择无关；
-		\item (Gauss-Markov)$\;c^T\hat{\beta}$是$c^T\beta$唯一的BLUE；
-		\item 设$\varphi_i=c_i^T\beta,\;i=1,2,\dots,k$都是可估函数，$\seq{\alpha}{k}\in\mathbb{R}^{}$，则$\varphi=\sum\limits_{i=1}^{k}\alpha_i\varphi_i$也是可估的，且$\hat{\varphi}=\sum\limits_{i=1}^{k}\alpha_ic_i^T\hat{\beta}$是$\varphi$的BLUE。
+		\item $c^{\top}\hat{\beta}$与$(X^{\top}X)^-$的选择无关；
+		\item $c^{\top}\hat{\beta}$为$c^{\top}\beta$的无偏估计；
+		\item  $\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})=\sigma^2c^{\top}(X^{\top}X)^-d$，且与$(X^{\top}X)^-$的选择无关；
+		\item (Gauss-Markov)$\;c^{\top}\hat{\beta}$是$c^{\top}\beta$唯一的BLUE；
+		\item 设$\varphi_i=c_i^{\top}\beta,\;i=1,2,\dots,k$都是可估函数，$\seq{\alpha}{k}\in\mathbb{R}^{}$，则$\varphi=\sum\limits_{i=1}^{k}\alpha_i\varphi_i$也是可估的，且$\hat{\varphi}=\sum\limits_{i=1}^{k}\alpha_ic_i^{\top}\hat{\beta}$是$\varphi$的BLUE。
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)$\;c^T\beta$是可估函数$\Leftrightarrow$存在$n\times1$向量$\alpha$使得$\operatorname{E}(\alpha^Ty)=\alpha^T\operatorname{E}(y)=\alpha^TX\beta=c^T\beta$对一切的$\beta$成立$\Leftrightarrow c=X^T\alpha$。\par
-	(2)由(1)可得可估函数对加法和数乘封闭，根据\cref{theo:Subspace}可知所有可估函数构成一个线性空间。注意到可估函数$c_1^T\beta$和$c_2^T\beta$线性相关当且仅当$c_1$和$c_2$线性相关，由\cref{prop:SpanSubspace}(3)和\cref{prop:MatrixRank}(7)可得可估函数空间的秩为$\operatorname{rank}(X)$。\par
-	(3)因为$c^T\beta$可估，由(1)可知存在$n\times 1$向量$\alpha$使得$c=X^T\alpha$，于是由\cref{prop:Transpose}(4)可得：
+	(1)$\;c^{\top}\beta$是可估函数$\Leftrightarrow$存在$n\times1$向量$\alpha$使得$\operatorname{E}(\alpha^{\top}y)=\alpha^{\top}\operatorname{E}(y)=\alpha^{\top}X\beta=c^{\top}\beta$对一切的$\beta$成立$\Leftrightarrow c=X^{\top}\alpha$。\par
+	(2)由(1)可得可估函数对加法和数乘封闭，根据\cref{theo:Subspace}可知所有可估函数构成一个线性空间。注意到可估函数$c_1^{\top}\beta$和$c_2^{\top}\beta$线性相关当且仅当$c_1$和$c_2$线性相关，由\cref{prop:SpanSubspace}(3)和\cref{prop:MatrixRank}(7)可得可估函数空间的秩为$\operatorname{rank}(X)$。\par
+	(3)因为$c^{\top}\beta$可估，由(1)可知存在$n\times 1$向量$\alpha$使得$c=X^{\top}\alpha$，于是由\cref{prop:Transpose}(4)可得：
 	\begin{equation*}
-		c^T\hat{\beta}=\alpha^TX(X^TX)^-X^Ty
+		c^{\top}\hat{\beta}=\alpha^{\top}X(X^{\top}X)^-X^{\top}y
 	\end{equation*}
 	由\cref{prop:A-}(4)即可得出结论。\par
-	(4)因为$c^T\beta$可估，由(1)可知存在$n\times 1$向量$\alpha$使得$c=X^T\alpha$，根据\cref{prop:A-}(7)可得：
+	(4)因为$c^{\top}\beta$可估，由(1)可知存在$n\times 1$向量$\alpha$使得$c=X^{\top}\alpha$，根据\cref{prop:A-}(7)可得：
 	\begin{equation*}
-		\operatorname{E}(c^T\hat{\beta})=\operatorname{E}[c^T(X^TX)^-X^Ty]=c^T(X^TX)^-X^TX\beta=c^T\beta
+		\operatorname{E}(c^{\top}\hat{\beta})=\operatorname{E}[c^{\top}(X^{\top}X)^-X^{\top}y]=c^{\top}(X^{\top}X)^-X^{\top}X\beta=c^{\top}\beta
 	\end{equation*}\par
-	(5)因为$c^T\beta,d^T\beta$是可估函数，由(1)可知存在$\alpha,\gamma$使得$c=X^T\alpha,d=X^T\gamma$。由\cref{prop:CovMat}(3)、\cref{prop:Transpose}(4)和\cref{prop:A-}(5)(7)可知：
+	(5)因为$c^{\top}\beta,d^{\top}\beta$是可估函数，由(1)可知存在$\alpha,\gamma$使得$c=X^{\top}\alpha,d=X^{\top}\gamma$。由\cref{prop:CovMat}(3)、\cref{prop:Transpose}(4)和\cref{prop:A-}(5)(7)可知：
 	\begin{align*}
-		\operatorname{Cov}(c^T\hat{\beta},d^T\hat{\beta})
-		&=\operatorname{Cov}[c^T(X^TX)^-X^Ty,d^T(X^TX)^-X^Ty] \\
-		&=c^T(X^TX)^-X^T\operatorname{Cov}(y)X[(X^TX)^-]^Td \\
-		&=c^T(X^TX)^-X^T\sigma^2I_nX(X^TX)^-d \\
-		&=\sigma^2\alpha^TX(X^TX)^-X^TX(X^TX)^-X^T\gamma \\
-		&=\sigma^2c^T(X^TX)^-d=\sigma^2\alpha^TX(X^TX)^-X^T\gamma
+		\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})
+		&=\operatorname{Cov}[c^{\top}(X^{\top}X)^-X^{\top}y,d^{\top}(X^{\top}X)^-X^{\top}y] \\
+		&=c^{\top}(X^{\top}X)^-X^{\top}\operatorname{Cov}(y)X[(X^{\top}X)^-]^{\top}d \\
+		&=c^{\top}(X^{\top}X)^-X^{\top}\sigma^2I_nX(X^{\top}X)^-d \\
+		&=\sigma^2\alpha^{\top}X(X^{\top}X)^-X^{\top}X(X^{\top}X)^-X^{\top}\gamma \\
+		&=\sigma^2c^{\top}(X^{\top}X)^-d=\sigma^2\alpha^{\top}X(X^{\top}X)^-X^{\top}\gamma
 	\end{align*}
-	由\cref{prop:A-}(4)即可知$\operatorname{Cov}(c^T\hat{\beta},d^T\hat{\beta})$与$(X^TX)^-$的选择无关。\par
+	由\cref{prop:A-}(4)即可知$\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})$与$(X^{\top}X)^-$的选择无关。\par
 	(6)无偏性由(4)可得，线性性由正则方程可知，下证方差最小。
-	设$a^Ty$为$c^T\beta$的任一无偏估计，由(1)的过程可知$c=X^Ta$。根据\cref{prop:A-}(5)和(5)可得：
+	设$a^{\top}y$为$c^{\top}\beta$的任一无偏估计，由(1)的过程可知$c=X^{\top}a$。根据\cref{prop:A-}(5)和(5)可得：
 	\begin{align*}
-		\operatorname{Var}(a^Ty)-\operatorname{Var}(c^T\hat{\beta})&=\sigma^2[a^Ta-c^T(X^TX)^-c] \\
-		&=\sigma^2[a^T-c^T(X^TX)^-X^T][a-X(X^TX)^-c] \\
-		&=\sigma^2||a-X(X^TX)^-c||^2\geqslant0
+		\operatorname{Var}(a^{\top}y)-\operatorname{Var}(c^{\top}\hat{\beta})&=\sigma^2[a^{\top}a-c^{\top}(X^{\top}X)^-c] \\
+		&=\sigma^2[a^{\top}-c^{\top}(X^{\top}X)^-X^{\top}][a-X(X^{\top}X)^-c] \\
+		&=\sigma^2||a-X(X^{\top}X)^-c||^2\geqslant0
 	\end{align*}
 	上式第一行到第二行是由于\cref{prop:A-}(7)和\cref{prop:Transpose}(4)：
 	\begin{align*}
-		&[a^T-c^T(X^TX)^-X^T][a-X(X^TX)^-c] \\
-		=&a^Ta-a^TX(X^TX)^-c-c^T(X^TX)^-X^Ta+c^T(X^TX)^-X^TX(X^TX)^-c \\
-		=&a^Ta-c^T(X^TX)^-c-c^T(X^TX)^-c+c^T(X^TX)^-c \\
-		=&a^Ta-c^T(X^TX)^-c
+		&[a^{\top}-c^{\top}(X^{\top}X)^-X^{\top}][a-X(X^{\top}X)^-c] \\
+		=&a^{\top}a-a^{\top}X(X^{\top}X)^-c-c^{\top}(X^{\top}X)^-X^{\top}a+c^{\top}(X^{\top}X)^-X^{\top}X(X^{\top}X)^-c \\
+		=&a^{\top}a-c^{\top}(X^{\top}X)^-c-c^{\top}(X^{\top}X)^-c+c^{\top}(X^{\top}X)^-c \\
+		=&a^{\top}a-c^{\top}(X^{\top}X)^-c
 	\end{align*}
-	由范数的性质可知$\operatorname{Var}(a^Ty)=\operatorname{Var}(c^T\hat{\beta})$当且仅当$a=X(X^TX)^-c$，由\cref{prop:A+}(3)可知$a=X(X^TX)^-c\Leftrightarrow a^T=c^T(X^TX)^-X^T\Leftrightarrow a^Ty=c^T(X^TX)^-X^Ty=c^T\hat{\beta}$。\par
+	由范数的性质可知$\operatorname{Var}(a^{\top}y)=\operatorname{Var}(c^{\top}\hat{\beta})$当且仅当$a=X(X^{\top}X)^-c$，由\cref{prop:A+}(3)可知$a=X(X^{\top}X)^-c\Leftrightarrow a^{\top}=c^{\top}(X^{\top}X)^-X^{\top}\Leftrightarrow a^{\top}y=c^{\top}(X^{\top}X)^-X^{\top}y=c^{\top}\hat{\beta}$。\par
 	(7)由(2)可知$\varphi$是可估的。\par
-	由(4)可得$c_i^T\hat{\beta}$是$c_i^T\beta$的无偏估计，所以：
+	由(4)可得$c_i^{\top}\hat{\beta}$是$c_i^{\top}\beta$的无偏估计，所以：
 	\begin{equation*}
-		\operatorname{E}(\hat{\varphi})=\operatorname{E}\left(\sum_{i=1}^{k}\alpha_ic_i^T\hat{\beta}\right)=\sum_{i=1}^{k}\alpha_i\operatorname{E}(c_i^T\hat{\beta})=\sum_{i=1}^{k}\alpha_ic_i^T\beta=\varphi
+		\operatorname{E}(\hat{\varphi})=\operatorname{E}\left(\sum_{i=1}^{k}\alpha_ic_i^{\top}\hat{\beta}\right)=\sum_{i=1}^{k}\alpha_i\operatorname{E}(c_i^{\top}\hat{\beta})=\sum_{i=1}^{k}\alpha_ic_i^{\top}\beta=\varphi
 	\end{equation*}
 	即$\hat{\varphi}$是一个无偏估计。\par
-	令$c=\sum\limits_{i=1}^{k}\alpha_ic_i$，则$\varphi=c^T\beta$。设$\gamma^Ty$是$\varphi$的一个无偏估计，于是由(6)可得：
+	令$c=\sum\limits_{i=1}^{k}\alpha_ic_i$，则$\varphi=c^{\top}\beta$。设$\gamma^{\top}y$是$\varphi$的一个无偏估计，于是由(6)可得：
 	\begin{equation*}
-		\operatorname{Var}(\gamma^Ty)-\operatorname{Var}(c^T\hat{\beta})=\sigma^2||\gamma-X(X^TX)^-c||^2
+		\operatorname{Var}(\gamma^{\top}y)-\operatorname{Var}(c^{\top}\hat{\beta})=\sigma^2||\gamma-X(X^{\top}X)^-c||^2
 	\end{equation*}
-	上式等于$0\Leftrightarrow \gamma^Ty=c^T\hat{\beta}=\hat{\varphi}$，即$\hat{\varphi}$是唯一的BLUE。
+	上式等于$0\Leftrightarrow \gamma^{\top}y=c^{\top}\hat{\beta}=\hat{\varphi}$，即$\hat{\varphi}$是唯一的BLUE。
 \end{proof}
 \begin{definition}
-	对于\cref{model:LinearModel}，若$c^T\beta$是可估函数，称$c^T\hat{\beta}$为$c^T\beta$的LSE，其中$\hat{\beta}$为正则方程的解。
+	对于\cref{model:LinearModel}，若$c^{\top}\beta$是可估函数，称$c^{\top}\hat{\beta}$为$c^{\top}\beta$的LSE，其中$\hat{\beta}$为正则方程的解。
 \end{definition}
 \subsubsection{残差}
 \begin{definition}
-	记$\hat{y}=X\hat{\beta}$，称$\hat{e}=y-\hat{y}$为\gls{ResidualVector}，称$\hat{e}^T\hat{e}$为\gls{SSE}，记为$\operatorname{SSE}$。
+	记$\hat{y}=X\hat{\beta}$，称$\hat{e}=y-\hat{y}$为\gls{ResidualVector}，称$\hat{e}^{\top}\hat{e}$为\gls{SSE}，记为$\operatorname{SSE}$。
 \end{definition}
 \begin{property}\label{prop:ehat}
 	对于\cref{model:LinearModel}，$\hat{\beta}$为正则方程的解，则残差向量$\hat{e}$满足：
 	\begin{enumerate}
 		\item $\operatorname{E}(\hat{e})=0,\;\operatorname{Cov}(\hat{e})=\sigma^2(I_n-P_X)$；
-		\item $\operatorname{SSE}=y^T(I_n-P_X)y$；
+		\item $\operatorname{SSE}=y^{\top}(I_n-P_X)y$；
 		\item $\operatorname{Cov}(\hat{y},\hat{e})=\mathbf{0}$；
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)由\cref{prop:OrthogonalProjectionMat}(2)可知向$\mathcal{M}(X)$的正交投影阵$P_X=X(X^TX)^-X^T$，根据\cref{prop:OrthogonalProjectionMat}(7)(3)可知$I_n-P_X$是对称幂等阵，所以由\cref{prop:CovMat}(3)可得：
+	(1)由\cref{prop:OrthogonalProjectionMat}(2)可知向$\mathcal{M}(X)$的正交投影阵$P_X=X(X^{\top}X)^-X^{\top}$，根据\cref{prop:OrthogonalProjectionMat}(7)(3)可知$I_n-P_X$是对称幂等阵，所以由\cref{prop:CovMat}(3)可得：
 	\begin{gather*}
 		\begin{aligned}
-			\operatorname{E}(\hat{e})&=\operatorname{E}(y-X\hat{\beta})=\operatorname{E}[I_ny-X(X^TX)^-X^Ty]=(I_n-P_X)\operatorname{E}(y) \\
+			\operatorname{E}(\hat{e})&=\operatorname{E}(y-X\hat{\beta})=\operatorname{E}[I_ny-X(X^{\top}X)^-X^{\top}y]=(I_n-P_X)\operatorname{E}(y) \\
 			&=(I_n-P_X)X\beta=(X-X)\beta=0
 		\end{aligned} \\
 		\begin{aligned}
-			\operatorname{Cov}(\hat{e})&=\operatorname{Cov}[(I_n-P_X)y]=(I_n-P_X)\operatorname{Cov}(y)(I_n-P_X)^T \\
+			\operatorname{Cov}(\hat{e})&=\operatorname{Cov}[(I_n-P_X)y]=(I_n-P_X)\operatorname{Cov}(y)(I_n-P_X)^{\top} \\
 			&=(I_n-P_X)\operatorname{Cov}(y)(I_n-P_X)=\sigma^2(I_n-P_X)
 		\end{aligned}
 	\end{gather*}\par
@@ -158,12 +158,12 @@
 	\end{equation*}
 	且$I_n-P_X$是一个对称幂等阵，于是由\cref{prop:Transpose}(4)可得：
 	\begin{equation*}
-		\hat{e}^T\hat{e}=y^T(I_n-P_X)^T(I_n-P_X)y=y^T(I_n-P_X)(I_n-P_X)y=y^T(I_n-P_X)y
+		\hat{e}^{\top}\hat{e}=y^{\top}(I_n-P_X)^{\top}(I_n-P_X)y=y^{\top}(I_n-P_X)(I_n-P_X)y=y^{\top}(I_n-P_X)y
 	\end{equation*}\par
 	(3)由\cref{prop:CovMat}(5)(3)和\cref{prop:OrthogonalProjectionMat}(2)(8)可得
 	\begin{align*}
 		\operatorname{Cov}(\hat{y},\hat{e})&=\operatorname{Cov}(\hat{y},y-\hat{y})=\operatorname{Cov}(\hat{y},y)-\operatorname{Cov}(\hat{y}) \\
-		&=\operatorname{Cov}[X(X^TX)^-X^Ty,y]-\operatorname{Cov}[X(X^TX)^-X^Ty] \\
+		&=\operatorname{Cov}[X(X^{\top}X)^-X^{\top}y,y]-\operatorname{Cov}[X(X^{\top}X)^-X^{\top}y] \\
 		&=\operatorname{Cov}[P_Xy,(I_n-P_X)y]=P_X\operatorname{Cov}(y)(I_n-P_X) \\
 		&=\sigma^2P_X(I_n-P_X)=\mathbf{0}\qedhere
 	\end{align*}
@@ -179,7 +179,7 @@
 \begin{proof}
 	注意到$(I_n-P_X)X=X-X=\mathbf{0}$，由\cref{prop:ehat}(2)、\cref{theo:ERVQuadraticForm}和\cref{prop:Transpose}(4)可得：
 	\begin{align*}
-		\operatorname{E}(\operatorname{SSE})&=\operatorname{E}[y^T(I_n-P_X)y] =\beta^TX^T(I_n-P_X)X\beta+\operatorname{tr}[(I_n-P_X)\sigma^2I_n] \\
+		\operatorname{E}(\operatorname{SSE})&=\operatorname{E}[y^{\top}(I_n-P_X)y] =\beta^{\top}X^{\top}(I_n-P_X)X\beta+\operatorname{tr}[(I_n-P_X)\sigma^2I_n] \\
 		&=\sigma^2\operatorname{tr}(I_n-P_X)
 	\end{align*}
 	由\cref{prop:OrthogonalProjectionMat}(7)(3)、\cref{prop:IdempotentMat}(2)(5)和\cref{prop:OrthogonalProjectionMat}(1)可得：
@@ -199,79 +199,79 @@
 \begin{theorem}\label{theo:ConstraintLinearModel}
 	对于\cref{model:LinearModel}，假设：
 	\begin{equation*}
-		A\beta=b,\quad A\in M_{k\times p}(K),\quad\operatorname{rank}(A)=k,\quad\mathcal{M}(A^T)\subseteq\mathcal{M}(X^T)
+		A\beta=b,\quad A\in M_{k\times p}(K),\quad\operatorname{rank}(A)=k,\quad\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top})
 	\end{equation*}
 	且$A\beta=b$相容，则：
 	\begin{equation*}
-		\hat{\beta}_A=\hat{\beta}-(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
+		\hat{\beta}_A=\hat{\beta}-(X^{\top}X)^-A^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b)
 	\end{equation*}
 	为$\beta$在约束$A\beta=b$下的约束LS解，$A\hat{\beta}_A$为$A\beta$的约束LSE。
 \end{theorem}
 \begin{proof}
 	使用Lagrange乘子法构造辅助函数（$\lambda$为Lagrange乘子，乘子前加上系数$2$是为了下面不出现分数，对结果没有影响）：
 	\begin{align*}
-		F(\beta,\lambda)&=||y-X\beta||^2+2\lambda^T(A\beta-b) \\
-		&=y^Ty-y^TX\beta-\beta^TX^Ty+\beta^TX^TX\beta+2\lambda^TA\beta-2\lambda^Tb
+		F(\beta,\lambda)&=||y-X\beta||^2+2\lambda^{\top}(A\beta-b) \\
+		&=y^{\top}y-y^{\top}X\beta-\beta^{\top}X^{\top}y+\beta^{\top}X^{\top}X\beta+2\lambda^{\top}A\beta-2\lambda^{\top}b
 	\end{align*}
 	于是：
 	\begin{equation*}
-		\frac{\partial F(\beta,\lambda)}{\partial\beta}=-2X^Ty+2X^TX\beta+2A^T\lambda
+		\frac{\partial F(\beta,\lambda)}{\partial\beta}=-2X^{\top}y+2X^{\top}X\beta+2A^{\top}\lambda
 	\end{equation*}
 	令上式为$0$，得到：
 	\begin{equation*}
-		X^TX\beta=X^Ty-A^T\lambda
+		X^{\top}X\beta=X^{\top}y-A^{\top}\lambda
 	\end{equation*}
 	于是约束下的解即为方程组：
 	\begin{equation*}
 		\begin{cases}
-			X^TX\beta=X^Ty-A^T\lambda \\
+			X^{\top}X\beta=X^{\top}y-A^{\top}\lambda \\
 			A\beta=b
 		\end{cases}
 	\end{equation*}
-	的解，将其记为$\hat{\beta}_A,\hat{\lambda}$。因为$\mathcal{M}(A^T)\subseteq\mathcal{M}(X^T)$，由\cref{theo:VectorSpaceAAAT}和\cref{theo:SolutionOfSLE2}(1)可知方程组是相容的。由\cref{theo:InhomogeneousLinearEq'sGeneralSolution2}可知：
+	的解，将其记为$\hat{\beta}_A,\hat{\lambda}$。因为$\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top})$，由\cref{theo:VectorSpaceAAAT}和\cref{theo:SolutionOfSLE2}(1)可知方程组是相容的。由\cref{theo:InhomogeneousLinearEq'sGeneralSolution2}可知：
 	\begin{equation*}
-		\hat{\beta}_A=(X^TX)^-X^Ty-(X^TX)^-A^T\hat{\lambda}=\hat{\beta}-(X^TX)^-A^T\hat{\lambda}
+		\hat{\beta}_A=(X^{\top}X)^-X^{\top}y-(X^{\top}X)^-A^{\top}\hat{\lambda}=\hat{\beta}-(X^{\top}X)^-A^{\top}\hat{\lambda}
 	\end{equation*}
 	代入方程组的第二个方程可得：
 	\begin{equation*}
-		A\hat{\beta}-A(X^TX)^-A^T\hat{\lambda}=b
+		A\hat{\beta}-A(X^{\top}X)^-A^{\top}\hat{\lambda}=b
 	\end{equation*}
-	由\info{$A(X^TX)^-A^T$的可逆性}可知：
+	由\info{$A(X^{\top}X)^-A^{\top}$的可逆性}可知：
 	\begin{equation*}
-		\hat{\lambda}=[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
+		\hat{\lambda}=[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b)
 	\end{equation*}
 	于是：
 	\begin{equation*}
-		\hat{\beta}_A=\hat{\beta}-(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
+		\hat{\beta}_A=\hat{\beta}-(X^{\top}X)^-A^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b)
 	\end{equation*}
 	下证明这个解确实是最小二乘解。\par
 	做分解：
 	\begin{align*}
 		||y-X\beta||^2
 		&=||y-X\hat{\beta}+X(\hat{\beta}-\beta)||^2 \\
-		&=||y-X\hat{\beta}||^2+2(y-X\hat{\beta})^TX(\hat{\beta}-\beta)+(\hat{\beta}-\beta)^TX^TX(\hat{\beta}-\beta)
+		&=||y-X\hat{\beta}||^2+2(y-X\hat{\beta})^{\top}X(\hat{\beta}-\beta)+(\hat{\beta}-\beta)^{\top}X^{\top}X(\hat{\beta}-\beta)
 	\end{align*}
 	由\cref{prop:Transpose}和\cref{prop:A-}(5)(6)可得：
 	\begin{align*}
-		(y-X\hat{\beta})^TX(\hat{\beta}-\beta)&=y^TX(\hat{\beta}-\beta)-\hat{\beta}^TX^TX(\hat{\beta}-\beta) \\
-		&=y^TX(\hat{\beta}-\beta)-[(X^TX)^-X^Ty]^TX^TX(\hat{\beta}-\beta) \\
-		&=y^TX(\hat{\beta}-\beta)-y^TX(X^TX)^-X^TX(\hat{\beta}-\beta) \\
-		&=y^TX(\hat{\beta}-\beta)-y^TX(\hat{\beta}-\beta)=0
+		(y-X\hat{\beta})^{\top}X(\hat{\beta}-\beta)&=y^{\top}X(\hat{\beta}-\beta)-\hat{\beta}^{\top}X^{\top}X(\hat{\beta}-\beta) \\
+		&=y^{\top}X(\hat{\beta}-\beta)-[(X^{\top}X)^-X^{\top}y]^{\top}X^{\top}X(\hat{\beta}-\beta) \\
+		&=y^{\top}X(\hat{\beta}-\beta)-y^{\top}X(X^{\top}X)^-X^{\top}X(\hat{\beta}-\beta) \\
+		&=y^{\top}X(\hat{\beta}-\beta)-y^{\top}X(\hat{\beta}-\beta)=0
 	\end{align*}
 	于是：
 	\begin{align*}
 		||y-X\beta||^2
-		&=||y-X\hat{\beta}||^2+(\hat{\beta}-\beta)^TX^TX(\hat{\beta}-\beta) \\
-		&=||y-X\hat{\beta}||^2+(\hat{\beta}-\hat{\beta}_A+\hat{\beta}_A-\beta)^TX^TX(\hat{\beta}-\hat{\beta}_A+\hat{\beta}_A-\beta) \\
-		&=||y-X\hat{\beta}||^2+||X(\hat{\beta}-\hat{\beta}_A)||^2+||X(\hat{\beta}_A-\beta)||^2+2(\hat{\beta}-\hat{\beta}_A)^TX^TX(\hat{\beta}_A-\beta)
+		&=||y-X\hat{\beta}||^2+(\hat{\beta}-\beta)^{\top}X^{\top}X(\hat{\beta}-\beta) \\
+		&=||y-X\hat{\beta}||^2+(\hat{\beta}-\hat{\beta}_A+\hat{\beta}_A-\beta)^{\top}X^{\top}X(\hat{\beta}-\hat{\beta}_A+\hat{\beta}_A-\beta) \\
+		&=||y-X\hat{\beta}||^2+||X(\hat{\beta}-\hat{\beta}_A)||^2+||X(\hat{\beta}_A-\beta)||^2+2(\hat{\beta}-\hat{\beta}_A)^{\top}X^{\top}X(\hat{\beta}_A-\beta)
 	\end{align*}
-	由\cref{prop:A-}(5)(7)以及$\mathcal{M}(A^T)\subseteq\mathcal{M}(X^T)$可得：
+	由\cref{prop:A-}(5)(7)以及$\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top})$可得：
 	\begin{align*}
-		(\hat{\beta}-\hat{\beta}_A)^TX^TX(\hat{\beta}_A-\beta)
-		&=[(X^TX)^-A^T\hat{\lambda}]^TX^TX(\beta_A-\beta)
-		=\hat{\lambda}^TA(X^TX)^-X^TX(\beta_A-\beta) \\
-		&=\hat{\lambda}^TA(\beta_A-\beta)
-		=\hat{\lambda}^T(A\beta_A-A\beta)=0
+		(\hat{\beta}-\hat{\beta}_A)^{\top}X^{\top}X(\hat{\beta}_A-\beta)
+		&=[(X^{\top}X)^-A^{\top}\hat{\lambda}]^{\top}X^{\top}X(\beta_A-\beta)
+		=\hat{\lambda}^{\top}A(X^{\top}X)^-X^{\top}X(\beta_A-\beta) \\
+		&=\hat{\lambda}^{\top}A(\beta_A-\beta)
+		=\hat{\lambda}^{\top}(A\beta_A-A\beta)=0
 	\end{align*}
 	所以：
 	\begin{equation*}
@@ -300,23 +300,23 @@
 	\begin{equation*}
 		\operatorname{E}(||y-X\hat{\beta}||^2)=(n-r)\sigma^2
 	\end{equation*}
-	由\cref{prop:A-}(5)(7)、$\mathcal{M}(A^T)\subseteq\mathcal{M}(X^T)$
+	由\cref{prop:A-}(5)(7)、$\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top})$
 	\begin{align*}
-		||X(\hat{\beta}-\hat{\beta}_A)||&=(\hat{\beta}-\hat{\beta}_A)^TX^TX(\hat{\beta}-\hat{\beta}_A) \\
-		&=\{(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)\}^T \\
-		&\quad\cdot X^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
-		&=(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}A(X^TX)^- \\
-		&\quad\cdot X^TX(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
-		&=(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}A(X^TX)^-A^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b) \\
-		&=(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)
+		||X(\hat{\beta}-\hat{\beta}_A)||&=(\hat{\beta}-\hat{\beta}_A)^{\top}X^{\top}X(\hat{\beta}-\hat{\beta}_A) \\
+		&=\{(X^{\top}X)^-A^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b)\}^{\top} \\
+		&\quad\cdot X^{\top}X(X^{\top}X)^-A^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b) \\
+		&=(A\hat{\beta}-b)^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}A(X^{\top}X)^- \\
+		&\quad\cdot X^{\top}X(X^{\top}X)^-A^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b) \\
+		&=(A\hat{\beta}-b)^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}A(X^{\top}X)^-A^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b) \\
+		&=(A\hat{\beta}-b)^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b)
 	\end{align*}
-	因为$\mathcal{M}(A^T)\subseteq\mathcal{M}(X^T)$，所以由\cref{prop:EstimableFunction}(1)可知$A\beta$的每一个元素都是可估函数，于是由\cref{theo:ERVQuadraticForm}和\cref{prop:EstimableFunction}(4)(5)可知：
+	因为$\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top})$，所以由\cref{prop:EstimableFunction}(1)可知$A\beta$的每一个元素都是可估函数，于是由\cref{theo:ERVQuadraticForm}和\cref{prop:EstimableFunction}(4)(5)可知：
 	\begin{align*}
 		\operatorname{E}(||X(\hat{\beta}-\hat{\beta}_A)||)
-		&=\operatorname{E}\{(A\hat{\beta}-b)^T[A(X^TX)^-A^T]^{-1}(A\hat{\beta}-b)\} \\
-		&=(A\beta-b)^T[A(X^TX)^-A^T]^{-1}(A\beta-b) \\
-		&\quad+\operatorname{tr}\{[A(X^TX)^-A^T]^{-1}\operatorname{Cov}(A\hat{\beta}-b)\} \\
-		&=\operatorname{tr}\{[A(X^TX)^-A^T]^{-1}\sigma^2A(X^TX)^-A^T\}=\sigma^2\operatorname{tr}(I_k)=k\sigma^2
+		&=\operatorname{E}\{(A\hat{\beta}-b)^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b)\} \\
+		&=(A\beta-b)^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\beta-b) \\
+		&\quad+\operatorname{tr}\{[A(X^{\top}X)^-A^{\top}]^{-1}\operatorname{Cov}(A\hat{\beta}-b)\} \\
+		&=\operatorname{tr}\{[A(X^{\top}X)^-A^{\top}]^{-1}\sigma^2A(X^{\top}X)^-A^{\top}\}=\sigma^2\operatorname{tr}(I_k)=k\sigma^2
 	\end{align*}
 	所以：
 	\begin{equation*}
@@ -333,42 +333,42 @@
 \begin{theorem}\label{theo:SSESSEACalculate}
 	对于无约束条件以及约束$A\beta=\mathbf{0}$，有：
 	\begin{gather*}
-		\operatorname{SSE}=||y-X\hat{\beta}||^2=y^Ty-\hat{\beta}^TX^Ty,\quad
-		\operatorname{SSE}_A=||y-X\hat{\beta}_A||^2=y^Ty-\hat{\beta}_A^TX^Ty
+		\operatorname{SSE}=||y-X\hat{\beta}||^2=y^{\top}y-\hat{\beta}^{\top}X^{\top}y,\quad
+		\operatorname{SSE}_A=||y-X\hat{\beta}_A||^2=y^{\top}y-\hat{\beta}_A^{\top}X^{\top}y
 	\end{gather*}
 \end{theorem}
 \begin{proof}
 	由\cref{prop:A-}(6)可知：
 	\begin{align*}
-		\operatorname{SSE}&=(y-X\hat{\beta})^T(y-X\hat{\beta})=y^Ty-y^TX\hat{\beta}-\hat{\beta}^TX^Ty+\hat{\beta}^TX^TX\hat{\beta} \\
-		&=y^Ty-2\hat{\beta}^TX^Ty+\hat{\beta}^TX^TX(X^TX)^-X^Ty=y^Ty-2\hat{\beta}^TX^Ty+\hat{\beta}^TX^Ty \\
-		&=y^Ty-\hat{\beta}^TX^Ty
+		\operatorname{SSE}&=(y-X\hat{\beta})^{\top}(y-X\hat{\beta})=y^{\top}y-y^{\top}X\hat{\beta}-\hat{\beta}^{\top}X^{\top}y+\hat{\beta}^{\top}X^{\top}X\hat{\beta} \\
+		&=y^{\top}y-2\hat{\beta}^{\top}X^{\top}y+\hat{\beta}^{\top}X^{\top}X(X^{\top}X)^-X^{\top}y=y^{\top}y-2\hat{\beta}^{\top}X^{\top}y+\hat{\beta}^{\top}X^{\top}y \\
+		&=y^{\top}y-\hat{\beta}^{\top}X^{\top}y
 	\end{align*}
 	由\cref{theo:ConstraintLinearModel}可知：
 	\begin{equation*}
 		\begin{cases}
-			X^TX\hat{\beta}_A=X^Ty-A^T\hat{\lambda} \\
+			X^{\top}X\hat{\beta}_A=X^{\top}y-A^{\top}\hat{\lambda} \\
 			A\hat{\beta}_A=\mathbf{0}
 		\end{cases}
 	\end{equation*}
 	其中$\lambda$为Lagrange乘子，于是有：
 	\begin{align*}
-		\operatorname{SSE}_A&=(y-X\hat{\beta}_A)^T(y-X\hat{\beta}_A)=y^Ty-y^TX\hat{\beta}_A-\hat{\beta}_A^TX^Ty+\hat{\beta}_A^TX^TX\hat{\beta}_A \\
-		&=y^Ty-\hat{\beta}_A^TX^Ty+\hat{\beta}_A^TX^TX\hat{\beta}_A-\hat{\beta}^TX^Ty=y^Ty-\hat{\beta}_A^TX^Ty+\hat{\beta}_A^T(X^TX\hat{\beta}_A-X^Ty) \\
-		&=y^Ty-\hat{\beta}_A^TX^Ty-\hat{\beta}_A^TA^T\hat{\lambda}=y^Ty-\hat{\beta}_A^TX^Ty\qedhere
+		\operatorname{SSE}_A&=(y-X\hat{\beta}_A)^{\top}(y-X\hat{\beta}_A)=y^{\top}y-y^{\top}X\hat{\beta}_A-\hat{\beta}_A^{\top}X^{\top}y+\hat{\beta}_A^{\top}X^{\top}X\hat{\beta}_A \\
+		&=y^{\top}y-\hat{\beta}_A^{\top}X^{\top}y+\hat{\beta}_A^{\top}X^{\top}X\hat{\beta}_A-\hat{\beta}^{\top}X^{\top}y=y^{\top}y-\hat{\beta}_A^{\top}X^{\top}y+\hat{\beta}_A^{\top}(X^{\top}X\hat{\beta}_A-X^{\top}y) \\
+		&=y^{\top}y-\hat{\beta}_A^{\top}X^{\top}y-\hat{\beta}_A^{\top}A^{\top}\hat{\lambda}=y^{\top}y-\hat{\beta}_A^{\top}X^{\top}y\qedhere
 	\end{align*}
 \end{proof}
 \begin{definition}
-	称$\hat{\beta}^TX^Ty=y^TP_Xy$为\gls{RSS}，记为$\operatorname{RSS}(\beta)$。称$\hat{\beta}_A^TX^Ty$为约束条件$A\beta=\mathbf{0}$下的回归平方和，记为$\operatorname{RSS}_A(\beta)$。称$y^Ty$为总平方和，记作$\operatorname{RSS}_{\text{总}}$。称$\sqrt{\dfrac{\operatorname{RSS}(\beta)}{\operatorname{RSS}_{\text{总}}}}$为$y$与$\seq{X}{p}$之间的复相关系数，记作$\operatorname{R}$。
+	称$\hat{\beta}^{\top}X^{\top}y=y^{\top}P_Xy$为\gls{RSS}，记为$\operatorname{RSS}(\beta)$。称$\hat{\beta}_A^{\top}X^{\top}y$为约束条件$A\beta=\mathbf{0}$下的回归平方和，记为$\operatorname{RSS}_A(\beta)$。称$y^{\top}y$为总平方和，记作$\operatorname{RSS}_{\text{总}}$。称$\sqrt{\dfrac{\operatorname{RSS}(\beta)}{\operatorname{RSS}_{\text{总}}}}$为$y$与$\seq{X}{p}$之间的复相关系数，记作$\operatorname{R}$。
 \end{definition}
 \begin{property}\label{prop:RSS=RSSbeta+SSE}
 	$\operatorname{RSS}_{\text{总}}=\operatorname{RSS}(\beta)+\operatorname{SSE}$。
 \end{property}
 \begin{proof}
-	由\cref{prop:ehat}(2)可得$\operatorname{RSS}(\beta)+\operatorname{SSE}=y^TP_Xy+y^T(I_n-P_X)y=y^Ty=\operatorname{RSS}_{\text{总}}$。
+	由\cref{prop:ehat}(2)可得$\operatorname{RSS}(\beta)+\operatorname{SSE}=y^{\top}P_Xy+y^{\top}(I_n-P_X)y=y^{\top}y=\operatorname{RSS}_{\text{总}}$。
 \end{proof}
 \begin{note}
-	回归平方和表示了数据平方和$y^Ty$中能够由因变量$y$与自变量$\seq{X}{p}$的线性关系解释的部分，因为它是$y$在$<\seq{X}{p}>$上投影长度的平方。由此可以看出$\operatorname{R}^2\leqslant1$。我们用$\operatorname{R}^2$来度量$\seq{X}{p}$对$y$线性拟合程度的好坏，越接近$1$越好。
+	回归平方和表示了数据平方和$y^{\top}y$中能够由因变量$y$与自变量$\seq{X}{p}$的线性关系解释的部分，因为它是$y$在$<\seq{X}{p}>$上投影长度的平方。由此可以看出$\operatorname{R}^2\leqslant1$。我们用$\operatorname{R}^2$来度量$\seq{X}{p}$对$y$线性拟合程度的好坏，越接近$1$越好。
 \end{note}
 
 \subsection{预测}
@@ -398,20 +398,20 @@
 		\varepsilon_{0m}
 	\end{pmatrix}
 \end{gather*}
-\textbf{假设$\mathcal{M}(X_0^T)\subseteq\mathcal{M}(X^T)$}。
+\textbf{假设$\mathcal{M}(X_0^{\top})\subseteq\mathcal{M}(X^{\top})$}。
 \subsubsection{被测量与历史数据无关}
 \begin{derivation}
 	此时使用$\operatorname{E}(y_0)=X_0\beta$的估计去进行预测。\par
-	由\cref{theo:VectorSpaceAAAT}可知$\mathcal{M}(X^T)=\mathcal{M}(X^TX)$，于是$\mathcal{M}(X_0^T)\subseteq\mathcal{M}(X^T)=\mathcal{M}(X^TX)$，由\cref{prop:A-}(3)可知$X_0(X^TX)^-X^Ty$与广义逆$(X^TX)^-$的选择无关。\par
-	因为$\mathcal{M}(X_0^T)\subseteq\mathcal{M}(X^T)$，所以$X_0\beta$是可估的，它具有可估函数的性质。但需注意，因为$y_0$也是一个随机变量，所以这里的无偏性指的是$\operatorname{E}(\hat{y}_0-y_0)=0$。
+	由\cref{theo:VectorSpaceAAAT}可知$\mathcal{M}(X^{\top})=\mathcal{M}(X^{\top}X)$，于是$\mathcal{M}(X_0^{\top})\subseteq\mathcal{M}(X^{\top})=\mathcal{M}(X^{\top}X)$，由\cref{prop:A-}(3)可知$X_0(X^{\top}X)^-X^{\top}y$与广义逆$(X^{\top}X)^-$的选择无关。\par
+	因为$\mathcal{M}(X_0^{\top})\subseteq\mathcal{M}(X^{\top})$，所以$X_0\beta$是可估的，它具有可估函数的性质。但需注意，因为$y_0$也是一个随机变量，所以这里的无偏性指的是$\operatorname{E}(\hat{y}_0-y_0)=0$。
 \end{derivation}
 \subsubsection{被测量与历史数据相关}
 \begin{derivation}
-	在某些情况下，$y_0$和$y$确实具有一定的相关性，用$\operatorname{Cov}(\varepsilon,\varepsilon_0)=\sigma^2V^T$来度量它们之间的相关性，此时有：
+	在某些情况下，$y_0$和$y$确实具有一定的相关性，用$\operatorname{Cov}(\varepsilon,\varepsilon_0)=\sigma^2V^{\top}$来度量它们之间的相关性，此时有：
 	\begin{equation*}
-		\operatorname{Cov}[(y,y_0)^T]=\operatorname{Cov}[(\varepsilon,\varepsilon_0)^T]=\sigma^2
+		\operatorname{Cov}[(y,y_0)^{\top}]=\operatorname{Cov}[(\varepsilon,\varepsilon_0)^{\top}]=\sigma^2
 		\begin{pmatrix}
-			I_n & V^T \\
+			I_n & V^{\top} \\
 			V & I_m 
 		\end{pmatrix}
 	\end{equation*}
@@ -419,7 +419,7 @@
 \begin{definition}
 	记$\hat{y}=Cy$是$y$的一个线性无偏估计，称：
 	\begin{equation*}
-		\operatorname{PMSE}(\hat{y})=\operatorname{E}[(\hat{y}-y)^TA(\hat{y}-y)]
+		\operatorname{PMSE}(\hat{y})=\operatorname{E}[(\hat{y}-y)^{\top}A(\hat{y}-y)]
 	\end{equation*}
 	为\gls{PMSE}，其中$A>0$。
 \end{definition}
@@ -436,18 +436,18 @@
 		\hat{y}_0-y_0=Cy-X_0\beta-\varepsilon_0=CX\beta+C\varepsilon-X_0\beta-\varepsilon_0=(CX-X_0)\beta+C\varepsilon-\varepsilon_0 \\
 		\operatorname{E}(\hat{y}_0-y_0)=(CX-X_0)\beta=\mathbf{0}\text{对一切$\beta$成立}\iff CX=X_0 \\
 		\begin{aligned}
-			\operatorname{Cov}(C\varepsilon-\varepsilon_0)&=\operatorname{E}[(C\varepsilon-\varepsilon_0)(C\varepsilon-\varepsilon_0)^T]=\operatorname{E}(C\varepsilon\varepsilon^TC^T-C\varepsilon\varepsilon_0^T-\varepsilon_0\varepsilon^TC^T+\varepsilon_0\varepsilon_0^T) \\
-			&=\operatorname{E}(C\varepsilon\varepsilon^TC^T)-\operatorname{E}(C\varepsilon\varepsilon_0^T)-\operatorname{E}(\varepsilon_0\varepsilon^TC^T)+\operatorname{E}(\varepsilon_0\varepsilon_0^T) \\
-			&=C\operatorname{E}(\varepsilon\varepsilon^T)C^T-\operatorname{Cov}(C\varepsilon,\varepsilon_0)-\operatorname{Cov}(\varepsilon_0,C\varepsilon)+\operatorname{Cov}(\varepsilon_0) \\
-			&=C\operatorname{Cov}(\varepsilon)C^T-2\operatorname{Cov}(C\varepsilon,\varepsilon_0)+\sigma^2I_m \\
-			&=\sigma^2CC^T-2C\operatorname{Cov}(\varepsilon,\varepsilon_0)+\sigma^2I_m \\
-			&=\sigma^2CC^T-2\sigma^2CV^T+\sigma^2I_m=\sigma^2(CC^T-2CV^T+I_m)
+			\operatorname{Cov}(C\varepsilon-\varepsilon_0)&=\operatorname{E}[(C\varepsilon-\varepsilon_0)(C\varepsilon-\varepsilon_0)^{\top}]=\operatorname{E}(C\varepsilon\varepsilon^{\top}C^{\top}-C\varepsilon\varepsilon_0^{\top}-\varepsilon_0\varepsilon^{\top}C^{\top}+\varepsilon_0\varepsilon_0^{\top}) \\
+			&=\operatorname{E}(C\varepsilon\varepsilon^{\top}C^{\top})-\operatorname{E}(C\varepsilon\varepsilon_0^{\top})-\operatorname{E}(\varepsilon_0\varepsilon^{\top}C^{\top})+\operatorname{E}(\varepsilon_0\varepsilon_0^{\top}) \\
+			&=C\operatorname{E}(\varepsilon\varepsilon^{\top})C^{\top}-\operatorname{Cov}(C\varepsilon,\varepsilon_0)-\operatorname{Cov}(\varepsilon_0,C\varepsilon)+\operatorname{Cov}(\varepsilon_0) \\
+			&=C\operatorname{Cov}(\varepsilon)C^{\top}-2\operatorname{Cov}(C\varepsilon,\varepsilon_0)+\sigma^2I_m \\
+			&=\sigma^2CC^{\top}-2C\operatorname{Cov}(\varepsilon,\varepsilon_0)+\sigma^2I_m \\
+			&=\sigma^2CC^{\top}-2\sigma^2CV^{\top}+\sigma^2I_m=\sigma^2(CC^{\top}-2CV^{\top}+I_m)
 		\end{aligned}
 	\end{gather*}
 	由\cref{theo:ERVQuadraticForm}和\cref{prop:Trace}(2)可得：
 	\begin{align*}
-		\operatorname{PMSE}(\hat{y}_0)&=\operatorname{E}[(\hat{y}_0-y)^TA(\hat{y}_0-y)] =\operatorname{E}[(C\varepsilon-\varepsilon_0)^TA(C\varepsilon-\varepsilon_0)] \\
-		&=\operatorname{tr}[A\sigma^2(CC^T-2CV^T+I_m)] =\sigma^2\operatorname{tr}[A(CC^T-2CV^T+I_m)]
+		\operatorname{PMSE}(\hat{y}_0)&=\operatorname{E}[(\hat{y}_0-y)^{\top}A(\hat{y}_0-y)] =\operatorname{E}[(C\varepsilon-\varepsilon_0)^{\top}A(C\varepsilon-\varepsilon_0)] \\
+		&=\operatorname{tr}[A\sigma^2(CC^{\top}-2CV^{\top}+I_m)] =\sigma^2\operatorname{tr}[A(CC^{\top}-2CV^{\top}+I_m)]
 	\end{align*}
 	接下来的目标就是求解：
 	\begin{equation*}
@@ -455,36 +455,36 @@
 	\end{equation*}\par
 	使用Lagrange乘子法，构造辅助函数（不引入$X_0$是因为它是常数，对结果没影响）：
 	\begin{equation*}
-		F(C,\varLambda)=\sigma^2\operatorname{tr}[A(CC^T-2CV^T+I_m)]-2\operatorname{tr}(CX\varLambda)
+		F(C,\varLambda)=\sigma^2\operatorname{tr}[A(CC^{\top}-2CV^{\top}+I_m)]-2\operatorname{tr}(CX\varLambda)
 	\end{equation*}
 	其中$\varLambda$是Lagrange乘子。由矩阵求导和\cref{prop:Trace}(1)可得：
 	\begin{align*}
-		\frac{\partial\operatorname{PSME}(\hat{y}_0)}{\partial C}&=\sigma^2\frac{\partial\operatorname{tr}(ACC^T)}{\partial C}-2\sigma^2\frac{\partial\operatorname{tr}(ACV^T)}{\partial C}-2\frac{\partial\operatorname{tr}(CX\varLambda)}{\partial C} \\
-		&=\sigma^22AC-2\sigma^2AV-2\varLambda^TX^T
+		\frac{\partial\operatorname{PSME}(\hat{y}_0)}{\partial C}&=\sigma^2\frac{\partial\operatorname{tr}(ACC^{\top})}{\partial C}-2\sigma^2\frac{\partial\operatorname{tr}(ACV^{\top})}{\partial C}-2\frac{\partial\operatorname{tr}(CX\varLambda)}{\partial C} \\
+		&=\sigma^22AC-2\sigma^2AV-2\varLambda^{\top}X^{\top}
 	\end{align*}
 	令上式为$0$可得：
 	\begin{gather*}
-		\sigma^2AC=\sigma^2AV+\varLambda^TX^T \\
-		C=V+\frac{A^{-1}\varLambda^TX^T}{\sigma^2}
+		\sigma^2AC=\sigma^2AV+\varLambda^{\top}X^{\top} \\
+		C=V+\frac{A^{-1}\varLambda^{\top}X^{\top}}{\sigma^2}
 	\end{gather*}
 	代入$CX=X_0$可得：
 	\begin{equation*}
-		VX+\frac{A^{-1}\varLambda^TX^TX}{\sigma^2}=X_0 \\
-		\varLambda^TX^TX=\sigma^2A(X_0-VX) \\
-		X^TX\varLambda=\sigma^2(X_0^T-X^TV^T)A^T
+		VX+\frac{A^{-1}\varLambda^{\top}X^{\top}X}{\sigma^2}=X_0 \\
+		\varLambda^{\top}X^{\top}X=\sigma^2A(X_0-VX) \\
+		X^{\top}X\varLambda=\sigma^2(X_0^{\top}-X^{\top}V^{\top})A^{\top}
 	\end{equation*}
-	由\cref{theo:VectorSpaceAAAT}可知$\mathcal{M}(X^T)=\mathcal{M}(X^TX)$，而$\mathcal{M}(X_0^T)\subseteq\mathcal{M}(X^T)$，所以上式等式右边矩阵的每一列都在$\mathcal{M}(X^TX)$中，即方程组是相容的。由\cref{theo:InhomogeneousLinearEq'sGeneralSolution2}可得：
+	由\cref{theo:VectorSpaceAAAT}可知$\mathcal{M}(X^{\top})=\mathcal{M}(X^{\top}X)$，而$\mathcal{M}(X_0^{\top})\subseteq\mathcal{M}(X^{\top})$，所以上式等式右边矩阵的每一列都在$\mathcal{M}(X^{\top}X)$中，即方程组是相容的。由\cref{theo:InhomogeneousLinearEq'sGeneralSolution2}可得：
 	\begin{equation*}
-		\varLambda=\sigma^2(X^TX)^-(X_0^T-X^TV^T)A^T
+		\varLambda=\sigma^2(X^{\top}X)^-(X_0^{\top}-X^{\top}V^{\top})A^{\top}
 	\end{equation*}
 	于是由\cref{prop:A-}(5)可得：
 	\begin{align*}
-		C&=V+A^{-1}A(X_0-VX)(X^TX)^-X^T=V+(X_0-VX)(X^TX)^-X^T \\
-		&=X_0(X^TX)^-X^T+V[I_n-X(X^TX)^-X^T]
+		C&=V+A^{-1}A(X_0-VX)(X^{\top}X)^-X^{\top}=V+(X_0-VX)(X^{\top}X)^-X^{\top} \\
+		&=X_0(X^{\top}X)^-X^{\top}+V[I_n-X(X^{\top}X)^-X^{\top}]
 	\end{align*}
-	由\cref{prop:A-}(3)(4)可知$C$是唯一的，与$(X^TX)^-$的选择无关。所以：
+	由\cref{prop:A-}(3)(4)可知$C$是唯一的，与$(X^{\top}X)^-$的选择无关。所以：
 	\begin{equation*}
-		\hat{y}_0=X_0(X^TX)^-X^Ty+V[I_n-X(X^TX)^-X^T]y=X_0\hat{\beta}+V(y-X\hat{\beta})
+		\hat{y}_0=X_0(X^{\top}X)^-X^{\top}y+V[I_n-X(X^{\top}X)^-X^{\top}]y=X_0\hat{\beta}+V(y-X\hat{\beta})
 	\end{equation*}
 	为$y_0$在广义预测均方误差意义下的最优线性无偏估计。
 \end{proof}

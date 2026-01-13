@@ -6,11 +6,11 @@
 \begin{definition}
 	设有$n$个总体$D_i$，它们的均值向量与协方差矩阵分别为$\boldsymbol{\mu_i},\Sigma_i,\;i=1,2,\dots,n$。现存在一个从上述$n$个总体中抽取出的样本$x$，若将其判给满足：
 	\begin{equation*}
-		j=\arg\min d^2_m(x,D_i)=(x-\boldsymbol{\mu})^T\Sigma^{-1}(x-\boldsymbol{\mu})
+		j=\arg\min d^2_m(x,D_i)=(x-\boldsymbol{\mu})^{\top}\Sigma^{-1}(x-\boldsymbol{\mu})
 	\end{equation*}
 	的分布$D_j$，称这种判别方法为\textbf{距离判别}。距离判别的判别函数为：
 	\begin{equation*}
-		(x-\boldsymbol{\mu})^T\hat{\Sigma}^{-1}(x-\boldsymbol{\mu})
+		(x-\boldsymbol{\mu})^{\top}\hat{\Sigma}^{-1}(x-\boldsymbol{\mu})
 	\end{equation*}
 \end{definition}
 
@@ -18,7 +18,7 @@
 
 \subsection{Fisher判别}
 \begin{definition}
-	设有$n$个总体$D_i$，它们的均值向量与协方差矩阵分别为$\boldsymbol{\mu_i},\Sigma_i,\;i=1,2,\dots,n$。现存在一个从上述$n$个总体中抽取出的未知分类的样本$x$，记线性判别函数为$u(y)=\alpha^Ty$，并且记：
+	设有$n$个总体$D_i$，它们的均值向量与协方差矩阵分别为$\boldsymbol{\mu_i},\Sigma_i,\;i=1,2,\dots,n$。现存在一个从上述$n$个总体中抽取出的未知分类的样本$x$，记线性判别函数为$u(y)=\alpha^{\top}y$，并且记：
 	\begin{equation*}
 		u_i=\operatorname{E}[u(\mathbf{X})|\mathbf{X}\in D_i],\quad\overline{u}=\frac{1}{n}\sum_{i=1}^{n}u_i,\quad\sigma_i^2=\operatorname{Var}[u(\mathbf{X})|\mathbf{X}\in D_i]
 	\end{equation*}
@@ -48,36 +48,36 @@
 \begin{proof}
 	注意到此时有：
 	\begin{gather*}
-		\hat{u}_i=\frac{1}{n_i}\sum_{j=1}^{n_i}\alpha^Tx^{(i)}_j=\alpha^T\overline{x^{(i)}},\;i=1,2,\dots,n \\
-		\hat{\overline{u}}=\frac{1}{n}\sum_{i=1}^{n}\hat{u}_i=\frac{1}{n}\sum_{i=1}^{n}\alpha^T\overline{x^{(i)}}=\alpha^T\overline{x} \\
+		\hat{u}_i=\frac{1}{n_i}\sum_{j=1}^{n_i}\alpha^{\top}x^{(i)}_j=\alpha^{\top}\overline{x^{(i)}},\;i=1,2,\dots,n \\
+		\hat{\overline{u}}=\frac{1}{n}\sum_{i=1}^{n}\hat{u}_i=\frac{1}{n}\sum_{i=1}^{n}\alpha^{\top}\overline{x^{(i)}}=\alpha^{\top}\overline{x} \\
 		\begin{aligned}
 			\hat{\sigma}_i^2
-			&=\frac{1}{n_i-1}\sum_{j=1}^{n_i}[u(x^{(i)}_j)-\hat{u}_i]^2=\frac{1}{n_i-1}\sum_{j=1}^{n_i}[\alpha^Tx^{(i)}_j-\alpha^T\overline{x^{(i)}}]^2 \\
-			&=\frac{1}{n_i-1}\sum_{j=1}^{n_i}[\alpha^T(x^{(i)}_j-\overline{x^{(i)}})]^2=\frac{1}{n_i-1}\sum_{j=1}^{n_i}\alpha^T(x^{(i)}_j-\overline{x^{(i)}})(x^{(i)}_j-\overline{x^{(i)}})^T\alpha \\
-			&=\frac{1}{n_i-1}\alpha^T\left[\sum_{j=1}^{n_i}(x^{(i)}_j-\overline{x^{(i)}})(x^{(i)}_j-\overline{x^{(i)}})^T\right]\alpha\coloneqq\frac{1}{n_i-1}\alpha^TS_i\alpha
+			&=\frac{1}{n_i-1}\sum_{j=1}^{n_i}[u(x^{(i)}_j)-\hat{u}_i]^2=\frac{1}{n_i-1}\sum_{j=1}^{n_i}[\alpha^{\top}x^{(i)}_j-\alpha^{\top}\overline{x^{(i)}}]^2 \\
+			&=\frac{1}{n_i-1}\sum_{j=1}^{n_i}[\alpha^{\top}(x^{(i)}_j-\overline{x^{(i)}})]^2=\frac{1}{n_i-1}\sum_{j=1}^{n_i}\alpha^{\top}(x^{(i)}_j-\overline{x^{(i)}})(x^{(i)}_j-\overline{x^{(i)}})^{\top}\alpha \\
+			&=\frac{1}{n_i-1}\alpha^{\top}\left[\sum_{j=1}^{n_i}(x^{(i)}_j-\overline{x^{(i)}})(x^{(i)}_j-\overline{x^{(i)}})^{\top}\right]\alpha\coloneqq\frac{1}{n_i-1}\alpha^{\top}S_i\alpha
 		\end{aligned}
 	\end{gather*}
 	于是：
 	\begin{gather*}
-		\sum_{i=1}^{n}(n_i-1)\sigma_i^2=\sum_{i=1}^{n}(n_i-1)\frac{1}{n_i-1}\alpha^TS_i\alpha\coloneqq\alpha^TS\alpha \\
-		\sum_{i=1}^{n}n_i(\hat{u}_i-\hat{\overline{u}})^2=\sum_{i=1}^{n}n_i[\alpha^T\overline{x^{(i)}}-\alpha^T\overline{x}]^2=\sum_{i=1}^{n}n_i\alpha^T(\overline{x^{(i)}}-\overline{x})(\overline{x^{(i)}}-\overline{x})^T\alpha\coloneqq\alpha^TB\alpha
+		\sum_{i=1}^{n}(n_i-1)\sigma_i^2=\sum_{i=1}^{n}(n_i-1)\frac{1}{n_i-1}\alpha^{\top}S_i\alpha\coloneqq\alpha^{\top}S\alpha \\
+		\sum_{i=1}^{n}n_i(\hat{u}_i-\hat{\overline{u}})^2=\sum_{i=1}^{n}n_i[\alpha^{\top}\overline{x^{(i)}}-\alpha^{\top}\overline{x}]^2=\sum_{i=1}^{n}n_i\alpha^{\top}(\overline{x^{(i)}}-\overline{x})(\overline{x^{(i)}}-\overline{x})^{\top}\alpha\coloneqq\alpha^{\top}B\alpha
 	\end{gather*}
 	所以：
 	\begin{equation*}
-		\alpha=\arg\max\frac{\alpha^TB\alpha}{\alpha^TS\alpha}
+		\alpha=\arg\max\frac{\alpha^{\top}B\alpha}{\alpha^{\top}S\alpha}
 	\end{equation*}
-	但若此时不作任何限制，由于对$\alpha$作任意倍的放缩都满足上式，所以解得的$\alpha$并不唯一，我们人为地添加约束条件$\alpha^TS\alpha=1$，于是该最优化问题变为：
+	但若此时不作任何限制，由于对$\alpha$作任意倍的放缩都满足上式，所以解得的$\alpha$并不唯一，我们人为地添加约束条件$\alpha^{\top}S\alpha=1$，于是该最优化问题变为：
 	\begin{gather*}
-		\alpha=\arg\max\frac{\alpha^TB\alpha}{\alpha^TS\alpha} \\
-		\operatorname{s.t.}\alpha^TS\alpha=1
+		\alpha=\arg\max\frac{\alpha^{\top}B\alpha}{\alpha^{\top}S\alpha} \\
+		\operatorname{s.t.}\alpha^{\top}S\alpha=1
 	\end{gather*}
 	使用Lagrange乘子法进行求解，引入Lagrange乘子$\lambda$构造Lagrange函数：
 	\begin{equation*}
-		L(\alpha,\lambda)=\alpha^TB\alpha-\lambda(\alpha^TS\alpha-1)
+		L(\alpha,\lambda)=\alpha^{\top}B\alpha-\lambda(\alpha^{\top}S\alpha-1)
 	\end{equation*}
 	求导可得：
 	\begin{equation*}
-		\frac{\partial L(\alpha,\lambda)}{\partial\alpha}=2B\alpha-2\lambda S\alpha,\quad\frac{\partial L(\alpha,\lambda)}{\partial\lambda}=1-\alpha^TS\alpha=0
+		\frac{\partial L(\alpha,\lambda)}{\partial\alpha}=2B\alpha-2\lambda S\alpha,\quad\frac{\partial L(\alpha,\lambda)}{\partial\lambda}=1-\alpha^{\top}S\alpha=0
 	\end{equation*}
 	于是只需令上第一式为$0$，即：
 	\begin{equation*}
@@ -85,7 +85,7 @@
 	\end{equation*}
 	所以$\lambda$为矩阵$B$关于矩阵$S$的广义特征值，此时目标函数为：
 	\begin{equation*}
-		\alpha^TB\alpha=\lambda\alpha^TS\alpha=\lambda
+		\alpha^{\top}B\alpha=\lambda\alpha^{\top}S\alpha=\lambda
 	\end{equation*}
 	由此可以看出该最优化问题的最优解为$\lambda$是最大的广义特征值且$\alpha$为对应于$\lambda$的特征向量。
 \end{proof}

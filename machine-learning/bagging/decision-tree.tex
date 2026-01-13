@@ -130,11 +130,11 @@
 	\caption{选择最优特征（分类特征）}
 	\begin{algorithmic}[1]
 		\State \textbf{Input:} 训练数据集 \(\mathcal{D}\), 特征集 \(\mathcal{F}\), 信息准则 \(\text{Criterion}\)
-		\State \textbf{Output:} 最优特征 \(F^*\)，最优特征对应的评分$\text{BestScore}$
+		\State \textbf{Output:} 最优特征 \(F^{\star}\)，最优特征对应的评分$\text{BestScore}$
 		
 		\Function{SelectBestFeature}{$\mathcal{D}, \mathcal{F}, \text{Criterion}$}
 		\State 初始化最大评分 \(\text{BestScore} \gets -\infty\)
-		\State 初始化最优特征 \(F^* \gets \varnothing\)
+		\State 初始化最优特征 \(F^{\star} \gets \varnothing\)
 		
 		\For{每个特征 \(F \in \mathcal{F}\)}
 		\State 计算特征 \(F\) 的取值集合 \(V_F=(F_i)\)
@@ -165,11 +165,11 @@
 		
 		\If{\(\text{Score} > \text{BestScore}\)}
 		\State \(\text{BestScore} \gets \text{Score}\)
-		\State \(F^* \gets F\)
+		\State \(F^{\star} \gets F\)
 		\EndIf
 		\EndFor
 		
-		\State \Return \(F^*, \text{BestScore}\)
+		\State \Return \(F^{\star}, \text{BestScore}\)
 		\EndFunction
 	\end{algorithmic}
 \end{algorithm}
@@ -178,12 +178,12 @@
 	\caption{对连续特征的处理}
 	\begin{algorithmic}[1]
 		\State \textbf{Input:} 训练数据集 \(\mathcal{D}\), 连续特征 \(F\)
-		\State \textbf{Output:} 最优划分点 \(t^*\)
+		\State \textbf{Output:} 最优划分点 \(t^{\star}\)
 		
 		\Function{FindBestSplitContinue}{$\mathcal{D}, F$}
 		\State 令 \(V_F = \{ x[F] \mid (x,y) \in \mathcal{D} \}\) 为 \(F\) 的所有取值
 		\State 将 \(V_F\) 按升序排序
-		\State 初始化最优分割点 \(t^* \gets \varnothing\)
+		\State 初始化最优分割点 \(t^{\star} \gets \varnothing\)
 		\State 初始化最大评分 \(\text{BestScore} \gets -\infty\)
 		
 		\For{每个相邻取值 \((v_i, v_{i+1}) \in V_F\)}
@@ -192,11 +192,11 @@
 		\State 计算划分后的评分$\text{Score}=$\Call{SplitScoreContinue}{$\mathcal{D},\mathcal{D}_1,\mathcal{D}_2$}
 		\If{\(\text{Score} > \text{BestScore}\)}
 		\State \(\text{BestScore} \gets \text{Score}\)
-		\State \(t^* \gets t\)
+		\State \(t^{\star} \gets t\)
 		\EndIf
 		\EndFor
 		
-		\State \Return \(t^*\)
+		\State \Return \(t^{\star}\)
 		\EndFunction
 	\end{algorithmic}
 \end{algorithm}
@@ -205,12 +205,12 @@
 	\caption{对分类变量的二分处理}
 	\begin{algorithmic}[1]
 		\State \textbf{Input:} 训练数据集 \(\mathcal{D}\), 分类特征 \(F\)
-		\State \textbf{Output:} 最优二分子集 \(S^*\)
+		\State \textbf{Output:} 最优二分子集 \(S^{\star}\)
 		
 		\Function{FindBestBinarySplit}{$\mathcal{D}, F$}
 		\State 令 \(V_F = \{ x[F] \mid (x,y) \in \mathcal{D} \}\) 为 \(F\) 的所有取值
 		\State 令 \(\mathcal{P}(V_F)\) 为 \(V_F\) 的所有可能的非空真子集
-		\State 初始化最优二分子集 \(S^* \gets \varnothing\)
+		\State 初始化最优二分子集 \(S^{\star} \gets \varnothing\)
 		\State 初始化最大评分 \(\text{BestScore} \gets -\infty\)
 		
 		\For{每个可能的二分子集 \(S \subset V_F\)}
@@ -218,11 +218,11 @@
 		\State 计算划分后的评分$\text{Score}=$\Call{SplitScoreContinue}{$\mathcal{D},\mathcal{D}_1,\mathcal{D}_2$}
 		\If{\(\text{Score} > \text{BestScore}\)}
 		\State \(\text{BestScore} \gets \text{Score}\)
-		\State \(S^* \gets S\)
+		\State \(S^{\star} \gets S\)
 		\EndIf
 		\EndFor
 		
-		\State \Return \(S^*\)
+		\State \Return \(S^{\star}\)
 		\EndFunction
 	\end{algorithmic}
 \end{algorithm}
@@ -271,7 +271,7 @@
 	\caption{后剪枝算法}
 	\begin{algorithmic}[1]
 		\State \textbf{Input:} 已生成的决策树 \( T \)，验证数据集 \( \mathcal{D}_{val} \)
-		\State \textbf{Output:} 剪枝后的决策树 \( T^* \)
+		\State \textbf{Output:} 剪枝后的决策树 \( T^{\star} \)
 		
 		\Function{PostPruning}{$T, \mathcal{D}_{val}$}
 		\For{树 \( T \) 中的每个内部节点 \( N \)（按照树的深度自底向上的顺序）}
@@ -292,7 +292,7 @@
 	\caption{代价复杂度剪枝 (Cost-Complexity Pruning with Validation)}
 	\begin{algorithmic}[1]
 		\State \textbf{Input:} 验证集 $\mathcal{D}_{val}$, 未剪枝完全生长的初始决策树 $T_0$
-		\State \textbf{Output:} 最优子树 $T^*$
+		\State \textbf{Output:} 最优子树 $T^{\star}$
 		
 		\Function{CCPVal}{$\mathcal{D}_{val},T_0$}
 		\State 初始化候选树集 $\mathcal{T} \gets \{ T_0 \}$
@@ -307,12 +307,12 @@
 		\alpha_t = \frac{R(T_t) - R(t)}{|T_t| - 1}
 		\]
 		\EndFor
-		\State 令 $\alpha_{\min} = \min \alpha_t$，将 $\alpha_{\min}$ 加入序列 $\alpha$，找到其对应节点 $t^*$，将 $T_{t^*}$ 剪去，令其变为叶节点，得到新树 $T'$
+		\State 令 $\alpha_{\min} = \min \alpha_t$，将 $\alpha_{\min}$ 加入序列 $\alpha$，找到其对应节点 $t^{\star}$，将 $T_{t^{\star}}$ 剪去，令其变为叶节点，得到新树 $T'$
 		\State 更新 $T \gets T'$ 并加入候选树集：$\mathcal{T} \gets \mathcal{T} \cup \{T\}$
 		\EndWhile
 
-		\State 令 $T^* = \arg\min_{T_i \in \mathcal{T}}\text{Error}(T_i, \mathcal{D}_{val})$，其中$\text{Error}(T_i, \mathcal{D}_{val})$是树$T_i$在验证集$\mathcal{D}_{val}$上的误差
-		\State \Return $T^*$
+		\State 令 $T^{\star} = \arg\min_{T_i \in \mathcal{T}}\text{Error}(T_i, \mathcal{D}_{val})$，其中$\text{Error}(T_i, \mathcal{D}_{val})$是树$T_i$在验证集$\mathcal{D}_{val}$上的误差
+		\State \Return $T^{\star}$
 		\EndFunction
 	\end{algorithmic}
 \end{algorithm}
@@ -408,7 +408,7 @@
 		
 		\State \textbf{递归分裂节点：}
 		\Function{SplitNode}{$\text{Node}, \mathcal{D}$}
-		\State 初始化$\text{BestScore}=-\infty,\;\text{Split}=\text{FALSE},\;F^*,\;s^*$
+		\State 初始化$\text{BestScore}=-\infty,\;\text{Split}=\text{FALSE},\;F^{\star},\;s^{\star}$
 		\For{每个特征 $F$}
 		\For{每个候选分裂点 $s$}
 		\State 将样本根据 $x[F] < s$ 分成左右子集 $\mathcal{D}_L, \mathcal{D}_R$
@@ -420,7 +420,7 @@
 		\If{Gain$>0$}
 		\State $\text{Split}=\text{TRUE}$
 		\If{Gain$>BestScore$}
-		\State $F^*=F,\;s^*=s$
+		\State $F^{\star}=F,\;s^{\star}=s$
 		\EndIf
 		\EndIf
 		\EndFor

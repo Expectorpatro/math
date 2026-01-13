@@ -43,7 +43,7 @@
 	\begin{equation*}
 		y=X\beta+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
 	\end{equation*}
-	称$\beta_0$为常数项，$\beta_I=(\seq{\beta}{p-1})^T$为回归系数。若记$X=(\mathbf{1}_n,\tilde{X})$，其中$\mathbf{1}_n$为由$n$个$1$构成的列向量，则线性回归模型可被改写为：
+	称$\beta_0$为常数项，$\beta_I=(\seq{\beta}{p-1})^{\top}$为回归系数。若记$X=(\mathbf{1}_n,\tilde{X})$，其中$\mathbf{1}_n$为由$n$个$1$构成的列向量，则线性回归模型可被改写为：
 	\begin{equation*}
 		y=\beta_0\mathbf{1}_n+\tilde{X}\beta_I+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
 	\end{equation*}
@@ -62,7 +62,7 @@
 		y_i=\alpha_0+\alpha_1(x_{i1}-\overline{x}_1)+\alpha_2(x_{i2}-\overline{x}_2)+\cdots+\alpha_{p-1}(x_{ip-1}-\overline{x}_{p-1})+\varepsilon_i \\
 		y=\alpha_0\mathbf{1}_n+\tilde{X}_c\alpha_I+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
 	\end{gather*}
-	为\gls{CentralizedLinearRegressionModel}，其中$\tilde{X}_c=\left(I_n-\dfrac{1}{n}\mathbf{1}_n\mathbf{1}_n^T\right)\tilde{X}$（请证明该结论）被称为\gls{CentralizedDesignMatrix}，第二行是第一行的矩阵表示。\par
+	为\gls{CentralizedLinearRegressionModel}，其中$\tilde{X}_c=\left(I_n-\dfrac{1}{n}\mathbf{1}_n\mathbf{1}_n^{\top}\right)\tilde{X}$（请证明该结论）被称为\gls{CentralizedDesignMatrix}，第二行是第一行的矩阵表示。\par
 	称：
 	\begin{gather*}
 		y_i=\gamma_0+\gamma_1\frac{x_{i1}-\overline{x}_1}{s_1}+\gamma_2\frac{x_{i2}-\overline{x}_2}{s_2}+\cdots+\gamma_{p-1}\frac{x_{ip-1}-\overline{x}_{p-1}}{s_{p-1}}+\varepsilon_i \\
@@ -73,145 +73,145 @@
 \begin{theorem}\label{theo:LinearRegressionModel}
 	对于线性回归模型，设$\hat{\beta}=(\hat{\beta}_0,\seq{\hat{\beta}}{p-1})$为正则方程的解，则有以下结论：
 	\begin{enumerate}
-		\item $X^TX,\tilde{X}^T\tilde{X},\tilde{X}_c^T\tilde{X}_c$和$\tilde{X}_s^T\tilde{X}_s$都是正定阵，于是都可逆；
-		\item $\mathbf{1}_n^T\tilde{X}_c=\mathbf{1}_n^T\tilde{X}_s=\mathbf{0}$；
-		\item $\hat{\alpha}_0=\hat{\gamma}_0=\overline{y}=\hat{\beta}_0+\overline{x}^T\hat{\beta}_I,\;\hat{\alpha}_I=(\tilde{X}_c^T\tilde{X}_c)^{-1}\tilde{X}_c^Ty=\hat{\beta}_I,\;\hat{\gamma}_I=(\tilde{X}_s^T\tilde{X}_s)^{-1}\tilde{X}_s^Ty=\operatorname{diag}\{\seq{s}{p-1}\}\hat{\alpha}_I(\hat{\beta}_I)$，即原经验回归方程、中心化后得到的经验回归方程与标准化后得到的经验回归方程是等价的，且有$\tilde{X}_c\hat{\alpha}_I=\tilde{X}_s\hat{\gamma}_I$；
-		\item $\operatorname{SSE}=\operatorname{SSE}_c=\operatorname{SSE}_s,\;\operatorname{SSE}_c=(y-\overline{y})^T(y-\overline{y})-\hat{\alpha}_I^T\tilde{X}_c^Ty,\;\operatorname{SSE}_s=(y-\overline{y})^T(y-\overline{y})-\hat{\gamma}_I^T\tilde{X}_c^Ty$，即$\hat{\sigma}^2=\hat{\sigma}_c^2=\hat{\sigma}_s^2$；
-		\item $R=\tilde{X}_s^T\tilde{X}_s$，其中$R$为回归自变量之间的样本相关系数矩阵；
-		\item $\operatorname{Cov}(\hat{\beta})=\sigma^2(X^TX)^{-1},\;\operatorname{Cov}(\hat{\beta}_I)=\operatorname{Cov}(\hat{\alpha}_I)$，且：
+		\item $X^{\top}X,\tilde{X}^{\top}\tilde{X},\tilde{X}_c^{\top}\tilde{X}_c$和$\tilde{X}_s^{\top}\tilde{X}_s$都是正定阵，于是都可逆；
+		\item $\mathbf{1}_n^{\top}\tilde{X}_c=\mathbf{1}_n^{\top}\tilde{X}_s=\mathbf{0}$；
+		\item $\hat{\alpha}_0=\hat{\gamma}_0=\overline{y}=\hat{\beta}_0+\overline{x}^{\top}\hat{\beta}_I,\;\hat{\alpha}_I=(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}\tilde{X}_c^{\top}y=\hat{\beta}_I,\;\hat{\gamma}_I=(\tilde{X}_s^{\top}\tilde{X}_s)^{-1}\tilde{X}_s^{\top}y=\operatorname{diag}\{\seq{s}{p-1}\}\hat{\alpha}_I(\hat{\beta}_I)$，即原经验回归方程、中心化后得到的经验回归方程与标准化后得到的经验回归方程是等价的，且有$\tilde{X}_c\hat{\alpha}_I=\tilde{X}_s\hat{\gamma}_I$；
+		\item $\operatorname{SSE}=\operatorname{SSE}_c=\operatorname{SSE}_s,\;\operatorname{SSE}_c=(y-\overline{y})^{\top}(y-\overline{y})-\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y,\;\operatorname{SSE}_s=(y-\overline{y})^{\top}(y-\overline{y})-\hat{\gamma}_I^{\top}\tilde{X}_c^{\top}y$，即$\hat{\sigma}^2=\hat{\sigma}_c^2=\hat{\sigma}_s^2$；
+		\item $R=\tilde{X}_s^{\top}\tilde{X}_s$，其中$R$为回归自变量之间的样本相关系数矩阵；
+		\item $\operatorname{Cov}(\hat{\beta})=\sigma^2(X^{\top}X)^{-1},\;\operatorname{Cov}(\hat{\beta}_I)=\operatorname{Cov}(\hat{\alpha}_I)$，且：
 		\begin{equation*}
 			\operatorname{Cov}(\hat{\alpha})=\sigma^2
 			\begin{pmatrix}
 				\dfrac{1}{n} & \mathbf{0} \\
-				\mathbf{0} & (\tilde{X}_c^T\tilde{X}_c)^{-1}
+				\mathbf{0} & (\tilde{X}_c^{\top}\tilde{X}_c)^{-1}
 			\end{pmatrix},\quad
 			\operatorname{Cov}(\hat{\gamma})=\sigma^2
 			\begin{pmatrix}
 				\dfrac{1}{n} & \mathbf{0} \\
-				\mathbf{0} & (\tilde{X}_s^T\tilde{X}_s)^{-1}
+				\mathbf{0} & (\tilde{X}_s^{\top}\tilde{X}_s)^{-1}
 			\end{pmatrix}
 		\end{equation*}
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
-	(1)由\cref{theo:AATPositiveSemidefinite}可知$X^TX$是一个半正定阵。若存在不为零向量的$\alpha$使得$\alpha^TX^TX\alpha=0$，则有$||X\alpha||=0$，即$X\alpha=\mathbf{0}$。而$\operatorname{rank}(X)=p$，所以$\alpha=\mathbf{0}$，矛盾，于是$X^TX$是一个正定阵，由\cref{theo:PositiveDefinite}(6)可知它是可逆的。$\tilde{X}^T\tilde{X},\tilde{X}_c^T\tilde{X}_c$和$\tilde{X}_s^T\tilde{X}_s$类似可得。\par
+	(1)由\cref{theo:AATPositiveSemidefinite}可知$X^{\top}X$是一个半正定阵。若存在不为零向量的$\alpha$使得$\alpha^{\top}X^{\top}X\alpha=0$，则有$||X\alpha||=0$，即$X\alpha=\mathbf{0}$。而$\operatorname{rank}(X)=p$，所以$\alpha=\mathbf{0}$，矛盾，于是$X^{\top}X$是一个正定阵，由\cref{theo:PositiveDefinite}(6)可知它是可逆的。$\tilde{X}^{\top}\tilde{X},\tilde{X}_c^{\top}\tilde{X}_c$和$\tilde{X}_s^{\top}\tilde{X}_s$类似可得。\par
 	(2)由定义即可得到。\par
 	(3)由(1)，对于中心化模型，此时的正则方程变为：
 	\begin{gather*}
 		\begin{pmatrix}
 			\mathbf{1}_n & \tilde{X}_c \\
-		\end{pmatrix}^T
+		\end{pmatrix}^{\top}
 		\begin{pmatrix}
 			\mathbf{1}_n & \tilde{X}_c \\
 		\end{pmatrix}\alpha=
 		\begin{pmatrix}
 			\mathbf{1}_n & \tilde{X}_c \\
-		\end{pmatrix}^Ty \\
+		\end{pmatrix}^{\top}y \\
 		\begin{pmatrix}
-			\mathbf{1}_n^T \\
-			\tilde{X}_c^T
+			\mathbf{1}_n^{\top} \\
+			\tilde{X}_c^{\top}
 		\end{pmatrix}
 		\begin{pmatrix}
 			\mathbf{1}_n & \tilde{X}_c \\
 		\end{pmatrix}\alpha=
 		\begin{pmatrix}
 			\mathbf{1}_n & \tilde{X}_c \\
-		\end{pmatrix}^Ty \\
+		\end{pmatrix}^{\top}y \\
 		\begin{pmatrix}
 			n & \mathbf{0} \\
-			\mathbf{0} & \tilde{X}_c^T\tilde{X}_c
+			\mathbf{0} & \tilde{X}_c^{\top}\tilde{X}_c
 		\end{pmatrix}\alpha=
 		\begin{pmatrix}
 			\sum\limits_{i=1}^{n}y_i \\
-			\tilde{X}_c^Ty
+			\tilde{X}_c^{\top}y
 		\end{pmatrix} \\
 		\begin{pmatrix}
 			n\alpha_0  \\
-			\tilde{X}_c^T\tilde{X}_c\alpha_I
+			\tilde{X}_c^{\top}\tilde{X}_c\alpha_I
 		\end{pmatrix}=
 		\begin{pmatrix}
 			\sum\limits_{i=1}^{n}y_i \\
-			\tilde{X}_c^Ty
+			\tilde{X}_c^{\top}y
 		\end{pmatrix} 
 	\end{gather*}
 	也即：
 	\begin{equation*}
-		\hat{\alpha}_0=\overline{y},\quad\hat{\alpha}_I=(\tilde{X}_c^T\tilde{X}_c)^{-1}\tilde{X}_c^Ty
+		\hat{\alpha}_0=\overline{y},\quad\hat{\alpha}_I=(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}\tilde{X}_c^{\top}y
 	\end{equation*}
 	同理可得：
 	\begin{equation*}
-		\hat{\gamma}_0=\overline{y},\quad\hat{\gamma}_I=(\tilde{X}_s^T\tilde{X}_s)^{-1}\tilde{X}_s^Ty
+		\hat{\gamma}_0=\overline{y},\quad\hat{\gamma}_I=(\tilde{X}_s^{\top}\tilde{X}_s)^{-1}\tilde{X}_s^{\top}y
 	\end{equation*}
 	由前述和\cref{prop:Transpose}(4)可得：
 	\begin{align*}
-		&\tilde{X}_c^T\tilde{X}_c=\tilde{X}^T\left(I_n-\dfrac{1}{n}\mathbf{1}_n\mathbf{1}_n^T\right)^T\tilde{X}_c=\tilde{X}^T\left(I_n-\dfrac{1}{n}\mathbf{1}_n\mathbf{1}_n^T\right)\tilde{X}_c \\
-		=&\tilde{X}^T\tilde{X}_c-\tilde{X}^T\frac{1}{n}\mathbf{1}_n\mathbf{1}_n^T\tilde{X}_c=\tilde{X}^T\tilde{X}_c=\tilde{X}^T\left(I_n-\dfrac{1}{n}\mathbf{1}_n\mathbf{1}_n^T\right)\tilde{X} \\
-		=&\tilde{X}^T\tilde{X}-\dfrac{1}{n}\tilde{X}^T\mathbf{1}_n\mathbf{1}_n^T\tilde{X}=\tilde{X}^T\tilde{X}-\dfrac{1}{n}n\overline{x}n\overline{x}^T=\tilde{X}^T\tilde{X}-n\overline{x}\overline{x}^T
+		&\tilde{X}_c^{\top}\tilde{X}_c=\tilde{X}^{\top}\left(I_n-\dfrac{1}{n}\mathbf{1}_n\mathbf{1}_n^{\top}\right)^{\top}\tilde{X}_c=\tilde{X}^{\top}\left(I_n-\dfrac{1}{n}\mathbf{1}_n\mathbf{1}_n^{\top}\right)\tilde{X}_c \\
+		=&\tilde{X}^{\top}\tilde{X}_c-\tilde{X}^{\top}\frac{1}{n}\mathbf{1}_n\mathbf{1}_n^{\top}\tilde{X}_c=\tilde{X}^{\top}\tilde{X}_c=\tilde{X}^{\top}\left(I_n-\dfrac{1}{n}\mathbf{1}_n\mathbf{1}_n^{\top}\right)\tilde{X} \\
+		=&\tilde{X}^{\top}\tilde{X}-\dfrac{1}{n}\tilde{X}^{\top}\mathbf{1}_n\mathbf{1}_n^{\top}\tilde{X}=\tilde{X}^{\top}\tilde{X}-\dfrac{1}{n}n\overline{x}n\overline{x}^{\top}=\tilde{X}^{\top}\tilde{X}-n\overline{x}\overline{x}^{\top}
 	\end{align*}
 	于是根据\cref{prop:InvertibleMatrix}(17)可得：
 	\begin{align*}
-		&\hat{\beta}=(X^TX)^{-1}X^Ty=
+		&\hat{\beta}=(X^{\top}X)^{-1}X^{\top}y=
 		\begin{pmatrix}
-			n & \mathbf{1}_{n}^T\tilde{X} \\
-			\tilde{X}^T\mathbf{1}_n & \tilde{X}^T\tilde{X}
+			n & \mathbf{1}_{n}^{\top}\tilde{X} \\
+			\tilde{X}^{\top}\mathbf{1}_n & \tilde{X}^{\top}\tilde{X}
 		\end{pmatrix}^{-1}
 		\begin{pmatrix}
-			\mathbf{1}_n^Ty \\
-			\tilde{X}^Ty
+			\mathbf{1}_n^{\top}y \\
+			\tilde{X}^{\top}y
 		\end{pmatrix} \\
 		=&
 		\begin{pmatrix}
-			\dfrac{1}{n}+\dfrac{1}{n}\mathbf{1}_{n}^T\tilde{X}( \tilde{X}^T\tilde{X}-\tilde{X}^T\mathbf{1}_n\dfrac{1}{n}\mathbf{1}_{n}^T\tilde{X})^{-1}\tilde{X}^T\mathbf{1}_n\dfrac{1}{n} & -\dfrac{1}{n}\mathbf{1}_{n}^T\tilde{X}(\tilde{X}^T\tilde{X}-\tilde{X}^T\mathbf{1}_n\dfrac{1}{n}\mathbf{1}_{n}^T\tilde{X})^{-1} \\
-			-(\tilde{X}^T\tilde{X}-\tilde{X}^T\mathbf{1}_n\dfrac{1}{n}\mathbf{1}_{n}^T\tilde{X})^{-1}\tilde{X}^T\mathbf{1}_n\dfrac{1}{n} & (\tilde{X}^T\tilde{X}-\tilde{X}^T\mathbf{1}_n\dfrac{1}{n}\mathbf{1}_{n}^T\tilde{X})^{-1}
+			\dfrac{1}{n}+\dfrac{1}{n}\mathbf{1}_{n}^{\top}\tilde{X}( \tilde{X}^{\top}\tilde{X}-\tilde{X}^{\top}\mathbf{1}_n\dfrac{1}{n}\mathbf{1}_{n}^{\top}\tilde{X})^{-1}\tilde{X}^{\top}\mathbf{1}_n\dfrac{1}{n} & -\dfrac{1}{n}\mathbf{1}_{n}^{\top}\tilde{X}(\tilde{X}^{\top}\tilde{X}-\tilde{X}^{\top}\mathbf{1}_n\dfrac{1}{n}\mathbf{1}_{n}^{\top}\tilde{X})^{-1} \\
+			-(\tilde{X}^{\top}\tilde{X}-\tilde{X}^{\top}\mathbf{1}_n\dfrac{1}{n}\mathbf{1}_{n}^{\top}\tilde{X})^{-1}\tilde{X}^{\top}\mathbf{1}_n\dfrac{1}{n} & (\tilde{X}^{\top}\tilde{X}-\tilde{X}^{\top}\mathbf{1}_n\dfrac{1}{n}\mathbf{1}_{n}^{\top}\tilde{X})^{-1}
 		\end{pmatrix}
 		\begin{pmatrix}
-			\mathbf{1}_n^Ty \\
-			\tilde{X}^Ty
+			\mathbf{1}_n^{\top}y \\
+			\tilde{X}^{\top}y
 		\end{pmatrix} \\
 		=&
 		\begin{pmatrix}
-			\dfrac{1}{n}+\overline{x}^T(\tilde{X}^T\tilde{X}-\overline{x}n\overline{x}^T)^{-1}\overline{x} & -\overline{x}^T(\tilde{X}^T\tilde{X}-\overline{x}n\overline{x}^T)^{-1} \\
-			-(\tilde{X}^T\tilde{X}-\overline{x}n\overline{x}^T)^{-1}\overline{x} & (\tilde{X}^T\tilde{X}-\overline{x}n\overline{x}^T)^{-1}
+			\dfrac{1}{n}+\overline{x}^{\top}(\tilde{X}^{\top}\tilde{X}-\overline{x}n\overline{x}^{\top})^{-1}\overline{x} & -\overline{x}^{\top}(\tilde{X}^{\top}\tilde{X}-\overline{x}n\overline{x}^{\top})^{-1} \\
+			-(\tilde{X}^{\top}\tilde{X}-\overline{x}n\overline{x}^{\top})^{-1}\overline{x} & (\tilde{X}^{\top}\tilde{X}-\overline{x}n\overline{x}^{\top})^{-1}
 		\end{pmatrix}
 		\begin{pmatrix}
-			\mathbf{1}_n^Ty \\
-			\tilde{X}^Ty
+			\mathbf{1}_n^{\top}y \\
+			\tilde{X}^{\top}y
 		\end{pmatrix} \\
 		=&
 		\begin{pmatrix}
-			\dfrac{1}{n}+\overline{x}^T(\tilde{X}_c^T\tilde{X}_c)^{-1}\overline{x} & -\overline{x}^T(\tilde{X}_c^T\tilde{X}_c)^{-1} \\
-			-(\tilde{X}_c^T\tilde{X}_c)^{-1}\overline{x} & (\tilde{X}_c^T\tilde{X}_c)^{-1}
+			\dfrac{1}{n}+\overline{x}^{\top}(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}\overline{x} & -\overline{x}^{\top}(\tilde{X}_c^{\top}\tilde{X}_c)^{-1} \\
+			-(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}\overline{x} & (\tilde{X}_c^{\top}\tilde{X}_c)^{-1}
 		\end{pmatrix}
 		\begin{pmatrix}
-			\mathbf{1}_n^Ty \\
-			\tilde{X}^Ty
+			\mathbf{1}_n^{\top}y \\
+			\tilde{X}^{\top}y
 		\end{pmatrix} \\
 		=&
 		\begin{pmatrix}
-		\overline{y}+\overline{x}^T(\tilde{X}_c^T\tilde{X}_c)^{-1}\overline{x}\mathbf{1}_n^Ty-\overline{x}^T(\tilde{X}_c^T\tilde{X}_c)^{-1}\tilde{X}^Ty \\
-		-(\tilde{X}_c^T\tilde{X}_c)^{-1}\overline{x}\mathbf{1}_n^Ty+(\tilde{X}_c^T\tilde{X}_c)^{-1}\tilde{X}^Ty
+		\overline{y}+\overline{x}^{\top}(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}\overline{x}\mathbf{1}_n^{\top}y-\overline{x}^{\top}(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}\tilde{X}^{\top}y \\
+		-(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}\overline{x}\mathbf{1}_n^{\top}y+(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}\tilde{X}^{\top}y
 		\end{pmatrix} \\
 		=&
 		\begin{pmatrix}
-		\overline{y}+\overline{x}^T(\tilde{X}_c^T\tilde{X}_c)^{-1}(\overline{x}\mathbf{1}_n^T-\tilde{X}^T)y \\
-		(\tilde{X}_c^T\tilde{X}_c)^{-1}(\tilde{X}^T-\overline{x}\mathbf{1}_n^T)y
+		\overline{y}+\overline{x}^{\top}(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}(\overline{x}\mathbf{1}_n^{\top}-\tilde{X}^{\top})y \\
+		(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}(\tilde{X}^{\top}-\overline{x}\mathbf{1}_n^{\top})y
 		\end{pmatrix}=
 		\begin{pmatrix}
-		\overline{y}-\overline{x}^T(\tilde{X}_c^T\tilde{X}_c)^{-1}\tilde{X}_c^Ty \\
-		(\tilde{X}_c^T\tilde{X}_c)^{-1}\tilde{X}_c^Ty
+		\overline{y}-\overline{x}^{\top}(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}\tilde{X}_c^{\top}y \\
+		(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}\tilde{X}_c^{\top}y
 		\end{pmatrix}
 	\end{align*}
 	所以有：
 	\begin{equation*}
-		\hat{\beta}_I=\hat{\alpha}_I,\quad\hat{\beta}_0=\overline{y}-\overline{x}^T\hat{\beta}_I
+		\hat{\beta}_I=\hat{\alpha}_I,\quad\hat{\beta}_0=\overline{y}-\overline{x}^{\top}\hat{\beta}_I
 	\end{equation*}
 	由前述、\cref{prop:Transpose}(4)和\cref{prop:InvertibleMatrix}(11)可得：
 	\begin{align*}
-		\hat{\gamma}_I&=\left[\left(\tilde{X}_c\operatorname{diag}\left\{\dfrac{1}{s_1},\dfrac{1}{s_2},\dots,\dfrac{1}{s_{p-1}}\right\}\right)^T\tilde{X}_c\operatorname{diag}\left\{\dfrac{1}{s_1},\dfrac{1}{s_2},\dots,\dfrac{1}{s_{p-1}}\right\}\right]^{-1} \\
-		&\quad\cdot\left(\tilde{X}_c\operatorname{diag}\left\{\dfrac{1}{s_1},\dfrac{1}{s_2},\dots,\dfrac{1}{s_{p-1}}\right\}\right)^Ty \\
-		&=\left(\operatorname{diag}\left\{\dfrac{1}{s_1},\dfrac{1}{s_2},\dots,\dfrac{1}{s_{p-1}}\right\}\tilde{X}_c^T\tilde{X}_c\operatorname{diag}\left\{\dfrac{1}{s_1},\dfrac{1}{s_2},\dots,\dfrac{1}{s_{p-1}}\right\}\right)^{-1} \\
-		&\quad\cdot\operatorname{diag}\left\{\dfrac{1}{s_1},\dfrac{1}{s_2},\dots,\dfrac{1}{s_{p-1}}\right\}\tilde{X}_c^Ty \\
-		=&\operatorname{diag}\{\seq{s}{p-1}\}(\tilde{X}_c^T\tilde{X}_c)^{-1}\operatorname{diag}\{\seq{s}{p-1}\}\operatorname{diag}\left\{\dfrac{1}{s_1},\dfrac{1}{s_2},\dots,\dfrac{1}{s_{p-1}}\right\}\tilde{X}_c^Ty  \\
+		\hat{\gamma}_I&=\left[\left(\tilde{X}_c\operatorname{diag}\left\{\dfrac{1}{s_1},\dfrac{1}{s_2},\dots,\dfrac{1}{s_{p-1}}\right\}\right)^{\top}\tilde{X}_c\operatorname{diag}\left\{\dfrac{1}{s_1},\dfrac{1}{s_2},\dots,\dfrac{1}{s_{p-1}}\right\}\right]^{-1} \\
+		&\quad\cdot\left(\tilde{X}_c\operatorname{diag}\left\{\dfrac{1}{s_1},\dfrac{1}{s_2},\dots,\dfrac{1}{s_{p-1}}\right\}\right)^{\top}y \\
+		&=\left(\operatorname{diag}\left\{\dfrac{1}{s_1},\dfrac{1}{s_2},\dots,\dfrac{1}{s_{p-1}}\right\}\tilde{X}_c^{\top}\tilde{X}_c\operatorname{diag}\left\{\dfrac{1}{s_1},\dfrac{1}{s_2},\dots,\dfrac{1}{s_{p-1}}\right\}\right)^{-1} \\
+		&\quad\cdot\operatorname{diag}\left\{\dfrac{1}{s_1},\dfrac{1}{s_2},\dots,\dfrac{1}{s_{p-1}}\right\}\tilde{X}_c^{\top}y \\
+		=&\operatorname{diag}\{\seq{s}{p-1}\}(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}\operatorname{diag}\{\seq{s}{p-1}\}\operatorname{diag}\left\{\dfrac{1}{s_1},\dfrac{1}{s_2},\dots,\dfrac{1}{s_{p-1}}\right\}\tilde{X}_c^{\top}y  \\
 		=&\operatorname{diag}\{\seq{s}{p-1}\}\hat{\alpha}_I
 	\end{align*}
 	将上述结果代入经验回归方程即可得到三种方程的等价性，同时：
@@ -221,18 +221,18 @@
 	(4)根据(3)可得：
 	\begin{gather*}
 		\begin{aligned}
-			&\operatorname{SSE}_c=||y-\hat{\alpha}_0\mathbf{1}_n-\tilde{X}_c\hat{\alpha}_I||^2=||y-\hat{\beta}_0\mathbf{1}_n-\overline{x}^T\hat{\beta}_I\mathbf{1}_n-\tilde{X}_c\hat{\beta}_I||^2 \\
-			=&||y-\hat{\beta}_0\mathbf{1}_n-\mathbf{1}_n\overline{x}^T\hat{\beta}_I-\tilde{X}_c\hat{\beta}_I||^2=||y-\hat{\beta}_0\mathbf{1}_n-\tilde{X}\hat{\beta}_I||^2=||y-X\hat{\beta}||^2=\operatorname{SSE}
+			&\operatorname{SSE}_c=||y-\hat{\alpha}_0\mathbf{1}_n-\tilde{X}_c\hat{\alpha}_I||^2=||y-\hat{\beta}_0\mathbf{1}_n-\overline{x}^{\top}\hat{\beta}_I\mathbf{1}_n-\tilde{X}_c\hat{\beta}_I||^2 \\
+			=&||y-\hat{\beta}_0\mathbf{1}_n-\mathbf{1}_n\overline{x}^{\top}\hat{\beta}_I-\tilde{X}_c\hat{\beta}_I||^2=||y-\hat{\beta}_0\mathbf{1}_n-\tilde{X}\hat{\beta}_I||^2=||y-X\hat{\beta}||^2=\operatorname{SSE}
 		\end{aligned} \\
 		\operatorname{SSE}_s=||y-\hat{\gamma}_0\mathbf{1}_n-\tilde{X}_s\hat{\gamma}_I||^2=||y-\hat{\alpha}_0\mathbf{1}_n-\tilde{X}_c\hat{\alpha}_I||^2=\operatorname{SSE}_c
 	\end{gather*}
 	于是$\operatorname{SSE}=\operatorname{SSE}_c=\operatorname{SSE}_s$，类似\cref{theo:SSESSEACalculate}可得中间两式，由\cref{theo:VarianceOfErrorTerm}可知后式成立。\par
 	(5)设$R=(r_{ij})$，注意到：
 	\begin{align*}
-		r_{ij}&=\left(\frac{x_{1i}-\overline{x}_i}{s_i},\frac{x_{2i}-\overline{x}_i}{s_i},\dots,\frac{x_{ni}-\overline{x}_i}{s_i}\right)^T\left(\frac{x_{1j}-\overline{x}_j}{s_j},\frac{x_{2j}-\overline{x}_j}{s_j},\dots,\frac{x_{nj}-\overline{x}_j}{s_j}\right) \\
+		r_{ij}&=\left(\frac{x_{1i}-\overline{x}_i}{s_i},\frac{x_{2i}-\overline{x}_i}{s_i},\dots,\frac{x_{ni}-\overline{x}_i}{s_i}\right)^{\top}\left(\frac{x_{1j}-\overline{x}_j}{s_j},\frac{x_{2j}-\overline{x}_j}{s_j},\dots,\frac{x_{nj}-\overline{x}_j}{s_j}\right) \\
 		&=\frac{1}{s_is_j}\sum_{k=1}^{n}(x_{ki}-\overline{x}_i)(x_{kj}-\overline{x}_j)=\frac{n-1}{s_is_j}\frac{1}{n-1}\sum_{k=1}^{n}(x_{ki}-\overline{x}_i)(x_{kj}-\overline{x}_j)=\widehat{\operatorname{Corr}}(\tilde{X})(i;j)
 	\end{align*}\par
-	(6)由\cref{prop:EstimableFunction}(5)和\cref{prop:CovMat}(3)可知$I_p\operatorname{Cov}(\hat{\beta})I_p=\sigma^2(X^TX)^{-1}$，即$\operatorname{Cov}(\hat{\beta})=\sigma^2(X^TX)^{-1}$。第二式由(3)第二式即可得到。后两式由对应的正则方程和\cref{prop:CovMat}(3)即可得到。
+	(6)由\cref{prop:EstimableFunction}(5)和\cref{prop:CovMat}(3)可知$I_p\operatorname{Cov}(\hat{\beta})I_p=\sigma^2(X^{\top}X)^{-1}$，即$\operatorname{Cov}(\hat{\beta})=\sigma^2(X^{\top}X)^{-1}$。第二式由(3)第二式即可得到。后两式由对应的正则方程和\cref{prop:CovMat}(3)即可得到。
 \end{proof}
 \begin{note}
 	由上述定理第三条又可以看出中心化和标准化能够使得常数项与回归系数的估计被分开，常数项的估计值直接就等于$y$的均值，并且由上述定理第五条可知对于中心化或标准化模型，常数项与回归系数的估计是不相关的，于是在理论分析中我们可以只关注回归系数的估计。标准化模型的另一个优势是可以消除变量量纲的影响，使得回归系数的估计可直接反应各自变量对因变量预测的重要程度。
@@ -254,35 +254,35 @@
 \begin{theorem}\label{theo:LinearRegressionModelTSH}
 	对于\cref{model:NormalLinearRegressionModel}，回归方程的显著性检验的统计量和拒绝域为：
 	\begin{gather*}
-		F=\frac{\hat{\beta}_I^T\tilde{X}^T\left(I_n-\frac{1}{n}\mathbf{1}_n\mathbf{1}_n^T\right)y/(p-1)}{\operatorname{SSE}/(n-p)},\quad \{F:F>\operatorname{F}_{p-1,n-p}(1-\alpha)\} \\
-		F=\frac{\hat{\alpha}_I^T\tilde{X}_c^Ty/(p-1)}{\operatorname{SSE}_c/(n-p)},\quad \{F:F>\operatorname{F}_{p-1,n-p}(1-\alpha)\} \\
-		F=\frac{\hat{\gamma}_I^T\tilde{X}_s^Ty/(p-1)}{\operatorname{SSE}_s/(n-p)},\quad \{F:F>\operatorname{F}_{p-1,n-p}(1-\alpha)\}
+		F=\frac{\hat{\beta}_I^{\top}\tilde{X}^{\top}\left(I_n-\frac{1}{n}\mathbf{1}_n\mathbf{1}_n^{\top}\right)y/(p-1)}{\operatorname{SSE}/(n-p)},\quad \{F:F>\operatorname{F}_{p-1,n-p}(1-\alpha)\} \\
+		F=\frac{\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y/(p-1)}{\operatorname{SSE}_c/(n-p)},\quad \{F:F>\operatorname{F}_{p-1,n-p}(1-\alpha)\} \\
+		F=\frac{\hat{\gamma}_I^{\top}\tilde{X}_s^{\top}y/(p-1)}{\operatorname{SSE}_s/(n-p)},\quad \{F:F>\operatorname{F}_{p-1,n-p}(1-\alpha)\}
 	\end{gather*}
 	回归系数$\beta_i$的显著性检验的统计量和拒绝域为：
 	\begin{gather*}
 		t=\frac{\hat{\beta}_i}{\sqrt{c_{ii}}\hat{\sigma}},\quad\left\{t:|t|>\operatorname{t}_{n-p}\left(1-\frac{\alpha}{2}\right)\right\}
 	\end{gather*}
-	其中$(X^TX)^{-1}=(c_{ij})$。
+	其中$(X^{\top}X)^{-1}=(c_{ij})$。
 \end{theorem}
 \begin{proof}
 	(1)可以发现此时的假设检验即为在\cref{theo:NormalLinearModelHypothesisTesting}中取$A=(\mathbf{0},I_{p-1}),\;b=\mathbf{0}$时的情况。原假设下模型变为：
 	\begin{equation*}
 		y_i=\alpha_0+\varepsilon_i,\quad i=1,2,\dots,n
 	\end{equation*}
-		此时设计阵为$\mathbf{1}_n$，正则方程为$n\hat{\alpha}_0=n\overline{y}$，$\hat{\alpha}=\overline{y}$，由\cref{theo:SSESSEACalculate}可得$\operatorname{SSE}_A=y^Ty-\overline{y}\mathbf{1}_n^Ty=y^Ty-\overline{y}n\overline{y}=y^Ty-n\overline{y}^2$。备择假设下根据\cref{theo:LinearRegressionModel}(3)可得：
+		此时设计阵为$\mathbf{1}_n$，正则方程为$n\hat{\alpha}_0=n\overline{y}$，$\hat{\alpha}=\overline{y}$，由\cref{theo:SSESSEACalculate}可得$\operatorname{SSE}_A=y^{\top}y-\overline{y}\mathbf{1}_n^{\top}y=y^{\top}y-\overline{y}n\overline{y}=y^{\top}y-n\overline{y}^2$。备择假设下根据\cref{theo:LinearRegressionModel}(3)可得：
 	\begin{equation*}
-		\operatorname{SSE}_c=y^Ty-\hat{\alpha}^TX_c^Ty=y^Ty-\hat{\alpha}_0n\overline{y}-\hat{\alpha}_I^T\tilde{X}_c^Ty=y^Ty-n\overline{y}^2-\hat{\alpha}_I^T\tilde{X}_c^Ty
+		\operatorname{SSE}_c=y^{\top}y-\hat{\alpha}^{\top}X_c^{\top}y=y^{\top}y-\hat{\alpha}_0n\overline{y}-\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y=y^{\top}y-n\overline{y}^2-\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y
 	\end{equation*}
 	于是有：
 	\begin{equation*}
-		\operatorname{SSE}_A-\operatorname{SSE}_c=y^Ty-n\overline{y}^2-(y^Ty-n\overline{y}^2-\hat{\alpha}_I^T\tilde{X}_c^Ty)=\hat{\alpha}_I^T\tilde{X}_c^Ty
+		\operatorname{SSE}_A-\operatorname{SSE}_c=y^{\top}y-n\overline{y}^2-(y^{\top}y-n\overline{y}^2-\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y)=\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y
 	\end{equation*}
-	由\cref{theo:NormalLinearModelHypothesisTesting}(5)即可得出第二式。由$\tilde{X}_c=\left(I_n-\dfrac{1}{n}\mathbf{1}_n\mathbf{1}_n^T\right)\tilde{X}$和\cref{theo:LinearRegressionModel}(3)(4)即可得剩下两式。\par
+	由\cref{theo:NormalLinearModelHypothesisTesting}(5)即可得出第二式。由$\tilde{X}_c=\left(I_n-\dfrac{1}{n}\mathbf{1}_n\mathbf{1}_n^{\top}\right)\tilde{X}$和\cref{theo:LinearRegressionModel}(3)(4)即可得剩下两式。\par
 	(2)仿照\cref{prop:NormalLinearModel}(2)的证明过程可知：
 	\begin{equation*}
-		\hat{\beta}\sim\operatorname{N}_p[\beta,\sigma^2(X^TX)^{-1}]
+		\hat{\beta}\sim\operatorname{N}_p[\beta,\sigma^2(X^{\top}X)^{-1}]
 	\end{equation*}
-	记$(X^TX)^{-1}=(c_{ij})$，由\cref{prop:MultiNormal}(3)可得：
+	记$(X^{\top}X)^{-1}=(c_{ij})$，由\cref{prop:MultiNormal}(3)可得：
 	\begin{equation*}
 		\hat{\beta}_i\sim\operatorname{N}(\beta_i,\sigma^2c_{ii})
 	\end{equation*}
@@ -306,15 +306,15 @@
 \begin{note}
 	复相关系数度量的是回归自变量和因变量之间的最大相关系数\info{以后给出证明并联系多元统计中的典型相关分析，修改前述复相关系数的叙述与此处的叙述}，由前述，当选用中心化模型或者标准化模型后我们可以把常数项剥离出去，这样就可以只剩下因变量与回归自变量了。由\cref{prop:Trace}(4)和\cref{theo:LinearRegressionModel}(3)可知此时的回归平方和应该修改为：
 	\begin{equation*}
-		\operatorname{RSS}(\beta)=\hat{\beta}_I^T\tilde{X}^T(y-\overline{y})=\hat{\beta}_I^T\tilde{X}^T\left(I_n-\frac{1}{n}\mathbf{1}_n\mathbf{1}_n^T\right)y=\hat{\alpha}_I^T\tilde{X}_c^Ty=\hat{\gamma}_I^T\tilde{X}_s^Ty
+		\operatorname{RSS}(\beta)=\hat{\beta}_I^{\top}\tilde{X}^{\top}(y-\overline{y})=\hat{\beta}_I^{\top}\tilde{X}^{\top}\left(I_n-\frac{1}{n}\mathbf{1}_n\mathbf{1}_n^{\top}\right)y=\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y=\hat{\gamma}_I^{\top}\tilde{X}_s^{\top}y
 	\end{equation*}
 	总平方和为：
 	\begin{equation*}
-		\operatorname{RSS}_{\text{总}}=(y-\overline{y})^T(y-\overline{y})
+		\operatorname{RSS}_{\text{总}}=(y-\overline{y})^{\top}(y-\overline{y})
 	\end{equation*}
 	由\cref{prop:Trace}(4)和\cref{theo:LinearRegressionModel}(3)可得线性回归模型的复相关系数公式为：
 	\begin{equation*}
-		R^2=\frac{\hat{\alpha}_I^T\tilde{X}_c^Ty}{(y-\overline{y})^T(y-\overline{y})}=\frac{\hat{\gamma}_I^T\tilde{X}_s^Ty}{(y-\overline{y})^T(y-\overline{y})}
+		R^2=\frac{\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y}{(y-\overline{y})^{\top}(y-\overline{y})}=\frac{\hat{\gamma}_I^{\top}\tilde{X}_s^{\top}y}{(y-\overline{y})^{\top}(y-\overline{y})}
 	\end{equation*}\info{补充调整后$R^2$}
 \end{note}
 \begin{theorem}\label{theo:LinearRegressionModelFR2}
@@ -326,7 +326,7 @@
 \begin{proof}
 	由\cref{theo:LinearRegressionModelTSH}(1)中$\operatorname{SSE}_c$的公式可得：
 	\begin{align*}
-		F&=\frac{\hat{\alpha}_I^T\tilde{X}_c^Ty/(p-1)}{\operatorname{SSE}_c/(n-p)}=\frac{\hat{\alpha}_I^T\tilde{X}_c^Ty/[\operatorname{RSS}_{\text{总}}(p-1)]}{[(y-\overline{y})^T(y-\overline{y})-\hat{\alpha}_I^T\tilde{X}_c^Ty]/[\operatorname{RSS}_{\text{总}}(n-p)]} \\
+		F&=\frac{\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y/(p-1)}{\operatorname{SSE}_c/(n-p)}=\frac{\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y/[\operatorname{RSS}_{\text{总}}(p-1)]}{[(y-\overline{y})^{\top}(y-\overline{y})-\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y]/[\operatorname{RSS}_{\text{总}}(n-p)]} \\
 		&=\frac{R^2/(p-1)}{(1-R^2)/(n-p)}=\frac{R^2}{1-R^2}\frac{n-p}{p-1}
 	\end{align*}
 	类似可得标准化模型时的结果。
@@ -396,7 +396,7 @@
 	\end{equation*}
 	由\cref{prop:NormalLinearModel}(1)可知此时$\beta$和$\sigma^2$的极大似然估计为：
 	\begin{equation*}
-		\hat{\beta}(\lambda)=(X^TX)^{-1}X^Ty^{(\lambda)},\quad\hat{\sigma}^2(\lambda)=\frac{1}{n}\operatorname{SSE}(\lambda)
+		\hat{\beta}(\lambda)=(X^{\top}X)^{-1}X^{\top}y^{(\lambda)},\quad\hat{\sigma}^2(\lambda)=\frac{1}{n}\operatorname{SSE}(\lambda)
 	\end{equation*}
 	对应的对数似然函数最大值为：
 	\begin{equation*}
@@ -404,12 +404,12 @@
 	\end{equation*}
 	由\cref{prop:ehat}(2)可知略去与$\lambda$无关的项之后的对数似然函数最大值为：
 	\begin{align*}
-		\ln L_{\text{max}}(\lambda)&=-\frac{n}{2}\ln \operatorname{SSE}(\lambda)+\sum_{i=1}^{n}\ln y_i^{\lambda-1}=-\frac{n}{2}\ln\{[y^{(\lambda)}]^T(I_n-P_X)y^{(\lambda)}\}+\frac{n}{2}\ln\mathbf{J}^{\frac{2}{n}} \\
-		&=-\frac{n}{2}\ln\left\{\frac{[y^{(\lambda)}]^T}{\mathbf{J}^{\frac{1}{n}}}(I_n-P_X)\frac{y^{(\lambda)}}{\mathbf{J}^{\frac{1}{n}}}\right\}
+		\ln L_{\text{max}}(\lambda)&=-\frac{n}{2}\ln \operatorname{SSE}(\lambda)+\sum_{i=1}^{n}\ln y_i^{\lambda-1}=-\frac{n}{2}\ln\{[y^{(\lambda)}]^{\top}(I_n-P_X)y^{(\lambda)}\}+\frac{n}{2}\ln\mathbf{J}^{\frac{2}{n}} \\
+		&=-\frac{n}{2}\ln\left\{\frac{[y^{(\lambda)}]^{\top}}{\mathbf{J}^{\frac{1}{n}}}(I_n-P_X)\frac{y^{(\lambda)}}{\mathbf{J}^{\frac{1}{n}}}\right\}
 	\end{align*}
 	可以看出$-\dfrac{n}{2}$也可略去，因为对数函数是单调函数，所以它也可以略去，于是只需解：
 	\begin{equation*}
-		\lambda=\underset{\lambda}{\arg\min}\frac{[y^{(\lambda)}]^T}{\mathbf{J}^{\frac{1}{n}}}(I_n-P_X)\frac{y^{(\lambda)}}{\mathbf{J}^{\frac{1}{n}}}
+		\lambda=\underset{\lambda}{\arg\min}\frac{[y^{(\lambda)}]^{\top}}{\mathbf{J}^{\frac{1}{n}}}(I_n-P_X)\frac{y^{(\lambda)}}{\mathbf{J}^{\frac{1}{n}}}
 	\end{equation*}
 	记$z^{(\lambda)}=\dfrac{y^{(\lambda)}}{\mathbf{J}^{\frac{1}{n}}}$，则：
 	\begin{equation*}
@@ -427,7 +427,7 @@
 \begin{algorithm}[H]
 	\caption{Box-Cox 变换的计算机求解}
 	\begin{algorithmic}[1]
-		\Require 观测向量 $y = (y_1,\dots,y_n)^T$，设计矩阵 $X$，候选参数集合 $\Lambda$
+		\Require 观测向量 $y = (y_1,\dots,y_n)^{\top}$，设计矩阵 $X$，候选参数集合 $\Lambda$
 		\Ensure 最优参数 $\hat{\lambda}$和变换后的向量$y^{(\lambda)}$
 		
 		\State \textbf{预处理:} 若存在 $y_i \le 0$，则对 $y$ 作平移: $y \gets y + c$，其中 $c > -\min(y_i)$
@@ -451,7 +451,7 @@
 		
 		\State 计算误差平方和:
 		\[
-		\operatorname{SSE}(\lambda) = [z^{(\lambda)}]^T (I_n - P_X) z^{(\lambda)}
+		\operatorname{SSE}(\lambda) = [z^{(\lambda)}]^{\top} (I_n - P_X) z^{(\lambda)}
 		\]
 		\EndFor
 		
@@ -467,14 +467,14 @@
 \begin{definition}
 	定义第$i$个样本\textbf{Cook统计量}为：
 	\begin{equation*}
-		D_i=\frac{(\hat{\beta}-\hat{\beta}_{(i)})^TX^TX(\hat{\beta}-\hat{\beta}_{(i)})}{p\hat{\sigma}^2},\quad i=1,2,\dots,n
+		D_i=\frac{(\hat{\beta}-\hat{\beta}_{(i)})^{\top}X^{\top}X(\hat{\beta}-\hat{\beta}_{(i)})}{p\hat{\sigma}^2},\quad i=1,2,\dots,n
 	\end{equation*}
 	其中$\hat{\beta}_{(i)}$表示删除第$i$个样本后拟合得到的回归系数。
 \end{definition}
 \begin{note}
 	从\cref{theo:NormalLinearModelConfidenceEllipsoid}可以看出：
 	\begin{equation*}
-		\left\{\beta:\frac{(\hat{\beta}-\beta)X^TX(\hat{\beta}-\beta)}{p\hat{\sigma}^2}\leqslant\operatorname{F}_{p,n-p}(\alpha)\right\}
+		\left\{\beta:\frac{(\hat{\beta}-\beta)X^{\top}X(\hat{\beta}-\beta)}{p\hat{\sigma}^2}\leqslant\operatorname{F}_{p,n-p}(\alpha)\right\}
 	\end{equation*}
 	是拒绝假设$\beta_0=\beta_1=\cdots=\beta_{p-1}=0$后$\beta$置信水平为$1-\alpha$的置信椭球。当$\beta$被换为$\hat{\beta}_{(i)}$时，$D_i$的值就对应着$\hat{\beta}_{(i)}$在$\hat{\beta}$置信椭球上的置信水平，$D_i$的值越大，$\alpha$就越大，置信水平就越小，也就是说$D_i$越大$\hat{\beta}_{(i)}$对应在$\hat{\beta}$的置信水平越小的置信椭球，加入第$i$个样本后得到的$\hat{\beta}$对应的置信水平越大，这往往代表着$\hat{\beta}$离样本中心越远（置信水平越大往往置信域越大，而置信域中心的点一般是均值的估计），即第$i$个样本对估计或预测造成的影响越大。\par
 	上述公式的一个问题是需要计算$n+1$次回归的结果，下面的结论给出了一个非常便捷的Cook统计量的计算公式。
@@ -487,38 +487,38 @@
 	其中$r_i$是学生化残差，$p_{ii}$是矩阵$P_X$的第$i$个主对角元。
 \end{theorem}
 \begin{proof}
-	注意到恒等式（两边同乘$A-uv^T$即可）：
+	注意到恒等式（两边同乘$A-uv^{\top}$即可）：
 	\begin{equation*}
-		(A-uv^T)^{-1}=A^{-1}+\frac{A^{-1}uv^TA^{-1}}{1-u^TA^{-1}v}
+		(A-uv^{\top})^{-1}=A^{-1}+\frac{A^{-1}uv^{\top}A^{-1}}{1-u^{\top}A^{-1}v}
 	\end{equation*}
-	其中$A\in M_{n}(K)$且可逆，$u,v\in M_{n\times 1}(K)$。记$X_{(i)}$为去除第$i$个样本后的设计阵，$x_i^T$为$X$的第$i$行，由\cref{prop:MatrixMultiplication}(1)的第四种理解可得：
+	其中$A\in M_{n}(K)$且可逆，$u,v\in M_{n\times 1}(K)$。记$X_{(i)}$为去除第$i$个样本后的设计阵，$x_i^{\top}$为$X$的第$i$行，由\cref{prop:MatrixMultiplication}(1)的第四种理解可得：
 	\begin{equation*}
-		(X_{(i)}^TX_{(i)})^{-1}=(X^TX-x_ix_i^T)^{-1}=(X^TX)^{-1}+\frac{(X^TX)^{-1}x_ix_i^T(X^TX)^{-1}}{1-p_{ii}}
+		(X_{(i)}^{\top}X_{(i)})^{-1}=(X^{\top}X-x_ix_i^{\top})^{-1}=(X^{\top}X)^{-1}+\frac{(X^{\top}X)^{-1}x_ix_i^{\top}(X^{\top}X)^{-1}}{1-p_{ii}}
 	\end{equation*}
-	将上式两边同乘$X^Ty$，记$y_{(i)}$为$y$去掉第$i$个分量后的向量，利用$X^Ty=X_{(i)}^Ty_{(i)}+y_ix_i$可得：
+	将上式两边同乘$X^{\top}y$，记$y_{(i)}$为$y$去掉第$i$个分量后的向量，利用$X^{\top}y=X_{(i)}^{\top}y_{(i)}+y_ix_i$可得：
 	\begin{gather*}
-		(X_{(i)}^TX_{(i)})^{-1}X^Ty=(X^TX)^{-1}X^Ty+\frac{(X^TX)^{-1}x_ix_i^T(X^TX)^{-1}X^Ty}{1-p_{ii}} \\
-		(X_{(i)}^TX_{(i)})^{-1}X_{(i)}^Ty_{(i)}+(X_{(i)}^TX_{(i)})^{-1}y_ix_i=\hat{\beta}+\frac{(X^TX)^{-1}x_ix_i^T\hat{\beta}}{1-p_{ii}} \\
-		\hat{\beta}_{(i)}+(X_{(i)}^TX_{(i)})^{-1}y_ix_i=\hat{\beta}+\frac{(X^TX)^{-1}x_ix_i^T\hat{\beta}}{1-p_{ii}}
+		(X_{(i)}^{\top}X_{(i)})^{-1}X^{\top}y=(X^{\top}X)^{-1}X^{\top}y+\frac{(X^{\top}X)^{-1}x_ix_i^{\top}(X^{\top}X)^{-1}X^{\top}y}{1-p_{ii}} \\
+		(X_{(i)}^{\top}X_{(i)})^{-1}X_{(i)}^{\top}y_{(i)}+(X_{(i)}^{\top}X_{(i)})^{-1}y_ix_i=\hat{\beta}+\frac{(X^{\top}X)^{-1}x_ix_i^{\top}\hat{\beta}}{1-p_{ii}} \\
+		\hat{\beta}_{(i)}+(X_{(i)}^{\top}X_{(i)})^{-1}y_ix_i=\hat{\beta}+\frac{(X^{\top}X)^{-1}x_ix_i^{\top}\hat{\beta}}{1-p_{ii}}
 	\end{gather*}
 	再将原式两边同乘$x_i$可得：
 	\begin{align*}
-		&(X_{(i)}^TX_{(i)})^{-1}x_i=(X^TX)^{-1}x_i+\frac{(X^TX)^{-1}x_ix_i^T(X^TX)^{-1}x_i}{1-p_{ii}} \\
-		=&\frac{(1-p_{ii})(X^TX)^{-1}x_i+(X^TX)^{-1}x_ix_i^T(X^TX)^{-1}x_i}{1-p_{ii}} \\
-		=&\frac{[1-x_i^T(X^TX)^{-1}x_i](X^TX)^{-1}x_i+(X^TX)^{-1}x_ix_i^T(X^TX)^{-1}x_i}{1-p_{ii}} \\
-		=&\frac{(X^TX)^{-1}x_i-x_i^T(X^TX)^{-1}x_i(X^TX)^{-1}x_i+(X^TX)^{-1}x_ix_i^T(X^TX)^{-1}x_i}{1-p_{ii}}=\frac{(X^TX)^{-1}x_i}{1-p_{ii}}
+		&(X_{(i)}^{\top}X_{(i)})^{-1}x_i=(X^{\top}X)^{-1}x_i+\frac{(X^{\top}X)^{-1}x_ix_i^{\top}(X^{\top}X)^{-1}x_i}{1-p_{ii}} \\
+		=&\frac{(1-p_{ii})(X^{\top}X)^{-1}x_i+(X^{\top}X)^{-1}x_ix_i^{\top}(X^{\top}X)^{-1}x_i}{1-p_{ii}} \\
+		=&\frac{[1-x_i^{\top}(X^{\top}X)^{-1}x_i](X^{\top}X)^{-1}x_i+(X^{\top}X)^{-1}x_ix_i^{\top}(X^{\top}X)^{-1}x_i}{1-p_{ii}} \\
+		=&\frac{(X^{\top}X)^{-1}x_i-x_i^{\top}(X^{\top}X)^{-1}x_i(X^{\top}X)^{-1}x_i+(X^{\top}X)^{-1}x_ix_i^{\top}(X^{\top}X)^{-1}x_i}{1-p_{ii}}=\frac{(X^{\top}X)^{-1}x_i}{1-p_{ii}}
 	\end{align*}
 	代入到上一组公式中可得：
 	\begin{gather*}
-		\hat{\beta}_{(i)}+\frac{(X^TX)^{-1}x_iy_i}{1-p_{ii}}=\hat{\beta}+\frac{(X^TX)^{-1}x_ix_i^T\hat{\beta}}{1-p_{ii}} \\
-		\hat{\beta}_{(i)}+\frac{(X^TX)^{-1}x_iy_i}{1-p_{ii}}=\hat{\beta}+\frac{(X^TX)^{-1}x_i\hat{y}_i}{1-p_{ii}} \\
-		\hat{\beta}-\hat{\beta}_{(i)}=\frac{(X^TX)^{-1}x_i(y_i-\hat{y}_i)}{1-p_{ii}}=\frac{(X^TX)^{-1}x_i\hat{\varepsilon}_i}{1-p_{ii}} 
+		\hat{\beta}_{(i)}+\frac{(X^{\top}X)^{-1}x_iy_i}{1-p_{ii}}=\hat{\beta}+\frac{(X^{\top}X)^{-1}x_ix_i^{\top}\hat{\beta}}{1-p_{ii}} \\
+		\hat{\beta}_{(i)}+\frac{(X^{\top}X)^{-1}x_iy_i}{1-p_{ii}}=\hat{\beta}+\frac{(X^{\top}X)^{-1}x_i\hat{y}_i}{1-p_{ii}} \\
+		\hat{\beta}-\hat{\beta}_{(i)}=\frac{(X^{\top}X)^{-1}x_i(y_i-\hat{y}_i)}{1-p_{ii}}=\frac{(X^{\top}X)^{-1}x_i\hat{\varepsilon}_i}{1-p_{ii}} 
 	\end{gather*}
 	将上式代入到Cook统计量的定义中，由\cref{prop:Transpose}(4)和\cref{prop:InvertibleMatrix}(12)可得到：
 	\begin{align*}
-		&D_i=\left[\frac{(X^TX)^{-1}x_i\hat{\varepsilon}_i}{1-p_{ii}}\right]^T(X^TX)\left[\frac{(X^TX)x_i\hat{\varepsilon}_i}{1-p_{ii}}\right]\frac{1}{p\hat{\sigma}^2} \\
-		=&\frac{1}{p}\frac{x_i^T(X^TX)^{-1}X^TX(X^TX)^{-1}x_i}{1-p_{ii}}\frac{\hat{\varepsilon}_i^2}{\hat{\sigma}^2(1-p_{ii})} \\
-		=&\frac{1}{p}\frac{x_i^T(X^TX)^{-1}x_i}{1-p_{ii}}r_i^2=\frac{1}{p}\frac{p_{ii}}{1-p_{ii}}r_i^2\qedhere
+		&D_i=\left[\frac{(X^{\top}X)^{-1}x_i\hat{\varepsilon}_i}{1-p_{ii}}\right]^{\top}(X^{\top}X)\left[\frac{(X^{\top}X)x_i\hat{\varepsilon}_i}{1-p_{ii}}\right]\frac{1}{p\hat{\sigma}^2} \\
+		=&\frac{1}{p}\frac{x_i^{\top}(X^{\top}X)^{-1}X^{\top}X(X^{\top}X)^{-1}x_i}{1-p_{ii}}\frac{\hat{\varepsilon}_i^2}{\hat{\sigma}^2(1-p_{ii})} \\
+		=&\frac{1}{p}\frac{x_i^{\top}(X^{\top}X)^{-1}x_i}{1-p_{ii}}r_i^2=\frac{1}{p}\frac{p_{ii}}{1-p_{ii}}r_i^2\qedhere
 	\end{align*}
 \end{proof}
 \subsubsection{异常点检测}
@@ -528,16 +528,16 @@
 \begin{definition}\label{model:MeanShiftLinearRegressionModel}
 	称：
 	\begin{equation*}
-		y=(X,d_j)(\beta^T,\eta)^T,\quad\varepsilon\sim\operatorname{N}_n(\mathbf{0},\sigma^2I_n)
+		y=(X,d_j)(\beta^{\top},\eta)^{\top},\quad\varepsilon\sim\operatorname{N}_n(\mathbf{0},\sigma^2I_n)
 	\end{equation*}
 	为\gls{MeanShiftLinearRegressionModel}，其中$d_j$为第$j$个分量为$1$其余分量为$0$的$n$维向量，$(X,d_j)$列满秩。
 \end{definition}
 \begin{theorem}\label{theo:MeanShiftLinearRegressionModel}
 	对于\cref{model:MeanShiftLinearRegressionModel}，有：
 	\begin{enumerate}
-		\item $\beta$的LSE$\beta^*$和$\eta$的LSE$\eta^*$分别为：
+		\item $\beta$的LSE$\beta^{\star}$和$\eta$的LSE$\eta^{\star}$分别为：
 		\begin{equation*}
-			\beta^*=\hat{\beta}_{(j)},\quad\eta^*=\frac{\hat{\varepsilon}_j}{1-p_{jj}}
+			\beta^{\star}=\hat{\beta}_{(j)},\quad\eta^{\star}=\frac{\hat{\varepsilon}_j}{1-p_{jj}}
 		\end{equation*}
 		$\hat{\beta}_{(j)}$为\cref{model:LinearRegressionModel}去除第$j$组数据后得到的$\beta$的LSE，$p_{ii}$是矩阵$P_X$的第$i$个主对角元。；
 		\item 对于假设检验问题$H_0:\eta=0,\;H_1:\eta\ne0$，检验统计量和拒绝域为：
@@ -552,53 +552,53 @@
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
-	(1)由\cref{theo:LinearRegressionModel}(1)可知$(X,d_j)^T(X,d_j)$可逆，于是此时的正则方程变为：
+	(1)由\cref{theo:LinearRegressionModel}(1)可知$(X,d_j)^{\top}(X,d_j)$可逆，于是此时的正则方程变为：
 	\begin{equation*}
 		\begin{pmatrix}
-			\beta^* \\
-			\eta^*
-		\end{pmatrix}=[(X,d_j)^T(X,d_j)]^{-1}(X,d_j)^Ty=
+			\beta^{\star} \\
+			\eta^{\star}
+		\end{pmatrix}=[(X,d_j)^{\top}(X,d_j)]^{-1}(X,d_j)^{\top}y=
 		\begin{pmatrix}
-			X^TX & x_j \\
-			x_j^T & 1
+			X^{\top}X & x_j \\
+			x_j^{\top} & 1
 		\end{pmatrix}^{-1}
 		\begin{pmatrix}
-			X^Ty \\
+			X^{\top}y \\
 			y_j
 		\end{pmatrix}
 	\end{equation*}
-	由\cref{theo:LinearRegressionModel}(1)可知$X^TX$可逆，设$x_j^T$为$X$的第$j$行，于是根据\cref{prop:InvertibleMatrix}(17)可得：
+	由\cref{theo:LinearRegressionModel}(1)可知$X^{\top}X$可逆，设$x_j^{\top}$为$X$的第$j$行，于是根据\cref{prop:InvertibleMatrix}(17)可得：
 	\begin{align*}
 	&\begin{pmatrix}
-		\beta^* \\
-		\eta^*
+		\beta^{\star} \\
+		\eta^{\star}
 	\end{pmatrix} \\
 	=&\begin{pmatrix}
-		(X^TX)^{-1}+(X^TX)^{-1}x_j[1-x_j^T(X^TX)^{-1}x_j]^{-1}x_j^T(X^TX)^{-1} & -(X^TX)^{-1}x_j[1-x_j^T(X^TX)^{-1}x_j]^{-1} \\
-		-[1-x_j^T(X^TX)^{-1}x_j]^{-1}x_j^T(X^TX)^{-1} & [1-x_j^T(X^TX)^{-1}x_j]^{-1}
+		(X^{\top}X)^{-1}+(X^{\top}X)^{-1}x_j[1-x_j^{\top}(X^{\top}X)^{-1}x_j]^{-1}x_j^{\top}(X^{\top}X)^{-1} & -(X^{\top}X)^{-1}x_j[1-x_j^{\top}(X^{\top}X)^{-1}x_j]^{-1} \\
+		-[1-x_j^{\top}(X^{\top}X)^{-1}x_j]^{-1}x_j^{\top}(X^{\top}X)^{-1} & [1-x_j^{\top}(X^{\top}X)^{-1}x_j]^{-1}
 	\end{pmatrix}
 	\begin{pmatrix}
-		X^Ty \\
+		X^{\top}y \\
 		y_j
 	\end{pmatrix} \\
 	=&
 	\begin{pmatrix}
-		(X^TX)^{-1}X^Ty+(X^TX)^{-1}x_j[1-x_j^T(X^TX)^{-1}x_j]^{-1}x_j^T(X^TX)^{-1}X^Ty-(X^TX)^{-1}x_j[1-x_j^T(X^TX)^{-1}x_j]^{-1}y_j \\
-		-[1-x_j^T(X^TX)^{-1}x_j]^{-1}x_j^T(X^TX)^{-1}X^Ty+[1-x_j^T(X^TX)^{-1}x_j]^{-1}y_j
+		(X^{\top}X)^{-1}X^{\top}y+(X^{\top}X)^{-1}x_j[1-x_j^{\top}(X^{\top}X)^{-1}x_j]^{-1}x_j^{\top}(X^{\top}X)^{-1}X^{\top}y-(X^{\top}X)^{-1}x_j[1-x_j^{\top}(X^{\top}X)^{-1}x_j]^{-1}y_j \\
+		-[1-x_j^{\top}(X^{\top}X)^{-1}x_j]^{-1}x_j^{\top}(X^{\top}X)^{-1}X^{\top}y+[1-x_j^{\top}(X^{\top}X)^{-1}x_j]^{-1}y_j
 	\end{pmatrix} \\
 	=&
 	\begin{pmatrix}
-		\hat{\beta}+(X^TX)^{-1}x_j\dfrac{1}{1-p_{jj}}x_j^T\hat{\beta}-(X^TX)^{-1}x_j\dfrac{1}{1-p_{jj}}y_j \\
-		-\dfrac{1}{1-p_{jj}}x_j^T\hat{\beta}+\dfrac{1}{1-p_{jj}}y_j
+		\hat{\beta}+(X^{\top}X)^{-1}x_j\dfrac{1}{1-p_{jj}}x_j^{\top}\hat{\beta}-(X^{\top}X)^{-1}x_j\dfrac{1}{1-p_{jj}}y_j \\
+		-\dfrac{1}{1-p_{jj}}x_j^{\top}\hat{\beta}+\dfrac{1}{1-p_{jj}}y_j
 	\end{pmatrix} \\
 	=&
 	\begin{pmatrix}
-		\hat{\beta}+\dfrac{1}{1-p_{jj}}(X^TX)^{-1}x_j\hat{y}_j-\dfrac{1}{1-p_{jj}}(X^TX)^{-1}x_jy_j \\
+		\hat{\beta}+\dfrac{1}{1-p_{jj}}(X^{\top}X)^{-1}x_j\hat{y}_j-\dfrac{1}{1-p_{jj}}(X^{\top}X)^{-1}x_jy_j \\
 		-\dfrac{1}{1-p_{jj}}\hat{y}_j+\dfrac{1}{1-p_{jj}}y_j
 	\end{pmatrix} \\
 	=&
 	\begin{pmatrix}
-		\hat{\beta}-\dfrac{1}{1-p_{jj}}(X^TX)^{-1}x_j\hat{\varepsilon}_j \\
+		\hat{\beta}-\dfrac{1}{1-p_{jj}}(X^{\top}X)^{-1}x_j\hat{\varepsilon}_j \\
 		\dfrac{\hat{\varepsilon}_j}{1-p_{jj}}
 	\end{pmatrix}
 	\end{align*}
@@ -611,18 +611,18 @@
 			\mathbf{0} & 1
 		\end{pmatrix}
 	\end{equation*}
-	和$b=\mathbf{0}$时的情况，此时$\operatorname{SSE}_A=y^Ty-\hat{\beta}^TX^Ty$，由(1)、\cref{prop:Transpose}(4)、\cref{prop:InvertibleMatrix}(12)、\cref{theo:SSESSEACalculate}和\cref{theo:VarianceOfErrorTerm}可得：
+	和$b=\mathbf{0}$时的情况，此时$\operatorname{SSE}_A=y^{\top}y-\hat{\beta}^{\top}X^{\top}y$，由(1)、\cref{prop:Transpose}(4)、\cref{prop:InvertibleMatrix}(12)、\cref{theo:SSESSEACalculate}和\cref{theo:VarianceOfErrorTerm}可得：
 	\begin{align*}
-		&\operatorname{SSE}=y^Ty-\Big((\beta^*)^T,\eta^*\Big)(X,d_j)^Ty=y^Ty-(\beta^*)^TX^Ty-\eta^*d_j^Ty \\
-		=&y^Ty-\left[\hat{\beta}-\frac{1}{1-p_{jj}}(X^TX)^{-1}x_j\hat{\varepsilon}_j\right]^TX^Ty-\frac{\hat{\varepsilon}_j}{1-p_{jj}}y_j \\
-		=&y^Ty-\hat{\beta}^TX^Ty+\frac{\hat{\varepsilon}_j}{1-p_{jj}}x_j^T(X^TX)^{-1}X^Ty-\frac{\hat{\varepsilon}_j}{1-p_{jj}}y_j \\
-		=&y^Ty-\hat{\beta}^TX^Ty+\frac{\hat{\varepsilon}_j}{1-p_{jj}}x_j^T\hat{\beta}-\frac{\hat{\varepsilon}_j}{1-p_{jj}}y_j \\
-		=&y^Ty-\hat{\beta}^TX^Ty+\frac{\hat{\varepsilon}_j}{1-p_{jj}}\hat{y}_j-\frac{\hat{\varepsilon}_j}{1-p_{jj}}y_j \\
-		=&y^Ty-\hat{\beta}^TX^Ty-\frac{\hat{\varepsilon}_j^2}{1-p_{jj}}=(n-p)\hat{\sigma}^2-\frac{\hat{\varepsilon}_j^2}{1-p_{jj}}
+		&\operatorname{SSE}=y^{\top}y-\Big((\beta^{\star})^{\top},\eta^{\star}\Big)(X,d_j)^{\top}y=y^{\top}y-(\beta^{\star})^{\top}X^{\top}y-\eta^{\star}d_j^{\top}y \\
+		=&y^{\top}y-\left[\hat{\beta}-\frac{1}{1-p_{jj}}(X^{\top}X)^{-1}x_j\hat{\varepsilon}_j\right]^{\top}X^{\top}y-\frac{\hat{\varepsilon}_j}{1-p_{jj}}y_j \\
+		=&y^{\top}y-\hat{\beta}^{\top}X^{\top}y+\frac{\hat{\varepsilon}_j}{1-p_{jj}}x_j^{\top}(X^{\top}X)^{-1}X^{\top}y-\frac{\hat{\varepsilon}_j}{1-p_{jj}}y_j \\
+		=&y^{\top}y-\hat{\beta}^{\top}X^{\top}y+\frac{\hat{\varepsilon}_j}{1-p_{jj}}x_j^{\top}\hat{\beta}-\frac{\hat{\varepsilon}_j}{1-p_{jj}}y_j \\
+		=&y^{\top}y-\hat{\beta}^{\top}X^{\top}y+\frac{\hat{\varepsilon}_j}{1-p_{jj}}\hat{y}_j-\frac{\hat{\varepsilon}_j}{1-p_{jj}}y_j \\
+		=&y^{\top}y-\hat{\beta}^{\top}X^{\top}y-\frac{\hat{\varepsilon}_j^2}{1-p_{jj}}=(n-p)\hat{\sigma}^2-\frac{\hat{\varepsilon}_j^2}{1-p_{jj}}
 	\end{align*}
 	于是可得：
 	\begin{equation*}
-		\operatorname{SSE}_A-\operatorname{SSE}=y^Ty-\hat{\beta}^TX^Ty-y^Ty+\hat{\beta}^TX^Ty+\frac{\hat{\varepsilon}_j^2}{1-p_{jj}}=\frac{\hat{\varepsilon}_j^2}{1-p_{jj}}
+		\operatorname{SSE}_A-\operatorname{SSE}=y^{\top}y-\hat{\beta}^{\top}X^{\top}y-y^{\top}y+\hat{\beta}^{\top}X^{\top}y+\frac{\hat{\varepsilon}_j^2}{1-p_{jj}}=\frac{\hat{\varepsilon}_j^2}{1-p_{jj}}
 	\end{equation*}
 	由\cref{theo:NormalLinearModelHypothesisTesting}(4)可得：
 	\begin{equation*}
@@ -633,37 +633,37 @@
 
 \subsection{复共线性与解决方案}
 \begin{note}
-	由\cref{theo:LinearRegressionModel}(1)可知$X^TX$正定且可逆，于是存在正交矩阵$Q$和$\seq{\lambda}{p}$使得：
+	由\cref{theo:LinearRegressionModel}(1)可知$X^{\top}X$正定且可逆，于是存在正交矩阵$Q$和$\seq{\lambda}{p}$使得：
 	\begin{equation*}
-		X^TX=Q^T\operatorname{diag}\{\seq{\lambda}{p}\}Q
+		X^{\top}X=Q^{\top}\operatorname{diag}\{\seq{\lambda}{p}\}Q
 	\end{equation*}
 	其中$\lambda_i>0$。由\cref{prop:MSE}(1)、\cref{prop:EstimableFunction}(4)(5)、\cref{prop:Trace}(2)、\cref{prop:InvertibleMatrix}(11)、\cref{prop:OrthogonalUnitaryMatrix}(1)和\cref{prop:Trace}(3)可得：
 	\begin{align*}
-		\operatorname{MSE}(\hat{\beta})&=\operatorname{tr}[\sigma^2(X^TX)^{-1}]=\sigma^2\operatorname{tr}(X^TX)^{-1}=\sigma^2\operatorname{tr}
-		\left(Q^T\operatorname{diag}\left\{\frac{1}{\lambda_1},\frac{1}{\lambda_2},\dots,\frac{1}{\lambda_{p}}\right\}Q\right) \\
+		\operatorname{MSE}(\hat{\beta})&=\operatorname{tr}[\sigma^2(X^{\top}X)^{-1}]=\sigma^2\operatorname{tr}(X^{\top}X)^{-1}=\sigma^2\operatorname{tr}
+		\left(Q^{\top}\operatorname{diag}\left\{\frac{1}{\lambda_1},\frac{1}{\lambda_2},\dots,\frac{1}{\lambda_{p}}\right\}Q\right) \\
 		&=\sigma^2\operatorname{tr}
-		\left(\operatorname{diag}\left\{\frac{1}{\lambda_1},\frac{1}{\lambda_2},\dots,\frac{1}{\lambda_{p}}\right\}QQ^T\right)=\sigma^2\sum_{i=1}^{p}\frac{1}{\lambda_i}
+		\left(\operatorname{diag}\left\{\frac{1}{\lambda_1},\frac{1}{\lambda_2},\dots,\frac{1}{\lambda_{p}}\right\}QQ^{\top}\right)=\sigma^2\sum_{i=1}^{p}\frac{1}{\lambda_i}
 	\end{align*}
-	当$X^TX$的一个特征根很小的时候，会导致$\operatorname{MSE}(\hat{\beta})=\operatorname{tr}\operatorname{Cov}(\hat{\beta})$很大。\par
+	当$X^{\top}X$的一个特征根很小的时候，会导致$\operatorname{MSE}(\hat{\beta})=\operatorname{tr}\operatorname{Cov}(\hat{\beta})$很大。\par
 	从另一个角度来看，由\cref{prop:MSE}(2)可得：
 	\begin{equation*}
-		\operatorname{E}(\hat{\beta}^T\hat{\beta})=\beta^T\beta+\sigma^2\sum_{i=1}^{p}\frac{1}{\lambda_i}
+		\operatorname{E}(\hat{\beta}^{\top}\hat{\beta})=\beta^{\top}\beta+\sigma^2\sum_{i=1}^{p}\frac{1}{\lambda_i}
 	\end{equation*}
-	当$X^TX$的一个特征根很小的时候，会导致$\operatorname{E}(\hat{\beta}^T\hat{\beta})$比$\beta^T\beta$大很多，也就是$\hat{\beta}$的平均长度比$\beta$大很多。\par
-	综上所述，当$X^TX$的一个特征根很小的时候，线性回归模型的最小二乘估计不再是一个好的估计。\par
-	设$\lambda$是$X^TX$的一个特征值，$\alpha$是其对应的特征向量。若$\lambda\approx0$，则：
+	当$X^{\top}X$的一个特征根很小的时候，会导致$\operatorname{E}(\hat{\beta}^{\top}\hat{\beta})$比$\beta^{\top}\beta$大很多，也就是$\hat{\beta}$的平均长度比$\beta$大很多。\par
+	综上所述，当$X^{\top}X$的一个特征根很小的时候，线性回归模型的最小二乘估计不再是一个好的估计。\par
+	设$\lambda$是$X^{\top}X$的一个特征值，$\alpha$是其对应的特征向量。若$\lambda\approx0$，则：
 	\begin{gather*}
-		X^TX\alpha=\lambda\alpha\approx\mathbf{0} \\
-		\alpha^TX^TX\alpha=\lambda\alpha^T\alpha\approx0
+		X^{\top}X\alpha=\lambda\alpha\approx\mathbf{0} \\
+		\alpha^{\top}X^{\top}X\alpha=\lambda\alpha^{\top}\alpha\approx0
 	\end{gather*}
 	也即$||X\alpha||\approx0$，$X\alpha\approx\mathbf{0}$，这等价于$X$的各列之间存在近似的线性相关关系，我们称之为\gls{Multicollinearity}关系。\par
-	度量复共线性严重程度的一个重要量是$X^TX$的条件数\info{数值分析条件数}：
+	度量复共线性严重程度的一个重要量是$X^{\top}X$的条件数\info{数值分析条件数}：
 	\begin{enumerate}
 		\item $k<100$：复共线性程度很小；
 		\item $100\leqslant k\leqslant1000$：存在中等程度或较强的复共线性；
 		\item $k>1000$：存在严重的复共线性。
 	\end{enumerate}
-	另一个可以度量复共线性严重程度的指标为\gls{VIF}：定义$\beta_i$的方差膨胀因子为$(X^TX)^{-1}(i,i)$，于是方差膨胀因子越大$\operatorname{MSE}(\hat{\beta})$越大。还可以证明\info{VIF等于$1-R^2$的倒数}。
+	另一个可以度量复共线性严重程度的指标为\gls{VIF}：定义$\beta_i$的方差膨胀因子为$(X^{\top}X)^{-1}(i,i)$，于是方差膨胀因子越大$\operatorname{MSE}(\hat{\beta})$越大。还可以证明\info{VIF等于$1-R^2$的倒数}。
 \end{note}
 \subsubsection{岭回归}
 \begin{note}
@@ -673,21 +673,21 @@
 	\end{equation*}
 	其中$\lambda$为正则强度。类似\cref{theo:LSELinearModel}可知此时的正则方程为：
 	\begin{equation*}
-		(X^TX+\lambda I_{p})\beta=X^Ty
+		(X^{\top}X+\lambda I_{p})\beta=X^{\top}y
 	\end{equation*}
-	显然$X^TX+\lambda I_{p}$是一个实对称阵，由\info{矩阵多项式的特征值}和\cref{theo:LinearRegressionModel}(1)可知它还是一个正定阵，根据\cref{theo:PositiveDefinite}(6)可得$X^TX+\lambda I_{p}$可逆，于是$\beta$的估计值$\hat{\beta}(\lambda)=(X^TX+\lambda I_{p})^{-1}X^Ty$。\par
-	从这个结果来看，修改后的目标函数将会选择长度更小的估计，同时也增大了$X^TX$的特征值，从而缓解复共线性问题。显然此时的$\hat{\beta}$已经不再是$\beta$的无偏估计，从\cref{prop:MSE}(1)可知，它有可能会选择均方误差更小的估计。
+	显然$X^{\top}X+\lambda I_{p}$是一个实对称阵，由\info{矩阵多项式的特征值}和\cref{theo:LinearRegressionModel}(1)可知它还是一个正定阵，根据\cref{theo:PositiveDefinite}(6)可得$X^{\top}X+\lambda I_{p}$可逆，于是$\beta$的估计值$\hat{\beta}(\lambda)=(X^{\top}X+\lambda I_{p})^{-1}X^{\top}y$。\par
+	从这个结果来看，修改后的目标函数将会选择长度更小的估计，同时也增大了$X^{\top}X$的特征值，从而缓解复共线性问题。显然此时的$\hat{\beta}$已经不再是$\beta$的无偏估计，从\cref{prop:MSE}(1)可知，它有可能会选择均方误差更小的估计。
 \end{note}
 \begin{definition}
 	对于\cref{model:CentralizedStandardizedLinearModel}，称：
 	\begin{equation*}
-		\hat{\beta}(\lambda)=(X^TX+\lambda I_p)^{-1}X^Ty
+		\hat{\beta}(\lambda)=(X^{\top}X+\lambda I_p)^{-1}X^{\top}y
 	\end{equation*}
 	为$\beta$的\gls{RidgeEstimate}。由\cref{theo:LinearRegressionModel}(1)，存在正交矩阵$Q$和$\seq{\lambda}{p}$使得：
 	\begin{equation*}
-		\tilde{X}^T\tilde{X}=Q^T\operatorname{diag}\{\seq{\lambda}{p-1}\}Q
+		\tilde{X}^{\top}\tilde{X}=Q^{\top}\operatorname{diag}\{\seq{\lambda}{p-1}\}Q
 	\end{equation*}
-	其中$\lambda_i>0$。记$Y=\tilde{X}Q^T,\;\delta_I=Q\beta_I$，于是模型可改写为：
+	其中$\lambda_i>0$。记$Y=\tilde{X}Q^{\top},\;\delta_I=Q\beta_I$，于是模型可改写为：
 	\begin{equation*}
 		y=\beta_0\mathbf{1}_n+Y\delta_I+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
 	\end{equation*}
@@ -696,30 +696,30 @@
 \begin{property}\label{prop:RidgeEstimate}
 	中心化模型的岭估计具有如下性质：
 	\begin{enumerate}
-		\item $\hat{\alpha}_0=\overline{y},\;\hat{\delta}(\lambda)=Q\hat{\alpha}_I(\lambda)=\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^Ty,\;\operatorname{Cov}[\hat{\delta}(\lambda)]=\sigma^2\operatorname{diag}\left\{\frac{\lambda_1}{(\lambda_1+\lambda)^2},\frac{\lambda_2}{(\lambda_2+\lambda)^2},\dots,\frac{\lambda_{p-1}}{(\lambda_{p-1}+\lambda)^2}\right\}$；
+		\item $\hat{\alpha}_0=\overline{y},\;\hat{\delta}(\lambda)=Q\hat{\alpha}_I(\lambda)=\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^{\top}y,\;\operatorname{Cov}[\hat{\delta}(\lambda)]=\sigma^2\operatorname{diag}\left\{\frac{\lambda_1}{(\lambda_1+\lambda)^2},\frac{\lambda_2}{(\lambda_2+\lambda)^2},\dots,\frac{\lambda_{p-1}}{(\lambda_{p-1}+\lambda)^2}\right\}$；
 		\item $\operatorname{MSE}[\hat{\delta}(\lambda)]=\operatorname{MSE}[\hat{\alpha}_I(\lambda)]$；
 		\item 存在$\lambda>0$使得$\operatorname{MSE}[\hat{\delta}(\lambda)]<\operatorname{MSE}(\hat{\delta})$；
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)显然$Y=\tilde{X}_cQ^T$也是中心化的，所以第一式成立。由正则方程、\cref{prop:Transpose}(4)、\cref{prop:InvertibleMatrix}(11)和\cref{prop:OrthogonalUnitaryMatrix}(1)可得：
+	(1)显然$Y=\tilde{X}_cQ^{\top}$也是中心化的，所以第一式成立。由正则方程、\cref{prop:Transpose}(4)、\cref{prop:InvertibleMatrix}(11)和\cref{prop:OrthogonalUnitaryMatrix}(1)可得：
 	\begin{align*}
-		&\hat{\delta}(\lambda)=(Y^TY+\lambda I_{p-1})^{-1}Y^Ty=(Q\tilde{X}_c^T\tilde{X}_cQ^T+\lambda QI_{p-1}Q^T)^{-1}Q\tilde{X}_c^Ty \\
-		=&Q(\tilde{X}_c^T\tilde{X}_c+\lambda I_{p-1})^{-1}Q^TQ\tilde{X}_c^Ty=Q(\tilde{X}_c^T\tilde{X}_c+\lambda I_{p-1})^{-1}\tilde{X}_c^Ty=Q\hat{\alpha}_I(\lambda)
+		&\hat{\delta}(\lambda)=(Y^{\top}Y+\lambda I_{p-1})^{-1}Y^{\top}y=(Q\tilde{X}_c^{\top}\tilde{X}_cQ^{\top}+\lambda QI_{p-1}Q^{\top})^{-1}Q\tilde{X}_c^{\top}y \\
+		=&Q(\tilde{X}_c^{\top}\tilde{X}_c+\lambda I_{p-1})^{-1}Q^{\top}Q\tilde{X}_c^{\top}y=Q(\tilde{X}_c^{\top}\tilde{X}_c+\lambda I_{p-1})^{-1}\tilde{X}_c^{\top}y=Q\hat{\alpha}_I(\lambda)
 	\end{align*}
 	注意到：
 	\begin{equation*}
-		Y^TY=Q\tilde{X}_c^T\tilde{X}_cQ^T=\operatorname{diag}\{\seq{\lambda}{p-1}\}
+		Y^{\top}Y=Q\tilde{X}_c^{\top}\tilde{X}_cQ^{\top}=\operatorname{diag}\{\seq{\lambda}{p-1}\}
 	\end{equation*}
 	所以：
 	\begin{equation*}
-		\hat{\delta}(\lambda)=\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^Ty
+		\hat{\delta}(\lambda)=\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^{\top}y
 	\end{equation*}
 	根据\cref{prop:CovMat}(3)和\cref{prop:InvertibleMatrix}(12)可得：
 	\begin{align*}
-		&\operatorname{Cov}[\hat{\delta}(\lambda)]=\operatorname{Cov}[\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^Ty] \\
-		=&\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^T\sigma^2I_n[\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^T]^T \\
-		=&\sigma^2\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^TY\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1} \\
+		&\operatorname{Cov}[\hat{\delta}(\lambda)]=\operatorname{Cov}[\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^{\top}y] \\
+		=&\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^{\top}\sigma^2I_n[\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^{\top}]^{\top} \\
+		=&\sigma^2\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^{\top}Y\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1} \\
 		=&\sigma^2\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}\operatorname{diag}\{\seq{\lambda}{p-1}\} \\
 		&\cdot\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1} \\
 		=&\sigma^2\operatorname{diag}\left\{\frac{\lambda_1}{(\lambda_1+\lambda)^2},\frac{\lambda_2}{(\lambda_2+\lambda)^2},\dots,\frac{\lambda_{p-1}}{(\lambda_{p-1}+\lambda)^2}\right\}
@@ -727,21 +727,21 @@
 	(2)由(1)、\cref{prop:MSE}(1)、\cref{prop:CovMat}(3)、\cref{prop:Trace}(3)、\cref{prop:MeasurableIntegral}(5)和\cref{prop:Transpose}(4)可得：
 	\begin{align*}
 		\operatorname{MSE}[\hat{\delta}(\lambda)]&=\operatorname{MSE}[Q\hat{\alpha}_I(\lambda)]=\operatorname{tr}\operatorname{Cov}[Q\hat{\alpha}_I(\lambda)] \\
-		&\quad+\{\operatorname{E}[Q\hat{\alpha}_I(\lambda)]-Q\alpha_I(\lambda)\}^T\{\operatorname{E}[Q\hat{\alpha}_I(\lambda)]-Q\alpha_I(\lambda)\} \\
-		&=\operatorname{tr}\{Q\operatorname{Cov}[\hat{\alpha}_I(\lambda)]Q^T\}+\{\operatorname{E}[\hat{\alpha}_I(\lambda)]-\alpha_I(\lambda)\}^TQ^TQ\{\operatorname{E}[\hat{\alpha}_I(\lambda)]-\alpha_I(\lambda)\} \\
-		&=\operatorname{tr}\operatorname{Cov}[\hat{\alpha}_I(\lambda)]+\{\operatorname{E}[\hat{\alpha}_I(\lambda)]-\alpha_I(\lambda)\}^T\{\operatorname{E}[\hat{\alpha}_I(\lambda)]-\alpha_I(\lambda)\}=\operatorname{MSE}[\hat{\alpha}_I(\lambda)]
+		&\quad+\{\operatorname{E}[Q\hat{\alpha}_I(\lambda)]-Q\alpha_I(\lambda)\}^{\top}\{\operatorname{E}[Q\hat{\alpha}_I(\lambda)]-Q\alpha_I(\lambda)\} \\
+		&=\operatorname{tr}\{Q\operatorname{Cov}[\hat{\alpha}_I(\lambda)]Q^{\top}\}+\{\operatorname{E}[\hat{\alpha}_I(\lambda)]-\alpha_I(\lambda)\}^{\top}Q^{\top}Q\{\operatorname{E}[\hat{\alpha}_I(\lambda)]-\alpha_I(\lambda)\} \\
+		&=\operatorname{tr}\operatorname{Cov}[\hat{\alpha}_I(\lambda)]+\{\operatorname{E}[\hat{\alpha}_I(\lambda)]-\alpha_I(\lambda)\}^{\top}\{\operatorname{E}[\hat{\alpha}_I(\lambda)]-\alpha_I(\lambda)\}=\operatorname{MSE}[\hat{\alpha}_I(\lambda)]
 	\end{align*}\par
 	(3)由(1)可得：
 	\begin{align*}
-		&\operatorname{E}[\hat{\delta}(\lambda)]=\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^T\operatorname{E}(y) \\
-		=&\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^T(\alpha_0\mathbf{1}_n+Y\delta) \\
-		=&\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^TY\delta \\
+		&\operatorname{E}[\hat{\delta}(\lambda)]=\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^{\top}\operatorname{E}(y) \\
+		=&\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^{\top}(\alpha_0\mathbf{1}_n+Y\delta) \\
+		=&\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}Y^{\top}Y\delta \\
 		=&\left(\operatorname{diag}\left\{\seq{\lambda}{p-1}\right\}+\lambda I_{p-1}\right)^{-1}\operatorname{diag}\{\seq{\lambda}{p-1}\}\delta \\
-		=&\left(\frac{\lambda_1}{\lambda_1+\lambda}\delta_1,\frac{\lambda_2}{\lambda_2+\lambda}\delta_2,\dots,\frac{\lambda_{p-1}}{\lambda_{p-1}+\lambda}\delta_{p-1}\right)^T
+		=&\left(\frac{\lambda_1}{\lambda_1+\lambda}\delta_1,\frac{\lambda_2}{\lambda_2+\lambda}\delta_2,\dots,\frac{\lambda_{p-1}}{\lambda_{p-1}+\lambda}\delta_{p-1}\right)^{\top}
 	\end{align*}
 	所以：
 	\begin{gather*}
-		\operatorname{E}[\hat{\delta}(\lambda)]-\delta=\left(-\frac{\lambda}{\lambda_1+\lambda}\delta_1,-\frac{\lambda}{\lambda_2+\lambda}\delta_2,\dots,-\frac{\lambda}{\lambda_{p-1}+\lambda}\delta_{p-1}\right)^T
+		\operatorname{E}[\hat{\delta}(\lambda)]-\delta=\left(-\frac{\lambda}{\lambda_1+\lambda}\delta_1,-\frac{\lambda}{\lambda_2+\lambda}\delta_2,\dots,-\frac{\lambda}{\lambda_{p-1}+\lambda}\delta_{p-1}\right)^{\top}
 	\end{gather*}
 	于是由\cref{prop:MSE}(1)、(1)、\cref{prop:Trace}(2)可得：
 	\begin{gather*}
@@ -751,7 +751,7 @@
 			&=-2\sigma^2\sum_{i=1}^{p-1}\frac{\lambda_i}{(\lambda_i+\lambda)^3}+2\lambda\sum_{i=1}^{p-1}\frac{\lambda_i\delta_i^2}{(\lambda_i+\lambda)^3}=\sum_{i=1}^{p-1}(\lambda\delta_i^2-\sigma^2)\frac{2\lambda_i}{(\lambda_i+\lambda)^3}
 		\end{aligned}
 	\end{gather*}
-	当$\lambda>0$但较小时，由上式看出此时可以有$\operatorname{MSE}[\hat{\delta}(\lambda)]$关于$\lambda$的导数小于$0$，所以存在$\lambda^*>0$，当$0<\lambda<\lambda^*$时$\operatorname{MSE}[\hat{\delta}(\lambda)]$是$\lambda$的单调减函数，也就是说在这个区间上$\operatorname{MSE}[\hat{\delta}(\lambda)]<\operatorname{MSE}(\hat{\delta})$。
+	当$\lambda>0$但较小时，由上式看出此时可以有$\operatorname{MSE}[\hat{\delta}(\lambda)]$关于$\lambda$的导数小于$0$，所以存在$\lambda^{\star}>0$，当$0<\lambda<\lambda^{\star}$时$\operatorname{MSE}[\hat{\delta}(\lambda)]$是$\lambda$的单调减函数，也就是说在这个区间上$\operatorname{MSE}[\hat{\delta}(\lambda)]<\operatorname{MSE}(\hat{\delta})$。
 \end{proof}
 \begin{note}
 	理论说明了存在较小的$\lambda$使得岭估计优于最小二乘估计，下面给出两个选择参数$\lambda$的方法。\par

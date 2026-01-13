@@ -198,7 +198,7 @@
 	\begin{equation*}
 		\operatorname{Var}_{\theta}(\delta)=\operatorname{Var}_{\theta}(\delta-f)=\operatorname{E}_{\theta}[(\delta-f)^2]-[g(\theta)]^2
 	\end{equation*}
-	为了得到UMVUE，我们就要对任意的$f$最小化$\operatorname{E}_{\theta}[(\delta-f)^2]$，这可以理解为寻找$\delta$在所有零无偏估计张成的子空间上的投影$f^*$。
+	为了得到UMVUE，我们就要对任意的$f$最小化$\operatorname{E}_{\theta}[(\delta-f)^2]$，这可以理解为寻找$\delta$在所有零无偏估计张成的子空间上的投影$f^{\star}$。
 \end{note}
 \begin{theorem}\label{theo:UMVUE0UnbiasedEstimation}
 	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，$\mathbf{X}$为从总体$F$中抽取的简单样本，$g(\theta)$为U可估的待估量，$\delta(\mathbf{X})$是$g(\theta)$的一个无偏估计量，对任意的$\theta\in\Theta$有$\operatorname{Var}_{\theta}[\delta(\mathbf{X})]<+\infty$。令：
@@ -325,7 +325,7 @@
 \begin{definition}
 	设$\mathscr{P}=\{P_{\theta}:\theta\in\Theta\}$是一族概率测度，对任意的$\theta\in\Theta$，$P_{\theta}$有关于$\sigma$有限测度$\mu$的概率函数$p_{\theta}(x)$。令：
 	\begin{equation*}
-		S_{\theta}(x)=\left(\frac{\partial\ln p_{\theta}(x)}{\partial\theta_1},\frac{\partial\ln p_{\theta}(x)}{\partial\theta_2},\dots,\frac{\partial\ln p_{\theta}(x)}{\partial\theta_n}\right)^T
+		S_{\theta}(x)=\left(\frac{\partial\ln p_{\theta}(x)}{\partial\theta_1},\frac{\partial\ln p_{\theta}(x)}{\partial\theta_2},\dots,\frac{\partial\ln p_{\theta}(x)}{\partial\theta_n}\right)^{\top}
 	\end{equation*}
 	若对任意的$\theta\in\Theta$，$p_{\theta}(x)$满足如下正则条件：
 	\begin{enumerate}
@@ -335,7 +335,7 @@
 	\end{enumerate}
 	则称：
 	\begin{equation*}
-		I(\theta)=\operatorname{Cov}_{\theta}[S_{\theta}(x)]=\operatorname{E}_{\theta}[S_{\theta}(x)S_{\theta}^T(x)]
+		I(\theta)=\operatorname{Cov}_{\theta}[S_{\theta}(x)]=\operatorname{E}_{\theta}[S_{\theta}(x)S_{\theta}^{\top}(x)]
 	\end{equation*}
 	为$\{p_{\theta}:\theta\in\Theta\}$的\gls{FIM}，$n=1$时称$I(\theta)$为$\{p_{\theta}:\theta\in\Theta\}$的\textbf{Fisher信息量}。类似定义随机变量概率函数族的Fisher信息量。
 \end{definition}
@@ -361,9 +361,9 @@
 		\begin{equation*}
 			[I(\theta)]_{ij}=-\operatorname{E}_{\theta}\left[\frac{\partial^2\ln p_{\theta}(x)}{\partial\theta_i\partial\theta_j}\right]
 		\end{equation*}
-		\item Fisher信息量与参数选择有关，若$\theta=h(\xi)$且$h$具有所有一阶偏导数，则$I(\xi)=J_{\theta}^T(\xi)I(\theta)J_{\theta}(\xi)$，其中$J_{\theta}(\xi)$是$\theta$关于$\xi$的Jacobian矩阵；
+		\item Fisher信息量与参数选择有关，若$\theta=h(\xi)$且$h$具有所有一阶偏导数，则$I(\xi)=J_{\theta}^{\top}(\xi)I(\theta)J_{\theta}(\xi)$，其中$J_{\theta}(\xi)$是$\theta$关于$\xi$的Jacobian矩阵；
 		\item 设$\seq{X}{n}$相互独立，参数空间都是$\Theta$且联合概率函数族是Cramer-Rao正则族，$I_i(\theta)$是$X_i$的Fisher信息矩阵，则$(\seq{X}{n})$的Fisher信息矩阵为$\sum\limits_{i=1}^{n}I_i(\theta)$；
-		\item 若$\{p_{\theta}(x):\theta\in\Theta\}$是满秩指数族的概率函数族，$T(x)$的每一个分量都在$L_2(X)$中，令$\theta=\operatorname{E}_{\eta}(T)$，则$I(\eta)=\operatorname{Cov}_{\eta}(T),\;I(\theta)=[\operatorname{Cov}_{\eta}^T(T)]^{-1}$；
+		\item 若$\{p_{\theta}(x):\theta\in\Theta\}$是满秩指数族的概率函数族，$T(x)$的每一个分量都在$L_2(X)$中，令$\theta=\operatorname{E}_{\eta}(T)$，则$I(\eta)=\operatorname{Cov}_{\eta}(T),\;I(\theta)=[\operatorname{Cov}_{\eta}^{\top}(T)]^{-1}$；
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -386,36 +386,36 @@
 	\begin{align*}
 		[i(\xi)]_{ij}&=\operatorname{E}_{\xi}\left[\frac{\partial\ln p_{\theta}(x)}{\partial\xi_i}\cdot\frac{\partial\ln p_{\theta}(x)}{\partial\xi_j}\right] \\
 		&=\operatorname{E}_{\xi}\left\{\left[\sum_{k=1}^n\frac{\partial\ln p_{\theta}(x)}{\partial\theta_k}\cdot\frac{\partial\theta_k}{\partial\xi_i}\right]\cdot\left[\sum_{l=1}^n\frac{\partial\ln p_{\theta}(x)}{\partial\theta_l}\cdot\frac{\partial\theta_l}{\partial\xi_j}\right]\right\} \\
-		&=\operatorname{E}_{\xi}\left[\left(\frac{\partial\theta}{\partial\xi_i}\right)^TS_{\theta}(x)S_{\theta}^T(x)\left(\frac{\partial\theta}{\partial\xi_j}\right)\right]
+		&=\operatorname{E}_{\xi}\left[\left(\frac{\partial\theta}{\partial\xi_i}\right)^{\top}S_{\theta}(x)S_{\theta}^{\top}(x)\left(\frac{\partial\theta}{\partial\xi_j}\right)\right]
 	\end{align*}
 	于是结论成立。\par
 	(4)设$X_i$在参数$\theta\in\Theta$下的概率函数为$p_{\theta,i}(x_i)$，由\info{独立密度乘积}和\cref{prop:MeasurableIntegral}(5)可得：
 	\begin{align*}
 		I(\theta)_{ij}&=\operatorname{E}_{\theta}\left\{\frac{\partial}{\partial\theta_i}\ln\left[\prod_{k=1}^{n}p_{\theta,k}(x_k)\right]\cdot\frac{\partial}{\partial\theta_j}\ln\left[\prod_{l=1}^{n}p_{\theta,l}(x_l)\right]\right\} \\
 		&=\operatorname{E}_{\theta}\left\{\left[\sum_{k=1}^{n}\frac{\partial\ln p_{\theta,k}(x_k)}{\partial\theta_i}\right]\cdot\left[\sum_{l=1}^{n}\frac{\partial\ln p_{\theta,l}(x_l)}{\partial\theta_j}\right]\right\} \\
-		&=\sum_{k=1}^{n}\sum_{l=1}^{n}\operatorname{E}_{\theta}[S_{\theta,k}(x_k)S_{\theta,l}^T(x_l)]
+		&=\sum_{k=1}^{n}\sum_{l=1}^{n}\operatorname{E}_{\theta}[S_{\theta,k}(x_k)S_{\theta,l}^{\top}(x_l)]
 	\end{align*}
 	当$k\ne l$时，由\info{独立性条件，需要再检查}和正则条件可知：
 	\begin{align*}
-		&\{\operatorname{E}_{\theta}[S_{\theta,k}(x_k)S_{\theta,l}^T(x_l)]\}_{p,q}=\operatorname{E}_{\theta}\left[\frac{\partial\ln p_{\theta,k}(x_k)}{\partial\theta_p}\cdot\frac{\partial\ln p_{\theta,l}(x_l)}{\partial\theta_q}\right] \\
+		&\{\operatorname{E}_{\theta}[S_{\theta,k}(x_k)S_{\theta,l}^{\top}(x_l)]\}_{p,q}=\operatorname{E}_{\theta}\left[\frac{\partial\ln p_{\theta,k}(x_k)}{\partial\theta_p}\cdot\frac{\partial\ln p_{\theta,l}(x_l)}{\partial\theta_q}\right] \\
 		=&\operatorname{E}_{\theta}\left[\frac{\partial\ln p_{\theta,k}(x_k)}{\partial\theta_p}\right]\cdot\operatorname{E}_{\theta}\left[\frac{\partial\ln p_{\theta,l}(x_l)}{\partial\theta_q}\right]=0
 	\end{align*}
 	所以：
 	\begin{equation*}
-		I(\theta)_{ij}=\sum_{k=1}^{n}\sum_{l=1}^{n}\operatorname{E}_{\theta}[S_{\theta,k}(x_k)S_{\theta,k}^T(x_k)]
+		I(\theta)_{ij}=\sum_{k=1}^{n}\sum_{l=1}^{n}\operatorname{E}_{\theta}[S_{\theta,k}(x_k)S_{\theta,k}^{\top}(x_k)]
 	\end{equation*}
 	即$I(\theta)=\sum\limits_{i=1}^{n}I_i(\theta)$。\par
 	(5)为了书写方便，下面的积分展开式都是多维的情况。因为：
 	\begin{gather*}
-		\ln p_{\eta}(x)=\ln\left\{\exp\left[\eta^TT(x)-\xi(\eta)\right]h(x)\right\}=\eta^TT(x)-\xi(\eta)+\ln h(x) \\
+		\ln p_{\eta}(x)=\ln\left\{\exp\left[\eta^{\top}T(x)-\xi(\eta)\right]h(x)\right\}=\eta^{\top}T(x)-\xi(\eta)+\ln h(x) \\
 		\frac{\partial\ln p_{\eta}(x)}{\partial\eta}=T(x)-\frac{\partial\xi(\eta)}{\partial\eta}
 	\end{gather*}
 	由\cref{prop:ExponentialFamily}(2)、\cref{prop:FrechetDifferential}(5)、\cref{prop:ExponentialFamily}(5)和\cref{prop:MeasurableIntegral}(5)可知：
 	\begin{align*}
-		&\frac{\partial\xi(\eta)}{\partial\eta}=\frac{\partial}{\partial\eta}\ln\left\{\int_{X}\exp\left[\eta^TT(x)\right]h(x)\dif\mu\right\} \\
-		=&\frac{1}{\int_{X}\exp\left[\eta^TT(x)\right]h(x)\dif\mu}\int_{X}\frac{\partial}{\partial\eta}\exp\left[\eta^TT(x)\right]h(x)\dif\mu \\
-		=&\frac{\int_{X}T(x)\exp\left[\eta^TT(x)\right]h(x)\dif\mu}{\int_{X}\exp\left[\eta^TT(x)\right]h(x)\dif\mu} \\
-		=&\frac{\int_{X}T(x)C(\eta)\exp\left[\eta^TT(x)\right]h(x)\dif\mu}{\int_{X}C(\eta)\exp\left[\eta^TT(x)\right]h(x)\dif\mu}=\operatorname{E}_{\eta}(T)
+		&\frac{\partial\xi(\eta)}{\partial\eta}=\frac{\partial}{\partial\eta}\ln\left\{\int_{X}\exp\left[\eta^{\top}T(x)\right]h(x)\dif\mu\right\} \\
+		=&\frac{1}{\int_{X}\exp\left[\eta^{\top}T(x)\right]h(x)\dif\mu}\int_{X}\frac{\partial}{\partial\eta}\exp\left[\eta^{\top}T(x)\right]h(x)\dif\mu \\
+		=&\frac{\int_{X}T(x)\exp\left[\eta^{\top}T(x)\right]h(x)\dif\mu}{\int_{X}\exp\left[\eta^{\top}T(x)\right]h(x)\dif\mu} \\
+		=&\frac{\int_{X}T(x)C(\eta)\exp\left[\eta^{\top}T(x)\right]h(x)\dif\mu}{\int_{X}C(\eta)\exp\left[\eta^{\top}T(x)\right]h(x)\dif\mu}=\operatorname{E}_{\eta}(T)
 	\end{align*}
 	所以根据\cref{prop:MeasurableIntegral}(5)可得：
 	\begin{equation*}
@@ -427,13 +427,13 @@
 	\end{equation*}\par
 	因为$T$是统计量，所以根据\cref{prop:ExponentialFamily}(5)、\cref{prop:MeasurableIntegral}(5)和\cref{prop:CovMat}(6)可得：
 	\begin{align*}
-		&J_{\theta}(\eta)=\frac{\partial\theta}{\partial\eta^T}=\frac{\partial}{\partial\eta^T}\operatorname{E}_{\eta}(T)=\int_{X}\frac{\partial}{\partial\eta^T}\left\{T(x)\exp\left[\eta^TT(x)-\xi(\eta)\right]h(x)\right\}\dif\mu \\
-		=&\int_{X}T(x)\left\{T^T(x)-\left[\frac{\partial\xi(\eta)}{\partial\eta}\right]^T\right\}\exp\left[\eta^TT(x)-\xi(\eta)\right]h(x)\dif\mu \\
-		=&\operatorname{E}_{\eta}(TT^T)-\operatorname{E}_{\eta}(T)[\operatorname{E}_{\eta}(T)]^T=\operatorname{Cov}_{\eta}(T)
+		&J_{\theta}(\eta)=\frac{\partial\theta}{\partial\eta^{\top}}=\frac{\partial}{\partial\eta^{\top}}\operatorname{E}_{\eta}(T)=\int_{X}\frac{\partial}{\partial\eta^{\top}}\left\{T(x)\exp\left[\eta^{\top}T(x)-\xi(\eta)\right]h(x)\right\}\dif\mu \\
+		=&\int_{X}T(x)\left\{T^{\top}(x)-\left[\frac{\partial\xi(\eta)}{\partial\eta}\right]^{\top}\right\}\exp\left[\eta^{\top}T(x)-\xi(\eta)\right]h(x)\dif\mu \\
+		=&\operatorname{E}_{\eta}(TT^{\top})-\operatorname{E}_{\eta}(T)[\operatorname{E}_{\eta}(T)]^{\top}=\operatorname{Cov}_{\eta}(T)
 	\end{align*}
 	由(3)可知：
 	\begin{equation*}
-		I(\eta)=J_{\theta}^T(\eta)I(\theta)J_{\theta}^T(\eta)=\operatorname{Cov}_{\eta}^T(T)I(\theta)\operatorname{Cov}_{\eta}(T)
+		I(\eta)=J_{\theta}^{\top}(\eta)I(\theta)J_{\theta}^{\top}(\eta)=\operatorname{Cov}_{\eta}^{\top}(T)I(\theta)\operatorname{Cov}_{\eta}(T)
 	\end{equation*}
 	因为指数族满秩，由\cref{prop:ExponentialFamily}(6)可知$T(x)$分量之间不满足任何线性约束，即$T(x)$的分量线性无关，所以$\operatorname{Cov}_{\eta}(T)$可逆\info{需要严格证明}，根据\cref{prop:InvertibleMatrix}(12)即可得出结论。
 \end{proof}
@@ -491,13 +491,13 @@
 	\end{equation*}
 	则有：
 	\begin{equation*}
-		\operatorname{Var}_{\theta}[\delta(\mathbf{X})]\geqslant\left[\frac{\partial\operatorname{E}_{\theta}(\delta)}{\partial\theta}\right]^T[I(\theta)]^{-1}\left[\frac{\partial\operatorname{E}_{\theta}(\delta)}{\partial\theta}\right]
+		\operatorname{Var}_{\theta}[\delta(\mathbf{X})]\geqslant\left[\frac{\partial\operatorname{E}_{\theta}(\delta)}{\partial\theta}\right]^{\top}[I(\theta)]^{-1}\left[\frac{\partial\operatorname{E}_{\theta}(\delta)}{\partial\theta}\right]
 	\end{equation*}
 \end{theorem}
 \begin{proof}
 	对任意$n$维实向量$\alpha$，由正则条件和\cref{ineq:cauchy-schiwarz-expectations}可得：
 	\begin{equation*}
-		\operatorname{Var}_{\theta}(\delta)\geqslant\frac{\operatorname{Cov}_{\theta}^2[\delta,\alpha^TS_{\theta}(x)]}{\operatorname{Var}_{\theta}[\alpha^TS_{\theta}(x)]}
+		\operatorname{Var}_{\theta}(\delta)\geqslant\frac{\operatorname{Cov}_{\theta}^2[\delta,\alpha^{\top}S_{\theta}(x)]}{\operatorname{Var}_{\theta}[\alpha^{\top}S_{\theta}(x)]}
 	\end{equation*}
 	令：
 	\begin{equation*}
@@ -505,7 +505,7 @@
 	\end{equation*}
 	由最值的不等式性和\info{注意这个代数不等式}可得：
 	\begin{equation*}
-		\operatorname{Var}_{\theta}(\delta)\geqslant\max_{\alpha}\frac{\operatorname{Cov}_{\theta}^2[\delta,\alpha^TS_{\theta}(x)]}{\operatorname{Var}_{\theta}[\alpha^TS_{\theta}(x)]}=\max_{\alpha}\frac{\alpha^T\gamma\gamma^T\alpha}{\alpha^TI(\theta)\alpha}=\gamma^T[I(\theta)]^{-1}\gamma
+		\operatorname{Var}_{\theta}(\delta)\geqslant\max_{\alpha}\frac{\operatorname{Cov}_{\theta}^2[\delta,\alpha^{\top}S_{\theta}(x)]}{\operatorname{Var}_{\theta}[\alpha^{\top}S_{\theta}(x)]}=\max_{\alpha}\frac{\alpha^{\top}\gamma\gamma^{\top}\alpha}{\alpha^{\top}I(\theta)\alpha}=\gamma^{\top}[I(\theta)]^{-1}\gamma
 	\end{equation*}
 	根据\cref{prop:MeasurableIntegral}(5)和条件可得：
 	\begin{align*}
