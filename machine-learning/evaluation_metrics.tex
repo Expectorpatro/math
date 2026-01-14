@@ -1,0 +1,124 @@
+\section{模型评价指标}
+
+\subsection{分类任务}
+
+设真实标签 $y\in\{1,\dots,r\}$，模型预测为 $\hat{y}\in\{1,\dots,r\}$，对二分类问题可记正类为$1$，负类为$0$。
+\begin{definition}
+	\gls{ConfusionMatrix}按真实标签与预测标签的组合统计样本个数，其每个元素含义如下：
+	\begin{itemize}
+		\item \gls{TP}：真实为正类且预测为正类的样本数；
+		\item \gls{TN}：真实为负类且预测为负类的样本数；
+		\item \gls{FP}：真实为负类但预测为正类的样本数；
+		\item \gls{FN}：真实为正类但预测为负类的样本数。
+	\end{itemize}
+\end{definition}
+\begin{definition}
+  \gls{Accuracy}度量模型预测正确的比例：
+  \begin{equation*}
+    \operatorname{Accuracy}=\frac{\operatorname{TP}+\operatorname{TN}}{\operatorname{TP}+\operatorname{TN}+\operatorname{FP}+\operatorname{FN}}.
+  \end{equation*}
+\end{definition}
+\begin{definition}
+  \gls{Precision}度量被预测为正类的样本中有多少是真正的正类：
+  \begin{equation*}
+    \operatorname{Precision}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FP}}.
+  \end{equation*}
+\end{definition}
+\begin{note}
+  精确率关心正类预测结果的\emph{准确性}，在系统对错误正类具有高成本的任务（如垃圾邮件过滤或癌症筛查）中尤为重要。较高的精确率意味着模型产生的误报较少。
+\end{note}
+\begin{definition}
+  \gls{Recall}又称\gls{Sensitivity}，衡量真实正类中有多少被模型成功识别，定义为：
+  \begin{equation*}
+    \operatorname{Recall}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FN}}.
+  \end{equation*}
+\end{definition}
+\begin{note}
+  召回率关注对正类的漏判率，适用于需要尽可能检出正类的场景（如疾病筛查或欺诈检测）。高召回率意味着漏报较少，但可能伴随较多假阳性，需要结合精确率来进行分析。
+\end{note}
+\begin{definition}
+  \gls{F1Score}是精确率与召回率的调和平均，用于在二者之间取得平衡：
+  \begin{equation*}
+    \operatorname{F}1=2\times\frac{\operatorname{Precision}\times\operatorname{Recall}}{\operatorname{Precision}+\operatorname{Recall}}.
+  \end{equation*}
+\end{definition}
+\begin{note}
+  调和平均的性质使$\operatorname{F}1$得分对低值敏感——当精确率或召回率其中之一很低时，$\operatorname{F}1$会显著下降，因此它常用作综合评价指标，适用于精确率和召回率同等重要的情形。
+\end{note}
+许多分类器输出的是连续得分或概率，样本得分或概率大于某一阈值即判断该样本为正类。通过调整阈值可以得到不同的预测结果。因此，可以考察阈值变化下的性能曲线，并使用曲线下的面积作为评价指标。
+\begin{definition}
+	称：
+	 \begin{equation*}
+		\operatorname{TPR}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FN}},\quad
+		\operatorname{FPR}=\frac{\operatorname{FP}}{\operatorname{FP}+\operatorname{TN}}
+	\end{equation*}
+	分别为\gls{TPR}与\gls{FPR}。
+\end{definition}
+\begin{definition}
+  \gls{ROC}为在$[0,1]$内连续变化判别阈值$t$，对每个$t$计算对应的：
+	\begin{equation*}
+		\operatorname{TPR}(t)=\frac{\operatorname{TP}(t)}{\operatorname{TP}(t)+\operatorname{FN}(t)},\quad
+		\operatorname{FPR}(t)=	\frac{\operatorname{FP}(t)}{\operatorname{FP}(t)+\operatorname{TN}(t)}
+	\end{equation*}
+	然后以$\mathrm{FPR}(t)$为横轴、$\mathrm{TPR}(t)$为纵轴作图得到的曲线。\gls{AUROC}定义为ROC曲线与$\mathrm{FPR}(t)$轴和$\mathrm{FPR}(t)=1$围成区域的面积。
+\end{definition}
+\begin{note}
+  ROC曲线反映了阈值变化对$\operatorname{TPR}$与$\operatorname{FPR}$的权衡。$\operatorname{AUROC}$独立于具体阈值，是比较不同模型总体区分能力的常用指标，取值范围通常在$[0.5,1]$，$0.5$表示随机猜测（对任意的$t\in[0,1]$有$\operatorname{FPR}(t)=\operatorname{TPR}(t)$，模型判断正类为正类的概率和模型判断负类为正类的概率一致），$1$表示完美分类。
+  \begin{figure}[H]
+  	\centering
+  	\begin{tikzpicture}[scale=3]
+  		% 坐标轴
+  		\draw[->] (0,0) -- (1.05,0) node[right] {\scriptsize FPR};
+  		\draw[->] (0,0) -- (0,1.05) node[above] {\scriptsize TPR};
+  		% 随机分类器的对角线
+  		\draw[color=gray, dashed] (0,0) -- (1,1);
+  		% 绘制示意 ROC 曲线
+  		\draw[color=blue, thick] (0,0) .. controls (0.15,0.5) and (0.3,0.75) .. (1,1);
+  		% 填充面积
+  		\path[blue!20] (0,0) -- (0.15,0.5) .. controls (0.15,0.5) and (0.3,0.75) .. (1,1) -- (1,0) -- cycle;
+  	\end{tikzpicture}
+  	\caption{ROC曲线示意}
+  \end{figure}
+\end{note}
+\begin{definition}
+  \gls{PRC}为在$[0,1]$内连续变化判别阈值$t$（$t$从$1$取向$0$），对每个$t$计算对应的$\operatorname{Precision}(t)$和$\operatorname{Recall}(t)$，然后以$\mathrm{Precision}(t)$为横轴、$\mathrm{Recall}(t)$为纵轴作图得到的曲线。\gls{AUPRC}定义为PRC与$\operatorname{Recall}(t)$轴和$\operatorname{Precision}(t)$轴围成区域的面积。
+\end{definition}
+\begin{note}
+  相比$\operatorname{AUROC}$，$\operatorname{AUPRC}$更关注正类的表现，因而在正负样本严重不平衡时更加敏感。较高的$\operatorname{AUPRC}$表明模型性能较好。
+  \begin{figure}[H]
+  	\centering
+  	\begin{tikzpicture}[scale=3]
+  		% 坐标轴
+  		\draw[->] (0,0) -- (1.05,0) node[right] {\scriptsize Recall};
+  		\draw[->] (0,0) -- (0,1.05) node[above] {\scriptsize Precision};
+  		% 绘制示意 PR 曲线
+  		\draw[color=blue, thick] (0,1) .. controls (0.3,0.9) and (0.6,0.6) .. (1,0.2);
+  		% 填充面积
+  		\path[blue!20] (0,1) .. controls (0.3,0.9) and (0.6,0.6) .. (1,0.2) -- (1,0) -- (0,0) -- cycle;
+  	\end{tikzpicture}
+  	\caption{PR曲线示意}
+  \end{figure}
+\end{note}
+
+\subsection{回归任务}
+设真实值为$\{y_i\}_{i=1}^{n}$，预测值为$\{\hat{y}i\}_{i=1}^{n}$。
+\begin{definition}
+  称：
+  \begin{equation*}
+    \operatorname{MAE}=\frac{1}{n}\sum_{i=1}^n|y_i-\hat{y}_i|
+  \end{equation*}
+  为\gls{MAE}。
+\end{definition}
+\begin{note}
+  MAE计算预测误差的绝对值并取平均，因而对所有误差赋予相同的线性权重。它具有易于解释、与原数据同量纲等优点，并对单个异常值不敏感。
+\end{note}
+\begin{definition}
+  称：
+  \begin{equation*}
+    \operatorname{MAPE}=\frac{1}{n}\sum_{i=1}^n\left|\frac{y_i-\hat{y}_i}{y_i}\right|
+  \end{equation*}
+  为\gls{MAPE}。
+\end{definition}
+\begin{note}
+  MAPE 将误差按照真实值比例归一化，适合对预测误差的相对大小进行衡量。需要注意的是，当$y_i$接近0时，MAPE会显著放大误差。
+\end{note}

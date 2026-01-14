@@ -42,7 +42,7 @@
 \begin{definition}
 	设迭代过程$x_{n+1}=Tx_n$收敛于$T$的不动点$x^{\star}$。令$\varepsilon_n=x_n-x^{\star}$，若有：
 	\begin{equation*}
-		\lim_{n\to+\infty}\frac{\varepsilon_{n+1}}{\varepsilon_n^p}=C\in\mathbb{R}^{}\backslash\{0\}
+		\lim_{n\to+\infty}\frac{\varepsilon_{n+1}}{\varepsilon_n^p}=C\in\mathbb{R}^{}\setminus\{0\}
 	\end{equation*}
 	则称该迭代过程是$p$阶收敛的。特别的，$p=1$且$|C|<1$时称为\gls{LinearConvergence}，$p>1$时称为\gls{SuperlinearConvergence}。
 \end{definition}
@@ -209,3 +209,142 @@ x_{n+1}=\tfrac12\!\left(x_n+\frac{a}{x_n}\right),\qquad n=0,1,2,\dots
 	\]
 	相对误差由 \(O(\epsilon)\) 降为 \(O(\epsilon^2)\)。
 \end{corollary}
+
+\section{插值法}
+\begin{definition}
+	设函数$f$在$[a,b]$上有定义，且已知在点$a\leqslant x_0<x_1<\cdots<x_n\leqslant b$上的值$y_0,y_1,\dots,y_n$。若存在一个简单函数$P(x)$使得：
+	\begin{equation*}
+		P(x_i)=y_i,\quad i=0,1,\dots,n
+	\end{equation*}
+	则称$P$为$f$的\gls{InterpolatingFunction}，点$x_0,x_1,\dots,x_n$被称为\gls{InterpolationNodes}，$[a,b]$为\gls{InterpolationInterval}，求插值函数$P$的方法称为\gls{InterpolationMethod}。若$P$是不超过$n$次的多项式，即：
+	\begin{equation*}
+		P(x)=\sum_{i=0}^{n}a_ix^i,\quad a_i\in\mathbb{R}^{},\;i=0,2,\dots,n
+	\end{equation*}
+	则称$P$为\gls{InterpolationPolynomial}，对应的插值法被称为\gls{PolynomialInterpolation}。若$P$是分段的多项式，则称对应的插值法为\gls{piecewise interpolation}。
+\end{definition}
+\begin{theorem}\label{theo:ExistenceUniquenessInterpolationPolynomial}
+	设函数$f$在$[a,b]$上有定义，且已知在点$a\leqslant x_0<x_1<\cdots<x_n\leqslant b$上的值$y_0,y_1,\dots,y_n$。$f$在$[a,b]$上次数不超过$n$的插值多项式存在且唯一。
+\end{theorem}
+\begin{proof}
+	设$P(x)=\sum\limits_{i=0}^{n}a_ix^i$，则由条件可得到：
+	\begin{equation*}
+		\begin{pmatrix}
+			1 & x_0 & x_0^2 & \cdots & x_0^n \\
+			1 & x_1 & x_1^2 & \cdots & x_1^n \\
+			\vdots & \vdots & \vdots & \ddots & \vdots \\
+			1 & x_n & x_n^2 & \cdots & x_n^n
+		\end{pmatrix}
+		\begin{pmatrix}
+			a_0 \\
+			a_1 \\ 
+			\vdots \\ 
+			a_n
+		\end{pmatrix}
+		=
+		\begin{pmatrix}
+			y_0 \\ 
+			y_1 \\ 
+			\vdots \\ 
+			y_n
+		\end{pmatrix}
+	\end{equation*}
+	根据\cref{prop:Determinant}(13)、\cref{prop:Rank}(1)和\cref{theo:SolutionOfSLE2}(2)可知上述线性方程组的解存在且唯一，即$f$在$[a,b]$上次数不超过$n$的插值多项式存在且唯一。
+\end{proof}
+\begin{definition}
+	若$n$次多项式$l_i(x),\;i=0,1,\dots,n$在$n+1$个节点$x_0<x_1<\cdots<x_n$上满足：
+	\begin{equation*}
+		l_i(x_j)=
+		\begin{cases}
+			1,& i=j \\
+			0,& i\ne j
+		\end{cases},\quad
+		i,j=0,1,\dots,n
+	\end{equation*}
+	则称$l_0(x),l_1(x),\dots,l_n(x)$为节点$x_0,x_1,\dots,x_n$上的$n$次\gls{InterpolationBasisFunctions}。
+\end{definition}
+\begin{definition}
+	设函数$f$在$[a,b]$上有定义，且已知在点$a\leqslant x_0<x_1<\cdots<x_n\leqslant b$上的值$y_0,y_1,\dots,y_n$。定义：
+	\begin{equation*}
+		l_i(x)=\frac{(x-x_0)(x-x_1)\dots(x-x_{i-1})(x-x_{i+1})\dots(x-x_n)}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)},\quad i=0,1,\dots,n
+	\end{equation*}
+	称：
+	\begin{equation*}
+		L_n(x)\coloneq\sum_{i=0}^{n}y_il_i(x)
+	\end{equation*}
+	为\gls{LagrangeInterpolationPolynomial}。
+\end{definition}
+\begin{property}\label{prop:LagrangeInterpolationPolynomial}
+	设函数$f$在$[a,b]$上有定义，且已知在点$a\leqslant x_0<x_1<\cdots<x_n\leqslant b$上的值$y_0,y_1,\dots,y_n$，$f^{(n)}$在$[a,b]$上连续，$f^{(n+1)}$在$(a,b)$上存在，$L_n$为$f$在节点$x_0,x_1,\dots,x_n$上的Lagrange插值多项式。$L_n$具有如下性质：
+	\begin{enumerate}
+		\item $\sum\limits_{i=0}^{n}l_i(x)=1$；
+		\item 记$w_{n+1}(x)=(x-x_0)(x-x_1)\cdots(x-x_n)$，则：
+		\begin{equation*}
+			L_n(x)=\sum_{i=0}^{n}y_i\frac{w_{n+1}(x)}{(x-x_i)w_{n+1}'(x_i)}
+		\end{equation*}
+		\item $L_n$有如下形式：
+		\begin{equation*}
+			L_n(x)=\frac{\sum\limits_{i=0}^{n}y_i\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}{\sum\limits_{i=0}^{n}\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}
+		\end{equation*}
+		\item 对于任意的$x\in[a,b]$，有误差估计：
+		\begin{equation*}
+			f(x)-L_n(x)=\frac{f^{(n+1)}(\xi)}{(n+1)!}w_{n+1}(x)
+		\end{equation*}
+		其中$\xi\in(a,b)$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)设$f$在$[a,b]$上恒等于$1$，由\info{$n$次多项式在复数域上最多有$n$个零点}即可得出结论。\par
+	(2)由\info{乘积的微分}可知：
+	\begin{equation*}
+		w_{n+1}'(x_i)=(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		l_i(x)=\frac{w_{n+1}(x)}{(x-x_i)w_{n+1}'(x_i)}
+	\end{equation*}\par
+	(3)由(1)(2)可得：
+	\begin{equation*}
+		1=\sum_{i=0}^{n}l_i(x)=\sum_{i=0}^{n}\frac{w_{n+1}(x)}{(x-x_i)w_{n+1}'(x_i)}=w_{n+1}(x)\sum_{i=0}^{n}\frac{1}{(x-x_i)w_{n+1}'(x_i)}
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		w_{n+1}(x)=\frac{1}{\sum\limits_{i=0}^{n}\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}
+	\end{equation*}
+	于是有：
+	\begin{align*}
+		L_n(x)&=\sum_{i=0}^{n}y_i\frac{w_{n+1}(x)}{(x-x_i)w_{n+1}'(x_i)}=w_{n+1}(x)\sum_{i=0}^{n}y_i\frac{1}{(x-x_i)w_{n+1}'(x_i)} \\
+		&=\frac{\sum\limits_{i=0}^{n}y_i\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}{\sum\limits_{i=0}^{n}\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}
+	\end{align*}\par
+	(4)由条件可设$f(x)-L_n(x)=K(x)w_{n+1}(x)$，其中$K(x)$是一个待定函数。作辅助函数：
+	\begin{equation*}
+		\varphi(t)=f(t)-L_n(t)-K(x)w_{n+1}(t)
+	\end{equation*}
+	由\cref{prop:FrechetDifferential}(4)可知$\varphi^{(n)}$在$[a,b]$上连续，$\varphi^{(n+1)}$在$(a,b)$上存在。因为$\varphi$在$x_0,x_1,\dots,x_n$和$x$处均为$0$，所以$\varphi$在$[a,b]$上有$n+2$个零点，根据\cref{theo:RolleTheorem}可知$\varphi'$在$\varphi$的两个零点间至少存在一个零点，所以$\varphi'$在$[a,b]$上至少存在$n+1$个零点。对$\varphi'$再使用\cref{theo:RolleTheorem}可知$\varphi''$在$[a,b]$上至少存在$n$个零点。依此类推可知$\varphi^{(n+1)}$在$(a,b)$上至少存在一个零点$\xi$，即：
+	\begin{equation*}
+		\varphi^{(n+1)}(\xi)=f^{(n+1)}(\xi)-K(x)(n+1)!=0
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		K(x)=\frac{f^P(n+1)(\xi)}{(n+1)!}
+	\end{equation*}
+	即：
+	\begin{equation*}
+		f(x)-L_n(x)=\frac{f^{(n+1)}(\xi)}{(n+1)!}w_{n+1}(x)\qedhere
+	\end{equation*}
+\end{proof}
+\begin{note}
+	\cref{prop:LagrangeInterpolationPolynomial}(3)中$L_n(x)$的形式又被称为\textbf{Barycentric形式}。该表示形式在数学上与拉格朗日插值多项式完全等价，但在数值计算中避免了高次多项式乘积的显式计算，即计算：
+	\begin{equation*}
+		w_{n+1}(x)=(x-x_0)(x-x_1)\cdots(x-x_n)
+	\end{equation*}
+	从而减少了由大数乘积和相消所引起的数值误差，具有显著更优的稳定性。基于上述原因，在实际数值计算中通常优先采用Barycentric形式来实现多项式插值。
+\end{note}
+\begin{minted}[linenos,breaklines]{python}
+    import numpy as np
+    from scipy.interpolate import BarycentricInterpolator
+    x_nodes = np.array([0.0,1.0,2.0,3.0])
+    y_nodes = np.array([1.0,2.0,0.0,5.0])
+    interp = BarycentricInterpolator(x_nodes,y_nodes)
+    print(interp(1.5))
+\end{minted}
+
