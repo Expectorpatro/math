@@ -23,7 +23,9 @@
 \begin{enumerate}
 	\item \textbf{内部指标（Internal Validation）}：只依赖数据与聚类标签（不需要真实标签）；
 	\item \textbf{外部指标（External Validation）}：需要真实标签。
-\end{enumerate}
+\end{enumerate}\par
+需要强调的是，外部评价指标的引入并不意味着聚类任务转化为监督学习问题。外部指标的核心作用在于：当研究者在特定数据集中事先掌握某种参考划分时，用以分析既有标签与数据内在结构之间的一致性关系。从而对聚类算法、距离度量或参数设置进行事后评估与比较。因此，外部指标并不参与聚类过程本身，也不作为聚类目标函数进行优化，而是作为一种方法学意义上的对照标准，为研究者理解聚类结果与现实语义之间的关系提供了一种量化参照，帮助研究者理解数据自身在多大程度上支持、修正或挑战已有的分类体系。\par
+当外部一致性较高时，说明在当前特征表示与距离度量下，数据的几何或统计结构能够较好地支持既定的类别划分；例如，在文本主题分析或基因表达数据中，若聚类结果与人工标注的主题类别或生物亚型高度一致，则可认为该标签在数据空间中具有较清晰的结构基础。相反，当外部一致性较低时，这并不必然意味着聚类算法失效，而可能揭示出标签本身的局限性：例如，在心理测量或社会科学调查中，理论上区分的若干类型可能在实际数据中呈现出连续分布或显著重叠；又如，在医学诊断中，同一疾病标签下的样本可能包含多个具有不同分子机制的亚群。此时，聚类结果与外部标签之间的不一致，反而为研究者提供了重新审视标签定义、发现潜在异质结构或子群划分的线索。\par
 设数据集$X=\{x_i\}_{i=1}^n,\ x_i\in\mathbb{R}^m$，聚类输出标签$y_i\in\{1,\dots,K\}$（或包含噪声$-1$），第$k$簇为$C_k=\{i:y_i=k\}$，簇大小$n_k=|C_k|$，簇中心和总体均值定义为：
 \begin{equation*}
 	\mu_k=\frac{1}{n_k}\sum_{i\in C_k}x_i,\quad
@@ -110,7 +112,7 @@
 		\begin{cases}
 			\dfrac{b_i-a_i}{\max\{a_i,b_i\}},&\max\{a_i,b_i\}\ne0 \\
 			0,&\max\{a_i,b_i\}=0
-		\end{cases},\quad\operatorname{Silhouette}=\frac{1}{n}\sum_{i=1}^ns_i
+		\end{cases},\quad\operatorname{Silhouette}\coloneq\frac{1}{n}\sum_{i=1}^ns_i
 	\end{gather*}
 \end{definition}
 \begin{property}[轮廓系数的取值范围]\label{prop:Silhouette}
@@ -145,23 +147,17 @@
 	\end{itemize}
 	称：
 	\begin{equation*}
-		\operatorname{RI}=\frac{a+b}{\binom{n}{2}}\in[0,1]
+		\operatorname{RI}=\frac{a+b}{\binom{n}{2}}
 	\end{equation*}
 	为\gls{RI}，称：
 	\begin{equation*}
-		\operatorname{ARI}=\frac{\mathrm{RI}-\operatorname{E}(\operatorname{RI})}{1-\operatorname{E}(\operatorname{RI})}\in[-1,1]
+		\operatorname{ARI}=\frac{\operatorname{RI}-\operatorname{E}(\operatorname{RI})}{1-\operatorname{E}(\operatorname{RI})}
 	\end{equation*}
 	为\gls{ARI}。
 \end{definition}
-\begin{property}
-	
-\end{property}
-\begin{note}
-	$\operatorname{RI}$基于样本对一致性来评价聚类结果，$\operatorname{RI}$ 越大表示聚类划分与真实标签的一致性越强；若 $\operatorname{RI}$ 接近 $1$，说明聚类结果与真实划分高度一致；若接近 $0$，说明一致性极弱。\par
-	为了理解$\operatorname{RI}$的统计行为，需要引入\textbf{随机聚类模型}：在该模型中，真实类别个数与各簇规模均被视为固定，而聚类标签在所有满足给定簇规模约束的分配方式中等概率随机生成。该模型刻画了“聚类结果与真实标签在统计意义上相互独立”的基准情形。\par
-	在这一随机模型下，$\operatorname{RI}$往往具有非零且相对较大的期望值。其根本原因在于样本对中真实不同类的情形通常占据主导地位，而这类样本对在随机聚类中被分配到不同簇的概率本身较高。例如，设$n=100$，真实标签包含$10$个类别、每类$10$个样本，则共有$\binom{100}{2}=4950$个样本对，其中真实不同类的样本对数为$4500$。即使聚类结果完全随机，只要簇规模与真实类别规模相近，大多数真实异类样本对仍会落入不同簇，从而使得 $\operatorname{RI}$取得看似较好的数值。这表明$\operatorname{RI}$对随机一致性并不敏感。\par
-	在固定边际（列联表个数统计值）的随机聚类模型下，样本对计数的期望可以由组合概率精确计算。设：
-	\begin{table}[htbp]
+\begin{theorem}
+	在固定边际（列联表个数统计值）的情况下，设：
+	\begin{table}[H]
 		\centering
 		\caption{真实类别与聚类簇的列联表}
 		\begin{tabular}{c|cccc|c}
@@ -173,28 +169,365 @@
 			$C_K$ & $N_{K1}$ & $N_{K2}$ & $\cdots$ & $N_{Kr}$ & $n_K$ \\ \hline
 			合计 & $m_1$ & $m_2$ & $\cdots$ & $m_r$ & $n$ \\ \hline
 		\end{tabular}
-	\end{table}\par
+	\end{table}
 	其中$C_i$表示第$i$个聚类簇，$L_j$表示第$j$个真实类别，$N_{ij}=|C_i\cap L_j|$为同时属于簇$C_i$且属于类别$L_j$的样本个数，并满足行边际与列边际约束：
 	\begin{equation*}
 		\sum_{j=1}^rN_{ij}=n_i,\quad
 		\sum_{i=1}^KN_{ij}=m_j,\quad
 		\sum_{i=1}^K\sum_{j=1}^rN_{ij}=n
 	\end{equation*}
-	同类同簇样本对数$a$的期望为：
+	则：
 	\begin{equation*}
-		\operatorname{E}(a)=\operatorname{E}\left[\sum_{i=1}^{K}\sum_{j=1}^{r}\binom{N_{ij}}{2}\right]=\frac{\sum\limits_{i=1}^K\binom{n_i}{2}\sum\limits_{j=1}^r \binom{m_j}{2}}{\binom{n}{2}}
+		\operatorname{E}(\operatorname{RI})=1+\frac{2\sum\limits_{i=1}^{K}\binom{n_i}{2}\sum\limits_{j=1}^{r}\binom{m_j}{2}}{[\binom{n}{2}]^2}-\frac{\sum\limits_{i=1}^{K}\binom{n_i}{2}+\sum\limits_{j=1}^{r}\binom{m_j}{2}}{\binom{n}{2}}
 	\end{equation*}
-	由此可得 Rand 指数在随机聚类下的期望值
-	\[
-	\operatorname{E}(\operatorname{RI})
-	=\frac{\operatorname{E}(a)+\operatorname{E}(b)}{\binom{n}{2}},
-	\]
-	其中 $\operatorname{E}(b)$ 由边际约束唯一确定，通常导致 $\operatorname{E}(\operatorname{RI})$ 明显大于 $0$。
-	
+\end{theorem}
+\begin{proof}
+	由\cref{prop:MeasurableIntegral}(5)可知：
+	\begin{equation*}
+		\operatorname{E}(\operatorname{RI})=\frac{\operatorname{E}(a)+\operatorname{E}(b)}{\binom{n}{2}}
+	\end{equation*}\par
+	对于$\operatorname{E}(a)$，根据\cref{prop:MeasurableIntegral}(5)可得\info{写非参数列联表的时候把这边综合起来}：
+	\begin{equation*}
+		\operatorname{E}(a)=\operatorname{E}\left[\sum_{i=1}^{K}\sum_{j=1}^{r}\binom{N_{ij}}{2}\right]=\sum_{i=1}^{K}\sum_{j=1}^{r}\frac{1}{2}\operatorname{E}[N_{ij}(N_{ij}-1)]=\sum_{i=1}^{K}\sum_{j=1}^{r}\frac{1}{2}[\operatorname{E}(N_{ij}^2)-\operatorname{E}(N_{ij})]
+	\end{equation*}
+	而：
+	\begin{equation*}
+		N_{ij}\sim\operatorname{Hyper}(n_i,m_j,n),\quad\operatorname{E}(N_{ij})=\frac{n_im_j}{n},\quad\operatorname{Var}(N_{ij})=\frac{n_im_j(n-n_i)(n-m_j)}{n^2(n-1)}
+	\end{equation*}
+	由\cref{prop:Variance}(1)可知：
+	\begin{align*}
+		&\operatorname{E}(N_{ij}^2)=\operatorname{Var}(N_{ij})+[\operatorname{E}(N_{ij})]^2=\frac{n_im_j(n-n_i)(n-m_j)}{n^2(n-1)}+\frac{n_i^2m_j^2}{n^2} \\
+		=&\frac{n_im_j(n-n_i)(n-m_j)+n_i^2m_j^2(n-1)}{n^2(n-1)}=\frac{n_im_j[(n-n_i)(n-m_j)+n_im_j(n-1)]}{n^2(n-1)} \\
+		=&\frac{n_im_j(n^2-m_jn-n_in+n_im_j+n_im_jn-n_im_j)}{n^2(n-1)}=\frac{n_im_j(n^2-m_jn-n_in+n_im_jn)}{n^2(n-1)} \\
+		=&\frac{n_im_j(n-m_j-n_i+n_im_j)}{n(n-1)} 
+	\end{align*}
+	于是：
+	\begin{align*}
+		&\operatorname{E}(N_{ij}^2)-\operatorname{E}(N_{ij})=\frac{n_im_j(n-m_j-n_i+n_im_j)}{n(n-1)}-\frac{n_im_j}{n} \\
+		=&\frac{n_im_j(n-m_j-n_i+n_im_j)-(n-1)n_im_j}{n(n-1)}=\frac{n_im_j(1-m_j-n_i+n_im_j)}{n(n-1)} \\
+		=&\frac{n_i(n_i-1)m_j(m_j-1)}{n(n-1)}
+	\end{align*}
+	所以：
+	\begin{equation*}
+		\operatorname{E}(a)=\sum_{i=1}^{K}\sum_{j=1}^{r}\frac{1}{2}\frac{n_i(n_i-1)m_j(m_j-1)}{n(n-1)}=\sum_{i=1}^{K}\sum_{j=1}^{r}\frac{\binom{n_i}{2}\binom{m_j}{2}}{\binom{n}{2}}=\frac{\sum\limits_{i=1}^{K}\binom{n_i}{2}\sum\limits_{j=1}^{r}\binom{m_j}{2}}{\binom{n}{2}}
+	\end{equation*}\par
+	对于$\operatorname{E}(b)$，注意到同簇样本个数$A$与同类样本个数$B$分别为：
+	\begin{equation*}
+		A=\sum_{i=1}^{K}\binom{n_i}{2},\quad B=\sum_{j=1}^{r}\binom{m_j}{2}
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		b=\binom{n}{2}-a-(B-a)-(A-a)=\binom{n}{2}-A-B+a
+	\end{equation*}
+	根据\cref{prop:MeasurableIntegral}(5)可得：
+	\begin{equation*}
+		\operatorname{E}(b)=\binom{n}{2}-A-B+\operatorname{E}(a)
+	\end{equation*}
+	所以：
+	\begin{align*}
+		&\operatorname{E}(\operatorname{RI})=\frac{2\operatorname{E}(a)+\binom{n}{2}-A-B}{\binom{n}{2}}=\frac{2\operatorname{E}(a)}{\binom{n}{2}}+1-\frac{A+B}{\binom{n}{2}} \\
+		=&1+\frac{2\sum\limits_{i=1}^{K}\binom{n_i}{2}\sum\limits_{j=1}^{r}\binom{m_j}{2}}{[\binom{n}{2}]^2}-\frac{\sum\limits_{i=1}^{K}\binom{n_i}{2}+\sum\limits_{j=1}^{r}\binom{m_j}{2}}{\binom{n}{2}}\qedhere
+	\end{align*}
+\end{proof}
+\begin{property}
+	$\operatorname{RI}\in[0,1],\;\operatorname{ARI}\leqslant1$。
+\end{property}
+\begin{proof}
+	$\operatorname{RI}\in[0,1]$是显然的。\par
+	若真实划分与聚类划分不是几乎必然完全一致，则随机生成的聚类结果不可能以概率$1$与真实标签完全一致，因此$\operatorname{E}(\operatorname{RI})<1$。\par
+	由$\operatorname{RI}\leqslant1$可知：
+	\begin{equation*}
+		\operatorname{RI}-\operatorname{E}(\operatorname{RI})\leqslant1-\operatorname{E}(\operatorname{RI})
+	\end{equation*}
+	由于$1-\operatorname{E}(\operatorname{RI})>0$，两边同除以$1-\operatorname{E}(\operatorname{RI})$可得：
+	\begin{equation*}
+		\operatorname{ARI}
+		=\frac{\operatorname{RI}-\operatorname{E}(\operatorname{RI})}{1-\operatorname{E}(\operatorname{RI})}\leqslant1\qedhere
+	\end{equation*}
+\end{proof}
+\begin{note}
+	$\operatorname{RI}$基于样本对一致性来评价聚类结果，$\operatorname{RI}$ 越大表示聚类划分与真实标签的一致性越强；若 $\operatorname{RI}$ 接近 $1$，说明聚类结果与真实划分高度一致；若接近 $0$，说明一致性极弱。\par
+	为了理解$\operatorname{RI}$的统计行为，需要引入\textbf{随机聚类模型}：在该模型中，真实类别个数与各簇规模均被视为固定，而聚类标签在所有满足给定簇规模约束的分配方式中等概率随机生成。该模型刻画了“聚类结果与真实标签在统计意义上相互独立”的基准情形。\par
+	在这一随机模型下，$\operatorname{RI}$往往具有非零且相对较大的期望值。其根本原因在于样本对中真实不同类的情形通常占据主导地位，而这类样本对在随机聚类中被分配到不同簇的概率本身较高。例如，设$n=100$，真实标签包含$10$个类别、每类$10$个样本，则共有$\binom{100}{2}=4950$个样本对，其中真实不同类的样本对数为$4500$。即使聚类结果完全随机，只要簇规模与真实类别规模相近，大多数真实异类样本对仍会落入不同簇，从而使得 $\operatorname{RI}$取得看似较好的数值。这表明$\operatorname{RI}$对随机一致性并不敏感。\par
 	$\operatorname{ARI}$正是基于上述随机模型对$\operatorname{RI}$进行期望校正，该校正保证了随机聚类的期望$\operatorname{ARI}$为$0$，完美一致时取值为$1$，并允许在一致性劣于随机时取负值。因此，$\operatorname{ARI}$相较于$\operatorname{RI}$提供了一个以随机一致性为基准的、更为稳健的外部聚类评价指标。
 \end{note}
-\paragraph{定义}
-用样本对计数：$TP=a$（同类同簇），$FP=d$（不同类同簇），$FN=c$（同类不同簇）：
+\begin{definition}
+	考虑所有样本对$(i,j)$，定义：
+	\begin{itemize}
+		\item $TP$：真实标签同类，且聚类结果同簇的样本对数；
+		\item $FP$：真实标签不同类，但聚类结果同簇的样本对数；
+		\item $FN$：真实标签同类，但聚类结果不同簇的样本对数。
+	\end{itemize}
+	称：
+	\begin{equation*}
+		\operatorname{FMI}
+		=\sqrt{
+			\frac{TP}{TP+FP}
+			\cdot
+			\frac{TP}{TP+FN}
+		}
+	\end{equation*}
+	为\gls{FMI}。
+\end{definition}
+\begin{property}\label{prop:FMI}
+	$\operatorname{FMI}\in[0,1]$。
+\end{property}
+\begin{proof}
+	由定义立即可得。
+\end{proof}
+\begin{note}
+	Fowlkes-Mallows指数从样本对一致性的角度同时兼顾了聚类结果的精确性与完整性。在真实标签给定的条件下，$\operatorname{FMI}$越大表示聚类结果与真实划分在样本对层面上的一致性越强；当聚类结果与真实标签完全一致时，$\operatorname{FMI}=1$；当不存在任何同类同簇的样本对时，$\operatorname{FMI}=0$。与$\operatorname{RI}$将异类异簇样本对也视为正确判断不同，$\operatorname{FMI}$仅关注真实同类样本是否被成功聚合，从而在类别数量较多或类别规模不平衡的情形下，往往比 RI 更为保守。
+\end{note}
+
+\subsection{K-means}
+\begin{algorithm}[H]
+	\caption{K-means Clustering (Lloyd's Algorithm)}
+	\label{alg:Kmeans}
+	\begin{algorithmic}[1]
+		\Require
+		Data points $X=\{x_n\}_{i=1}^{n}\subseteq\mathbb{R}^m$;
+		number of clusters $K$;
+		maximum number of iterations $T$;
+		tolerance $\varepsilon$
+		\Ensure
+		Cluster assignments $\{C_1,\dots,C_K\}$;
+		centroids $\{\mu_1,\dots,\mu_K\}$
+		
+		\State Select the first centroid $\mu_1$ uniformly at random from $X$
+		\Comment{Initialization step}
+		\For{$k=2$ to $K$}
+		\For{each data point $x_i \in \mathcal{X}$}
+		\State $D_i^2 \gets \min\limits_{1\leqslant j < k} \|x_i - \mu_j\|^2$
+		\EndFor
+		\State Select $\mu_k$ from $X$ with probability
+		\[
+		\mathbb{P}(x_i) = \frac{D_i^2}{\sum\limits_{j=1}^n D_j^2}
+		\]
+		\EndFor
+		
+		\For{$t=1$ to $T$}
+		\Comment{Assignment step}
+		\For{each data point $x_i\in X$}
+		\State $y_i \gets \arg\min\limits_{k=1,\dots,K} \|x_i-\mu_k\|^2$
+		\State Assign $x_i$ to cluster $C_{y_i}$
+		\EndFor
+		
+		\For{$k=1$ to $K$}
+		\Comment{Update step}
+		\State $\mu_k^{\text{new}} \gets \dfrac{1}{|C_k|}
+		\sum\limits_{x_i\in C_k} x_i$
+		\EndFor
+		
+		\If{$\max\limits_{k} \|\mu_k^{\text{new}}-\mu_k\| < \varepsilon$}
+		\State \textbf{break}
+		\EndIf
+		
+		\State $\mu_k \gets \mu_k^{\text{new}} \quad \forall\;k=1,\dots,K$
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
+\cref{alg:Kmeans}给出了经典的K-means聚类算法（亦称Lloyd算法）的完整流程。该算法的目标是在给定样本集合的情况下，将样本划分为$K$个互不相交的簇，使得簇内样本在欧氏距离意义下尽可能紧密。从优化角度看，K-means试图最小化如下的类内平方和目标函数：
 \begin{equation*}
-	\mathrm{FMI}=\sqrt{\frac{TP}{TP+FP}\cdot\frac{TP}{TP+FN}}\in[0,1]
+	\Phi(\{\mu_k\},\{C_k\})=\sum_{k=1}^K\sum_{x_i\in C_k}\|x_i-\mu_k\|^2
+\end{equation*}\par
+算法首先对簇中心进行初始化。为缓解随机初始化可能导致的收敛不稳定问题，采用了k-means++初始化策略。具体而言，第一个中心$\mu_1$从样本集合$X$中均匀随机选取。随后，在已经选定前$k-1$个中心的条件下，对每个样本 $x_i$ 计算其到最近已选中心的平方距离：
+\begin{equation*}
+	D_i^2=\min_{1\leqslant j < k}\|x_i-\mu_j\|^2
 \end{equation*}
+该距离刻画了样本$x_i$在当前中心集合下对整体目标函数$\Phi$的贡献大小。接下来，根据经验概率分布：
+\begin{equation*}
+	\mathbb{P}(x_i)=\frac{D_i^2}{\sum_{j=1}^nD_j^2}
+\end{equation*}
+从样本集中随机选择下一个中心$\mu_k$。该初始化策略倾向于优先选择远离已有中心的样本，从而使初始簇中心在空间中更加分散，为后续迭代提供更有利的起点。\par
+在给定当前簇中心$\{\mu_1,\dots,\mu_K\}$的条件下，算法对每一个样本$x_i$计算其到各个簇中心的欧氏距离平方，并将其分配到最近的簇：
+\begin{equation*}
+	y_i=\arg\min_{k=1,\dots,K} \|x_i-\mu_k\|^2
+\end{equation*}
+该步骤在固定簇中心的情况下，使目标函数$\Phi$关于簇划分$\{C_k\}$达到最小。\par
+在样本分配结果固定后，算法对每一个簇重新计算其中心：
+\begin{equation*}
+	\mu_k^{\text{new}}=\frac{1}{|C_k|}\sum_{x_i\in C_k}x_i
+\end{equation*}\par
+样本分配与中心更新两个步骤交替进行，最多执行$T$次迭代。当相邻两次迭代中所有簇中心的变化满足：
+\begin{equation*}
+	\max_k \|\mu_k^{\text{new}}-\mu_k\|<\varepsilon
+\end{equation*}
+时，算法提前终止并输出最终的聚类结果。\par
+由于每一次分配或更新步骤都会使目标函数$\Phi$的值非增，且$\Phi$在下界零处有界，因此K-means算法在有限步内必然收敛到某一局部最优解。然而，由于目标函数是非凸的\info{证明}，算法的最终结果依赖于初始中心的选取，这也是在实际应用中通常采用k-means++初始化而非完全随机初始化的原因。
+
+\subsection{凝聚型层次聚类}
+\begin{algorithm}[H]
+	\caption{Agglomerative Hierarchical Clustering}
+	\label{alg:AgglomerativeHierarchicalClustering}
+	\begin{algorithmic}[1]
+		\Require
+		Data points $X=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m$;
+		linkage criterion $L$;
+		distance metric $\rho(\cdot,\cdot)$;
+		target number of clusters $K$ \textbf{or} distance threshold $h_0$
+		\Ensure
+		Cluster assignments $\{C_1,\dots,C_{K}\}$;
+		merge history (dendrogram)
+		
+		\State Initialize clusters $C_i \gets \{x_i\}$ for $i=1,\dots,n$
+		\State Compute initial pairwise dissimilarities $D_L(C_p,C_q)$
+		
+		\While{stopping criterion not satisfied}
+		\State $(p,q)\gets \underset{p\neq q}{\arg\min}D_L(C_p,C_q)$
+		\If{$D_L(C_p,C_q) > h_0$}
+		\State \textbf{break}
+		\EndIf
+		\State Merge clusters $C_p$ and $C_q$ into $C_{\text{new}}$
+		\State Record merge height $D_L(C_p,C_q)$
+		\State Remove $C_p,C_q$ and add $C_{\text{new}}$
+		\State Update dissimilarities involving $C_{\text{new}}$
+		\If{number of clusters $= K$}
+		\State \textbf{break}
+		\EndIf
+		\EndWhile
+	\end{algorithmic}
+\end{algorithm}
+\cref{alg:AgglomerativeHierarchicalClustering}给出了\gls{AgglomerativeHierarchicalClustering}的基本流程。算法从最细粒度的划分开始，将每一个样本视为一个单独的簇。随后，在当前簇集合中，根据预先选定的簇间距离准则（linkage criterion），反复选择距离最近的两个簇并将其合并。该合并过程持续进行，直到簇的数量减少至预先指定的目标簇数$K$，或最小簇间距离大于给定值$h_0$。\par
+层次聚类的核心在于如何定义两个簇之间的距离。设$A,B\subseteq X$为两个簇，$\rho$ 为样本空间中的距离度量，则簇间距离$D_L(A,B)$由 linkage 准则给出。不同的 linkage 定义对应着不同的几何偏好与聚类行为。\par
+常见的 linkage 定义如下：
+\begin{enumerate}
+	\item \textbf{单链接（Single linkage）：}$D_{\text{single}}(A,B)=\min\limits_{x\in A,\,y\in B} \rho(x,y)$；
+	\item \textbf{全链接（Complete linkage）：}$D_{\text{complete}}(A,B)=\max\limits_{x\in A,\,y\in B} \rho(x,y)$；
+	\item \textbf{平均链接（Average linkage）：}$D_{\text{average}}(A,B)=\dfrac{1}{|A||B|}\sum\limits_{x\in A}\sum\limits_{y\in B}\rho(x,y)$；
+	\item \textbf{Ward 方法（Ward linkage）：}
+	Ward 方法并不直接基于样本对距离，而是选择使合并后类内平方和增量最小的两个簇：
+	\begin{equation*}
+		\Delta(A,B)=\operatorname{SSE}(A\cup B)-\operatorname{SSE}(A)-\operatorname{SSE}(B)
+	\end{equation*}
+\end{enumerate}
+
+\subsection{DBSCAN}
+\begin{algorithm}[H]
+	\caption{DBSCAN (Density-Based Spatial Clustering of Applications with Noise)}
+	\label{alg:DBSCAN}
+	\begin{algorithmic}[1]
+		\Require
+		Data points $X=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m$;
+		neighborhood radius $\varepsilon$;
+		minimum number of points $\operatorname{MinPts}$
+		\Ensure
+		Cluster assignments $\{C_1,\dots,C_K\}$;
+		noise set $\mathcal{N}$
+		
+		\State Mark all points as \textbf{unvisited}
+		\State $K \gets 0$, $\mathcal{N}\gets\varnothing$
+		
+		\For{each point $x_i\in X$}
+		\If{$x_i$ is visited}
+		\State \textbf{continue}
+		\EndIf
+		\State Mark $x_i$ as visited
+		\State $N_\varepsilon(x_i)\gets\{x_j\in X: \rho(x_j,x_i)\leqslant\varepsilon\}$
+		
+		\If{$|N_\varepsilon(x_i)|<\operatorname{MinPts}$}
+		\State Label $x_i$ as \textbf{noise}; $\mathcal{N}\gets \mathcal{N}\cup\{x_i\}$
+		\Else
+		\State $K\gets K+1$
+		\State Create new cluster $C_K$ and add $x_i$ to $C_K$
+		\State $S \gets N_\varepsilon(x_i)\setminus\{x_i\}$
+		
+		\While{$S\ne \varnothing$}
+		\State Select $x_p\in S$ and remove it from $S$
+		
+		\If{$x_p$ is not visited}
+		\State Mark $x_p$ as visited
+		\State $N_\varepsilon(x_p)\gets\{x_j\in X: \rho(x_j,x_p)\leqslant\varepsilon\}$
+		\If{$|N_\varepsilon(x_p)|\geqslant\operatorname{MinPts}$}
+		\State $S \gets S \cup [N_\varepsilon(x_p)\setminus\{x_p\}]$
+		\EndIf
+		\EndIf
+		
+		\If{$x_p$ is \textbf{unvisited} or \textbf{noise}}
+		\State Add $x_p$ to $C_K$; $\mathcal{N}\gets \mathcal{N}\setminus\{x_p\}$
+		\EndIf
+		\EndWhile
+		\EndIf
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
+\cref{alg:DBSCAN}给出了DBSCAN算法的完整流程。与基于中心的K-means不同，DBSCAN不依赖簇中心或簇数量的预先设定，而是通过样本在空间中的密度分布来刻画簇结构。\par
+给定半径参数$\varepsilon$与最小点数阈值$\operatorname{MinPts}$，定义点$x_i$的$\varepsilon$-邻域为：
+\begin{equation*}
+	N_\varepsilon(x_i)=\{x_j\in X:\|x_j-x_i\|\leqslant\varepsilon\}
+\end{equation*}
+若$|N_\varepsilon(x_i)|\leqslant\operatorname{MinPts}$，则称$x_i$为核心点；若点本身不是核心点，但位于某一核心点的$\varepsilon$-邻域内，则称其为边界点；其余点被视为噪声。\par
+DBSCAN从任一未访问样本出发，若其为核心点，则以该点为起始，通过密度可达关系不断扩张簇；若样本不是核心点，则将其标记为噪声或边界点。该扩张过程持续进行，直至当前簇无法继续增长。\par
+由于DBSCAN能够识别任意形状的簇并显式区分噪声点，其在处理非凸簇结构时具有显著优势。然而，算法对参数 $\varepsilon$ 与$\operatorname{MinPts}$较为敏感，且在高维空间中邻域查询的效率可能显著下降，这在一定程度上限制了其适用范围。
+
+\subsection{OPTICS}
+\begin{algorithm}[H]
+	\caption{OPTICS (Ordering Points To Identify the Clustering Structure)}
+	\label{alg:OPTICS}
+	\begin{algorithmic}[1]
+		\Require
+		Data points $X=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m$;
+		maximum neighborhood radius $\varepsilon_{\max}$;
+		minimum number of points $\operatorname{MinPts}$
+		\Ensure
+		Cluster ordering $\mathcal{O}$;
+		reachability distances $\{d_{\text{reach}}(x_i)\}$
+		
+		\State Mark all points as \textbf{unprocessed}
+		\State Initialize $d_{\text{reach}}(x_i)\gets +\infty$ for all $x_i$ and empty ordering list $\mathcal{O}$
+		
+		\For{each point $x_i\in X$}
+		\If{$x_i$ is processed}
+		\State \textbf{continue}
+		\EndIf
+		
+		\State Compute neighborhood $N_{\varepsilon_{\max}}(x_i)$
+		\State Mark $x_i$ as processed; Append $x_i$ to $\mathcal{O}$
+		
+		\If{$|N_{\varepsilon_{\max}}(x_i)|\geqslant \operatorname{MinPts}$}
+		\State Compute core distance
+		\[
+		d_{\text{core}}(x_i)
+		=\text{distance to the $\operatorname{MinPts}$-th nearest neighbor of }x_i
+		\]
+		
+		\State Initialize empty priority queue $S$
+		
+		\For{each unprocessed point $x_j\in N_{\varepsilon_{\max}}(x_i)$}
+		\State $d_{\text{new}}
+		\gets \max\{d_{\text{core}}(x_i),\,\rho(x_i,x_j)\}$
+		\State $d_{\text{reach}}(x_j)
+		\gets \min\{d_{\text{reach}}(x_j),\,d_{\text{new}}\}$
+		\State Insert or update $x_j$ in $S$ with key $d_{\text{reach}}(x_j)$
+		\EndFor
+		
+		\While{$S\ne \varnothing$}
+		\State Extract $x_p$ with smallest $d_{\text{reach}}(x_p)$ from $S$
+		\State Compute neighborhood $N_{\varepsilon_{\max}}(x_p)$
+		\State Mark $x_p$ as processed
+		\State Append $x_p$ to $\mathcal{O}$
+		
+		\If{$|N_{\varepsilon_{\max}}(x_p)|\geqslant \operatorname{MinPts}$}
+		\State Compute $d_{\text{core}}(x_p)$
+		\For{each unprocessed point $x_q\in N_{\varepsilon_{\max}}(x_p)$}
+		\State $d_{\text{new}}
+		\gets \max\{d_{\text{core}}(x_p),\,\rho(x_p,x_q)\}$
+		\State $d_{\text{reach}}(x_q)
+		\gets \min\{d_{\text{reach}}(x_q),\,d_{\text{new}}\}$
+		\State Insert or update $x_q$ in $S$ with key $d_{\text{reach}}(x_q)$
+		\EndFor
+		\EndIf
+		\EndWhile
+		\EndIf
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
+\cref{alg:OPTICS} 给出了OPTICS算法的完整流程。OPTICS属于基于密度的聚类方法，其基本密度可达性定义与 DBSCAN 保持一致，但其核心目标并非直接给出单一的聚类划分结果，而是通过对样本点进行有序遍历，显式刻画数据在不同密度尺度下的潜在聚类结构。\par
+在 OPTICS 中，引入\gls{CoreDistance}以刻画样本点局部密度水平。对于样本点$x_i$，其核心距离定义为：\par
+当点$x_i$的$\varepsilon_{\max}$-邻域中包含的样本数不少于$\operatorname{MinPts}$时，$x_i$被视为核心点，其核心距离反映了达到该局部密度所需的最小尺度；否则，该点被视为非核心点，其核心距离定义为无穷大。\par
+基于核心距离，OPTICS 进一步定义样本$x_j$相对于核心点$x_i$的\gls{ReachabilityDistance} 。可达距离刻画了在保持局部密度约束的前提下，从核心点$x_i$触及样$x_j$所需的最小距离尺度，是 OPTICS 构建样本排序的关键量。\par
+OPTICS 从任一未处理样本出发，若该样本为核心点，则利用可达距离对其邻域样本进行基于优先级队列的扩张，并不断选择当前可达距离最小的样本进行处理。通过该过程，算法在不固定单一密度阈值的情况下，生成一个包含所有样本的线性排序 $\mathcal{O}$，并为每个样本记录其对应的可达距离。\par
+最终得到的可达距离图通过按照排序顺序绘制样本的可达距离，以一维形式揭示数据在不同密度尺度下的结构特征。在该图中，连续的低可达距离区域通常对应于高密度簇，而不同密度簇之间则表现为明显的“高度跃迁”或“谷地边界”。通过在可达距离图上选择不同的高度阈值进行切割，可以在后处理阶段提取出对应于不同密度水平的聚类结果。\par
+
+从方法论角度看，DBSCAN 可被视为 OPTICS 在固定邻域半径 $\varepsilon$ 下的特例：当在可达距离图中选定单一阈值时，OPTICS 所得到的聚类结果与 DBSCAN 在相同参数设置下是等价的。相比之下，OPTICS 通过保留完整的密度排序信息，能够同时刻画多尺度密度结构，在不同密度簇共存的数据集中具有更强的表达能力。\par
+
+在计算复杂度方面，OPTICS 的主要开销来自于邻域查询与优先队列操作。在采用空间索引结构（如 $k$-d tree 或 ball tree）的情况下，其时间复杂度通常与 DBSCAN 相当；在最坏情况下，时间复杂度可达 $O(n^2)$。算法的空间复杂度主要由邻域信息与可达距离存储决定，通常为 $O(n)$ 至 $O(n^2)$，具体取决于实现方式与数据分布。
