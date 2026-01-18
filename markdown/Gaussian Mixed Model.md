@@ -16,28 +16,28 @@
 
 ## 符号说明
 
-| 符号                                                                                                      |                                                    | 解释                                   |
-| ------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------ |
-| $n$                                                                                                     |                                                    | 高斯分布的个数（总体聚类的类个数）                    |
-| $N$                                                                                                     |                                                    | 样本数                                  |
-| $x_i$                                                                                                   | $i=1,2,\dots,N$                                    | 第$i$个样本单元                            |
-| $z_i$                                                                                                   | $i=1,2,\dots,N$                                    | 第$i$个样本单元的隐变量                        |
-| $c_j$                                                                                                   | $j=1,2,\dots,n$                                    | $z_i$可能的取值                           |
-| $\pi_{ij}$                                                                                              | $i=1,2,\dots,N\\j=1,2,\dots,n$                     | $p(z_i=c_j)$                         |
-| $\pi_{ij}^{(t)}$                                                                                        | $i=1,2,\dots,N,\\j=1,2,\dots,n,\\t\in\mathbb{N}^+$ | 隐变量$z_i$在第$t$步时取值为$c_j$的先验概率         |
-| $\gamma_t(z_i=c_j)$                                                                                     | $i=1,2,\dots,N,\\j=1,2,\dots,n,\\t\in\mathbb{N}^+$ | 隐变量$z_i$在第$t$步时取值为$c_j$的后验概率         |
-| $\pi_i=(\pi_{i1},\pi_{i2},\dots,\pi_{in})$                                                              | $i=1,2,\dots,N$                                    | $z_i$的分布                             |
-| $\mu_j$                                                                                                 | $j=1,2,\dots,n$                                    | 第$j$个高斯分布的均值                         |
+| 符号                                                                                                    |                                                    | 解释                                              |
+| ------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------- |
+| $n$                                                                                                     |                                                    | 高斯分布的个数（总体聚类的类个数）                |
+| $N$                                                                                                     |                                                    | 样本数                                            |
+| $x_i$                                                                                                   | $i=1,2,\dots,N$                                    | 第$i$个样本单元                                   |
+| $z_i$                                                                                                   | $i=1,2,\dots,N$                                    | 第$i$个样本单元的隐变量                           |
+| $c_j$                                                                                                   | $j=1,2,\dots,n$                                    | $z_i$可能的取值                                   |
+| $\pi_{ij}$                                                                                              | $i=1,2,\dots,N\\j=1,2,\dots,n$                     | $p(z_i=c_j)$                                      |
+| $\pi_{ij}^{(t)}$                                                                                        | $i=1,2,\dots,N,\\j=1,2,\dots,n,\\t\in\mathbb{N}^+$ | 隐变量$z_i$在第$t$步时取值为$c_j$的先验概率       |
+| $\gamma_t(z_i=c_j)$                                                                                     | $i=1,2,\dots,N,\\j=1,2,\dots,n,\\t\in\mathbb{N}^+$ | 隐变量$z_i$在第$t$步时取值为$c_j$的后验概率       |
+| $\pi_i=(\pi_{i1},\pi_{i2},\dots,\pi_{in})$                                                              | $i=1,2,\dots,N$                                    | $z_i$的分布                                       |
+| $\mu_j$                                                                                                 | $j=1,2,\dots,n$                                    | 第$j$个高斯分布的均值                             |
 | $\mu_j^{(t)}$                                                                                           | $j=1,2,\dots,n\\t\in\mathbb{N}^+$                  | 第$t$步时，第$j$个高斯分布的均值                  |
-| $\mu=(\mu_1,\mu_2,\dots,\mu_n)$                                                                         |                                                    | 所有高斯分布的均值                            |
-| $\Sigma_j$                                                                                              | $j=1,2,\dots,n$                                    | 第$j$个高斯分布的协方差矩阵                      |
-| $\Sigma_j^{(t)}$                                                                                        | $j=1,2,\dots,n\\t\in\mathbb{N}^+$                  | 第$t$步时，第$j$个高斯分布的协方差矩阵               |
-| $\Sigma=(\Sigma_1,\Sigma_2,\dots,\Sigma_n)$                                                             |                                                    | 所有高斯分布的协方差矩阵                         |
-| $\mathbf{\theta_{i}}=(\mu_i,\;\Sigma_i)$                                                                | $i=1,2,\dots,n$                                    | 第$i$个高斯分布参数的值                        |
-| $\mathbf{\theta_{i}^{(t)}}=(\mu_i^{(t)},\;\Sigma_i^{(t)})$                                              | $i=1,2,\dots,n,\\t\in\mathbb{N}^+$                 | 第$t$步时，第$i$个高斯分布参数的值                 |
-| $\mathbf{\theta}=(\mathbf{\theta_1},\mathbf{\theta_2},\dots,\mathbf{\theta_n})$                         |                                                    | 所有高斯分布参数的值                           |
-| $\mathbf{\theta^{(t)}}=(\mathbf{\theta_1^{(t)}},\mathbf{\theta_2^{(t)}},\dots,\mathbf{\theta_n^{(t)}})$ |                                                    | 第$t$步时，所有高斯分布参数的值                    |
-| $l(\mathbf{\theta})$                                                                                    |                                                    | 似然函数的下界函数                            |
+| $\mu=(\mu_1,\mu_2,\dots,\mu_n)$                                                                         |                                                    | 所有高斯分布的均值                                |
+| $\Sigma_j$                                                                                              | $j=1,2,\dots,n$                                    | 第$j$个高斯分布的协方差矩阵                       |
+| $\Sigma_j^{(t)}$                                                                                        | $j=1,2,\dots,n\\t\in\mathbb{N}^+$                  | 第$t$步时，第$j$个高斯分布的协方差矩阵            |
+| $\Sigma=(\Sigma_1,\Sigma_2,\dots,\Sigma_n)$                                                             |                                                    | 所有高斯分布的协方差矩阵                          |
+| $\mathbf{\theta_{i}}=(\mu_i,\;\Sigma_i)$                                                                | $i=1,2,\dots,n$                                    | 第$i$个高斯分布参数的值                           |
+| $\mathbf{\theta_{i}^{(t)}}=(\mu_i^{(t)},\;\Sigma_i^{(t)})$                                              | $i=1,2,\dots,n,\\t\in\mathbb{N}^+$                 | 第$t$步时，第$i$个高斯分布参数的值                |
+| $\mathbf{\theta}=(\mathbf{\theta_1},\mathbf{\theta_2},\dots,\mathbf{\theta_n})$                         |                                                    | 所有高斯分布参数的值                              |
+| $\mathbf{\theta^{(t)}}=(\mathbf{\theta_1^{(t)}},\mathbf{\theta_2^{(t)}},\dots,\mathbf{\theta_n^{(t)}})$ |                                                    | 第$t$步时，所有高斯分布参数的值                   |
+| $l(\mathbf{\theta})$                                                                                    |                                                    | 似然函数的下界函数                                |
 | $l_t(\mathbf{\theta})$                                                                                  |                                                    | 似然函数的下界函数在$\mathbf{\theta^{(t)}}$下的值 |
 
 ## 隐变量（latent variable）
@@ -127,11 +127,10 @@ $$
 $$
 \begin{align*}
     \mathbf{\theta^{(t+1)}}
-    &=\argmax_\mathbf{\theta^{(t+1)}}l(\mathbf{\theta}) \\
-    &=\argmax_\mathbf{\theta^{(t+1)}}\sum_{i=1}^N\sum_{j=1}^n\pi_{ij}\log\frac{p(x_i,z_i=c_j|\mathbf{\theta})}{\pi_{ij}} \\
+    &=\argmax_\mathbf{\theta^{(t+1)}} l(\mathbf{\theta}) \\
+    &=\argmax_\mathbf{\theta^{(t+1)}}\sum_{i=1}^{N}\sum_{j=1}^n\pi_{ij}\log\frac{p(x_i,z_i=c_j|\mathbf{\theta})}{\pi_{ij}} \\
     &=\argmax_\mathbf{\theta^{(t+1)}}\sum_{i=1}^N\sum_{j=1}^n\pi_{ij}\log\frac{N(x_i|\mu_j,\Sigma_j)}{\pi_{ij}}
 \end{align*}
-
 $$
 
 对于这个优化问题，我们就可以使用一般的极大似然估计（MLE）去做了。

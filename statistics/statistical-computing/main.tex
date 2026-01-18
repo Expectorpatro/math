@@ -218,9 +218,9 @@ x_{n+1}=\tfrac12\!\left(x_n+\frac{a}{x_n}\right),\qquad n=0,1,2,\dots
 	\end{equation*}
 	则称$P$为$f$的\gls{InterpolatingFunction}，点$x_0,x_1,\dots,x_n$被称为\gls{InterpolationNodes}，$[a,b]$为\gls{InterpolationInterval}，求插值函数$P$的方法称为\gls{InterpolationMethod}。若$P$是不超过$n$次的多项式，即：
 	\begin{equation*}
-		P(x)=\sum_{i=0}^{n}a_ix^i,\quad a_i\in\mathbb{R}^{},\;i=0,2,\dots,n
+		P(x)=\sum_{i=0}^{n}a_ix^i,\quad a_i\in\mathbb{R}^{},\;i=0,1,\dots,n
 	\end{equation*}
-	则称$P$为\gls{InterpolationPolynomial}，对应的插值法被称为\gls{PolynomialInterpolation}。若$P$是分段的多项式，则称对应的插值法为\gls{piecewise interpolation}。
+	则称$P$为\gls{InterpolationPolynomial}，对应的插值法被称为\gls{PolynomialInterpolation}。若$P$是分段的多项式，则称对应的插值法为\gls{PiecewiseInterpolation}。
 \end{definition}
 \begin{theorem}\label{theo:ExistenceUniquenessInterpolationPolynomial}
 	设函数$f$在$[a,b]$上有定义，且已知在点$a\leqslant x_0<x_1<\cdots<x_n\leqslant b$上的值$y_0,y_1,\dots,y_n$。$f$在$[a,b]$上次数不超过$n$的插值多项式存在且唯一。
@@ -250,6 +250,7 @@ x_{n+1}=\tfrac12\!\left(x_n+\frac{a}{x_n}\right),\qquad n=0,1,2,\dots
 	\end{equation*}
 	根据\cref{prop:Determinant}(13)、\cref{prop:Rank}(1)和\cref{theo:SolutionOfSLE2}(2)可知上述线性方程组的解存在且唯一，即$f$在$[a,b]$上次数不超过$n$的插值多项式存在且唯一。
 \end{proof}
+\subsubsection{Lagrange插值多项式}
 \begin{definition}
 	若$n$次多项式$l_i(x),\;i=0,1,\dots,n$在$n+1$个节点$x_0<x_1<\cdots<x_n$上满足：
 	\begin{equation*}
@@ -271,30 +272,29 @@ x_{n+1}=\tfrac12\!\left(x_n+\frac{a}{x_n}\right),\qquad n=0,1,2,\dots
 	\begin{equation*}
 		L_n(x)\coloneq\sum_{i=0}^{n}y_il_i(x)
 	\end{equation*}
-	为\gls{LagrangeInterpolationPolynomial}。
+	为$f$在节点$x_0,x_1,\dots,x_n$上的\gls{LagrangeInterpolationPolynomial}。
 \end{definition}
 \begin{property}\label{prop:LagrangeInterpolationPolynomial}
-	设函数$f$在$[a,b]$上有定义，且已知在点$a\leqslant x_0<x_1<\cdots<x_n\leqslant b$上的值$y_0,y_1,\dots,y_n$，$f^{(n)}$在$[a,b]$上连续，$f^{(n+1)}$在$(a,b)$上存在，$L_n$为$f$在节点$x_0,x_1,\dots,x_n$上的Lagrange插值多项式。$L_n$具有如下性质：
+	设函数$f$在$[a,b]$上有定义，且已知在点$a\leqslant x_0<x_1<\cdots<x_n\leqslant b$上的值$y_0,y_1,\dots,y_n$，$f\in C^n([a,b])$，$f^{(n+1)}$在$(a,b)$上存在，$L_n$为$f$在节点$x_0,x_1,\dots,x_n$上的Lagrange插值多项式。$L_n$具有如下性质：
 	\begin{enumerate}
-		\item $\sum\limits_{i=0}^{n}l_i(x)=1$；
 		\item 记$w_{n+1}(x)=(x-x_0)(x-x_1)\cdots(x-x_n)$，则：
 		\begin{equation*}
 			L_n(x)=\sum_{i=0}^{n}y_i\frac{w_{n+1}(x)}{(x-x_i)w_{n+1}'(x_i)}
-		\end{equation*}
-		\item $L_n$有如下形式：
-		\begin{equation*}
-			L_n(x)=\frac{\sum\limits_{i=0}^{n}y_i\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}{\sum\limits_{i=0}^{n}\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}
 		\end{equation*}
 		\item 对于任意的$x\in[a,b]$，有误差估计：
 		\begin{equation*}
 			f(x)-L_n(x)=\frac{f^{(n+1)}(\xi)}{(n+1)!}w_{n+1}(x)
 		\end{equation*}
-		其中$\xi\in(a,b)$。
+		其中$\xi\in(a,b)$；
+		\item $\sum\limits_{i=0}^{n}x_i^ml_i(x)=x^m(m\leqslant n)$；
+		\item $L_n$有如下形式：
+		\begin{equation*}
+			L_n(x)=\frac{\sum\limits_{i=0}^{n}y_i\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}{\sum\limits_{i=0}^{n}\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}
+		\end{equation*}
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)设$f$在$[a,b]$上恒等于$1$，由\info{$n$次多项式在复数域上最多有$n$个零点}即可得出结论。\par
-	(2)由\info{乘积的微分}可知：
+	(1)由\info{乘积的微分}可知：
 	\begin{equation*}
 		w_{n+1}'(x_i)=(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)
 	\end{equation*}
@@ -302,7 +302,24 @@ x_{n+1}=\tfrac12\!\left(x_n+\frac{a}{x_n}\right),\qquad n=0,1,2,\dots
 	\begin{equation*}
 		l_i(x)=\frac{w_{n+1}(x)}{(x-x_i)w_{n+1}'(x_i)}
 	\end{equation*}\par
-	(3)由(1)(2)可得：
+	(2)由条件可设$f(x)-L_n(x)=K(x)w_{n+1}(x)$，其中$K(x)$是一个待定函数。作辅助函数：
+	\begin{equation*}
+		\varphi(t)=f(t)-L_n(t)-K(x)w_{n+1}(t)
+	\end{equation*}
+	由\cref{prop:RMap}(5.b)和\cref{prop:FrechetDifferential}(4)可知$\varphi^{(n)}$在$[a,b]$上连续，$\varphi^{(n+1)}$在$(a,b)$上存在。因为$\varphi$在$x_0,x_1,\dots,x_n$和$x$处均为$0$，所以$\varphi$在$[a,b]$上有$n+2$个零点，根据\cref{prop:RMap}(5.b)、\cref{prop:FrechetDifferential}(4)和\cref{theo:RolleTheorem}可知$\varphi'$在$\varphi$的两个零点间至少存在一个零点，所以$\varphi'$在$[a,b]$上至少存在$n+1$个零点。对$\varphi'$再使用\cref{theo:RolleTheorem}可知$\varphi''$在$[a,b]$上至少存在$n$个零点。依此类推可知$\varphi^{(n+1)}$在$(a,b)$上至少存在一个零点$\xi$，即：
+	\begin{equation*}
+		\varphi^{(n+1)}(\xi)=f^{(n+1)}(\xi)-K(x)(n+1)!=0
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		K(x)=\frac{f^{(n+1)}(\xi)}{(n+1)!}
+	\end{equation*}
+	即：
+	\begin{equation*}
+		f(x)-L_n(x)=\frac{f^{(n+1)}(\xi)}{(n+1)!}w_{n+1}(x)
+	\end{equation*}\par
+	(3)设$f=x^m$，由(2)即可得出结论。\par
+	(4)在(3)中取$m=0$，由(1)(3)可得：
 	\begin{equation*}
 		1=\sum_{i=0}^{n}l_i(x)=\sum_{i=0}^{n}\frac{w_{n+1}(x)}{(x-x_i)w_{n+1}'(x_i)}=w_{n+1}(x)\sum_{i=0}^{n}\frac{1}{(x-x_i)w_{n+1}'(x_i)}
 	\end{equation*}
@@ -313,27 +330,11 @@ x_{n+1}=\tfrac12\!\left(x_n+\frac{a}{x_n}\right),\qquad n=0,1,2,\dots
 	于是有：
 	\begin{align*}
 		L_n(x)&=\sum_{i=0}^{n}y_i\frac{w_{n+1}(x)}{(x-x_i)w_{n+1}'(x_i)}=w_{n+1}(x)\sum_{i=0}^{n}y_i\frac{1}{(x-x_i)w_{n+1}'(x_i)} \\
-		&=\frac{\sum\limits_{i=0}^{n}y_i\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}{\sum\limits_{i=0}^{n}\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}
-	\end{align*}\par
-	(4)由条件可设$f(x)-L_n(x)=K(x)w_{n+1}(x)$，其中$K(x)$是一个待定函数。作辅助函数：
-	\begin{equation*}
-		\varphi(t)=f(t)-L_n(t)-K(x)w_{n+1}(t)
-	\end{equation*}
-	由\cref{prop:FrechetDifferential}(4)可知$\varphi^{(n)}$在$[a,b]$上连续，$\varphi^{(n+1)}$在$(a,b)$上存在。因为$\varphi$在$x_0,x_1,\dots,x_n$和$x$处均为$0$，所以$\varphi$在$[a,b]$上有$n+2$个零点，根据\cref{theo:RolleTheorem}可知$\varphi'$在$\varphi$的两个零点间至少存在一个零点，所以$\varphi'$在$[a,b]$上至少存在$n+1$个零点。对$\varphi'$再使用\cref{theo:RolleTheorem}可知$\varphi''$在$[a,b]$上至少存在$n$个零点。依此类推可知$\varphi^{(n+1)}$在$(a,b)$上至少存在一个零点$\xi$，即：
-	\begin{equation*}
-		\varphi^{(n+1)}(\xi)=f^{(n+1)}(\xi)-K(x)(n+1)!=0
-	\end{equation*}
-	于是：
-	\begin{equation*}
-		K(x)=\frac{f^P(n+1)(\xi)}{(n+1)!}
-	\end{equation*}
-	即：
-	\begin{equation*}
-		f(x)-L_n(x)=\frac{f^{(n+1)}(\xi)}{(n+1)!}w_{n+1}(x)\qedhere
-	\end{equation*}
+		&=\frac{\sum\limits_{i=0}^{n}y_i\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}{\sum\limits_{i=0}^{n}\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}\qedhere
+	\end{align*}
 \end{proof}
 \begin{note}
-	\cref{prop:LagrangeInterpolationPolynomial}(3)中$L_n(x)$的形式又被称为\textbf{Barycentric形式}。该表示形式在数学上与拉格朗日插值多项式完全等价，但在数值计算中避免了高次多项式乘积的显式计算，即计算：
+	\cref{prop:LagrangeInterpolationPolynomial}(4)中$L_n$的形式又被称为\textbf{Barycentric形式}。该表示形式在数学上与拉格朗日插值多项式完全等价，但在数值计算中避免了高次多项式乘积的显式计算，即计算：
 	\begin{equation*}
 		w_{n+1}(x)=(x-x_0)(x-x_1)\cdots(x-x_n)
 	\end{equation*}
@@ -347,4 +348,240 @@ x_{n+1}=\tfrac12\!\left(x_n+\frac{a}{x_n}\right),\qquad n=0,1,2,\dots
     interp = BarycentricInterpolator(x_nodes,y_nodes)
     print(interp(1.5))
 \end{minted}
+\subsubsection{Newton插值多项式}
+\begin{definition}
+	设函数$f$在$[a,b]$上有定义，$a\leqslant x_0<x_1<\cdots<x_n\leqslant b$。记$f[x_0]=f(x_0)$，称：
+	\begin{equation*}
+		f[x_0,x_n]=\frac{f(x_n)-f(x_0)}{x_n-x_0}
+	\end{equation*}
+	为$f$关于点$x_0,x_n$的\gls{FirstOrderDividedDifference}。称：
+	\begin{equation*}
+		f[x_0,x_1,\dots,x_n]=\frac{f[x_1,x_2,\dots,x_n]-f[x_0,x_1,\dots,x_{n-1}]}{x_n-x_0}
+	\end{equation*}
+	为$f$的\gls{NthOrderDividedDifference}。
+\end{definition}
+\begin{property}\label{prop:DividedDifference}
+	设函数$f$在$[a,b]$上有定义，$a\leqslant x_0<x_1<\cdots<x_n\leqslant b$。均差具有如下性质：
+	\begin{enumerate}
+		\item $f$的$n$阶均差可以表示为$f(x_0),f(x_1),\dots,f(x_n)$的线性组合：
+		\begin{equation*}
+			f[x_0,x_1,\dots,x_n]=\sum_{i=0}^{n}\frac{f(x_i)}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)}
+		\end{equation*}
+		\item $f[x_0,x_1,\dots,x_n]$对$\{x_0,x_1,\dots,x_n\}$的任意顺序置换保持不变；
+		\item 对任意的$\alpha,\beta\in\mathbb{R}^{}$和$[a,b]$上的函数$g$，有：
+		\begin{equation*}
+			(\alpha f+\beta g)[x_0,x_1,\dots,x_n]=\alpha f[x_0,x_1,\dots,x_n]+\beta g[x_0,x_1,\dots,x_n]
+		\end{equation*}
+		\item 若$f\in C^n([a,b])$，则存在$\xi\in[a,b]$使得：
+		\begin{equation*}
+			f[x_0,x_1,\dots,x_n]=\frac{f^{(n)}(\xi)}{n!}
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)使用数学归纳法。当$n=1$时有：
+	\begin{equation*}
+		f[x_0,x_1]=\frac{f(x_1)-f(x_0)}{x_1-x_0}=\frac{f(x_0)}{x_0-x_1}+\frac{f(x_1)}{x_1-x_0}
+	\end{equation*}
+	结论成立。设结论对$n-1$成立，下面证明结论对$n$也成立。\par
+	根据归纳假设：
+	\begin{align*}
+		&f[x_0,x_1,\dots,x_n]=\frac{f[x_1,x_2,\dots,x_n]-f[x_0,x_1,\dots,x_{n-1}]}{x_n-x_0} \\
+		=&\frac{1}{x_n-x_0}\left[\sum_{i=1}^{n}\frac{f(x_i)}{(x_i-x_1)(x_i-x_2)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)}\right. \\
+		&\left.-\sum_{i=0}^{n-1}\frac{f(x_i)}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_{n-1})}\right]  \\
+		=&\frac{f(x_n)}{(x_n-x_0)(x_n-x_1)\dots(x_n-x_{n-1})}+\frac{f(x_0)}{(x_0-x_1)(x_0-x_2)\dots(x_0-x_n)} \\
+		&+\sum_{i=1}^{n-1}\left[\frac{f(x_i)}{(x_n-x_0)(x_i-x_1)(x_i-x_2)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)}\right. \\
+		&\left.-\frac{f(x_i)}{(x_n-x_0)(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_{n-1})}\right]
+	\end{align*}
+	对于最后一项：
+	\begin{align*}
+		&\sum_{i=1}^{n-1}\left[\frac{(x_i-x_0)f(x_i)}{(x_n-x_0)(x_i-x_0)(x_i-x_1)(x_i-x_2)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)}\right. \\
+		&\left.-\frac{(x_i-x_n)f(x_i)}{(x_n-x_0)(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_{n-1})(x_i-x_n)}\right] \\
+		=&\sum_{i=1}^{n-1}\frac{(x_i-x_0)f(x_i)-(x_i-x_n)f(x_i)}{(x_n-x_0)(x_i-x_0)(x_i-x_1)(x_i-x_2)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)} \\
+		=&\sum_{i=1}^{n-1}\frac{(x_n-x_0)f(x_i)}{(x_n-x_0)(x_i-x_0)(x_i-x_1)(x_i-x_2)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)} \\
+		=&\sum_{i=1}^{n-1}\frac{f(x_i)}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)}
+	\end{align*}
+	所以结论成立。\par
+	(2)由(1)立即可得。\par
+	(3)由(1)立即可得。\par
+	(4)令$L_{n-1}$为$f$在节点$x_0,x_1,\dots,x_{n-1}$上的Lagrange插值多项式，作辅助函数：
+	\begin{equation*}
+		\varphi(x)=f(x)-L_{n-1}(x)-f[x_0,x_1,\dots,x_n]w_n(x)
+	\end{equation*}
+	由$L_{n-1}$的定义可知$f-L_{n-1}$在节点$x_0,x_1,\dots,x_{n-1}$上为$0$，而$w_n$在节点$x_0,x_1,\dots,x_{n-1}$上为$0$，所以$x_0,x_1,\dots,x_{n-1}$是$\varphi$的零点。注意到：
+	\begin{align*}
+		&f(x_n)-L_{n-1}(x_n)-f[x_0,x_1,\dots,x_n]w_n(x_n) \\
+		=&f(x_n)-\sum_{i=0}^{n-1}\frac{f(x_i)(x_n-x_0)(x_n-x_1)\dots(x_n-x_{i-1})(x_n-x_{i+1})\dots(x_n-x_{n-1})}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_{n-1})} \\
+		&-\sum_{i=0}^{n}\frac{f(x_i)(x_n-x_0)(x_n-x_1)\cdots(x_n-x_{n-1})}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)} \\
+		=&f(x_n)-\sum_{i=0}^{n-1}\frac{f(x_i)(x_n-x_0)(x_n-x_1)\dots(x_n-x_{i-1})(x_n-x_{i+1})\dots(x_n-x_{n-1})}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_{n-1})} \\
+		&-f(x_n)-\sum_{i=0}^{n-1}\frac{f(x_i)(x_n-x_0)(x_n-x_1)\cdots(x_n-x_{n-1})}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)} \\
+		=&-\sum_{i=0}^{n-1}\frac{f(x_i)(x_n-x_0)(x_n-x_1)\dots(x_n-x_{n-1})}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_{n-1})(x_n-x_i)} \\
+		&-\sum_{i=0}^{n-1}\frac{f(x_i)(x_n-x_0)(x_n-x_1)\cdots(x_n-x_{n-1})}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)}=0
+	\end{align*}
+	所以$x_n$也是$\varphi$的零点。根据\cref{prop:RMap}(5.b)、\cref{prop:FrechetDifferential}(4)和\cref{theo:RolleTheorem}可知$\varphi'$在$[a,b]$上存在$n$个零点。对$\varphi'$再使用\cref{theo:RolleTheorem}可知$\varphi''$在$[a,b]$上存在$n-1$个零点。依此类推可知$\varphi^{(n)}$在$[a,b]$上存在一个零点$\xi$，即：
+	\begin{equation*}
+		\varphi^{(n)}(\xi)=f^{(n)}(\xi)-f[x_0,x_1,\dots,x_n]n!=0
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		f[x_0,x_1,\dots,x_n]=\frac{f^{(n)}(\xi)}{n!}\qedhere
+	\end{equation*}
+\end{proof}
+\begin{definition}
+	设函数$f$在$[a,b]$上有定义，且已知在点$a\leqslant x_0<x_1<\cdots<x_n\leqslant b$上的值$y_0,y_1,\dots,y_n$。称：
+	\begin{equation*}
+		P_n(x)=f[x_0]+f[x_0,x_1](x-x_0)+f[x_0,x_1,x_2](x-x_0)(x-x_1)+\cdots+f[x_0,x_1,\dots,x_n]\prod_{i=0}^{n-1}(x-x_i)
+	\end{equation*}
+	为$f$在节点$x_0,x_1,\dots,x_n$上的\gls{NewtonInterpolationPolynomial}。
+\end{definition}
+\begin{property}\label{prop:NewtonInterpolationPolynomial}
+	Newton插值多项式与Lagrange插值多项式等价。
+\end{property}
+\begin{proof}
+	设函数$f$在$[a,b]$上有定义，且已知在点$a\leqslant x_0<x_1<\cdots<x_n\leqslant b$上的值$y_0,y_1,\dots,y_n$。因为$f$在节点$x_0,x_1,\dots,x_n$上的Newton插值多项式$P_n$的次数不超过$n$，根据\cref{theo:ExistenceUniquenessInterpolationPolynomial}只需证明$P_n(x_i)=f(x_i),\;i=0,1,\dots,n$。\par
+	使用数学归纳法。当$i=0$时由$P_n$的定义可知$P_n(x_0)=f(x_0)$，设结论对$n-1$成立，下面证明结论对$n$也成立。\par
+	对于：
+	\begin{equation*}
+		P_n(x)=P_{n-1}(x)+f[x_0,x_1,\dots,x_n]w_n(x)
+	\end{equation*}
+	因为对任意的$i=0,1,\dots,n-1$有$w_n(x_i)=0$，所以由归纳假设可知：
+	\begin{equation*}
+		P_n(x_i)=P_{n-1}(x_i)=f(x_i),\quad i=0,1,\dots,n-1
+	\end{equation*}
+	下面证明$P_n(x_n)=f(x_n)$。\par
+	作辅助函数$R(x)=f(x)-P_{n-1}(x)$，于是有：
+	\begin{equation*}
+		\frac{R(x_n)}{w_n(x_n)}=\frac{f(x_n)-P_{n-1}(x_n)}{w_n(x_n)}
+	\end{equation*}
+	由\cref{prop:DividedDifference}(1)可得：
+	\begin{equation*}
+		R[x_0,x_1,\dots,x_n]=\sum_{i=0}^{n}\frac{R(x_i)}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)}=\frac{R(x_n)}{w_n(x_n)}
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\frac{f(x_n)-P_{n-1}(x_n)}{w_n(x_n)}=R[x_0,x_1,\dots,x_n]
+	\end{equation*}
+	根据\cref{prop:DividedDifference}(3)可知：
+	\begin{equation*}
+		R[x_0,x_1,\dots,x_n]=f[x_0,x_1,\dots,x_n]-P_{n-1}[x_0,x_1,\dots,x_n]
+	\end{equation*}
+	因为$P_{n-1}$的次数不超过$n-1$，由\cref{prop:DividedDifference}(4)可知$P_{n-1}[x_0,x_1,\dots,x_n]=0$，于是有：
+	\begin{equation*}
+		R[x_0,x_1,\dots,x_n]=f[x_0,x_1,\dots,x_n]
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\frac{f(x_n)-P_{n-1}(x_n)}{w_n(x_n)}=f[x_0,x_1,\dots,x_n]
+	\end{equation*}
+	即：
+	\begin{equation*}
+		P_{n-1}(x_n)=f(x_n)-f[x_0,x_1,\dots,x_n]w_n(x_n)
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		P_n(x_n)=P_{n-1}(x_n)+f[x_0,x_1,\dots,x_n]w_n(x_n)=f(x_n)\qedhere
+	\end{equation*}
+\end{proof}
+\begin{note}
+	根据\cref{prop:NewtonInterpolationPolynomial}，Newton插值多项式和Lagrange插值多项式是等价的，于是它具有了Lagrange插值多项式的全部性质。既然等价，那为什么要研究它呢？\par
+	从构造方式看，Lagrange插值是一次性使用全部节点进行整体构造，而Newton插值具有天然的递推性。当新增插值节点时，Lagrange插值多项式通常需要重新计算，而Newton插值多项式只需增加一个新的均差项即可完成更新，这使其在逐点插值与在线计算中具有明显优势。
+\end{note}
+\subsubsection{Hermite插值}
+\begin{definition}
+	设函数$f$在$[a,b]$上有定义，且已知$f^{(j)}(x_i)$，$i=0,1,\dots,n,\;j=0,1,\dots,m_i$，其中$a\leqslant x_0<x_1<\cdots<x_n\leqslant b$。令$N=\sum\limits_{i=0}^{n}m_i-1$，称满足：
+	\begin{equation*}
+		H^{(j)}_N(x_i)=f^{(j)}(x_i),\quad i=0,1,\dots,n,\;j=0,1,\dots,m_i
+	\end{equation*}
+	的不超过$N$次的多项式$H_N(x)$为\gls{HermiteInterpolationPolynomial}。
+\end{definition}
+\begin{definition}
+	定义：
+	\begin{equation*}
+		f[\underbrace{x,x,\dots,x}_{n+1\text{个}x}]\coloneq\frac{f^{(n)}(x)}{n!}
+	\end{equation*}
+\end{definition}
+\begin{property}\label{prop:HermiteInterpolationPolynomial}
+	设函数$f$在$[a,b]$上有定义，且已知$f^{(j)}(x_i)$，$i=0,1,\dots,n,\;j=0,1,\dots,m_i$，其中$a\leqslant x_0<x_1<\cdots<x_n\leqslant b$，$N=\sum\limits_{i=0}^{n}m_i-1$。Hermite插值多项式具有如下性质：
+	\begin{enumerate}
+		\item Hermite插值多项式存在且唯一；
+		\item 若将每个节点$x_i$重复$m_i+1$次，按重复顺序排列为$y_0,y_1,\dots,y_M$，则：
+		\begin{equation*}
+			H_N(x)=f[y_0]+f[y_0,y_1](x-y_0)+\cdots+f[y_0,y_1,\dots,y_M]\prod_{i=0}^{M-1}(x-y_i)
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+%\begin{proof}
+%	设$H_N(x)=a_0+a_1x+a_2x^2+\cdots+a_Nx^N$，则$H_N$满足：
+%	\begin{equation*}
+%		\begin{pmatrix}
+%			1 & x_0 & x_0^2 & \cdots & x_0^N \\
+%			0 & 1 & 2x_0 & \cdots & N x_0^{N-1} \\
+%			\vdots & \vdots & \vdots & \ddots & \vdots \\
+%			0 & 0 & \cdots & \cdots & \dfrac{N!}{(N-m_0)!}x_0^{N-m_0} \\[0.4em]
+%			\vdots & \vdots &  &  & \vdots \\[0.4em]
+%			1 & x_n & x_n^2 & \cdots & x_n^N \\
+%			0 & 1 & 2x_n & \cdots & N x_n^{N-1} \\
+%			\vdots & \vdots & \vdots & \ddots & \vdots \\
+%			0 & 0 & \cdots & \cdots & \dfrac{N!}{(N-m_n)!}x_n^{N-m_n}
+%		\end{pmatrix}
+%		\begin{pmatrix}
+%			a_0 \\ a_1 \\ \vdots \\ a_N
+%		\end{pmatrix}
+%		=
+%		\begin{pmatrix}
+%			f(x_0) \\
+%			f'(x_0) \\
+%			\vdots \\
+%			f^{(m_0)}(x_0) \\
+%			\vdots \\
+%			f(x_n) \\
+%			f'(x_n) \\
+%			\vdots \\
+%			f^{(m_n)}(x_n)
+%		\end{pmatrix}
+%	\end{equation*}
+%	由Hermite–Vandermonde矩阵行列式非零
+%\end{proof}
+\begin{minted}[breaklines,linenos]{python}
+    import numpy as np
+    from scipy.interpolate import KroghInterpolator
+    # Hermite interpolation data
+    # f(0) = 1, f'(0) = 0
+    # f(1) = 2, f'(1) = -1
+    x = np.array([0.0, 0.0, 1.0, 1.0])
+    y = np.array([1.0, 0.0, 2.0, -1.0])
+    # Hermite interpolation
+    hermite_poly = KroghInterpolator(x, y)
+    # evaluate
+    x_eval = np.linspace(0.0, 1.0, 100)
+    y_eval = hermite_poly(x_eval)
+    print(hermite_poly(0.5))
+\end{minted}
 
+%\section{EM算法}
+%
+%在数理统计中，参数估计问题通常建立在如下概率模型之上：设$(X,\mathcal{A},\mathscr{P})$为可控参数结构，$\Theta$是参数空间，$\seq{X}{n}$是$X$的一个样本，然后通过极大似然估计来构造参数$\theta$的估计量。\par
+%但在大量统计模型中，样本并非直接来自一个“完全”概率机制，
+%而是某个更高维随机结构的部分观测结果。
+%\begin{definition}
+%	设$(Y,\mathscr{B})$是一个可测空间，$(X\times Y,\sigma(\mathcal{A}\times\mathcal{B}),\mathscr{P})$为可控参数结构，$\Theta$为参数空间，$f_X,f_Y$分别是$(X,\mathscr{A})$和$(Y,\mathscr{B})$上的随机变量，$f_X$可观测而$f_Y$不可观测，称这类问题为\gls{IncompleteDataProblem}。
+%\end{definition}
+%\begin{note}
+%	在不完全数据问题下，观测数据$\mathbf{X}$的对数似然函数具有如下形式：
+%	\begin{equation}
+%		\ell(\theta,\mathbf{X})
+%		= \log\int p_\theta(\mathbf{X},\mathbf{Y})\dif\mathbf{Y}
+%	\end{equation}
+%	由于积分运算位于对数函数内部，该目标函数在一般情形下既不具有解析形式，也往往缺乏良好的凸性或可分解结构，从而使得直接的极大似然估计在理论分析与数值计算上都面临显著困难。\par
+%	与此形成鲜明对比的是，若观测数据对潜变量$\mathbf{Y}$可被观测，
+%	则所谓的\textbf{完全数据对数似然}
+%	\begin{equation}
+%		\log p_\theta(Y,Z)
+%	\end{equation}
+%	通常具有更为简单且结构化的形式。
+%	在许多重要统计模型中，
+%	完全数据模型属于指数族，
+%	其极大似然估计可通过充分统计量或标准优化方法得到。
+%	因此，不完全数据问题的核心困难并不来源于模型本身，
+%	而是来源于对潜变量的不可观测性。
+%\end{note}
