@@ -1,4 +1,8 @@
 \section{测度空间}
+本章主要讨论测度，先来介绍一下本章的思路：为了可以在测度上进行极限的计算，我们需要在$\sigma$域上定义测度，但是直接在复杂的$\sigma$域上规定测度通常既不自然也不可操作，一方面$\sigma$域里的集合极其繁杂，无法逐一赋值；另一方面还要同时验证对可列并的可加性，几乎无从下手。更合理的起点是简单集合构成的集合族，例如$\mathbb{R}^{n}$中的矩形，这类集合便于计算、便于检验性质，并且在多数场景下形成半环，因此我们先在半环上定义测度，然后试图将其延拓到半环生成的$\sigma$域上。然而从半环直接把测度延拓到$\sigma$域并不容易，于是引入外测度作为桥梁，随后再用Caratheodory条件选出一类“表现良好”的集合，这些集合自动组成$\sigma$域，并且$\tau$在其上成为真正的测度，且与原先在半环上的定义一致。最后讨论完全测度空间，我们将在下面两节看到为什么要研究完全测度空间。
+\begin{definition}
+	称$X$和其上的一个$\sigma$域$\mathscr{A}$为\gls{MeasurableSpace}，记为$(X,\mathscr{A})$，称$\mathscr{A}$中的集合为\gls{MeasurableSet}。
+\end{definition}
 \subsection{集函数与测度}
 \begin{definition}
 	设$\mathscr{A}$是$X$上的一个集族。称定义在$\mathscr{A}$上的函数为\textbf{集函数}。
@@ -64,7 +68,6 @@
 	\end{equation*}
 	于是$\mu$有可减性。
 \end{proof}
-一
 \begin{theorem}\label{theo:SemiringCountableAdditivitySetFunction}
 	半环$\mathscr{A}$上有可列可加性且满足$\mu(\varnothing)=0$的非负集函数$\mu$具有次可列可加性、下连续性和上连续性。
 \end{theorem}
@@ -98,10 +101,11 @@
 		\sum_{i=1}^{+\infty}\sum_{j=1}^{k_i}\mu(C_{ij})
 	\end{equation*}
 	收敛。由\cref{prop:RSeq}(8.b)可得：
-	\begin{equation*}
-		\lim_{n\to+\infty}\left[\sum_{i=n}^{+\infty}\sum_{j=1}^{k_i}\mu(C_{ij})\right]=\lim_{n\to+\infty}\left[\sum_{i=1}^{+\infty}\sum_{j=1}^{k_i}\mu(C_{ij})-\sum_{i=1}^{n-1}\sum_{j=1}^{k_i}\mu(C_{ij})\right]=\sum_{i=1}^{+\infty}\sum_{j=1}^{k_i}\mu(C_{ij})-\lim_{n\to+\infty}\sum_{i=1}^{n-1}\sum_{j=1}^{k_i}\mu(C_{ij})=0
-	\end{equation*}
-	于是有：
+	\begin{align*}
+		&\lim_{n\to+\infty}\left[\sum_{i=n}^{+\infty}\sum_{j=1}^{k_i}\mu(C_{ij})\right]=\lim_{n\to+\infty}\left[\sum_{i=1}^{+\infty}\sum_{j=1}^{k_i}\mu(C_{ij})-\sum_{i=1}^{n-1}\sum_{j=1}^{k_i}\mu(C_{ij})\right] \\
+		=&\sum_{i=1}^{+\infty}\sum_{j=1}^{k_i}\mu(C_{ij})-\lim_{n\to+\infty}\sum_{i=1}^{n-1}\sum_{j=1}^{k_i}\mu(C_{ij})=0
+	\end{align*}
+	于是根据\cref{prop:RSeq}(8.b)可知：
 	\begin{equation*}
 		\lim_{n\to+\infty}\mu(A_n)=\mu(A)+\lim_{n\to+\infty}\left[\sum_{i=n}^{+\infty}\sum_{j=1}^{k_i}\mu(C_{ij})\right]=\mu(A)
 	\end{equation*}
@@ -147,7 +151,7 @@
 		\item $\mu$具有有限可加性；
 		\item $\mu$具有可减性；
 		\item  若$\mathscr{A}$是一个半环，则$\mu$具有单调性、可减性、次可列可加性、次有限可加性、下连续性和上连续性；
-		\item 若$\mathscr{B}$是$\mathscr{A}$的一个子$\sigma$域，则$\mu$在$\mathscr{B}$上也成为一个测度。
+		\item 若$\mathscr{B}$是$\mathscr{A}$的一个含有空集的子集，则$\mu$在$\mathscr{B}$上也成为一个测度。
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -214,7 +218,7 @@
 
 \subsection{外测度}
 \begin{definition}
-	设$\tau$是$X$的所有子集构成的集族$\mathscr{A}$到$\overline{\mathbb{R}}$上的集函数，如果：
+	设$\tau$是$\mathscr{P}(X)$到$\overline{\mathbb{R}}$上的集函数，如果：
 	\begin{enumerate}
 		\item $\tau(\varnothing)=0$；
 		\item 若$A\subseteq B$且$A,B\in\mathscr{A}$，则有$\tau(A)\leqslant\tau(B)$；
@@ -223,24 +227,24 @@
 	则称$\tau$为$X$上的\gls{ExteriorMeasure}。
 \end{definition}
 \begin{property}\label{prop:ExteriorMeasure}
-	$X$的所有子集构成的集族$\mathscr{A}$上的外测度$\tau$具有如下性质：
+	$\mathscr{P}(X)$上的外测度$\tau$具有如下性质：
 	\begin{enumerate}
 		\item $\tau$是非负集函数；
 		\item $\tau$具有次有限可加性；
-		\item $\mathscr{A}$上的测度$\tau$一定是$X$上的外测度。
+		\item $\mathscr{P}(X)$上的测度$\tau$是$X$上的外测度。
 	\end{enumerate}
 \end{property}
 \begin{proof}
 	(1)由外测度的定义立即可得。\par
-	(2)任取$A_1,A_2,\dots,A_n\in\mathscr{A}$，由$\tau$的次可列可加性可得：
+	(2)任取$A_1,A_2,\dots,A_n\in\mathscr{P}(X)$，由$\tau$的次可列可加性可得：
 	\begin{equation*}
 		\tau\left(\underset{i=1}{\overset{n}{\cup}}A_i\right)=\tau(A_1\cup A_2\cdots\cup A_n\cup\varnothing\cdots)\leqslant\sum_{i=1}^{n}\tau(A_i)+0=\sum_{i=1}^{n}\tau(A_i)
 	\end{equation*}
 	由$A_1,A_2,\dots,A_n$的任意性，$\tau$具有次有限可加性。\par
-	(3)显然$\mathscr{A}$是一个$\sigma$域。由\cref{prop:SigmaField}(1)可知$\mathscr{A}$是一个域，根据\cref{theo:SetNecessarilySet1}可知$\mathscr{A}$是一个半环，所以$\tau$是半环上的测度。由\cref{prop:Measure}(3)可知$\tau$具有单调性和次可列可加性。因为$\tau$是一个测度，所以$\tau(\varnothing)=0$。综上，$\tau$是$X$上的外测度。
+	(3)显然$\mathscr{P}(X)$是一个$\sigma$域。由\cref{prop:SigmaField}(1)和\cref{theo:SetNecessarilySet1}可知$\mathscr{P}(X)$是一个半环，所以$\tau$是半环上的测度。由\cref{prop:Measure}(3)可知$\tau$具有单调性和次可列可加性。因为$\tau$是一个测度，所以$\tau(\varnothing)=0$。综上，$\tau$是$X$上的外测度。
 \end{proof}
 \begin{theorem}
-	设$\mathscr{A}$是一个包含$\varnothing$的集族，$\mu$是$\mathscr{A}$上的一个非负集函数且满足$\mu(\varnothing)=0$，若对于任意的$A\in\mathscr{B}$（$\mathscr{B}$是$X$的所有子集构成的集族）有：
+	设$\mathscr{A}$是一个包含$\varnothing$的集族，$\mu$是$\mathscr{A}$上的一个非负集函数且满足$\mu(\varnothing)=0$，若对于任意的$A\in\mathscr{P}(X)$有：
 	\begin{equation*}
 		\tau(A)=\inf\left\{\sum_{n=1}^{+\infty}\mu(B_n):B_n\in\mathscr{A},\;A\subseteq\underset{n=1}{\overset{+\infty}{\cup}}B_n\right\}
 	\end{equation*}
@@ -252,25 +256,22 @@
 		0\leqslant\tau(\varnothing)\leqslant\sum_{n=1}^{+\infty}\mu(\varnothing)=0
 	\end{equation*}
 	于是$\tau(\varnothing)=0$。\par
-	(2)设$A\subseteq B$且$A,B\in\mathscr{B}$，对于满足条件：
-	\begin{equation*}
-		B\subseteq\underset{n=1}{\overset{+\infty}{\cup}}B_n
-	\end{equation*}
-	的$\{B_n\}$，自然有：
-	\begin{equation*}
-		A\subseteq\underset{n=1}{\overset{+\infty}{\cup}}B_n
-	\end{equation*}
-	所以：
+	(2)设$A\subseteq B$且$A,B\in\mathscr{P}(X)$，对于满足条件$B\subseteq\underset{n=1}{\overset{+\infty}{\cup}}B_n$的$\{B_n\}$，自然有$A\subseteq\underset{n=1}{\overset{+\infty}{\cup}}B_n$，所以：
 	\begin{equation*}
 		\tau(A)\leqslant\sum_{n=1}^{+\infty}\mu(B_n)
 	\end{equation*}
 	对右边取下确界即有$\tau(A)\leqslant\tau(B)$。\par
-	(3)设$\{A_n\}$是$\mathscr{B}$中的一个集合序列。若存在$n_0\in\mathbb{N}^+$使得$\tau(A_{n_0})=+\infty$，则由$\tau$的定义和(2)可得：
+	(3)设$\{A_n\}$是$\mathscr{P}(X)$中的一个集合序列。\par
+	若存在$n_0\in\mathbb{N}^+$使得$\tau(A_{n_0})=+\infty$，则$\sum\limits_{n=1}^{+\infty}\tau(A_n)=+\infty$。由(2)可得：
 	\begin{equation*}
-		\tau\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)\leqslant+\infty=\tau(A_{n_0})\leqslant\sum_{n=1}^{+\infty}\tau(A_n)
+		\tau\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)=+\infty\leqslant\sum\limits_{n=1}^{+\infty}\tau(A_n)
 	\end{equation*}
 	即$\tau$具有次可列可加性。\par
-	若$\tau(A_n)<+\infty$对$n\in\mathbb{N}^+$都成立，任取$\varepsilon>0$，对任意的$n\in\mathbb{N}^+$，存在$\mathscr{A}$中的一个集合序列$\{B_{ni}\}$使得：
+	若$\tau(A_n)<+\infty$对$n\in\mathbb{N}^+$都成立，则：
+	\begin{equation*}
+		\left\{\sum_{i=1}^{+\infty}\mu(B_i):B_i\in\mathscr{A},\;A_n\subseteq\underset{i=1}{\overset{+\infty}{\cup}}B_i\right\}\ne\varnothing
+	\end{equation*}
+	任取$\varepsilon>0$，对任意的$n\in\mathbb{N}^+$，存在$\mathscr{A}$中的一个集合序列$\{B_{ni}\}$使得：
 	\begin{equation*}
 		A_n\subseteq\underset{i=1}{\overset{+\infty}{\cup}}B_{ni},\;
 		\sum_{i=1}^{+\infty}\mu(B_{ni})<\tau(A_n)+\frac{\varepsilon}{2^n}
@@ -291,14 +292,14 @@
 	综上，$\tau$是一个外测度。
 \end{proof}
 \begin{definition}[Caratheodory condition]
-	设$X$是一个集合，$\mathscr{A}$是$X$的所有子集构成的集族，$\tau$是$X$上的外测度。称满足条件：
+	设$X$是一个集合，$\tau$是$X$上的外测度。称满足条件：
 	\begin{equation*}
-		\tau(T)=\tau(T\cap A)+\tau(T\cap A^c),\;\forall\;T\in\mathscr{A}
+		\tau(T)=\tau(T\cap A)+\tau(T\cap A^c),\;\forall\;T\in\mathscr{P}(X)
 	\end{equation*}
-	的集合$A\in\mathscr{A}$为$\tau$\gls{MeasurableSet}。将由所有$\tau$可测集构成的集族记作$\mathscr{A}_{\tau}$。
+	的集合$A\in\mathscr{P}(X)$为$\tau$可测集。将由所有$\tau$可测集构成的集族记作$\mathscr{A}_{\tau}$。
 \end{definition}
 \begin{lemma}\label{lem:EmeasureAB}
-	设$X$是一个集合，$\mathscr{A}$是$X$的所有子集构成的集族，$\tau$是$X$上的外测度。集合$E\in\mathscr{A}_{\tau}$的充要条件是对与$\forall\;A\subseteq E,\;\forall\;B\subseteq E^c$，总有：
+	设$X$是一个集合，$\tau$是$X$上的外测度。集合$E\in\mathscr{A}_{\tau}$的充要条件是对与$\forall\;A\subseteq E,\;\forall\;B\subseteq E^c$，总有：
 	\begin{equation*}
 		\tau(A\cup B)=\tau(A)+\tau(B)
 	\end{equation*}
@@ -307,7 +308,7 @@
 	\textbf{必要性：}对任意的$A\subseteq E,\;B\subseteq E^c$，取$T=A\cup B$，因为$E\in \mathscr{A}_{\tau}$，那么对于这个$T$，应有：
 	\begin{equation}
 		\tau(A\cup B)=\tau(T)=\tau(T\cap E)+\tau(T\cap E^c)=\tau(A)+\tau(B)\notag
-	\end{equation}
+	\end{equation}\par
 	\textbf{充分性：}对任意的$T\in \mathscr{A}$，$\exists\;A\subseteq E,\;\exists\; B\subseteq E^c$，使得$T=A\cup B$，那么就有：
 	\begin{equation}
 		\tau(T)=\tau(A\cup B)=\tau(A)+\tau(B)=\tau(T\cap E)+\tau(T\cap E^c)\notag
@@ -315,7 +316,7 @@
 	由$T$的任意性，$E\in \mathscr{A}_{\tau}$。
 \end{proof}
 \begin{property}\label{prop:tauMeasurableSetCollection}
-	设$X$是一个集合，$\mathscr{A}$是$X$的所有子集构成的集族，$\tau$是$X$上的外测度。$\mathscr{A}_{\tau}$具有如下性质：
+	设$X$是一个集合，$\tau$是$X$上的外测度。$\mathscr{A}_{\tau}$具有如下性质：
 	\begin{enumerate}
 		\item $\varnothing,X\in \mathscr{A}_{\tau}$； 
 		\item $S\in \mathscr{A}_{\tau}$的充要条件是$S^c\in \mathscr{A}_{\tau}$；
@@ -334,13 +335,7 @@
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)代入定义直接可得。\par
-	(2)若$S\in \mathscr{A}_{\tau}$，对任意的$T\in \mathscr{A}$，则有：
-	\begin{align*}
-		\tau(T)=\tau(T\cap S)+\tau(T\cap S^c)
-		&=\tau[T\cap(S^c)^c]+\tau(T\cap S^c) \\
-		&=\tau(T\cap S^c)+\tau[T\cap(S^c)^c]
-	\end{align*}\par
+	(1)(2)代入定义直接可得。\par
 	(3)因为$S_1\in \mathscr{A}_{\tau}$，对任意的$T$都有：
 	\begin{equation}\label{eq:S_1measure}
 		\tau(T)=\tau(T\cap S_1)+\tau(T\cap S_1^c)
@@ -349,54 +344,44 @@
 	\begin{equation}\label{eq:TcapS_1measure}
 		\tau(T\cap S_1^c)=\tau[(T\cap S_1^c)\cap S_2]+\tau[(T\cap S_1^c)\cap S_2^c]
 	\end{equation}
-	将\eqref{eq:TcapS_1measure}式代入\eqref{eq:S_1measure}式，再由\cref{prop:SetOperation}(7)，得到：
+	将\eqref{eq:TcapS_1measure}式代入\eqref{eq:S_1measure}式，再由\cref{prop:SetOperation}(7)可得：
 	\begin{align*}
 		\tau(T)&=\tau(T\cap S_1)+\tau[(T\cap S_1^c)\cap S_2]+\tau[(T\cap S_1^c)\cap S_2^c] \\
 		&=\tau(T\cap S_1)+\tau[(T\cap S_1^c)\cap S_2]+\tau[T\cap(S_1\cup S_2)^c]
 	\end{align*}
-	由于$T\cap S_1\subseteq S_1$，$(T\cap S_1^c)\cap S_2\subseteq S_1^c$，满足\cref{lem:EmeasureAB}条件，因此上式的前两项可以合并：
+	由于$T\cap S_1\subseteq S_1$，$(T\cap S_1^c)\cap S_2\subseteq S_1^c$，由\cref{lem:EmeasureAB}和\cref{prop:SetOperation}(4)可得：
 	\begin{align*}
-		\tau(T\cap S_1)+\tau[(T\cap S_1^c)\cap S_2]&=\tau[(T\cap S_1)\cup(T\cap S_1^c\cap S_2)] \\
-		&=\tau\{T\cap[S_1\cup(S_1^c\cap S_2)]\} \\
-		&=\tau\{T\cap[(S_1\cup S_1^c)\cap(S_1\cup S_2)]\} \\
-		&=\tau[T\cap(S_1\cup S_2)]
+		&\tau(T\cap S_1)+\tau[(T\cap S_1^c)\cap S_2]=\tau[(T\cap S_1)\cup(T\cap S_1^c\cap S_2)] \\
+		=&\tau\{T\cap[S_1\cup(S_1^c\cap S_2)]\}=\tau\{T\cap[(S_1\cup S_1^c)\cap(S_1\cup S_2)]\}=\tau[T\cap(S_1\cup S_2)]
 	\end{align*}
 	那么就有：
 	\begin{equation*}
 		\tau(T)=\tau[T\cap(S_1\cup S_2)]+\tau[T\cap(S_1\cup S_2)^c]
 	\end{equation*}
 	由$T$的任意性，$S_1\cup S_2\in \mathscr{A}_{\tau}$。\par
-	当$S_1\cap S_2=\varnothing$时，显然$S_2\subseteq S_1^c$，那么就有$T\cap S_2\subseteq S_1^c$，由\cref{lem:EmeasureAB}：
-	\begin{align*}
-		\tau[T\cap(S_1\cup S_2)]&=\tau[(T\cap S_1)\cup(T\cap S_2)]\\
-		&=\tau(T\cap S_1)+\tau(T\cap S_2)
-	\end{align*}
-	由数学归纳法，$\underset{i=1}{\overset{n}{\cup}}S_i\in \mathscr{A}_{\tau}$且当$\seq{S}{n}$互不相交时可得：
-	\begin{equation*}
-		\tau\left(\underset{i=1}{\overset{n}{\cup}}S_i\right)=\sum_{i=1}^{n}\tau(S_i)
-	\end{equation*}\par
+	当$S_1\cap S_2=\varnothing$时有$S_2\subseteq S_1^c$，由\cref{lem:EmeasureAB}可得$\tau(S_1\cup S_2)=\tau(S_1)+\tau(S_2)$。\par
 	(4)由\cref{prop:SetOperation}(7)以及(2)(3)直接得到：
 	\begin{equation*}
 		\underset{i=1}{\overset{n}{\cap}}S_i=\left(\underset{i=1}{\overset{n}{\cup}}S_i^c\right)^c\in \mathscr{A}_{\tau}
 	\end{equation*}\par
 	(5)$\;S_1\setminus S_2=S_1\cap S_2^c$，由(2)(4)可知$S_1\setminus S_2\in \mathscr{A}_{\tau}$。\par
-	(6)设$\{S_n\}$互不相交。由(3)可得对任意的$n$，$\underset{i=1}{\overset{n}{\cup}}S_i\in \mathscr{A}_{\tau}$，那么对任意的$T\in \mathscr{A}$，就有（第一行到第二行利用外测度的单调性，第二行到第三行利用(3)）：
+	(6)设$\{S_n\}$互不相交。由(3)可得对任意的$n$，$\underset{i=1}{\overset{n}{\cup}}S_i\in \mathscr{A}_{\tau}$，那么对任意的$T\in \mathscr{P}(X)$，用\cref{prop:SetOperation}(4)和(3)可得：
 	\begin{align*}
 		\tau(T)&=\tau\left[T\cap\left(\underset{i=1}{\overset{n}{\cup}}S_i\right)\right]+\tau\left[T\cap\left(\underset{i=1}{\overset{n}{\cup}}S_i\right)^c\right] \\
 		&\geqslant \tau\left[T\cap\left(\underset{i=1}{\overset{n}{\cup}}S_i\right)\right]+\tau\left[T\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)^c\right] \\
 		&=\sum_{i=1}^n\tau(T\cap S_i)+\tau\left[T\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)^c\right]
 	\end{align*}
-	令$n\to+\infty$，有（第一行到第二行利用\cref{prop:RSeq}(6)，第二行到第三行利用外测度的次可列可加性）：
+	令$n\to+\infty$，根据\cref{prop:RSeq}(6)和\cref{prop:SetOperation}(4)可得：
 	\begin{align}
 		\tau(T)&\geqslant\sum_{i=1}^n\tau(T\cap S_i)+\tau\left[T\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)^c\right]\notag \\
 		&\geqslant\sum_{i=1}^{+\infty} \tau(T\cap S_i)+\tau\left[T\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)^c\right] \label{eq:TcupSi}\\
 		&\geqslant \tau\left[\underset{i=1}{\overset{+\infty}{\cup}}(T\cap S_i)\right]+\tau\left[T\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)^c\right] \notag \\ &=\tau\left[T\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)\right]+\tau\left[T\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)^c\right]\notag
 	\end{align}
-	又因：
+	又：
 	\begin{equation*}
 		T=\left[T\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)\right]\cup\left[T\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)^c\right]
 	\end{equation*}
-	由外测度的次有限可加性（\cref{prop:ExteriorMeasure}(2)）可得：
+	所以根据\cref{prop:ExteriorMeasure}(2)可得：
 	\begin{equation*}
 		\tau(T)\leqslant \tau\left[T\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)\right]+\tau\left[T\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)^c\right]
 	\end{equation*}
@@ -407,9 +392,7 @@
 	由$T$的任意性，$\underset{n=1}{\overset{+\infty}{\cup}}S_n$是$\tau$可测集。\par
 	令$T=\underset{n=1}{\overset{+\infty}{\cup}}S_n$，代入\cref{eq:TcupSi}式，则：
 	\begin{align*}
-		\tau\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)
-		&\geqslant\sum_{i=1}^{+\infty} \tau\left[\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)\cap S_i\right]+\tau\left[\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)^c\right] \\
-		&=\sum_{i=1}^{+\infty} \tau(S_i)
+		\tau\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)\geqslant\sum_{i=1}^{+\infty}\tau\left[\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)\cap S_i\right]+\tau\left[\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}S_n\right)^c\right]=\sum_{i=1}^{+\infty} \tau(S_i)
 	\end{align*}
 	但是由外测度的次可列可加性有：
 	\begin{equation*}
@@ -431,11 +414,11 @@
 	(8)由(1)(2)(6)立即可得。
 \end{proof}
 \begin{theorem}\label{theo:ExteriorMeasureCompleteSpace}
-	设$X$是一个集合，$\mathscr{A}$是$X$的所有子集构成的集族，$\tau$是$X$上的外测度。$(X,\mathscr{A}_{\tau},\tau)$是一个完全测度空间。
+	设$X$是一个集合，$\tau$是$X$上的外测度。$(X,\mathscr{A}_{\tau},\tau)$是一个完全测度空间。
 \end{theorem}
 \begin{proof}
 	由\cref{prop:tauMeasurableSetCollection}(6)和外测度的定义可知$\tau$是$\mathscr{A}_{\tau}$上的测度，根据\cref{prop:tauMeasurableSetCollection}(8)可得$\mathscr{A}_\tau$是$\sigma$域，所以$(X,\mathscr{A}_\tau,\tau)$是测度空间。\par
-	任取$A\in \mathscr{A}$满足$\tau(A)=0$，对任何的$E\in \mathscr{A}$，由外测度的单调性和非负性（\cref{prop:ExteriorMeasure}(1)）可得$\tau(E\cap A)=0$，于是由外测度的单调性可得：
+	任取$A\in\mathscr{P}(X)$满足$\tau(A)=0$，对任何的$E\in \mathscr{P}(X)$，由\cref{prop:ExteriorMeasure}(1)可得$\tau(E\cap A)=0$，于是：
 	\begin{equation*}
 		\tau(E)\geqslant\tau(E\cap A^c)=\tau(E\cap A)+\tau(E\cap A^c)
 	\end{equation*}
@@ -484,11 +467,10 @@
 		\mu(D\setminus C)=\mu(D)-\mu(C)=\tau(D)-\tau(C)=\tau(D\setminus C)
 	\end{equation*}
 	所以$D\setminus C\in\mathscr{B}$。\par
-	(3)任取$\mathscr{B}$中一个单调不减的集合序列$\{B_n\}$，则有$\mu(B_n)=\tau(B_n)$对任意的$n\in\mathbb{N}^+$成立且$\underset{n=1}{\overset{+\infty}{\cup}}B_n\in\sigma(\mathscr{A})$。令$B_0=\varnothing$，因为$\mu,\tau$是测度，所以$B_0\in\mathscr{B}$。由\cref{prop:SigmaField}(4)可知$B_n\setminus B_{n-1}\in\sigma(\mathscr{A})$，所以由测度的可列可加性和\cref{prop:Measure}(2)可得：
+	(3)任取$\mathscr{B}$中一个单调不减的集合序列$\{B_n\}$，则有$\mu(B_n)=\tau(B_n)$对任意的$n\in\mathbb{N}^+$成立，根据\cref{theo:SetNecessarilySet2}可知$\underset{n=1}{\overset{+\infty}{\cup}}B_n\in\sigma(\mathscr{A})$。令$B_0=\varnothing$，因为$\mu,\tau$是测度，所以$B_0\in\mathscr{B}$。由\cref{prop:SigmaField}(4)可知$B_n\setminus B_{n-1}\in\sigma(\mathscr{A})$，所以由\cref{prop:Measure}(2)可得：
 	\begin{align*}
-		\mu\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)&=\mu\left[\underset{n=1}{\overset{+\infty}{\cup}}(B_n\setminus B_{n-1})\right]=\sum_{n=1}^{+\infty}\mu(B_n\setminus B_{n-1})=\sum_{n=1}^{+\infty}[\mu(B_n)-\mu(B_{n-1})] \\
-		&=\sum_{n=1}^{+\infty}[\tau(B_n)-\tau(B_{n-1})]=\sum_{n=1}^{+\infty}\tau(B_n\setminus B_{n-1})=\tau\left[\underset{n=1}{\overset{+\infty}{\cup}}(B_n\setminus B_{n-1})\right] \\
-		&=\tau\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)
+		&\mu\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)=\mu\left[\underset{n=1}{\overset{+\infty}{\cup}}(B_n\setminus B_{n-1})\right]=\sum_{n=1}^{+\infty}\mu(B_n\setminus B_{n-1})=\sum_{n=1}^{+\infty}[\mu(B_n)-\mu(B_{n-1})] \\
+		=&\sum_{n=1}^{+\infty}[\tau(B_n)-\tau(B_{n-1})]=\sum_{n=1}^{+\infty}\tau(B_n\setminus B_{n-1})=\tau\left[\underset{n=1}{\overset{+\infty}{\cup}}(B_n\setminus B_{n-1})\right]=\tau\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)
 	\end{align*}
 	所以$\underset{n=1}{\overset{+\infty}{\cup}}B_n\in\mathscr{B}$。\par
 	综上，$\mathscr{B}$是一个$\lambda$系。\par
@@ -499,7 +481,7 @@
 	\begin{equation*}
 		\underset{n=1}{\overset{+\infty}{\cup}}A_n=X,\;\mu(A_n)<+\infty,\;\forall\;n\in\mathbb{N}^+
 	\end{equation*}
-	则$\tau$是唯一的且是由$\mu$生成的外测度。
+	则$\tau$是唯一的且是由$\mu$生成的外测度，同时$\tau$是$\sigma$有限测度。
 \end{theorem}
 \begin{proof}
 	取$\tau$为由$\mu$生成的外测度。证明分成以下三步：
@@ -511,11 +493,11 @@
 			\begin{equation*}
 				\tau(B)\geqslant\tau(B\cap A)+\tau(B\cap A^c)
 			\end{equation*}
-			\item 设$\mathscr{B}$是$X$的所有子集构成的集族，$\mathscr{B}_{\tau}$是$\tau$可测集，则$\mathscr{A}\subseteq\mathscr{B}_{\tau}$。
+			\item $\mathscr{A}\subseteq\mathscr{A}_{\tau}$。
 		\end{enumerate}
 		\item 满足定理条件时$\tau$是唯一的。
 	\end{enumerate}\par
-	(1)取任意的$A\in \mathscr{A}$和任意满足$A\subseteq\underset{n=1}{\overset{+\infty}{\cup}}B_n$的$\mathscr{A}$中的集合序列$\{B_n\}$。根据半环的定义可得$A\cap B_n\in\mathscr{A}$，由\cref{prop:SetOperation}(4)和\cref{prop:Measure}(3)可得：
+	(1)取任意的$A\in \mathscr{A}$和任意满足$A\subseteq\underset{n=1}{\overset{+\infty}{\cup}}B_n$的$\mathscr{A}$中的集合序列$\{B_n\}$。根据半环的定义可得$A\cap B_n\in\mathscr{A}$，由\cref{prop:SetOperation}(4)和\cref{prop:Measure}(3)（次可列可加性和单调性）可得：
 	\begin{equation*}
 		\mu(A)=\mu\left[A\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)\right]=\mu\left[\underset{n=1}{\overset{+\infty}{\cup}}(A\cap B_n)\right]\leqslant\sum_{n=1}^{+\infty}\mu(A\cap B_n)\leqslant\sum_{n=1}^{+\infty}\mu(B_n)
 	\end{equation*}
@@ -525,20 +507,20 @@
 	\end{equation*}
 	再取$B_1=A,\;B_n=\varnothing,\;\forall\;n\geqslant2$，有：
 	\begin{equation*}
-		\mu(A)=\sum_{n=1}^{+\infty}\mu(B_n)\geqslant\tau(A)
+		\sum_{n=1}^{+\infty}\mu(B_n)=\mu(A)\geqslant\tau(A)
 	\end{equation*}
 	于是有$\mu(A)=\tau(A)$。\par
-	(2.a)因为$\mathscr{A}$是半环，所以存在互不相交的$\seq{C}{n}\subset\mathscr{A}$使得：
+	(2.a)因为$\mathscr{A}$是半环，由\cref{prop:SetOperation}(6)可知存在互不相交的$\seq{C}{n}\in\mathscr{A}$使得：
 	\begin{equation*}
 		B\cap A^c=B\setminus A=\underset{i=1}{\overset{n}{\cup}}C_i
 	\end{equation*}
-	由(1)可得$\mu(B)=\tau(B)$，根据半环对交的封闭性与\cref{prop:Measure}(1)可得：
+	由(1)可得$\mu(B)=\tau(B)$，根据\cref{prop:Measure}(1)可得：
 	\begin{align*}
 		\tau(B)&=\mu(B)=\mu[(B\cap A)\cup (B\cap A^c)]=\mu(B\cap A)+\mu(B\cap A^c) \\
 		&=\mu(B\cap A)+\mu\left(\underset{i=1}{\overset{n}{\cup}}C_i\right)=\mu(B\cap A)+\sum_{i=1}^{n}\mu(C_i) \\
 		&\geqslant\mu(B\cap A)+\tau(B\cap A^c)=\tau(B\cap A)+\tau(B\cap A^c)
 	\end{align*}\par
-	(2.b)即要证对任意的$A\in \mathscr{A}$和任意的$C\in \mathscr{B}$，有：
+	(2.b)即要证对任意的$A\in\mathscr{A}$和任意的$C\in\mathscr{P}(X)$，有：
 	\begin{equation*}
 		\tau(C)=\tau(C\cap A)+\tau(C\cap A^c)
 	\end{equation*}\par
@@ -551,7 +533,7 @@
 	\begin{equation*}
 		\tau(C)+\varepsilon\geqslant\sum_{n=1}^{+\infty}\mu(C_n)
 	\end{equation*}
-	根据(1)、(2.a)、外测度的定义和\cref{prop:SetOperation}(4)可得：
+	根据(1)、(2.a)、\cref{prop:Series}(4)、外测度的定义和\cref{prop:SetOperation}(4)可得：
 	\begin{align*}
 		\tau(C)+\varepsilon&\geqslant\sum_{n=1}^{+\infty}\mu(C_n)=\sum_{n=1}^{+\infty}\tau(C_n)\geqslant\sum_{n=1}^{+\infty}[\tau(C_n\cap A)+\tau(C_n\cap A^c)] \\
 		&=\sum_{n=1}^{+\infty}\tau(C_n\cap A)+\sum_{n=1}^{+\infty}\tau(C_n\cap A^c)\geqslant\tau\left[\underset{n=1}{\overset{+\infty}{\cup}}(C_n\cap A)\right]+\tau\left[\underset{n=1}{\overset{+\infty}{\cup}}(C_n\cap A^c)\right] \\
@@ -569,14 +551,18 @@
 	\begin{equation*}
 		\tau(C)=\tau(C\cap A)+\tau(C\cap A^c)
 	\end{equation*}\par
-	综上有$\mathscr{A}\subseteq\mathscr{B}_\tau$，由\cref{theo:ExteriorMeasureCompleteSpace}可得$\mathscr{B}_\tau$是$\sigma$域且$\tau$是$\mathscr{B}_\tau$上的测度，所以$\sigma(\mathscr{A})\subseteq\mathscr{B}_\tau$，$\tau$限制在$\sigma(\mathscr{A})$上时具有可列可加性，所以$\tau$是$\sigma(\mathscr{A})$上的测度。\par
-	(3)因为半环是$\pi$系，由\cref{lem:PiExtensionMeasure}可知此时满足条件的$\tau$是唯一的。
+	综上有$\mathscr{A}\subseteq\mathscr{A}_\tau$，由\cref{theo:ExteriorMeasureCompleteSpace}可得$\mathscr{A}_\tau$是$\sigma$域且$\tau$是$\mathscr{A}_\tau$上的测度，所以$\sigma(\mathscr{A})\subseteq\mathscr{A}_\tau$，$\tau$限制在$\sigma(\mathscr{A})$上时具有可列可加性，所以$\tau$是$\sigma(\mathscr{A})$上的测度。\par
+	(3)因为半环是$\pi$系，由\cref{lem:PiExtensionMeasure}可知此时满足条件的$\tau$是唯一的。\par
+	$\tau$的$\sigma$有限性由所给条件可直接得出。
 \end{proof}
+\begin{note}
+	半环上测度的扩张结果实际为完全测度空间$(X,\mathscr{A}_\tau,\tau)$。
+\end{note}
 \begin{corollary}\label{cor:SemiringMeasureExtension}
-	对于包含$X$的半环$\mathscr{A}$上的$\sigma$有限测度$\mu$，存在$\sigma(\mathscr{A})$上$\mu$唯一的扩张$\tau$，且$\tau$是由$\mu$生成的外测度。
+	对于半代数$\mathscr{A}$上的$\sigma$有限测度$\mu$，存在$\sigma(\mathscr{A})$上$\mu$唯一的扩张$\tau$，且$\tau$是由$\mu$生成的外测度，同时$\tau$是$\sigma$有限测度。
 \end{corollary}
 \begin{proof}
-	由\cref{theo:SemiringMeasureExtension}可知只需要证明存在互不相交的$\{A_n\}$满足：
+	由\cref{theo:SemiringMeasureExtension}可知只需要证明存在互不相交的$\{A_n\}\subseteq\mathscr{A}$满足：
 	\begin{equation*}
 		\underset{n=1}{\overset{+\infty}{\cup}}A_n=X,\quad\mu(A_n)<+\infty,\;\forall\;n\in\mathbb{N}^+
 	\end{equation*}\par
@@ -584,17 +570,17 @@
 	\begin{equation*}
 		X=\underset{n=1}{\overset{+\infty}{\cup}}A_n=\underset{n=1}{\overset{+\infty}{\cup}}\left[A_n\Big\backslash\left(\underset{i=1}{\overset{n-1}{\cup}}A_n\right)\right]=\underset{n=1}{\overset{+\infty}{\cup}}\left(\underset{i=1}{\overset{k_n}{\cup}}C_{ni}\right)
 	\end{equation*}
-	其中$C_{ni}$互不相交。因为$C_{ni}\subseteq A_n$，由\cref{prop:Measure}(3)可得$\mu(C_{ni})<+\infty$。$\{C_{ni}\}$即为满足条件的集合序列。
+	其中$C_{ni}$互不相交。因为$C_{ni}\subseteq A_n$，由\cref{prop:Measure}(3)（单调性）可得$\mu(C_{ni})<+\infty$。$\{C_{ni}\}$即为满足条件的集合序列。
 \end{proof}
-\begin{theorem}\label{theo:DifOfFtauAndSigmaA}
-	设$\tau$是半环$\mathscr{A}$上的测度$\mu$生成的外测度，$\mathscr{B}$是$X$的所有子集构成的集族，则：
+\begin{theorem}\label{theo:DifOfAtauAndSigmaA}
+	设$\tau$是半环$\mathscr{A}$上的测度$\mu$生成的外测度，则：
 	\begin{enumerate}
-		\item 对任意的$A\in\mathscr{B}_\tau$，存在$B\in\sigma(\mathscr{A})$使得$A\subseteq B$且$\tau(A)=\tau(B)$；
+		\item 对任意的$A\in\mathscr{A}_\tau$，存在$B\in\sigma(\mathscr{A})$使得$A\subseteq B$且$\tau(A)=\tau(B)$；
 		\item 若存在$\mathscr{A}$中互不相交的集合序列$\{A_n\}$使得：
 		\begin{equation*}
 			\underset{n=1}{\overset{+\infty}{\cup}}A_n=X,\;\mu(A_n)<+\infty,\;\forall\;n\in\mathbb{N}^+
 		\end{equation*}
-		则对任意的$A\in\mathscr{B}_\tau$，存在$B\in\sigma(\mathscr{A})$使得$A\subseteq B$且有$\tau(B\setminus A)=0$。
+		则对任意的$A\in\mathscr{A}_\tau$，存在$B\in\sigma(\mathscr{A})$使得$A\subseteq B$且有$\tau(B\setminus A)=0$。
 	\end{enumerate}
 \end{theorem}
 \begin{proof}
@@ -606,18 +592,18 @@
 	\begin{equation*}
 		\tau(B)\leqslant\tau\left(\underset{k=1}{\overset{+\infty}{\cup}}B_{nk}\right)\leqslant\sum_{k=1}^{+\infty}\mu(B_{nk})<\tau(A)+\frac{1}{n}
 	\end{equation*}
-	令$n\to+\infty$即可得到$\tau(B)\leqslant\tau(A)$，于是$\tau(A)=\tau(B)$。\par
-	(2)由\cref{theo:SemiringMeasureExtension}的证明过程可知$\sigma(\mathscr{A})\subseteq\mathscr{B}_\tau$，所以$A_n\in\mathscr{B}_\tau$，对于任意的$A\in\mathscr{B}_\tau$，根据\cref{prop:tauMeasurableSetCollection}和\cref{prop:SigmaField}(2)可得$A\cap A_n\in\mathscr{B}_\tau$。由(1)可得存在$B_n\in\sigma(\mathscr{A})$满足$A\cap A_n\subseteq B_n$且$\tau(A\cap A_n)=\tau(B_n)$。由外测度的单调性和生成的外测度的定义可知$\tau(A\cap A_n)\leqslant\tau(A_n)\leqslant\mu(A_n)<+\infty$。令$B=\underset{n=1}{\overset{+\infty}{\cup}}B_n$，则：
+	令$n\to+\infty$，由\cref{prop:RSeq}(6)即可得到$\tau(B)\leqslant\tau(A)$，于是$\tau(A)=\tau(B)$。\par
+	(2)由\cref{theo:SemiringMeasureExtension}的证明过程可知$\sigma(\mathscr{A})\subseteq\mathscr{A}_\tau$，所以$A_n\in\mathscr{A}_\tau$。对于任意的$A\in\mathscr{A}_\tau$，根据\cref{prop:tauMeasurableSetCollection}(4)可得$A\cap A_n\in\mathscr{A}_\tau$。由(1)可得存在$B_n\in\sigma(\mathscr{A})$满足$A\cap A_n\subseteq B_n$且$\tau(A\cap A_n)=\tau(B_n)$。由外测度的单调性和生成的外测度的定义可知$\tau(A\cap A_n)\leqslant\tau(A_n)\leqslant\mu(A_n)<+\infty$。令$B=\underset{n=1}{\overset{+\infty}{\cup}}B_n$，则根据\cref{prop:SetOperation}(4)可得：
 	\begin{equation*}
 		\underset{n=1}{\overset{+\infty}{\cup}}(A\cap A_n)=A\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)=A\subseteq\underset{n=1}{\overset{+\infty}{\cup}}B_n=B
 	\end{equation*}
-	因为$\sigma(\mathscr{A})\subseteq\mathscr{B}_\tau$，所以$B_n\in\mathscr{B}_\tau$。根据\cref{theo:ExteriorMeasureCompleteSpace}可得$\mathscr{B}_\tau$是一个$\sigma$域且$\tau$是$\mathscr{B}_\tau$上的测度，由\cref{prop:Measure}(1)、\cref{theo:SetNecessarilySet1}和\cref{prop:Measure}(3)可得：
+	因为$\sigma(\mathscr{A})\subseteq\mathscr{A}_\tau$，所以$B_n\in\mathscr{A}_\tau$。根据\cref{theo:ExteriorMeasureCompleteSpace}可得$\mathscr{A}_\tau$是一个$\sigma$域且$\tau$是$\mathscr{A}_\tau$上的测度，由\cref{prop:Measure}(2)可得：
 	\begin{equation*}
 		\tau[B_n\setminus (A\cap A_n)]=\tau(B_n)-\tau(A\cap A_n)=0
 	\end{equation*}
 	由\cref{prop:SetOperation}(4)(5)、外测度的单调性和外测度的次可列可加性可得：
 	\begin{align*}
-		\tau(B\setminus A)&=\tau[B\setminus(A\cap X)]=\tau\left\{\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)\Big\backslash\left[A\bigcap\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)\right]\right\} \\
+		\tau(B\setminus A)&=\tau[B\setminus(A\cap X)]=\tau\left\{\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)\Big\backslash\left[A\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)\right]\right\} \\
 		&=\tau\left\{\underset{n=1}{\overset{+\infty}{\cup}}B_n\Big\backslash\left[\underset{m=1}{\overset{+\infty}{\cup}}(A\cap A_m)\right]\right\}\leqslant\tau\left\{\underset{n=1}{\overset{+\infty}{\cup}}[B_n\setminus(A\cap A_n)]\right\} \\
 		&\leqslant\sum_{n=1}^{+\infty}\tau[B_n\setminus(A\cap A_n)]=0
 	\end{align*}
@@ -641,7 +627,7 @@
 	因为$\varnothing\subseteq\varnothing,\;\mu(\varnothing)=0,\;X\in\mathscr{A}$，所以$X=X\cup\varnothing\in\tilde{\mathscr{A}}$。\par
 	对任意的$A\cup N\in\tilde{\mathscr{A}}$，由\cref{prop:SetOperation}(7)可得：
 	\begin{equation*}
-		(A\cup N)^c=[(A\cup N)^c\cap B]\cup[(A\cup N)^c\cap B^c]=[A^c\cap N^c\cap B]\cup[A^c\cap N^c\cap B^c]
+		(A\cup N)^c=[(A\cup N)^c\cap B]\cup[(A\cup N)^c\cap B^c]=(A^c\cap N^c\cap B)\cup(A^c\cap N^c\cap B^c)
 	\end{equation*}
 	因为$N\subseteq B$，所以$B^c\subseteq N^c$，于是根据\cref{prop:SigmaField}(2)可得：
 	\begin{equation*}
@@ -655,7 +641,7 @@
 	\begin{equation*}
 		\underset{n=1}{\overset{+\infty}{\cup}}A_n,\;\underset{n=1}{\overset{+\infty}{\cup}}B_n\in\mathscr{A}
 	\end{equation*}
-	由\cref{prop:Measure}(3)可得：
+	由\cref{prop:SigmaField}(1)、\cref{theo:SetNecessarilySet1}和\cref{prop:Measure}(3)可得：
 	\begin{equation*}
 		\mu\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)\leqslant\sum_{n=1}^{+\infty}\mu(B_n)=0
 	\end{equation*}
@@ -668,11 +654,11 @@
 		\underset{n=1}{\overset{+\infty}{\cup}}(A_n\cup N_n)\in\tilde{\mathscr{A}}
 	\end{equation*}\par
 	综上，$\tilde{\mathscr{A}}$是$\sigma$域。\par
-	\textbf{(2)$\;\tilde{\mu}$是良定义的：}任取$A_1\cup N_1=A_2\cup N_2\in\tilde{\mathscr{A}}$。由$\tilde{\mu}$的定义有$\tilde{\mu}(A_1\cup N_1)=\mu(A_1)$，根据\cref{prop:Measure}(3)可得：
+	\textbf{(2)$\;\tilde{\mu}$是良定义的：}任取$A_1\cup N_1=A_2\cup N_2\in\tilde{\mathscr{A}}$。由$\tilde{\mu}$的定义有$\tilde{\mu}(A_1\cup N_1)=\mu(A_1)$，根据\cref{prop:Measure}(3)（次有限可加性）可得：
 	\begin{equation*}
 		\mu(A_1)\leqslant\mu(A_1\cup B_1\cup B_2)\leqslant\mu(A_1)+\mu(B_1)+\mu(B_2)=\mu(A_1)
 	\end{equation*}
-	于是根据\cref{prop:Measure}(3)可得：
+	所以$\mu(A_1\cup B_1\cup B_2)=\mu(A_1)$，于是根据\cref{prop:Measure}(3)（单调性）可得：
 	\begin{equation*}
 		\tilde{\mu}(A_1\cup N_1)=\mu(A_1)=\mu(A_1\cup B_1\cup B_2)\geqslant\mu(A_2)=\tilde{\mu}(A_2\cup N_2)
 	\end{equation*}
@@ -687,7 +673,7 @@
 		&=\sum_{n=1}^{+\infty}\mu(A_n)=\sum_{n=1}^{+\infty}\tilde{\mu}(A_n\cup N_n)
 	\end{align*}
 	所以$\tilde{\mu}$是$\tilde{\mathscr{A}}$上的测度。\par
-	\textbf{(4)$\;(X,\tilde{\mathscr{A}},\tilde{\mu})$是完全测度空间：}若$C\subseteq(A\cup N)\in\tilde{\mathscr{A}},\;\tilde{\mu}(A\cup N)=0,\;A\cup N\in\tilde{\mathscr{A}}$，由\cref{prop:Measure}(3)可得：
+	\textbf{(4)$\;(X,\tilde{\mathscr{A}},\tilde{\mu})$是完全测度空间：}若$C\subseteq(A\cup N)\in\tilde{\mathscr{A}},\;\tilde{\mu}(A\cup N)=0,\;A\cup N\in\tilde{\mathscr{A}}$，由\cref{prop:Measure}(3)（次有限可加性）可得：
 	\begin{equation*}
 		\mu(A\cup B)\leqslant\mu(A)+\mu(B)=\tilde{\mu}(A\cup N)+\mu(B)=0
 	\end{equation*}
@@ -702,38 +688,117 @@
 	\begin{equation*}
 		\underset{n=1}{\overset{+\infty}{\cup}}A_n=X,\;\mu(A_n)<+\infty,\;\forall\;n\in\mathbb{N}^+
 	\end{equation*}
-	$\mathscr{B}$是由$X$的所有子集构成的集族，则$(X,\mathscr{B}_\tau,\tau)$是$(X,\sigma(\mathscr{A}),\tau)$的完全化。
+	则$(X,\mathscr{A}_\tau,\tau)$是$(X,\sigma(\mathscr{A}),\tau)$的完全化。
 \end{theorem}
 \begin{proof}
 	记$\mathscr{C}=\sigma(\mathscr{A})$。\par
-	\textbf{(1)$\;\tilde{\mathscr{C}}=\mathscr{B}_\tau$：}对任意的$A\cup N\in\tilde{\mathscr{C}}$，由\cref{theo:ExteriorMeasureCompleteSpace}可知$(X,\mathscr{B}_\tau,\tau)$是一个完全测度空间，所以$N\in\mathscr{B}_\tau$。由\cref{theo:SemiringMeasureExtension}(2.b)和生成的定义可知$\mathscr{C}\subseteq\mathscr{B}_\tau$，所以$A\in\mathscr{B}_\tau$。根据\cref{prop:SigmaField}(3)可得$A\cup N\in\mathscr{B}_\tau$，所以$\tilde{\mathscr{C}}\subseteq\mathscr{B}_\tau$。\par
-	对任意的$A\in\mathscr{B}_\tau$，由\cref{theo:DifOfFtauAndSigmaA}(2)可知存在$B\in\mathscr{C}$满足$A\subseteq B$且$\tau(B\setminus A)=0$。因为$\mathscr{C}\subseteq\mathscr{B}_\tau$，所以$B\in\mathscr{B}_\tau$，由\cref{prop:SigmaField}(4)可得$B\setminus A\in\mathscr{B}_\tau$，于是由\cref{theo:DifOfFtauAndSigmaA}(1)可知存在$C\in\mathscr{C}$满足$B\setminus A\subseteq C$且$\tau(C)=\tau(B\setminus A)=0$。因为$B\setminus A\subseteq C$，所以$(B\setminus A)\cap C^c=\varnothing$，于是：
-	\begin{equation*}
-		A=(A\cap C)\cup(A\cap C^c)=(A\cap C)\cup\{[(B\setminus A)\cup A]\cap C^c\}=(A\cap C)\cup(B\cap C^c)
-	\end{equation*}
-	因为$\mathscr{C}\subseteq\mathscr{B}_\tau$，由\cref{prop:SigmaField}(2)可得$B\cap C^c\in\mathscr{C}$，而$A\cap C\subseteq C,\;\tau(C)=0$，所以$A\in\tilde{\mathscr{C}}$，于是有$\mathscr{B}_\tau\subseteq\tilde{\mathscr{C}}$。\par
-	综上$\tilde{\mathscr{C}}=\mathscr{B}_\tau$。\par
-	\textbf{(2)$\;\tau$：}对任意的$A\cup N\in\mathscr{B}_\tau,\;N\subseteq B\in\mathscr{C},\;\tau(B)=0$，由外测度的单调性和\cref{prop:ExteriorMeasure}(1)可得：
+	\textbf{(1)$\;\tilde{\mathscr{C}}=\mathscr{A}_\tau$：}对任意的$A\cup N\in\tilde{\mathscr{C}},\;A\in\mathscr{C}$，由\cref{theo:ExteriorMeasureCompleteSpace}可知$(X,\mathscr{A}_\tau,\tau)$是一个完全测度空间，所以$N\in\mathscr{A}_\tau$。由\cref{theo:SemiringMeasureExtension}(2.b)和生成的定义可知$\mathscr{C}\subseteq\mathscr{A}_\tau$，所以$A\in\mathscr{A}_\tau$。根据\cref{prop:SigmaField}(3)可得$A\cup N\in\mathscr{A}_\tau$，所以$\tilde{\mathscr{C}}\subseteq\mathscr{A}_\tau$。\par
+	对任意的$A\in\mathscr{A}_\tau$，由\cref{theo:DifOfAtauAndSigmaA}(2)可知存在$B\in\mathscr{C}$满足$A\subseteq B$且$\tau(B\setminus A)=0$。因为$\mathscr{C}\subseteq\mathscr{A}_\tau$，所以$B\in\mathscr{A}_\tau$，由\cref{prop:SigmaField}(4)可得$B\setminus A\in\mathscr{A}_\tau$，于是由\cref{theo:DifOfAtauAndSigmaA}(1)可知存在$C\in\mathscr{C}$满足$B\setminus A\subseteq C$且$\tau(C)=\tau(B\setminus A)=0$。因为$B\setminus A\subseteq C$，所以$(B\setminus A)\cap C^c=\varnothing$，于是由\cref{prop:SetOperation}(4)可得：
+	\begin{align*}
+		&A=(A\cap C)\cup(A\cap C^c)=(A\cap C)\cup[(A\cap C^c)\cup\varnothing] \\
+		=&(A\cap C)\cup\{(A\cap C^c)\cup[(B\setminus A)\cap C^c]\}=(A\cap C)\cup\{[(B\setminus A)\cup A]\cap C^c\} \\
+		=&(A\cap C)\cup(B\cap C^c)=(B\cap C^c)\cup(A\cap C)
+	\end{align*}
+	因为$\mathscr{C}\subseteq\mathscr{A}_\tau$，由\cref{prop:SigmaField}(2)可得$B\cap C^c\in\mathscr{C}$，而$A\cap C\subseteq C,\;\tau(C)=0$，所以$A\in\tilde{\mathscr{C}}$，于是有$\mathscr{A}_\tau\subseteq\tilde{\mathscr{C}}$。\par
+	综上$\tilde{\mathscr{C}}=\mathscr{A}_\tau$。\par
+	\textbf{(2)$\;\tau$：}对任意的$A\cup N\in\mathscr{A}_\tau,\;N\subseteq B\in\mathscr{C},\;\tau(B)=0$，由外测度的单调性和\cref{prop:ExteriorMeasure}(1)可得：
 	\begin{equation*}
 		\tau(A)\leqslant\tau(A\cup N)\leqslant\tau(A)+\tau(N)\leqslant\tau(A)+\tau(B)=\tau(A)
 	\end{equation*}
 	所以$\tau(A\cup N)=\tau(A)$。\par
-	综上，由\cref{theo:CompleteMeasureSpace}可知$(X,\mathscr{B}_\tau,\tau)$是$(X,\sigma(\mathscr{A}),\tau)$的完全化。
+	综上，由\cref{theo:CompleteMeasureSpace}可知$(X,\mathscr{A}_\tau,\tau)$是$(X,\sigma(\mathscr{A}),\tau)$的完全化。
 \end{proof}
 
 \subsection{乘积空间}
 \begin{definition}
-	设$\{X_t:t\in T\}$是一族非空集合，称：
+	设$\{(X_t,\mathscr{A}_t):t\in T\}$是一族可测空间，称：
 	\begin{equation*}
-		\prod_{t\in T}^{}X_t=\Big\{\{x_t\in X_t:t\in T\}\Big\}
+		\prod_{t\in T}^{}X_t=\Big\{x=\{x_t,t\in T\}:\forall\;t\in T,\;x_t\in X_t\Big\}
 	\end{equation*}
-	为$\{X_t:t\in T\}$的\gls{ProductSpace}。设$S\subset T$，称由$\prod\limits_{t\in T}^{}X_t$到$\prod\limits_{t\in S}^{}X_t$的映射：
+	为$\{X_t:t\in T\}$的\gls{ProductSpace}。设$S\subseteq T$，称由$\prod\limits_{t\in T}^{}X_t$到$\prod\limits_{t\in S}^{}X_t$的映射：
 	\begin{equation*}
-		\pi_S(\{x_t:t\in T\})=\{x_t:t\in S\}
+		\pi_S(\{x_t,t\in T\})=\{x_t,t\in S\}
 	\end{equation*}
-	为\textbf{投影映射}。
+	为\textbf{投影映射}。记由$T$的所有含有有限个元素的子集构成的集族为$\mathcal{D}$（特别的，记由$T$的所有含有$n$个元素的子集构成的集族为$\mathcal{D}_n$），称：
+	\begin{equation*}
+		\mathscr{D}=\underset{S\in\mathcal{D}}{\overset{}{\bigcup}}\left\{\pi_S^{-1}\left(\prod_{t\in S}^{}A_t\right)=\left(\prod_{t\in S}^{}A_t\right)\times\left(\prod_{t\notin S}^{}X_t\right):\forall\;t\in T,\;A_t\in\mathscr{A}_t\right\}
+	\end{equation*}
+	为\gls{FiniteDimensionalMeasurableCylinderSet}，记：
+	\begin{equation*}
+		\prod_{t\in T}^{}\mathscr{A}_t=\sigma(\mathscr{D})
+	\end{equation*}
+	并称$\sigma(\mathscr{D})$为$\{\mathscr{A}_t\}$的乘积，称$\left(\prod\limits_{t\in T}^{}X_t,\prod\limits_{t\in T}^{}\mathscr{A}_t\right)$为$\{(X_t,\mathscr{A}_t):t\in T\}$的乘积。
 \end{definition}
-
+\begin{property}
+	有限维可测矩形柱集有如下性质：
+	\begin{enumerate}
+		\item 对任意的$n\in\mathbb{N}^+$和$S\in\mathcal{D}_n$，集族：
+		\begin{equation*}
+			\mathscr{D}_S\coloneq\left\{\prod_{t\in S}^{}A_t:\forall\;t\in S,\;A_t\in\mathscr{A}_t\right\}
+		\end{equation*}
+		是半环；
+		\item $\mathscr{D}$是半代数；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)对任意的$t\in S$取$A_t=\varnothing$，则：
+	\begin{equation*}
+		\prod_{t\in S}^{}A_t=\varnothing\in\mathscr{D}_S
+	\end{equation*}
+	任取$A,B\in\mathscr{D}_S$，有：
+	\begin{equation*}
+		A=\prod_{t\in S}^{}A_t,\;B=\prod_{t\in S}^{}B_t,\quad\forall\;t\in S,\;A_t,B_t\in\mathscr{A}_t
+	\end{equation*}
+	则由\cref{prop:SigmaField}(2)可得：
+	\begin{equation*}
+		A\cap B=\prod_{t\in S}^{}(A_t\cap B_t)\in\mathscr{D}_S
+	\end{equation*}
+	任取$A,B\in\mathscr{D}_S$，$B\subseteq S$，有：
+	\begin{equation*}
+		A=\prod_{t\in S}^{}A_t,\;B=\prod_{t\in S}^{}B_t,\quad\forall\;t\in S,\;A_t,B_t\in\mathscr{A}_t
+	\end{equation*}
+	则：
+	\begin{equation*}
+		A\setminus B=\left[\underset{C_t\in\{B_t,A_t\setminus B_t\}}{\overset{}{\bigcup}}\left(\prod_{t\in S}^{}C_t\right)\right]\Big\backslash\prod_{t\in S}^{}B_t
+	\end{equation*}
+	由\cref{prop:SigmaField}(4)可知$A_t\setminus B_t\in\mathscr{A}_t$，于是$A\setminus B$可以表示为$\mathscr{D}_S$中$2^n-1$个互不相交元素的并集。\par
+	综上，由\cref{prop:Semiring}(2)可知$\mathscr{D}_S$是半环。\par
+	(2)由定义即可得到$\prod\limits_{t\in T}^{}X_t\in\mathscr{D}$，下面只需证明$\mathscr{D}$是一个半环。\par
+	对任意的$t\in S$取$A_t=\varnothing$，则：
+	\begin{equation*}
+		\pi_S^{-1}\left(\prod_{t\in S}^{}A_t\right)=\varnothing\in\mathscr{D}
+	\end{equation*}
+	对于任意的$A,B\in\mathscr{D}$，存在$m,n\in\mathbb{N}^+$和$S_m\in\mathcal{D}_m,S_n\in\mathcal{D}_n$使得：
+	\begin{gather*}
+		A=\pi_{S_m}^{-1}\left(\prod_{t\in S_m}^{}A_t\right)=\left(\prod_{t\in S_m}^{}A_t\right)\times\left(\prod_{t\notin S_m}^{}X_t\right) \\ B=\pi_{S_n}^{-1}\left(\prod_{t\in S_n}^{}B_t\right)=\left(\prod_{t\in S_n}^{}B_t\right)\times\left(\prod_{t\notin S_n}^{}X_t\right)
+	\end{gather*}
+	记：
+	\begin{equation*}
+		S=S_m\cup S_n,\quad\hat{A}_t=
+		\begin{cases}
+			A_t,&t\in S_m \\
+			X_t,&t\in S\setminus S_m
+		\end{cases},\quad\hat{B}_t=
+		\begin{cases}
+		B_t,&t\in S_n \\
+		X_t,&t\in S\setminus S_n
+		\end{cases}
+	\end{equation*}
+	则：
+	\begin{equation*}
+		\prod_{t\in S}^{}\hat{A}_t,\prod_{t\in S}^{}\hat{B}_t\in\mathscr{D}_S
+	\end{equation*}
+	由(1)可知$\mathscr{D}_S$是半环，于是：
+	\begin{equation*}
+		A\cap B=\left(\prod_{t\in S}^{}\hat{A}_t\bigcap\prod_{t\in S}^{}\hat{B}_t\right)\times\prod_{t\notin S}^{}X_t=\prod_{t\in S}^{}(\hat{A}_t\cap\hat{B}_t)\times\prod_{t\notin S}^{}X_t\in\mathscr{D}
+	\end{equation*}
+	若$B\subseteq A$，则：
+	\begin{equation*}
+		A\setminus B=\left(\prod_{t\in S}^{}\hat{A}_t\Big\backslash\prod_{t\in S}^{}\hat{B}_t\right)\times\prod_{t\notin S}^{}X_t
+	\end{equation*}
+	可以表示为$\mathscr{D}$中有限个互不相交的元素的并集。\par
+	综上，由\cref{prop:Semiring}(2)可知$\mathscr{D}$是半代数。\par
+\end{proof}
 \subsection{LS测度与L测度}
 \begin{definition}
 	称$\mathbb{R}$上非降右连续实值函数$F$为\gls{Qausi-DistributionFunction}。
@@ -774,7 +839,7 @@
 	(1)由之前note中的讨论即可得到。\par
 	(2)由(1)和\cref{theo:ExteriorMeasureCompleteSpace}可知$(\mathbb{R}^{},\mathscr{A}_{\lambda_F})$构成一个完全测度空间。\par
 	(3)由\cref{theo:ExteriorMeasureCompleteSpace}的证明过程即可得到。\par
-	(4)由\cref{theo:DifOfFtauAndSigmaA}(2)和(1)即可得到。\par
+	(4)由\cref{theo:DifOfAtauAndSigmaA}(2)和(1)即可得到。\par
 	(5)由\cref{theo:CompletedExterior}即可得到。\par
 	(6)因为准分布函数$F$是实值函数，由之前note中$\mathbb{R}^{}$的分解式和(1)即可得到。
 \end{proof}
