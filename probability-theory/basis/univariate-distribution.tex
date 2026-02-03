@@ -1095,3 +1095,120 @@
 \end{proof}
 
 \subsection{随机数的生成}
+\begin{theorem}\label{theo:AcceptanceRejectionSampling}
+	设$(X,\mathscr{A},P)$是一个概率空间，$\mu\ll P$，$\tilde{\pi}:X\to[0,\infty)$是$\mathscr{A}$上的可测函数，且满足：
+	\begin{equation*}
+		Z:=\int_{X}\tilde{\pi}(x)\dif\mu\in(0,+\infty)
+	\end{equation*}
+	目标概率测度$\pi$为：
+	\begin{equation*}
+		\pi(A):=\frac{1}{Z}\int_{A}\tilde{\pi}(x)\dif\mu,\quad\forall A\in\mathscr{A}
+	\end{equation*}
+	$Q$是一个提议概率测度且$Q\ll\mu$，记其Radon-Nikodym导数为$q=\dif Q/\dif\mu$。若存在常数$M\in(0,+\infty)$使得：
+	\begin{equation*}
+		\tilde{\pi}(x)\leqslant Mq(x)\;\text{a.e. 于}(X,\mathscr{A},\mu)
+	\end{equation*}
+	考虑如下接受--拒绝采样算法：
+	\begin{enumerate}
+		\item 生成$f\sim Q$；
+		\item 在与$f$独立的条件下生成$U\sim\mathrm{Unif}(0,1)$；
+		\item 若
+		\begin{equation*}
+			U\leqslant\alpha(f):=\frac{\tilde{\pi}(f)}{Mq(f)},
+		\end{equation*}
+		则接受$f$，否则拒绝并返回第$1$步重新生成。
+	\end{enumerate}
+	记单次试验中的接受事件为$B=\{U\leqslant\alpha(f)\}$，则有以下结论成立：
+	\begin{enumerate}
+		\item 给定接受事件$B$，随机变量$f$的条件分布恰为目标分布$\pi$，即：
+		\begin{equation*}
+			P(f\in A|B)=\pi(A),\quad\forall A\in\mathscr{A}
+		\end{equation*}
+		\item 单次试验的接受概率为：
+		\begin{equation*}
+			P(A)=\frac{Z}{M}
+		\end{equation*}
+		\item 设$Y$为算法第一次被接受时输出的样本，则
+		\begin{equation*}
+			Y\sim \pi
+		\end{equation*}
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)任取$A\in\mathscr{A}$。由全概率公式以及$U$与$f$的独立性，
+	\begin{equation*}
+		P(f\in A,B)=\int_{A}P(f=x,B)Q(\dif x)=\int_{A}\frac{P(B)Q(\dif x)}{Q(\dif x)}Q(\dif x)=\int_{A}P(B|f=x)Q(\dif x)
+	\end{equation*}
+	又由于$U\sim\mathrm{Unif}(0,1)$，且由支配条件$\tilde{\pi}(x)\le M q(x)$可知$0\le \alpha(x)\le 1$，从而
+	\begin{equation*}
+		\mathbb{P}(A\mid X=x)
+		=\mathbb{P}(U\le \alpha(x))
+		=\alpha(x)
+		=\frac{\tilde{\pi}(x)}{M q(x)},\qquad \mu\text{-a.e.}
+	\end{equation*}
+	利用$Q(dx)=q(x)\,d\mu(x)$，得到
+	\begin{equation*}
+		\mathbb{P}(X\in B,A)
+		=\int_{B}\frac{\tilde{\pi}(x)}{M q(x)}\,q(x)\,d\mu(x)
+		=\frac{1}{M}\int_{B}\tilde{\pi}(x)\,d\mu(x).
+	\end{equation*}
+	
+	\medskip
+	\noindent\textbf{第二步：计算接受概率$\mathbb{P}(A)$。}
+	
+	取$B=\mathcal{X}$，由上式直接得到
+	\begin{equation*}
+		\mathbb{P}(A)
+		=\frac{1}{M}\int_{\mathcal{X}}\tilde{\pi}(x)\,d\mu(x)
+		=\frac{Z}{M},
+	\end{equation*}
+	从而证明(ii)。
+	
+	\medskip
+	\noindent\textbf{第三步：确定条件分布$\mathcal{L}(X\mid A)$。}
+	
+	由条件概率定义以及前两步，
+	\begin{align*}
+		\mathbb{P}(X\in B\mid A)
+		&=\frac{\mathbb{P}(X\in B,A)}{\mathbb{P}(A)} \\
+		&=\frac{\frac{1}{M}\int_{B}\tilde{\pi}(x)\,d\mu(x)}{\frac{1}{M}\int_{\mathcal{X}}\tilde{\pi}(x)\,d\mu(x)} \\
+		&=\frac{1}{Z}\int_{B}\tilde{\pi}(x)\,d\mu(x)
+		=\Pi(B),
+	\end{align*}
+	这即证明了(i)。
+	
+	\medskip
+	\noindent\textbf{第四步：算法输出样本的分布。}
+	
+	设$(X_k,U_k)_{k\ge1}$是独立同分布的试验序列，定义
+	\begin{equation*}
+		A_k:=\{U_k\le \alpha(X_k)\},\qquad 
+		T:=\inf\{k\ge1:A_k\text{发生}\},\qquad 
+		Y:=X_T.
+	\end{equation*}
+	则$Y$即算法的输出样本。
+	
+	对任意$B\in\mathcal{B}$，有
+	\begin{align*}
+		\mathbb{P}(Y\in B)
+		&=\sum_{k=1}^{\infty}\mathbb{P}(T=k,X_k\in B) \\
+		&=\sum_{k=1}^{\infty}\mathbb{P}(A_1^c,\dots,A_{k-1}^c)\,\mathbb{P}(A_k,X_k\in B).
+	\end{align*}
+	由于各次试验独立同分布，
+	\begin{equation*}
+		\mathbb{P}(A_1^c,\dots,A_{k-1}^c)=(1-\mathbb{P}(A))^{k-1},
+		\qquad 
+		\mathbb{P}(A_k,X_k\in B)=\mathbb{P}(A,X\in B).
+	\end{equation*}
+	因此
+	\begin{align*}
+		\mathbb{P}(Y\in B)
+		&=\left[\sum_{k=1}^{\infty}(1-\mathbb{P}(A))^{k-1}\right]\mathbb{P}(A,X\in B) \\
+		&=\frac{1}{\mathbb{P}(A)}\mathbb{P}(A,X\in B)
+		=\mathbb{P}(X\in B\mid A)
+		=\Pi(B),
+	\end{align*}
+	其中最后一步由(i)成立。
+	
+	故$Y\sim\Pi$，从而证明(iii)。证毕。
+\end{proof}

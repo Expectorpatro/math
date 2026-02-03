@@ -474,7 +474,7 @@
 		activation functions $\phi(\cdot)$
 		
 		\Ensure 
-		Hidden states $\{h_t^{(l)}\}_{l=1}^{L}$
+		Hidden states $\{h_t^{(L)}\}_{t=1}^{T}$
 		\State Initialize hidden states $h_0^{(l)} = \mathbf{0}$ for all $l = 1,\dots,L$
 		\For{$t = 1$ \textbf{to} $T$}   \Comment{Iterate over time steps}
 		\For{$l= 1$ \textbf{to} $L$}  \Comment{Iterate over layers}
@@ -742,3 +742,97 @@
 \end{note}
 \subsubsection{填充}
 在上述卷积与池化定义中，邻域窗口$W_{i,j}$可能在靠近边界时超出输入特征图$X$的定义域。为使边界位置也能应用同样的局部算子，通常在输入矩阵四周引入\gls{padding}。在卷积与池化中，所有邻域窗口$W_{i,j}$实际均作用在扩展特征图$\tilde{X}$上。
+\subsubsection{CNN}
+\gls{CNN}是一类专门用于对网格结构数据进行分类的神经网络模型，在计算机视觉、医学影像分析以及模式识别等领域得到了广泛应用。其核心思想是通过局部连接、权值共享以及层级化特征学习机制，在保持参数规模可控的同时，有效建模输入数据中的空间局部相关性与层级结构信息。\par
+典型的卷积神经网络由特征提取阶段和分类阶段两部分组成。特征提取阶段由 $L$ 个堆叠的特征提取块构成，每一块通常包含卷积层、非线性激活函数以及池化层，用于逐层从原始输入中提取由低级到高级的层级化表示。卷积层通过局部加权运算提取空间局部模式，激活函数引入非线性变换，而池化层则通过降采样操作增强模型的平移不变性并降低特征分辨率。\par
+在完成多层特征抽取之后，网络进入分类阶段。该阶段首先将高维特征图展平成一维向量，并通过若干全连接层对特征进行全局整合，最终由Softmax层输出关于各类别的预测概率。
+\begin{figure}[t]
+	\centering
+	\begin{tikzpicture}[
+		font=\small,
+		>=Latex,
+		node distance=8mm,
+		block/.style={draw, rounded corners=2pt, minimum height=7mm, minimum width=32mm, align=center},
+		conv/.style={block, fill=blue!10},
+		pool/.style={block, fill=green!12},
+		fc/.style={block, fill=orange!15},
+		op/.style={block, fill=gray!10},
+		arrow/.style={->, thick}
+		]
+		
+		% =========================
+		% Input
+		% =========================
+		\node[block, fill=yellow!15] (in) {Input};
+		
+		% =========================
+		% First feature block (one layer)
+		% =========================
+		\node[conv, below=of in] (c1) {Conv};
+		\node[op, below=2mm of c1] (r1) {Activation Function};
+		\node[pool, below=2mm of r1] (p1) {Pool};
+		
+		% =========================
+		% Dots for middle layers
+		% =========================
+		\node[below=8mm of p1] (dots) {$\vdots$};
+		
+		% =========================
+		% Last feature block (one layer)
+		% =========================
+		\node[conv, below=8mm of dots] (cL) {Conv};
+		\node[op, below=2mm of cL] (rL) {Activation Function};
+		\node[pool, below=2mm of rL] (pL) {Pool};
+		
+		% =========================
+		% Classifier
+		% =========================
+		\node[op, below=of pL] (flat) {Flatten};
+		\node[fc, below=2mm of flat] (f1) {FC};
+		\node[op, below=2mm of f1] (rF) {Activation Function};
+		\node[fc, below=2mm of rF] (f2) {FC};
+		\node[op, below=2mm of f2] (sm) {Softmax};
+		
+		% =========================
+		% Arrows
+		% =========================
+		\draw[arrow] (in) -- (c1);
+		\draw[arrow] (c1) -- (r1);
+		\draw[arrow] (r1) -- (p1);
+		
+		\draw[arrow] (p1) -- (dots);
+		\draw[arrow] (dots) -- (cL);
+		
+		\draw[arrow] (cL) -- (rL);
+		\draw[arrow] (rL) -- (pL);
+		
+		\draw[arrow] (pL) -- (flat);
+		\draw[arrow] (flat) -- (f1);
+		\draw[arrow] (f1) -- (rF);
+		\draw[arrow] (rF) -- (f2);
+		\draw[arrow] (f2) -- (sm);
+		
+		% =========================
+		% Left brace: single layer definition
+		% =========================
+		\draw [decorate, decoration={brace, mirror, amplitude=5pt}]
+		($(c1.north west)+(-6mm,0)$) -- ($(p1.south west)+(-6mm,0)$)
+		node[midway, left=8mm] {\small One Feature Block};
+		
+		% =========================
+		% Right brace: L layers in total
+		% =========================
+		\draw [decorate, decoration={brace, amplitude=7pt}]
+		($(c1.north east)+(6mm,0)$) -- ($(pL.south east)+(6mm,0)$)
+		node[midway, right=10mm] {\small $L$ Feature Extraction Blocks};
+		
+		% =========================
+		% Grouping boxes (optional but clean)
+		% =========================
+		\node[draw, dashed, rounded corners=2pt, inner sep=6pt, fit=(c1)(pL)] {};
+		\node[draw, dashed, rounded corners=2pt, inner sep=6pt, fit=(flat)(sm),
+		label={[font=\small]right:Classifier}] {};
+		
+	\end{tikzpicture}
+	\caption{卷积神经网络结构示意图}
+\end{figure}

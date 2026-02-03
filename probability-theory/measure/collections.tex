@@ -3,7 +3,7 @@
 	一个\gls{Set}是指具有某种性质的事物的全体。组成集合的每个事物称为该集合的\gls{Element}。若集合的元素只有有限多个，则称该集合为\gls{FiniteSet}，否则称为\gls{InfiniteSet}；不含任何元素的集合称为\gls{EmptySet}，用符号$\varnothing$表示。语境中所有相关元素构成的集合称之为\gls{UniversalSet}，一般用$X$表示，也称为\textbf{空间}或\textbf{全空间}。
 \end{definition}
 \begin{definition}
-	若集合$A$由集合构成，则称$A$是一个\gls{FamilyOfSets}。
+	若集合$A$由集合构成，则称$A$是一个\gls{FamilyOfSets}。记$A$的所有子集构成的集合为$\mathscr{P}(A)$。
 \end{definition}
 
 \subsection{集合相关}
@@ -11,60 +11,49 @@
 \begin{definition}
 	设$A,B$是两个集合：
 	\begin{enumerate}
-		\item $A$\textbf{包含}$B$是指对任意的$x\in B$有$x\in A$，记作$B\subseteq A$，也称作$B$包含于$A$，$B$是$A$的\textbf{子集}；
+		\item $A$\textbf{包含}$B$是指对任意的$x\in B$有$x\in A$，记作$B\subseteq A$，也称作$B$包含于$A$，$B$是$A$的\gls{Subset}；
 		\item $A$和$B$\textbf{相等}是指$A\subseteq B$且$B\subseteq A$；
-		\item $A$和$B$\textbf{不交}是指$A$和$B$没有相同的元素；
+		\item $A$和$B$\gls{Disjoint}是指$A$和$B$没有相同的元素；
 	\end{enumerate}
-	若$A\ne B$且有$A$包含$B$，则称$B$是$A$的\textbf{真子集}，记作$B\subsetneq A$。
+	若$A\ne B$且有$A$包含$B$，则称$B$是$A$的\gls{ProperSubset}，记作$B\subsetneq A$。
 \end{definition}
 \subsubsection{集合的运算}
 \begin{definition}
 	设$A,B$是全集$X$的两个子集，定义：
 	\begin{enumerate}
-		\item $A\cup B\coloneq\{x:x\in A\text{或}x\in B\}$，称之为$A$与$B$的\textbf{并集}；
-		\item $A\cap B\coloneq\{x:x\in A\text{且}x\in B\}$，称之为$A$与$B$的\textbf{交集}；
-		\item $A\setminus B\coloneq\{x:x\in A\text{且}x\notin B\}$，称之为$A$与$B$的\textbf{差集}；
-		\item $A\Delta B\coloneq (A\setminus B)\cup(B\setminus A)$，称之为$A$与$B$的\textbf{对称差}；
-		\item $A^c\coloneq X\setminus A$，称之为$A$的\textbf{补集}。
+		\item $A\cup B\coloneq\{x:x\in A\text{或}x\in B\}$，称之为$A$与$B$的\gls{Union}；
+		\item $A\cap B\coloneq\{x:x\in A\text{且}x\in B\}$，称之为$A$与$B$的\gls{Intersection}；
+		\item $A\setminus B\coloneq\{x:x\in A\text{且}x\notin B\}$，称之为$A$与$B$的\gls{Difference}；
+		\item $A\Delta B\coloneq (A\setminus B)\cup(B\setminus A)$，称之为$A$与$B$的\gls{SymmetricDifference}；
+		\item $A^c\coloneq X\setminus A$，称之为$A$的\gls{Complement}。
 	\end{enumerate}
 \end{definition}
 \begin{property}\label{prop:SetOperation}
 	设$A,B,C$是全集$X$的三个子集，$\{A_n:n\in I\}$是$X$的子集构成的一个集族，其中$I$是一个指标集。集合的运算有如下性质：
 	\begin{enumerate}
 		\item \textbf{幂等性：}$A\cup A=A,\;A\cap A=A$；
-		\item \textbf{交换律：}$A\cup B=B\cup A,\;A\cap B=B\cap A$；
+		\item \textbf{交换律：}$A\cup B=B\cup A,\;A\cap B=B\cap A,\;A\Delta B=B\Delta A$；
 		\item \textbf{结合律：}$(A\cup B)\cup C=A\cup(B\cup C),\;(A\cap B)\cap C=A\cap(B\cap C)$；
-		\item \textbf{分配律：}$(A\cup B)\cap C=(A\cap C)\cup(B\cap C),\;(A\cap B)\cup C=(A\cup C)\cap(B\cup C)$，$(A\cup B)\setminus C=(A\setminus C)\cup(B\setminus C),\;(A\setminus B)\cap C=(A\cap C)\setminus(B\cap C),\;(A\cap B)\setminus C=(A\setminus C)\cap(B\setminus C)$；
+		\item \textbf{分配律：}
+		\begin{gather*}
+			A\cap\left(\underset{n\in I}{\overset{}{\bigcup}}A_n\right)=\underset{n\in I}{\overset{}{\bigcup}}(A\cap A_n),\quad A\cup\left(\underset{n\in I}{\overset{}{\bigcap}}A_n\right)=\underset{n\in I}{\overset{}{\bigcap}}(A\cup A_n) \\
+			\left(\underset{n\in I}{\overset{}{\bigcup}}A_n\right)\Big\backslash A=\underset{n\in I}{\overset{}{\bigcup}}(A_n\setminus A),\quad\left(\underset{n\in I}{\overset{}{\bigcap}}A_n\right)\Big\backslash A=\underset{n\in I}{\overset{}{\bigcap}}(A_n\setminus A) \\
+			(A\setminus B)\cap C=(A\cap C)\setminus(B\cap C)
+		\end{gather*}
 		\item $(A\setminus B)\setminus C=A\setminus(B\cup C)=(A\setminus B)\cap(A\setminus C)$；
 		\item $A\setminus B=A\cap B^c=A\setminus (A\cap B)$；
 		\item \textbf{De-Morgan Law：}
 		\begin{equation*}
-			\left(\underset{n\in I}{\bigcup}A_n\right)^c=\underset{n\in I}{\bigcap}A_n^c,\quad
-			\left(\underset{n\in I}{\bigcap}A_n\right)^c=\underset{n\in I}{\bigcup}A_n^c
+			A\Big\backslash\left(\underset{n\in I}{\bigcup}A_n\right)=\underset{n\in I}{\bigcap}(A\backslash A_n),\quad
+			A\Big\backslash\left(\underset{n\in I}{\bigcap}A_n\right)=\underset{n\in I}{\bigcup}(A\backslash A_n)
 		\end{equation*}
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	只证明De-Morgan Law，其余利用集合相等的定义类似可得。\par
-	(7)对于第一个等式有：
-	\begin{equation*}
-		x\in\left(\underset{n\in I}{\bigcup}A_n\right)^c
-		\iff
-		\forall\;n\in I,\;x\notin A_n
-		\iff
-		x\in\underset{n\in I}{\bigcap}A_n^c
-	\end{equation*}\par
-	对于第二个等式有：
-	\begin{equation*}
-		x\in\left(\underset{n\in I}{\bigcap}A_n\right)^c
-		\iff
-		\exists\;n\in I,\;x\notin A_n
-		\iff
-		x\in\underset{n\in I}{\bigcup}A_n^c\qedhere
-	\end{equation*}
+	利用集合相等的定义即可得到。
 \end{proof}
 \begin{definition}
-	设$\{A_n\}$为一个集合序列，
+	设$\{A_n\}$为一个集合序列。
 	\begin{enumerate}
 		\item 若$A_n\subseteq A_{n+1},\;\forall\;n\in\mathbb{N}^+$，则称$\{A_n\}$为单调递增的集合序列，记为$A_n\uparrow$；
 		\item 若$A_n\supseteq A_{n+1},\;\forall\;n\in\mathbb{N}^+$，则称$\{A_n\}$为单调递减的集合序列，记为$A_n\downarrow$；
@@ -92,7 +81,7 @@
 		\item $\{A_n\}$的上下极限具有如下等价定义：
 		\begin{gather*}
 			\varliminf_{n\to+\infty}A_n=\{x:\exists\;N\in\mathbb{N}^+,\;\forall\;n\geqslant N,\;x\in A_n\} \\
-			\varlimsup_{n\to+\infty}A_n=\{x:\forall\;N\in\mathbb{N}^+,\;\exists\;n\geqslant N,\;x\in A_n\}=\{x:x\text{属于无穷多个$A_n$中}\}
+			\varlimsup_{n\to+\infty}A_n=\{x:\forall\;N\in\mathbb{N}^+,\;\exists\;n\geqslant N,\;x\in A_n\}=\{x:x\text{属于无穷多个$A_n$}\}
 		\end{gather*}
 		\item $\{A_n\}$的下极限包含于上极限，即：
 		\begin{equation*}
@@ -213,7 +202,7 @@
 	\end{enumerate}
 	则称$\mathscr{A}$为\gls{FieldOfSets}或\gls{AlgebraOfSets}。
 \end{definition}
-\begin{property}
+\begin{property}\label{prop:FieldOfSets}
 	域具有如下性质：
 	\begin{enumerate}
 		\item 域对有限交、并、补、差封闭；
@@ -222,7 +211,7 @@
 \end{property}
 \begin{proof}
 	(1)有限交和有限补由定义立即可得。由\cref{prop:SetOperation}(7)可得有限并的封闭性，根据\cref{prop:SetOperation}(6)可得有限差的封闭性。\par
-	(2)只需证明二者互为充要条件，必要性显然，由\cref{prop:SetOperation}(7)即可得到充分习惯。
+	(2)只需证明二者互为充要条件，由\cref{prop:SetOperation}(7)即可得到。
 \end{proof}
 \begin{theorem}\label{theo:SetNecessarilySet1}
 	半环必是$\pi$系，环必是半环，域必是环和半代数。
@@ -235,16 +224,12 @@
 	\end{equation*}
 	因为$\mathscr{A}$是一个环，所以$A\setminus B,B\setminus A\in\mathscr{A}$，$[(A\setminus B)\cup(B\setminus A)]\in\mathscr{A}$，$A\cup B\in\mathscr{A}$，所以$A\cap B=(A\cup B)\setminus[(A\setminus B)\cup(B\setminus A)]\in\mathscr{A}$，即$\mathscr{A}$对交的运算是封闭的。\par
 	因为$\mathscr{A}$是一个环，对差的运算封闭，所以取$C=A\setminus B$即有$A\setminus B=C\in\mathscr{A}$。\par
-	(3)设$\mathscr{A}$是一个域，$A,B\in\mathscr{A}$，由\cref{prop:SetOperation}(7)(6)可得：
-	\begin{gather*}
-		A\cup B=(A^c\cap B^c)^c\in\mathscr{A},\quad A\setminus B=A\cap B^c\in\mathscr{A}
-	\end{gather*}
-	即$\mathscr{A}$是一个环。\par
+	(3)由\cref{prop:FieldOfSets}(1)可知域是环。\par
 	(4)由(3)(2)和域的定义立即可得。
 \end{proof}
 \subsubsection{单调系、$\lambda$系、$\sigma$环、$\sigma$域}
 \begin{definition}
-	如果集族$\mathscr{A}$中的所有单调序列$\{A_n\}$都满足$\lim\limits_{n\to+\infty}A_n\in\mathscr{A}$，则称$\mathscr{A}$为\gls{MonotoneClass}。
+	根据\cref{prop:SetLimit}(3)，如果集族$\mathscr{A}$中的所有单调序列$\{A_n\}$都满足$\lim\limits_{n\to+\infty}A_n\in\mathscr{A}$，则称$\mathscr{A}$为\gls{MonotoneClass}。
 \end{definition}
 \begin{definition}
 	如果$X$上的集族$\mathscr{A}$满足：
@@ -296,7 +281,7 @@
 		A\cap B=A\cap B\cap X\cap\cdots=(A^c\cup B^c\cup\varnothing\cup\cdots)^c\in\mathscr{A}
 	\end{equation*}
 	所以$\mathscr{A}$是一个域。\par
-	(2)由(1)可知$\mathscr{A}$是一个域，根据\cref{theo:SetNecessarilySet1}可得$\mathscr{A}$是一个$\pi$系，所以$\mathscr{A}$对有限交封闭。\par
+	(2)有限交由(1)和\cref{prop:FieldOfSets}(1)即可得到。\par
 	任取集合序列$\{A_n\}\subseteq\mathscr{A}$，由\cref{prop:SetOperation}(7)和$\sigma$域的定义可得：
 	\begin{equation*}
 		\underset{n=1}{\overset{+\infty}{\cap}}A_n=\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n^c\right)^c\in\mathscr{A}
@@ -307,12 +292,8 @@
 		A\cup B=A\cup B\cup\varnothing\cup\cdots\in\mathscr{A}
 	\end{equation*}
 	所以$\mathscr{A}$对有限并封闭。\par
-	(4)任取$A,B\in\mathscr{A}$，由\cref{prop:SetOperation}(6)、$\sigma$域定义和(2)可得：
-	\begin{equation*}
-		A\setminus B=A\cap B^c\in\mathscr{A}
-	\end{equation*}
-	上述公式也表明差运算可转换为交运算和补运算，由(2)即可得到$\sigma$域对可列差封闭。\par
-	(5)显然。\par
+	(4)有限差由(1)和\cref{prop:FieldOfSets}(1)即可得到，可列差由\cref{prop:SetOperation}(7)、有限差的结论和(2)即可得到。\par
+	(5)由定义逐条验证即可。\par
 	(6)因为$X\in\mathscr{A}$，所以$A=A\cap X\in A\cap\mathscr{A}$。\par
 	对任意的$B\in A\cap\mathscr{A}$，有$B=A\cap C$，其中$C\in\mathscr{A}$，于是由\cref{prop:SetOperation}(7)(4)：
 	\begin{equation*}
@@ -326,49 +307,40 @@
 	因为$\mathscr{A}$是$\sigma$域，所以$\underset{n=1}{\overset{+\infty}{\cup}}C_n\in\mathscr{A}$，于是$\underset{n=1}{\overset{+\infty}{\cup}}B_n\in A\cap\mathscr{A}$。\par
 	综上，$A\cap\mathscr{A}$是$A$上的$\sigma$域。
 \end{proof}
-\begin{definition}
-	称$X$和其上的一个$\sigma$域$\mathscr{A}$为\gls{MeasurableSpace}，记为$(X,\mathscr{A})$，称$\mathscr{A}$中的集合为\gls{MeasurableSet}。
-\end{definition}
 \begin{theorem}\label{theo:SetNecessarilySet2}
 	$\lambda$系是单调系，$\sigma$域是$\lambda$系。
 \end{theorem}
 \begin{proof}
-	(1)设$\mathscr{A}$是一个$\lambda$系。由$\lambda$系的定义，$\mathscr{A}$中单调递增的集合序列必在$\mathscr{A}$中有极限。任取$\mathscr{A}$中的单调递减序列$\{A_n\}$，由\cref{prop:lambda-System}可知$\{A_n^c\}$是$\mathscr{A}$中的一个单调递增序列，于是有：
+	(1)设$\mathscr{A}$是一个$\lambda$系。由$\lambda$系的定义，$\mathscr{A}$中单调递增的集合序列必在$\mathscr{A}$中有极限。任取$\mathscr{A}$中的单调递减序列$\{A_n\}$，由\cref{prop:lambda-System}可知$\{A_n^c\}$是$\mathscr{A}$中的一个单调递增序列，于是根据\cref{prop:SetLimit}(3)可得：
 	\begin{equation*}
 		\lim_{n\to+\infty}A_n^c=\underset{n=1}{\overset{+\infty}{\cup}}A_n^c\in\mathscr{A}
 	\end{equation*}
-	所以根据\cref{prop:lambda-System}可得：
+	所以根据\cref{prop:SetOperation}(7)和\cref{prop:lambda-System}可得：
 	\begin{equation*}
 		\underset{n=1}{\overset{+\infty}{\cap}}A_n=\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n^c\right)^c\in\mathscr{A}
 	\end{equation*}
-	即$\{A_n\}$在$\mathscr{A}$中有极限。由$\{A_n\}$的任意性，$\mathscr{A}$中单调递减的集合序列也必在$\mathscr{A}$中有极限。综上，$\mathscr{A}$是一个单调系。由$\mathscr{A}$的任意性，$\lambda$系是单调系。\par
-	(2)由\cref{prop:SigmaField}(1)可得$\sigma$域是域，所以$\sigma$域是环，因此对差的运算封闭。根据$\sigma$域的定义即可得出结论。
+	即$\{A_n\}$在$\mathscr{A}$中有极限。由$\{A_n\}$的任意性，$\mathscr{A}$中单调递减的集合序列也必在$\mathscr{A}$中有极限。综上，$\mathscr{A}$是一个单调系。\par
+	(2)由\cref{prop:SigmaField}(4)可知$\sigma$域对差的运算封闭，根据定义即可得出结论。
 \end{proof}
 \subsubsection{集族的关系总结}
 上面提到的集族之间有如下关系：
-\begin{gather*}
-	\text{$\sigma$域}\subset\text{域}\subset\text{环}\subset\text{半环}\subset\text{$\pi$系} \\
-	\text{$\sigma$域}\subset\text{$\lambda$系}\subset\text{单调系}
-\end{gather*}
+\begin{equation*}
+	\text{单调系}\supset\text{$\lambda$系}\supset\text{$\sigma$域}\subset\text{域}\subset\text{环}\subset\text{半环}\subset\text{$\pi$系}
+\end{equation*}
 \begin{theorem}\label{theo:RingContainX=Field}
 	一个包含$X$的环是域，一个包含$X$的$\sigma$环是$\sigma$域。
 \end{theorem}
 \begin{proof}
-	(1)设$\mathscr{A}$是一个环且$X\in\mathscr{A}$。任取$A,B\in\mathscr{A}$，由环的定义可得：
-	\begin{equation*}
-		A\cap B=(A\cup B)\setminus[(A\setminus B)\cup (B\setminus A)]\in\mathscr{A}
-	\end{equation*}
-	由$A,B$的任意性，$\mathscr{A}$对交的运算封闭。\par
+	(1)设$\mathscr{A}$是一个环且$X\in\mathscr{A}$。由\cref{theo:SetNecessarilySet1}可知$\mathscr{A}$对交的运算封闭。\par
 	因为$A^c=X\setminus A$，所以$A^c\in\mathscr{A}$。由$A$的任意性，$\mathscr{A}$对补的运算封闭。\par
 	综上，$\mathscr{A}$是一个域，即一个包含$X$的环是域。\par
-	(2)设$\mathscr{A}$是$\sigma$域，$A\in\mathscr{A}$。因为$X\in\mathscr{A},\;A^c=X\setminus A$，而$\sigma$环对差的运算封闭，所以$\mathscr{A}$对补的运算封闭。又因为$\sigma$环对可列并封闭，所以$\mathscr{A}$是$\sigma$域，即一个包含$X$的$\sigma$环是$\sigma$域。
+	(2)设$\mathscr{A}$是$\sigma$环，$A\in\mathscr{A}$。因为$X\in\mathscr{A},\;A^c=X\setminus A$，而$\sigma$环对差的运算封闭，所以$\mathscr{A}$对补的运算封闭。由定义可知$\mathscr{A}$是$\sigma$域，即一个包含$X$的$\sigma$环是$\sigma$域。
 \end{proof}
-一
 \begin{theorem}\label{theo:Monotone+Field=SigmaField}
 	一个既是单调系又是域的集族必是$\sigma$域。
 \end{theorem}
 \begin{proof}
-	设$\mathscr{A}$既是单调系又是域。因为$\mathscr{A}$是一个域，所以对补的运算封闭且$X\in\mathscr{A}$。任取$A_n\in\mathscr{A},\;n\in\mathbb{N}^+$，因为域是环，所以$\mathscr{A}$对有限并封闭，即$\underset{i=1}{\overset{n}{\cup}}A_i\in\mathscr{A},\;\forall\;n\in\mathbb{N}^+$。因为$\mathscr{A}$是单调系，所以单调递增集合序列：
+	设$\mathscr{A}$既是单调系又是域。因为$\mathscr{A}$是一个域，所以对补的运算封闭且$X\in\mathscr{A}$。任取$A_n\in\mathscr{A},\;n\in\mathbb{N}^+$，由\cref{theo:SetNecessarilySet1}可知$\mathscr{A}$对有限并封闭，即$\underset{i=1}{\overset{n}{\cup}}A_i\in\mathscr{A},\;\forall\;n\in\mathbb{N}^+$。因为$\mathscr{A}$是单调系，根据\cref{prop:SetLimit}(3)，单调递增集合序列：
 	\begin{equation*}
 		\left\{B_n=\underset{i=1}{\overset{n}{\cup}}A_i\right\}
 	\end{equation*}
@@ -382,7 +354,7 @@
 	一个既是$\lambda$系又是$\pi$系的集族必是$\sigma$域。
 \end{theorem}
 \begin{proof}
-	设$\mathscr{A}$既是$\lambda$系又是$\pi$系。因为$\mathscr{A}$是$\lambda$系，所以$X\in\mathscr{A}$。任取$A\in\mathscr{A}$，由$\lambda$系的定义可得$A^c=X\setminus A\in\mathscr{A}$。由$A$的任意性，$\mathscr{A}$对补的运算封闭。又因为$\mathscr{A}$是一个$\pi$系，所以$\mathscr{A}$对交的运算封闭。综上可知$\mathscr{A}$是一个域。因为$\lambda$系是单调系，所以$\mathscr{A}$既是域又是单调系，由\cref{theo:Monotone+Field=SigmaField}可得$\mathscr{A}$是$\sigma$域。
+	设$\mathscr{A}$既是$\lambda$系又是$\pi$系。因为$\mathscr{A}$是$\lambda$系，所以$X\in\mathscr{A}$。任取$A\in\mathscr{A}$，由$\lambda$系的定义可得$A^c=X\setminus A\in\mathscr{A}$。由$A$的任意性，$\mathscr{A}$对补的运算封闭。又因为$\mathscr{A}$是一个$\pi$系，所以$\mathscr{A}$对交的运算封闭。综上可知$\mathscr{A}$是一个域。由\cref{theo:SetNecessarilySet2}可知$\lambda$系是单调系，所以$\mathscr{A}$既是域又是单调系，由\cref{theo:Monotone+Field=SigmaField}可得$\mathscr{A}$是$\sigma$域。
 \end{proof}
 
 \subsection{集族的生成}
@@ -402,18 +374,7 @@
 	\begin{equation*}
 		\mathscr{C}=\underset{\mathscr{D}\in \mathbf{A}}{\cap}\mathscr{D}
 	\end{equation*}
-	下只需证$\mathscr{C}$是一个环（或单调系，或$\lambda$系，或$\sigma$域）。\par
-	(1)任取$A,B\in\mathscr{C}$，则对任意的$\mathscr{D}\in\mathbf{A}$，有$A,B\in\mathscr{D}$。因为$\mathscr{D}$是一个环，所以$A\cup B\in\mathscr{D},\;A\setminus B\in\mathscr{D}$。由$\mathscr{D}$的任意性，$A\cup B\in\mathscr{C},\;A\setminus B\in\mathscr{C}$，所以$\mathscr{C}$是一个环。\par
-	(2)任取单调集合序列$\{A_n\}\subseteq\mathscr{C}$，则对任意的$\mathscr{D}\in\mathbf{A}$，有$\{A_n\}\subseteq\mathscr{D}$。因为$\mathscr{D}$是单调系，所以$\lim\limits_{n\to+\infty}A_n\in\mathscr{D}$。由$\mathscr{D}$的任意性，$\lim\limits_{n\to+\infty}A_n\in\mathscr{C}$。由$\{A_n\}$的任意性，$\mathscr{C}$是一个单调系。\par
-	(3)因为任意的$\mathscr{D}\in\mathbf{A}$都是$\lambda$系，所以$X\in\mathscr{C}$。任取$A,B\in\mathscr{C},\;B\subseteq A$，则对任意的$\mathscr{D}\in\mathbf{A}$，有$A\setminus B\in\mathscr{D}$。由$\mathscr{D}$的任意性，$A\setminus B\in\mathscr{C}$。由$A,B$的任意性，$\mathscr{C}$对包含关系的差运算封闭。任取单调递增集合序列$\{A_n\}\subseteq\mathscr{C}$，则对任意的$\mathscr{D}\in\mathbf{A}$，有$\{A_n\}\subseteq\mathscr{D}$。因为$\mathscr{D}$是$\lambda$系，所以$\mathscr{D}$是单调系，于是$\lim\limits_{n\to+\infty}A_n\in\mathscr{D}$。由$\mathscr{D}$的任意性，$\lim\limits_{n\to+\infty}A_n\in\mathscr{C}$。由$\{A_n\}$的任意性，$\mathscr{C}$对单调递增集合序列的极限是封闭的。综上，$\mathscr{C}$是一个$\lambda$系。\par
-	(4)因为任意的$\mathscr{D}\in\mathbf{A}$都是$\sigma$域，所以$X\in\mathscr{C}$。任取$A\in\mathscr{C}$，则对任意的$\mathscr{D}$，有$A\in\mathscr{D}$。因为$\mathscr{D}$是$\sigma$域，所以$A^c\in\mathscr{D}$。由$\mathscr{D}$的任意性，$A^c\in\mathscr{C}$。由$A$的任意性，$\mathscr{C}$对补的运算封闭。任取集合序列$\{A_n\}\subseteq\mathscr{C}$，则对任意的$\mathscr{D}$，有$\{A_n\}\subseteq\mathscr{D}$。因为$\mathscr{D}$是$\sigma$域，所以$\underset{n=1}{\overset{+\infty}{\cup}}A_n\in\mathscr{D}$。由$\mathscr{D}$的任意性，$\underset{n=1}{\overset{+\infty}{\cup}}A_n\in\mathscr{C}$。由$\{A_n\}$的任意性，$\mathscr{C}$对可列并的运算封闭。综上，$\mathscr{C}$是一个$\sigma$域。\par
-	综上，$\mathscr{C}$就是由$\mathscr{A}$生成的环（或单调系，或$\lambda$系，或$\sigma$域），于是结论成立。
-\end{proof}
-\begin{theorem}\label{theo:GeneratedSigmaFieldEqual}
-	若要证明$\sigma(\mathscr{A})=\sigma(\mathscr{B})$，只需证明$\mathscr{A}$内的元素和$\mathscr{B}$内的元素可以经过有限次补、差、交、并运算和可列次交、并运算互相表出。
-\end{theorem}
-\begin{proof}
-	若$\mathscr{A}$内的元素可以由$\mathscr{B}$内的元素经过上述运算表出，由\cref{prop:SigmaField}可知$\sigma$域对上述运算封闭，所以$\mathscr{A}\subseteq\sigma(\mathscr{B})$，由生成的定义可知$\sigma(\mathscr{A})\subseteq\sigma(\mathscr{B})$。同理可得$\sigma(\mathscr{B})\subseteq\sigma(\mathscr{A})$，于是$\sigma(\mathscr{A})=\sigma(\mathscr{B})$。
+	$\mathscr{C}$就是由$\mathscr{A}$生成的环（或单调系，或$\lambda$系，或$\sigma$域），根据定义逐条验证即可。
 \end{proof}
 \begin{theorem}\label{theo:RingGeneratedBySemiring}
 	如果$\mathscr{A}$是半环，则：
@@ -429,13 +390,13 @@
 		\mathscr{B}=\underset{n=1}{\overset{+\infty}{\cup}}
 		\left\{\underset{i=1}{\overset{n}{\cup}}A_i:A_i\in\mathscr{A};\;A_i\cap A_j=\varnothing,\forall\;i\ne j\right\}
 	\end{equation*}
-	由$\mathscr{B}$的定义，$\mathscr{A}\subseteq \mathscr{B}$（$n=1$）。因为环对有限并封闭，所以包含$\mathscr{A}$的环必然包含$\mathscr{B}$。若证得$\mathscr{B}$是一个环，则可得到$r(\mathscr{A})=\mathscr{B}$。\par
+	由$\mathscr{B}$的定义，$\mathscr{A}\subseteq \mathscr{B}$。因为环对有限并封闭，所以包含$\mathscr{A}$的环必然包含$\mathscr{B}$。若证得$\mathscr{B}$是一个环，则可得到$r(\mathscr{A})=\mathscr{B}$。\par
 	任取$A,B\in \mathscr{B}$，则存在$m,n\in\mathbb{N}^+$和互不相交的$\seq{A}{m}\in \mathscr{A}$、互不相交的$\seq{B}{n}\in \mathscr{A}$使得：
 	\begin{equation*}
 		A=\underset{i=1}{\overset{m}{\cup}}A_i,\;
 		B=\underset{i=1}{\overset{n}{\cup}}B_i
 	\end{equation*}
-	于是由\cref{prop:SetOperation}(4)(6)(7)可得：
+	于是由\cref{prop:SetOperation}(6)(4)(7)可得：
 	\begin{equation*}
 		A\setminus B=A\cap B^c=\underset{i=1}{\overset{m}{\cup}}(A_i\cap B^c)=\underset{i=1}{\overset{m}{\cup}}\left[A_i\cap\left(\underset{j=1}{\overset{n}{\cap}}B_i^c\right)\right]=\underset{i=1}{\overset{m}{\cup}}\underset{j=1}{\overset{n}{\cap}}(A_i\cap B_j^c)=\underset{i=1}{\overset{m}{\cup}}\underset{j=1}{\overset{n}{\cap}}(A_i\setminus B_j)
 	\end{equation*}
@@ -446,40 +407,48 @@
 	于是：
 	\begin{align*}
 		A\setminus B&=\underset{i=1}{\overset{m}{\cup}}\underset{j=1}{\overset{n}{\cap}}(A_i\setminus B_j)=\underset{i=1}{\overset{m}{\cup}}\underset{j=1}{\overset{n}{\cap}}\underset{k=1}{\overset{r_{ij}}{\cup}}C_{ijk} \\
-		&=\underset{i=1}{\overset{m}{\cup}}(C_{111}\cup C_{112}\cdots\cup C_{11r_{11}})\cap(C_{121}\cup C_{122}\cdots\cup C_{12r_{12}})\cdots \\
+		&=\underset{i=1}{\overset{m}{\cup}}[(C_{111}\cup C_{112}\cdots\cup C_{11r_{11}})\cap(C_{121}\cup C_{122}\cdots\cup C_{12r_{12}})\cdots] \\
 		&=\underset{i=1}{\overset{m}{\cup}}\left\{\underset{j=1}{\overset{r_{11}}{\cup}}[C_{11j}\cap(C_{121}\cup C_{122}\cdots\cup C_{12r_{12}})]\right\}\cap(C_{131}\cup C_{132}\cdots\cup C_{13r_{13}})\cdots \\
-		&=\underset{i=1}{\overset{m}{\cup}}\left[\underset{j=1}{\overset{r_{11}}{\cup}}\underset{k=1}{\overset{r_{12}}{\cup}}(C_{11j}\cap C_{12k})\right]\cap(C_{131}\cup C_{132}\cdots\cup C_{13r_{13}})\cdots \\
-		&=\underset{i=1}{\overset{n}{\cup}}\underset{(\seq{k}{n})\in\prod_{k=1}^{n}\{1,2,\dots,r_{ik}\}}{\overset{}{\bigcup}}\underset{j=1}{\overset{n}{\cap}}C_{ijk_j}
+		&=\underset{i=1}{\overset{m}{\cup}}\left[\underset{l=1}{\overset{r_{11}}{\cup}}\underset{k=1}{\overset{r_{12}}{\cup}}(C_{11l}\cap C_{12k})\right]\cap(C_{131}\cup C_{132}\cdots\cup C_{13r_{13}})\cdots \\
+		&=\underset{i=1}{\overset{n}{\cup}}\underset{k_1=1}{\overset{r_{i1}}{\cup}}\underset{k_2=1}{\overset{r_{i2}}{\cup}}\cdots\underset{k_n=1}{\overset{r_{i_n}}{\cup}}\underset{j=1}{\overset{n}{\cap}}C_{ijk_j}
 	\end{align*}
-	因为$\mathscr{A}$是半环，对交封闭，所以$\underset{j=1}{\overset{n}{\cap}}C_{ijk_j}\in \mathscr{A}$。因为$C_{ij1},C_{ij2},\dots,C_{ijr_{ij}}$互不相交且$\seq{A}{m}$互不相交，所以$\underset{j=1}{\overset{n}{\cap}}C_{ijk_j}$互不相交，于是有$A\setminus B\in \mathscr{B}$，即$\mathscr{B}$对差封闭。\par
+	因为$\mathscr{A}$是半环，所以$\underset{j=1}{\overset{n}{\cap}}C_{ijk_j}\in \mathscr{A}$。因为$C_{ij1},C_{ij2},\dots,C_{ijr_{ij}}$互不相交且$\seq{A}{m}$互不相交，所以$\underset{j=1}{\overset{n}{\cap}}C_{ijk_j}$互不相交，于是有$A\setminus B\in \mathscr{B}$，即$\mathscr{B}$对差封闭。\par
 	考虑$A\cup B=B\cup(A\setminus B)$，因为$B\cap (A\setminus B)=\varnothing$，所以$A\cup B\in \mathscr{B}$。\par
 	综上，$\mathscr{B}$对并和差封闭，所以$\mathscr{B}$是一个环。
 \end{proof}
+\begin{note}
+	下面两个定理的证明思路具有统一的结构。其核心困难在于无法直接验证生成族本身的封闭性，证明中采用“固定一个集合，构造与其运算良好的集合族”的方法：先固定$A$，构造：
+	\begin{equation*}
+		\mathscr{B_A}=\{B:\text{与 }A\text{ 运算后仍留在生成族中}\}
+	\end{equation*}
+	再证明$\mathscr{B_A}$本身是单调系（或$\lambda$系）并包含原集族族。由生成的最小性可知生成族必包含于$\mathscr{B_A}$，从而推出“与$A$的运算对生成族中的任意元素都成立”。再重复该过程，得到生成族中任意两元素的封闭性。
+\end{note}
+
 \begin{theorem}\label{theo:SigmaField=MonotoneField}
 	若$\mathscr{A}$是域，则$\sigma(\mathscr{A})=m(\mathscr{A})$。
 \end{theorem}
 \begin{proof}
-	因为$\sigma(\mathscr{A})$是包含$\mathscr{A}$的$\sigma$域，所以$\sigma(\mathscr{A})$也是包含$\mathscr{A}$的单调系。因为$m(\mathscr{A})$是包含$\mathscr{A}$的最小的单调系，所以$m(\mathscr{A})\subseteq\sigma(\mathscr{A})$。\par
-	下证$\sigma(\mathscr{A})\subseteq m(\mathscr{A})$，由\cref{theo:Monotone+Field=SigmaField}可得一个既是单调系又是域的集族必是$\sigma$域，所以证得$m(\mathscr{A})$是一个域即可得到$\sigma(\mathscr{A})\subseteq m(\mathscr{A})$。又因为$\mathscr{A}$是域，所以$X\in\mathscr{A}$，同时$X\in m(\mathscr{A})$，由\cref{theo:RingContainX=Field}可得一个包含$X$的环是域，所以只需证明$m(\mathscr{A})$是一个环。\par
-	对任意的$A\in \mathscr{A}$，令：
+	由\cref{theo:SetNecessarilySet2}可知$\sigma(\mathscr{A})$是包含$\mathscr{A}$的单调系，所以$m(\mathscr{A})\subseteq\sigma(\mathscr{A})$。下证$\sigma(\mathscr{A})\subseteq m(\mathscr{A})$。\par
+	若能证得$m(\mathscr{A})$是一个$\sigma$域即可得出结论，由\cref{theo:Monotone+Field=SigmaField}可得一个既是单调系又是域的集族必是$\sigma$域，所以证得$m(\mathscr{A})$是一个域即可。又因为$\mathscr{A}$是域，所以$X\in\mathscr{A}$，同时$X\in m(\mathscr{A})$，由\cref{theo:RingContainX=Field}可得一个包含$X$的环是域，所以只需证明$m(\mathscr{A})$是一个环。\par
+	对任意的$A\in\mathscr{A}$，令：
 	\begin{equation*}
 		\mathscr{B}_A=\{B\in m(\mathscr{A}):A\cup B,A\setminus B\in m(\mathscr{A})\}
 	\end{equation*}
-	任取$\mathscr{B}_A$中一个单调不减序列$\{B_n\}$，考虑：
+	任取$\mathscr{B}_A$中一个单调不减序列$\{B_n\}$，根据\cref{prop:SetLimit}(3)可知：
 	\begin{equation*}
 		A\cup\left(\lim_{n\to+\infty}B_n\right)=A\cup\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)
 		=\underset{n=1}{\overset{+\infty}{\cup}}(A\cup B_n)
 	\end{equation*}
-	则$\{A\cup B_n\}$也是一个单调不减序列。因为对任意的$n\in\mathbb{N}^+$，有$A\cup B_n\in m(\mathscr{A})$，所以：
+	且$\{A\cup B_n\}$也是一个单调不减序列。因为对任意的$n\in\mathbb{N}^+$，有$A\cup B_n\in m(\mathscr{A})$，所以根据\cref{prop:SetLimit}(3)可知：
 	\begin{equation*}
 		A\cup\left(\lim_{n\to+\infty}B_n\right)=\lim_{n\to+\infty}(A\cup B_n)\in m(\mathscr{A})
 	\end{equation*}
-	考虑：
+	根据\cref{prop:SetLimit}(3)和\cref{prop:SetOperation}(7)可知：
 	\begin{equation*}
-		A\setminus\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)
+		A\setminus\left(\lim_{n\to+\infty}B_n\right)=A\setminus\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)
 		=\underset{n=1}{\overset{+\infty}{\cap}}(A\setminus B_n)
 	\end{equation*}
-	则$\{A\setminus B_n\}$是一个单调不增序列。因为对任意的$n\in\mathbb{N}^+$，有$A\setminus B_n\in m(\mathscr{A})$，所以由\cref{prop:SetOperation}(6)(7)可得：
+	则$\{A\setminus B_n\}$是一个单调不增序列。因为对任意的$n\in\mathbb{N}^+$，有$A\setminus B_n\in m(\mathscr{A})$，所以由\cref{prop:SetOperation}(6)(7)和\cref{prop:SetLimit}(3)可得：
 	\begin{equation*}
 		A\setminus\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)=A\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)^c=A\cap\left(\underset{n=1}{\overset{+\infty}{\cap}}B_n^c\right)=\underset{n=1}{\overset{+\infty}{\cap}}(A\cap B_n^c)=\lim_{n\to+\infty}(A\setminus B_n)\in m(\mathscr{A})
 	\end{equation*}
@@ -489,7 +458,7 @@
 	\end{equation*}
 	由$\{B_n\}$的任意性，$\mathscr{B}_A$对单调不减序列的极限封闭。同理，$\mathscr{B}_A$对单调不增序列的极限封闭。\par
 	综上，$\mathscr{B}_A$是一个单调系。\par
-	因为$\mathscr{A}$是一个域，由\cref{theo:SetNecessarilySet1}可知$\mathscr{A}$是一个环，所以$\mathscr{A}$对并和差封闭，即$\mathscr{A}$中任意元素与$A$的并集和差集都在$\mathscr{A}$中，根据生成的定义，$\mathscr{A}\in m(\mathscr{A})$，即$\mathscr{A}$中任意元素与$A$的并集和差集还有它们本身都在$m(\mathscr{A})$中，所以$\mathscr{A}\subseteq\mathscr{B}_A$。由$m(\mathscr{A})$的定义，$m(\mathscr{A})\subseteq\mathscr{B}_A$，于是：
+	因为$\mathscr{A}$是一个域，由\cref{theo:SetNecessarilySet1}可知$\mathscr{A}$是一个环，所以$\mathscr{A}$对并和差封闭，即$\mathscr{A}\subseteq\mathscr{B}_A$，于是$m(\mathscr{A})\subseteq\mathscr{B}_A$，因此：
 	\begin{equation*}
 		\forall\;A\in \mathscr{A},\;\forall\;B\in m(\mathscr{A}),\; A\cup B,A\setminus B\in m(\mathscr{A})
 	\end{equation*}\par
@@ -522,7 +491,8 @@
 	如果$\mathscr{A}$是$\pi$系，则$\sigma(\mathscr{A})=l(\mathscr{A})$。
 \end{theorem}
 \begin{proof}
-	由\cref{theo:SetNecessarilySet2}可知$\sigma(\mathscr{A})$是一个$\lambda$系，由生成的定义可得$\mathscr{A}\subseteq\sigma(\mathscr{A})$，于是$l(\mathscr{A})\subseteq\sigma(\mathscr{A})$。下证$\sigma(\mathscr{A})\subseteq l(\mathscr{A})$。由生成的定义$\mathscr{A}\subseteq l(\mathscr{A})$，若证得$l(\mathscr{A})$是一个$\sigma$域，则可得$\sigma(\mathscr{A})\subseteq l(\mathscr{A})$。由\cref{theo:Lambda+Pi=Sigma}可知只需证明$l(\mathscr{A})$是一个$\pi$系。\par
+	由\cref{theo:SetNecessarilySet2}可知$\sigma(\mathscr{A})$是一个$\lambda$系，所以$l(\mathscr{A})\subseteq\sigma(\mathscr{A})$。下证$\sigma(\mathscr{A})\subseteq l(\mathscr{A})$。\par
+	若证得$l(\mathscr{A})$是一个$\sigma$域即可得出结论。由\cref{theo:Lambda+Pi=Sigma}可知只需证明$l(\mathscr{A})$是一个$\pi$系。\par
 	对任意的$A\in \mathscr{A}$，令：
 	\begin{equation*}
 		\mathscr{B}_A=\{B\in l(\mathscr{A}):A\cap B\in l(\mathscr{A})\}
@@ -533,16 +503,16 @@
 		A\cap(D\setminus C)=(A\cap D)\setminus(A\cap C)
 	\end{equation*}
 	因为$C,D\in \mathscr{B}_A$，所以$A\cap C,A\cap D\in l(\mathscr{A})$。因为$C\subseteq D$，所以$A\cap C\subseteq A\cap D$，由$\lambda$系的定义可得$(A\cap D)\setminus(A\cap C)\in l(\mathscr{A})$，即$A\cap(D\setminus C)\in l(\mathscr{A})$，所以$D\setminus C\in \mathscr{B}_A$。\par
-	任取$\mathscr{B}_A$中的一个单调不减的集合列$\{B_n\}$，则有$B_n\in l(\mathscr{A}),A\cap B_n\in l(\mathscr{A})$对$n\in\mathbb{N}^+$成立，于是$\{B_n\}$是$l(\mathscr{A})$中单调不减的集合列。由$\lambda$系的定义可知：
+	任取$\mathscr{B}_A$中的一个单调不减的集合列$\{B_n\}$，则有$B_n\in l(\mathscr{A}),A\cap B_n\in l(\mathscr{A})$对$n\in\mathbb{N}^+$成立，于是$\{B_n\}$是$l(\mathscr{A})$中单调不减的集合列。由\cref{prop:SetLimit}(3)和$\lambda$系的定义可知：
 	\begin{equation*}
 		\lim_{n\to+\infty}B_n=\underset{n=1}{\overset{+\infty}{\cup}}B_n\in l(\mathscr{A})
 	\end{equation*}
-	考虑：
+	根据\cref{prop:SetOperation}(4)可得：
 	\begin{equation*}
 		A\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)
 		=\underset{n=1}{\overset{+\infty}{\cup}}(A\cap B_n)
 	\end{equation*}
-	因为$\{B_n\}$单调不减，所以$\{A\cap B_n\}$是$l(\mathscr{A})$中单调不减的集合列，由$\lambda$系的定义可得：
+	因为$\{B_n\}$单调不减，所以$\{A\cap B_n\}$是$l(\mathscr{A})$中单调不减的集合列，由\cref{prop:SetLimit}(3)和$\lambda$系的定义可得：
 	\begin{equation*}
 		A\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)=\lim_{n\to+\infty}(A\cap B_n)\in l(\mathscr{A})
 	\end{equation*}
@@ -551,7 +521,7 @@
 		\lim_{n\to+\infty}B_n=\underset{n=1}{\overset{+\infty}{\cup}}B_n\in\mathscr{B}_A
 	\end{equation*}
 	综上，$\mathscr{B}_A$是一个$\lambda$系。\par
-	因为$\mathscr{A}$是一个$\pi$系，所以$\mathscr{A}$对交封闭，于是$\mathscr{A}$中任一元素与$A$的交集都在$\mathscr{A}$中，从而都在$l(\mathscr{A})$中，并且它们自身也在$l(\mathscr{A})$中，所以$\mathscr{A}\subseteq \mathscr{B}_A$。根据生成的定义，$l(\mathscr{A})\subseteq \mathscr{B}_A$。这说明：
+	因为$\mathscr{A}$是一个$\pi$系，所以$\mathscr{A}\subseteq\mathscr{B}_A$，即$l(\mathscr{A})\subseteq\mathscr{B}_A$。这说明：
 	\begin{equation*}
 		\forall\;A\in \mathscr{A},\;\forall\;B\in l(\mathscr{A}),\;A\cap B\in l(\mathscr{A})
 	\end{equation*}\par
@@ -654,8 +624,8 @@
 	(1) \textbf{a：}因为有限开区间都是开集，所以$\{(a,b):a,b\in\mathbb{R}\}\subseteq\mathcal{O}$，于是有$\{(a,b):a,b\in\mathbb{R}\}\subseteq\sigma(\mathcal{O})$，由生成的定义可得$\mathcal{B}=\sigma(\{(a,b):a,b\in\mathbb{R}\})\subseteq\sigma(\mathcal{O})$。\par
 	由\cref{lem:OpenSet=CountableFiniteOpenSetUnion}可知对$\mathbb{R}$中的任意一个开集，它都可以表示为至多可列个有限开区间的并集，所以$\mathcal{O}\subseteq\sigma(\{(a,b):a,b\in\mathbb{R}\})=\mathcal{B}$，由生成的定义可得$\sigma(\mathcal{O})\subseteq\mathcal{B}$。\par
 	综上，$\sigma(\mathcal{O})=\mathcal{B}$。\par
-	\textbf{b：}由\cref{theo:duality between openset and closed set}可知开集的补集是闭集，闭集的补集是开集，根据\cref{theo:GeneratedSigmaFieldEqual}即可得到$\sigma(\mathcal{D})=\sigma(\mathcal{O})=\mathcal{B}$。\par
-	\textbf{cde：}仅给出构造公式，利用这些公式和\cref{theo:GeneratedSigmaFieldEqual}即可得出所有的结论。注意到c的1和3是补集的关系，2和4也是补集的关系，所以只需证明1和2。
+	\textbf{b：}由\cref{theo:duality between openset and closed set}可知开集的补集是闭集，闭集的补集是开集，根据sigma运算即可得到$\sigma(\mathcal{D})=\sigma(\mathcal{O})=\mathcal{B}$。\par
+	\textbf{cde：}仅给出构造公式，利用这些公式和sigma运算即可得出所有的结论。注意到c的1和3是补集的关系，2和4也是补集的关系，所以只需证明1和2。
 	\begin{gather*}
 		(a,b)=\underset{n=1}{\overset{+\infty}{\bigcup}}\left\{\left(-\infty,b-\frac{1}{n}\right]\Big\backslash\left(-\infty,a+\frac{1}{n}\right]\right\}\in\sigma(\{(-\infty,a]:a\in\mathbb{R}\}) \\
 		(-\infty,a]=\left[\underset{n=1}{\overset{+\infty}{\cup}}(a-n,a)\right]\bigcup\left[\underset{n=1}{\overset{+\infty}{\bigcap}}\left(a-\frac{1}{n},a+\frac{1}{n}\right)\right]\in\sigma(\{(a,b):a,b\in\mathbb{R}\}) \\
@@ -686,7 +656,7 @@
 	且将其中的$\mathbb{R}$换成$\mathbb{R}^{}$中任一稠密子集$D$也成立。
 \end{theorem}
 \begin{proof}
-	下给出构造公式，利用\cref{prop:BorelSigmaField}(1)和\cref{theo:GeneratedSigmaFieldEqual}即可得出结论。注意到1和4是补集的关系，2和3也是补集的关系，所以只需证明1和2。
+	下给出构造公式，利用\cref{prop:BorelSigmaField}(1)和sigma运算即可得出结论。注意到1和4是补集的关系，2和3也是补集的关系，所以只需证明1和2。
 	\begin{gather*}
 		[-\infty,a)=\{-\infty\}\cup(-\infty,a)\in\mathcal{B}_{\overline{\mathbb{R}}} \\
 		\{-\infty\}=\underset{n=1}{\overset{+\infty}{\cap}}[-\infty, -n),\{+\infty\}=\underset{n=1}{\overset{+\infty}{\cap}}[-\infty,n)^c\in\sigma(\{[-\infty,a):a\in\mathbb{R}\}) \\
