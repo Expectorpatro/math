@@ -5,3 +5,55 @@
 \input{appendix/number-field}
 \input{appendix/Equivalent-relationship}
 \input{appendix/matrix}
+
+\begin{theorem}\label{theo:CountableUnionCountable}
+	设$\{A_n\}$是一列集合，且对每个$n\in\mathbb{N}$，$A_n$都是至多可列集，则：
+	\begin{equation*}
+		A=\underset{n=1}{\overset{+\infty}{\cup}}A_n
+	\end{equation*}
+	也是至多可列集。
+\end{theorem}
+\begin{proof}
+	由于每个$A_n$至多可列，存在映射$f_n:\mathbb{N}\to A_n$使得$f_n(\mathbb{N})=A_n$，于是$A$中的任一元素都可写成$f_n(m)$的形式，其中$(n,m)\in\mathbb{N}\times\mathbb{N}$。对$\mathbb{N}\times\mathbb{N}$进行对角线枚举即可，即按$n+m=0,1,2,\dots$的顺序，依次枚举所有满足$n+m=k$的$(n,m)$：
+	\begin{equation*}
+		(0,0),\ 
+		(0,1),(1,0),\ 
+		(0,2),(1,1),(2,0),\ 
+		\dots
+	\end{equation*}
+	即可枚举完$A$。
+\end{proof}
+\begin{figure}[h]
+	\centering
+	\begin{tikzpicture}[scale=0.9]
+		
+		% 坐标轴
+		\draw[->] (-0.5,0) -- (6,0) node[right] {$m$};
+		\draw[->] (0,-0.5) -- (0,6) node[above] {$n$};
+		
+		% 网格点
+		\foreach \n in {0,1,2,3,4,5} {
+			\foreach \m in {0,1,2,3,4,5} {
+				\fill (\m,\n) circle (2pt);
+			}
+		}
+		
+		% 对角线
+		\foreach \k in {0,1,2,3,4,5} {
+			\draw[red, thick]
+			(0,\k) -- (\k,0);
+		}
+		
+		% 标注
+		\node at (3,5.5) {$n+m=\text{常数}$};
+		\node[red] at (4.5,2.5) {对角线枚举};
+		
+	\end{tikzpicture}
+	\caption{对角线枚举 $\mathbb{N}\times\mathbb{N}$：可列个可列是可列}
+\end{figure}
+\begin{corollary}\label{cor:QCountable}
+	有理数是可列的。
+\end{corollary}
+\begin{proof}
+	有理数可以表示为整数的商，由\cref{theo:CountableUnionCountable}即可得出结论。
+\end{proof}
