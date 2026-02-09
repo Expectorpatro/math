@@ -301,15 +301,14 @@
 		\EndFor
 		\State Select $\mu_k$ from $X$ with probability
 		\[
-		\mathbb{P}(x_i) = \frac{D_i^2}{\sum\limits_{j=1}^n D_j^2}
+		P(x_i) = \frac{D_i^2}{\sum\limits_{j=1}^n D_j^2}
 		\]
 		\EndFor
 		
 		\For{$t=1$ to $T$}
 		\Comment{Assignment step}
 		\For{each data point $x_i\in X$}
-		\State $y_i \gets \arg\min\limits_{k=1,\dots,K} \|x_i-\mu_k\|^2$
-		\State Assign $x_i$ to cluster $C_{y_i}$
+		\State $y_i \gets \underset{k=1,2,\dots,K}{\arg\min}\|x_i-\mu_k\|^2$, assign $x_i$ to cluster $C_{y_i}$
 		\EndFor
 		
 		\For{$k=1$ to $K$}
@@ -322,7 +321,7 @@
 		\State \textbf{break}
 		\EndIf
 		
-		\State $\mu_k \gets \mu_k^{\text{new}} \quad \forall\;k=1,\dots,K$
+		\State $\mu_k \gets \mu_k^{\text{new}},\;\forall\;k=1,\dots,K$
 		\EndFor
 	\end{algorithmic}
 \end{algorithm}
@@ -330,30 +329,125 @@
 \begin{equation*}
 	\Phi(\{\mu_k\},\{C_k\})=\sum_{k=1}^K\sum_{x_i\in C_k}\|x_i-\mu_k\|^2
 \end{equation*}\par
-算法首先对簇中心进行初始化。为缓解随机初始化可能导致的收敛不稳定问题，采用了k-means++初始化策略。具体而言，第一个中心$\mu_1$从样本集合$X$中均匀随机选取。随后，在已经选定前$k-1$个中心的条件下，对每个样本 $x_i$ 计算其到最近已选中心的平方距离：
+由于每一次分配或更新步骤都会使目标函数$\Phi$的值非增\info{平方分解均值最小，下面两个算法也需要链接}，且$\Phi$在下界零处有界，根据\cref{prop:RSeq}(7)可知K-means算法在有限步内必然收敛到某一局部最优解。然而，由于目标函数是非凸的\info{证明}，算法的最终结果依赖于初始中心的选取，这也是在实际应用中通常采用k-means++初始化（即\cref{alg:Kmeans}中的1-7步）而非完全随机初始化的原因。
+\subsubsection{K-modes}
+\begin{algorithm}[H]
+	\caption{K-modes Clustering Algorithm with Cao Initialization}
+	\label{alg:Kmodes}
+	\begin{algorithmic}[1]
+		\Require
+		Categorical data $X=\{x_i\}_{i=1}^n$, where $x_i=(x_{i1},\dots,x_{ip})$;
+		number of clusters $K$;
+		maximum number of iterations $T$
+		\Ensure
+		Cluster assignments $\{C_1,\dots,C_K\}$;
+		modes $\{m_1,\dots,m_K\}$
+		
+		\State For each categorical variable $j=1,\dots,p$, let $\mathcal C_j$ denote its set of possible categories.
+		For each $c\in\mathcal C_j$, compute
+		\[
+		f_j(c)
+		=
+		\frac{1}{n}
+		\sum_{i=1}^n I(x_{ij}=c)
+		\]
+		\State Define sample density: $\mathrm{dens}(x_i)=\sum\limits_{j=1}^p f_j(x_{ij})$
+		\State Select the first mode: $m_1 \gets \underset{x_i\in X}{\arg\max}\;\mathrm{dens}(x_i)$
+		\For{$k=2$ to $K$}
+		\State Select
+		\[
+		m_k \gets \underset{x_i\in X}{\arg\max}
+		\Bigl(
+		\mathrm{dens}(x_i)\cdot
+		\min_{1\leqslant r<k}\sum_{j=1}^p I(x_{ij}\neq m_{rj})
+		\Bigr)
+		\]
+		\EndFor
+		
+		\For{$t=1$ to $T$}
+		\Comment{Assignment step}
+		\For{each data point $x_i\in X$}
+		\State $y_i \gets \underset{k=1,2,\dots,K}{\arg\min}
+		\sum\limits_{j=1}^p I(x_{ij}\neq m_{kj})$, assign $x_i$ to cluster $C_{y_i}$
+		\EndFor
+		
+		\For{$k=1$ to $K$}
+		\Comment{Update step}
+		\For{$j=1$ to $p$}
+		\State $m_{kj} \gets \operatorname{mode}\{x_{ij}:x_i\in C_k\}$
+		\EndFor
+		\EndFor
+		
+		\If{cluster assignments do not change}
+		\State \textbf{break}
+		\EndIf
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
+\cref{alg:Kmodes} 给出了K-modes聚类算法的标准形式。该算法专门用于处理分类型数据，其目标是在简单匹配不相似度下最小化类内不一致性。对应的优化目标函数为：
 \begin{equation*}
-	D_i^2=\min_{1\leqslant j < k}\|x_i-\mu_j\|^2
+	\Psi({m_k},{C_k})=
+	\sum_{k=1}^K\sum_{x_i\in C_k}\sum_{j=1}^p I(x_{ij}\neq m_{kj})
 \end{equation*}
-该距离刻画了样本$x_i$在当前中心集合下对整体目标函数$\Phi$的贡献大小。接下来，根据经验概率分布：
+该目标函数在簇分配或逐维众数更新时均单调不增，因此算法在有限步内收敛到某一局部最优解。与K-means类似，由于目标函数的非凸性，K-modes的结果依赖于初始化方式，实际应用中通常采用Cao初始化（即\cref{alg:Kmodes}中的1-6步）。\par
+Cao初始化的核心思想在于：初始聚类原型应当同时具备代表性和区分性。具体而言，算法首先通过各分类变量的经验频率刻画样本在全体数据中的密度，从而选取在每一维上均取高频类别的样本作为第一个初始中心，该样本可被视为总体经验分布下的一个典型点。随后，在选取其余初始中心时，Cao初始化在保证中心密度较高的同时，引入与已有中心之间的简单匹配不相似度，以避免多个初始原型集中于同一高频区域。
+\subsubsection{K-prototypes}
+\begin{algorithm}[H]
+	\caption{K-prototypes Clustering Algorithm}
+	\label{alg:Kprototypes}
+	\begin{algorithmic}[1]
+		\Require
+		Mixed-type data $X=\{x_i=(x_i^{(n)},x_i^{(c)})\}_{i=1}^n$;
+		number of clusters $K$;
+		trade-off parameter $\gamma>0$;
+		maximum number of iterations $T$
+		\Ensure
+		Cluster assignments $\{C_1,\dots,C_K\}$;
+		prototypes $\{(\mu_k,m_k)\}_{k=1}^K$
+		
+		\Comment{Initialization step}
+		\State Initialize numerical prototypes $\mu_1,\dots,\mu_K$
+		by applying K-means++ initialization
+		
+		\State Initialize categorical prototypes $m_1,\dots,m_K$
+		by applying Cao initialization
+		
+		\For{$t=1$ to $T$}
+		\Comment{Assignment step}
+		\For{each data point $x_i\in X$}
+		\State $y_i \gets \underset{k=1,2,\dots,K}{\arg\min}
+		\Big(
+		\|x_i^{(n)}-\mu_k\|^2
+		+
+		\gamma\sum\limits_{j=1}^q I(x_{ij}^{(c)}\neq m_{kj})
+		\Big)$, assign $x_i$ to cluster $C_{y_i}$
+		\EndFor
+		
+		\For{$k=1$ to $K$}
+		\Comment{Update step}
+		\State $\mu_k \gets \dfrac{1}{|C_k|}
+		\sum\limits_{x_i\in C_k} x_i^{(n)}$
+		\For{$j=1$ to $\dim(x_i^{(c)})$}
+		\State $m_{kj} \gets
+		\operatorname{mode}\{x_{ij}^{(c)}:x_i\in C_k\}$
+		\EndFor
+		\EndFor
+		
+		\If{cluster assignments do not change}
+		\State \textbf{break}
+		\EndIf
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
+
+\cref{alg:Kprototypes} 描述了K-prototypes聚类算法的完整流程。该算法同时处理数值型与分类型变量，其优化目标为：
 \begin{equation*}
-	\mathbb{P}(x_i)=\frac{D_i^2}{\sum_{j=1}^nD_j^2}
+	\Omega({\mu_k,m_k},{C_k})=
+	\sum_{k=1}^K\sum_{x_i\in C_k}
+	\Big(\|x_i^{(n)}-\mu_k\|^2 + \gamma\sum_{j=1}^{\dim(x_i^{(c)})} I(x_{ij}^{(c)}\neq m_{kj})\Big)
 \end{equation*}
-从样本集中随机选择下一个中心$\mu_k$。该初始化策略倾向于优先选择远离已有中心的样本，从而使初始簇中心在空间中更加分散，为后续迭代提供更有利的起点。\par
-在给定当前簇中心$\{\mu_1,\dots,\mu_K\}$的条件下，算法对每一个样本$x_i$计算其到各个簇中心的欧氏距离平方，并将其分配到最近的簇：
-\begin{equation*}
-	y_i=\arg\min_{k=1,\dots,K} \|x_i-\mu_k\|^2
-\end{equation*}
-该步骤在固定簇中心的情况下，使目标函数$\Phi$关于簇划分$\{C_k\}$达到最小。\par
-在样本分配结果固定后，算法对每一个簇重新计算其中心：
-\begin{equation*}
-	\mu_k^{\text{new}}=\frac{1}{|C_k|}\sum_{x_i\in C_k}x_i
-\end{equation*}\par
-样本分配与中心更新两个步骤交替进行，最多执行$T$次迭代。当相邻两次迭代中所有簇中心的变化满足：
-\begin{equation*}
-	\max_k \|\mu_k^{\text{new}}-\mu_k\|<\varepsilon
-\end{equation*}
-时，算法提前终止并输出最终的聚类结果。\par
-由于每一次分配或更新步骤都会使目标函数$\Phi$的值非增，且$\Phi$在下界零处有界，因此K-means算法在有限步内必然收敛到某一局部最优解。然而，由于目标函数是非凸的\info{证明}，算法的最终结果依赖于初始中心的选取，这也是在实际应用中通常采用k-means++初始化而非完全随机初始化的原因。
+其中参数$\gamma$用于平衡数值误差与分类型不匹配误差的相对尺度，实践中，通常在对数值型变量进行标准化处理后，根据数值型与分类型变量的维数比例设置$\gamma\approx p/q$，其中$p$与$q$分别表示数值型与分类型变量的维数。与 K-means和K-modes 类似，K-prototypes通过交替最小化策略保证目标函数单调下降，但最终仅能保证收敛到局部最优解。
+
 
 \subsection{凝聚型层次聚类}
 \begin{algorithm}[H]
@@ -395,10 +489,7 @@
 	\item \textbf{全链接（Complete linkage）：}$D_{\text{complete}}(A,B)=\max\limits_{x\in A,\,y\in B} \rho(x,y)$；
 	\item \textbf{平均链接（Average linkage）：}$D_{\text{average}}(A,B)=\dfrac{1}{|A||B|}\sum\limits_{x\in A}\sum\limits_{y\in B}\rho(x,y)$；
 	\item \textbf{Ward 方法（Ward linkage）：}
-	Ward 方法并不直接基于样本对距离，而是选择使合并后类内平方和增量最小的两个簇：
-	\begin{equation*}
-		\Delta(A,B)=\operatorname{SSE}(A\cup B)-\operatorname{SSE}(A)-\operatorname{SSE}(B)
-	\end{equation*}
+	$\Delta(A,B)=\operatorname{SSE}(A\cup B)-\operatorname{SSE}(A)-\operatorname{SSE}(B)$，Ward 方法并不直接基于样本对距离，而是选择使合并后类内平方和增量最小的两个簇
 \end{enumerate}
 
 \subsection{DBSCAN}
