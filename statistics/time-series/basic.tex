@@ -1,4 +1,4 @@
-\section{本科时间序列}
+\section{基本时间序列}
 
 \subsection{预处理}
 \subsection{title}
@@ -74,3 +74,194 @@ acf(x, lag=)
 均值，方差，自协方差函数（），自相关系数\par
 可逆性（特征方程）\par
 逆函数公式
+
+\subsection{指数平滑模型}
+
+\begin{definition}
+	设$\{X_t\}$是一个时间序列，若存在不可观测状态$\{Y_t\}$以及随机误差$\{\varepsilon_t\}$，使得模型可以写为：
+	\begin{gather*}
+		X_t=f(Y_t)+g(Y_{t-1},\varepsilon_t) \\
+		Y_t=p(Y_{t-1})+q(Y_{t-1},\varepsilon_t)
+	\end{gather*}
+	则称时间序列$\{X_t\}$具有\gls{StateSpace}表示，上第一式称为\gls{MeasurementEquation}，第二式称为\gls{StateEquation}。
+\end{definition}
+
+\begin{definition}
+	设时间序列$\{X_t\}$具有状态空间表示。若其观测方程与状态方程分别为：
+	\begin{gather*}
+		X_t=Y_{t-1}+\varepsilon_t \\
+		Y_t=Y_{t-1}+\alpha\varepsilon_t,
+		\quad 0<\alpha<1
+	\end{gather*}
+	且$\operatorname{E}(\varepsilon_t)=0$，则称$\{X_t\}$为\gls{SES}模型，其中$Y_t$称为序列在时刻$t$的\gls{LevelState}，参数$\alpha$称为\gls{SmoothingParameter}。
+\end{definition}
+\begin{property}\label{prop:SES}
+	设$\{X_t\}$是简单指数平滑模型，则：
+	\begin{enumerate}
+		\item $\{Y_t\}$具有递推形式：
+		\begin{equation*}
+			Y_t=\alpha X_t+(1-\alpha)Y_{t-1}=\alpha\sum_{i=0}^{T-1}(1-\alpha)^i X_{T-i}+(1-\alpha)^T Y_0
+		\end{equation*}
+		\item $\hat{X}_{t+h|t}=Y_t,\quad h\geqslant1$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)
+\end{proof}
+\subsection{Holt 线性趋势（加性趋势）}
+
+当序列呈现稳定的线性趋势时，Holt 方法通过水平 \(\ell_t\) 与斜率 \(b_t\) 两个状态来描述。加性误差的观测方程和状态更新方程为【243587268339714†L333-L358】：
+\begin{align*}
+	y_t &= \ell_{t-1} + b_{t-1} + \varepsilon_t,\\
+	\ell_t &= \ell_{t-1} + b_{t-1} + \alpha\,\varepsilon_t,\\
+	b_t &= b_{t-1} + \beta\,\varepsilon_t,
+\end{align*}
+其中 \(\alpha,\beta\in[0,1]\)。相应的乘性误差模型为：
+\begin{align*}
+	y_t &= (\ell_{t-1} + b_{t-1})\,\varepsilon_t,\\
+	\ell_t &= (\ell_{t-1} + b_{t-1})\bigl(1 + \alpha(\varepsilon_t-1)\bigr),\\
+	b_t &= b_{t-1}\,\bigl(1 + \beta(\varepsilon_t-1)\bigr).
+\end{align*}
+两类误差的\textbf{一步预测}均为
+\begin{equation*}
+	\hat{y}_{t+1|t} = \ell_t + b_t,
+\end{equation*}
+即根据当前水平和斜率进行线性外推。
+
+\paragraph{多步预测公式推导} 根据状态更新方程可证，\(\ell_t\) 和 \(b_t\) 在预测期内保持不变。因此 \(h\) 步预测为
+\begin{equation*}
+	\hat{y}_{t+h|t} = \ell_t + h\,b_t.
+\end{equation*}
+证明可用数学归纳法：对 \(h=1\) 成立，假设对 \(h\) 成立，则 \(\hat{y}_{t+h+1|t} = \hat{y}_{t+h|t} + b_t = (\ell_t + h\,b_t) + b_t = \ell_t + (h+1)b_t\)。
+
+\paragraph{性质} Holt 方法的长期预测呈直线增长或下降，其斜率由 \(b_t\) 决定。当 \(\beta\) 较小或为零时，斜率更新缓慢，趋势相对平滑。
+
+\subsection{阻尼趋势}
+
+阻尼趋势引入阻尼因子 \(\phi \in (0,1)\) 抑制远期线性增长。加性误差的模型形式为【243587268339714†L376-L392】：
+\begin{align*}
+	y_t &= \ell_{t-1} + \phi\,b_{t-1} + \varepsilon_t,\\
+	\ell_t &= \ell_{t-1} + \phi\,b_{t-1} + \alpha\,\varepsilon_t,\\
+	b_t &= \phi\,b_{t-1} + \beta\,\varepsilon_t.
+\end{align*}
+乘性误差模型类似，只是观测与状态更新中出现乘性误差。一步预测为 \(\hat{y}_{t+1|t} = \ell_t + \phi\,b_t\)。
+
+\paragraph{多步预测公式推导} 阻尼趋势的 \(h\) 步预测为【243587268339714†L376-L392】：
+\begin{equation*}
+	\hat{y}_{t+h|t} = \ell_t + b_t\,\phi\,\frac{1 - \phi^{\,h}}{1 - \phi}.
+\end{equation*}
+这一公式来自求和等比数列 \(\phi + \phi^2 + \cdots + \phi^h = \phi\,(1 - \phi^{h})/(1 - \phi)\)。随着 \(h\to\infty\)，预测逼近极限 \(\ell_t + b_t\,\phi/(1-\phi)\)，因此阻尼方法的长期预测趋于常数而非无限增长【243587268339714†L376-L392】。
+
+\section{季节模型}
+
+季节性反映周期性波动，可通过季节因子 \(s_t\) 表示长度为 \(m\) 的周期。本节讨论无季节、加性季节和乘性季节三种情况。令 \(k=\lfloor (h-1)/m\rfloor\) 表示预测步长中完整季节的个数。
+
+\subsection{无季节}
+
+若序列不存在季节波动，则季节项 \(s_t\) 缺省。本情形下的预测公式已在前述趋势模型部分给出。
+
+\subsection{加性季节}
+
+加性季节假设季节效应以绝对差异形式叠加。加性误差模型的状态空间方程【243587268339714†L494-L504】：
+\begin{align*}
+	y_t &= \ell_{t-1} + b_{t-1} + s_{t-m} + \varepsilon_t,\\
+	\ell_t &= \ell_{t-1} + b_{t-1} + \alpha\,\varepsilon_t,\\
+	b_t &= b_{t-1} + \beta\,\varepsilon_t,\\
+	s_t &= s_{t-m} + \gamma\,\varepsilon_t,
+\end{align*}
+其中 \(\gamma\in[0,1]\) 为季节平滑参数。乘性误差模型改为 \(y_t = (\ell_{t-1}+b_{t-1}+s_{t-m})\,\varepsilon_t\)，其余状态更新乘上 \((1+\cdot)\) 的误差调整因子。一步预测为
+\begin{equation*}
+	\hat{y}_{t+1|t} = \ell_t + b_t + s_{t+1-m}.
+\end{equation*}
+
+\paragraph{多步预测公式推导} 在预测阶段，状态不再更新，因此季节因子以周期 \(m\) 轮回。加性季节的 \(h\) 步预测为
+\begin{equation*}
+	\hat{y}_{t+h|t} = \ell_t + h\,b_t + s_{t+h-m(k+1)},
+\end{equation*}
+其中最后一个季节项索引 \((t+h-m(k+1))\) 确保使用最近完整周期的估计【243587268339714†L494-L504】。
+
+\subsection{乘性季节}
+
+乘性季节假设季节效应按比例放大或缩小。加性误差的观测方程和更新方程【243587268339714†L518-L530】：
+\begin{align*}
+	y_t &= (\ell_{t-1} + b_{t-1})\,s_{t-m} + \varepsilon_t,\\
+	\ell_t &= \ell_{t-1} + b_{t-1} + \alpha\,\frac{\varepsilon_t}{s_{t-m}},\\
+	b_t &= b_{t-1} + \beta\,\frac{\varepsilon_t}{s_{t-m}},\\
+	s_t &= s_{t-m} + \gamma\,\frac{\varepsilon_t}{\ell_{t-1}+b_{t-1}},
+\end{align*}
+乘性误差模型则将 \(\varepsilon_t\) 以乘法形式作用于观测和状态更新。一步预测为
+\begin{equation*}
+	\hat{y}_{t+1|t} = (\ell_t + b_t)\,s_{t+1-m}.
+\end{equation*}
+
+\paragraph{多步预测公式推导} 与加性季节类似，但预测值与季节因子相乘：
+\begin{equation*}
+	\hat{y}_{t+h|t} = \bigl(\ell_t + h\,b_t\bigr)\,s_{t+h-m(k+1)}.
+\end{equation*}
+如果趋势采用阻尼形式，则把 \(h\,b_t\) 替换为 \(\phi\)-阻尼和，乘性季节预测则为 \(\bigl[\ell_t + b_t\,\phi(1-\phi^{h})/(1-\phi)\bigr]\,s_{t+h-m(k+1)}\)【243587268339714†L599-L608】。
+
+\section{误差类型：加性与乘性}
+
+\begin{itemize}
+	\item \textbf{加性误差（A）}：观测方程中误差以加法形式出现，如 \(y_t = \text{系统值} + \varepsilon_t\)。状态更新也通过加法调整。加性误差适用于方差相对稳定的时间序列。
+	\item \textbf{乘性误差（M）}：误差以乘法形式出现，如 \(y_t = \text{系统值} \times \varepsilon_t\)。相对误差用于更新状态，使得状态变量保持正值。乘性误差适用于方差随水平变化的序列。
+\end{itemize}
+虽然误差类型影响状态更新和预测区间，但不改变点预测的形式；因此上述多步预测公式同时适用于两类误差。
+
+\section{三种趋势 $\times$ 三种季节 $\times$ 两种误差的模型表}
+
+表~\ref{tab:ets} 汇总了 \(3\times 3\times 2=18\) 种 ETS 模型的组合。表中列出误差类型 \(E\)、趋势类型 \(T\)、季节类型 \(S\)、模型记号 \(\mathrm{ETS}(E,T,S)\) 以及 \(h\) 步点预测公式。符号 \(\ell_t,b_t,s_t\) 分别表示时间 \(t\) 的水平、斜率和季节状态，\(\phi\) 为阻尼系数，\(k=\lfloor (h-1)/m\rfloor\)。
+
+\begin{table}[h]
+	\centering
+	\small
+	\caption{18 种 ETS 模型及其多步预测公式}
+	\label{tab:ets}
+	\begin{tabular}{cccc}
+		\toprule
+		误差 $E$ & 趋势 $T$ & 季节 $S$ & $h$ 步预测公式 \\
+		\midrule
+		A/M & N (SES) & N & $\hat{y}_{t+h|t} = \ell_t$ \\
+		A/M & A (Holt) & N & $\hat{y}_{t+h|t} = \ell_t + h\,b_t$ \\
+		A/M & Ad (阻尼) & N & $\hat{y}_{t+h|t} = \ell_t + b_t\,\phi\,\dfrac{1 - \phi^{\,h}}{1-\phi}$ \\
+		\midrule
+		A/M & N (SES) & A (加性季节) & $\hat{y}_{t+h|t} = \ell_t + s_{t+h-m(k+1)}$ \\
+		A/M & A (Holt) & A & $\hat{y}_{t+h|t} = \ell_t + h\,b_t + s_{t+h-m(k+1)}$ \\
+		A/M & Ad (阻尼) & A & $\hat{y}_{t+h|t} = \ell_t + b_t\,\phi\,\dfrac{1 - \phi^{\,h}}{1-\phi} + s_{t+h-m(k+1)}$ \\
+		\midrule
+		A/M & N (SES) & M (乘性季节) & $\hat{y}_{t+h|t} = \ell_t\,s_{t+h-m(k+1)}$ \\
+		A/M & A (Holt) & M & $\hat{y}_{t+h|t} = \bigl(\ell_t + h\,b_t\bigr)\,s_{t+h-m(k+1)}$ \\
+		A/M & Ad (阻尼) & M & $\hat{y}_{t+h|t} = \Bigl[\ell_t + b_t\,\phi\,\dfrac{1 - \phi^{\,h}}{1-\phi}\Bigr]\,s_{t+h-m(k+1)}$ \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\section{模型的数学性质与证明}
+
+本节讨论一些指数平滑模型的重要数学性质并给出证明。
+
+\subsection{加权移动平均性质}
+
+简单指数平滑的平滑方程 \(\ell_t = \alpha y_t + (1-\alpha)\ell_{t-1}\) 可以展开为加权移动平均。在初始水平 \(\ell_0\) 给定的情况下，通过递推可得
+\begin{align*}
+	\ell_t &= \alpha y_t + (1-\alpha)\ell_{t-1}\\
+	&= \alpha y_t + (1-\alpha)\bigl[\alpha y_{t-1} + (1-\alpha)\ell_{t-2}\bigr]\\
+	&= \alpha y_t + \alpha(1-\alpha)\,y_{t-1} + (1-\alpha)^2\ell_{t-2}.
+\end{align*}
+继续展开得到
+\begin{equation*}
+	\ell_T = \alpha\sum_{j=0}^{T-1}(1-\alpha)^j\,y_{T-j} \;+\; (1-\alpha)^T\,\ell_0,
+\end{equation*}
+说明各历史观测以指数衰减的权重贡献于当前水平【243587268339714†L108-L124】。
+
+\subsection{阻尼趋势的极限}
+
+在阻尼趋势模型中，多步预测的趋势部分为几何级数和 \(\phi + \phi^2 + \cdots + \phi^h\)。利用等比数列求和公式可得
+\[
+\phi + \phi^2 + \cdots + \phi^h = \phi\,\frac{1-\phi^{\,h}}{1-\phi}.
+\]
+因此 \(h\) 步预测为 \(\hat{y}_{t+h|t} = \ell_t + b_t\,\phi(1-\phi^{h})/(1-\phi)\)。当 \(h\to\infty\) 时，几何级数趋于 \(\phi/(1-\phi)\)，预测逼近常数 \(\ell_t + b_t\,\phi/(1-\phi)\)，说明阻尼方法避免了长期线性爆炸。
+
+\subsection{季节模型的周期性}
+
+在加性或乘性季节模型中，季节状态 \(s_t\) 以周期 \(m\) 轮回：\(s_t=s_{t-m}\) 当不考虑误差更新时。因此在预测阶段，\(\hat{y}_{t+h|t}\) 使用索引 \(t+h-m(k+1)\) 的季节因子来选择最后一个完整周期的估计值【243587268339714†L494-L504】。这意味着预测的季节模式与最近一年（或最近 \(m\) 个周期）的形状一致。
