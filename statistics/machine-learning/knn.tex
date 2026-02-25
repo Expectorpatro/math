@@ -1,0 +1,25 @@
+\section{K近邻模型}
+
+\begin{definition}
+	设$\mathcal{D}={(x_i,y_i)}_{i=1}^{n}$为观测样本集，其中$x_i$为第$i$个样本的特征向量，$y_i$是第$i$个样本的标签或值。给定距离度量$\rho$以及整数$k\geqslant1$，对任意样本$x$，记其$k$个最近邻样本索引集合为：
+	\begin{equation*}
+		\mathcal{N}_k(x)=\underset{S\subset\{1,\dots,n\},|S|=k}{\arg\min}\sum_{i\in S}\rho(x,x_i)
+	\end{equation*}
+	则称如下规则为\gls{KNN}模型：
+	\begin{enumerate}
+		\item \textbf{分类情形：}
+		\begin{equation*}
+			\hat y(x)=\underset{c\in\mathcal{Y}}{\arg\min}{}\sum*{i\in\mathcal{N}_k(x)}\mathbf{1}(y_i=c)
+		\end{equation*}
+		\item \textbf{回归情形：}
+		\begin{equation*}
+			\hat y(x)=\frac{1}{k}\sum_{i\in\mathcal{N}_k(x)}y_i
+		\end{equation*}
+	\end{enumerate}
+	若进一步引入权重函数$w_i(x)$，则可得到加权KNN估计：
+	\begin{equation*}
+		\hat y(x)=\sum_{i\in\mathcal{N}*k(x)}w_i(x)y_i,\qquad\sum*{i\in\mathcal{N}_k(x)}w_i(x)=1
+	\end{equation*}
+	其中权重通常取为距离的单调递减函数。
+\end{definition}
+KNN属于一种基于实例(instance-based)的非参数学习方法，其核心思想是在局部邻域中进行统计决策。模型本身不存在显式训练阶段，计算复杂度主要集中在查询阶段的最近邻搜索，因此在高维数据中通常结合KD-Tree或Ball-Tree等空间索引结构以降低搜索成本。
