@@ -272,9 +272,9 @@
 	\end{equation*}
 \end{proof}
 \begin{lemma}\label{lem:RandonNikodym2}
-	设$\varphi$和$\mu$都是可测空间$(X,\mathscr{F})$上的有限测度，$\varphi\ll\mu$，则存在非负的$f\in L_1(X,\mathscr{F},\mu)$使得：
+	设$\varphi$和$\mu$都是可测空间$(X,\mathscr{F})$上的有限测度。若$\varphi\ll\mu$，则存在非负的$f\in L_1(X,\mathscr{F},\mu)$使得对任意的$A\in\mathscr{F}$有：
 	\begin{equation*}
-		\varphi(A)=\int_{A}f(x)\dif\mu,\quad\forall\;A\in\mathscr{F}
+		\varphi(A)=\int_{A}f(x)\dif\mu
 	\end{equation*}
 	且$f$在a.e.于$(X,\mathscr{F},\mu)$的意义下唯一。
 \end{lemma}
@@ -331,22 +331,151 @@
 	$f$的唯一性由\cref{prop:MeasurableIntegral}(11)立即可得。
 \end{proof}
 \begin{lemma}\label{lem:RandonNikodym3}
-	设$\varphi$和$\mu$分别是可测空间$(X,\mathscr{F})$上的$\sigma$有限符号测度和有限测度，$\varphi\ll\mu$，则存在有限的可测函数$f$使得$\int_{A}f^-(x)\dif\mu<+\infty$且：
+	设$\varphi$和$\mu$分别是可测空间$(X,\mathscr{F})$上的$\sigma$有限符号测度和有限测度。若$\varphi\ll\mu$，则存在有限的可测函数$f$使得对任意的$A\in\mathscr{F}$有：
 	\begin{equation*}
-		\varphi(A)=\int_{A}f(x)\dif\mu,\quad\forall\;A\in\mathscr{F}
+		\int_{A}f^-(x)\dif\mu<+\infty,\quad\varphi(A)=\int_{A}f(x)\dif\mu
 	\end{equation*}
 	同时$f$在a.e.于$(X,\mathscr{F},\mu)$的意义下唯一。
 \end{lemma}
 \begin{proof}
-	
+	先讨论$\varphi$是有限符号测度的情况，此时$\varphi$的Jordan分解$\varphi^+$和$\varphi^-$都是$(X,\mathscr{F})$上的有限测度。对任意满足$\varphi(A)=0$的$A\in\mathscr{F}$，由\cref{prop:Measure}(3)可知$\varphi^+(A)=\varphi^-(A)=0$，所以$\varphi^+,\varphi^-\ll\mu$。根据\cref{lem:RandonNikodym2}可知存在非负的$f^+,f^-\in L_1(X,\mathscr{F},\mu)$使得：
+	\begin{equation*}
+		\varphi^+(A)=\int_{A}f^-(x)\dif\mu,\;\varphi^-(A)=\int_{A}f^-(x)\dif\mu,\quad\forall\;A\in\mathscr{F}
+	\end{equation*}
+	且$f^+,f^-$在a.e.于$(X,\mathscr{F},\mu)$的意义下唯一，由\cref{prop:NonnegativeMeasurableIntegral}(8)(7)和\cref{prop:MeasurableFunction}(9)可取$f^+,f^-$为有限的可测函数。取$f=f^+-f^-$，则$f$是有限的可测函数，由\cref{prop:MeasurableFunction}(5.a)、\cref{prop:MeasurableIntegral}(6)就有：
+	\begin{equation*}
+		\int_{A}f(x)\dif\mu=\int_{A}f^+(x)\dif\mu-\int_{A}f^-(x)\dif\mu=\varphi^+(A)-\varphi^-(A),\quad\forall\;A\in\mathscr{F}
+	\end{equation*}
+	$f$的唯一性由\cref{prop:Measure}(3)（次有限可加性）保证。\par
+	当$\varphi$是$\sigma$有限符号测度时，存在互不相交$\{A_n\}\subseteq\mathscr{F}$使得：
+	\begin{equation*}
+		\underset{n=1}{\overset{+\infty}{\cup}}A_n=X,\quad\forall\;A\in\mathscr{F},\;|\varphi(A_n)|<+\infty
+	\end{equation*}
+	由\cref{prop:SignedMeasure}(3)可知$\varphi$限制在$(A_n,A_n\cap\mathscr{F})$上是有限符号测度，而$\mu$限制在$(A_n,A_n\cap\mathscr{F})$上是有限测度，且此时仍有$\varphi\ll\mu$，于是根据之前$\varphi$是有限符号测度情况的讨论可知在每个$(A_n,A_n\cap\mathscr{F})$存在有限的可测函数$f_n$满足$\int_{A}f_n^-(x)\dif\mu<+\infty$且：
+	\begin{equation*}
+		\varphi(A)=\int_{A}f_n(x)\dif\mu,\quad\forall\;A\in A_n\cap\mathscr{F}
+	\end{equation*}
+	同时$f_n$在a.e.于$(A_n,A_n\cap\mathscr{F},\mu)$的意义下唯一。将$f_n$延拓到$X$上：
+	\begin{equation*}
+		f_n'(x)=
+		\begin{cases}
+			f_n(x),&x\in A_n \\
+			0,&x\in A_n^c
+		\end{cases}
+	\end{equation*}
+	由\cref{prop:MeasurableFunction}(1)可验证得到$f_n'$是$(X,\mathscr{F})$上有限的可测函数，取：
+	\begin{equation*}
+		g_n=\sum_{i=1}^{n}f_i',\quad f=\sum_{n=1}^{+\infty}f_n'
+	\end{equation*}
+	因为$f_n'(x)$在$(A_n,A_n\cap\mathscr{F})$上有限，所以$f$在$X$上有限，而$f=\lim\limits_{n\to+\infty}g_n$，根据\cref{prop:MeasurableFunction}(5.a)(6)可知$f$是可测函数，由\cref{prop:Measure}(3)（次可列可加性）可得$f$在a.e.于$(X,\mathscr{F},\mu)$的意义下唯一。对任意的$A\in\mathscr{F}$有：
+	\begin{equation*}
+		\varphi(A_n\cap A)=\int_{A_n\cap A}f_n(x)\dif\mu=\int_{A_n\cap A}f(x)\dif\mu
+	\end{equation*}
+	于是由\cref{theo:MeasurableCountableIntegral}、\cref{prop:SigmaField}(4)、\cref{prop:NonnegativeMeasurableIntegral}(5)、\cref{prop:MeasurableIntegral}(6)、\cref{prop:Series}(4)和\cref{prop:SignedMeasure}(2)处的约定可得：
+	\begin{align*}
+		&\int_{X}f^-(x)\dif\mu=\int_{\underset{n=1}{\overset{+\infty}{\cup}}A_n}f^-(x)\dif\mu=\sum_{n=1}^{+\infty}\int_{A_n}f^-(x)\dif\mu=\sum_{n=1}^{+\infty}\int_{A_n\cap\{f<0\}}-f(x)\dif\mu \\
+		=&-\sum_{n=1}^{+\infty}\int_{A_n\cap\{f<0\}}f(x)\dif\mu=-\sum_{n=1}^{+\infty}\varphi(A_n\cap\{f<0\})=-\varphi(\{f<0\})<+\infty
+	\end{align*}
+	所以根据\cref{prop:MeasurableIntegral}(3)可知对任意的$A\in\mathscr{F}$有：
+	\begin{equation*}
+		\int_{A}f^-(x)\dif\mu<+\infty
+	\end{equation*}
+	由\cref{prop:SetOperation}(4)和\cref{theo:MeasurableCountableIntegral}可知对任意的$A\in\mathscr{F}$有：
+	\begin{align*}
+		&\varphi(A)=\varphi(A\cap X)=\varphi\left[A\cap\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)\right]=\varphi\left[\underset{n=1}{\overset{+\infty}{\cup}}(A_n\cap A)\right] \\
+		=&\sum_{n=1}^{+\infty}\varphi(A_n\cap A)=\sum_{n=1}^{+\infty}\int_{A_n\cap A}f(x)\dif\mu=\int_{A}f(x)\dif\mu\qedhere
+	\end{align*}
 \end{proof}
-\begin{theorem}\label{theo:RandonNikodym}
-	设$\varphi$和$\mu$分别是可测空间$(X,\mathscr{F})$上的符号测度和$\sigma$有限测度。若$\varphi\ll\mu$，则存在$(X,\mathscr{F},\mu)$上在a.e.于$X$的意义下唯一的可测函数$f$满足：
+\begin{lemma}\label{lem:RandonNikodym4}
+	设$\varphi$和$\mu$分别是可测空间$(X,\mathscr{F})$上的符号测度和有限测度。若$\varphi\ll\mu$，则存在可测函数$f$使得对任意的$A\in\mathscr{F}$有：
+	\begin{equation*}
+		\int_{A}f^-(x)\dif\mu<+\infty,\quad\varphi(A)=\int_{A}f(x)\dif\mu
+	\end{equation*}
+	同时$f$在a.e.于$(X,\mathscr{F},\mu)$的意义下唯一。若$\varphi$是$\sigma$有限的，则$f$也是有限的。
+\end{lemma}
+\begin{proof}
+	记：
+	\begin{equation*}
+		\mathscr{D}=\left\{A\in\mathscr{F}:\text{存在互不相交的}\{A_n\}\subseteq\mathscr{F}\text{使得}\underset{n=1}{\overset{+\infty}{\cup}}A_n=A\text{且对任意的}n\in\mathbb{N}^+\text{有}|\varphi(A_n)|<+\infty\right\}
+	\end{equation*}
+	由\info{可列个可列是可列}可知$\mathscr{D}$对可列不交并封闭。任取$A,B\in\mathscr{D}$，则存在互不相交的$\{A_n\}\subseteq\mathscr{F}$和互不相交的$\{B_n\}\subseteq\mathscr{F}$满足：
+	\begin{equation*}
+		A=\underset{n=1}{\overset{+\infty}{\cup}}A_n,\; B=\underset{n=1}{\overset{+\infty}{\cup}}B_n,\quad|\varphi(A_n)|,|\varphi(B_n)|<+\infty,\;\forall\;n\in\mathbb{N}^+
+	\end{equation*}
+	于是由\cref{prop:SetOperation}(4)(6)(7)可得：
+	\begin{align*}
+		&A\setminus B=\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)\Big\backslash\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)=\underset{n=1}{\overset{+\infty}{\bigcup}}\left[A_n\Big\backslash\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)\right] \\
+		=&\underset{n=1}{\overset{+\infty}{\bigcup}}\left[A_n\bigcap\left(\underset{n=1}{\overset{+\infty}{\cup}}B_n\right)^c\right]=\underset{n=1}{\overset{+\infty}{\bigcup}}\left[A_n\bigcap\left(\underset{n=1}{\overset{+\infty}{\cap}}B_n^c\right)\right]
+	\end{align*}
+	根据\cref{prop:SigmaField}(2)和\cref{prop:SignedMeasure}(3)可得：
+	\begin{equation*}
+		A_n\bigcap\left(\underset{n=1}{\overset{+\infty}{\cap}}B_n^c\right)\in\mathscr{F},\;\left\lvert\varphi\left[A_n\bigcap\left(\underset{n=1}{\overset{+\infty}{\cap}}B_n^c\right)\right]\right\rvert<|\varphi(A_n)|<+\infty
+	\end{equation*}
+	因为$\{A_n\}$互不相交，所以$\left\{A_n\bigcap\left(\underset{n=1}{\overset{+\infty}{\cap}}B_n^c\right)\right\}$也互不相交，于是$A\setminus B\in\mathscr{D}$，$\mathscr{D}$对差封闭。任取$\{A_n\}\subseteq\mathscr{D}$，则：
+	\begin{equation*}
+		\underset{n=1}{\overset{+\infty}{\cup}}\left[A_n\Big\backslash\left(\underset{i=1}{\overset{n-1}{\cup}}A_n\right)\right]
+	\end{equation*}
+	因为$\mathscr{D}$对差和可列不交并封闭且$\varnothing\in\mathscr{D}$，所以$\underset{n=1}{\overset{+\infty}{\cup}}A_n\in\mathscr{D}$，即$\mathscr{D}$对可列并封闭。\par
+	综上，$\mathscr{D}$是一个$\sigma$环。\par
+	记：
+	\begin{equation*}
+		\alpha=\sup\{\mu(A):A\in\mathscr{D}\}
+	\end{equation*}
+	取$\{B_n\}\subseteq\mathscr{D}$满足：
+	\begin{equation*}
+		\lim_{n\to+\infty}\mu(B_n)=\alpha
+	\end{equation*}
+	令$B=\underset{n=1}{\overset{+\infty}{\cup}}B_n$，因为$\mathscr{D}$是一个$\sigma$环，所以$B\in\mathscr{D}$，由\cref{prop:Measure}(3)（单调性）可得：
+	\begin{equation*}
+		\alpha\geqslant\mu(B)\geqslant\mu(B_n)\to\alpha
+	\end{equation*}
+	根据\cref{prop:RSeq}(4)可知$\mu(B)=\alpha$。\par
+	因为$\varphi$和$\mu$分别是$(B,B\cap\mathscr{F})$上的$\sigma$有限符号测度和有限测度，$\varphi\ll\mu$，由\cref{lem:RandonNikodym3}可知存在有限的可测函数$g$使得对任意的$A\in B\cap\mathscr{F}$有：
+	\begin{equation*}
+		\int_{A}g^-(x)\dif\mu<+\infty,\quad\varphi(A)=\int_{A}g(x)\dif\mu
+	\end{equation*}
+	且$g$在a.e.于$(B,B\cap\mathscr{F},\mu)$的意义下唯一。\par
+	对任意的$A\in B^c\cap\mathscr{F}$，若$\mu(A)=0$，因为$\varphi\ll\mu$，所以$\varphi(A)=0$；若$\mu(A)>0$，则$\varphi(A)=+\infty$：若$\varphi(A)\ne+\infty$，则$A\cup B\in\mathscr{D}$，由\cref{prop:Measure}(1)可得：
+	\begin{equation*}
+		\mu(A\cup B)=\mu(A)+\mu(B)>\mu(B)
+	\end{equation*}
+	与$B$的取法矛盾。所以根据\cref{prop:MeasurableIntegral}(1)和\cref{prop:NonnegativeMeasurableIntegral}(8)：
+	\begin{equation*}
+		\varphi(A)=\int_{A}+\infty\dif\mu=
+		\begin{cases}
+			0,&\mu(A)=0 \\
+			+\infty,&\mu(A)>0
+		\end{cases}
+	\end{equation*}\par
+	取$f(x)=g(x)I(x\in B)+\infty I(x\in B^c)$，由\cref{prop:MeasurableFunction}(1)可验证得到$f$是可测函数。对任意的$A\in\mathscr{F}$，根据\cref{prop:SigmaField}(2)(4)和\cref{prop:NonnegativeMeasurableIntegral}(5)可知：
+	\begin{equation*}
+		\int_{A}f^-(x)\dif\mu=\int_{A\cap B}g^-(x)\dif\mu<+\infty
+	\end{equation*}
+	由\cref{prop:SetOperation}(4)、\cref{prop:Measure}(1)和\cref{theo:MeasurableCountableIntegral}可得：
+	\begin{align*}
+		&\varphi(A)=\varphi(A\cap B)+\varphi(A\cap B^c)=\int_{A\cap B}g(x)\dif\mu+\int_{A\cap B^c}+\infty\dif\mu \\
+		=&\int_{A\cap B}f(x)\dif\mu+\int_{A\cap B^c}f(x)\dif\mu=\int_{A}f(x)\dif\mu
+	\end{align*}
+	$f$的唯一性可由$g$的唯一性直接得到。若$\varphi$是$\sigma$有限的，则$\mathscr{D}=\mathscr{F}$，由\cref{prop:Measure}(3)可知$B=X$，所以$f=g$，$f$有限。
+\end{proof}
+\begin{theorem}[Randon-Nikodym Theorem]\label{theo:RandonNikodym}
+	设$\varphi$和$\mu$分别是可测空间$(X,\mathscr{F})$上的符号测度和$\sigma$有限测度。若$\varphi\ll\mu$，则存在$(X,\mathscr{F})$上的可测函数$f$满足：
 	\begin{equation*}
 		\forall\;A\in\mathscr{F},\;\varphi(A)=\int_{A}f(x)\dif\mu\quad\int_{X}f^-(x)\dif\mu<+\infty
 	\end{equation*}
-	若$\varphi$是$\sigma$有限的，则$f$有限a.e.于$X$。称$f$为$\varphi$关于$\mu$的Randon-Nikodym导数，记作$\dfrac{\dif\varphi}{\dif\mu}$。
+	且$f$在a.e.于$(X,\mathscr{F},\mu)$的意义下唯一。若$\varphi$是$\sigma$有限的，则$f$也是有限的。称$f$为$\varphi$关于$\mu$的Randon-Nikodym导数，记作$\dfrac{\dif\varphi}{\dif\mu}$。
 \end{theorem}
+\begin{proof}
+	因为$\mu$是$\sigma$有限测度，所以可取$(X,\mathscr{F})$的一个可列可测分割$\{A_n\}$，满足对任意的$n\in\mathbb{N}^+$有$\mu(A_n)<+\infty$。由\cref{prop:Measure}(3)（单调性）和\cref{lem:RandonNikodym4}可知存在$(A_n,A_n\cap\mathscr{F})$上的可测函数$f_n$使得对任意的$A\in A_n\cap\mathscr{F}$有：
+	\begin{equation*}
+		\int_{A}f_n^-(x)\dif\mu<+\infty,\quad\varphi(A)=\int_{A}f_n(x)\dif\mu
+	\end{equation*}
+	同时$f_n$在a.e.于$(A_n,A_n\cap\mathscr{F},\mu)$的意义下唯一，若$\varphi$在$(A_n,A_n\cap\mathscr{F})$上是$\sigma$有限的，则$f_n$也是有限的。取$f=\sum\limits_{n=1}^{+\infty}f_n$，与\cref{lem:RandonNikodym3}完全一样的过程可以证明得到$f$是一个可测函数，在a.e.于$(X,\mathscr{F},\mu)$的意义下唯一且满足：
+	\begin{equation*}
+		\forall\;A\in\mathscr{F},\;\varphi(A)=\int_{A}f(x)\dif\mu\quad\int_{X}f^-(x)\dif\mu<+\infty
+	\end{equation*}
+	若$\varphi$是$\sigma$有限的，则由\cref{prop:SignedMeasure}(1)(4)可得$\varphi$在$(A_n,A_n\cap\mathscr{F})$上是$\sigma$有限的，所以$f_n$在$A_n$上是有限的，于是$f$在$X$上是有限的。
+\end{proof}
 \begin{lemma}\label{lem:IntChangeOfMeasure}
 	设$\varphi$和$\mu$是可测空间$(X,\mathscr{F})$上的$\sigma$有限测度，$\varphi\ll\mu$。对任意$(X,\mathscr{F})$上的可测函数$f$和任意的$A\in\mathscr{F}$，只要：
 	\begin{equation*}
