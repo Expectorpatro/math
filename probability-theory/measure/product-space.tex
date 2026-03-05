@@ -1,4 +1,147 @@
 \section{乘积空间}
+
+\subsection{集族与函数}
+
+\begin{definition}
+	设$\{(X_t,\mathscr{F}_t):t\in T\}$是一族可测空间，称：
+	\begin{equation*}
+		\prod_{t\in T}^{}X_t=\Big\{x=\{x_t,t\in T\}:\forall\;t\in T,\;x_t\in X_t\Big\}
+	\end{equation*}
+	为$\{X_t:t\in T\}$的\gls{ProductSpace}。设$S\subseteq T$，称由$\prod\limits_{t\in T}^{}X_t$到$\prod\limits_{t\in S}^{}X_t$的映射：
+	\begin{equation*}
+		\pi_S(\{x_t,t\in T\})=\{x_t,t\in S\}
+	\end{equation*}
+	为\textbf{投影映射}。记由$T$的所有含有有限个元素的子集构成的集族为$\mathcal{D}$（特别的，记由$T$的所有含有$n$个元素的子集构成的集族为$\mathcal{D}_n$），称：
+	\begin{equation*}
+		\mathscr{D}=\underset{S\in\mathcal{D}}{\overset{}{\bigcup}}\left\{\pi_S^{-1}\left(\prod_{t\in S}^{}A_t\right)=\left(\prod_{t\in S}^{}A_t\right)\times\left(\prod_{t\notin S}^{}X_t\right):\forall\;t\in T,\;A_t\in\mathscr{F}_t\right\}
+	\end{equation*}
+	为\gls{FiniteDimensionalRectangularCylinderSet}，记：
+	\begin{equation*}
+		\prod_{t\in T}^{}\mathscr{F}_t=\sigma(\mathscr{D})
+	\end{equation*}
+	并称$\sigma(\mathscr{D})$为$\{\mathscr{F}_t\}$的乘积，称$\left(\prod\limits_{t\in T}^{}X_t,\prod\limits_{t\in T}^{}\mathscr{F}_t\right)$为$\{(X_t,\mathscr{F}_t):t\in T\}$的乘积。对任意的$S_n\in\mathcal{D}_n$，定义：
+	\begin{equation*}
+		\prod_{t\in S_n}^{}\mathscr{F}_t=\sigma\left(\left\{\prod_{t\in S_n}^{}A_t:\forall\;t\in S_n,\;A_t\in\mathscr{F}_t\right\}\right)
+	\end{equation*}
+	称：
+	\begin{equation*}
+		\mathscr{A}=\underset{S\in\mathcal{D}}{\overset{}{\bigcup}}\left\{\pi_S^{-1}(A):\forall\;A\in\prod_{t\in S}^{}\mathscr{F}_t\right\}
+	\end{equation*}
+	为\gls{FiniteDimensionalMeasurableCylinderSet}。记$\mathcal{D}$中所有含有可列个元素的子集构成的集族为$\mathcal{N}$，定义：
+	\begin{equation*}
+		\mathscr{F}_0=\underset{S\in\mathcal{N}}{\overset{}{\bigcup}}\left\{\pi_S^{-1}\left(\prod_{t\in S}^{}A_t\right):\forall\;t\in S,\;A_t\in\mathscr{F}_t\right\}
+	\end{equation*}
+\end{definition}
+\begin{property}\label{prop:FiniteDimensionalCylinderSet}
+	有限维可测矩形柱集和有限维可测柱集有如下性质：
+	\begin{enumerate}
+		\item 对任意的$n\in\mathbb{N}^+$和$S_n\in\mathcal{D}_n$，集族：
+		\begin{equation*}
+			\mathscr{D}_{S_n}\coloneq\left\{\prod_{t\in S_n}^{}A_t:\forall\;t\in S_n,\;A_t\in\mathscr{F}_t\right\}
+		\end{equation*}
+		是半环；
+		\item $\mathscr{D}$是半代数；
+		\item $\mathscr{D}\subseteq\mathscr{A}$；
+		\item $\mathscr{A}$是域；
+		\item $\prod\limits_{t\in T}^{}\mathscr{F}_t=\sigma\left(\underset{t\in T}{\bigcup}^{}\pi_t^{-1}\mathscr{F}_t\right)=\sigma(\mathscr{A})=\mathscr{F}_0$\info{未完成}。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)对任意的$t\in S_n$取$A_t=\varnothing$，则：
+	\begin{equation*}
+		\prod_{t\in S_n}^{}A_t=\varnothing\in\mathscr{D}_{S_n}
+	\end{equation*}
+	任取$A,B\in\mathscr{D}_{S_n}$，有：
+	\begin{equation*}
+		A=\prod_{t\in S_n}^{}A_t,\;B=\prod_{t\in S_n}^{}B_t,\quad\forall\;t\in S_n,\;A_t,B_t\in\mathscr{F}_t
+	\end{equation*}
+	则由\cref{prop:SigmaField}(2)可得：
+	\begin{equation*}
+		A\cap B=\prod_{t\in S_n}^{}(A_t\cap B_t)\in\mathscr{D}_{S_n}
+	\end{equation*}
+	若$B\subseteq A$，则有：
+	\begin{equation*}
+		A\setminus B=\left\{\prod_{}^{}C_t:C_t\in\{B_t,A_t\setminus B_t:t\in S_n\}\right\}\Big\backslash\prod_{t\in S_n}^{}B_t
+	\end{equation*}
+	由\cref{prop:SigmaField}(4)(3)可知$A_t\setminus B_t\in\mathscr{F}_t$，于是$A\setminus B$可以表示为$\mathscr{D}_{S_n}$中$2^n-1$个互不相交元素的并集。\par
+	综上，由\cref{prop:Semiring}(2)可知$\mathscr{D}_{S_n}$是半环。\par
+	(2)由定义即可得到$\prod\limits_{t\in T}^{}X_t\in\mathscr{D}$，下面只需证明$\mathscr{D}$是一个半环。\par
+	对任意的$t\in S$取$A_t=\varnothing$，由\cref{theo:PropertyOfPreimage}(1)可得：
+	\begin{equation*}
+		\pi_S^{-1}\left(\prod_{t\in S}^{}A_t\right)=\varnothing\in\mathscr{D}
+	\end{equation*}
+	对于任意的$A,B\in\mathscr{D}$，存在$m,n\in\mathbb{N}^+$和$S_m\in\mathcal{D}_m,S_n\in\mathcal{D}_n$使得：
+	\begin{gather*}
+		A=\pi_{S_m}^{-1}\left(\prod_{t\in S_m}^{}A_t\right)=\left(\prod_{t\in S_m}^{}A_t\right)\times\left(\prod_{t\notin S_m}^{}X_t\right) \\ B=\pi_{S_n}^{-1}\left(\prod_{t\in S_n}^{}B_t\right)=\left(\prod_{t\in S_n}^{}B_t\right)\times\left(\prod_{t\notin S_n}^{}X_t\right)
+	\end{gather*}
+	记：
+	\begin{equation*}
+		S=S_m\cup S_n,\quad\hat{A}_t=
+		\begin{cases}
+			A_t,&t\in S_m \\
+			X_t,&t\in S\setminus S_m
+		\end{cases},\quad\hat{B}_t=
+		\begin{cases}
+			B_t,&t\in S_n \\
+			X_t,&t\in S\setminus S_n
+		\end{cases}
+	\end{equation*}
+	则：
+	\begin{equation*}
+		\prod_{t\in S}^{}\hat{A}_t,\prod_{t\in S}^{}\hat{B}_t\in\mathscr{D}_S
+	\end{equation*}
+	由(1)可知$\mathscr{D}_S$是半环，于是：
+	\begin{equation*}
+		A\cap B=\left(\prod_{t\in S}^{}\hat{A}_t\bigcap\prod_{t\in S}^{}\hat{B}_t\right)\times\prod_{t\notin S}^{}X_t=\prod_{t\in S}^{}(\hat{A}_t\cap\hat{B}_t)\times\prod_{t\notin S}^{}X_t\in\mathscr{D}
+	\end{equation*}
+	若$B\subseteq A$，则：
+	\begin{equation*}
+		A\setminus B=\left(\prod_{t\in S}^{}\hat{A}_t\Big\backslash\prod_{t\in S}^{}\hat{B}_t\right)\times\prod_{t\notin S}^{}X_t
+	\end{equation*}
+	可以表示为$\mathscr{D}$中有限个互不相交的元素的并集。\par
+	综上，由\cref{prop:Semiring}(2)可知$\mathscr{D}$是半代数。\par
+	(3)由定义立即可得。\par
+	(4)由定义即可得到$\prod\limits_{t\in T}^{}X_t\in\mathscr{A}\in\mathscr{A}$，由\cref{theo:RingContainX=Field}可知只需证明$\mathscr{A}$是一个环。\par
+	任取$A,B\in\mathscr{A}$，则存在$m,n\in\mathbb{N}^+$、$S_m\in \mathcal{D}_m,,S_n\in\mathcal{D}_n$和$\tilde{A}\in\prod\limits_{t\in S_m}^{}X_t,\tilde{B}\in\prod\limits_{t\in S_n}^{}X_t$满足：
+	\begin{equation*}
+		A=\pi_{S_m}^{-1}\tilde{A},\;B=\pi_{S_n}^{-1}\tilde{B}
+	\end{equation*}
+	记$S=S_m\cup S_n$和：
+	\begin{gather*}
+		\hat{A}=\Big\{\{x_t:t\in S\}:\forall\;t\in S_m,\;x_t\in\tilde{A},\;\forall\;t\in S\setminus S_m,\;x_t\in X_t\Big\} \\
+		\hat{B}=\Big\{\{x_t:t\in S\}:\forall\;t\in S_n,\;x_t\in\tilde{B},\;\forall\;t\in S\setminus S_n,\;x_t\in X_t\Big\}
+	\end{gather*}
+	则$A=\pi_{S}^{-1}\hat{A},B=\pi_{S}^{-1}\hat{B}\in\prod\limits_{t\in S}\mathscr{F}_t$。由\cref{theo:PropertyOfPreimage}(4)(3)、\cref{prop:SigmaField}(3)(2)和\cref{prop:SetOperation}(6)可得：
+	\begin{gather*}
+		A\cup B=\pi_{S}^{-1}\hat{A}\cup\pi_{S}^{-1}\hat{B}=\pi_{S}^{-1}(\hat{A}\cup\hat{B})\in\mathscr{A} \\
+		A\setminus B=\pi_{S}^{-1}\hat{A}\setminus\pi_{S}^{-1}\hat{B}=\pi_{S}^{-1}\hat{A}\cap(\pi_{S}^{-1}\hat{B})^c=\pi_{S}^{-1}\hat{A}\cap\pi_{S}^{-1}\hat{B}^c=\pi_{S}^{-1}(\hat{A}\cap\hat{B}^c)\in\mathscr{A}
+	\end{gather*}\par
+	综上，由$A,B$的任意性可知$\mathscr{A}$是环。
+\end{proof}
+\begin{property}
+	投影映射$\pi_S$是$\left(\prod\limits_{t\in T}^{}X_t,\prod\limits_{t\in T}^{}\mathscr{F}_t\right)$到$\left(\prod\limits_{t\in S}^{}X_t,\prod\limits_{t\in S}^{}\mathscr{F}_t\right)$上的可测映射。
+\end{property}
+\begin{proof}
+	由\cref{prop:MeasurableMapping}(1)即可得出结论。
+\end{proof}
+\begin{theorem}
+	$f=\{f_t:t\in T\}$是从可测空间$(X,\mathscr{F})$到可测空间$\left(\prod\limits_{t\in T}^{}X_t,\prod\limits_{t\in T}^{}\mathscr{F}_t\right)$的可测映射当且仅当对任意的$t\in T$，$f_t$是从$(X,\mathscr{F})$到$(X_t,\mathscr{F}_t)$上的可测映射。
+\end{theorem}
+\begin{proof}
+	\textbf{(1)必要性：}由\cref{prop:FiniteDimensionalCylinderSet}(5)、\cref{lem:PreimageSigmaField}和\cref{theo:PropertyOfPreimage}(4)可得：
+	\begin{align*}
+		&f^{-1}\left(\prod_{t\in T}^{}\mathscr{F}_t\right)=f^{-1}\left[\sigma\left(\underset{t\in T}{\bigcup}^{}\pi_t^{-1}\mathscr{F}_t\right)\right]=\sigma\left[f^{-1}\left(\underset{t\in T}{\bigcup}^{}\pi_t^{-1}\mathscr{F}_t\right)\right] \\
+		=&\sigma\left[\underset{t\in T}{\bigcup}^{}f^{-1}(\pi_t^{-1}\mathscr{F}_t)\right]=\sigma\left(\underset{t\in T}{\bigcup}^{}f_t^{-1}\mathscr{F}_t\right)
+	\end{align*}
+	所以$f_t=\pi_t\circ f$，由\cref{prop:MeasurableMapping}(2)可知$f_t$是从$(X,\mathscr{F})$到$(X_t,\mathscr{F}_t)$上的可测映射。\par
+	\textbf{(2)充分性：}设$S\in\mathcal{N}$，对任意的$t\in S$取$A_t\in\mathscr{F}_t$，因为：
+	\begin{equation*}
+		f^{-1}\left[\pi_S^{-1}\left(\prod_{t\in S}^{}A_t\right)\right]=\underset{t\in S}{\bigcap}f_t^{-1}A_t
+	\end{equation*}
+	由\cref{prop:SigmaField}(2)、\cref{prop:FiniteDimensionalCylinderSet}(5)和\cref{prop:MeasurableMapping}(1)即可得出结论。
+\end{proof}
+
+\subsection{Fubini定理}
 \begin{theorem}
 	设$(X_1,\mathscr{F}_1,\mu_1),(X_2,\mathscr{F}_2,\mu_2)$是$\sigma$有限测度空间，则：
 	\begin{enumerate}
