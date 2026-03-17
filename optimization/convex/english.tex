@@ -1,0 +1,793 @@
+\NewTerm[no acronym] {LineSegment} 
+{line segment} 
+{线段}
+\NewTerm[no acronym] {Line} 
+{line} 
+{直线}
+\NewTerm[no acronym] {ConvexCombination} 
+{convex combination} 
+{凸组合}
+\NewTerm[no acronym] {ConvexHull} 
+{convex hull} 
+{凸包}
+\NewTerm[no acronym] {AffineSet} 
+{affine set} 
+{仿射集}
+\NewTerm[no acronym] {AffineCombination} 
+{affine combination} 
+{仿射组合}
+\NewTerm[no acronym] {AffineHull} 
+{affine hull} 
+{仿射包}
+\NewTerm[no acronym] {Cone} 
+{cone} 
+{锥}
+\NewTerm[no acronym] {ConvexCone} 
+{convex cone} 
+{凸锥}
+\NewTerm[no acronym] {ConicCombination} 
+{Conic combination} 
+{锥组合}
+\NewTerm[no acronym] {ConicHull} 
+{conic hull} 
+{锥包}
+\NewTerm[no acronym] {Hyperplane} 
+{hyperplane} 
+{超平面}
+\NewTerm[no acronym] {Halfspace} 
+{halfspace} 
+{半空间}
+\NewTerm[no acronym] {Polyhedron} 
+{polyhedron} 
+{多面体}
+\NewTerm[no acronym] {Ball} 
+{ball} 
+{球}
+\NewTerm[no acronym] {Ellipsoid} 
+{ellipsoid} 
+{椭球}
+\NewTerm[no acronym] {AffineFunction} 
+{affine function} 
+{仿射函数}
+\NewTerm[no acronym] {ConvexFunction} 
+{convex function} 
+{凸函数}
+%suppressPackageStartupMessages({
+%	library(readxl)
+%	library(dplyr)
+%	library(tidyr)
+%	library(purrr)
+%	library(stringr)
+%	library(ggplot2)
+%	library(jsonlite)
+%	library(writexl)
+%})
+%
+%setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+%
+%data_dir <- "."
+%llt_dir <- file.path(data_dir, "llt")
+%wood_dir <- file.path(data_dir, "wood")
+%out_dir <- "plots"
+%dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
+%
+%method_levels <- c(
+%"GATE",
+%"Shadow",
+%"BatchGATE",
+%"StepGATE",
+%"LassoGATE"
+%)
+%use_ggh4x <- requireNamespace("ggh4x", quietly = TRUE)
+%P_TOTAL <- 100
+%
+%true_features <- function(case) {
+%	if (case %in% c(1, 2)) 0:4 else 0:5
+%}
+%
+%parse_beta_hat <- function(x) {
+%	if (is.na(x) || !nzchar(x)) {
+%		return(integer(0))
+%	}
+%	parsed <- tryCatch(jsonlite::fromJSON(x), error = function(e) NULL)
+%	if (is.null(parsed) || length(parsed) == 0) {
+%		return(integer(0))
+%	}
+%	if (is.matrix(parsed) || is.data.frame(parsed)) {
+%		idx <- parsed[, 1]
+%	} else if (is.list(parsed)) {
+%		idx <- vapply(parsed, function(p) p[[1]], numeric(1))
+%	} else if (is.numeric(parsed) && length(parsed) >= 1) {
+%		idx <- parsed[1]
+%	} else {
+%		return(integer(0))
+%	}
+%	unique(as.integer(idx))
+%}
+%
+%calc_tpr <- function(pred, truth) {
+%	truth <- unique(truth)
+%	pred <- unique(pred)
+%	tp <- length(intersect(pred, truth))
+%	tp / length(truth)
+%}
+%
+%calc_fpr <- function(pred, truth) {
+%	truth <- unique(truth)
+%	pred <- unique(pred)
+%	denom <- P_TOTAL - length(truth)
+%	fp <- length(setdiff(pred, truth))
+%	fp / denom
+%}
+%
+%calc_f1 <- function(pred, truth) {
+%	pred <- unique(pred)
+%	truth <- unique(truth)
+%	if (length(pred) == 0) {
+%		return(0)
+%	}
+%	tp <- length(intersect(pred, truth))
+%	prec <- tp / length(pred)
+%	rec <- tp / length(truth)
+%	if ((prec + rec) == 0) 0 else 2 * prec * rec / (prec + rec)
+%}
+%
+%calc_feature_count <- function(pred) {
+%	length(unique(pred))
+%}
+%
+%list_framework1_files <- function(dir) {
+%	files <- list.files(
+%	dir,
+%	pattern = "^framework1_.*\\.xlsx$",
+%	full.names = TRUE
+%	)
+%	tibble(file = files, name = basename(files)) %>%
+%	mutate(
+%	m = str_match(name, "^framework1_(\\d+)_(\\d+)_(\\d+)_(\\d+)\\.xlsx$")
+%	) %>%
+%	filter(!is.na(m[, 1])) %>%
+%	transmute(
+%	file = file,
+%	case = as.integer(m[, 2]),
+%	train_num = as.integer(m[, 3]),
+%	NQ = as.integer(m[, 4]),
+%	H = as.integer(m[, 5])
+%	)
+%}
+%
+%list_framework2_files <- function(dir) {
+%	files <- list.files(
+%	dir,
+%	pattern = "^framework2_.*\\.xlsx$",
+%	full.names = TRUE
+%	)
+%	tibble(file = files, name = basename(files)) %>%
+%	mutate(
+%	m = str_match(
+%	name,
+%	"^framework2_(\\d+)_(\\d+)_(\\d+)_(\\d+)_(\\d+)\\.xlsx$"
+%	)
+%	) %>%
+%	filter(!is.na(m[, 1])) %>%
+%	transmute(
+%	file = file,
+%	case = as.integer(m[, 2]),
+%	query_budget = as.integer(m[, 3]),
+%	train_num = as.integer(m[, 4]),
+%	NQ = as.integer(m[, 5]),
+%	H = as.integer(m[, 6])
+%	)
+%}
+%
+%list_framework3_files <- function(dir) {
+%	files <- list.files(
+%	dir,
+%	pattern = "^framework3_.*\\.xlsx$",
+%	full.names = TRUE
+%	)
+%	tibble(file = files, name = basename(files)) %>%
+%	mutate(
+%	m = str_match(name, "^framework3_(\\d+)_(\\d+)_(\\d+)_(\\d+)\\.xlsx$")
+%	) %>%
+%	filter(!is.na(m[, 1])) %>%
+%	transmute(
+%	file = file,
+%	case = as.integer(m[, 2]),
+%	train_num = as.integer(m[, 3]),
+%	NQ = as.integer(m[, 4]),
+%	H = as.integer(m[, 5])
+%	)
+%}
+%
+%read_framework1 <- function(file, case) {
+%	sheets <- excel_sheets(file)
+%	df <- map_dfr(sheets, function(sh) {
+%		read_xlsx(file, sheet = sh) %>% mutate(method = sh)
+%	})
+%	
+%	df$beta_hat <- as.character(df$beta_hat)
+%	truth <- true_features(case)
+%	
+%	df %>%
+%	mutate(
+%	case = case,
+%	method = factor(method, levels = method_levels),
+%	pred = map(beta_hat, parse_beta_hat),
+%	tpr = map_dbl(pred, ~ calc_tpr(.x, truth)),
+%	fpr = map_dbl(pred, ~ calc_fpr(.x, truth)),
+%	feature_f1 = map_dbl(pred, ~ calc_f1(.x, truth)),
+%	feature_count = map_int(pred, calc_feature_count)
+%	) %>%
+%	filter(method %in% method_levels) %>%
+%	transmute(
+%	case = case,
+%	method = method,
+%	`repeat` = .data[["repeat"]],
+%	train_size = train_size,
+%	train_acc = train_acc,
+%	train_auc = train_auc,
+%	test_acc = test_acc,
+%	test_auc = test_auc,
+%	time = time,
+%	tpr = tpr,
+%	fpr = fpr,
+%	feature_f1 = feature_f1,
+%	feature_count = feature_count
+%	)
+%}
+%
+%prepare_framework1_long <- function(df, include_time = FALSE) {
+%	metric_map <- c(
+%	train_size = "Train Size",
+%	train_acc = "Train ACC",
+%	train_auc = "Train AUC",
+%	test_acc = "Test ACC",
+%	test_auc = "Test AUC",
+%	tpr = "TPR",
+%	fpr = "FPR",
+%	feature_f1 = "Feature F1",
+%	feature_count = "Feature Count"
+%	)
+%	metric_cols <- c(
+%	"train_size",
+%	"train_acc",
+%	"train_auc",
+%	"test_acc",
+%	"test_auc",
+%	"tpr",
+%	"fpr",
+%	"feature_f1",
+%	"feature_count"
+%	)
+%	metric_levels <- c(
+%	"Train Size",
+%	"Train ACC",
+%	"Train AUC",
+%	"Test ACC",
+%	"Test AUC",
+%	"TPR",
+%	"FPR",
+%	"Feature F1",
+%	"Feature Count"
+%	)
+%	
+%	if (include_time) {
+%		metric_map <- c(metric_map, time = "Time")
+%		metric_cols <- c(metric_cols, "time")
+%		metric_levels <- c(metric_levels, "Time")
+%	}
+%	
+%	df %>%
+%	mutate(case = factor(case)) %>%
+%	pivot_longer(
+%	all_of(metric_cols),
+%	names_to = "metric",
+%	values_to = "value"
+%	) %>%
+%	mutate(
+%	metric = recode(metric, !!!metric_map),
+%	metric = factor(metric, levels = metric_levels)
+%	)
+%}
+%
+%summarise_framework1_long <- function(long_df) {
+%	long_df %>%
+%	group_by(train_num, NQ, H, method, case, metric) %>%
+%	summarise(
+%	mean = mean(value, na.rm = TRUE),
+%	sd = sd(value, na.rm = TRUE),
+%	n = n(),
+%	.groups = "drop"
+%	)
+%}
+%
+%# 每个 framework 的子 facet 纵轴范围；留 NA 表示自动范围
+%# 注意：范围只影响显示，不会用于重新计算分位数
+%facet_y_limits <- tibble::tribble(
+%~framework   , ~metric         , ~ymin , ~ymax   ,
+%"framework1" , "Train Size"    , 0     , 3100    ,
+%"framework1" , "Train ACC"     , 0.75  ,    1    ,
+%"framework1" , "Train AUC"     , 0.85  ,    1    ,
+%"framework1" , "Test ACC"      , 0.75  ,    1    ,
+%"framework1" , "Test AUC"      , 0.85  ,    1    ,
+%"framework1" , "TPR"           , 0.55  ,    1    ,
+%"framework1" , "FPR"           , 0     ,    0.3  ,
+%"framework1" , "Feature F1"    , 0.3   ,    1    ,
+%"framework1" , "Feature Count" , 0     ,   30    ,
+%"framework1" , "Time"          , 0     ,    0.45 ,
+%"framework3" , "Train Size"    , 0     ,  900    ,
+%"framework3" , "Train ACC"     , 0.75  ,    1    ,
+%"framework3" , "Train AUC"     , 0.85  ,    1    ,
+%"framework3" , "Test ACC"      , 0.75  ,    1    ,
+%"framework3" , "Test AUC"      , 0.85  ,    1    ,
+%"framework3" , "TPR"           , 0.99  ,    1    ,
+%"framework3" , "FPR"           , 0     ,    0.25 ,
+%"framework3" , "Feature F1"    , 0.3   ,    1    ,
+%"framework3" , "Feature Count" , 0     ,   30    ,
+%"framework3" , "Time"          , NA    , NA
+%)
+%
+%build_facet_scales <- function(framework_label) {
+%	limit_df <- facet_y_limits %>%
+%	filter(framework == framework_label) %>%
+%	filter(!is.na(ymin), !is.na(ymax))
+%	
+%	if (nrow(limit_df) == 0) {
+%		return(list())
+%	}
+%	
+%	purrr::pmap(
+%	limit_df,
+%	function(framework, metric, ymin, ymax) {
+%		as.formula(
+%		sprintf(
+%		"metric == '%s' ~ scale_y_continuous(limits = c(%s, %s), oob = scales::oob_keep)",
+%		metric,
+%		ymin,
+%		ymax
+%		)
+%		)
+%	}
+%	)
+%}
+%
+%plot_framework1_facets <- function(long_df, label, out_path) {
+%	p <- ggplot(
+%	long_df,
+%	aes(x = method, y = value, fill = case, group = interaction(method, case))
+%	) +
+%	geom_boxplot(
+%	position = position_dodge2(width = 0.8, preserve = "single"),
+%	outlier.shape = NA,
+%	linewidth = 0.4
+%	) +
+%	facet_wrap(~metric, scales = "free_y", ncol = 3) +
+%	labs(
+%	title = paste0("Framework1 | ", label),
+%	x = "Method",
+%	y = "Metric",
+%	fill = "Case"
+%	) +
+%	theme_bw(base_size = 11) +
+%	theme(
+%	axis.text.x = element_text(angle = 25, hjust = 1),
+%	panel.grid.minor = element_blank()
+%	)
+%	
+%	if (use_ggh4x) {
+%		scales_list <- build_facet_scales("framework1")
+%		if (length(scales_list) > 0) {
+%			p <- p + ggh4x::facetted_pos_scales(y = scales_list)
+%		}
+%	} else if (nrow(facet_y_limits %>% filter(framework == "framework1")) > 0) {
+%		message("Install ggh4x to enable per-facet y limits for framework1.")
+%	}
+%	
+%	ggsave(out_path, p, width = 13, height = 7)
+%}
+%
+%plot_framework3_facets <- function(long_df, label, out_path) {
+%	p <- ggplot(
+%	long_df,
+%	aes(x = method, y = value, fill = case, group = interaction(method, case))
+%	) +
+%	geom_boxplot(
+%	position = position_dodge2(width = 0.8, preserve = "single"),
+%	outlier.shape = NA,
+%	linewidth = 0.4
+%	) +
+%	facet_wrap(~metric, scales = "free_y", ncol = 3) +
+%	labs(
+%	title = paste0("Framework3 | ", label),
+%	x = "Method",
+%	y = "Metric",
+%	fill = "Case"
+%	) +
+%	theme_bw(base_size = 11) +
+%	theme(
+%	axis.text.x = element_text(angle = 25, hjust = 1),
+%	panel.grid.minor = element_blank()
+%	)
+%	
+%	if (use_ggh4x) {
+%		scales_list <- build_facet_scales("framework3")
+%		if (length(scales_list) > 0) {
+%			p <- p + ggh4x::facetted_pos_scales(y = scales_list)
+%		}
+%	} else if (nrow(facet_y_limits %>% filter(framework == "framework3")) > 0) {
+%		message("Install ggh4x to enable per-facet y limits for framework3.")
+%	}
+%	
+%	ggsave(out_path, p, width = 13, height = 7)
+%}
+%
+%plot_framework1_time <- function(llt_df, wood_df, label, out_path) {
+%	time_df <- bind_rows(
+%	llt_df %>% mutate(faster = "LLT"),
+%	wood_df %>% mutate(faster = "Woodbury")
+%	) %>%
+%	filter(!is.na(time), method != "Shadow", method %in% method_levels)
+%	
+%	if ("GATE" %in% method_levels && any(time_df$method == "GATE")) {
+%		gate_source <- if (
+%		any(time_df$method == "GATE" & time_df$faster == "LLT")
+%		) {
+%			"LLT"
+%		} else if (any(time_df$method == "GATE" & time_df$faster == "Woodbury")) {
+%			"Woodbury"
+%		} else {
+%			NA_character_
+%		}
+%		
+%		if (!is.na(gate_source)) {
+%			gate_df <- time_df %>%
+%			filter(method == "GATE", faster == gate_source) %>%
+%			mutate(faster = "GATE")
+%			time_df <- time_df %>% filter(method != "GATE") %>% bind_rows(gate_df)
+%		}
+%	}
+%	
+%	faster_levels <- c("LLT", "Woodbury", "GATE")
+%	time_df <- time_df %>%
+%	mutate(
+%	case = factor(case),
+%	faster = factor(faster, levels = faster_levels)
+%	)
+%	
+%	p <- ggplot(
+%	time_df,
+%	aes(
+%	x = method,
+%	y = time,
+%	fill = faster,
+%	group = interaction(method, faster)
+%	)
+%	) +
+%	geom_boxplot(
+%	position = position_dodge2(width = 0.8, preserve = "single"),
+%	outlier.shape = NA,
+%	outlier.alpha = 0.35,
+%	linewidth = 0.4
+%	) +
+%	facet_wrap(~case, ncol = 3) +
+%	labs(
+%	title = paste0("Framework1 Time | ", label),
+%	x = "Method",
+%	y = "Time (s)",
+%	fill = "Faster"
+%	) +
+%	coord_cartesian(ylim = c(0, 0.4)) +
+%	theme_bw(base_size = 11) +
+%	theme(
+%	axis.text.x = element_text(angle = 25, hjust = 1),
+%	panel.grid.minor = element_blank()
+%	)
+%	
+%	ggsave(out_path, p, width = 11, height = 4.5)
+%}
+%
+%read_framework2_curve <- function(file, case) {
+%	sheets <- excel_sheets(file)
+%	curve_sheets <- sheets[str_detect(sheets, "_curve$")]
+%	if (length(curve_sheets) == 0) {
+%		return(tibble())
+%	}
+%	
+%	map_dfr(curve_sheets, function(sh) {
+%		read_xlsx(file, sheet = sh) %>%
+%		mutate(method = str_remove(sh, "_curve$"))
+%	}) %>%
+%	mutate(
+%	case = case,
+%	method = factor(method, levels = method_levels)
+%	) %>%
+%	filter(method %in% method_levels)
+%}
+%
+%plot_learning_curve <- function(case, label, file, out_path) {
+%	df <- read_framework2_curve(file, case)
+%	long <- df %>%
+%	pivot_longer(
+%	c(test_acc, test_auc),
+%	names_to = "metric",
+%	values_to = "value"
+%	)
+%	
+%	summary <- long %>%
+%	group_by(method, iteration, metric) %>%
+%	summarise(
+%	mean = mean(value, na.rm = TRUE),
+%	sd = sd(value, na.rm = TRUE),
+%	n = n(),
+%	.groups = "drop"
+%	) %>%
+%	mutate(err = sd)
+%	
+%	p <- ggplot(
+%	summary,
+%	aes(x = iteration, y = mean, color = method, fill = method)
+%	) +
+%	geom_line(linewidth = 0.9) +
+%	geom_ribbon(
+%	aes(ymin = mean - err, ymax = mean + err),
+%	alpha = 0.15,
+%	color = NA
+%	) +
+%	facet_wrap(~metric, scales = "free_y", ncol = 2) +
+%	labs(
+%	title = sprintf("Framework2 | case=%d | %s", case, label),
+%	x = "Iteration",
+%	y = "Mean metric"
+%	) +
+%	theme_bw(base_size = 11) +
+%	theme(panel.grid.minor = element_blank())
+%	
+%	ggsave(out_path, p, width = 10, height = 6)
+%}
+%
+%write_summary_excel <- function(df, out_path) {
+%	if (requireNamespace("writexl", quietly = TRUE)) {
+%		writexl::write_xlsx(df, out_path)
+%		return(invisible(NULL))
+%	}
+%	if (requireNamespace("openxlsx", quietly = TRUE)) {
+%		openxlsx::write.xlsx(df, out_path, overwrite = TRUE)
+%		return(invisible(NULL))
+%	}
+%}
+%
+%llt_fw1 <- list_framework1_files(llt_dir)
+%wood_fw1 <- list_framework1_files(wood_dir)
+%
+%fw1_groups <- bind_rows(llt_fw1, wood_fw1) %>%
+%distinct(train_num, NQ, H) %>%
+%arrange(train_num, NQ, H)
+%
+%fw1_summary_all <- tibble()
+%
+%for (i in seq_len(nrow(fw1_groups))) {
+%	param <- fw1_groups[i, ]
+%	
+%	llt_group <- llt_fw1 %>%
+%	filter(train_num == param$train_num, NQ == param$NQ, H == param$H)
+%	
+%	wood_group <- wood_fw1 %>%
+%	filter(train_num == param$train_num, NQ == param$NQ, H == param$H)
+%	
+%	base_group <- llt_group
+%	if (nrow(wood_group) > 0) {
+%		missing_cases <- setdiff(wood_group$case, llt_group$case)
+%		base_group <- bind_rows(
+%		llt_group,
+%		wood_group %>% filter(case %in% missing_cases)
+%		)
+%	}
+%	
+%	if (nrow(base_group) == 0) {
+%		next
+%	}
+%	
+%	base_group <- base_group %>%
+%	select(file, case, train_num, NQ, H)
+%	
+%	label <- sprintf(
+%	"train=%d | NQ=%d | H=%d",
+%	param$train_num,
+%	param$NQ,
+%	param$H
+%	)
+%	
+%	base_df <- pmap_dfr(
+%	base_group,
+%	function(file, case, train_num, NQ, H) {
+%		read_framework1(file, case) %>%
+%		mutate(train_num = train_num, NQ = NQ, H = H)
+%	}
+%	)
+%	
+%	llt_df <- pmap_dfr(
+%	llt_group,
+%	function(file, case, train_num, NQ, H) {
+%		read_framework1(file, case)
+%	}
+%	)
+%	
+%	wood_df <- pmap_dfr(
+%	wood_group,
+%	function(file, case, train_num, NQ, H) {
+%		read_framework1(file, case)
+%	}
+%	)
+%	
+%	fw1_long <- prepare_framework1_long(base_df)
+%	
+%	fw1_out <- file.path(
+%	out_dir,
+%	sprintf(
+%	"framework1_metrics_train%d_NQ%d_H%d.pdf",
+%	param$train_num,
+%	param$NQ,
+%	param$H
+%	)
+%	)
+%	plot_framework1_facets(fw1_long, label, fw1_out)
+%	
+%	time_out <- file.path(
+%	out_dir,
+%	sprintf(
+%	"framework1_time_train%d_NQ%d_H%d.pdf",
+%	param$train_num,
+%	param$NQ,
+%	param$H
+%	)
+%	)
+%	plot_framework1_time(llt_df, wood_df, label, time_out)
+%	
+%	fw1_long_summary <- prepare_framework1_long(base_df, include_time = TRUE)
+%	fw1_summary_all <- bind_rows(
+%	fw1_summary_all,
+%	summarise_framework1_long(fw1_long_summary)
+%	)
+%}
+%
+%summary_out <- file.path(out_dir, "framework1_metrics_summary.xlsx")
+%write_summary_excel(fw1_summary_all, summary_out)
+%
+%llt_fw3 <- list_framework3_files(llt_dir)
+%wood_fw3 <- list_framework3_files(wood_dir)
+%
+%fw3_groups <- bind_rows(llt_fw3, wood_fw3) %>%
+%distinct(train_num, NQ, H) %>%
+%arrange(train_num, NQ, H)
+%
+%
+%fw3_summary_all <- tibble()
+%
+%for (i in seq_len(nrow(fw3_groups))) {
+%	param <- fw3_groups[i, ]
+%	
+%	llt_group <- llt_fw3 %>%
+%	filter(train_num == param$train_num, NQ == param$NQ, H == param$H)
+%	
+%	wood_group <- wood_fw3 %>%
+%	filter(train_num == param$train_num, NQ == param$NQ, H == param$H)
+%	
+%	base_group <- llt_group
+%	if (nrow(wood_group) > 0) {
+%		missing_cases <- setdiff(wood_group$case, llt_group$case)
+%		base_group <- bind_rows(
+%		llt_group,
+%		wood_group %>% filter(case %in% missing_cases)
+%		)
+%	}
+%	
+%	if (nrow(base_group) == 0) {
+%		next
+%	}
+%	
+%	label <- sprintf(
+%	"train=%d | NQ=%d | H=%d",
+%	param$train_num,
+%	param$NQ,
+%	param$H
+%	)
+%	
+%	base_df <- pmap_dfr(
+%	base_group,
+%	function(file, case, train_num, NQ, H) {
+%		read_framework1(file, case) %>%
+%		mutate(train_num = train_num, NQ = NQ, H = H)
+%	}
+%	)
+%	
+%	fw3_long <- prepare_framework1_long(base_df)
+%	fw3_out <- file.path(
+%	out_dir,
+%	sprintf(
+%	"framework3_metrics_train%d_NQ%d_H%d.pdf",
+%	param$train_num,
+%	param$NQ,
+%	param$H
+%	)
+%	)
+%	plot_framework3_facets(fw3_long, label, fw3_out)
+%	
+%	fw3_long_summary <- prepare_framework1_long(base_df, include_time = TRUE)
+%	fw3_summary_all <- bind_rows(
+%	fw3_summary_all,
+%	summarise_framework1_long(fw3_long_summary)
+%	)
+%}
+%
+%fw3_summary_out <- file.path(out_dir, "framework3_metrics_summary.xlsx")
+%write_summary_excel(fw3_summary_all, fw3_summary_out)
+%
+%llt_fw2 <- list_framework2_files(llt_dir)
+%wood_fw2 <- list_framework2_files(wood_dir)
+%
+%fw2_groups <- bind_rows(llt_fw2, wood_fw2) %>%
+%distinct(query_budget, train_num, NQ, H) %>%
+%arrange(query_budget, train_num, NQ, H)
+%
+%if (nrow(fw2_groups) == 0) {
+%	message("No framework2 files found in wood/ or llt/.")
+%}
+%
+%for (i in seq_len(nrow(fw2_groups))) {
+%	param <- fw2_groups[i, ]
+%	
+%	llt_group <- llt_fw2 %>%
+%	filter(
+%	query_budget == param$query_budget,
+%	train_num == param$train_num,
+%	NQ == param$NQ,
+%	H == param$H
+%	)
+%	
+%	wood_group <- wood_fw2 %>%
+%	filter(
+%	query_budget == param$query_budget,
+%	train_num == param$train_num,
+%	NQ == param$NQ,
+%	H == param$H
+%	)
+%	
+%	base_group <- llt_group
+%	if (nrow(wood_group) > 0) {
+%		missing_cases <- setdiff(wood_group$case, llt_group$case)
+%		base_group <- bind_rows(
+%		llt_group,
+%		wood_group %>% filter(case %in% missing_cases)
+%		)
+%	}
+%	
+%	if (nrow(base_group) == 0) {
+%		next
+%	}
+%	
+%	for (case in sort(unique(base_group$case))) {
+%		file_row <- base_group %>% filter(case == !!case) %>% slice(1)
+%		label <- sprintf(
+%		"budget=%d | train=%d | NQ=%d | H=%d",
+%		param$query_budget,
+%		param$train_num,
+%		param$NQ,
+%		param$H
+%		)
+%		
+%		out_path <- file.path(
+%		out_dir,
+%		sprintf(
+%		"framework2_case%d_budget%d_train%d_NQ%d_H%d.pdf",
+%		case,
+%		param$query_budget,
+%		param$train_num,
+%		param$NQ,
+%		param$H
+%		)
+%		)
+%		
+%		plot_learning_curve(case, label, file_row$file, out_path)
+%	}
+%}
