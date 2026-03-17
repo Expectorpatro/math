@@ -1,4 +1,129 @@
 \chapter{概率初步}
+
+\begin{definition}
+	若$f$是概率空间$(X,\mathscr{F},P)$到$(\mathbb{R}^{n},\mathcal{B}(\mathbb{R}^{n}))$上的可测映射，则称$f$是$n$维\gls{RandomVector}。当$n=1$时，称$f$为\gls{r.v.}。
+\end{definition}
+\begin{definition}
+	若$\mathbb{R}^{n}$上的准分布函数$F$满足\footnote{此处极限符号的含义为$\seq{x}{n}$中存在$x_i\to-\infty$或$x_i\to+\infty$。}：
+	\begin{equation*}
+		\lim_{\seq{x}{n}\to-\infty}F(\seq{x}{n})=0,\quad\lim_{\seq{x}{n}\to+\infty}F(\seq{x}{n})=1
+	\end{equation*}
+	则称$F$是$\mathbb{R}^{n}$上的\gls{d.f.}。
+\end{definition}
+%\begin{definition}
+%	设$F$是$\mathbb{R}^{}$上的准分布函数。定义：
+%	\begin{equation*}
+%		\forall\;t\in(F(-\infty),F(+\infty)),\;F^{\leftarrow}(t)=\inf\{x\in\mathbb{R}^{}:F(x)\geqslant t\}
+%	\end{equation*}
+%	称$F^{\leftarrow}$为$F$的\gls{Left-continuousInverse}。
+%\end{definition}
+%\begin{property}\label{prop:LeftcontinuousInverse}
+%	对任意$\mathbb{R}^{}$上的准分布函数$F$，有：
+%	\begin{enumerate}
+%		\item $\forall\;t\in(F(-\infty),F(+\infty)),\;\forall\;x\in\mathbb{R}^{},\;F^{\leftarrow}(t)\leqslant x\Leftrightarrow F(x)\geqslant t$；
+%		\item $\forall\;t\in(F(-\infty),F(+\infty)),\;F^{\leftarrow}(t)\in\mathbb{R}^{}$；
+%		\item $F^{\leftarrow}$左连续；
+%		\item $F^{\leftarrow}$单调递增。
+%	\end{enumerate}
+%\end{property}
+%\begin{proof}
+%	(1)由$F$的单调性可得：
+%	\begin{equation*}
+%		F^{\leftarrow}(t)\leqslant x\Leftrightarrow\inf\{y\in\mathbb{R}^{}:F(y)\geqslant t\}\leqslant x\Leftrightarrow F(x)\geqslant t
+%	\end{equation*}\par
+%	(2)若存在$t\in(F(-\infty),F(+\infty))$使得$F^{\leftarrow}(t)=-\infty$，则对于任意的$x\in\mathbb{R}^{}$有$F^{\leftarrow}(t)\leqslant x$，由(1)可得$F(x)\geqslant t$，根据$F$的单调性，此时应有$t\leqslant F(-\infty)$，矛盾。正无穷的情况同理可得。\par
+%	(3)对任意的$t\in(F(-\infty),F(+\infty))$，取任意的$\{t_n\}\uparrow t$，则对任意的$n\in\mathbb{N}^+$有：
+%	\begin{equation*}
+%		\{x\in\mathbb{R}^{}:F(x)\geqslant t\}\subseteq\{x\in\mathbb{R}^{}:F(x)\geqslant t_n\},\;\{x\in\mathbb{R}^{}:F(x)\geqslant t_{n+1}\}\subseteq\{x\in\mathbb{R}^{}:F(x)\geqslant t_n\}
+%	\end{equation*}
+%	于是$F^{\leftarrow}(t)\geqslant F^{\leftarrow}(t_n),\;F^{\leftarrow}(t_{n+1})\geqslant F^{\leftarrow}(t_n)$，所以$\{F^{\leftarrow}(t_n)\}$单调递增且有上界。由\cref{prop:RSeq}(7)可知$\{F^{\leftarrow}(t_n)\}$存在极限，根据\cref{prop:RSeq}(6)可得该极限小于等于$F^{\leftarrow}(t)$。若：
+%	\begin{equation*}
+%		\lim_{n\to+\infty}F^{\leftarrow}(t_n)<F^{\leftarrow}(t)
+%	\end{equation*}
+%	由\info{实数的稠密性}可取$y$满足：
+%	\begin{equation*}
+%		\lim_{n\to+\infty}F^{\leftarrow}(t_n)<y<F^{\leftarrow}(t)
+%	\end{equation*}
+%	根据\cref{prop:RSeq}(5)可知存在$N\in\mathbb{N}^+$使得当$n>N$时有$F^{\leftarrow}(t_n)<y$，于是$F(t_n)\leqslant F(y)\leqslant F(t)$。因为$F$是单调递增的且$\{t_n\}\uparrow t$，上式成立当且仅当$F(y)=F(t)$，由(1)可知此时$y\geqslant F^{\leftarrow}(t)$，矛盾。\par
+%	(4)由(3)的证明过程立即可得。
+%\end{proof}
+\begin{theorem}
+	设$f=(\seq{f}{n})$是概率空间$(X,\mathscr{F},P)$上的随机向量。对任意的$x=(\seq{x}{n})\in\mathbb{R}^{n}$，由\cref{prop:MeasurableFunction}(1.b)和\cref{prop:SigmaField}(2)，令：
+	\begin{equation*}
+		F(x)=P(f\leqslant x)=P\left(\underset{i=1}{\overset{n}{\cap}}\{f_i\leqslant x_i\}\right)
+	\end{equation*}
+	则$F$是$\mathbb{R}^{n}$上的$n$元分布函数。
+\end{theorem}
+\begin{proof}
+	(1)由\cref{prop:Measure}(3)（单调性）可得$F(x)$是一个非降的实值函数。\par
+	(2)任取$f$的一个维度$f_i$，注意到：
+	\begin{equation*}
+		\{f\leqslant x\}=\left(\underset{j\ne i}{\overset{}{\cap}}\{f_j\leqslant x_j\}\right)\bigcap\left(\lim_{n\to+\infty}\left\{f_i\leqslant x_i+\frac{1}{n}\right\}\right)
+	\end{equation*}
+	考虑集族$\{X_n\}$，其中：
+	\begin{equation*}
+		X_n=\left(\underset{j\ne i}{\overset{}{\cap}}\{f_j\leqslant x_j\}\right)\bigcap\left(\left\{f_i\leqslant x_i+\frac{1}{n}\right\}\right)
+	\end{equation*}
+	则$\{X_n\}$是一个单调不增的集族，根据\cref{prop:SetLimit}(3)有：
+	\begin{equation*}
+		\lim_{n\to+\infty}X_n=\underset{n=1}{\overset{+\infty}{\cap}}X_n=\left(\underset{j\ne i}{\overset{}{\cap}}\{f_j\leqslant x_j\}\right)\bigcap\left(\underset{n=1}{\overset{+\infty}{\bigcap}}\left\{f_i\leqslant x_i+\frac{1}{n}\right\}\right)=\{f\leqslant x\}
+	\end{equation*}
+	因为$P(X=1)$，由\cref{prop:Measure}(3)（单调性）可得$P(X_1)<+\infty$，所以根据\cref{prop:Measure}(3)（上连续性）可得：
+	\begin{align*}
+		&F(x)=P(\{f\leqslant x\})=P\left(\lim_{n\to+\infty}X_n\right)=\lim_{n\to+\infty}P(X_n) \\
+		=&\lim_{h\to+0}F(x_1,x_2,\dots,x_{i-1},x_i+h,x_{i+1},\dots,x_n)
+	\end{align*}
+	于是$F(x)$是右连续的。\par
+	(3)对任意的$a=(\seq{a}{n})\in\mathbb{R}^{n}$和$b=(\seq{b}{n})\in\mathbb{R}^{n}$且$a\leqslant b$，记：
+	\begin{gather*}
+		C=\Big\{c=(\seq{c}{n}):c_i\in\{a_i,b_i\},\;\forall\;i=1,2,\dots,n\Big\} \\
+		n(c)=\Big|\Big\{i\in\{1,2,\dots,n\}:c_i=a_i\Big\}\Big|,\quad E_i=\{a_i<f_i\leqslant b_i\}
+	\end{gather*}
+	由\cref{prop:MeasurableFunction}(1.b)、\cref{prop:SigmaField}(4)(2)、\cref{prop:NonnegativeSimpleIntegral}(5)
+	\begin{equation*}
+		P\left(\underset{i=1}{\overset{n}{\cap}}E_i\right)=\int_{X}I\left(x\in\underset{i=1}{\overset{n}{\cap}}E_i\right)\dif P
+	\end{equation*}
+	注意到：
+	\begin{align*}
+		&I\left(x\in\underset{i=1}{\overset{n}{\cap}}E_i\right)=\prod_{i=1}^{n}I(x\in E_i)=\prod_{i=1}^{n}[I(x\in\{f_i\leqslant b_i\})-I(x\in\{f_i\leqslant a_i\})] \\
+		=&\sum_{c\in C}^{}(-1)^{n(c)}\prod_{i=1}^{n}I(x\in\{f_i\leqslant c_i\})=\sum_{c\in C}^{}(-1)^{n(c)}I\left(x\in\underset{i=1}{\overset{n}{\cap}}\{f_i\leqslant c_i\}\right)
+	\end{align*}
+	根据\cref{prop:MeasurableIntegral}(6)、\cref{prop:NonnegativeMeasurableIntegral}(5)可得：
+	\begin{align*}
+		&0\leqslant P\left(\underset{i=1}{\overset{n}{\cap}}E_i\right)=\int_{X}I\left(x\in\underset{i=1}{\overset{n}{\cap}}E_i\right)\dif P=\int_{X}\left[\sum_{c\in C}^{}(-1)^{n(c)}I\left(x\in\underset{i=1}{\overset{n}{\cap}}\{f_i\leqslant c_i\}\right)\right]\dif P \\
+		=&\sum_{c\in C}^{}(-1)^{n(c)}\int_{X}I\left(x\in\underset{i=1}{\overset{n}{\cap}}\{f_i\leqslant c_i\}\right)\dif P=\sum_{c\in C}^{}(-1)^{n(c)}P\left(\underset{i=1}{\overset{n}{\cap}}\{f_i\leqslant c_i\}\right) \\
+		=&\sum_{c\in C}^{}(-1)^{n(c)}F(c)
+	\end{align*}\par
+	(4)由$f$取值在$\mathbb{R}^{n}$上和\cref{prop:Measure}(3)（上下连续性）立即可得：
+	\begin{equation*}
+		\lim_{\seq{x}{n}\to-\infty}F(\seq{x}{n})=0,\quad\lim_{\seq{x}{n}\to+\infty}F(\seq{x}{n})=1\qedhere
+	\end{equation*}
+\end{proof}
+\begin{definition}
+	设$f=(\seq{f}{n})$是概率空间$(X,\mathscr{F},P)$上的随机向量，$F$是$\mathbb{R}^{n}$上的$n$元分布函数。若对任意的$x=(\seq{x}{n})\in\mathbb{R}^{n}$，都有：
+	\begin{equation*}
+		F(x)=P(f\leqslant x)=P\left(\underset{i=1}{\overset{n}{\cap}}\{f_i\leqslant x_i\}\right)
+	\end{equation*}
+	则称$f$的分布函数是$F$，也说成$f$服从$F$，记为$f\sim F$，称$F$为$\seq{f}{n}$的\gls{JointDistributionFunction}。根据\cref{theo:ProductMeasurable}，$\seq{f}{n}$中任意$m$个分量构成的随机向量的联合分布函数被称为对应的$m$个分量的\gls{MarginalDistributionFunction}。
+\end{definition}
+\begin{property}
+	设$F$是$\mathbb{R}^{n}$上的分布函数，则必存在一个概率空间$(X,\mathscr{F},P)$和其上的$n$维随机向量$f$使得$f\sim F$。
+\end{property}
+\begin{proof}
+	由\cref{theo:MultiDimensionalQuasiDistributionMeasure}和\cref{prop:LSMeasure}(1)可知$F$可导出$(\mathbb{R}^{n},\mathcal{B}(\mathbb{R}^{n}))$上的测度$P$。取$X=\mathbb{R}^{n}$、$\mathscr{F}=\mathcal{B}(\mathbb{R}^{n})$和$\mathbb{R}^{n}$上的恒等映射$f$，由\cref{prop:BorelSigmaField}(1.b)和\cref{prop:MeasurableFunction}(1.b)可知$f$是$(X,\mathscr{F},P)$上的$n$维向量。\par
+	对任意的$x=(\seq{x}{n})\in\mathbb{R}^{n}$，取$A_k=\prod_{i=1}^{n}(-k,x_i]$，则$A_k$单调递增，由\cref{prop:BorelSigmaField}(1.b)可知$A_k\in\mathcal{B}(\mathbb{R}^{n})$。由\cref{prop:SetLimit}(3)、\cref{theo:SetNecessarilySet2}、(1)和\cref{prop:Measure}(3)（下连续性）可得：
+	\begin{equation*}
+		P\Big((-\infty,x]\Big)=P\left(\lim_{k\to+\infty}A_k\right)=\lim_{k\to+\infty}P(A_k)=\lim_{k\to+\infty}\left[\sum_{c\in\{-k,x_i\}}^{}(-1)^{n(c)}F(c)\right]=F(x)
+	\end{equation*}
+	所以$P(X)=1$且对任意的$x\in\mathbb{R}^{n}$有$P(f\leqslant x)=F(x)$，$(X,\mathscr{F},P)$是概率空间，$f\sim F$。
+\end{proof}
+\begin{definition}
+	若$f$是从概率空间$(X,\mathscr{F},P)$到可测空间$(Y,\mathscr{A})$的可测映射，由\cref{prop:MeasurableMapping}(4.a)，称概率测度：
+	\begin{equation*}
+		P(f^{-1}A),\;\forall\;A\in\mathscr{A}
+	\end{equation*}
+	为$f$的\gls{ProbabilityDistribution}，简记为$Pf^{-1}$。在没有明确可测映射的场合，也称概率测度$P$为概率分布。
+\end{definition}
   
 \input{probability-theory/basis/classification}
 \input{probability-theory/basis/independence}
