@@ -1,5 +1,73 @@
 \section{大数定律}
 
+\begin{definition}
+	设$\{f_n\}$是概率空间$(X,\mathscr{F},P)$上的随机变量序列。记$\mathscr{A}_n=\sigma(\{f_k:k\geqslant n\})$，由\cref{prop:SigmaField}(5)可知：
+	\begin{equation*}
+		\mathscr{A}=\underset{n=1}{\overset{+\infty}{\cap}}\mathscr{A}_n
+	\end{equation*}
+	也是一个$\sigma$域，称$\mathscr{A}$为$\{f_n\}$的\textbf{尾$\sigma$域}，$\mathscr{A}$中的事件被称为\textbf{尾事件}，称关于$\mathscr{A}$可测的随机变量为\textbf{尾随机变量}。
+\end{definition}
+\begin{note}
+	从尾事件和尾随机变量的定义可以看出：一个事件如果是否发生只取决于“从某一项以后一直怎么样”，而不取决于前面有限项具体取什么值，那它就是尾事件。同理，一个随机变量如果它的取值只由“无穷远处的尾部”决定，而前面有限项怎么改都不影响它，那它就是尾随机变量。
+\end{note}
+\begin{theorem}[Kolmogorov 0-1 Law]\label{theo:01Law}
+	设$\{f_n\}$是概率空间$(X,\mathscr{F},P)$上相互独立的随机变量序列，则：
+	\begin{enumerate}
+		\item 关于$\{f_n\}$的任一尾事件$A$，$P(A)$只能是$0$或者$1$；
+		\item 关于$\{f_n\}$的任一尾随机变量为常数a.s.于$(X,\mathscr{A},P)$。
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)对任意的$n\in\mathbb{N}^+$，令$\mathscr{B}_n=\sigma(\{f_1,f_2,\dots,f_n\})$，由\cref{prop:Independent}(6)可知$\mathscr{B}_n$和$\mathscr{A}_{n+1}$独立，而$\mathscr{A}\subseteq\mathscr{A}_{n+1}$，所以$\mathscr{B}_n$和$\mathscr{A}$独立，$\underset{n=1}{\overset{+\infty}{\cup}}\mathscr{B}_n$与$\mathscr{A}$独立。令$\mathscr{B}=\sigma\left(\underset{n=1}{\overset{+\infty}{\bigcup}}\mathscr{B}_n\right)$，由$\mathscr{B}_n$的递增性和\cref{prop:SigmaField}(2)可知$\underset{n=1}{\overset{+\infty}{\cup}}\mathscr{B}_n$是$\pi$系，根据\cref{prop:Independent}(2)可得$\mathscr{B}$和$\mathscr{A}$独立。因为$f_n$关于$\mathscr{B}_n$可测，所以$\sigma(\{f_n\})\subseteq\mathscr{B}$；因为$\mathscr{B}_n\subseteq\sigma(\{f_n\})$，所以$\mathscr{B}\subseteq\sigma(\{f_n\})$，即$\mathscr{B}=\sigma(\{f_n\})$。任取$A\in\mathscr{A}$，则$A\in\mathscr{A}_1=\sigma(\{f_n\})$，即$A\in\mathscr{B}$。将$A$表示为$A\cap A$，由$\mathscr{A}$和$\mathscr{B}$的独立性可得：
+	\begin{equation*}
+		P(A)=P(A\cap A)=[P(A)]^2
+	\end{equation*}
+	所以$P(A)$为$0$或$1$。\par
+	(2)任取关于$\{f_n\}$的尾随机变量$f$，由\cref{prop:MeasurableFunction}(1.b)可知对任意的$a\in\mathbb{R}^{}$，$\{f\leqslant a\}$是尾事件，根据(1)可知$P(f\leqslant a)$为$0$或$1$。取：
+	\begin{equation*}
+		a_0=\inf\{a\in\mathbb{R}^{}:P(f\leqslant a)=1\}
+	\end{equation*}
+	由分布函数的右连续性可得$P(f\leqslant a_0)=1$。根据\cref{prop:Measure}(3)（下连续性）和\cref{prop:RSeq}(5)可得：
+	\begin{equation*}
+		P(f<a_0)=\lim_{n\to+\infty}P\left(f\leqslant a_0-\frac{1}{n}\right)=0
+	\end{equation*}
+	由\cref{prop:Measure}(2)可得$P(f=a_0)=1$。
+\end{proof}
+\begin{note}
+	Kolmogorov 0-1 Law说明了如果$\{f_n\}$是独立的随机变量序列，则：
+	\begin{enumerate}
+		\item $\sum\limits_{n=1}^{+\infty}f_n$要么收敛a.s.于$(X,\mathscr{A},P)$要么发散a.s.于$(X,\mathscr{A},P)$；
+		\item 若$\lim\limits_{n\to+\infty}\dfrac{1}{n}\sum\limits_{i=1}^{n}f_i$存在，则只能是一个常数a.s.于$(X,\mathscr{A},P)$。
+	\end{enumerate}
+	由函数项级数收敛的Cauchy式定义、\cref{prop:SigmaField}(2)和\cref{prop:MeasurableFunction}(5.b)(3)可以得到$\sum\limits_{n=1}^{+\infty}f_n$收敛是尾事件，根据\cref{prop:MeasurableFunction}(5.a)(6)和\cref{prop:RSeq}(8.b)可知如果$\lim\limits_{n\to+\infty}\dfrac{1}{n}\sum\limits_{i=1}^{n}f_i$存在，则$\lim\limits_{n\to+\infty}\dfrac{1}{n}\sum\limits_{i=1}^{n}f_i$是尾随机变量。
+\end{note}
+\begin{lemma}[Borel-Cantelli Lemma]\label{lem:BorelCantelli}
+	设$(X,\mathscr{F},P)$是概率空间，$\{A_n\}\subseteq\mathscr{F}$。
+	\begin{enumerate}
+		\item 若$\sum\limits_{n=1}^{+\infty}P(A_n)<+\infty$，则：
+		\begin{equation*}
+			P\left(\varlimsup_{n\to+\infty}A_n\right)=0
+		\end{equation*}
+		\item 若$\{A_n\}$相互独立且$\sum\limits_{n=1}^{+\infty}P(A_n)=+\infty$，则：
+		\begin{equation*}
+			P\left(\varlimsup_{n\to+\infty}A_n\right)=1
+		\end{equation*}
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	(1)由\cref{prop:SetLimit}(3)、\cref{prop:Measure}(3)（上连续性，次可列可加性）和\cref{prop:RSeq}(6)可得：
+	\begin{equation*}
+		P\left(\varlimsup_{n\to+\infty}A_n\right)=P\left(\underset{n=1}{\overset{+\infty}{\cap}}\underset{k=n}{\overset{+\infty}{\cup}}A_k\right)=\lim_{n\to+\infty}P\left(\underset{k=n}{\overset{+\infty}{\cup}}A_k\right)\leqslant\lim_{n\to+\infty}\sum_{k=n}^{+\infty}P(A_k)=0
+	\end{equation*}\par
+	(2)由\cref{prop:SetOperation}(7)、\cref{prop:SetLimit}(3)、\cref{prop:Measure}(3)（下连续性，上连续性）和\cref{prop:RSeq}(6)可得：
+	\begin{align*}
+		&P\left[\left(\varlimsup_{n\to+\infty}A_n\right)^c\right]=P\left(\underset{n=1}{\overset{+\infty}{\cup}}\underset{k=n}{\overset{+\infty}{\cap}}A_k^c\right)=\lim_{n\to+\infty}P\left(\underset{k=n}{\overset{+\infty}{\cap}}A_k^c\right)=\lim_{n\to+\infty}\lim_{m\to+\infty}P\left(\underset{k=n}{\overset{m}{\cap}}A_k^c\right) \\
+		=&\lim_{n\to+\infty}\lim_{m\to+\infty}\prod_{k=n}^{m}[1-P(A_k)]=\lim_{n\to+\infty}\lim_{m\to+\infty}\exp\left\{\sum_{k=n}^{m}\ln[1-P(A_k)]\right\} \\
+		\leqslant&\lim_{n\to+\infty}\lim_{m\to+\infty}\exp\left\{-\sum_{k=n}^{m}P(A_k)\right\}=\lim_{n\to+\infty}\exp\left\{-\sum_{k=n}^{+\infty}P(A_k)\right\}=0
+	\end{align*}
+	由\cref{prop:Measure}(2)即可得出结论。
+\end{proof}
+
 \subsection{弱大数定律}
 \begin{definition}
 	设$\{X_n\}$是一个随机变量序列，若
