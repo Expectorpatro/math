@@ -1,11 +1,9 @@
 \section{Banach空间}
 
-\begin{definition}
-	完备的赋范线性空间称之为\gls{BanachSpace}。
-\end{definition}
+
 \subsection{无限维Banach空间的基}
 \begin{definition}
-	设$X$是一个无限维的Banach空间，$X$中的点列$\{e_n\}$如果满足：$X$中的任一元素$x$可唯一地表示成
+	设$X$是无限维的Banach空间，$X$中的点列$\{e_n\}$如果满足：$X$中的任一元素$x$可唯一地表示成
 	\begin{equation*}
 		x=\sum_{n=1}^{+\infty}\xi_ne_n
 	\end{equation*}
@@ -31,4 +29,85 @@
 		&\leqslant\left\|\sum_{i=1}^{n}(\eta_{in}-\xi_i)e_i\right\|+\left\|\sum_{i=n+1}^{+\infty}\xi_ie_i\right\|
 	\end{align*}
 	因为$\sum\limits_{n=1}^{+\infty}\xi_ne_n$依$X$中的范数收敛，所以后一项由Cauchy收敛准则趋于$0$，而前一项显然趋于$0$，所以$\{x_n\}\rightarrow x$，且$x_n\in E,\;\forall\;n\in\mathbb{N}^+$。因此$x$是$E$的一个聚点。由$x$的任意性，$X\subset\overline{E}$。而$E$是可数集合，因此$X$可分。
+\end{proof}
+
+\begin{corollary}
+	设内积空间$X$中存在完备的规范正交系，则$X$可分。
+\end{corollary}
+\begin{proof}
+	设$\{e_n\}$是$X$中完备的规范正交系，由\cref{theo:OthonormalSystem}(2)可知对任意的$x\in X$，有：
+	\begin{equation*}
+		x=\sum_{n=1}^{+\infty}(x,e_n)e_n
+	\end{equation*}
+	根据\cref{theo:Density}(3)可知由$\{e_n\}$张成的子空间在$X$中稠密，由\info{可列个可列是可列}可知$\{e_n\}$以有理数为系数的所有可能的线性组合构成的集在$X$中也稠密且可列，于是$X$可分。
+\end{proof}
+\begin{theorem}
+	可分的内积空间$X$必存在完备的规范正交系。
+\end{theorem}
+\begin{proof}
+	因为$X$可分，所以$X$中有可列的稠密子集$\{x_n\}$。由Schmidt正交化定理，利用$\{x_n\}$可以建立规范正交系$\{e_n\}$，且$\{x_n\}$与$\{e_n\}$张成的子空间相同。因为$\{x_n\}$在$X$中稠密，所以任取$y\in X$，存在$\{x_n\}$中的点列$\{y_n\}$使得$\{y_n\}\to y$。因为$x_n$可由$\{e_n\}$线性表出，所以$\{y_n\}$可由$\{e_n\}$线性表出，于是$\{y_n\}\subset\operatorname{span}\{e_n,\;n\in\mathbb{N}^+\}$。把$y_n$用$\{e_n\}$线性表出，就可以得到：
+	\begin{equation*}
+		y_k=\sum_{n=1}^{+\infty}(y_k,e_n)e_n,\;k\in\mathbb{N}^+
+	\end{equation*}
+	因为：
+	\begin{align*}
+		\left\|y-\sum_{n=1}^{+\infty}(y,e_n)e_n\right\|
+		&\leqslant||y-y_k||+\left\|y_k-\sum_{n=1}^{+\infty}(y,e_n)e_n\right\| \\
+		&=||y-y_k||+\left\|\sum_{n=1}^{+\infty}(y_k,e_n)e_n-\sum_{n=1}^{+\infty}(y,e_n)e_n\right\| \\
+		&=||y-y_k||+\left\|\sum_{n=1}^{+\infty}(y_k-y,e_n)e_n\right\|
+	\end{align*}
+	又：
+	\begin{align*}
+		\left\|\sum_{n=1}^{+\infty}(y_k-y,e_n)e_n\right\|
+		&=\sqrt{\left(\sum_{n=1}^{+\infty}(y_k-y,e_n)e_n,\sum_{n=1}^{+\infty}(y_k-y,e_n)e_n\right)} \\
+		&=\sqrt{\sum_{n=1}^{+\infty}(y_k-y,e_n)\overline{(y_k-y,e_n)}}  
+		\\
+		&=\sqrt{\sum_{n=1}^{+\infty}|(y_k-y,e_n)|^2}
+	\end{align*}
+	由Bessel inequality可得：
+	\begin{equation*}
+		\left\|\sum_{n=1}^{+\infty}(y_k-y,e_n)e_n\right\|
+		=\sqrt{\sum_{n=1}^{+\infty}|(y_k-y,e_n)|^2}
+		\leqslant||y_k-y||
+	\end{equation*}
+	于是有：
+	\begin{equation*}
+		\left\|y-\sum_{n=1}^{+\infty}(y,e_n)e_n\right\|
+		\leqslant2||y-y_k||\to0\quad(k\to+\infty)
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\left\|y-\sum_{n=1}^{+\infty}(y,e_n)e_n\right\|=0w
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		y=\sum_{n=1}^{+\infty}(y,e_n)e_n
+	\end{equation*}
+	由$y$的任意性，$\{e_n\}$是完备的。
+\end{proof}
+\subsubsection{可分Hilbert空间的同构性}
+\begin{theorem}
+	实（或复）可分Hilbert空间与实（或复）$l^2$空间等距同构，所以所有实（或复）可分Hilbert空间彼此等距同构。
+\end{theorem}
+\begin{proof}
+	设$X$为实（或复）可分Hilbert空间，$\{e_n\}$是$X$中的一个完备规范正交系。任取$x\in X$，$\{c_n\}$是$x$关于$\{e_n\}$的Fourier系数集。作$X$到$l^2$中的映射：
+	\begin{equation*}
+		T:Tx=\{c_n\}
+	\end{equation*}\par
+	(1)由Parseval's identity，$T$是双射。\par
+	(2)任取$x,y\in X$，$\alpha,\beta$为$X$对应数域中的两个数，则：
+	\begin{equation*}
+		T(\alpha x+\beta y)=\{(\alpha x+\beta y,e_n)\}=\{\alpha(x,e_n)+\beta(y,e_n)\}=\alpha Tx+\beta Ty
+	\end{equation*}\par
+	综上两点，$T$是$X$到$l^2$中的同构映射。\par
+	任取$x,y\in X$，由$\{e_n\}$的完备性可得：
+	\begin{align*}
+		||x-y||^2
+		&=\left(\sum_{n=1}^{+\infty}(x-y,e_n)e_n,\sum_{n=1}^{+\infty}(x-y,e_n)e_n\right) \\
+		&=\sum_{n=1}^{+\infty}(x-y,e_n)\overline{(x-y,e_n)} \\
+		&=\sum_{n=1}^{+\infty}|(x-y,e_n)|^2 \\
+		&=||Tx-Ty||^2
+	\end{align*}
+	所以$||x-y||=||Tx-Ty||$，即$X$与$l^2$空间等距。\par
+	综上，$X$与$l^2$等距同构。由$X$的任意性以及等距同构的传递性，所有实（或复）可分Hilbert空间彼此等距同构。
 \end{proof}

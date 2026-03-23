@@ -23,7 +23,10 @@
 	设$X$是赋范线性空间。若点列$\{x_n\}\subseteq X$收敛于点$x$，则称$\{x_n\}$\gls{convergenceNorm}于$x$，也称$\{x_n\}$\gls{Strongconvergence}于$x$。
 \end{definition}
 \begin{definition}
-	设$X$是一个线性空间，$||\cdot||_1,\;||\cdot||_2$是定义在$X$上的两个范数，$X$按照这两个范数均为赋范线性空间。若：
+	完备的赋范线性空间称之为\gls{BanachSpace}。
+\end{definition}
+\begin{definition}
+	设$X$是线性空间，$||\cdot||_1,\;||\cdot||_2$是定义在$X$上的两个范数，$X$按照这两个范数均为赋范线性空间。若：
 	\begin{equation*}
 		\exists\;K_1,K_2>0,\;\forall\;x\in X,\;K_1||x||_1\leqslant||x_2||\leqslant K_2||x||_1
 	\end{equation*}
@@ -52,10 +55,36 @@
 	由$\{a_n\}$和$\{b_n\}$的收敛性以及$\{x_n\}$和$\{y_n\}$的收敛性立即可得$a_nx_n+b_ny_n\to ax+bx$。\par
 	(4)由定义即可得到。
 \end{proof}
+\begin{definition}
+	在$\mathbb{R}^{n}$中定义元素$x=(\xi_1,\xi_2,\dots,\xi_n)$的范数为：
+	\begin{equation*}
+		||x||_2=\left(\sum_{i=1}^n\xi_i^2\right)^{\frac{1}{2}}
+	\end{equation*}
+	则$\mathbb{R}^{n}$成为一个赋范线性空间。称上述范数为\textbf{欧式范数}。
+\end{definition}
+\begin{proof}
+	(1)$\;||x||_2\in\mathbb{R}$、(2)非负性和(3)数乘显然，(4)三角不等式的证明可见欧式距离三角不等式的证明。
+\end{proof}
+\begin{theorem}\label{theo:NormRn}
+	$\mathbb{R}^{n}$上的任意两个范数都等价。
+\end{theorem}
+\begin{proof}
+	只需证明$\mathbb{R}^{n}$上的任意一个范数都与欧式范数等价（传递性自行验证）。取$\mathbb{R}^{n}$上的范数$N(x)$。\par
+	先证明$\{x:||x||_2=1\}$是有界闭集。有界性立即可得。因为$\{1\}$是闭集，根据\cref{prop:Norm}(2)和\cref{theo:ContinousMapO2OC2C}可知$\{x;||x||_2=1\}$是闭集。\par
+	由\cref{theo:CompactRn}可知$\{x:||x||_2=1\}$是紧集，根据\cref{prop:Norm}(2)和\cref{prop:CompactMap}(3)可知$N(x)$在$\{x:||x||_2=1\}$上存在最小值$a$和最大值$b$。对于任意不为$\mathbf{0}$的$x\in\mathbb{R}^{n}$有$\dfrac{x}{||x||_2}\in\{x:||x||_2=1\}$，于是有：
+	\begin{equation*}
+		a\leqslant N\left(\frac{x}{||x||_2}\right)\leqslant b
+	\end{equation*}
+	即：
+	\begin{equation*}
+		a||x||_2\leqslant N(x)\leqslant b||x||_2
+	\end{equation*}
+	当$x=\mathbf{0}$时，上式也成立，所以$N(x)$与欧式范数$||x||_2$等价。
+\end{proof}
 
 \subsection{线性算子}
 \begin{definition}
-	设$X$和$Y$是数域$K$上的线性空间，$E\subseteq X$，$T:E\to Y$是一个映射。若对任意的$x,y\in E$，有：
+	设$X$和$Y$是数域$K$上的线性空间，$E\subseteq X$，$T:E\to Y$是映射。若对任意的$x,y\in E$，有：
 	\begin{equation*}
 		T(x+y)=Tx+Ty
 	\end{equation*}
@@ -70,10 +99,10 @@
 \end{note}
 \subsubsection{线性算子的连续性}
 \begin{definition}
-	设$X$和$Y$是数域$K$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是一个映射。若$T$是连续的，则称$T$为\gls{ContinuousLinearOperator}。
+	设$X$和$Y$是数域$K$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是映射。若$T$是连续的，则称$T$为\gls{ContinuousLinearOperator}。
 \end{definition}
 \begin{property}\label{prop:ContinuousLinearOperator}
-	设$X$和$Y$是数域$K$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是一个映射。
+	设$X$和$Y$是数域$K$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是映射。
 	\begin{enumerate}
 		\item 若$K=\mathbb{R}^{}$，$T$是连续可加算子，则$T$是连续线性算子；
 		\item 若$K=\mathbb{C}^{}$，$T$是连续可加算子且$T(ix)=iTx$，则$T$是连续线性算子。
@@ -104,7 +133,7 @@
 	\end{equation*}
 	所以$T$对有理数集满足齐次性。\par
 	因为任意无理数都可用一个有理数序列去逼近，由$T$的连续性，$T$对无理数集也满足齐次性。\par
-	综上，$T$是一个连续线性算子。\par
+	综上，$T$是连续线性算子。\par
 	(2)设$a=a_1+ia_2\in\mathbb{C}$，由(1)可得：
 	\begin{align*}
 		T(ax)&=T[(a_1+ia_2)x]=T(a_1x+ia_2x)=T(a_1x)+T(ia_2x) \\
@@ -113,16 +142,16 @@
 \end{proof}
 \subsubsection{线性算子的有界性}
 \begin{definition}
-	设$X$和$Y$是数域$K$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是一个映射。若$T$将$E$中的任一有界集映成$Y$中的有界集，则称$T$是\gls{BoundedLinearOperator}。如果存在$E$中的有界集$A$，使得$TA$是$Y$中的无界集，则称$T$是\gls{UnboundedLinearOperator}。
+	设$X$和$Y$是数域$K$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是映射。若$T$将$E$中的任一有界集映成$Y$中的有界集，则称$T$是\gls{BoundedLinearOperator}。如果存在$E$中的有界集$A$，使得$TA$是$Y$中的无界集，则称$T$是\gls{UnboundedLinearOperator}。
 \end{definition}
 \begin{property}\label{prop:BoundedLinearOperator}
-	设$X$和$Y$是$\mathbb{R}^{}$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是一个映射。$T$有界的充分必要条件为：
+	设$X$和$Y$是$\mathbb{R}^{}$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是映射。$T$有界的充分必要条件为：
 	\begin{equation*}
 		\exists\;M>0,\;\forall\;x\in E,\;||Tx||_Y\leqslant M||x||_X
 	\end{equation*}
 \end{property}
 \begin{proof}
-	\textbf{(1)充分性：}任取$A\subseteq E$是一个有界集，由赋范线性空间上距离的定义和有界集的定义可知：
+	\textbf{(1)充分性：}任取$A\subseteq E$是有界集，由赋范线性空间上距离的定义和有界集的定义可知：
 	\begin{equation*}
 		\exists\;K>0,\;\forall\;x\in A,\;||x||_X\leqslant K
 	\end{equation*}
@@ -151,7 +180,7 @@
 \end{proof}
 \subsubsection{线性算子有界与连续的关系}
 \begin{theorem}\label{theo:LinearOperatorBoundedContinuous}
-	设$X$和$Y$是$\mathbb{R}^{}$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是一个映射，则以下陈述等价：
+	设$X$和$Y$是$\mathbb{R}^{}$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是映射，则以下陈述等价：
 	\begin{enumerate}
 		\item $T$在$E$上连续。
 		\item $T$在$E$中某给定点$x_0$连续。
@@ -190,7 +219,7 @@
 \subsection{有限维赋范线性空间}
 \subsubsection{拓扑同构}
 \begin{definition}
-	设$(X,\rho_X)$和$(Y,\rho_Y)$都是度量空间，$T$是一个$X$到$Y$的双射。若$T$和$T^{-1}$都是连续映射，则称$T$是$X$到$Y$上的\gls{HomeoMap}。如果存在一个$X$到$Y$上的同胚映射，则称$X$和$Y$\gls{homeomorphic}。
+	设$(X,\rho_X)$和$(Y,\rho_Y)$都是度量空间，$T$是$X$到$Y$的双射。若$T$和$T^{-1}$都是连续映射，则称$T$是$X$到$Y$上的\gls{HomeoMap}。如果存在一个$X$到$Y$上的同胚映射，则称$X$和$Y$\gls{homeomorphic}。
 \end{definition}
 \begin{definition}
 	设$X$和$Y$都是赋范线性空间，如果满足条件：
@@ -201,7 +230,7 @@
 	则称$X$和$Y$\gls{TopoIso}。
 \end{definition}
 \begin{definition}
-	$X$是一个赋范线性空间，若$X$的任一有界闭集是紧的，则称$X$是
+	$X$是赋范线性空间，若$X$的任一有界闭集是紧的，则称$X$是
 	\gls{LocallyCompact}。
 \end{definition}
 \begin{property}\label{prop:FiniteDimensionalNormedLinearSpace}
@@ -215,11 +244,11 @@
 \begin{proof}
 	(1)由\cref{prop:IsomorphicOfLinearSpace}(7)及\cref{theo:CompositeContinuousMap}可知拓扑同构具有传递性，于是只需证明实（复）$n$维赋范线性空间与$\mathbb{R}^{n}$（$\mathbb{C}^{n}$）拓扑同构。\par
 	任取一个实$n$维赋范线性空间$X$。下证$X$和$\mathbb{R}^{n}$之间存在一个双射。\par
-	设$X$是一个实的$n$维赋范线性空间，$\{e_1,e_2,\dots,e_n\}$是$X$的一个基。定义一个映射$T:\mathbb{R}^{n}\mapsto X$如下（$\xi\in\mathbb{R}^{n}$）：
+	设$X$是实的$n$维赋范线性空间，$\{e_1,e_2,\dots,e_n\}$是$X$的一个基。定义一个映射$T:\mathbb{R}^{n}\mapsto X$如下（$\xi\in\mathbb{R}^{n}$）：
 	\begin{equation*}
 		T\xi=\sum_{i=1}^n\xi_ie_i
 	\end{equation*}
-	由于$\{e_1,e_2,\dots,e_n\}$是$X$的一个基，根据\cref{prop:LinearlyDependent}(4)可知$T\xi$的表出方式唯一，即$T$是一个单射。其次对任意的$x\in X$，根据基的定义它必然能由$\{e_1,e_2,\dots,e_n\}$线性表出，因此有$\eta=(\eta_1,\eta_2,\dots,\eta_n)\in\mathbb{R}^{n}$，使得$x=\sum\limits_{i=1}^n\eta_ie_i=T\eta$，因此$T$是一个满射。\par
+	由于$\{e_1,e_2,\dots,e_n\}$是$X$的一个基，根据\cref{prop:LinearlyDependent}(4)可知$T\xi$的表出方式唯一，即$T$是单射。其次对任意的$x\in X$，根据基的定义它必然能由$\{e_1,e_2,\dots,e_n\}$线性表出，因此有$\eta=(\eta_1,\eta_2,\dots,\eta_n)\in\mathbb{R}^{n}$，使得$x=\sum\limits_{i=1}^n\eta_ie_i=T\eta$，因此$T$是满射。\par
 	映射$T$保持线性运算是显然的。\par
 	综上，$X$和$\mathbb{R}^{n}$作为线性空间是同构的。\par
 	下证映射$T$是连续映射。\par
@@ -229,13 +258,13 @@
 		&=\left\|\sum_{i=1}^n(\xi_i-\eta_i)e_i\right\|_X\leqslant\sum_{i=1}^n|\xi_i-\eta_i|\;||e_i||_X \\
 		&\leqslant\left(\sum_{i=1}^n|\xi_i-\eta_i|^2\right)^\frac{1}{2}\cdot\left(\sum_{i=1}^n||e_i||_X^2\right)^\frac{1}{2}
 	\end{align*}
-	所以$T$是一个连续映射。\par
-	下证$T^{-1}$是一个连续映射。\par
-	要证$T^{-1}$是一个连续映射，证明$\forall\;x,y\in X$，$\exists\;\alpha\geqslant0$使得：
+	所以$T$是连续映射。\par
+	下证$T^{-1}$是连续映射。\par
+	要证$T^{-1}$是连续映射，证明$\forall\;x,y\in X$，$\exists\;\alpha\geqslant0$使得：
 	\begin{equation*}
 		||T^{-1}x-T^{-1}y||\leqslant\alpha||x-y||_X
 	\end{equation*}
-	即可。因为已经证得$T$是一个双射且保持线性运算，所以只需证$||T^{-1}x||\leqslant\alpha||x||_X$，即：
+	即可。因为已经证得$T$是双射且保持线性运算，所以只需证$||T^{-1}x||\leqslant\alpha||x||_X$，即：
 	\begin{equation*}
 		\exists\;\alpha>0,\;\forall\;x\in X,\;\frac{||x||_X}{||T^{-1}x||}\geqslant\alpha
 	\end{equation*}
@@ -243,7 +272,7 @@
 	\begin{equation*}
 		f(\xi_1,\xi_2,\dots,\xi_n)=||x||_X
 	\end{equation*}
-	当$(\xi_1,\xi_2,\dots,\xi_n)$在$\mathbb{R}^{n}$的单位球面上时，即$\sum\limits_{i=1}^n\xi_i^2=1$时，由\cref{prop:IsomorphicOfLinearSpace}(1)可知$||x||_X\ne0$。又因为单位球面是一个有界闭集（因为$\{1\}$是闭集，根据\cref{prop:Norm}(2)和\cref{theo:ContinousMapO2OC2C}可知$\{x;||x||_2=1\}$是闭集。），由\cref{theo:CompactRn}和\cref{prop:CompactMap}(3)可得$f(\xi_1,\xi_2,\dots,\xi_n)$在单位球面上有正的下确界$\alpha$，即$||x||_X\geqslant\alpha$。对任意的$x\in X$进行单位化，即取$x'$满足：
+	当$(\xi_1,\xi_2,\dots,\xi_n)$在$\mathbb{R}^{n}$的单位球面上时，即$\sum\limits_{i=1}^n\xi_i^2=1$时，由\cref{prop:IsomorphicOfLinearSpace}(1)可知$||x||_X\ne0$。又因为单位球面是有界闭集（因为$\{1\}$是闭集，根据\cref{prop:Norm}(2)和\cref{theo:ContinousMapO2OC2C}可知$\{x;||x||_2=1\}$是闭集。），由\cref{theo:CompactRn}和\cref{prop:CompactMap}(3)可得$f(\xi_1,\xi_2,\dots,\xi_n)$在单位球面上有正的下确界$\alpha$，即$||x||_X\geqslant\alpha$。对任意的$x\in X$进行单位化，即取$x'$满足：
 	\begin{equation*}
 		x'=\frac{x}{||T^{-1}x||}
 	\end{equation*}
@@ -253,8 +282,8 @@
 	\end{equation*}\par
 	复：类似，$\mathbb{R}^{2n}$。\par
 	(2)由(1)可知$X$与$\mathbb{R}^{n}$是拓扑同构的，那么$X$与$\mathbb{R}^{n}$之间存在一个双射$T:X\rightarrow\mathbb{R}^{n}$，且$T$和$T^{-1}$是连续的。任取$X$上的一个Cauchy点列$\{x_n\}$，$Tx_n=y_n\in\mathbb{R}^{n}$。\par 
-	下证$\{y_n\}$也是一个柯西序列，即证对任意的$\varepsilon>0$，存在$N\in\mathbb{N}^+$，当$n,m>N$时，有$\rho(y_n,y_m)<\varepsilon$。\par
-	因为$T$是连续的，所以对上述$\varepsilon$，存在$\delta>0$，当$\rho(x_n,x_m)<\delta$时，有$\rho(y_n,y_m)<\varepsilon$。而$\{x_n\}$是Cauchy点列，因此对上述$\delta$，存在$N_1\in\mathbb{N}^+$，当$n,m>N_1$时，有$\rho(x_n,x_m)<\delta$。所以取$N=N_1$即可满足条件。因此$\{y_n\}$是一个柯西序列。\par
+	下证$\{y_n\}$也是柯西序列，即证对任意的$\varepsilon>0$，存在$N\in\mathbb{N}^+$，当$n,m>N$时，有$\rho(y_n,y_m)<\varepsilon$。\par
+	因为$T$是连续的，所以对上述$\varepsilon$，存在$\delta>0$，当$\rho(x_n,x_m)<\delta$时，有$\rho(y_n,y_m)<\varepsilon$。而$\{x_n\}$是Cauchy点列，因此对上述$\delta$，存在$N_1\in\mathbb{N}^+$，当$n,m>N_1$时，有$\rho(x_n,x_m)<\delta$。所以取$N=N_1$即可满足条件。因此$\{y_n\}$是柯西序列。\par
 	由\cref{theo:RnComplete}可知$\mathbb{R}^{n}$是完备的，所以$\{y_n\}\rightarrow y\in\mathbb{R}^{n}$，于是：
 	\begin{equation*}
 		\lim_{n\to+\infty}T^{-1}y_n=T^{-1}\left(\lim_{n\to+\infty}y_n\right)=T^{-1}y
@@ -268,38 +297,408 @@
 	充分性：若此时$X$是无限维的。取$S=\{x:||x||=1\}$为$X$的单位球面\info{有空证明}
 \end{proof}
 
-
-
-
-
-
-
-
-
-\subsection{$\mathbb{R}^{n}$上的范数}
+\subsection{Hilbert空间}
 \begin{definition}
-	在$\mathbb{R}^{n}$中定义元素$x=(\xi_1,\xi_2,\dots,\xi_n)$的范数为：
+	设$X$是内积空间，在其上定义如下范数：
 	\begin{equation*}
-		||x||_2=\left(\sum_{i=1}^n\xi_i^2\right)^{\frac{1}{2}}
+		||x||=\sqrt{(x,x)}
 	\end{equation*}
-	则$\mathbb{R}^{n}$成为一个赋范线性空间。称上述范数为\textbf{欧式范数}。
+	那么$X$成为赋范线性空间。若$X$是完备的，则称其为\gls{HilbertSpace}。若$X$不完备，则称其为\gls{PreHilbertSpace}。
 \end{definition}
+下证这个定义满足范数的定义：
 \begin{proof}
-	(1)$\;||x||_2\in\mathbb{R}$、(2)非负性和(3)数乘显然，(4)三角不等式的证明可见欧式距离三角不等式的证明。
+	(1)非负性和(2)数乘可分别由内积的定义(3)和(1)立刻得出。\par
+	(3)三角不等式：由\cref{ineq:cauchy-schiwarz-inner-product}可得：
+	\begin{align*}
+		&||x+y||^2=(x+y,x+y)=(x,x+y)+(y,x+y) \\
+		=&(x,x)+(x,y)+(y,x)+(y,y)\leqslant||x||^2+2||x|||\;|y||+||y||^2=(||x||+||y||)^2
+	\end{align*}
+	即$||x+y||\leqslant||x||+||y||$。
 \end{proof}
-\begin{theorem}\label{theo:NormRn}
-	$\mathbb{R}^{n}$上的任意两个范数都等价。
+\begin{property}\label{prop:InnerProduct}
+	设$X$是内积空间，则：
+	\begin{enumerate}
+		\item 内积是连续函数；
+		\item(Polarization Identity) 对任意的$x,y\in X$，当$X$是实内积空间时有$(x,y)=\frac{1}{4}(||x+y||^2-||x-y||^2)$，当$X$是复内积空间时有$(x,y)=\frac{1}{4}(||x+y||^2-||x-y||^2+i||x+iy||^2-i||x-iy||^2)$；
+		\item(Parallelogram Law) 对任意的$x,y\in X$，由$X$的内积导出的范数$||\cdot||$满足：
+		\begin{equation*}
+			||x+y||^2+||x-y||^2=2||x||^2+2||y||^2
+		\end{equation*}
+		反之，如果$X$是赋范线性空间，$X$的范数满足上式，则可以在$X$中定义内积$(\cdot,\cdot)$使$X$成为内积空间。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)设$\{x_n\},\{y_n\}$是内积空间$X$中的点列，且分别依范数收敛于$x,y\in X$，由\cref{ineq:cauchy-schiwarz-inner-product}可得：
+	\begin{align*}
+		|(x_n,y_n)-(x,y)|&=|(x_n,y_n)-(x_n,y)+(x_n,y)-(x,y)| \\
+		&=|(x_n,y_n-y)+(x_n-x,y)| \\
+		&\leqslant|(x_n,y_n-y)|+|(x_n-x,y)| \\
+		&\leqslant||x_n||\;||y_n-y||+||x_n-x||\;||y|| 
+	\end{align*}
+	根据\cref{prop:ConvergentSeqOfPoints}(3)可知$\{x_n\}$有界，所以$||x_n||$有界。由\cref{prop:RSeq}(8.b)(8.c)可知上式极限为$0$，即内积是连续函数。\par
+	(2)当$X$是实内积空间时有：
+	\begin{align*}
+		&\frac{1}{4}(||x+y||^2-||x-y||^2)=\frac{1}{4}[(x+y,x+y)-(x-y,x-y)] \\
+		=&\frac{1}{4}[(x,x)+(x,y)+(y,x)+(y,y)-(x,x)-(x,-y)-(-y,x)-(-y,-y)] \\
+		=&\frac{1}{4}[(x,x)+(x,y)+(x,y)+(y,y)-(x,x)+(x,y)+(x,y)-(y,y)]=(x,y)
+	\end{align*}
+	当$X$是复内积空间时有：
+	\begin{align*}
+		&\quad\;\frac{1}{4}(||x+y||^2-||x-y||^2+i||x+iy||^2-i||x-iy||^2) \\
+		&=\frac{1}{4}[(x+y,x+y)-(x-y,x-y)+i(x+iy,x+iy)-i(x-iy,x-iy)] \\
+		&=\frac{1}{4}[(x,x)+(x,y)+(y,x)+(y,y)-(x,x)-(x,-y)-(-y,x)-(-y,-y)]+ \\
+		&\quad\;\frac{1}{4}i[(x,x)+(x,iy)+(iy,x)+(iy,iy)-(x,x)-(x,-iy)-(-iy,x)-(-iy,-iy)] \\
+		&=\frac{1}{4}[2(x,y)+2(y,x)+2i(x,iy)+2i(iy,x)] \\
+		&=\frac{1}{4}[2(x,y)+2(y,x)+2(x,y)-2(y,x)=(x,y)
+	\end{align*}\par
+	(3)对于第一个结论，注意到：
+	\begin{align*}
+		&||x+y||^2+||x-y||^2=(x+y,x+y)+(x-y,x-y) \\
+		=&(x,x)+(x,y)+(y,x)+(y,y)+(x,x)-(x,y)-(y,x)+(y,y) \\
+		=&2(x,x)+2(y,y)=2||x||^2+2||y||^2
+	\end{align*}
+	第二个结论利用(2)来定义内积再代回验证即可。
+\end{proof}
+\subsubsection{Hilbert空间中的正交系}
+\begin{definition}
+	设$X$是内积空间，$x,y\in X$，$M,N\subseteq X$。若$(x,y)=0$，则称$x$与$y$\gls{Orthogonal}，记为$x\perp y$。若$x$与$M$中任一元素正交，则称$x$与$M$正交，记为$x\perp M$。若对于任意的$x\in M$以及任意的$y\in N$有$x\perp y$，则称$M$与$N$正交，记为$M\perp N$。称$\{x\in X:x\perp M\}$为$M$的\gls{OrthogonalComplement}，记为$M^{\perp}$。
+\end{definition}
+\begin{definition}
+	设$X$是内积空间，$E\subseteq X$，$x\in X$。若存在$y\in E$使得：
+	\begin{equation*}
+		x=y+z,\quad y\in E,\;z\in E^{\perp}
+	\end{equation*}
+	则称$y$为$x$在$E$中的\gls{OrthogonalProjection}。
+\end{definition}
+\begin{property}\label{prop:Orthogonal}
+	设$X$是内积空间，则：
+	\begin{enumerate}
+		\item 若$x_1,x_2,\dots,x_n\in X$互相正交，则：
+		\begin{equation*}
+			\left\|\sum\limits_{i=1}^nx_i\right\|^2=\sum_{i=1}^{n}||x_i||^2
+		\end{equation*}
+		\item 若$x\in X$，$\{y_n\}\subseteq X$，$\{y_n\}\to y\in X$，对任意的$n\in\mathbb{N}^+$有$x\perp y_n$，则$x\perp y$；
+		\item 若$x\in X$与$X$中的一个稠密子集$E$正交，则$x=\mathbf{0}$；
+		\item 若$E\subseteq X$，$x\perp E$，则$x\perp\operatorname{span}(E)$；
+		\item 若$E\subseteq X$，则$E^{\perp}$是$X$的闭子空间；
+		\item 若$E$是$X$的子空间，$x\in E$，$x$在$E$中存在正交投影$y$，则$y$是唯一的。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由内积的线性运算性质，可以得到：
+	\begin{equation*}
+		\left\|\sum_{i=1}^nx_i\right\|^2
+		=\left(\sum_{i=1}^nx_i,\sum_{i=1}^nx_i\right)
+		=\sum_{i=1}^{n}(x_i,x_i)
+		=\sum_{i=1}^{n}||x_i||^2
+	\end{equation*}\par
+	(2)根据\cref{prop:InnerProduct}(1)和\cref{prop:RSeq}(5)可得：
+	\begin{equation*}
+		(x,y)=\left(x,\lim_{n\to\infty}y_n\right)=\lim_{n\to\infty}(x,y_n)=0
+	\end{equation*}\par
+	(3)因为$E$在$X$中稠密，由\cref{theo:Density}(3)可知存在$\{x_n\}\subseteq E$使得$\{x_n\}\to x$。根据(2)可得$(x,x)=0$，由内积的定义即可得到$x=\mathbf{0}$。\par
+	(4)由内积的线性性立即可得。\par
+	(5)由(4)和\cref{theo:Subspace}立即可得$E^{\perp}$是$X$的子空间，由(2)可得$E^{\perp}$是闭集。\par
+	(6)设$x=y+z$，若此时存在另一分解$x=y'+z',\;y'\in E,z'\in E^{\perp}$，则$y+z=y'+z'$，也即$y-y'=z'-z$。因为$(y-y')\in E$，由(4)可得$(z'-z)\in E^{\perp}$，所以$(y-y')=(z'-z)\in E\cap E^{\perp}=\{\mathbf{0}\}$，故$y=y',\;z=z'$。
+\end{proof}
+\begin{definition}
+	设$X$是内积空间，$E\subseteq M$，$x\in X$。如果存在$y\in E$使得：
+	\begin{equation*}
+		||x-y||=\inf_{z\in E}||x-z||
+	\end{equation*}
+	则称$y$是$x$在$M$中的一个\gls{BestApproximationElement}。
+\end{definition}
+\begin{theorem}\label{theo:BestApproximationElement}
+	设$X$是Hilbert空间，$E$是$X$中的凸闭集。对任意的$x\in X$，在$E$中存在$x$的唯一的最佳逼近元，且就是$x$在$E$中的正交投影。
 \end{theorem}
 \begin{proof}
-	只需证明$\mathbb{R}^{n}$上的任意一个范数都与欧式范数等价（传递性自行验证）。取$\mathbb{R}^{n}$上的范数$N(x)$。\par
-	先证明$\{x:||x||_2=1\}$是有界闭集。有界性立即可得。因为$\{1\}$是闭集，根据\cref{prop:Norm}(2)和\cref{theo:ContinousMapO2OC2C}可知$\{x;||x||_2=1\}$是闭集。\par
-	由\cref{theo:CompactRn}可知$\{x:||x||_2=1\}$是紧集，根据\cref{prop:Norm}(2)和\cref{prop:CompactMap}(3)可知$N(x)$在$\{x:||x||_2=1\}$上存在最小值$a$和最大值$b$。对于任意不为$\mathbf{0}$的$x\in\mathbb{R}^{n}$有$\dfrac{x}{||x||_2}\in\{x:||x||_2=1\}$，于是有：
+	任取$x\in X$，记：
 	\begin{equation*}
-		a\leqslant N\left(\frac{x}{||x||_2}\right)\leqslant b
-	\end{equation*}
-	即：
+		\inf_{z\in E}||x-z||=a
+	\end{equation*}\par
+	\textbf{(1)存在性：}由下确界的定义，可从$E$中得到一个点列$\{y_n\}$满足：
 	\begin{equation*}
-		a||x||_2\leqslant N(x)\leqslant b||x||_2
+		\lim_{n\to+\infty}||x-y_n||=a
 	\end{equation*}
-	当$x=\mathbf{0}$时，上式也成立，所以$N(x)$与欧式范数$||x||_2$等价。
+	下证$\{y_n\}$是Cauchy点列。令$n>m$，由\cref{prop:InnerProduct}(3)可得到：
+	\begin{align*}
+		&||y_n-y_m||^2=||y_n-x+x-y_m||^2 \\
+		=&2||y_n-x||^2+2||x-y_m||^2-||2x-y_m-y_n||^2 \\
+		=&2||y_n-x||^2+2||x-y_m||^2-4\left\|x-\frac{y_m+y_n}{2}\right\|^2
+	\end{align*}
+	因为$E$是$X$中的闭凸集，$y_m,y_n\in E$，所以$\dfrac{y_m+y_n}{2}\in E$，进而有：
+	\begin{equation*}
+		\left\|x-\frac{y_m+y_n}{2}\right\|^2\geqslant a^2
+	\end{equation*}
+	又因$n,m\to+\infty$时，有：
+	\begin{equation*}
+		||y_n-x||^2\to a^2,\;||x-y_m||^2\to a^2
+	\end{equation*}
+	由\cref{prop:RSeq}(6)(8.b)(8.c)可得：
+	\begin{align*}
+		&\lim_{m\to+\infty}||y_n-y_m||^2\leqslant\lim_{m\to+\infty}\left(2||y_n-x||^2+2||x-y_m||^2-4a^2\right) \\
+		=&\lim_{m\to+\infty}2||y_n-x||^2+\lim_{m\to+\infty}2||x-y_m||^2-4a^2=2a^2+2a^2-4a^2=0
+	\end{align*}
+	故$\{y_n\}$是Cauchy点列。因为$X$是完备的，所以$\{y_n\}\to y\in X$。又因$E$是闭集，所以$y\in E$。由\cref{prop:Norm}(2)可得：
+	\begin{equation*}
+		||x-y||=\left\|x-\lim_{n\to+\infty}y_n\right\|=\lim_{n\to+\infty}||x-y_n||=a
+	\end{equation*}
+	所以$y$是$x$在$E$中的最佳逼近元。\par
+	\textbf{(2)唯一性：}假设$x$在$E$中存在另一最佳逼近元$y'$，由\cref{prop:InnerProduct}(3)可得：
+	\begin{align*}
+		&||y-y'||^2=||y-x+x-y'||^2 \\
+		=&2||y-x||^2+2||x-y'||^2-4\left\|x-\frac{y+y'}{2}\right\|^2\leqslant0
+	\end{align*}
+	所以$||y-y'||=0$，$y=y'$。\par
+	$y$是$x$在$E$上的投影由\cref{theo:OrthogonalProjection}的证明过程立即可得。
+\end{proof}
+\begin{theorem}\label{theo:OrthogonalProjection}
+	设$X$是Hilbert空间，$E$是$X$中的闭子空间。对任意的$x\in X$，存在下述唯一的正交分解：
+	\begin{equation*}
+		x=y+z,\quad y\in E,\;z\in E^{\perp}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	\textbf{(1)存在性：}因为$E$是$X$中的闭子空间，所以$E$是凸闭集，由\cref{theo:BestApproximationElement}可知$x$在$E$中存在唯一的最佳逼近元$y$，记$||x-y||=a$。因为$y\in E$，所以对任一实（或复）数$\lambda$以及任意的$u\in E$，有$y+\lambda u\in E$，故：
+	\begin{align*}
+		a^2
+		&\leqslant||x-(y+\lambda u)||^2 =\Bigl((x-y)-\lambda u,(x-y)-\lambda u\Bigr) \\
+		&=||x-y||^2-\overline{\lambda}(x-y,u)-\lambda(u,x-y)+|\lambda|^2||u||^2
+	\end{align*}
+	取$\lambda=\dfrac{(x-y,u)}{||u||^2}$，上式即可化为：
+	\begin{equation*}
+		a^2\leqslant a^2-\frac{|(x-y,u)|^2}{||u||^2}-\frac{|(x-y,u)|^2}{||u||^2}+\frac{|(x-y,u)|^2}{||u||^4}||u||^2=a^2-\frac{|(x-y,u)|^2}{||u||^2}
+	\end{equation*}
+	所以$(x-y,u)=0$。由$u$的任意性，$(x-y)\perp E$。令$z=x-y$，即有：
+	\begin{equation*}
+		x=y+z,\quad y\in E,\;z\in E^{\perp}
+	\end{equation*}\par
+	\textbf{(2)唯一性：}由\cref{prop:Orthogonal}(6)立即可得。
+\end{proof}
+\begin{definition}
+	设$\{e_n\}$为内积空间$X$中的元素系，且满足：
+	\begin{equation*}
+		(e_m,e_n)=
+		\begin{cases}
+			0,&m\ne n \\
+			1,&m=n
+		\end{cases}
+	\end{equation*}
+	则称$\{e_n\}$是$X$中的一个\gls{OrthonormalSystem}。对任意的$x\in X$，称$c_n=(x,e_n)$为$x$关于$\{e_n\}$的第$n$个\gls{FourierCoefficient}，称$\{(x,e_n)\}$为$x$关于$\{e_n\}$的\gls{SetOfFourierCoefficients}。
+\end{definition}
+\begin{lemma}\label{lem:OrthogonalProjectionSpan}
+	$X$是内积空间，$\{e_1,e_2,\dots,e_n\}$是$X$中的一个规范正交系，$E=\operatorname{span}\{e_1,e_2,\dots,e_n\}$。对任意的$x\in X$，$x$在$E$上的正交投影为：
+	\begin{equation*}
+		y=\sum_{i=1}^{n}(x,e_i)e_i
+	\end{equation*}
+\end{lemma}
+\begin{proof}
+	对任意的$i=1,2,\dots,n$有：
+	\begin{equation*}
+		(x-y,e_i)=\left(x-\sum_{j=1}^{n}(x,e_j)e_j,e_i\right)=(x,e_i)-\sum_{j=1}^{n}(x,e_j)(e_j,e_i)=(x,e_i)-(x,e_i)=0
+	\end{equation*}
+	由\cref{prop:Orthogonal}(4)可知$x-y\perp E$，所以$y$是$X$在$E$上的正交投影。
+\end{proof}
+\begin{theorem}[Bessel's inequality]]\label{theo:BesselInequality}
+	$X$是内积空间，$\{e_n\}$是$X$中的一个规范正交系。对任意的$x\in X$，有：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}|(x,e_n)|^2\leqslant||x||^2
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由\cref{lem:OrthogonalProjectionSpan}可知$x$在$\operatorname{span}\{e_1,e_2,\dots,e_n\}$中存在正交投影：
+	\begin{equation*}
+		y=\sum_{i=1}^{n}(x,e_i)e_i
+	\end{equation*}
+	由\cref{prop:Orthogonal}(1)可得$||y||\leqslant||x||$，故：
+	\begin{align*}
+		&||y||^2=\left\|\sum_{i=1}^{n}(x,e_i)e_i\right\|^2 =\left(\sum_{i=1}^{n}(x,e_i)e_i,\sum_{i=1}^{n}(x,e_i)e_i\right) \\
+		=&\sum_{i=1}^n\Bigl((x,e_i)e_i,(x,e_i)e_i\Bigr) =\sum_{i=1}^n|(x,e_i)|^2(e_i,e_i) =\sum_{i=1}^n|(x,e_i)|^2\leqslant||x||^2
+	\end{align*}
+	由\cref{prop:RSeq}(6)即可得到结果。
+\end{proof}
+\begin{theorem}[Parseval's identity]\label{theo:ParsevalIdentity}
+	设$X$是Hilbert空间，$\{e_n\}$是$X$中的一个规范正交系，数列$\{c_n\}\in l^2$。存在唯一的$x\in X$，使得$\{c_n\}$是$x$关于$\{e_n\}$的Fourier系数集，且等式：
+	\begin{equation*}
+		||x||^2=\sum_{n=1}^{+\infty}|c_n|^2
+	\end{equation*}
+	成立。
+\end{theorem}
+\begin{proof}
+	\textbf{(1)存在性：}构建点列$\left\{x_n=\sum\limits_{i=1}^{n}c_ie_i\right\}$，设$m>n$，则有：
+	\begin{equation*}
+		||x_m-x_n||^2=\left\|\sum_{i=n+1}^{m}c_ie_i\right\|^2=\left(\sum_{i=n+1}^{m}c_ie_i,\sum_{i=n+1}^{m}c_ie_i\right)=\sum_{i=n+1}^{m}|c_i|^2(e_i,e_i)=\sum_{i=n+1}^{m}|c_i|^2
+	\end{equation*}
+	因为数列$\{c_n\}\in l^2$，所以$\sum\limits_{i=1}^{+\infty}|c_i|^2$收敛，由\cref{prop:Series}(3)可得$||x_m-x_n||^2\to0$，因此$\{x_n\}$是$X$中的Cauchy点列。又因为$X$完备，所以$\{x_n\}\to x\in X$。\par
+	由\cref{prop:InnerProduct}(1)可知，对任意的$i\in\mathbb{N}^+$，有：
+	\begin{equation*}
+		(x,e_{i})=\left(\lim_{n\to+\infty}x_n,e_{i}\right)=\lim_{n\to+\infty}(x_n,e_{i})
+	\end{equation*}
+	由$\{x_n\}$的定义可知，当$n\geqslant i$时，$(x_n,e_{i})=c_{i}$，所以$(x,e_{i})=c_{i}$，即$(x,e_n)=c_n$，所以$\{c_n\}$是$x$关于$\{e_n\}$的Fourier系数集。又因为：
+	\begin{equation*}
+		||x_n||^2=\left\|\sum_{i=1}^{n}c_ie_i\right\|^2=\left(\sum_{i=1}^{n}c_ie_i,\sum_{i=1}^{n}c_ie_i\right)=\sum_{i=1}^{n}|c_i|^2(e_i,e_i)=\sum_{i=1}^{n}|c_i|^2
+	\end{equation*}
+	由\cref{prop:Norm}(2)即可得到：
+	\begin{equation*}
+		||x||^2=\lim_{n\to\infty}||x_n||^2=\lim_{n\to\infty}\sum_{i=1}^{n}|c_i|^2=\sum_{i=1}^{+\infty}|c_i|^2
+	\end{equation*}\par
+	\textbf{(2)唯一性：}\info{没搞明白}
+\end{proof}
+\begin{definition}
+	$X$是内积空间，$\{e_n\}$是$X$中的一个规范正交系。如果对任意的$x\in X$，Parseval's identity：
+	\begin{equation*}
+		||x||^2=\sum_{n=1}^{+\infty}|(x,e_n)|^2
+	\end{equation*}
+	恒成立，则称$\{e_n\}$是完备的。
+\end{definition}
+\begin{definition}
+	$X$是内积空间，$\{e_n\}$是$X$中的一个规范正交系。如果对任意的$x\in X$，由$(x,e_n)=0,\;\forall\;n\in\mathbb{N}^+$可推出$x=\mathbf{0}$，则称$\{e_n\}$是\gls{Compeletely}。
+\end{definition}
+\begin{theorem}\label{theo:OthonormalSystem}
+	$X$是内积空间，$\{e_n\}$是$X$中的一个规范正交系。则下列性质等价：
+	\begin{enumerate}
+		\item $\{e_n\}$是完备的。
+		\item 对任意的$x\in X$，有：
+		\begin{equation*}
+			x=\sum_{n=1}^{+\infty}(x,e_n)e_n
+		\end{equation*}
+		\item 对任意的$x,y\in X$，有：
+		\begin{equation*}
+			(x,y)=\sum_{n=1}^{+\infty}(x,e_n)\overline{(y,e_n)}
+		\end{equation*}
+		且上式右端级数绝对收敛。
+	\end{enumerate}
+	如果$X$是Hilbert空间，则$\{e_n\}$是完全的与上述三个命题也等价。
+\end{theorem}
+\begin{proof}
+	我们按照$1\Rightarrow2\Rightarrow3\Rightarrow1$、$3\Rightarrow4\Rightarrow1$的顺序来证明等价性。\par
+	(1)设$x\in X$，则对任意的$n\in\mathbb{N}^+$，有：
+	\begin{align*}
+		&\left\|x-\sum_{i=1}^{n}(x,e_i)e_i\right\|=\left(x-\sum_{i=1}^{n}(x,e_i)e_i,x-\sum_{i=1}^{n}(x,e_i)e_i\right) \\
+		=&\left(x,x-\sum_{i=1}^{n}(x,e_i)e_i\right)-\left(\sum_{i=1}^{n}(x,e_i)e_i,x-\sum_{i=1}^{n}(x,e_i)e_i\right) \\
+		=&\overline{\left(x-\sum_{i=1}^{n}(x,e_i)e_i,x\right)}-\sum_{i=1}^{n}\Bigl((x,e_i)e_i,x-\sum_{j=1}^{n}(x,e_j)e_j\Bigr) \\
+		=&\overline{(x,x)-\sum_{i=1}^n\Bigl((x,e_i)e_i,x\Bigr)}-\sum_{i=1}^{n}\overline{\Bigl(x-\sum_{j=1}^{n}(x,e_j)e_j,(x,e_i)e_i\Bigr)} \\
+		=&(x,x)-\sum_{i=1}^{n}\overline{\Bigl((x,e_i)e_i,x\Bigr)}-\sum_{i=1}^{n}\overline{\Bigl(x,(x,e_i)e_i\Bigr)}+\sum_{i=1}^{n}\sum_{j=1}^{n}\overline{\Bigl((x,e_j)e_j,(x,e_i)e_i\Bigr)} \\
+		=&(x,x)-\sum_{i=1}^{n}\Bigl(x,(x,e_i)e_i\Bigr)-\sum_{i=1}^{n}\Bigl((x,e_i)e_i,x\Bigr)+\sum_{i=1}^{n}\sum_{j=1}^{n}\Bigl((x,e_i)e_i,(x,e_j)e_j\Bigr) \\
+		=&(x,x)-\sum_{i=1}^{n}\overline{(x,e_i)}(x,e_i)-\sum_{i=1}^{n}(x,e_i)(e_i,x)+\sum_{i=1}^{n}(x,e_i)\overline{(x,e_i)} \\
+		=&||x||^2-\sum_{i=1}^{n}\overline{(x,e_i)}(x,e_i)-\sum_{i=1}^{n}(x,e_i)\overline{(x,e_i)}+\sum_{i=1}^{n}(x,e_i)\overline{(x,e_i)} \\
+		=&||x||^2-\sum_{i=1}^{n}\overline{(x,e_i)}(x,e_i)=||x||^2-\sum_{i=1}^{n}|(x,e_i)|^2
+	\end{align*}
+	因为$\{e_n\}$是完备的，所以Parseval's identity成立，于是由\cref{prop:Norm}(2)和\cref{prop:RSeq}(8.b)：
+	\begin{equation*}
+		\left\|x-\sum_{n=1}^{+\infty}(x,e_n)e_n\right\|=\lim_{n\to+\infty}\left\|x-\sum_{i=1}^{n}(x,e_i)e_i\right\|=\lim_{n\to+\infty}\left[||x||^2-\sum_{i=1}^{n}|(x,e_i)|^2\right]=0
+	\end{equation*}
+	即$x=\sum\limits_{n=1}^{+\infty}(x,e_n)e_n$。\par
+	(2)任取$x,y\in X$，取点列$\{x_n\},\{y_n\}$使得：
+	\begin{equation*}
+		x_n=\sum_{i=1}^{n}(x,e_i)e_i,\;y_n=\sum_{i=1}^{n}(y,e_i)e_i
+	\end{equation*}
+	于是$\{x_n\}\to x,\;\{y_n\}\to y$。因为：
+	\begin{align*}
+		&(x_n,y_n)=\left(\sum_{i=1}^{n}(x,e_i)e_i,\sum_{i=1}^{n}(y,e_i)e_i\right)=\sum_{i=1}^{n}(x,e_i)\left(e_i,\sum_{j=1}^{n}(y,e_j)e_j\right) \\
+		=&\sum_{i=1}^{n}(x,e_i)\sum_{j=1}^{n}\overline{(y,e_j)}(e_i,e_j) =\sum_{i=1}^{n}(x,e_i)\overline{(y,e_i)}
+	\end{align*}
+	由\cref{prop:InnerProduct}(1)可得：
+	\begin{equation*}
+		(x,y)=\lim_{n\to+\infty}(x_n,y_n)=\lim_{n\to+\infty}\left[\sum_{i=1}^{n}(x,e_i)\overline{(y,e_i)}\right]=\sum_{n=1}^{+\infty}(x,e_n)\overline{(y,e_n)}
+	\end{equation*}
+	对任意的$N\in\mathbb{N}^+$，由\cref{theo:BesselInequality}可知：
+	\begin{equation*}
+		\sum_{n=1}^{N}|(x,e_n)|^2\leqslant||x||^2,\quad\sum_{n=1}^{N}|(y,e_n)|^2\leqslant||y||^2
+	\end{equation*}
+	根据\cref{ineq:cauchy-ineq-R}可得：
+	\begin{equation*}
+		\sum_{n=1}^{N}|(x,e_n)\overline{(y,e_n)}|=\sum_{n=1}^{N}|(x,e_n)(y,e_n)|\leqslant\left(\sum_{n=1}^{N}|(x,e_n)|^2\right)^{\frac{1}{2}}\left(\sum_{n=1}^{N}|(y,e_n)|^2\right)^{\frac{1}{2}}\leqslant||x||\;||y||
+	\end{equation*}
+	由\cref{prop:RSeq}(6)即可得出结论。\par
+	(3)取$y=x$即有：
+	\begin{equation*}
+		||x||^2=(x,x)=\sum_{n=1}^{+\infty}(x,e_n)\overline{(x,e_n)}=\sum_{n=1}^{+\infty}|(x,e_n)|^2
+	\end{equation*}\par
+	(4)因为对任意的$x\in X$，有$(x,e_n)=0$，所以对任意的$y\in X$，有：
+	\begin{equation*}
+		(x,y)=\sum_{n=1}^{+\infty}(x,e_n)\overline{(y,e_n)}=0
+	\end{equation*}
+	所以$x=\mathbf{0}$，$\{e_n\}$是完全的。\par
+	(5)任取$x\in X$。由\cref{theo:BesselInequality}可知$\{(x,e_n)\}\in l^2$。因为$X$是Hilbert空间，由\cref{theo:ParsevalIdentity}，存在$y\in X$，使得$\{(x,e_n)\}$是$y$关于$\{e_n\}$的Fourier系数集，且：
+	\begin{equation*}
+		||y||^2=\sum_{n=1}^{+\infty}|(x,e_n)|^2
+	\end{equation*}
+	而$\{(x,e_n)\}$也是$x$关于$\{e_n\}$的Fourier系数集，所以$x-y$关于$\{e_n\}$的Fourier系数满足$(x-y,e_n)=(x,e_n)-(y,e_n)=(x,e_n)-(x,e_n)=0$。因为$\{e_n\}$是完全的，所以$x-y=\mathbf{0}$，即$x=y$，于是：
+	\begin{equation*}
+		||x||^2=\sum_{n=1}^{+\infty}|(x,e_n)|^2\qedhere
+	\end{equation*}
+\end{proof}
+\subsubsection{Schmidt正交化}
+\begin{theorem}[Schmidt正交化]
+	设$E=\{x_n\}$是内积空间$X$中的一个可列子集，则由$E$必可作出一个规范正交系$\{e_n\}$，使得$E$张成的子空间与$\{e_n\}$张成的子空间相同。
+\end{theorem}
+\begin{proof}
+	取$y_1\ne\mathbf{0}$且$y_1\in E$，令：
+	\begin{equation*}
+		e_1=\frac{y_1}{||y_1||}
+	\end{equation*}
+	则$||e_1||=1$。取$y_2\in E$与$e_1$线性无关（若不存在这样的$y_2$，则结论成立），令：
+	\begin{equation*}
+		h_2=y_2-(y_2,e_1)e_1
+	\end{equation*}
+	则$h_2\ne\mathbf{0}$，否则的话就有$y_2=(y_2,e_1)e_1$，即$y_2$与$e_1$线性相关，与$y_2$的取法矛盾。因为：
+	\begin{equation*}
+		\Big(y_2-(y_2,e_1)e_1,e_1\Big)=(y_2,e_1)-(y_2,e_1)(e_1,e_1)=0
+	\end{equation*}
+	所以$h_2=y_2-(y_2,e_1)e_1\perp e_1$。令：
+	\begin{equation*}
+		e_2=\frac{h_2}{||h_2||}
+	\end{equation*}
+	则$||e_2||=1,\;e_2\perp e_1$。取$y_3$与$e_1,e_2$线性无关（若不存在这样的$y_2$，则结论成立），令：
+	\begin{equation*}
+		h_3=y_3-(y_3,e_1)e_1-(y_3,e_2)e_2
+	\end{equation*}
+	与前面相似，$h_3\ne\mathbf{0}$，且$h_3\perp e_j,\;j=1,2$。令：
+	\begin{equation*}
+		e_3=\frac{h_3}{||h_3||}
+	\end{equation*}
+	则$||e_3||=1,\;e_i\perp e_j,\;i=1,2,3,\;j=1,2,3,\;i\ne j$。\par
+	重复上述步骤，假设已作好相互正交且范数为$1$的元素$e_1,,e_2,\dots,e_{n}$。取$y_{n+1}\in E$与$e_1,,e_2,\dots,e_{n}$线性无关（若不存在这样的$y_2$，则结论成立），令：
+	\begin{equation*}
+		h_{n+1}=y_{n+1}-\sum_{i=1}^{n}(y_{n+1},e_i)e_i
+	\end{equation*}
+	则$h_{n+1}\ne\mathbf{0}$，且有$h_{n+1}\perp e_i,\;i=1,2,\dots,n$。再令：
+	\begin{equation*}
+		e_{n+1}=\frac{h_{n+1}}{||h_{n+1}||}
+	\end{equation*}
+	于是得到$n+1$个相互正交且范数均为$1$的元素$e_1,e_2,\dots,e_{n+1}$。由归纳法，可以得到最多含可列个元素的规范正交系$\{e_n\}$。\par
+	接下来证明$E$张成的子空间$L$与$\{e_n\}$张成的子空间$L'$相同。\par
+	从$e_n$的取法可以看出，$e_n$可以由$E$中的元素线性表出，于是$L'\subseteq L$。反之，$E$中的元素$x$要么与某个$y_n$线性相关，此时$y_n$可以由$\{e_n\}$线性表出，所以$x$可以由$\{e_n\}$线性表出，要么与取过的所有$y_n$线性无关，此时$x$必然会进入规范正交系的构造过程，依旧可以由$\{e_n\}$线性表出，于是$L\subseteq L'$。综上，$L=L'$。
+\end{proof}
+\subsubsection{Riesz表示定理}
+\begin{theorem}\label{theo:RieszRepresentation}
+	设$f$是从Hilbert空间$X$到$X$的标量域$K$上的连续线性映射，则存在唯一的$y\in X$使得：
+	\begin{equation*}
+		\forall\;x\in X,\;f(x)=(x,y)
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	\textbf{(1)存在性：}当$E=\{x\in X:f(x)=0\}\ne X$时（反之取$y=\mathbf{0}$即可\info{任何向量与0的内积都是0}），因为$f$是连续线性映射，由\cref{theo:Subspace}和\cref{theo:ContinousMapO2OC2C}(2)可知$E$是$X$的闭线性子空间，由\cref{theo:OrthogonalProjection}可知存在$x_0\in X$满足$x_0\perp E$且$||x_0||=1$，$X$中的任意元素$x$可以分解为：
+	\begin{equation*}
+		x=\alpha x_0+y
+	\end{equation*}
+	其中$y\in E$，$\alpha\in K$。因为$f$是线性映射，所以：
+	\begin{equation*}
+		f(y)=f(x-\alpha x_0)=f(x)-\alpha f(x_0)=0
+	\end{equation*}
+	即$\alpha=\dfrac{f(x)}{f(x_0)}$（因为$x_0\perp E$，结合$E$的定义可知$f(x_0)=0$当且仅当$x_0=\mathbf{0}$，但$||x_0||=1$）。注意到：
+	\begin{equation*}
+		(x,x_0)=(\alpha x_0+y,x_0)=\alpha(x_0,x_0)+(y,x_0)=\alpha
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		f(x)=\alpha f(x_0)=(x,x_0)f(x_0)=\Big(x,\overline{f(x_0)}x_0\Big)
+	\end{equation*}
+	取$y=\overline{f(x_0)}x_0$即可。\par
+	\textbf{(2)唯一性：}若存在不同于$y$的$y'$也满足条件，则对任意的$x\in X$有$f(x)=(x,y)=(x,y')$，即：
+	\begin{equation*}
+		(x,y)-(x,y')=(x,y-y')=0
+	\end{equation*}
+	取$x=y-y'$即可得到$y=y'$。
 \end{proof}
