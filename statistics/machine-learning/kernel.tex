@@ -1,0 +1,121 @@
+\section{核方法}
+
+\begin{definition}
+	设$X$是空间，$k:X\times X\to\mathbb{R}^{}$被称为\gls{KernelFunction}。
+	\begin{enumerate}
+		\item 若对任意的$x_1,x_2\in X$有$k(x_1,x_2)=k(x_2,x_1)$，则称$k$是\textbf{对称核}；
+		\item 若对任意的$\seq{x}{n}\in X$和任意的$\seq{a}{n}\in\mathbb{R}^{}$有：
+		\begin{equation*}
+			\sum_{i=1}^{n}\sum_{j=1}^{n}a_ia_jk(x_i,x_j)\geqslant0
+		\end{equation*}
+		则称$k$为\textbf{半正定核}。
+	\end{enumerate}
+\end{definition}
+\begin{definition}
+	设$X$是空间，$k:X\times X\to\mathbb{R}^{}$。对任意的$\seq{x}{n}\in X$，称$K=\Big(k(x_i,x_j)\Big)\in M_{n\times n}(\mathbb{R}^{})$为$n$维\textbf{核矩阵}或\textbf{Gram矩阵}。
+\end{definition}
+\begin{definition}
+	设$X$是空间，$k:X\times X\to\mathbb{R}^{}$，$Y$是Hilbert空间。若存在$\varphi:X\to Y$使得对任意的$x_1,x_2\in X$有：
+	\begin{equation*}
+		k(x_1,x_2)=\Big(\varphi(x_1),\varphi(x_2)\Big)
+	\end{equation*}
+	则称$\varphi$是$k$关于$Y$的一个\textbf{特征映射}。
+\end{definition}
+\begin{theorem}\label{theo:FeatureMapPositiveSemidefiniteKernel}
+	设$X$是空间，$k:X\times X\to\mathbb{R}^{}$，$Y$是Hilbert空间。若$k$存在关于$Y$的特征映射，则$k$是半正定核。
+\end{theorem}
+\begin{proof}
+	对任意的$\seq{x}{n}\in X$和任意的$\seq{a}{n}\in\mathbb{R}^{}$有：
+	\begin{align*}
+		\sum_{i=1}^{n}\sum_{j=1}^{n}a_ia_jk(x_i,x_j)&=\sum_{i=1}^{n}\sum_{j=1}^{n}a_ia_j\Big(\varphi(x_i),\varphi(x_j)\Big)=\left(\sum_{i=1}^{n}a_i\varphi(x_i),\sum_{i=1}^{n}a_j\varphi(x_i)\right) \\
+		&=\left\|\sum_{i=1}^{n}a_i\varphi(x_i)\right\|^2\geqslant0\qedhere
+	\end{align*}
+\end{proof}
+\begin{definition}
+	若Hilbert空间$Y$是定义在$X$上的实值函数空间，则称$Y$为$X$上的\textbf{Hilbert函数空间}。
+\end{definition}
+\begin{definition}
+	设$Y$是$X$上的实Hilbert函数空间。若对任意的$x\in X$，泛函：
+	\begin{equation*}
+		L_x:Y\to\mathbb{R}^{},\quad\forall\;f\in Y,\;L_x(f)=f(x)
+	\end{equation*}
+	都是有界线性泛函，则称$Y$为$X$上的\gls{RKHS}。
+\end{definition}
+\begin{theorem}\label{theo:ReproducingKernel}
+	若$Y$是$X$上的RKHS，则对于任意的$x\in X$，存在唯一的$k_x\in Y$使得对于任意的$f\in Y$有$f(x)=(f,k_x)$。
+\end{theorem}
+\begin{proof}
+	因为$Y$是$X$上的RKHS，所以对于任意的$x\in X$，泛函：
+	\begin{equation*}
+		L_x:Y\to\mathbb{R}^{},\quad\forall\;f\in Y,\;L_x(f)=f(x)
+	\end{equation*}
+	都是有界线性泛函。由\cref{theo:LinearOperatorBoundedContinuous}(1)可知$L_x$是连续泛函，根据\cref{theo:RieszRepresentation}可知存在唯一的$k_x\in Y$使得对任意的$f\in Y$有$L_x(f)=f(x)=(f,k_x)$。
+\end{proof}
+\begin{definition}
+	设$Y$是$X$上的RKHS，$x\in X$。称满足对于任意的$f\in Y$有$f(x)=(f,k_x)$的$k_x\in Y$为$x$关于$Y$的\gls{ReproducingKernel}。
+\end{definition}
+\begin{note}
+	再生核族$\{k_x:x\in X\}$可导出核函数$k(x_1,x_2)=k_{x_1}(x_2)$。
+\end{note}
+\begin{property}\label{prop:ReproducingKernel}
+	设$Y$是$X$上的RKHS，$k$是$Y$上的再生核族$\{k_x:x\in X\}$导出的核函数，则：
+	\begin{enumerate}
+		\item 对任意的$x_1,x_2\in X$有$k(x_1,x_2)=(k_{x_1},k_{x_2})$；
+		\item $k$是对称核；
+		\item $k$是半正定核；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)取任意的$x_1,x_2\in X$，由\cref{theo:ReproducingKernel}可知$k_{x_1},k_{x_2}\in Y$，所以$k_{x_1}(x_2)=k(x_1,x_2)=(k_{x_1},k_{x_2})$。\par
+	(2)在(1)中其实有$k_{x_1}(x_2)=k(x_1,x_2)=(k_{x_1},k_{x_2})=(k_{x_2},k_{x_1})=k_{x_2}(x_1)=k(x_2,x_1)$。\par
+	(3)由\cref{theo:FeatureMapPositiveSemidefiniteKernel}立即可得。
+\end{proof}
+\begin{theorem}[Aronszajn Theorem]\label{theo:AronszajnTheorem}
+	设$X$是空间，$k:X\times X\to\mathbb{R}^{}$。$k$是半正定核当且仅当存在$X$上的再生核Hilbert空间$Y$，对任意的$x\in X$，$k(x,\cdot)$是$x$关于$Y$的再生核。
+\end{theorem}
+\begin{proof}
+	\textbf{(1)充分性：}由\cref{prop:ReproducingKernel}(2)立即可得。
+%	\textbf{(2)必要性：}记：
+%	\begin{equation*}
+%		Y_0=\left\{f(x)=\sum_{i=1}^{n}a_ik(x,x_i):\forall\;n\in\mathbb{N}^+,\;a_i\in\mathbb{R}^{},\;x_i\in X\right\}
+%	\end{equation*}
+%	对任意的：
+%	\begin{equation*}
+%		f(x)=\sum_{i=1}^{m}a_ik(x,x_i),g(x)=\sum_{i=1}^{n}b_ik(x,y_i)\in Y_0
+%	\end{equation*}
+%	定义：
+%	\begin{equation*}
+%		(f,g)=\sum_{i=1}^{m}\sum_{j=1}^{n}a_ib_jk(x_i,y_j)
+%	\end{equation*}
+%	则$(\cdot,\cdot)$是内积（线性性和对称性显然，由$k$的半正定性可得非负性），于是$Y_0$成为一个内积空间。由\info{度量空间的完备化}可将$Y_0$完备化得到Hilbert空间$Y$
+\end{proof}
+\begin{theorem}[Representor Theorem]\label{theo:RepresentorTheorem}
+	设$X$是空间，$k:X\times X\to\mathbb{R}^{}$是半正定核，由\cref{theo:AronszajnTheorem}，$Y$是由$k$导出的$X$上的RKHS，$\{(x_i,y_i)\}_{i=1}^{n}$为训练样本。对于优化问题：
+	\begin{equation*}
+		\min_{f\in Y}\Omega[f(x_1),f(x_2),\dots,f(x_n)]+\lambda||f||^2,\quad\lambda>0
+	\end{equation*}
+	其任一最优解$f^*$都可以表示为：
+	\begin{equation*}
+		f(x)=\sum_{i=1}^{n}a_ik(x,x_i)
+	\end{equation*}
+	其中$a_i\in\mathbb{R}^{}$。
+\end{theorem}
+\begin{proof}
+	由\cref{prop:SpanSubspace}(1)，取$Y$的子空间：
+	\begin{equation*}
+		Y_n=\operatorname{span}\{k_{x_1},k_{x_2},\dots,k_{x_n}\}
+	\end{equation*}
+	由\cref{prop:SpanSubspace}(2)、\cref{prop:FiniteDimensionalNormedLinearSpace}(2)和\cref{prop:CauchySeq}(1)可知$Y_n$是闭的。根据\cref{theo:OrthogonalProjection}可知对任意的$f\in Y$，存在下述唯一的分解：
+	\begin{equation*}
+		f=f_1+f_2,\quad f_1\in Y_n,\;f_2\in Y_n^{\perp}
+	\end{equation*}
+	由\cref{prop:Orthogonal}(1)可知$||f||^2=||f_1||^2+||f_2||^2$。因为$f_2\in Y_n^{\perp}$，所以对任意的$i=1,2,\dots,n$有$f_2\perp k_{x_i}$，于是：
+	\begin{equation*}
+		(f_2,k_{x_i})=f_2(x_i)=0
+	\end{equation*}
+	所以$f(x_i)=f_1(x_i)$，优化问题可被改写为：
+	\begin{equation*}
+		\min_{f\in Y}\Omega[f_1(x_1),f_1(x_2),\dots,f_1(x_n)]+\lambda[||f_1||^2+||f_2||^2],\quad\lambda>0
+	\end{equation*}
+	若$f^*$是最优解，则$f^*$必然在$Y_n$中，否则$f^*$在$Y_n$上的正交投影对应的目标函数值一定比$f^*$对应的目标函数值小。
+\end{proof}
