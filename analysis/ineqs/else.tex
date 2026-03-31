@@ -26,6 +26,20 @@
 	将 $x=|a|$ 和 $y=|b|$ 代回，即得所需的不等式。
 \end{proof}
 
+\begin{theorem}\label{theo:ExpMinus1Bound}
+	对任意的$x\in\mathbb{R}^{}$有$|e^{ix}-1|\leqslant|x|$。
+\end{theorem}
+\begin{proof}
+	注意到：
+	\begin{equation*}
+		|e^{ix}-1|^2=[\cos(x)-1]^2+\sin^2(x)=2-2\cos(x)=4\sin^2\left(\frac{x}{2}\right)
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		|e^{ix}-1|=2\left|\sin\left(\frac{x}{2}\right)\right|\leqslant x\qedhere
+	\end{equation*}
+\end{proof}
+
 \subsection{Jensen不等式}
 \begin{theorem}
 	设$(X,\mathscr{F},P)$是一个概率空间，$\mathscr{A}\subseteq\mathscr{F}$，$f$是$(X,\mathscr{F})$上可积的Borel函数，$\varphi$为$(\mathbb{R}^{},\mathcal{B})$上的Borel函数且是$\mathbb{R}^{}$上的凸函数，$\varphi\circ f$在$X$上可积，则有\info{补充凹函数版本}：
@@ -61,20 +75,94 @@
 	\end{equation*}\info{未完成}
 \end{proof}
 
-\subsection{Chebyshev不等式}
-\begin{theorem}
-	设$X$是一个随机变量，其数学期望和方差都存在，则对任意的$\varepsilon>0$，有：
-	\begin{inequality*}\label{ineq:Chebyshev}
-		P(|X-\operatorname{E}(X)|\geqslant\varepsilon)\leqslant\frac{\operatorname{Var}(X)}{\varepsilon^2}
-	\end{inequality*}
+
+\subsection{Markov不等式}
+\begin{theorem}[Markov Inequality]\label{theo:MarkovInequality}
+	设$f$是概率空间$(X,\mathscr{F},P)$上的非负随机变量，$\operatorname{E}(f)<+\infty$，则对任意的$t\in\mathbb{R}^{+}$有：
+	\begin{equation*}
+		P(f\geqslant t)\leqslant\frac{\operatorname{E}(f)}{t}
+	\end{equation*}
 \end{theorem}
 \begin{proof}
-	设$X$的分布函数为$F(x)$，则：
+	由\cref{prop:SimpleFunction}(1)(2.a)、\cref{prop:NonnegativeMeasurableIntegral}(6)(10)、\cref{prop:MeasurableFunction}(1.d)和\cref{prop:NonnegativeSimpleIntegral}(4)
+	\begin{equation*}
+		\operatorname{E}(f)\geqslant\operatorname{E}[tI(x\in\{f\geqslant t\})]=t\operatorname{E}[I(x\in\{f\geqslant t\})]=tP(f\geqslant t)\qedhere
+	\end{equation*}
+\end{proof}
+\begin{note}
+	Markov Inequality有很多变形，比如下面的两个推论，第一个可以视为Chebyshev Inequality的推广，第二个则在高维概率中具有重要意义。
+\end{note}
+\begin{corollary}\label{cor:ChebyshevInequality}
+	设$f$是概率空间$(X,\mathscr{F},P)$上的随机变量，$f$的$n\in\mathbb{N}^+$阶矩存在，则对任意的$t\in\mathbb{R}^{+}$有：
+	\begin{equation*}
+		P\Big(|f-\operatorname{E}(f)|\geqslant t\Big)\leqslant\frac{\operatorname{E}[|f-\operatorname{E}(f)|^n]}{t^n}
+	\end{equation*}
+\end{corollary}
+\begin{proof}
+	因为$f$的$n$阶矩存在，由\cref{prop:Moment}(3)可知$\operatorname{E}(f)\in\mathbb{R}^{}$，根据\cref{prop:MeasurableFunction}(1.b)(1.d)和\cref{prop:SigmaField}(2)可知$|f-\operatorname{E}(f)|$是非负随机变量。由\cref{theo:MarkovInequality}可得：
+	\begin{equation*}
+		P\Big(|f-\operatorname{E}(f)|\geqslant t\Big)=P\Big(|f-\operatorname{E}(f)|^n\geqslant t^n\Big)\leqslant\frac{\operatorname{E}[|f-\operatorname{E}(f)|^n]}{t^n}\qedhere
+	\end{equation*}
+\end{proof}
+\begin{corollary}\label{cor:ChernoffBound}
+	设$f$是概率空间$(X,\mathscr{F},P)$上的随机变量，$\operatorname{E}(f)<+\infty$，$\operatorname{E}(e^{\lambda f})$在$\lambda\in[0,a]$上存在，则对任意的$t\in\mathbb{R}^{}$有：
+	\begin{equation*}
+		\log P\Big((f-\operatorname{E}(f))\geqslant t\Big)\leqslant\inf_{\lambda\in[0,a]}\Big\{\log\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}-\lambda t\Big\}
+	\end{equation*}
+\end{corollary}
+\begin{proof}
+	由\cref{prop:MeasurableFunction}(1.a)(10)、\cref{prop:MeasurableMapping}(2)(4)和\cref{theo:MarkovInequality}可知：
+	\begin{equation*}
+		P\Big((f-\operatorname{E}(f))\geqslant t\Big)\geqslant=P\left(e^{\lambda[f-\operatorname{E}(f)]}\geqslant e^{\lambda t}\right)\leqslant\frac{\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}}{e^{\lambda t}}\qedhere
+	\end{equation*}
+\end{proof}
+\begin{definition}
+	设$f$是概率空间$(X,\mathscr{F},P)$上的随机变量，$\operatorname{E}(f)<+\infty$。如果存在$\sigma>0$使得对任意的$\lambda\in\mathbb{R}^{}$都有：
+	\begin{equation*}
+		\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}\leqslant\exp\left(\frac{\sigma^2\lambda^2}{2}\right)
+	\end{equation*}
+	则称$f$是次高斯的，$\sigma$被称为$f$的次高斯参数。
+\end{definition}
+\begin{property}
+	设$f$是概率空间$(X,\mathscr{F},P)$上次高斯参数为$\sigma$的次高斯随机变量，则：
+	\begin{enumerate}
+		\item $-f$也是次高斯的；
+		\item $f$有如下的上下尾不等式：
+		\begin{equation*}
+			\forall\;t\geqslant0,\;P\Big(f-\operatorname{E}(f)\geqslant t\Big)\leqslant\exp\left(-\frac{t^2}{2\sigma^2}\right),\;P\Big(f-\operatorname{E}(f)\leqslant -t\Big)\leqslant\exp\left(-\frac{t^2}{2\sigma^2}\right)
+		\end{equation*}
+		\item $f$有如下的集中不等式：
+		\begin{equation*}
+			\forall\;t\geqslant0,\;P\Big(|f-\operatorname{E}(f)|\geqslant t\Big)\leqslant2\exp\left(-\frac{t^2}{2\sigma^2}\right)
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由\cref{prop:MeasurableIntegral}(6)即可得到：
+	\begin{equation*}
+		\operatorname{E}\{e^{\lambda[-f-\operatorname{E}(-f)]}\}=\operatorname{E}\{e^{-\lambda[f+\operatorname{E}(-f)]}\}=\operatorname{E}\{e^{-\lambda[f-\operatorname{E}(f)]}\}\leqslant\exp\left(\frac{\sigma^2\lambda^2}{2}\right)
+	\end{equation*}\par
+	(2)因为$f$是次高斯的，所以对任意的$\lambda\in\mathbb{R}^{}$，$\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}$存在，所以由\cref{prop:MeasurableIntegral}(6)可知$\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}$存在。根据\cref{cor:ChernoffBound}可得：
 	\begin{align*}
-		P(|X-\operatorname{E}(X)|\geqslant\varepsilon)
-		&=\int_{\{x:|x-\operatorname{E}(X)|\geqslant\varepsilon\}}^{}\dif F(x) \\
-		&\leqslant\int_{\{x:|x-\operatorname{E}(X)|\geqslant\varepsilon\}}^{}\frac{|x-\operatorname{E}(X)|^2}{\varepsilon^2}\dif F(x) \\
-		&\leqslant\frac{1}{\varepsilon^2}\int_{-\infty}^{+\infty}|x-\operatorname{E}(X)|^2\dif F(x) \\
-		&=\frac{\operatorname{Var}(X)}{\varepsilon^2}\qedhere
+		&P\Big(f-\operatorname{E}(f)\geqslant t\Big)\leqslant\inf_{\lambda\in\mathbb{R}^{}}\frac{\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}}{e^{\lambda t}}\leqslant\inf_{\lambda\in\mathbb{R}^{}}\exp\left(\frac{\sigma^2\lambda^2}{2}-\lambda t\right) \\
+		=&\exp\left[\frac{\sigma^2}{2}\left(\frac{t}{\sigma^2}\right) ^2-\frac{t^2}{\sigma^2}\right]=\exp\left(\frac{t^2}{2\sigma^2}-\frac{t^2}{\sigma^2}\right)=\exp\left(-\frac{t^2}{2\sigma^2}\right)
 	\end{align*}
+	由(1)、\cref{prop:MeasurableIntegral}(6)和上述上尾不等式可得：
+	\begin{equation*}
+		P\Big(-f-\operatorname{E}(-f)\geqslant t\Big)=P\Big(-f+\operatorname{E}(f)\geqslant t\Big)=P\Big(f-\operatorname{E}(f)\leqslant -t\Big)\leqslant\exp\left(-\frac{t^2}{2\sigma^2}\right)
+	\end{equation*}\par
+	(3)由(2)立即可得。
+\end{proof}
+\begin{theorem}[Hoeffding Bound]\label{theo:HoeffdingBound}
+	设$\seq{f}{n}$是概率空间$(X,\mathscr{F},P)$上相互独立的随机变量，对任意的$i=1,2,\dots,n$有$a_i\leqslant f_i\leqslant b_i\;$a.s.于$(X,\mathscr{F},P)$，则对任意的$t>0$：
+	\begin{gather*}
+		P\left(\sum_{i=1}^{n}[f_i-\operatorname{E}(f_i)]\geqslant t\right)\leqslant\exp\left[-\frac{2t^2}{\sum\limits_{i=1}^{n}(b_i-a_i)^2}\right] \\ P\left(\left|\sum_{i=1}^{n}[f_i-\operatorname{E}(f_i)]\right|\geqslant t\right)\leqslant2\exp\left[-\frac{2t^2}{\sum\limits_{i=1}^{n}(b_i-a_i)^2}\right]
+	\end{gather*}
+	也即：
+	\begin{gather*}
+		P\left(\frac{1}{n}\sum_{i=1}^{n}[f_i-\operatorname{E}(f_i)]\geqslant t\right)\leqslant\exp\left[-\frac{2n^2t^2}{\sum\limits_{i=1}^{n}(b_i-a_i)^2}\right] \\ P\left(\left|\frac{1}{n}\sum_{i=1}^{n}[f_i-\operatorname{E}(f_i)]\right|\geqslant t\right)\leqslant2\exp\left[-\frac{2n^2t^2}{\sum\limits_{i=1}^{n}(b_i-a_i)^2}\right]
+	\end{gather*}
+\end{theorem}
+\begin{proof}
+	证明涉及到很长且无聊的代数计算，所以略去。
 \end{proof}
