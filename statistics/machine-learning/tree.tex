@@ -253,7 +253,7 @@
 	\begin{enumerate}
 		\item 若对任意$b$和$b'\ne b$有$\operatorname{Var}(f_b)=\sigma^2$且$\operatorname{Corr}(f_b,f_{b'})=\rho$，则Bagging模型预测的方差满足：
 		\begin{equation*}
-			\operatorname{Var}[f_{\text{bag}}(x)]=\rho\sigma^2+\frac{1-\rho}{B}\sigma^2
+			\operatorname{Var}[f_{\text{bag}}(x)]=\sigma^2\left(\rho+\frac{1-\rho}{B}\right)
 		\end{equation*}
 		\item 二分类多数投票情形下，若每个基分类器的错误率$p<\dfrac{1}{2}$，则在各分类器相互独立的假设下，Bagging 集成分类器的错误率随$B$指数下降；当基分类器之间存在正相关时，错误率下降速度受相关性限制，并趋于一个正值。
 	\end{enumerate}
@@ -271,21 +271,17 @@
 	\begin{equation*}
 		P(I_b=1)=p<\dfrac{1}{2},\quad S_B=\sum_{b=1}^BI_b\sim\operatorname{Binomial}(B,p)
 	\end{equation*}
-	且多数投票出错当且仅当$S_B>B/2$，因此：
+	且多数投票出错当且仅当$S_B>B/2$。根据\cref{theo:HoeffdingBound}可知当$p<1/2$时，Bagging模型出错的概率为：
 	\begin{equation*}
-		I_{\text{bag}}=P\left(S_B>\frac{B}{2}\right)
+		P\left(S_B>\frac{B}{2}\right)=P\left(\frac{S_B}{B}-p\geqslant\frac{1}{2}-p\right)\leqslant\exp\left[-\frac{2B^2}{B}\left(\frac{1}{2}-p\right)^2\right]=\exp\left[-2B\left(\frac{1}{2}-p\right)^2\right]
 	\end{equation*}
-	由\info{Hoeffding不等式}可知：
-	\begin{equation*}
-		P\left(S_B>\frac{B}{2}\right)=P\left(\frac{S_B}{B}-p\geqslant\frac{1}{2}-p\right)\leqslant\exp\left[-2B\left(\frac{1}{2}-p\right)^2\right]
-	\end{equation*}
-	即当$p<1/2$时，Bagging的错误率随基学习器个数$B$指数级下降。\par
+	即Bagging的错误率随基学习器个数$B$指数级下降。\par
 	若误差之间满足$\operatorname{Corr}(I_b,I_{b'})=\rho>0$，则由\cref{prop:Variance}(3)和\cref{prop:Binom}(2)可知：
 	\begin{align*}
 		\operatorname{Var}(S_B)		&=\operatorname{Var}\left(\sum_{b=1}^BI_b\right)=\sum_{b=1}^B\operatorname{Var}(I_b)+2\sum_{1\leqslant b<b'\leqslant B}\operatorname{Cov}(I_b,I_{b'}) \\
 		&=Bp(1-p)+B(B-1)\rho p(1-p)=Bp(1-p)[1+(B-1)\rho]
 	\end{align*}
-	根据\cref{prop:CovMat}(3)可得$\operatorname{E}(S_B)=Bp$。因为$\operatorname{Var}(S_B)\sim B^2\rho p(1-p)(B\to\infty)$，于是由\info{CLT}可知：
+	根据\cref{prop:CovMat}(3)可得$\operatorname{E}(S_B)=Bp$。因为$\operatorname{Var}(S_B)\sim B^2\rho p(1-p)(B\to+\infty)$，于是由\info{CLT}可知：
 	\begin{equation*}
 		\frac{S_B-Bp}{\sqrt{B^2\rho p(1-p)}}\overset{d}{\longrightarrow}\operatorname{N}(0,1)
 	\end{equation*}
@@ -293,101 +289,232 @@
 	\begin{align*}
 		P\left(S_B>\frac{B}{2}\right)&=P\left(\frac{S_B-Bp}{\sqrt{B^2\rho p(1-p)}}>\frac{\frac{1}{2}-p}{\sqrt{\rho p(1-p)}}
 		\right)  \\
-		&\longrightarrow1-\Phi\left(\frac{\frac{1}{2}-p}{\sqrt{\rho p(1-p)}}\right)<1\quad B\to\infty\qedhere
+		&\longrightarrow1-\Phi\left(\frac{\frac{1}{2}-p}{\sqrt{\rho p(1-p)}}\right)<1,\;(B\to+\infty)\qedhere
 	\end{align*}
 \end{proof}
 \begin{note}
 	根据\cref{prop:Bagging}(1)(2)，集成学习的有效性依赖于基学习器之间同时具备较高预测精度与足够的异质性。若所有基学习器高度相关，简单平均或投票并不能显著改善模型性能。\par
 	在 Bagging 框架中，异质性主要通过随机化机制引入：
 	\begin{enumerate}
-		\item \textbf{样本层面的异质性}：通过自助采样从经验分布中生成不同训练子集，使各基学习器在不同样本扰动下独立训练；
-		\item \textbf{特征层面的异质性}：在扩展模型（如随机森林）中，仅在随机选取的特征子集上进行划分搜索，进一步降低基模型之间的相关性。
+		\item \textbf{样本层面的异质性}：通过自助采样生成不同训练子集，使各基学习器在不同样本扰动下进行训练；
+		\item \textbf{特征层面的异质性}：对特征也进行自助采样，各基学习器仅在随机选取的特征子集上进行划分搜索。
 	\end{enumerate}
 \end{note}
-\section{Boosting模型}
-假设一共有$m$个基模型，分别为$f_1(x),f_2(x),\dots,f_m(x)$，$n$个样本，$\seq{x}{n}$，则XGBoost模型的损失函数、正则项和目标函数分别为：
-\begin{gather*}
-	L=\sum_{i=1}^{n}\ell(y_i,\hat{y}_i^{(m)}),\;R=\sum_{i=1}^{m}\Omega(f_i) \\
-	Obj=L+R=\sum_{i=1}^{n}\ell(y_i,\hat{y}_i^{(m)})+\sum_{i=1}^{m}\Omega(f_i)
-\end{gather*}
-第$t$步的目标函数为：
-\begin{align*}
-	Obj
-	&=\sum_{i=1}^{n}\ell(y_i,\hat{y}_i^{(t)})+\sum_{i=1}^{t}\Omega(f_i) \\
-	&=\sum_{i=1}^{n}\ell(y_i,\hat{y}_i^{(t-1)}+f_t(x_i))+\sum_{i=1}^{t-1}\Omega(f_i)+\Omega(f_t) \\
-	&=\sum_{i=1}^{n}\ell(y_i,\hat{y}_i^{(t-1)}+f_t(x_i))+\Omega(f_t)+C
-\end{align*}
-因为$C$是常数，所以可以直接扔掉。我们的目标是最优化目标函数，方式是通过引入新的一个基模型$f_t(x)$，所以要研究$f_t(x)$对于每一个样本具体取怎样的值能够使目标函数值降低，换句话说就是，$f_t(x_i)$该在损失函数$l$的第二个分量上往前或往后走多少？由此我们想到Taylor展开，Taylor展开其实就是表示自变量变化一定值后函数值的变化。将目标函数进行二阶展开来近似可以得到：
-\begin{align*}
-	\operatorname{Obj}
-	&\approx\sum_{i=1}^{n}\left[\ell(y_i,\hat{y}_i^{(t-1)})+g_if_t(x_i)+\frac{1}{2}h_if_t^2(x_i)\right]+\Omega(f_t) \\
-	&=\sum_{i=1}^{n}\left[\frac{1}{2}h_if_t^2(x_i)+g_if_t(x_i)\right]+\Omega(f_t)+\sum_{i=1}^{n}\ell(y_i,\hat{y}_i^{(t-1)})
-\end{align*}
-其中：
-\begin{equation*}
-	g_i=\frac{\partial \ell(y_i,z)}{\partial z}\Big|_{z=\hat{y}_i^{(t-1)}},\quad
-	h_i=\frac{\partial^2 \ell(y_i,z)}{\partial z^2}\Bigl|_{z=\hat{y}_i^{(t-1)}}
-\end{equation*}
-考虑到此时已经拟合成功了$t-1$个基模型，上式最后一项是常数，所以也可以扔掉，于是我们的目标函数变为了：
-\begin{equation*}
-	\operatorname{Obj}=\sum_{i=1}^{n}\left[\frac{1}{2}h_if_t^2(x_i)+g_if_t(x_i)\right]+\Omega(f_t)
-\end{equation*}
 
-\subsection{抽象到具体}
-上面我们进行的讨论都带着$f_t$，$f_t$是抽象的模型，接下来要选择一个具体的基模型去讨论，也就是说，我们得选择一个具体的基模型去训练，用这个目标函数去指导基模型的最优化问题。在原始论文中陈天奇选择了回归决策树模型，接下来我们也使用该模型去进行介绍。\par
-陈天奇在回归决策树模型中使用了如下的正则项：
-\begin{equation*}
-	\Omega(f)=\gamma T+\lambda\sum_{i=1}^{T}\omega_i^2
-\end{equation*}
-其中$\gamma,\lambda$是控制惩罚强度的超参数，$T$是模型叶节点的数量，$\omega_i$是这棵树第$i$个叶节点的输出值。记$q(x)$为一个函数，它将样本$x$映射到$x$属于的叶节点的编号，也就是说$q(x_i)=j$表示$x_i$这个样本最后被划分到了树的第$j$个叶节点，该样本的训练输出值为$\omega_j$。记$I_j=\{i:q(x_i)=j\}$，于是上述的抽象目标函数在回归决策树下的具体目标函数为：
-\begin{align*}
-	\operatorname{Obj}
-	&=\sum_{i=1}^{n}\left[\frac{1}{2}h_if_t^2(x_i)+g_if_t(x_i)\right]+\Omega(f_t) \\
-	&=\sum_{i=1}^{n}\left[\frac{1}{2}h_iw_{q(x_i)}^2+g_iw_{q(x_i)}\right]+\gamma T+\lambda\sum_{i=1}^{T}\omega_i^2 \\
-	&=\sum_{j=1}^{T}\left[\frac{1}{2}\left(\sum_{i\in I_j}h_i+\lambda\right)w_j^2+\left(\sum_{i\in I_j}g_i\right)\omega_j\right]+\gamma T
-\end{align*}
+\subsection{Boosting模型}
+\begin{definition}
+	设$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$为观测样本集，其中$x_i$为第$i$个样本的特征向量，$y_i$是第$i$个样本的标签或值。Boosting通过顺序生成基学习器$f^{(1)},f^{(2)},\dots,f^{(B)}$来构造集成模型，其中每一步训练都基于前一步的拟合结果，对先前被错误预测的样本赋予更高关注，或对当前残差进行进一步拟合。\gls{BoostingEnsembleModel}定义为各基学习器输出的加权聚合函数。对于回归问题，集成预测函数通常定义为加权求和；对于分类问题，集成预测函数通常定义为加权投票。
+\end{definition}
+\subsubsection{GBDT}
 \begin{algorithm}[H]
-	\caption{XGBoost 第 \( t \) 步生成回归树 $f_t$}
+	\caption{Gradient Boosting Decision Tree}
 	\begin{algorithmic}[1]
-		\State \textbf{Input:} 样本集 $\mathcal{D} = \{(x_i, y_i)\}$，当前预测值 $\{\hat{y}_i^{(t-1)}\}$，正则项参数 $\gamma,\lambda$
-		\State \textbf{Output:} 本轮生成的回归树 $f_t$
+		\State \textbf{Input:}
+		training set $\mathcal{D}_{\mathrm{train}}=\{(x_i,y_i)\}_{i=1}^n$,
+		validation set $\mathcal{D}_{\mathrm{val}}=\{(x_i^{(v)},y_i^{(v)})\}_{i=1}^{n_v}$,
+		loss function $\ell(y,F(x))$,
+		number of boosting iterations $B$,
+		learning rate $\eta$,
+		early-stopping patience $P$,
+		tolerance $\varepsilon$,
+		tree-building parameters for \Call{BuildTree}{$\cdot$}
 		
-		\State \textbf{计算损失函数的一阶导数与二阶导数：}
-		\For{每个样本 $i = 1, \dots, n$}
-		\State 计算 $g_i=\dfrac{\partial \ell(y_i,z)}{\partial z}\Big|_{z=\hat{y}_i^{(t-1)}}$
-		\State 计算 $h_i=\dfrac{\partial^2 \ell(y_i,z)}{\partial z^2}\Bigl|_{z=\hat{y}_i^{(t-1)}}$
+		\State \textbf{Output:} Additive model $F_{\hat{b}}(x)$
+		
+		\State Initialize the model prediction with a common output $F_0(x)$ for all samples
+		\Statex \textit{For classification, this output is the empirical distribution of the training samples.}
+		\Statex \textit{for regression, it is the constant minimizing the empirical loss on the training set.}
+		
+		\State $\hat{b}\gets 0$, $c_{\mathrm{stop}}\gets 0$, $L_{\mathrm{best}}\gets +\infty$
+		
+		\For{$b=1,2,\dots,B$}
+		\State Compute pseudo-residuals for all training samples
+		\begin{equation*}
+			r_{ib}\gets-\nabla\ell[y_i,F_{b-1}(x_i)],
+			\quad i=1,2,\dots,n
+		\end{equation*}
+		
+		\State Fit a regression tree $T_b\gets\Call{BuildTree}{\{(x_i,r_{ib})\}_{i=1}^n}$
+		
+		\State Let the leaf rigions of $T_b$ be $R_{1b},R_{2b},\dots,R_{J_bb}$
+
+		\For{$j=1,2,\dots,J_b$}
+		\State Compute the optimal leaf output on region $R_{jb}$
+		\begin{equation*}
+			\gamma_{jb}\gets
+			\underset{\gamma\in\mathbb{R}}{\arg\min}
+			\sum_{x_i\in R_{jb}}
+			\ell[y_i,F_{b-1}(x_i)+\gamma]
+		\end{equation*}
 		\EndFor
 		
-		\State \textbf{初始化根节点：}
-		\State 将所有样本分配到根节点，计算节点的 $G = \sum_i g_i$，$H = \sum_i h_i$
-		\State 计算当前节点的最优输出 $\omega = -\frac{G}{H + \lambda}$，当前目标函数值为 $\text{Obj} = -\frac{1}{2}\frac{G^2}{H + \lambda} + \gamma$
+		\State Define the $b$-th base learner $f_b(x)\gets\sum\limits_{j=1}^{J_b}\gamma_{jb}I(x\in R_{jb})$ and update the additive model $F_b(x)\gets F_{b-1}(x)+\eta f_b(x)$
 		
-		\State \textbf{递归分裂节点：}
-		\Function{SplitNode}{$\text{Node}, \mathcal{D}$}
-		\State 初始化$\text{BestScore}=-\infty,\;\text{Split}=\text{FALSE},\;F^{\star},\;s^{\star}$
-		\For{每个特征 $F$}
-		\For{每个候选分裂点 $s$}
-		\State 将样本根据 $x[F] < s$ 分成左右子集 $\mathcal{D}_L, \mathcal{D}_R$
-		\State 分别计算 $G_L, H_L, G_R, H_R$
-		\State 计算当前分裂的目标函数值增益：
-		\[
-		\text{Gain} = \operatorname{Obj}-\operatorname{Obj}_{L}-\operatorname{Obj}_{R}=\frac{1}{2}\left( \frac{G_L^2}{H_L + \lambda} + \frac{G_R^2}{H_R + \lambda} - \frac{(G_L + G_R)^2}{H_L + H_R + \lambda} \right) - \gamma
-		\]
-		\If{Gain$>0$}
-		\State $\text{Split}=\text{TRUE}$
-		\If{Gain$>BestScore$}
-		\State $F^{\star}=F,\;s^{\star}=s$
+		\State Evaluate the validation loss $L_b\gets
+		\frac{1}{n_v}\sum\limits_{i=1}^{n_v}\ell[y_i^{(v)},F_b(x_i^{(v)})]$
+	
+		\If{$L_b<L_{\mathrm{best}}-\varepsilon$}
+		\State $L_{\mathrm{best}}\gets L_b$, $\hat b\gets b$, $c_{\mathrm{stop}}\gets 0$
+		\Else
+		\State $c_{\mathrm{stop}}\gets c_{\mathrm{stop}}+1$
 		\EndIf
+		
+		\If{$c_{\mathrm{stop}}\geqslant P$}
+		\State \textbf{break}
 		\EndIf
 		\EndFor
-		\EndFor
-		\If{Split$=$TRUE}
-		\State 用最佳划分点分裂当前节点，得到LeftChild和RightChild
-		\State \Call{SplitNode}{LeftChild, $\mathcal{D}_L$}
-		\State \Call{SplitNode}{RightChild, $\mathcal{D}_R$}
-		\EndIf
-		\EndFunction
 		
-		\State \Return 构造出的回归树 $f_t$
+		\State \Return $F_{\hat{b}}(x)$
+	\end{algorithmic}
+\end{algorithm}
+\subsubsection{XGBoost}
+XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进一步对每一轮新增树的学习过程进行了更精细的刻画。\par
+与传统GBDT主要关注经验损失的下降不同，XGBoost在目标函数中显式加入了对新增树复杂度的正则化惩罚，从而将第$b$轮的优化目标写为：
+\begin{equation*}
+	L^{(b)}=\sum_{i=1}^{n}\ell[y_i,F_{b-1}(x_i)+f_b(x_i)]+\Omega(f_b)
+\end{equation*}
+其中，$\Omega(f_b)$表示对第$b$棵树复杂度的惩罚项，定义为：
+\begin{equation*}
+	\Omega(f_b)=\gamma|T_b|+\frac{1}{2}\lambda\sum_{j=1}^{J_b}w_{jb}^2
+\end{equation*}
+这里，$|T_b|$表示第$b$棵树的叶节点个数，$w_{jb}$表示第$b$棵树第$j$个叶节点的输出值，参数$\gamma$用于惩罚树结构过于复杂的情形，参数$\lambda$用于约束叶节点输出的大小，避免输出太激进。\par
+由于直接对$f_b$进行优化仍然较困难，XGBoost在$F_{b-1}(x_i)$附近对损失函数作二阶近似。令：
+\begin{equation*}
+	g_{ib}=\left.\frac{\partial \ell(y_i,F)}{\partial F}\right|_{F=F_{b-1}(x_i)},
+	\quad
+	h_{ib}=\left.\frac{\partial^2 \ell(y_i,F)}{\partial F^2}\right|_{F=F_{b-1}(x_i)}
+\end{equation*}
+其中，$g_{ib}$和$h_{ib}$分别表示第$i$个样本在第$b$轮迭代时损失函数关于当前预测的一阶导数和二阶导数。于是由\cref{theo:Taylor}(1)有近似展开：
+\begin{equation*}
+	\ell[y_i,F_{b-1}(x_i)+f_b(x_i)]\approx\ell[y_i,F_{b-1}(x_i)]+g_{ib}f_b(x_i)+\frac{1}{2}h_{ib}f_b^2(x_i)
+\end{equation*}
+将其代入$L^{(b)}$，得到：
+\begin{equation*}
+	L^{(b)}\approx\sum_{i=1}^{n}\left\{\ell[y_i,F_{b-1}(x_i)]+g_{ib}f_b(x_i)+\frac{1}{2}h_{ib}f_b^2(x_i)\right\}+\Omega(f_b)
+\end{equation*}
+其中，$\sum\limits_{i=1}^{n}\ell[y_i,F_{b-1}(x_i)]$与当前轮新增树$f_b$无关，于是第$b$轮真正需要优化的目标可写为：
+\begin{equation*}
+	\tilde{L}^{(b)}=\sum_{i=1}^{n}\left\{g_{ib}f_b(x_i)+\frac{1}{2}h_{ib}f_b^2(x_i)\right\}+\Omega(f_b)
+\end{equation*}
+接下来利用树模型的结构来化简目标函数。设第$b$棵树$f_b$将样本空间划分为$J_b$个叶节点区域$R_{1b},R_{2b},\dots,R_{J_bb}$，并且对落入第$j$个叶节点的样本统一输出$w_{jb}$。将样本按叶节点分组，记：
+\begin{equation*}
+	G_{jb}=\sum_{x_i\in R_{jb}}g_{ib},
+	\quad
+	H_{jb}=\sum_{x_i\in R_{jb}}h_{ib}
+\end{equation*}
+则有：
+\begin{align*}
+	\tilde{L}^{(b)}&=\sum_{j=1}^{J_b}\left\{G_{jb}w_{jb}+\frac{1}{2}H_{jb}w_{jb}^2\right\}+\gamma|T_b|+\frac{1}{2}\lambda\sum_{j=1}^{J_b}w_{jb}^2 \\
+	&=\sum_{j=1}^{J_b}\left\{G_{jb}w_{jb}+\frac{1}{2}(H_{jb}+\lambda)w_{jb}^2\right\}+\gamma|T_b|
+\end{align*}
+于是最优叶节点输出和给定树结构下的最优目标值分别为：
+\begin{equation*}
+	w_{jb}^{\star}=-\frac{G_{jb}}{H_{jb}+\lambda},\quad\tilde{L}^{(b)\star}=-\frac{1}{2}\sum_{j=1}^{J_b}\frac{G_{jb}^2}{H_{jb}+\lambda}+\gamma|T_b|
+\end{equation*}
+这个式子表明，一旦树的划分结构确定，叶节点权重可以显式求出，而且整棵树的优劣也可以直接由各叶节点上的$G_{jb}$与$H_{jb}$来衡量。进一步地，XGBoost在生成树时正是利用这一目标值来计算分裂增益，从而决定最优划分并判断一个结点是否值得继续分裂。\par
+设在第$b$轮迭代中，当前有某个待分裂叶节点$R$，其对应的一阶与二阶统计量分别为：
+\begin{equation*}
+	G=\sum_{x_i\in R}g_{ib},
+	\quad
+	H=\sum_{x_i\in R}h_{ib}
+\end{equation*}
+如果该结点暂时不分裂，而是作为一个叶节点保留，则根据前述最优目标值公式，这个叶节点对目标函数的贡献为：
+\begin{equation*}
+	-\frac{1}{2}\frac{G^2}{H+\lambda}+\gamma
+\end{equation*}
+现在考虑将该结点分裂为左、右两个子结点$R_L$与$R_R$。记它们各自的一阶与二阶统计量为：
+\begin{equation*}
+	G_L=\sum_{x_i\in R_L}g_{ib},
+	\quad
+	H_L=\sum_{x_i\in R_L}h_{ib},
+	\quad
+	G_R=\sum_{x_i\in R_R}g_{ib},
+	\quad
+	H_R=\sum_{x_i\in R_R}h_{ib}
+\end{equation*}
+显然有$G=G_L+G_R,\;H=H_L+H_R$。分裂之后，原来的一个叶节点变成两个叶节点，因此这两个子结点对目标函数的贡献之和为：
+\begin{equation*}
+	-\frac{1}{2}\frac{G_L^2}{H_L+\lambda}
+	-\frac{1}{2}\frac{G_R^2}{H_R+\lambda}
+	+2\gamma
+\end{equation*}
+因此，分裂前后目标函数的变化量可写为：
+\begin{align*}
+	\Delta
+	&=
+	\left(
+	-\frac{1}{2}\frac{G_L^2}{H_L+\lambda}
+	-\frac{1}{2}\frac{G_R^2}{H_R+\lambda}
+	+2\gamma
+	\right)
+	-
+	\left(
+	-\frac{1}{2}\frac{G^2}{H+\lambda}
+	+\gamma
+	\right) \\
+	&=
+	-\frac{1}{2}\frac{G_L^2}{H_L+\lambda}
+	-\frac{1}{2}\frac{G_R^2}{H_R+\lambda}
+	+\frac{1}{2}\frac{G^2}{H+\lambda}
+	+\gamma
+\end{align*}
+由于我们希望目标函数尽可能小，因此只有当$\Delta<0$时，分裂才会使目标函数下降，也才是有利的分裂。\par
+这就是XGBoost中用于评估一个候选分裂是否值得采用的分裂增益公式。XGBoost将树结构的生长过程直接纳入了统一的优化框架之中（GBDT是分开的），使得每一次分裂都具有明确的目标函数解释。
+\begin{algorithm}[H]
+	\caption{Extreme Gradient Boosting}
+	\begin{algorithmic}[1]
+		\State \textbf{Input:}
+		training set $\mathcal{D}_{\mathrm{train}}=\{(x_i,y_i)\}_{i=1}^n$,
+		validation set $\mathcal{D}_{\mathrm{val}}=\{(x_i^{(v)},y_i^{(v)})\}_{i=1}^{n_v}$,
+		loss function $\ell(y,\hat y)$,
+		number of boosting iterations $B$,
+		learning rate $\eta$,
+		regularization parameters $\lambda,\gamma$,
+		early-stopping patience $P$,
+		tolerance $\varepsilon$,
+		tree-building parameters for \Call{BuildTree}{$\cdot$}
+		
+		\State \textbf{Output:} Additive model $\hat y_{\hat b}(x)$
+		
+		\State Initialize the model prediction with a common output $F_0(x)$ for all samples
+		\Statex \textit{For classification, this output is the empirical distribution of the training samples.}
+		\Statex \textit{for regression, it is the constant minimizing the empirical loss on the training set.}
+		
+		\State $\hat b\gets 0$, $c_{\mathrm{stop}}\gets 0$, $L_{\mathrm{best}}\gets +\infty$
+		
+		\For{$b=1,2,\dots,B$}
+		\State Compute first- and second-order statistics for all training samples:
+		\State $g_{ib}\gets \dfrac{\partial\ell(y_i,F)}{\partial F}\big|_{F=F_{b-1}(x_i)},\;h_{ib}\gets \dfrac{\partial^2\ell(y_i,F)}{\partial F^2}\big|_{F=F_{b-1}(x_i)},\;i=1,2,\dots,n$
+		
+		\State Fit a regression tree structure $T_b\gets\Call{BuildTree}{\{(x_i,g_{ib},h_{ib})\}_{i=1}^n,\lambda,\gamma}$
+		
+		\State Let the leaf regions of $T_b$ be $R_{1b},R_{2b},\dots,R_{J_b b}$
+		
+		\For{$j=1,2,\dots,J_b$}
+		\State Compute aggregated statistics on region $R_{jb}$
+		\State $G_{jb}\gets\sum\limits_{x_i\in R_{jb}}g_{ib},\quad H_{jb}\gets\sum\limits_{x_i\in R_{jb}}h_{ib}$
+		
+		\State Compute the optimal leaf output
+		\begin{equation*}
+			w_{jb}\gets-\frac{G_{jb}}{H_{jb}+\lambda}
+		\end{equation*}
+		\EndFor
+		
+		\State Define the $b$-th base learner $f_b(x)\gets\sum\limits_{j=1}^{J_b}w_{jb}I(x\in R_{jb})$ and update the additive model $F_b(x)\gets F_{b-1}(x)+\eta f_b(x)$
+		
+		\State Evaluate the validation loss $L_b\gets\frac{1}{n_v}\sum\limits_{i=1}^{n_v}\ell[y_i^{(v)},F_b(x_i^{(v)})]$
+		
+		\If{$L_b<L_{\mathrm{best}}-\varepsilon$}
+		\State $L_{\mathrm{best}}\gets L_b$, $\hat b\gets b$, $c_{\mathrm{stop}}\gets 0$
+		\Else
+		\State $c_{\mathrm{stop}}\gets c_{\mathrm{stop}}+1$
+		\EndIf
+		
+		\If{$c_{\mathrm{stop}}\geqslant P$}
+		\State \textbf{break}
+		\EndIf
+		\EndFor
+		
+		\State \Return $F_{\hat b}(x)$
 	\end{algorithmic}
 \end{algorithm}
