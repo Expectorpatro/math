@@ -1,24 +1,21 @@
 \chapter{假设检验理论}
 \begin{definition}
-	设$(X,\mathscr{A},\mathscr{P})$是统计结构，则称$\mathscr{P}$的非空子集为\gls{Hypothesis}。若$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，则$\Theta$的非空子集也被称之为假设。设$\mathbf{X}$是从总体$F$中抽取的简单样本，判断$F$是否服从某一假设的问题是\gls{HypothesisTesting}问题。称要检验的假设$\mathscr{P}_0(\Theta_0)$为\gls{NullHypothesis}，记为$H_0$，$\mathscr{P_1}\subseteq\mathscr{P}\setminus\mathscr{P}_0(\Theta_1\subseteq\Theta\setminus\Theta_0)$被称之为\gls{AlternativeHypothesis}，记为$H_1$。若某一假设仅包含$\mathscr{P}$中的一个点，则称该假设为\gls{SimpleHypothesis}，否则称之为\gls{CompositeHypothesis}。称$(H_0,H_1)$为检验问题。检验指的是：
+	设$(X,\mathscr{A},\mathscr{P})$是统计结构，则称$\mathscr{P}$的非空子集为\gls{Hypothesis}。若$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，则$\Theta$的非空子集也被称之为假设。设$\seq{f}{n}$是从总体$F$中抽取的简单样本，判断$F$是否服从某一假设的问题是\gls{HypothesisTesting}问题。称要检验的假设$\mathscr{P}_0(\Theta_0)$为\gls{NullHypothesis}，记为$H_0$，$\mathscr{P}_1\subseteq\mathscr{P}\setminus\mathscr{P}_0(\Theta_1\subseteq\Theta\setminus\Theta_0)$被称之为\gls{AlternativeHypothesis}，记为$H_1$。检验指的是：
 	\begin{enumerate}
-		\item 将$X$划分为互不相交的两个$\mathscr{P}$可测集，即$X=W\cup\overline{W},\;W\cap\overline{W}=\varnothing,\;W,\overline{W}\in\mathscr{A}$；
-		\item 作如下规定，若$\mathbf{X}\in W$，则拒绝原假设$H_0$，接受备择假设$H_1$；若$\mathbf{X}\in\overline{W}$，则接受原假设$H_0$，拒绝备择假设$H_1$。
+		\item 将$X$划分为互不相交的两个$\mathscr{A}$中的元素，即$X=W\cup\overline{W},\;W\cap\overline{W}=\varnothing,\;W,\overline{W}\in\mathscr{A}$；
+		\item 作如下规定，若一次试验中$\underset{i=1}{\overset{n}{\cap}}\{f_i\in W\}$发生了，则拒绝原假设$H_0$，接受备择假设$H_1$；反之则接受原假设$H_0$，拒绝备择假设$H_1$。
 	\end{enumerate}
 	称$W$为\gls{RejectRegion}。
 \end{definition}
 \begin{definition}
 	在检验问题$(H_0,H_1)$中，若$H_0$为真但由于样本的随机性拒绝了$H_0$，称此时犯的错误为\gls{Type1Error}或\textbf{拒真错误}；若$H_0$为伪但由于样本的随机性接受了$H_0$，称此时犯的错误为\gls{Type2Error}或\textbf{取伪错误}。
 \end{definition}
-\begin{note}
-	理想中的情况是有方法（即存在$X$的一个划分）能够同时降低犯两类错误的可能，但实际情况是降低第一类错误发生的概率就会提高第二类错误发生的概率，反之降低第二类错误发生的概率就会提高第一类错误发生的概率。Neyman和Pearson提出了一个基本思想：先使得犯第一类错误的可能性尽可能地小，然后尽可能地降低犯第二类错误的可能性，即拒真优先。
-\end{note}
 \begin{definition}
-	设$(X,\mathscr{A},\mathscr{P})$是统计结构，$\mathbf{X}$为从总体$F$中抽取的简单样本，$(H_0,H_1)$是检验问题。称：
+	设$(X,\mathscr{A},\mathscr{P})$是统计结构，$\seq{f}{n}$为从总体$F$中抽取的简单样本，$(H_0,H_1)$是检验问题，$W$为拒绝域。称满足条件：
 	\begin{equation*}
 		\forall\;P\in\mathscr{P},\;g(P)=P(W)
 	\end{equation*}
-	为检验问题$(H_0,H_1)$的\gls{PowerFunction}。当$F\in H_0$时，$g(F)\leqslant\alpha$的检验被称之为\gls{SignificanceLevel}为$\alpha$的检验。
+	的函数$g$为检验问题$(H_0,H_1)$的\gls{PowerFunction}。当$F\in H_0$时，$g(F)\leqslant\alpha$的检验被称之为\gls{SignificanceLevel}为$\alpha$的检验。
 \end{definition}
 \begin{note}
 	当$F\in H_0$时，$g(F)$为犯第一类错误的概率；当$F\in H_1$时，$1-g(F)$为犯第二类错误的概率。
@@ -34,10 +31,10 @@
 	\end{enumerate}
 \end{method}
 \begin{definition}
-	设$(H_0,H_1)$是统计结构$(X,\mathscr{A},\mathscr{P})$上的一个假设检验问题，$\mathbf{X}$是从总体$F$中抽取的简单样本，利用$\mathbf{X}$能够作出拒绝原假设的最小显著性水平被称为检验的\gls{PValue}。
+	设$(H_0,H_1)$是统计结构$(X,\mathscr{A},\mathscr{P})$上的一个假设检验问题，$\seq{f}{n}$是从总体$F$中抽取的简单样本，利用$\seq{f}{n}$能够作出拒绝原假设的最小显著性水平被称为检验的\gls{PValue}。
 \end{definition}
 \begin{note}
-	为什么需要$p$值的概念？根据Neyman和Pearson的思想我们需要先降低犯第一类错误的可能性，也就是确定一个具体的拒绝域使得显著性水平$\alpha$小于某个给定值，但此时会出现一个问题，由于不同的人对原假设的保守性程度不一样，他们选择的显著性水平就会不一样，对原假设越保守那所选取的$\alpha$就会越小，只关注是否拒绝原假设这一结论就会引起争议。如果能够给出p值让大家有一个大致的参照，虽然此时还是会有争议，但至少我们有了一个参考值。\par
+	为什么需要$p$值的概念？由于不同的人对原假设的保守性程度不一样，他们选择的显著性水平就会不一样，对原假设越保守那所选取的$\alpha$就会越小，只关注是否拒绝原假设这一结论就会引起争议。如果能够给出p值让大家有一个大致的参照，虽然此时还是会有争议，但至少我们有了一个参考值。\par
 	如何求$p$值？为了得到拒绝原假设的最小显著性水平，那必然需要使得当前样本下的统计量值在拒绝域内且在拒绝域的边界上，否则拒绝域还能进一步缩小，即该显著性水平不是最小的。因为此时拒绝域的形式已经确定了，边界值也给出了，那么实际上我们就得到了一个具体的拒绝域，所以有：
 	\begin{equation*}
 		p=\sup_{P\in H_0}g(P)
@@ -49,10 +46,11 @@
 	\begin{equation*}
 		\sup_{P\in H_0}g(P)\leqslant\alpha
 	\end{equation*}
-	这就会导致当$F$真的在$H_0$中时，犯第一类错误的概率实际上有可能小于$\alpha$。这代表着什么？根据前述同时降低两类错误的矛盾性和Neyman、Pearson的基本思想，如果犯第一类错误的概率实际上小于$\alpha$，那么在显著性水平为$\alpha$的检验中犯第二类错误的概率不是最低的，检验还能进一步优化。由此引入下述随机化检验的概念。
+	这就会导致当$F$真的在$H_0$中时，犯第一类错误的概率实际上有可能小于$\alpha$。这代表着检验还能进一步优化，由此引入下述随机化检验的概念。
 \end{note}
 \begin{definition}
 	设$\varphi$是可测空间$(X,\mathscr{A})$上的可测函数。若$0\leqslant\varphi\leqslant1$，则称$\varphi$是\gls{TestFunction}。当$\varphi$只取$0,1$两个值时，称对应的检验为\gls{NonrandomizedTesting}，否则称为\gls{RandomizedTesting}。$\varphi$的势函数为$\operatorname{E}(\varphi)$。
 \end{definition}
 
+\input{statistics/testing-hypothesis/large-scale-testing}
 \input{statistics/testing-hypothesis/nonparametric}

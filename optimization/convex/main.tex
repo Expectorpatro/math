@@ -235,29 +235,148 @@
 	因为$E$是凸集，所以$\theta y_1+(1-\theta)y_2\in E$，于是$\theta x_1+(1-\theta)x_2\in f^{-1}(E)$。由$x_1,x_2,\theta$的任意性可知$f^{-1}(E)$是$\mathbb{R}^{n}$中的凸集。
 \end{proof}
 
+\subsection{凸函数}
 \begin{definition}
-	设$X$是欧氏空间，$x_1,x_2\in X$。若存在$\alpha_1,\alpha_2$满足$\alpha_1+\alpha_2=1,\;0\leqslant\alpha_i\leqslant1,\;i=1,2$，使得$x=\alpha_1x_1+\alpha_2x_2$，则称$x$为$x_1,x_2$的\gls{ConvexCombination}。若$0<\alpha_i<1,\;i=1,2$，称其为\gls{StrictlyConvexCombination}。
+	设$X$是一个非空集合，$f:X\to\overline{R}^n$。若存在$x\in X$使得$f(x)<+\infty$且对任意的$x\in X$有$f(x)>-\infty$，则称$f$关于$X$是\gls{ProperFunction}。
 \end{definition}
 \begin{definition}
-	设$E$是欧式空间$X$中的一个凸集，$x\in E$。若$x$不能表示为$E$中不同的两点的严格凸组合，则称$x$是$E$的一个\gls{ExtremePoint}。
-\end{definition}
-
-\begin{definition}
-	设$f$是定义在开区间$(a,b)$上的实值函数，$a,b\in\overline{\mathbb{R}^{}}$。若对任意的$a<x<y<b$和任意的$\alpha\in(0,1)$有：
+	设$f$是关于凸集$E\subseteq\mathbb{R}^{n}$的适当函数。若对任意的$x,y\in E$和任意的$\alpha\in[0,1]$都有：
 	\begin{equation*}
 		f[\alpha x+(1-\alpha)y]\leqslant\alpha f(x)+(1-\alpha)f(y)
 	\end{equation*}
 	则称$f$是\gls{ConvexFunction}，若上式取严格的小于号则称$f$\gls{StrictlyConvex}。若$-f$是凸函数，则称$f$为\gls{ConcaveFunction}。
 \end{definition}
 \begin{property}\label{prop:ConvexFunction}
-	设$f$是定义在开区间$(a,b)$上的函数。凸函数具有如下性质：
+	设$f$是$E\subseteq\mathbb{R}^{n}$上的凸函数。凸函数具有如下性质：
 	\begin{enumerate}
-		\item 若$f$在$(a,b)$上可微，则$f$是凸函数的充分必要条件为对任意的$a<x<y<b$有$f'(x)\leqslant f'(y)$，是严格凸函数的充分必要条件为对任意的$a<x<y<b$有$f'(x)<f'(y)$；
-		\item 若$f$在$(a,b)$上二次可微，则$f$是凸函数的充分必要条件为对任意的$x\in(a,b)$有$f''(x)\geqslant0$，是严格凸函数的充分必要条件为对任意的$x\in(a,b)$有$f''(x)>0$；
+		\item 若$A\in M_{n\times n}(\mathbb{R}^{}),\;b\in\mathbb{R}^{n}$，对任意的$x\in E$有$Ax+b\in E$，则$f(Ax+b)$也是$E$上的凸函数；
+		\item 若$f$在$E$上Fr\'echet可微，根据\cref{prop:FrechetGateaux}(1)，则$f$是$E$上的凸函数的充分必要条件为对任意的$x,y\in E$有：
+		\begin{equation*}
+			f(y)\geqslant f(x)+(\nabla fx,y-x)
+		\end{equation*}		
+		\item 若$f$在$E$上二次可微，则$f$是凸函数的充分必要条件为对任意的$x,h\in E$有$\operatorname{D}^2fx(h,h)\geqslant0$；
 		\item 若$f$是凸函数，$t\in(a,b)$，则存在经过点$(t,f(t))$的直线$g(x)=c(x-t)+f(t)$满足对任意的$x\in(a,b)$有$g(x)\leqslant f(x)$。当$f$为严格凸函数时，$g(x)=f(x)$当且仅当$x=t$。
 	\end{enumerate}
 \end{property}
+\begin{proof}
+	(1)任取$x_1,x_2\in E$，则对任意的$\alpha\in[0,1]$有：
+	\begin{align*}
+		&f\{A[\alpha x_1+(1-\alpha)x_2]+b\}=f[A\alpha x_1+\alpha b+A(1-\alpha)x_2+(1-\alpha)b] \\
+		=&f[\alpha(Ax_1+b)+(1-\alpha)(Ax_2+b)]\leqslant\alpha f(Ax_1+b)+(1-\alpha)f(x_2+b)
+	\end{align*}\par
+	(2)\textbf{必要性：}对任意的$x,y\in E$，因为$f$是凸函数，由(1)可知：
+	\begin{equation*}
+		\varphi(t)=f[x+t(y-x)]
+	\end{equation*}
+	在$[0,1]$上是凸函数，所以对任意的$t\in(0,1]$有：
+	\begin{equation*}
+		\varphi(t)\leqslant(1-t)\varphi(0)+t\varphi(1)
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\frac{\varphi(t)-\varphi(0)}{t}\leqslant\varphi(1)-\varphi(0)
+	\end{equation*}
+	因为$f$在$x$处Fr\'echet可微，由\cref{prop:FrechetGateaux}(1)可知$\varphi$在$t=0$处可微，于是取$t\downarrow0$，根据\cref{prop:RMap}(4)可知：
+	\begin{equation*}
+		\varphi'(0)=\operatorname{D}_Gfx(y-x)=(\nabla fx,y-x)\leqslant f(y)-f(x)
+	\end{equation*}\par
+	\textbf{充分性：}任取$x,y\in E$和$\alpha\in[0,1]$，记$z=\alpha x+(1-\alpha)y$，由条件可得：
+	\begin{equation*}
+		f(x)\geqslant f(z)+(\nabla fz,x-z),\quad f(y)\geqslant f(z)+(\nabla fz,y-z)
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\alpha f(x)\geqslant\alpha f(z)+\alpha(\nabla fz,x-z),\quad(1-\alpha)f(y)\geqslant(1-\alpha)f(z)+(1-\alpha)(\nabla fz,y-z)
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\alpha f(x)+(1-\alpha)f(y)\geqslant f(z)+\alpha(\nabla fz,x-z)+(1-\alpha)(\nabla fz,y-z)
+	\end{equation*}
+	注意到：
+	\begin{align*}
+		&\alpha(\nabla fz,x-z)+(1-\alpha)(\nabla fz,y-z)=\Big(\nabla fz,\alpha(x-z)+(1-\alpha)(y-z)\Big) \\
+		=&\Big(\nabla fz,\alpha x+(1-\alpha)y-\alpha z-(1-\alpha)z\Big)=\Big(\nabla fz,z-\alpha z-(1-\alpha)z\Big) \\
+		=&\Big(\nabla fz,\mathbf{0}\Big)=0
+	\end{align*}
+	所以：
+	\begin{equation*}
+		\alpha f(x)+(1-\alpha)f(y)\geqslant f[\alpha x+(1-\alpha)y]
+	\end{equation*}
+	由$x,y,\alpha$的任意性可知$f$是$E$上的凸函数。\par
+	(3)\textbf{必要性：}对任意的$x\in E$，若存在$h\in E$使得$\operatorname{D}^2f(h,h)<0$，由\cref{theo:TaylorTheorem}(1)可得：
+	\begin{equation*}
+		f(x_0+th)=f(x_0)+t\operatorname{D}fx(h)+\frac{t^2}{2}\operatorname{D}^2fx(h,h)+\operatorname{o}(t^2),\;(t\to0)
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\frac{f(x_0+th)-f(x_0)-t\operatorname{D}fx(h)}{t^2}=\frac{1}{2}\operatorname{D}^2fx(h,h)+\frac{\operatorname{o}(t^2)}{t^2},\;(t\to0)
+	\end{equation*}
+	由\cref{prop:RMap}(5.b)(3)可知当$t$足够小时有：
+	\begin{equation*}
+		\frac{f(x_0+th)-f(x_0)-t(\operatorname{D}fx)h}{t^2}<0
+	\end{equation*}
+	根据\cref{prop:FrechetGateaux}(1)可知这与(2)矛盾。\par
+	\textbf{充分性：}由\cref{theo:TaylorTheorem}(2)和(2)立即可得。
+\end{proof}
 
+\section{最优性理论}
+\subsubsection{可微函数的最优性}
+由\cref{theo:FrechetExtremumOptimality}给出。
+\subsubsection{不可微函数的最优性}
+\begin{definition}
+	设$f$关于$\mathbb{R}^{n}$是适当函数，$x\in\mathbb{R}^{n}$。若$g\in\mathbb{R}^{n}$对任意的$y\in\mathbb{R}^{n}$满足：
+	\begin{equation*}
+		f(y)\geqslant f(x)+g^T(y-x)
+	\end{equation*}
+	则称$g$为$f$在$x$处的一个\gls{Subgradient}，称$f$在$x$处所有次梯度构成的集合为\gls{Subdifferential}。
+\end{definition}
+次梯度是否存在呢？
+%\begin{lemma}\label{lem:HyperplaneSeperation}
+%	设$A,B$是$\mathbb{R}^{n}$上不交的闭集，$A$是有界的，则存在$x\in A$和$y\in B$满足$\rho(x,y)$是$A$和$B$中点的最小距离。
+%\end{lemma}
+%\begin{proof}
+%	对任意的$a\in A$和$b\in B$，定义函数$f(a,b)=\rho(a,b)$，由\cref{prop:RmConvergence}(2)(3)和\cref{prop:Norm}(2)可知$f$在$A\times B$上连续。\par
+%	取$\{(a_n,b_n)\}\subseteq A\times B$，使得$\{\rho(a_n-b_n)\}\to d=\inf\{\rho(a,b):a\in A,b\in B\}$。由\cref{theo:CompactRn}可知$A$是紧集，所以$\{a_n\}$存在收敛子列$\{a_{n_i}\}\to x\in A$。注意到：
+%	\begin{align*}
+%		\rho(b_n,\mathbf{0})\leqslant\rho(b_n,a_n)+\rho(a_n,\mathbf{0})<+\infty
+%	\end{align*}
+%	所以$\{b_n\}$是有界序列。记$C$为$\{b_n\}$及其聚点的并集，因为$B$是闭集，$\{b_n\}\subseteq B$，所以$C\subseteq B$且是闭集。因为$\{b_n\}$是有界序列，由\cref{prop:Norm}(2)可$C$是有界的，根据\cref{theo:CompactRn}可知$C$是紧集，所以$\{b_n\}$存在收敛子列$\{b_{n_i}\}\to y\in B$。\par
+%	由$f$的连续性和\cref{prop:ConvergentSeqOfPoints}(4)可得：
+%	\begin{align*}
+%		f(x,y)=\rho(x,y)=\lim_{i\to+\infty}\rho(a_{n_i}-b_{n_i})=d
+%	\end{align*}
+%	所以$x,y$即为满足要求的点。
+%\end{proof}
+\begin{theorem}[Hyperplane Seperation Theorem]\label{theo:HyperplaneSeperationTheorem}
+	设$A$和$B$是$\mathbb{R}^{n}$上不交的非空凸集，则存在非零的$a\in\mathbb{R}^{n}$和$b\in\mathbb{R}^{}$使得：
+	\begin{equation*}
+		\forall\;x\in A,\;(a,x)\geqslant b,\quad\forall\;y\in B,\;(a,y)\leqslant b
+	\end{equation*}
+%	若$A,B$是闭的且二者中至少一个是有界的，则存在非零的$a\in\mathbb{R}^{n}$和$b\in\mathbb{R}^{}$使得：
+%	\begin{equation*}
+%		\forall\;x\in A,\;(a,x)>b,\quad\forall\;y\in B,\;(a,y)<b
+%	\end{equation*}
+\end{theorem}
+\begin{proof}
+%	先证明第二种情况。\par
+%	由\cref{lem:HyperplaneSeperation}可知存在$x\in A$和$y\in B$使得$\rho(x,y)$是$A$和$B$中点的最小距离。取$a=x-y$，因为$A$和$B$不相交，所以$a\ne\mathbf{0}$。取$b_A=(a,x)$，$b_B=(a,y)$，因为$a\ne\mathbf{0}$，所以$b_A\ne b_B$，设$b_A<b_B$，反之可类似讨论。下面证明对任意的$x'\in A$有$(a,x')\geqslant b_A$，对任意的$y'\in B$有$(a,y')\leqslant b_B$。\par
+%	任取$x'\in A$。由于$A$是凸集，所以对任意$t\in[0,1]$有$x_t=(1-t)x+tx'\in A$，注意到$||x_t-y||^2\geqslant||x-y||^2$，而：
+%	\begin{equation*}
+%		||x_t-y||^2=||x-y+t(x'-x)||^2=||x-y||^2+2t(x-y,x'-x)+t^2||x'-x||^2
+%	\end{equation*}
+%	所以$2t(x-y,x'-x)+t^2||x'-x||^2\geqslant 0$。对$t>0$两边除以$t$，由\cref{prop:RMap}(4)可得$(x-y,x'-x)\geqslant 0$，即：
+%	\begin{equation*}
+%		(a,x')\geqslant (a,x)=b_A
+%	\end{equation*}
+%	当$t=0$时$x'=x$，上式依旧成立。同理可证$B$的情况。任取$b\in(b_A,b_B)$即可得出结论。\par
+	严格证明涉及到泛函分析中过于复杂的内容，略去。
+\end{proof}
+\begin{definition}
+	设$E\subseteq\mathbb{R}^{n}$，$x_0\in\partial E$。若非零的$\alpha\in\mathbb{R}^{n}$和$b\in\mathbb{R}^{}$满足对任意的$x\in E$有$(\alpha,x)\leqslant(\alpha,x_0)$，则称超平面$\{x\in\mathbb{R}^{n}:(\alpha,x)=(\alpha,x_0)\}$为$E$在$x_0$处的\gls{SupportingHyperplane}。
+\end{definition}
+\begin{theorem}[Supporting Hyperplane Theorem]\label{theo:SupportingHyperplaneTheorem}
+	若$E\subseteq\mathbb{R}^{n}$是凸集，则在$E$的任意边界点处都存在支撑超平面。
+\end{theorem}
 \subsection{映射的上下极限与半连续性}
 \begin{definition}
 	$(X,\rho)$是度量空间，$E$是$X$的子空间，$f$是$E$到$\mathbb{R}$上的映射。对于$E$中的任一聚点$a$，定义：
