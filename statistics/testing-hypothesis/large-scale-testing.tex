@@ -1,0 +1,99 @@
+\section{多重假设检验}
+\begin{property}
+	若控制每一次假设检验的显著性水平为$\alpha$，$n$次独立假设检验中至少犯一次第一次错误的概率为$1-(1-\alpha)^n$。
+\end{property}
+\begin{proof}
+	此时一次第一类错误都没犯的概率为$(1-\alpha)^n$。
+\end{proof}
+设$n$个原假设中有$n_0$个为真，$n_0$个为假。记试验中被错误拒绝的假设个数为$V$，被正确拒绝的假设个数为$S$，总拒绝数为$R=V+S$。
+\begin{definition}
+	称$P(V\geqslant1)$为\gls{FWER}。
+\end{definition}
+\begin{definition}
+	称：
+	\begin{equation*}
+		\operatorname{E}\left(\frac{V}{\max\{R,1\}}\right)
+	\end{equation*}
+	为\gls{FDR}。
+\end{definition}
+\begin{method}[BonFerroni]
+	由\cref{prop:Measure}(3)（次有限可加性）可知，将$n$个假设检验问题中单个假设检验的显著性水平设置为$\dfrac{\alpha}{n}$，即可保证FWER小于$\alpha$。
+\end{method}
+\begin{method}[Benjamini--Hochberg]
+	设$n$个假设检验对应的$p$值为$p_1,p_2\dots,p_n$，将其从小到大排序为$p_{(1)}\leqslant p_{(2)}\leqslant\cdots\leqslant p_{(n)}$。给定目标水平$\alpha$，取最大的$k$使得：
+	\begin{equation*}
+		p_{(k)}\leqslant\frac{k}{n}\alpha
+	\end{equation*}
+	则拒绝$H_{(1)},H_{(2)}\dots,H_{(k)}$。若各真原假设对应的$p$值独立且服从$U(0,1)$，并且与其余$p$值独立，则此时的FDR不超过$\alpha$。
+\end{method}
+\begin{proof}
+	记$I_0$为真原假设的指标集合，$m_0=|I_0|$。对每个$i\in I_0$，记$R^{(-i)}$为删去$p_i$之后，其余$n-1$个$p$值按同一Benjamini--Hochberg规则所产生的拒绝数。由逐步上升法的结构可知，若第$i$个真原假设被错误拒绝且$R=r$，则必有
+	\begin{equation*}
+		p_i\leqslant \frac{r}{n}\alpha
+	\end{equation*}
+	并且
+	\begin{equation*}
+		R^{(-i)}=r-1
+	\end{equation*}
+	于是
+	\begin{align*}
+		\mathrm{FDR}
+		&=E\left(\frac{V}{R\vee1}\right)\\
+		&=\sum_{i\in I_0}E\left(\frac{\mathbf{1}\{p_i\text{被拒绝}\}}{R\vee1}\right)\\
+		&=\sum_{i\in I_0}\sum_{r=1}^n\frac1rP\left(p_i\leqslant \frac{r}{n}\alpha,R=r\right)\\
+		&\leqslant \sum_{i\in I_0}\sum_{r=1}^n\frac1rP\left(p_i\leqslant \frac{r}{n}\alpha,R^{(-i)}=r-1\right)
+	\end{align*}
+	若各真原假设对应的$p$值独立且服从$U(0,1)$，并且与其余$p$值独立，则
+	\begin{align*}
+		\mathrm{FDR}
+		&\leqslant \sum_{i\in I_0}\sum_{r=1}^n\frac1rP\left(p_i\leqslant \frac{r}{n}\alpha\right)P\left(R^{(-i)}=r-1\right)\\
+		&=\sum_{i\in I_0}\sum_{r=1}^n\frac1r\frac{r\alpha}{n}P\left(R^{(-i)}=r-1\right)\\
+		&=\sum_{i\in I_0}\frac{\alpha}{n}\sum_{r=1}^nP\left(R^{(-i)}=r-1\right)\\
+		&=\frac{m_0}{n}\alpha\\
+		&\leqslant \alpha
+	\end{align*}
+	故Benjamini--Hochberg方法在独立情形下控制FDR
+\end{proof}
+
+\begin{method}[Benjamini--Yekutieli]
+	设$n$个假设检验对应的$p$值为$p_1,\dots,p_n$，将其从小到大排序为
+	\begin{equation*}
+		p_{(1)}\leqslant p_{(2)}\leqslant\cdots\leqslant p_{(n)}
+	\end{equation*}
+	记
+	\begin{equation*}
+		c_n=\sum_{j=1}^n\frac1j
+	\end{equation*}
+	给定目标水平$\alpha$，取最大的$k$使得
+	\begin{equation*}
+		p_{(k)}\leqslant \frac{k}{n\,c_n}\alpha
+	\end{equation*}
+	则拒绝
+	\begin{equation*}
+		H_{(1)},\dots,H_{(k)}
+	\end{equation*}
+	证明：Benjamini--Yekutieli证明了如下上界：对任意依赖结构，若采用Benjamini--Hochberg型逐步上升法，并以
+	\begin{equation*}
+		\alpha_i=\frac{i}{n}\gamma,\qquad i=1,\dots,n
+	\end{equation*}
+	作为临界值，则有
+	\begin{equation*}
+		\mathrm{FDR}\leqslant \frac{m_0}{n}\gamma c_n
+	\end{equation*}
+	现在取
+	\begin{equation*}
+		\gamma=\frac{\alpha}{c_n}
+	\end{equation*}
+	则对应临界值恰为
+	\begin{equation*}
+		\alpha_i=\frac{i}{n\,c_n}\alpha
+	\end{equation*}
+	于是
+	\begin{align*}
+		\mathrm{FDR}
+		&\leqslant \frac{m_0}{n}\frac{\alpha}{c_n}c_n\\
+		&=\frac{m_0}{n}\alpha\\
+		&\leqslant \alpha
+	\end{align*}
+	故Benjamini--Yekutieli方法在任意依赖结构下控制FDR
+\end{method}
