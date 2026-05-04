@@ -1,3 +1,4 @@
+#pragma once
 using Rank = int;
 
 template <typename T>
@@ -9,7 +10,7 @@ struct ListNode
 
     ListNode() = default;
 
-    ListNode(const T &e, ListNode<T> *p = nullptr, ListNode<T> *s = nullptr)
+    ListNode(T const &e, ListNode<T> *p = nullptr, ListNode<T> *s = nullptr)
         : data(e), pred(p), succ(s) {};
 };
 
@@ -27,23 +28,23 @@ protected:
 
 public:
     List();
-    List(const List<T> &L);
-    List(const List<T> &L, int r, int n);
+    List(List<T> const &L);
+    List(List<T> const &L, int r, int n);
     List(ListNode<T> *p, int n);
     ~List();
 
     Rank size() const;
     bool empty() const;
-    const ListNode<T> *first() const;
+    ListNode<T> const *first() const;
     T &operator[](Rank r);
-    const T &operator[](Rank r) const;
+    T const &operator[](Rank r) const;
 
-    const ListNode<T> *find(T const &e, ListNode<T> *p, int n) const;
+    ListNode<T> const *find(T const &e, ListNode<T> *p, int n) const;
 
     void insertAsFirst(T const &e);
     void insertAsLast(T const &e);
-    void insertAfter(ListNode<T> *p, const T &e);
-    void insertBefore(ListNode<T> *p, const T &e);
+    void insertAfter(ListNode<T> *p, T const &e);
+    void insertBefore(ListNode<T> *p, T const &e);
     void remove(ListNode<T> *p)
 };
 
@@ -77,13 +78,13 @@ List<T>::List()
 }
 
 template <typename T>
-List<T>::List(const List<T> &L)
+List<T>::List(List<T> const &L)
 {
     copyNodes(L.first(), L._size);
 }
 
 template <typename T>
-List<T>::List(const List<T> &L, int r, int n)
+List<T>::List(List<T> const &L, int r, int n)
 {
     copyNodes(L[r], n);
 }
@@ -118,7 +119,7 @@ bool List<T>::empty() const
 }
 
 template <typename T>
-const ListNode<T> *List<T>::first() const
+ListNode<T> const *List<T>::first() const
 {
     return header->succ;
 }
@@ -136,7 +137,7 @@ T &List<T>::operator[](Rank r)
 }
 
 template <typename T>
-const T &List<T>::operator[](Rank r) const
+T const &List<T>::operator[](Rank r) const
 {
     ListNode<T> *p{first()};
     while (0 < r--)
@@ -148,7 +149,7 @@ const T &List<T>::operator[](Rank r) const
 }
 
 template <typename T>
-const ListNode<T> *List<T>::find(T const &e, ListNode<T> *p, int n) const
+ListNode<T> const *List<T>::find(T const &e, ListNode<T> *p, int n) const
 {
     while (0 < n--)
     {
@@ -178,7 +179,7 @@ void List<T>::insertAsLast(T const &e)
 }
 
 template <typename T>
-void List<T>::insertAfter(ListNode<T> *p, const T &e)
+void List<T>::insertAfter(ListNode<T> *p, T const &e)
 {
     _size++;
     ListNode<T> *x = new ListNode<T>(e, p, p->succ);
@@ -187,7 +188,7 @@ void List<T>::insertAfter(ListNode<T> *p, const T &e)
 }
 
 template <typename T>
-void List<T>::insertBefore(ListNode<T> *p, const T &e)
+void List<T>::insertBefore(ListNode<T> *p, T const &e)
 {
     _size++;
     ListNode<T> *x = new ListNode<T>(e, p->pred, p);
