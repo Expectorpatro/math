@@ -1,3 +1,4 @@
+#pragma once
 #include <cstdlib>
 
 using Rank = int;
@@ -12,29 +13,29 @@ private:
     int _capacity{};
     T *_elem{};
 
-    void copyFrom(const T *A, Rank lo, Rank hi);
+    void copyFrom(T const *A, Rank lo, Rank hi);
     void expand();
     void shrink();
     void merge(Rank lo, Rank mid, Rank hi);
 
 public:
     Vector(int c = DEFAULT_CAPACITY, int s = 0, T v = T{});
-    Vector(const T *arr, Rank lo, Rank hi);
-    Vector(const Vector<T> &V);
-    Vector(const Vector<T> &V, Rank lo, Rank hi);
+    Vector(T const *arr, Rank lo, Rank hi);
+    Vector(Vector<T> const &V);
+    Vector(Vector<T> const &V, Rank lo, Rank hi);
     ~Vector();
 
-    Vector<T> &operator=(const Vector<T> &V);
+    Vector<T> &operator=(Vector<T> const &V);
 
     Rank size() const;
     bool empty() const;
     T &operator[](Rank r);
-    const T &operator[](Rank r) const;
+    T const &operator[](Rank r) const;
 
-    Rank find(const T &e, Rank lo, Rank hi) const;
-    Rank binSearch(const T &e, Rank lo, Rank hi) const;
+    Rank find(T const &e, Rank lo, Rank hi) const;
+    Rank binSearch(T const &e, Rank lo, Rank hi) const;
 
-    void insert(const T &e, Rank r);
+    void insert(T const &e, Rank r);
     void remove(Rank lo, Rank hi);
 
     template <typename VST>
@@ -52,7 +53,7 @@ public:
 };
 
 template <typename T>
-void Vector<T>::copyFrom(const T *A, Rank lo, Rank hi)
+void Vector<T>::copyFrom(T const *A, Rank lo, Rank hi)
 {
     Rank n{hi - lo};
     _capacity = (2 * n > DEFAULT_CAPACITY) ? 2 * n : DEFAULT_CAPACITY;
@@ -138,19 +139,19 @@ Vector<T>::Vector(int c, int s, T v)
 }
 
 template <typename T>
-Vector<T>::Vector(const T *arr, Rank lo, Rank hi)
+Vector<T>::Vector(T const *arr, Rank lo, Rank hi)
 {
     copyFrom(arr, lo, hi);
 }
 
 template <typename T>
-Vector<T>::Vector(const Vector<T> &V)
+Vector<T>::Vector(Vector<T> const &V)
 {
     copyFrom(V._elem, 0, V._size);
 }
 
 template <typename T>
-Vector<T>::Vector(const Vector<T> &V, Rank lo, Rank hi)
+Vector<T>::Vector(Vector<T> const &V, Rank lo, Rank hi)
 {
     copyFrom(V._elem, lo, hi);
 }
@@ -162,7 +163,7 @@ Vector<T>::~Vector()
 }
 
 template <typename T>
-Vector<T> &Vector<T>::operator=(const Vector<T> &V)
+Vector<T> &Vector<T>::operator=(Vector<T> const &V)
 {
     if (this == &V)
         return *this;
@@ -191,13 +192,13 @@ T &Vector<T>::operator[](Rank r)
 }
 
 template <typename T>
-const T &Vector<T>::operator[](Rank r) const
+T const &Vector<T>::operator[](Rank r) const
 {
     return _elem[r];
 }
 
 template <typename T>
-Rank Vector<T>::find(const T &e, Rank lo, Rank hi) const
+Rank Vector<T>::find(T const &e, Rank lo, Rank hi) const
 {
     while ((lo < hi--) && (e != _elem[hi]))
         ;
@@ -205,7 +206,7 @@ Rank Vector<T>::find(const T &e, Rank lo, Rank hi) const
 }
 
 template <typename T>
-Rank Vector<T>::binSearch(const T &e, Rank lo, Rank hi) const
+Rank Vector<T>::binSearch(T const &e, Rank lo, Rank hi) const
 {
     while (lo < hi)
     {
@@ -223,7 +224,7 @@ Rank Vector<T>::binSearch(const T &e, Rank lo, Rank hi) const
 }
 
 template <typename T>
-void Vector<T>::insert(const T &e, Rank r)
+void Vector<T>::insert(T const &e, Rank r)
 {
     expand();
     for (Rank i{_size}; i > r; i--)
@@ -235,9 +236,6 @@ void Vector<T>::insert(const T &e, Rank r)
 template <typename T>
 void Vector<T>::remove(Rank lo, Rank hi)
 {
-    if (lo >= hi)
-        return;
-
     while (hi < _size)
         _elem[lo++] = _elem[hi++];
 
