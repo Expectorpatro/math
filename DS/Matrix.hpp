@@ -64,6 +64,97 @@ private:
                 resultRow[j] += a * rhsRow[j];
         }
     }
+
+    void avxMicroKernel(Matrix<T> const &rhs,
+                        Matrix<T> &result,
+                        Rank iBegin,
+                        Rank jBegin) const
+    {
+        if constexpr (std::is_same<T, float>::value)
+        {
+            __m256 c00{_mm256_loadu_ps(&result._data[(iBegin + 0) * rhs._cols + jBegin])};
+            __m256 c01{_mm256_loadu_ps(&result._data[(iBegin + 0) * rhs._cols + jBegin + 8])};
+            __m256 c10{_mm256_loadu_ps(&result._data[(iBegin + 1) * rhs._cols + jBegin])};
+            __m256 c11{_mm256_loadu_ps(&result._data[(iBegin + 1) * rhs._cols + jBegin + 8])};
+            __m256 c20{_mm256_loadu_ps(&result._data[(iBegin + 2) * rhs._cols + jBegin])};
+            __m256 c21{_mm256_loadu_ps(&result._data[(iBegin + 2) * rhs._cols + jBegin + 8])};
+            __m256 c30{_mm256_loadu_ps(&result._data[(iBegin + 3) * rhs._cols + jBegin])};
+            __m256 c31{_mm256_loadu_ps(&result._data[(iBegin + 3) * rhs._cols + jBegin + 8])};
+
+            for (Rank k{0}; k < _cols; ++k)
+            {
+                __m256 b0{_mm256_loadu_ps(&rhs._data[k * rhs._cols + jBegin])};
+                __m256 b1{_mm256_loadu_ps(&rhs._data[k * rhs._cols + jBegin + 8])};
+
+                __m256 a{_mm256_set1_ps(_data[(iBegin + 0) * _cols + k])};
+                c00 = _mm256_add_ps(_mm256_mul_ps(a, b0), c00);
+                c01 = _mm256_add_ps(_mm256_mul_ps(a, b1), c01);
+
+                a = _mm256_set1_ps(_data[(iBegin + 1) * _cols + k]);
+                c10 = _mm256_add_ps(_mm256_mul_ps(a, b0), c10);
+                c11 = _mm256_add_ps(_mm256_mul_ps(a, b1), c11);
+
+                a = _mm256_set1_ps(_data[(iBegin + 2) * _cols + k]);
+                c20 = _mm256_add_ps(_mm256_mul_ps(a, b0), c20);
+                c21 = _mm256_add_ps(_mm256_mul_ps(a, b1), c21);
+
+                a = _mm256_set1_ps(_data[(iBegin + 3) * _cols + k]);
+                c30 = _mm256_add_ps(_mm256_mul_ps(a, b0), c30);
+                c31 = _mm256_add_ps(_mm256_mul_ps(a, b1), c31);
+            }
+
+            _mm256_storeu_ps(&result._data[(iBegin + 0) * rhs._cols + jBegin], c00);
+            _mm256_storeu_ps(&result._data[(iBegin + 0) * rhs._cols + jBegin + 8], c01);
+            _mm256_storeu_ps(&result._data[(iBegin + 1) * rhs._cols + jBegin], c10);
+            _mm256_storeu_ps(&result._data[(iBegin + 1) * rhs._cols + jBegin + 8], c11);
+            _mm256_storeu_ps(&result._data[(iBegin + 2) * rhs._cols + jBegin], c20);
+            _mm256_storeu_ps(&result._data[(iBegin + 2) * rhs._cols + jBegin + 8], c21);
+            _mm256_storeu_ps(&result._data[(iBegin + 3) * rhs._cols + jBegin], c30);
+            _mm256_storeu_ps(&result._data[(iBegin + 3) * rhs._cols + jBegin + 8], c31);
+        }
+        else if constexpr (std::is_same<T, double>::value)
+        {
+            __m256d c00{_mm256_loadu_pd(&result._data[(iBegin + 0) * rhs._cols + jBegin])};
+            __m256d c01{_mm256_loadu_pd(&result._data[(iBegin + 0) * rhs._cols + jBegin + 4])};
+            __m256d c10{_mm256_loadu_pd(&result._data[(iBegin + 1) * rhs._cols + jBegin])};
+            __m256d c11{_mm256_loadu_pd(&result._data[(iBegin + 1) * rhs._cols + jBegin + 4])};
+            __m256d c20{_mm256_loadu_pd(&result._data[(iBegin + 2) * rhs._cols + jBegin])};
+            __m256d c21{_mm256_loadu_pd(&result._data[(iBegin + 2) * rhs._cols + jBegin + 4])};
+            __m256d c30{_mm256_loadu_pd(&result._data[(iBegin + 3) * rhs._cols + jBegin])};
+            __m256d c31{_mm256_loadu_pd(&result._data[(iBegin + 3) * rhs._cols + jBegin + 4])};
+
+            for (Rank k{0}; k < _cols; ++k)
+            {
+                __m256d b0{_mm256_loadu_pd(&rhs._data[k * rhs._cols + jBegin])};
+                __m256d b1{_mm256_loadu_pd(&rhs._data[k * rhs._cols + jBegin + 4])};
+
+                __m256d a{_mm256_set1_pd(_data[(iBegin + 0) * _cols + k])};
+                c00 = _mm256_add_pd(_mm256_mul_pd(a, b0), c00);
+                c01 = _mm256_add_pd(_mm256_mul_pd(a, b1), c01);
+
+                a = _mm256_set1_pd(_data[(iBegin + 1) * _cols + k]);
+                c10 = _mm256_add_pd(_mm256_mul_pd(a, b0), c10);
+                c11 = _mm256_add_pd(_mm256_mul_pd(a, b1), c11);
+
+                a = _mm256_set1_pd(_data[(iBegin + 2) * _cols + k]);
+                c20 = _mm256_add_pd(_mm256_mul_pd(a, b0), c20);
+                c21 = _mm256_add_pd(_mm256_mul_pd(a, b1), c21);
+
+                a = _mm256_set1_pd(_data[(iBegin + 3) * _cols + k]);
+                c30 = _mm256_add_pd(_mm256_mul_pd(a, b0), c30);
+                c31 = _mm256_add_pd(_mm256_mul_pd(a, b1), c31);
+            }
+
+            _mm256_storeu_pd(&result._data[(iBegin + 0) * rhs._cols + jBegin], c00);
+            _mm256_storeu_pd(&result._data[(iBegin + 0) * rhs._cols + jBegin + 4], c01);
+            _mm256_storeu_pd(&result._data[(iBegin + 1) * rhs._cols + jBegin], c10);
+            _mm256_storeu_pd(&result._data[(iBegin + 1) * rhs._cols + jBegin + 4], c11);
+            _mm256_storeu_pd(&result._data[(iBegin + 2) * rhs._cols + jBegin], c20);
+            _mm256_storeu_pd(&result._data[(iBegin + 2) * rhs._cols + jBegin + 4], c21);
+            _mm256_storeu_pd(&result._data[(iBegin + 3) * rhs._cols + jBegin], c30);
+            _mm256_storeu_pd(&result._data[(iBegin + 3) * rhs._cols + jBegin + 4], c31);
+        }
+    }
 #endif
 
 public:
@@ -129,21 +220,25 @@ public:
         return result;
     }
 
-    Matrix<T> matmulBlocked(Matrix<T> const &rhs, Rank blockSize = 32) const
+    Matrix<T> matmulBlocked(Matrix<T> const &rhs) const
     {
         checkMul(rhs);
 
+        Rank I_bSize{64};
+        Rank J_bSize{128};
+        Rank K_bSize{64};
+
         Matrix<T> result{_rows, rhs._cols, T{}};
 
-        for (Rank ii{0}; ii < _rows; ii += blockSize)
+        for (Rank ii{0}; ii < _rows; ii += I_bSize)
         {
-            for (Rank kk{0}; kk < _cols; kk += blockSize)
+            for (Rank kk{0}; kk < _cols; kk += K_bSize)
             {
-                for (Rank jj{0}; jj < rhs._cols; jj += blockSize)
+                for (Rank jj{0}; jj < rhs._cols; jj += J_bSize)
                 {
-                    Rank const iEnd{min(ii + blockSize, _rows)};
-                    Rank const kEnd{min(kk + blockSize, _cols)};
-                    Rank const jEnd{min(jj + blockSize, rhs._cols)};
+                    Rank const iEnd{min(ii + I_bSize, _rows)};
+                    Rank const kEnd{min(kk + K_bSize, _cols)};
+                    Rank const jEnd{min(jj + J_bSize, rhs._cols)};
 
                     for (Rank i{ii}; i < iEnd; ++i)
                     {
@@ -163,45 +258,169 @@ public:
         return result;
     }
 
-    Matrix<T> matmulSIMD(Matrix<T> const &rhs, Rank blockSize = 32) const
+#if defined(__AVX__)
+    Matrix<T> matmulSIMD(Matrix<T> const &rhs) const
     {
         checkMul(rhs);
 
-#if defined(__AVX__)
-        if constexpr (std::is_same<T, float>::value || std::is_same<T, double>::value)
+        Rank I_bSize{64};
+        Rank J_bSize{128};
+        Rank K_bSize{64};
+
+        Matrix<T> result{_rows, rhs._cols, T{}};
+
+        for (Rank ii{0}; ii < _rows; ii += I_bSize)
         {
-            Matrix<T> result{_rows, rhs._cols, T{}};
-
-            for (Rank ii{0}; ii < _rows; ii += blockSize)
+            for (Rank kk{0}; kk < _cols; kk += K_bSize)
             {
-                for (Rank kk{0}; kk < _cols; kk += blockSize)
+                for (Rank jj{0}; jj < rhs._cols; jj += J_bSize)
                 {
-                    for (Rank jj{0}; jj < rhs._cols; jj += blockSize)
-                    {
-                        Rank const iEnd{min(ii + blockSize, _rows)};
-                        Rank const kEnd{min(kk + blockSize, _cols)};
-                        Rank const jEnd{min(jj + blockSize, rhs._cols)};
+                    Rank const iEnd{min(ii + I_bSize, _rows)};
+                    Rank const kEnd{min(kk + K_bSize, _cols)};
+                    Rank const jEnd{min(jj + J_bSize, rhs._cols)};
 
-                        for (Rank i{ii}; i < iEnd; ++i)
+                    for (Rank i{ii}; i < iEnd; ++i)
+                    {
+                        for (Rank k{kk}; k < kEnd; ++k)
                         {
-                            for (Rank k{kk}; k < kEnd; ++k)
-                            {
-                                T const a{_data[i * _cols + k]};
-                                T const *rhsRow{&rhs._data[k * rhs._cols]};
-                                T *resultRow{&result._data[i * rhs._cols]};
-                                avxSIMD(a, rhsRow, resultRow, jj, jEnd);
-                            }
+                            T const a{_data[i * _cols + k]};
+                            T const *rhsRow{&rhs._data[k * rhs._cols]};
+                            T *resultRow{&result._data[i * rhs._cols]};
+                            avxSIMD(a, rhsRow, resultRow, jj, jEnd);
                         }
                     }
                 }
             }
-
-            return result;
         }
-#endif
 
-        return matmulBlocked(rhs, blockSize);
+        return result;
     }
+
+    Matrix<T> matmulMicroKernelSIMD(Matrix<T> const &rhs) const
+    {
+        checkMul(rhs);
+
+        Rank I_bSize{64};
+        Rank J_bSize{128};
+
+        Matrix<T> result{_rows, rhs._cols, T{}};
+
+        Rank const microRows{4};
+        Rank const microCols{std::is_same<T, float>::value ? 16 : 8};
+
+        for (Rank ii{0}; ii < _rows; ii += I_bSize)
+        {
+            for (Rank jj{0}; jj < rhs._cols; jj += J_bSize)
+            {
+                Rank const iEnd{min(ii + I_bSize, _rows)};
+                Rank const jEnd{min(jj + J_bSize, rhs._cols)};
+
+                Rank i{ii};
+
+                for (; i + microRows <= iEnd; i += microRows)
+                {
+                    Rank j{jj};
+
+                    for (; j + microCols <= jEnd; j += microCols)
+                        avxMicroKernel(rhs, result, i, j);
+
+                    if (j < jEnd)
+                    {
+                        for (Rank row{i}; row < i + microRows; ++row)
+                        {
+                            T *resultRow{&result._data[row * rhs._cols]};
+
+                            for (Rank k{0}; k < _cols; ++k)
+                            {
+                                T const a{_data[row * _cols + k]};
+                                T const *rhsRow{&rhs._data[k * rhs._cols]};
+                                avxSIMD(a, rhsRow, resultRow, j, jEnd);
+                            }
+                        }
+                    }
+                }
+
+                for (; i < iEnd; ++i)
+                {
+                    T *resultRow{&result._data[i * rhs._cols]};
+
+                    for (Rank k{0}; k < _cols; ++k)
+                    {
+                        T const a{_data[i * _cols + k]};
+                        T const *rhsRow{&rhs._data[k * rhs._cols]};
+                        avxSIMD(a, rhsRow, resultRow, jj, jEnd);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    Matrix<T> matmulOpenMP(Matrix<T> const &rhs) const
+    {
+        checkMul(rhs);
+
+        Rank I_bSize{64};
+        Rank J_bSize{128};
+
+        Matrix<T> result{_rows, rhs._cols, T{}};
+
+        Rank const microRows{4};
+        Rank const microCols{std::is_same<T, float>::value ? 16 : 8};
+
+#ifdef _OPENMP
+#pragma omp parallel for collapse(2) schedule(static)
+#endif
+        for (Rank ii{0}; ii < _rows; ii += I_bSize)
+        {
+            for (Rank jj{0}; jj < rhs._cols; jj += J_bSize)
+            {
+                Rank const iEnd{min(ii + I_bSize, _rows)};
+                Rank const jEnd{min(jj + J_bSize, rhs._cols)};
+
+                Rank i{ii};
+
+                for (; i + microRows <= iEnd; i += microRows)
+                {
+                    Rank j{jj};
+
+                    for (; j + microCols <= jEnd; j += microCols)
+                        avxMicroKernel(rhs, result, i, j);
+
+                    if (j < jEnd)
+                    {
+                        for (Rank row{i}; row < i + microRows; ++row)
+                        {
+                            T *resultRow{&result._data[row * rhs._cols]};
+
+                            for (Rank k{0}; k < _cols; ++k)
+                            {
+                                T const a{_data[row * _cols + k]};
+                                T const *rhsRow{&rhs._data[k * rhs._cols]};
+                                avxSIMD(a, rhsRow, resultRow, j, jEnd);
+                            }
+                        }
+                    }
+                }
+
+                for (; i < iEnd; ++i)
+                {
+                    T *resultRow{&result._data[i * rhs._cols]};
+
+                    for (Rank k{0}; k < _cols; ++k)
+                    {
+                        T const a{_data[i * _cols + k]};
+                        T const *rhsRow{&rhs._data[k * rhs._cols]};
+                        avxSIMD(a, rhsRow, resultRow, jj, jEnd);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+#endif
 
     Matrix<T> matmul(Matrix<T> const &rhs) const
     {
