@@ -159,6 +159,78 @@ private:
             _mm256_storeu_pd(C + (iBegin + 3) * N + jBegin + 4, c31);
         }
     }
+
+    Vector<T> packA(Rank iBegin,
+                    Rank iEnd,
+                    Rank kBegin,
+                    Rank kEnd,
+                    Rank microRows,
+                    T *A,
+                    Rank K) const
+    {
+        Rank const rowCount{iEnd - iBegin};
+        Rank const kCount{kEnd - kBegin};
+
+        Rank const rowPanelCount{(rowCount + microRows - 1) / microRows};
+        Rank const packedSize{rowPanelCount * microRows * kCount};
+        Vector<T> packedA{packedSize, packedSize, T{}};
+
+        Rank dst{0};
+        for (Rank i{iBegin}; i < iEnd; i += microRows)
+        {
+            for (Rank k{kBegin}; k < kEnd; ++k)
+            {
+                for (Rank row{0}; row < microRows; ++row)
+                {
+                    Rank const srcRow{i + row};
+
+                    if (srcRow < iEnd)
+                    {
+                        packedA[dst] = A[srcRow * K + k];
+                    }
+                    dst += 1;
+                }
+            }
+        }
+
+        return packedA;
+    }
+
+    Vector<T> packB(Rank kBegin,
+                    Rank kEnd,
+                    Rank jBegin,
+                    Rank jEnd,
+                    Rank microCols,
+                    T *B,
+                    Rank N) const
+    {
+        Rank const colCount{jEnd - jBegin};
+        Rank const kCount{kEnd - kBegin};
+
+        Rank const colPanelCount{(colCount + microCols - 1) / microCols};
+        Rank const packedSize{colPanelCount * microCols * kCount};
+        Vector<T> packedB{packedSize, packedSize, T{}};
+
+        Rank dst{0};
+
+        for (Rank k{kBegin}; k < kEnd; ++k)
+        {
+            for (Rank j{jBegin}; j < jEnd; j += microCols)
+            {
+                for (Rank col{0}; col < microCols; ++col)
+                {
+                    Rank const srcCol{j + col};
+                    if (srcCol < jEnd)
+                    {
+                        packedB[dst] = B[k * N + srcCol];
+                    }
+                    dst += 1;
+                }
+            }
+        }
+
+        return packedB;
+    }
 #endif
 
 public:
@@ -190,9 +262,9 @@ public:
         Rank const N{rhs._cols};
         Matrix<T> result{M, N, T{}};
 
-        T const *A{_data._elem};
-        T const *B{rhs._data._elem};
-        T *C{result._data._elem};
+        T const *A{&_data[0]};
+        T const *B{&rhs._data[0]};
+        T *C{&result._data[0]};
 
         for (Rank i{0}; i < M; ++i)
         {
@@ -227,9 +299,9 @@ public:
         Rank const N{rhs._cols};
         Matrix<T> result{M, N, T{}};
 
-        T const *A{_data._elem};
-        T const *B{rhs._data._elem};
-        T *C{result._data._elem};
+        T const *A{&_data[0]};
+        T const *B{&rhs._data[0]};
+        T *C{&result._data[0]};
 
         for (Rank i{0}; i < M; ++i)
         {
@@ -261,9 +333,9 @@ public:
 
         Matrix<T> result{M, N, T{}};
 
-        T const *A{_data._elem};
-        T const *B{rhs._data._elem};
-        T *C{result._data._elem};
+        T const *A{&_data[0]};
+        T const *B{&rhs._data[0]};
+        T *C{&result._data[0]};
 
         for (Rank ii{0}; ii < M; ii += I_bSize)
         {
@@ -310,9 +382,9 @@ public:
         Rank const N{rhs._cols};
         Matrix<T> result{M, N, T{}};
 
-        T const *A{_data._elem};
-        T const *B{rhs._data._elem};
-        T *C{result._data._elem};
+        T const *A{&_data[0]};
+        T const *B{&rhs._data[0]};
+        T *C{&result._data[0]};
 
         for (Rank ii{0}; ii < M; ii += I_bSize)
         {
@@ -350,9 +422,9 @@ public:
         Rank const N{rhs._cols};
         Matrix<T> result{M, N, T{}};
 
-        T const *A{_data._elem};
-        T const *B{rhs._data._elem};
-        T *C{result._data._elem};
+        T const *A{&_data[0]};
+        T const *B{&rhs._data[0]};
+        T *C{&result._data[0]};
 
         Rank const microRows{4};
         Rank const microCols{std::is_same<T, float>::value ? 16 : 8};
@@ -416,6 +488,44 @@ public:
         return result;
     }
 
+    Matrix<T> matmulPacking(Matrix<T> const &rhs) const
+    {
+        checkMul(rhs);
+
+        Rank const M{_rows};
+        Rank const K{_cols};
+        Rank const N{rhs._cols};
+        Matrix<T> result{M, N, T{}};
+
+        T const *A{&_data[0]};
+        T const *B{&rhs._data[0]};
+        T *C{&result._data[0]};
+
+        Rank const microRows{4};
+        Rank const microCols{std::is_same<T, float>::value ? 16 : 8};
+
+        for (Rank ii{0}; ii < M; ii += I_bSize)
+        {
+            Rank const iEnd{std::min(ii + I_bSize, M)};
+
+            for (Rank kk{0}; kk < K; kk += K_bSize)
+            {
+                Rank const kEnd{std::min(kk + K_bSize, K)};
+
+                Vector<T> packedA{packA(ii, iEnd, kk, kEnd, microRows, A, K)};
+                T const *packedAPtr{packedA._elem};
+
+                for (Rank jj{0}; jj < N; jj += J_bSize)
+                {
+                    Rank const jEnd{std::min(jj + J_bSize, N)};
+                    Vector<T> packedB{packB(kk, kEnd, jj, jEnd, microCols, A, K)};
+                    T const *packedBPtr{packedB._elem};
+                }
+            }
+        }
+
+        return result;
+    }
 #endif
 
     Matrix<T> matmul(Matrix<T> const &rhs) const
