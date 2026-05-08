@@ -1,5 +1,5 @@
 #pragma once
-using Rank = int;
+using int = int;
 
 template <typename T>
 struct ListNode
@@ -33,11 +33,11 @@ public:
     List(ListNode<T> *p, int n);
     ~List();
 
-    Rank size() const;
+    int size() const;
     bool empty() const;
     ListNode<T> const *first() const;
-    T &operator[](Rank r);
-    T const &operator[](Rank r) const;
+    T &operator[](int r);
+    T const &operator[](int r) const;
 
     ListNode<T> const *find(T const &e, ListNode<T> *p, int n) const;
 
@@ -107,7 +107,7 @@ List<T>::~List()
 }
 
 template <typename T>
-Rank List<T>::size() const
+int List<T>::size() const
 {
     return _size;
 }
@@ -125,7 +125,7 @@ ListNode<T> const *List<T>::first() const
 }
 
 template <typename T>
-T &List<T>::operator[](Rank r)
+T &List<T>::operator[](int r)
 {
     ListNode<T> *p{first()};
     while (0 < r--)
@@ -137,7 +137,7 @@ T &List<T>::operator[](Rank r)
 }
 
 template <typename T>
-T const &List<T>::operator[](Rank r) const
+T const &List<T>::operator[](int r) const
 {
     ListNode<T> *p{first()};
     while (0 < r--)
