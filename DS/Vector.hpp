@@ -1,61 +1,59 @@
 #pragma once
 #include <cstdlib>
 
-using Rank = int;
-
 template <typename T>
 class Vector
 {
 private:
     static constexpr int DEFAULT_CAPACITY{3};
 
-    Rank _size{};
+    int _size{};
     int _capacity{};
     T *_elem{};
 
-    void copyFrom(T const *A, Rank lo, Rank hi);
+    void copyFrom(T const *A, int lo, int hi);
     void expand();
     void shrink();
-    void merge(Rank lo, Rank mid, Rank hi);
+    void merge(int lo, int mid, int hi);
 
 public:
     Vector(int c = DEFAULT_CAPACITY, int s = 0, T v = T{});
-    Vector(T const *arr, Rank lo, Rank hi);
+    Vector(T const *arr, int lo, int hi);
     Vector(Vector<T> const &V);
-    Vector(Vector<T> const &V, Rank lo, Rank hi);
+    Vector(Vector<T> const &V, int lo, int hi);
     ~Vector();
 
     Vector<T> &operator=(Vector<T> const &V);
 
-    Rank size() const;
+    int size() const;
     bool empty() const;
-    T &operator[](Rank r);
-    T const &operator[](Rank r) const;
+    T &operator[](int r);
+    T const &operator[](int r) const;
 
-    Rank find(T const &e, Rank lo, Rank hi) const;
-    Rank binSearch(T const &e, Rank lo, Rank hi) const;
+    int find(T const &e, int lo, int hi) const;
+    int binSearch(T const &e, int lo, int hi) const;
 
-    void insert(T const &e, Rank r);
-    void remove(Rank lo, Rank hi);
+    void insert(T const &e, int r);
+    void remove(int lo, int hi);
 
     template <typename VST>
     void traverse(VST &visit);
 
     bool disordered() const;
-    void unsort(Rank lo, Rank hi);
+    void unsort(int lo, int hi);
     void permute();
 
-    void bubbleSort(Rank lo, Rank hi);
-    void mergeSort(Rank lo, Rank hi);
+    void bubbleSort(int lo, int hi);
+    void mergeSort(int lo, int hi);
 
     void deduplicate();
     void uniquify();
 };
 
 template <typename T>
-void Vector<T>::copyFrom(T const *A, Rank lo, Rank hi)
+void Vector<T>::copyFrom(T const *A, int lo, int hi)
 {
-    Rank n{hi - lo};
+    int n{hi - lo};
     _capacity = (2 * n > DEFAULT_CAPACITY) ? 2 * n : DEFAULT_CAPACITY;
     _elem = new T[_capacity];
     _size = 0;
@@ -75,7 +73,7 @@ void Vector<T>::expand()
     _capacity <<= 1;
     _elem = new T[_capacity];
 
-    for (Rank i{0}; i < _size; i++)
+    for (int i{0}; i < _size; i++)
         _elem[i] = oldElem[i];
 
     delete[] oldElem;
@@ -95,24 +93,24 @@ void Vector<T>::shrink()
         _capacity = DEFAULT_CAPACITY;
     _elem = new T[_capacity];
 
-    for (Rank i{0}; i < _size; i++)
+    for (int i{0}; i < _size; i++)
         _elem[i] = oldElem[i];
 
     delete[] oldElem;
 }
 
 template <typename T>
-void Vector<T>::merge(Rank lo, Rank mid, Rank hi)
+void Vector<T>::merge(int lo, int mid, int hi)
 {
-    Rank leftSize{mid - lo};
+    int leftSize{mid - lo};
     T *leftBuf{new T[leftSize]};
 
-    for (Rank i{0}; i < leftSize; i++)
+    for (int i{0}; i < leftSize; i++)
         leftBuf[i] = _elem[lo + i];
 
-    Rank left{0};
-    Rank right{mid};
-    Rank dest{lo};
+    int left{0};
+    int right{mid};
+    int dest{lo};
 
     while (left < leftSize && right < hi)
     {
@@ -139,7 +137,7 @@ Vector<T>::Vector(int c, int s, T v)
 }
 
 template <typename T>
-Vector<T>::Vector(T const *arr, Rank lo, Rank hi)
+Vector<T>::Vector(T const *arr, int lo, int hi)
 {
     copyFrom(arr, lo, hi);
 }
@@ -151,7 +149,7 @@ Vector<T>::Vector(Vector<T> const &V)
 }
 
 template <typename T>
-Vector<T>::Vector(Vector<T> const &V, Rank lo, Rank hi)
+Vector<T>::Vector(Vector<T> const &V, int lo, int hi)
 {
     copyFrom(V._elem, lo, hi);
 }
@@ -174,7 +172,7 @@ Vector<T> &Vector<T>::operator=(Vector<T> const &V)
 }
 
 template <typename T>
-Rank Vector<T>::size() const
+int Vector<T>::size() const
 {
     return _size;
 }
@@ -186,19 +184,19 @@ bool Vector<T>::empty() const
 }
 
 template <typename T>
-T &Vector<T>::operator[](Rank r)
+T &Vector<T>::operator[](int r)
 {
     return _elem[r];
 }
 
 template <typename T>
-T const &Vector<T>::operator[](Rank r) const
+T const &Vector<T>::operator[](int r) const
 {
     return _elem[r];
 }
 
 template <typename T>
-Rank Vector<T>::find(T const &e, Rank lo, Rank hi) const
+int Vector<T>::find(T const &e, int lo, int hi) const
 {
     while ((lo < hi--) && (e != _elem[hi]))
         ;
@@ -206,11 +204,11 @@ Rank Vector<T>::find(T const &e, Rank lo, Rank hi) const
 }
 
 template <typename T>
-Rank Vector<T>::binSearch(T const &e, Rank lo, Rank hi) const
+int Vector<T>::binSearch(T const &e, int lo, int hi) const
 {
     while (lo < hi)
     {
-        Rank mi{lo + ((hi - lo) >> 1)};
+        int mi{lo + ((hi - lo) >> 1)};
 
         if (_elem[mi] < e)
             lo = mi + 1;
@@ -224,17 +222,17 @@ Rank Vector<T>::binSearch(T const &e, Rank lo, Rank hi) const
 }
 
 template <typename T>
-void Vector<T>::insert(T const &e, Rank r)
+void Vector<T>::insert(T const &e, int r)
 {
     expand();
-    for (Rank i{_size}; i > r; i--)
+    for (int i{_size}; i > r; i--)
         _elem[i] = _elem[i - 1];
     _elem[r] = e;
     _size++;
 }
 
 template <typename T>
-void Vector<T>::remove(Rank lo, Rank hi)
+void Vector<T>::remove(int lo, int hi)
 {
     while (hi < _size)
         _elem[lo++] = _elem[hi++];
@@ -247,14 +245,14 @@ template <typename T>
 template <typename VST>
 void Vector<T>::traverse(VST &visit)
 {
-    for (Rank i{0}; i < _size; i++)
+    for (int i{0}; i < _size; i++)
         visit(_elem[i]);
 }
 
 template <typename T>
 bool Vector<T>::disordered() const
 {
-    for (Rank i{0}; i < _size - 1; i++)
+    for (int i{0}; i < _size - 1; i++)
     {
         if (_elem[i] > _elem[i + 1])
             return true;
@@ -263,13 +261,13 @@ bool Vector<T>::disordered() const
 }
 
 template <typename T>
-void Vector<T>::unsort(Rank lo, Rank hi)
+void Vector<T>::unsort(int lo, int hi)
 {
     T *V{_elem + lo};
 
-    for (Rank i{hi - lo}; i > 0; i--)
+    for (int i{hi - lo}; i > 0; i--)
     {
-        Rank j{rand() % i};
+        int j{rand() % i};
         T temp{V[i - 1]};
         V[i - 1] = V[j];
         V[j] = temp;
@@ -283,13 +281,13 @@ void Vector<T>::permute()
 }
 
 template <typename T>
-void Vector<T>::bubbleSort(Rank lo, Rank hi)
+void Vector<T>::bubbleSort(int lo, int hi)
 {
-    for (Rank end{hi}; end > lo + 1; end--)
+    for (int end{hi}; end > lo + 1; end--)
     {
         bool swapped{false};
 
-        for (Rank i{lo + 1}; i < end; i++)
+        for (int i{lo + 1}; i < end; i++)
         {
             if (_elem[i - 1] > _elem[i])
             {
@@ -306,12 +304,12 @@ void Vector<T>::bubbleSort(Rank lo, Rank hi)
 }
 
 template <typename T>
-void Vector<T>::mergeSort(Rank lo, Rank hi)
+void Vector<T>::mergeSort(int lo, int hi)
 {
     if (hi - lo < 2)
         return;
 
-    Rank mid{lo + ((hi - lo) >> 1)};
+    int mid{lo + ((hi - lo) >> 1)};
     mergeSort(lo, mid);
     mergeSort(mid, hi);
 
@@ -324,7 +322,7 @@ void Vector<T>::mergeSort(Rank lo, Rank hi)
 template <typename T>
 void Vector<T>::deduplicate()
 {
-    Rank i{1};
+    int i{1};
     while (i < _size)
     {
         if (find(_elem[i], 0, i) < 0)
@@ -340,8 +338,8 @@ void Vector<T>::uniquify()
     if (_size < 2)
         return;
 
-    Rank writeIndex{0};
-    for (Rank readIndex{1}; readIndex < _size; readIndex++)
+    int writeIndex{0};
+    for (int readIndex{1}; readIndex < _size; readIndex++)
     {
         if (_elem[readIndex] != _elem[writeIndex])
             _elem[++writeIndex] = _elem[readIndex];
