@@ -2,6 +2,7 @@
 
 #if defined(__AVX__) && defined(__FMA__)
 #include "AvxMicroKernel.hpp"
+#include "AvxPackKernel.hpp"
 #endif
 #include "Vector.hpp"
 
@@ -28,6 +29,7 @@ private:
 
 #if defined(__AVX__) && defined(__FMA__)
     using Kernel = AvxMicroKernel<T>;
+    using PackKernel = AvxPackKernel<T>;
 #endif
 
 public:
@@ -199,7 +201,7 @@ public:
                         {
                             T const a{A[i * K + k]};
                             T const *BRow{B + k * N};
-                            Kernel::updateRow(a, BRow, CRow, jj, jEnd);
+                            Kernel::Simd::avxSIMD(a, BRow, CRow, jj, jEnd);
                         }
                     }
                 }
@@ -266,7 +268,7 @@ public:
                                     T const a{A[row * K + k]};
                                     T const *BRow{B + k * N};
 
-                                    Kernel::updateRow(a, BRow, CRow, jFullEnd, jEnd);
+                                    Kernel::Simd::avxSIMD(a, BRow, CRow, jFullEnd, jEnd);
                                 }
                             }
                         }
@@ -281,7 +283,7 @@ public:
                             T const a{A[i * K + k]};
                             T const *BRow{B + k * N};
 
-                            Kernel::updateRow(a, BRow, CRow, jj, jEnd);
+                            Kernel::Simd::avxSIMD(a, BRow, CRow, jj, jEnd);
                         }
                     }
                 }
@@ -304,87 +306,34 @@ public:
         T const *B{&rhs._data[0]};
         T *C{&result._data[0]};
 
-        for (int ii{0}; ii < M; ii += I_bSize)
+        for (int kk{0}; kk < K; kk += K_bSize)
         {
-            int const iEnd{std::min(ii + I_bSize, M)};
+            int const kEnd{std::min(kk + K_bSize, K)};
+            int const kCount{kEnd - kk};
 
-            for (int kk{0}; kk < K; kk += K_bSize)
+            Vector<T> packedA{PackKernel::packA(A, ii, iEnd, iCount, kk, kEnd, kCount, K)};
+            T const *packedAPtr{&packedA[0]};
+
+            for (int jj{0}; jj < N; jj += J_bSize)
             {
-                int const kEnd{std::min(kk + K_bSize, K)};
+                int const jEnd{std::min(jj + J_bSize, N)};
+                int const jCount{jEnd - jBegin};
 
-                int const kCount{kEnd - kk};
-                Vector<T> packedA{Kernel::packA(A, ii, iEnd, kk, kEnd, K)};
-                T const *packedAPtr{&packedA[0]};
+                int const colPanelCount{(jCount + PackKernel::microCols - 1) / PackKernel::microCols};
+                int const packedBStride{colPanelCount * PackKernel::microCols};
+                int const packedBSize{packedBStride * kCount};
+                Vector<T> packedB{PackKernel::packB(B, kk, kEnd, jj, jEnd, packedBSize, N)};
+                T const *packedBPtr{&packedB[0]};
 
-                for (int jj{0}; jj < N; jj += J_bSize)
+                for (int ii{0}; ii < M; ii += I_bSize)
                 {
-                    int const jEnd{std::min(jj + J_bSize, N)};
-
-                    Vector<T> packedB{Kernel::packB(B, kk, kEnd, jj, jEnd, N)};
-                    T const *packedBPtr{&packedB[0]};
-                    int const packedBStride{Kernel::packedBStride(jj, jEnd)};
-
-                    int const iFullEnd{iEnd - ((iEnd - ii) % Kernel::microRows)};
-                    int const jFullEnd{jEnd - ((jEnd - jj) % Kernel::microCols)};
-                    bool const hasRightTail{jFullEnd < jEnd};
-
-                    if (!hasRightTail)
-                    {
-                        for (int i{ii}; i < iFullEnd; i += Kernel::microRows)
-                        {
-                            for (int j{jj}; j < jFullEnd; j += Kernel::microCols)
-                            {
-                                T const *packedAPanel{
-                                    Kernel::packedAPanel(packedAPtr, i, ii, kCount)};
-                                T const *packedBPanel{
-                                    Kernel::packedBPanel(packedBPtr, j, jj)};
-                                Kernel::runPacked(
-                                    packedAPanel, packedBPanel, C, i, j, kCount, packedBStride, N);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (int i{ii}; i < iFullEnd; i += Kernel::microRows)
-                        {
-                            for (int j{jj}; j < jFullEnd; j += Kernel::microCols)
-                            {
-                                T const *packedAPanel{
-                                    Kernel::packedAPanel(packedAPtr, i, ii, kCount)};
-                                T const *packedBPanel{
-                                    Kernel::packedBPanel(packedBPtr, j, jj)};
-                                Kernel::runPacked(
-                                    packedAPanel, packedBPanel, C, i, j, kCount, packedBStride, N);
-                            }
-
-                            for (int row{i}; row < i + Kernel::microRows; ++row)
-                            {
-                                T *CRow{C + row * N};
-
-                                for (int k{kk}; k < kEnd; ++k)
-                                {
-                                    T const a{A[row * K + k]};
-                                    T const *BRow{B + k * N};
-
-                                    Kernel::updateRow(a, BRow, CRow, jFullEnd, jEnd);
-                                }
-                            }
-                        }
-                    }
-
-                    for (int i{iFullEnd}; i < iEnd; ++i)
-                    {
-                        T *CRow{C + i * N};
-
-                        for (int k{kk}; k < kEnd; ++k)
-                        {
-                            T const a{A[i * K + k]};
-                            T const *BRow{B + k * N};
-
-                            Kernel::updateRow(a, BRow, CRow, jj, jEnd);
-                        }
-                    }
+                    int const iEnd{std::min(ii + I_bSize, M)};
+                    int const iCount{iEnd - ii};
                 }
+
+                int const iFullEnd{iEnd - ((iEnd - ii) % PackKernel::microRows)};
+                int const jFullEnd{jEnd - ((jEnd - jj) % PackKernel::microCols)};
+                bool const hasRightTail{jFullEnd < jEnd};
             }
         }
 
