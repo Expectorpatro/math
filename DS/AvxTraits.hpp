@@ -60,4 +60,30 @@ struct AvxTraits
             return _mm256_fmadd_pd(a, b, c);
         }
     }
+
+    static void avxSIMD(T const &a,
+                        T const *BRow,
+                        T *CRow,
+                        int jBegin,
+                        int jEnd)
+    {
+        Vec va{set1(a)};
+
+        int j{jBegin};
+
+        for (; j + lanes <= jEnd; j += lanes)
+        {
+            Vec vb{load(BRow + j)};
+            Vec vc{load(CRow + j)};
+
+            vc = fmadd(va, vb, vc);
+
+            store(CRow + j, vc);
+        }
+
+        for (; j < jEnd; ++j)
+        {
+            CRow[j] += a * BRow[j];
+        }
+    }
 };

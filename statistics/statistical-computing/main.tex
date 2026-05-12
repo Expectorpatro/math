@@ -558,30 +558,109 @@ x_{n+1}=\tfrac12\!\left(x_n+\frac{a}{x_n}\right),\qquad n=0,1,2,\dots
     print(hermite_poly(0.5))
 \end{minted}
 
-%\section{EM算法}
-%
-%在数理统计中，参数估计问题通常建立在如下概率模型之上：设$(X,\mathcal{A},\mathscr{P})$为可控参数结构，$\Theta$是参数空间，$\seq{X}{n}$是$X$的一个样本，然后通过极大似然估计来构造参数$\theta$的估计量。\par
-%但在大量统计模型中，样本并非直接来自一个“完全”概率机制，
-%而是某个更高维随机结构的部分观测结果。
-%\begin{definition}
-%	设$(Y,\mathscr{B})$是一个可测空间，$(X\times Y,\sigma(\mathcal{A}\times\mathcal{B}),\mathscr{P})$为可控参数结构，$\Theta$为参数空间，$f_X,f_Y$分别是$(X,\mathscr{A})$和$(Y,\mathscr{B})$上的随机变量，$f_X$可观测而$f_Y$不可观测，称这类问题为\gls{IncompleteDataProblem}。
-%\end{definition}
-%\begin{note}
-%	在不完全数据问题下，观测数据$\mathbf{X}$的对数似然函数具有如下形式：
-%	\begin{equation}
-%		\ell(\theta,\mathbf{X})
-%		= \log\int p_\theta(\mathbf{X},\mathbf{Y})\dif\mathbf{Y}
-%	\end{equation}
-%	由于积分运算位于对数函数内部，该目标函数在一般情形下既不具有解析形式，也往往缺乏良好的凸性或可分解结构，从而使得直接的极大似然估计在理论分析与数值计算上都面临显著困难。\par
-%	与此形成鲜明对比的是，若观测数据对潜变量$\mathbf{Y}$可被观测，
-%	则所谓的\textbf{完全数据对数似然}
-%	\begin{equation}
-%		\log p_\theta(Y,Z)
-%	\end{equation}
-%	通常具有更为简单且结构化的形式。
-%	在许多重要统计模型中，
-%	完全数据模型属于指数族，
-%	其极大似然估计可通过充分统计量或标准优化方法得到。
-%	因此，不完全数据问题的核心困难并不来源于模型本身，
-%	而是来源于对潜变量的不可观测性。
-%\end{note}
+\section{变分法}
+\begin{definition}
+	设$\varphi,\mu$是可测空间$(X,\mathscr{F})$上的概率测度，$\varphi\ll\mu$，根据\cref{theo:RandonNikodym}，称：
+	\begin{equation*}
+		\int_{X}\ln\frac{\dif\varphi}{\dif\mu}\dif\varphi
+	\end{equation*}
+	为$\varphi$关于$\mu$的\gls{KullbackLeiblerDivergence} ，记为$\operatorname{KL}(\varphi\|\mu)$。
+\end{definition}
+\begin{note}
+	设$\mu$是可测空间$(X,\mathscr{F})$上的概率测度，我们希望求解$\mu$但是它很难求解，\gls{VariationalMethod}的思想就是取一族形式简单、便于计算的概率函数，并在这一族分布中找到一个最接近$p$的。由\cref{ineq:Gibbs}可以看出KL散度可以被用来衡量分布之间的差异性。
+\end{note}
+\begin{note}
+	在贝叶斯统计中，我们需要求解后验分布$p(y\mid x)$，变分法提供了一个视角。\par
+	设$y\mid x$的概率分布为$\varphi$，其近似概率分布为$\psi$，$\varphi,\psi\ll\mu$，$\varphi,\psi,\mu$是可测空间$(X,\mathscr{F})$上的概率测度，根据\cref{theo:RandonNikodym}，记：
+	\begin{equation*}
+		q(y)=\frac{\dif\psi}{\dif\mu},\quad p(y\mid x)=\frac{\dif\varphi}{\dif\mu}
+	\end{equation*}
+	由\cref{prop:RandonNikodym}(5)和\cref{lem:IntChangeOfMeasure}可知：
+	\begin{equation*}
+		\operatorname{KL}(\psi\|\varphi)=\int_{X}\ln\frac{\dif\psi}{\dif\varphi}\dif\psi=\int_{X}\ln\left(\frac{\dif\psi}{\dif\mu}\Big/\frac{\dif\varphi}{\dif\mu}\right)\dif\psi=\int_{X}\ln\frac{q(y)}{p(y\mid x)}q(y)\dif\mu
+	\end{equation*}
+	由于KL散度公式中存在未知的$p(y\mid x)$，于是需要将其转变为易于求解的形式。由\info{贝叶斯公式}和\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{align*}
+		&\operatorname{KL}(\psi\|\varphi)=\int_{X}q(y)\ln\frac{q(y)}{p(y\mid x)}\dif\mu=\int_{X}q(y)[\ln q(y)-\ln p(y\mid x)]\dif\mu \\
+		=&\int_{X}q(y)[\ln q(y)-\ln p(y,x)+\ln p(x)]\dif\mu \\
+		=&\int_{X}q(y)[\ln q(y)-\ln p(y,x)]\dif\mu+\int_{X}q(y)\ln p(x)\dif\mu \\
+		=&\int_{X}q(y)[\ln q(y)-\ln p(y,x)]\dif\mu+\ln p(x)\int_{X}q(y)\dif\mu \\
+		=&\int_{X}q(y)[\ln q(y)-\ln p(y,x)]\dif\mu+\ln p(x)
+	\end{align*}
+	于是根据\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{equation*}
+		\ln p(x)=\int_{X}q(y)[\ln p(y,x)-\ln q(y)]\dif\mu+\operatorname{KL}(\psi\|\varphi)
+	\end{equation*}
+	因为$\ln p(x)$与$y$无关，所以最小化$\operatorname{KL}(q\| p)$等价于最大化$\int_{X}q(y)[\ln p(y,x)-\ln q(y)]\dif\mu$。
+\end{note}
+\begin{definition}
+	在前述框架下，称：
+	\begin{equation*}
+		\int_{X}q(y)[\ln p(y,x)-\ln q(y)]\dif\mu
+	\end{equation*}
+	为\gls{ELBO}，记做$L(q,x)$。
+\end{definition}
+
+\subsection{EM算法}
+在极大似然估计中，若观测变量$f$为从可控参数结构$(X,\mathscr{A},\mathscr{P})$到可测空间$(Y,\mathscr{B})$上的可测映射，参数空间为$\Theta$，控制测度为$\mu$，根据\cref{theo:RandonNikodym}，记$\dfrac{\dif P_{\theta}}{\dif\mu}(f)=p_{\theta}(f)$，那么目标函数可以写成：
+\begin{equation*}
+	\hat{\theta}=\underset{\theta}{\arg\max}\ln p_{\theta}(f)
+\end{equation*}
+然而，在许多含有潜在结构的统计模型中，观测变量$f$本身的概率分布并不容易直接写出。真正容易描述的，往往是它在某些无法观测的隐变量$g$给定条件下的条件分布。有时，隐变量$g$本身的分布也不是单纯的辅助工具，而是我们希望估计和理解的对象。\par
+但是在引入隐变量之后，我们需要通过对隐变量积分，才能得到观测变量的边际似然。设$g$为概率空间$(X,\mathscr{A},P)$到可测空间$(Z,\mathscr{C})$上的可测映射，$Pg^{-1}\ll\nu$，根据\cref{theo:RandonNikodym}，记$\dfrac{\dif Pg^{-1}}{\dif\nu}=q(g)$，由\info{全概率公式}和\cref{lem:IntChangeOfMeasure}可得：
+\begin{equation*}
+	p_{\theta}(f)=\int_{Z}p_{\theta}(f\mid g)\dif Pg^{-1}=\int_{Z}q(g)p_{\theta}(f\mid g)\dif\nu
+\end{equation*}
+原本我们只是想最大化一个对数似然函数，但由于隐变量无法观测，观测数据的概率必须通过积分得到，这使得目标函数通常难以直接优化。EM算法(Expectation-Maximization Algorithm)正是为了解决这类问题而提出的。\par
+由\cref{ineq:Jensen}、\info{贝叶斯公式}和\cref{prop:MeasurableIntegral}(6)可得：
+\begin{align*}
+	&\ln p_{\theta}(f)=\ln\int_{Z}q(g)p_{\theta}(f\mid g)\dif\nu=\ln\operatorname{E}[p_{\theta}(f\mid g)]\geqslant\operatorname{E}[\ln p_{\theta}(f\mid g)] \\
+	=&\int_{Z}q(g)[\ln p_{\theta}(f\mid g)]\dif\nu=\int_{Z}q(g)[\ln p_{\theta}(f,g)-\ln q(g)]\dif\nu \\
+	=&\int_{Z}q(g)\ln p_{\theta}(f,g)\dif\nu-\int_{Z}q(g)\ln q(g)\dif\nu
+\end{align*}
+记：
+\begin{equation*}
+	L(q,\theta)=\int_{Z}q(g)\ln p_{\theta}(f,g)\dif\nu-\int_{Z}q(g)\ln q(g)\dif\nu
+\end{equation*}
+则有:
+\begin{equation*}
+	L(q,\theta)\leqslant\ln p_{\theta}(f)
+\end{equation*}
+这个$L(q,\theta)$就是边际对数似然$\ln p_{\theta}(f)$的一个下界。\par
+EM算法的基本思想就是：既然直接最大化$\ln p_{\theta}(f)$比较困难，那么可以转而反复提高这个下界。若一组$\hat{q},\hat{\theta}$使得$L(q,\theta)$达到最大，则$\hat{\theta}$也应该是$\theta$的极大似然估计。\par
+进一步地，由\cref{prop:RandonNikodym}(5)、\cref{lem:IntChangeOfMeasure}和\info{贝叶斯公式}可知这个下界与真实边际对数似然之间的差距可以精确写成一个KL散度：
+\begin{align*}
+	&\operatorname{KL}[q(g)\|p_{\theta}(g\mid f)]=\int_{Z}q(g)\ln\frac{q(g)}{p_{\theta}(g\mid f)}\dif\nu \\
+	=&\int_{Z}q(g)\ln q(g)\dif\nu-
+	\int_{Z}q(g)\ln p_{\theta}(g\mid f)\dif\nu \\
+	=&\int_{Z}q(g)\ln q(g)\dif\nu-\int_{Z}q(g)\ln p_{\theta}(f,g)\dif\nu+\ln p_{\theta}(f)
+\end{align*}
+于是：
+\begin{equation*}
+	\ln p_{\theta}(f)=L(q,\theta)+\operatorname{KL}[q(g)\|p_{\theta}(g\mid f)]
+\end{equation*}\par
+\begin{method}[Expectation-Maximization Algorithm]
+	EM算法可以理解为对$L(q,\theta)$进行坐标上升。具体地说，在第$t$轮迭代中，假设当前参数为$\theta^{(t)}$。EM算法交替更新$q$和$\theta$。\par
+	首先固定$\theta=\theta^{(t)}$，最大化$L(q,\theta^{(t)})$。由于
+	\begin{equation*}
+		\ln p_{\theta^{(t)}}(f)=L(q,\theta^{(t)})+\operatorname{KL}[q(g)\|p_{\theta^{(t)}}(g\mid f)]
+	\end{equation*}
+	而左边与$q$无关，是一个定值，所以最大化$L(q,\theta^{(t)})$等价于最小化$\operatorname{KL}[q(g)\|p_{\theta^{(t)}}(g\mid f)]$。当$q^{(t+1)}(g)=p_{\theta^{(t)}}(g\mid f)$时，KL散度达到最小值$0$。因此，EM算法的E步就是在当前参数$\theta^{(t)}$下计算隐变量的后验分布。\par
+	接着固定$q=q^{(t+1)}$，最大化$L(q^{(t+1)},\theta)$。因为：
+	\begin{equation*}
+		L[q^{(t+1)},\theta]=\int_{Z}q^{(t+1)}(g)\ln p_{\theta}(f,g)\dif\nu-\int_{Z}q^{(t+1)}(g)\ln q^{(t+1)}(g)\dif\nu
+	\end{equation*}
+	其中第二项不含$\theta$，所以关于$\theta$的优化等价于：
+	\begin{equation*}
+		\theta^{(t+1)}=\underset{\theta}{\arg\max}\int_{Z}q^{(t+1)}(g)\ln p_{\theta}(f,g)\dif\nu
+	\end{equation*}
+	代入：
+	\begin{equation*}
+		q^{(t+1)}(g)=p_{\theta^{(t)}}(g\mid f)
+	\end{equation*}
+	得到：
+	\begin{equation*}
+		\theta^{(t+1)}=\underset{\theta}{\arg\max}\int_{Z}p_{\theta^{(t)}}(g\mid f)\ln p_{\theta}(f,g)\dif\nu
+	\end{equation*}
+	对于这个优化问题，我们就可以使用一般的极大似然估计去做了。
+\end{method}
