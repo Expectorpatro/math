@@ -1,5 +1,4 @@
 #pragma once
-using int = int;
 
 template <typename T>
 struct ListNode
