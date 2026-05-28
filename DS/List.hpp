@@ -18,8 +18,8 @@ class List
 {
 private:
     int _size;
-    ListNode<T> *header;
-    ListNode<T> *trailer;
+    ListNode<T> *_header;
+    ListNode<T> *_trailer;
 
 protected:
     void init();
@@ -50,12 +50,12 @@ public:
 template <typename T>
 void List<T>::init()
 {
-    header = new ListNode<T>;
-    trailer = new ListNode<T>;
-    header->succ = trailer;
-    header->pred = nullptr;
-    trailer->pred = header;
-    trailer->succ = nullptr;
+    _header = new ListNode<T>;
+    _trailer = new ListNode<T>;
+    _header->succ = _trailer;
+    _header->pred = nullptr;
+    _trailer->pred = _header;
+    _trailer->succ = nullptr;
     _size = 0;
 }
 
@@ -99,10 +99,10 @@ List<T>::~List()
 {
     while (0 < _size)
     {
-        remove(header->succ);
+        remove(_header->succ);
     }
-    delete header;
-    delete trailer;
+    delete _header;
+    delete _trailer;
 }
 
 template <typename T>
@@ -120,7 +120,7 @@ bool List<T>::empty() const
 template <typename T>
 ListNode<T> const *List<T>::first() const
 {
-    return header->succ;
+    return _header->succ;
 }
 
 template <typename T>
@@ -163,18 +163,18 @@ template <typename T>
 void List<T>::insertAsFirst(T const &e)
 {
     _size++;
-    ListNode<T> *x = new ListNode<T>(e, header, header->succ);
-    header->succ->pred = x;
-    header->succ = x;
+    ListNode<T> *x = new ListNode<T>(e, _header, _header->succ);
+    _header->succ->pred = x;
+    _header->succ = x;
 }
 
 template <typename T>
 void List<T>::insertAsLast(T const &e)
 {
     _size++;
-    ListNode<T> *x = new ListNode<T>(e, trailer->pred, trailer);
-    trailer->pred->succ = x;
-    trailer->pred = x;
+    ListNode<T> *x = new ListNode<T>(e, _trailer->pred, _trailer);
+    _trailer->pred->succ = x;
+    _trailer->pred = x;
 }
 
 template <typename T>
