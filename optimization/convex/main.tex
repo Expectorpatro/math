@@ -397,3 +397,164 @@
 	\end{equation*}
 	则称$f(x)$在$a$点\gls{lowerSemicontinuous}。
 \end{definition}
+
+\subsection{线搜索法}
+在迭代优化算法中，一次迭代通常包含两个基本问题：首先确定一个搜索方向，其次确定沿该方向移动的步长。如果步长过小，则每次迭代的推进幅度有限，算法收敛速度可能很慢；如果步长过大，则损失函数值不但不能下降，反而可能上升。因此，步长选择需要在“保证下降”和“保持足够推进”之间取得平衡。\par
+线搜索法正是为了解决这一问题而引入的。所谓线搜索法，是指在当前点$x_n$和搜索方向$d_n$确定之后，沿着射线$\{x_n+\alpha d_n:\alpha>0\}$寻找一个合适的步长$\alpha_n$，并用它更新迭代点。
+\begin{definition}
+	给定初始步长$\alpha>0$和收缩因子$\rho\in(0,1)$，定义候选步长序列：
+	\begin{equation*}
+		\alpha_n=\rho^n\alpha,\quad n\in\mathbb{N}
+	\end{equation*}
+	从$n=0$开始依次检验$\alpha_n$是否满足预先给定的步长接受准则。若取第一个满足该准则的步长$\alpha_n$作为当前迭代步长，则称这种步长选择方法为\gls{BacktrackingMethod}。
+\end{definition}
+\begin{definition}
+	设$X$为实赋范线性空间，$E\subseteq X$为开集，函数$f:E\to\mathbb{R}$在$x\in E$处Fr\'echet可微，$c\in(0,1)$，$d\in X$是一个下降方向。若$\alpha>0$满足$x+\alpha d\in E$，并且
+	\begin{equation*}
+		f(x+\alpha d)\leqslant f(x)+c\alpha\operatorname{D}fx(d)
+	\end{equation*}
+	则称$\alpha$满足沿方向$d$的\textbf{Armijo准则}。
+\end{definition}
+\begin{note}
+	因为$d\in X$为下降方向，所以$\operatorname{D}fx(d)<0$。由\cref{theo:TaylorTheorem}(1)可得：
+	\begin{equation*}
+		f(x+\alpha d)=f(x)+\alpha\operatorname{D}fx(d)+\operatorname{o}(\alpha),\;(\alpha\to0)
+	\end{equation*}
+	因此一阶线性近似预示着，沿方向$d$移动一个小步长$\alpha$后，函数值应当下降，其线性预测下降量为$-\alpha\operatorname{D}fx(d)>0$。Armijo准则要求步长$\alpha$满足：
+	\begin{equation*}
+		f(x)-f(x+\alpha d)\geqslant-c\alpha\operatorname{D}fx(d)
+	\end{equation*}
+	因此，Armijo准则的含义是实际下降量至少要达到一阶Taylor线性预测下降量的$c$倍。参数$c\in(0,1)$控制这个要求的严格程度，$c$越大，要求实际下降越接近线性预测下降量。在应用中，$c$常取较小的数值，如$c=10^{-4}$。\par
+	Armijo准则的缺陷在于它只控制了步长$\alpha$不能太大，因为太大的步长通常会违反下降条件，但它没有控制“步长不能太小”。如果步长非常非常小，函数值虽然下降得很少，但也可能满足Armijo准则。
+\end{note}
+\begin{definition}
+	设$X$为实赋范线性空间，$E\subseteq X$为开集，函数$f:E\to\mathbb{R}$在$x\in E$处Fr\'echet可微，$c\in(0,0.5)$，$d\in X$是一个下降方向。若$\alpha>0$满足$x+\alpha d\in E$，并且
+	\begin{equation*}
+		f(x)+(1-c)\alpha\operatorname{D}fx(d)
+		\leqslant
+		f(x+\alpha d)
+		\leqslant
+		f(x)+c\alpha\operatorname{D}fx(d),
+	\end{equation*}
+	则称$\alpha$满足沿方向$d$的\textbf{Goldstein准则}。
+\end{definition}
+\begin{note}
+	Goldstein准则可以看作是在Armijo准则的基础上进一步加入了对步长下界的控制。\par
+	Goldstein准则中的右侧不等式正是Armijo准则，它要求函数值具有充分下降。Goldstein准则中的左侧不等式为：
+	\begin{equation*}
+		f(x)-f(x+\alpha d)
+		\leqslant
+		-(1-c)\alpha\operatorname{D}fx(d)
+	\end{equation*}
+	由于$-\alpha\operatorname{D}fx(d)>0$是一阶Taylor线性近似预示的下降量，因此左侧不等式要求实际下降量不能超过线性预测下降量的$(1-c)$倍。由\cref{theo:TaylorTheorem}(1)可得：
+	\begin{equation*}
+		f(x+\alpha d)=f(x)+\alpha\operatorname{D}fx(d)+\operatorname{o}(\alpha),\;(\alpha\to0)
+	\end{equation*}
+	因此当$\alpha$过小时，实际下降量会过于接近完整的一阶线性预测下降量，从而违反Goldstein左侧条件。直观地说，这表示沿方向$d$还没有走得足够远，函数沿该方向的下降趋势尚未明显减弱。\par
+	综上，Goldstein准则通过两个不等式同时控制步长：右侧的Armijo条件保证步长不能太大，左侧条件保证步长不能太小。\par
+	Goldstein的缺陷出于其优势，它用Taylor展开的原理保证了所取的步长$\alpha$不会太小，但是对应的新增不等式在逻辑上却对应着要求下降量不能太大，导致它可能会错杀好步长。
+\end{note}
+\begin{definition}
+	设$X$为实赋范线性空间，$E\subseteq X$为开集，函数$f:E\to\mathbb{R}$在$x$与$x+\alpha d$处Fr\'echet可微，$0<c_1<c_2<1$，$d\in X$是一个下降方向。若$\alpha>0$满足$x+\alpha d\in E$，并且：
+	\begin{gather*}
+		f(x+\alpha d)\leqslant
+		f(x)+c_1\alpha\operatorname{D}fx(d),\\
+		\operatorname{D}f(x+\alpha d)(d)\geqslant c_2\operatorname{D}fx(d)
+	\end{gather*}
+	则称$\alpha$满足沿方向$d$的\textbf{Wolfe准则}。
+\end{definition}
+\begin{note}
+	Wolfe准则可以看作是对Goldstein准则的改进。它保留了Armijo准则中的充分下降条件，但将Goldstein准则中用于排除过小步长的函数值下界替换为了方向导数条件。\par
+	Wolfe准则中的第二个不等式称为曲率条件。由于$\operatorname{D}fx(d)<0$，该条件要求新点$x+\alpha d$处沿方向$d$的方向导数不能过小。换言之，沿方向$d$的下降趋势必须已经有所减弱。因此，曲率条件的作用是排除过小的步长。\par
+	Wolfe准则的缺陷在于所取的$\alpha$可能导致$x+\alpha d$的下降趋势反向增长得过强，即已经从另一个方向远离了损失函数的极小点。
+\end{note}
+\begin{definition}
+	设$X$为实赋范线性空间，$E\subseteq X$为开集，函数$f:E\to\mathbb{R}$在$x$与$x+\alpha d$处Fr\'echet可微，$0<c_1<c_2<1$，$d\in X$是一个下降方向。若$\alpha>0$满足$x+\alpha d\in E$，并且：
+	\begin{gather*}
+		f(x+\alpha d)\leqslant f(x)+c_1\alpha\operatorname{D}fx(d) \\
+		\left|\operatorname{D}f(x+\alpha d)(d)\right|\leqslant c_2\left|\operatorname{D}fx(d)\right|
+	\end{gather*}
+	则称$\alpha$满足沿方向$d$的\textbf{强Wolfe准则}。
+\end{definition}
+\begin{note}
+	强Wolfe准则是Wolfe准则的加强形式，其第二个不等式要求沿方向$d$的下降趋势不仅不能过强，而且也不能反向增长得过强。
+\end{note}
+\begin{theorem}\label{theo:Zoutendijk}
+	设$X$为实Hilbert空间，$E\subseteq X$为开集，函数$f\in C^1:E\to\mathbb{R}$，$f$在$E$上有下界，$\nabla f$在$E$的Lipschitz连续，即存在常数$L>0$，使得：
+	\begin{equation*}
+		||\nabla fx-\nabla fy||\leqslant L||x-y||
+	\end{equation*}
+	给定初始点$x_0\in E$，考虑由线搜索方法生成的迭代序列$\{x_{n+1}=x_n+\alpha_nd_n\}$，其中$d_n$是$f$在$x_n$处的下降方向。若步长$\alpha_k>0$满足Wolfe准则，则有：
+	\begin{equation*}
+		\sum_{n=0}^{+\infty}\cos^2\theta_n||\nabla fx_n||^2<+\infty
+	\end{equation*}
+	其中$\theta_n$为$-\nabla fx_n$与$d_n$之间的夹角，即：
+	\begin{equation*}
+		\cos\theta_n=\frac{-(\nabla fx_n,d_n)}{||\nabla fx_n||\;||d_n||}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由Wolfe准则可知：
+	\begin{equation*}
+		(\nabla fx_{n+1},d_n)\geqslant c_2(\nabla fx_n,d_n)
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		(\nabla fx_{n+1}-\nabla fx_n,d_n)\geqslant(c_2-1)(\nabla fx_n,d_n)
+	\end{equation*}
+	根据\cref{ineq:cauchy-schiwarz-inner-product}可知：
+	\begin{equation*}
+		(\nabla fx_{n+1}-\nabla fx_n,d_n)\leqslant||\nabla fx_{n+1}-\nabla fx_n||\;||d_n||\leqslant L||x_{n+1}-x_n||\;||d_n|=\alpha_nL||d_n||^2
+	\end{equation*}
+	联合上两式可得：
+	\begin{equation*}
+		\alpha_nL||d_n||^2\geqslant(c_2-1)(\nabla fx_n,d_n) \\
+		\alpha_n\geqslant\frac{(c_2-1)(\nabla fx_n,d_n)}{L||d_n||^2}
+	\end{equation*}
+	由Wolfe准则可知：
+	\begin{equation*}
+		f(x_{n+1})\leqslant f(x_n)+c_1\alpha_n(\nabla fx_n,d_n)\leqslant f(x_n)+c_1\frac{(c_2-1)(\nabla fx_n,d_n)}{L||d_n||^2}(\nabla fx_n,d_n)
+	\end{equation*}
+	即：
+	\begin{equation*}
+		f(x_{n+1})\leqslant f(x_n)+c_1\frac{(c_2-1)(\nabla fx_n,d_n)^2}{L||d_n||^2}=f(x_n)+c_1\frac{(c_2-1)\cos^2\theta_n}{L}||\nabla fx_n||^2
+	\end{equation*}
+	对上式求和即可得到：
+	\begin{equation*}
+		f(x_{n+1})\leqslant f(x_0)-\frac{c_1(1-c_2)}{L}\sum_{i=0}^{n}\cos^2\theta_i||\nabla fx_i||^2
+	\end{equation*}
+	因为$0<c_1<c_2<1$，所以$c_1(1-c_2)>0$，即对任意的$n\in\mathbb{N}$有$f(x_{n+1})\leqslant f(x_0)$。因为$f$在$E$上有下界，所以结论成立。
+\end{proof}
+\begin{theorem}
+	设$X$为实Hilbert空间，$E\subseteq X$为开集，函数$f\in C^1:E\to\mathbb{R}$，$f$在$E$上有下界，$\nabla f$在$E$的Lipschitz连续，即存在常数$L>0$，使得：
+	\begin{equation*}
+		||\nabla fx-\nabla fy||\leqslant L||x-y||
+	\end{equation*}
+	给定初始点$x_0\in E$，考虑由线搜索方法生成的迭代序列$\{x_{n+1}=x_n+\alpha_nd_n\}$，其中$d_n$是$f$在$x_n$处的下降方向。若步长$\alpha_k>0$满足Wolfe准则，且对任意的$n\in\mathbb{N}$，存在$\beta>0$使得：
+	\begin{equation*}
+		\theta_n<\frac{\pi}{2}-\beta
+	\end{equation*}
+	则：
+	\begin{equation*}
+		\lim_{n\to\infty}||\nabla fx_n||=0
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	若结论不成立，由\cref{prop:ConvergentSeqOfPoints}(4)可知存在$\{\nabla fx_n\}$的子列$\{\nabla fx_{n_k}\}$和$\varepsilon>0$使得：
+	\begin{equation*}
+		\forall\;k\in\mathbb{N}^+,\;||\nabla fx_{n_k}||>\varepsilon
+	\end{equation*}
+	注意到：
+	\begin{equation*}
+		\cos(\theta_n)>\cos\left(\frac{\pi}{2}-\beta\right)=\sin\beta
+	\end{equation*}
+	根据\cref{theo:Zoutendijk}可得：
+	\begin{equation*}
+		+\infty>\sum_{n=0}^{+\infty}\cos^2\theta_n||\nabla fx_n||^2>\sum_{k=0}^{+\infty}\cos^2\theta_{n_k}||\nabla fx_{n_k}||^2>\sum_{k=0}^{+\infty}\sin^2\beta\varepsilon^2
+	\end{equation*}
+	矛盾，所以结论成立。
+\end{proof}
+\begin{note}
+	上述定理中的条件是很直观的，如果$\theta_n$很接近$\dfrac{\pi}{2}$，就意味着梯度方向和下降方向垂直，根据\cref{theo:TaylorTheorem}(1)可知此此时损失函数值几乎不发生变化。
+\end{note}
+
