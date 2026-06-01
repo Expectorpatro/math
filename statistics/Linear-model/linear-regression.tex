@@ -77,7 +77,7 @@
 		\item $\mathbf{1}_n^{\top}\tilde{X}_c=\mathbf{1}_n^{\top}\tilde{X}_s=\mathbf{0}$；
 		\item $\hat{\alpha}_0=\hat{\gamma}_0=\overline{y}=\hat{\beta}_0+\overline{x}^{\top}\hat{\beta}_I,\;\hat{\alpha}_I=(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}\tilde{X}_c^{\top}y=\hat{\beta}_I,\;\hat{\gamma}_I=(\tilde{X}_s^{\top}\tilde{X}_s)^{-1}\tilde{X}_s^{\top}y=\operatorname{diag}\{\seq{s}{p-1}\}\hat{\alpha}_I(\hat{\beta}_I)$，即原经验回归方程、中心化后得到的经验回归方程与标准化后得到的经验回归方程是等价的，且有$\tilde{X}_c\hat{\alpha}_I=\tilde{X}_s\hat{\gamma}_I$；
 		\item $\operatorname{SSE}=\operatorname{SSE}_c=\operatorname{SSE}_s,\;\operatorname{SSE}_c=(y-\overline{y})^{\top}(y-\overline{y})-\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y,\;\operatorname{SSE}_s=(y-\overline{y})^{\top}(y-\overline{y})-\hat{\gamma}_I^{\top}\tilde{X}_c^{\top}y$，即$\hat{\sigma}^2=\hat{\sigma}_c^2=\hat{\sigma}_s^2$；
-		\item $R=\tilde{X}_s^{\top}\tilde{X}_s$，其中$R$为回归自变量之间的样本相关系数矩阵；
+		\item $(n-1)R=\tilde{X}_s^{\top}\tilde{X}_s$，其中$R$为回归自变量之间的样本相关系数矩阵；
 		\item $\operatorname{Cov}(\hat{\beta})=\sigma^2(X^{\top}X)^{-1},\;\operatorname{Cov}(\hat{\beta}_I)=\operatorname{Cov}(\hat{\alpha}_I)$，且：
 		\begin{equation*}
 			\operatorname{Cov}(\hat{\alpha})=\sigma^2
@@ -227,15 +227,16 @@
 		\operatorname{SSE}_s=||y-\hat{\gamma}_0\mathbf{1}_n-\tilde{X}_s\hat{\gamma}_I||^2=||y-\hat{\alpha}_0\mathbf{1}_n-\tilde{X}_c\hat{\alpha}_I||^2=\operatorname{SSE}_c
 	\end{gather*}
 	于是$\operatorname{SSE}=\operatorname{SSE}_c=\operatorname{SSE}_s$，类似\cref{theo:SSESSEACalculate}可得中间两式，由\cref{theo:VarianceOfErrorTerm}可知后式成立。\par
-	(5)设$R=(r_{ij})$，注意到：
+	(5)注意到：
 	\begin{align*}
-		r_{ij}&=\left(\frac{x_{1i}-\overline{x}_i}{s_i},\frac{x_{2i}-\overline{x}_i}{s_i},\dots,\frac{x_{ni}-\overline{x}_i}{s_i}\right)^{\top}\left(\frac{x_{1j}-\overline{x}_j}{s_j},\frac{x_{2j}-\overline{x}_j}{s_j},\dots,\frac{x_{nj}-\overline{x}_j}{s_j}\right) \\
-		&=\frac{1}{s_is_j}\sum_{k=1}^{n}(x_{ki}-\overline{x}_i)(x_{kj}-\overline{x}_j)=\frac{n-1}{s_is_j}\frac{1}{n-1}\sum_{k=1}^{n}(x_{ki}-\overline{x}_i)(x_{kj}-\overline{x}_j)=\widehat{\operatorname{Corr}}(\tilde{X})(i;j)
+		&\left(\frac{x_{1i}-\overline{x}_i}{s_i},\frac{x_{2i}-\overline{x}_i}{s_i},\dots,\frac{x_{ni}-\overline{x}_i}{s_i}\right)^{\top}\left(\frac{x_{1j}-\overline{x}_j}{s_j},\frac{x_{2j}-\overline{x}_j}{s_j},\dots,\frac{x_{nj}-\overline{x}_j}{s_j}\right) \\
+		=&\frac{1}{s_is_j}\sum_{k=1}^{n}(x_{ki}-\overline{x}_i)(x_{kj}-\overline{x}_j)=\frac{n-1}{s_is_j}\frac{1}{n-1}\sum_{k=1}^{n}(x_{ki}-\overline{x}_i)(x_{kj}-\overline{x}_j) \\
+		=&(n-1)\widehat{\operatorname{Corr}}(\tilde{X})(i;j)
 	\end{align*}\par
 	(6)由\cref{prop:EstimableFunction}(5)和\cref{prop:CovMat}(3)可知$I_p\operatorname{Cov}(\hat{\beta})I_p=\sigma^2(X^{\top}X)^{-1}$，即$\operatorname{Cov}(\hat{\beta})=\sigma^2(X^{\top}X)^{-1}$。第二式由(3)第二式即可得到。后两式由对应的正则方程和\cref{prop:CovMat}(3)即可得到。
 \end{proof}
 \begin{note}
-	由上述定理第三条又可以看出中心化和标准化能够使得常数项与回归系数的估计被分开，常数项的估计值直接就等于$y$的均值，并且由上述定理第五条可知对于中心化或标准化模型，常数项与回归系数的估计是不相关的，于是在理论分析中我们可以只关注回归系数的估计。标准化模型的另一个优势是可以消除变量量纲的影响，使得回归系数的估计可直接反应各自变量对因变量预测的重要程度。
+	由上述定理第三条又可以看出中心化和标准化能够使得常数项与回归系数的估计被分开，常数项的估计值直接就等于$y$的均值，并且由上述定理第六条可知对于中心化或标准化模型，常数项与回归系数的估计是不相关的，于是在理论分析中我们可以只关注回归系数的估计。标准化模型的另一个优势是可以消除变量量纲的影响，使得回归系数的估计可直接反应各自变量对因变量预测的重要程度。
 \end{note}
 
 \subsection{显著性检验与复相关系数}
