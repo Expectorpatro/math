@@ -526,7 +526,7 @@
 	因为$0<c_1<c_2<1$，所以$c_1(1-c_2)>0$，即对任意的$n\in\mathbb{N}$有$f(x_{n+1})\leqslant f(x_0)$。因为$f$在$E$上有下界，所以结论成立。
 \end{proof}
 \begin{theorem}
-	设$X$为实Hilbert空间，$E\subseteq X$为开集，函数$f\in C^1:E\to\mathbb{R}$，$f$在$E$上有下界，$\nabla f$在$E$的Lipschitz连续，即存在常数$L>0$，使得：
+	设$X$为实Hilbert空间，$E\subseteq X$为开集，函数$f\in C^1(E):E\to\mathbb{R}$，$f$在$E$上有下界，$\nabla f$在$E$上Lipschitz连续，即存在常数$L>0$，使得：
 	\begin{equation*}
 		||\nabla fx-\nabla fy||\leqslant L||x-y||
 	\end{equation*}
@@ -557,4 +557,100 @@
 \begin{note}
 	上述定理中的条件是很直观的，如果$\theta_n$很接近$\dfrac{\pi}{2}$，就意味着梯度方向和下降方向垂直，根据\cref{theo:TaylorTheorem}(1)可知此此时损失函数值几乎不发生变化。
 \end{note}
+
+\subsection{Newton法}
+\begin{method}[Newton Method]\label{method:NewtonMethod}
+	设$E\subseteq \mathbb{R}^m$为开集，函数$f\in C^2(E):E\to\mathbb{R}$。给定当前迭代点$x_n\in E$，$\nabla^2fx_n$可逆，根据\cref{theo:TaylorTheorem}(1)，考虑在$x_n$处沿方向$d_n$的二阶Taylor近似：
+	\begin{align*}
+		f(x_n+d_n)&\approx f(x_n)+\operatorname{D}fx_n(d_n)+\frac{1}{2}\operatorname{D}^2fx_n(d_n,d_n) \\
+		&=f(x_n)+(\nabla fx_n)^Td_n+\frac{1}{2}d_n^T\nabla^2fx_nd_n
+	\end{align*}
+	Newton法的基本思想是：不直接最小化原函数$f(x_n+d_n)$，而是在当前点$x_n$处求解方向$d_n$使得其二次近似最小化。因此，根据\cref{theo:FrechetExtremumOptimality}(1)，令上右式关于$d_n$的一阶Fr\'echet微分为零可得：
+	\begin{equation*}
+		\nabla^2fx_nd_n=-\nabla fx_n
+	\end{equation*}
+	从而得到：
+	\begin{equation*}
+		d_n=-\left(\nabla^2fx_n\right)^{-1}\nabla fx_n
+	\end{equation*}
+	于是Newton法的迭代格式为：
+	\begin{equation*}
+		x_{n+1}=x_n+d_n=x_n-\left(\nabla^2fx_n\right)^{-1}\nabla fx_n
+	\end{equation*}
+	其中$d_n$称为$f$在$x_n$处的Newton方向。
+\end{method}
+\begin{theorem}\label{theo:ClassicalNewtonConvergence}
+	设$E\subseteq \mathbb{R}^m$为开集，函数$f\in C^2(E):E\to\mathbb{R}$，$f$在$E$上的最小值点$x$满足：
+	\begin{equation*}
+		\nabla fx=\mathbf{0},\quad\nabla^2fx>0
+	\end{equation*}
+	$\nabla^2fx$在$x$的$\delta$邻域（$\delta>0$）$U(x,\delta)$上满足Lipschitz条件：
+	\begin{equation*}
+		||\nabla^2fx-\nabla^2fy||\leqslant L||x-y||,\quad\forall x,y\in U(x,\delta)
+	\end{equation*}
+	考虑Newton迭代：
+	\begin{equation*}
+		x_{n+1}=x_n+d_n=x_n-\left(\nabla^2fx_n\right)^{-1}\nabla fx_n
+	\end{equation*}
+	则：
+	\begin{enumerate}
+		\item 如果初始点$x_0$充分接近$x$，则Newton迭代良定，并且$\{x_n\}$Q-二次收敛到$x$；
+		\item $\{||\nabla fx_n||\}$Q-二次收敛到$0$。
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)注意到：
+	\begin{align*}
+		x_{n+1}-x&=x_n-\left(\nabla^2fx_n\right)^{-1}\nabla fx_n-x=\left(\nabla^2fx_n\right)^{-1}\left[\nabla^2fx_n(x_n-x)-\nabla fx_n\right] \\
+		&=\left(\nabla^2fx_n\right)^{-1}\left[\nabla^2fx_n(x_n-x)-\left(\nabla fx_n-\nabla fx\right)\right]
+	\end{align*}
+	由\info{Newton-Leibniz公式}、\cref{prop:FrechetDifferential}(6)和\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{equation*}
+		\nabla fx_n-\nabla fx=\int_{0}^{1}\nabla^2f[x_n+t(x-x_n)](x_n-x)\dif t
+	\end{equation*}
+	根据\cref{prop:MeasurableIntegral}(6)(7)\info{积分的范数小于等于范数的积分，算子范数}可得：
+	\begin{align*}
+		&\left\|\left[\nabla^2fx_n(x_n-x)-\left(\nabla fx_n-\nabla fx\right)\right]\right\| \\
+		=&\left\|\left[\nabla^2fx_n(x_n-x)-\int_{0}^{1}\nabla^2f[x_n+t(x-x_n)](x_n-x)\dif t\right]\right\| \\
+		=&\left\|\int_{0}^{1}\left\{\nabla^2fx_n-\nabla^2f[x_n+t(x-x_n)]\right\}(x_n-x)\dif t\right\| \\
+		\leqslant&\int_{0}^{1}\left\|\left\{\nabla^2fx_n-\nabla^2f[x_n+t(x-x_n)]\right\}(x_n-x)\right\|\dif t \\
+		\leqslant&\int_{0}^{1}\left\|\left\{\nabla^2fx_n-\nabla^2f[x_n+t(x-x_n)]\right\}\right\|||x_n-x||\dif t \\
+		\leqslant&||x_n-x||\int_{0}^{1}Lt||x-x_n||\dif t=\frac{||x_n-x||^2L}{2}
+	\end{align*}
+	于是由\info{算子范数}可得：
+	\begin{align*}
+		&||x_{n+1}-x||=\left\|\left(\nabla^2fx_n\right)^{-1}\left[\nabla^2fx_n(x_n-x)-\left(\nabla fx_n-\nabla fx\right)\right]\right\| \\
+		\leqslant&\left\|\left(\nabla^2fx_n\right)^{-1}\right\|\left\|\left[\nabla^2fx_n(x_n-x)-\left(\nabla fx_n-\nabla fx\right)\right]\right\|  \\
+		\leqslant&\left\|\left(\nabla^2fx_n\right)^{-1}\right\|\frac{||x_n-x||^2L}{2}
+	\end{align*}
+	可以证明存在$r>0$，当$||x_n-x||\leqslant r$时有$\left\|\left(\nabla^2fx_n\right)^{-1}\right\|\leqslant2\left\|\left(\nabla^2fx\right)^{-1}\right\|$\footnote{证明过于复杂，略去。}，所以：
+	\begin{equation*}
+		\frac{||x_{n+1}-x||}{||x_n-x||^2}\leqslant L\left\|\left(\nabla^2fx\right)^{-1}\right\|
+	\end{equation*}
+	当：
+	\begin{equation*}
+		||x_0-x||\leqslant\min\left\{\delta,r,\frac{1}{2L\left\|\left(\nabla^2fx\right)^{-1}\right\|}\right\}
+	\end{equation*}
+	时结论成立，第三式是因为：
+	\begin{equation*}
+		||x_1-x||\leqslant L\left\|\left(\nabla^2fx\right)^{-1}\right\|||x_0-x||^2
+	\end{equation*}
+	右式未必满足小于等于$||x_0-x||$，这将导致序列$\{x_n:n\geqslant1\}$不在$U(x,\delta)$中。一旦控制了该不等式，则$||x_1-x||\leqslant\dfrac{1}{2}||x_0-x||$。设$n$时有：
+	\begin{equation*}
+		||x_n-x||\leqslant\frac{1}{2L\left\|\left(\nabla^2fx\right)^{-1}\right\|}
+	\end{equation*}
+	则$n+1$时有：
+	\begin{equation*}
+		||x_{n+1}-x||\leqslant L\left\|\left(\nabla^2fx\right)^{-1}\right\|||x_n-x||^2\leqslant\frac{1}{2}||x_n-x||
+	\end{equation*}
+	这保证了$\{x_n\}\subseteq U(x,\delta)$，并且每进行一步范数误差至少减少一半。\par
+	(2)由Newton方程、\info{Newton-Leibniz公式，积分的范数小于等于范数的积分，算子范数}、\cref{prop:FrechetDifferential}(6)可得：
+	\begin{align*}
+		&||\nabla fx_{n+1}||=||\nabla fx_{n+1}-\nabla fx_n-\nabla^2fx_nd_n\||=\left\|\int_{0}^{1}\nabla^2f(x_n+td_n)d_n\dif t-\nabla^2fx_nd_n\right\| \\
+		=&\left\|\int_{0}^{1}\left[\nabla^2f(x_n+td_n)-\nabla^2fx_n\right]d_n\dif t\right\|\leqslant\int_{0}^{1}\left\|\left[\nabla^2f(x_n+td_n)-\nabla^2fx_n\right]d_n\right\|\dif t \\
+		\leqslant&\int_{0}^{1}\left\|\nabla^2f(x_n+td_n)-\nabla^2fx_n\right\|||d_n||\dif t\leqslant\int_{0}^{1}L||td_n||\;||d_n||\dif t=\frac{L||d_n||^2}{2} \\
+		=&\frac{L}{2}\left\|\left(\nabla^2fx_n\right)^{-1}\nabla fx_n\right\|^2\leqslant\frac{L}{2}\left\|\left(\nabla^2fx_n\right)^{-1}\right\|^2||\nabla fx_n||^2\leqslant2L\left\|\left(\nabla^2fx\right)^{-1}\right\|^2||\nabla fx_n||^2
+	\end{align*}
+	所以$\{||\nabla fx_n||\}$Q-二次收敛到$0$。
+\end{proof}
 
