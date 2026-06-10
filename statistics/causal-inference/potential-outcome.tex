@@ -1,0 +1,299 @@
+\section{潜在结果框架}
+
+设$(X,\mathscr{F},P)$为概率空间，其中$X$表示总体，每个个体记为$x\in X$。考虑有限处理集合：
+\begin{equation*}
+	\mathcal{A}=\{a_1,\ldots,a_K\}
+\end{equation*}
+\begin{definition}
+	定义可测映射：
+	\begin{equation*}
+		T:(X,\mathscr{F})\to(\mathcal{A},2^{\mathcal{A}})
+	\end{equation*}
+	$Tx$表示个体$x$接受的处理水平。
+\end{definition}
+\begin{definition}
+	对每个处理水平$a\in\mathcal{A}$，称可测函数：
+	\begin{equation*}
+		Y^a:(X,\mathscr{F})\to(\mathcal{Y},\mathscr{Y})
+	\end{equation*}
+	为\gls{PotentialOutcome}，其中$Y^a(x)$表示同一个体$x$在处理$T=a$时应产生的结果。定义$Y(x)$为个体$x$的实际结果。
+\end{definition}
+\begin{definition}
+	对个体$x\in X$，若$Tx=a$，则$Y^a(x)$称为\gls{ObservedOutcome}；若$Tx\neq a$，则$Y^a(x)$称为\gls{CounterfactualOutcome}。
+\end{definition}
+\begin{definition}[稳定个体处理值假设]
+	\gls{SUTVA}要求潜在结果$Y^a(x)$只依赖于个体$x$自身接受的处理水平$a$，不依赖于其他个体的处理分配，也不依赖于处理水平$a$的不同实施版本。即，对任意$a\in\mathcal{A}$，$Y^a$是良定义的可测映射：
+	\begin{equation*}
+		Y^a:(X,\mathscr{F})\to(\mathcal{Y},\mathscr{Y})
+	\end{equation*}
+	若存在不同版本的同一个处理$a$会导致不同结果，则应将这些版本重新编码为不同处理水平，否则$Y^a$不是良定义对象。
+\end{definition}
+\begin{definition}[一致性假设]
+	一致性假设要求：若个体实际接受处理$T=a$，则其观测结果等于对应处理水平下的潜在结果，即对任意的$a\in\mathcal{A}$有：
+	\begin{equation*}
+		\{x\in X:Tx=a\}\subseteq\{x\in X:Y(x)=Y^a(x)\}
+	\end{equation*}
+\end{definition}
+\begin{definition}
+	定义处理前协变量$L$为可测映射：
+	\begin{equation*}
+		L:(X,\mathscr{F})\to(\mathcal{L},\mathscr{L})
+	\end{equation*}
+\end{definition}
+\begin{definition}[可交换性假设]
+	可交换性假设要求：在给定处理前协变量$L$后，实际处理分配$T$与所有潜在结果条件独立，即
+	\begin{equation*}
+		(Y^{a_1},\ldots,Y^{a_K})\perp\!\!\!\perp T\mid L
+	\end{equation*}
+	等价地，对任意$a,t\in\mathcal{A}$和任意$A\in\mathscr{Y}$有：
+	\begin{equation*}
+		P(Y^a\in A\mid T=t,L)=P(Y^a\in A\mid L)
+	\end{equation*}
+	在相应条件概率有定义时成立。该假设表示：给定$L$后，处理组之间在潜在结果分布上可比，不存在未被$L$控制的\gls{ConfoundingFactor}。
+\end{definition}
+\begin{note}
+	混杂因素通常指同时影响处理分配和结果的处理前变量。若不对这类变量进行调整，不同处理组之间在接受处理之前就可能已经存在系统性差异，因此观测到的结果差异不一定完全来自处理效应，而可能部分或全部来自混杂因素。\par
+	举例而言，例如，研究是否实施某种治疗是否会影响某种疾病患者的死亡风险。在真实临床数据中，年龄较大的患者病情往往更复杂，医生也可能更倾向于对老年患者使用治疗。因此，年龄会影响患者是否接受治疗。同时，年龄本身也会影响死亡风险，因为老年患者即使不接受这种治疗，其基础死亡风险也通常更高。\par
+	在这种情况下，如果直接比较接受治疗者和未接受治疗者的死亡率，就可能发现接受治疗组的死亡率更高。但这个差异不一定说明治疗本身提高了死亡率，因为接受治疗组中老年患者比例可能更高。也就是说，死亡率升高可能来自年龄差异，而不是治疗效应本身。因此，年龄就是这个研究问题中的一个混杂因素。
+\end{note}
+\begin{definition}[正值假设]
+	正值假设要求：在协变量分布的定义域内，每个处理水平被分配的概率都为正，即对任意$a\in\mathcal{A}$有：
+	\begin{equation*}
+		P(T=a\mid L)>0
+	\end{equation*}
+	若只关心处理水平$a$与$b$之间的因果效应，则只需要求：
+	\begin{equation*}
+		P(T=a\mid L)>0,\quad P(T=b\mid L)>0
+	\end{equation*}
+	该假设排除了某些协变量取值下只能接受某一种处理、从而无法比较不同处理潜在结果的情形。
+\end{definition}
+\begin{definition}
+	对任意$a,b\in\mathcal{A}$，称：
+	\begin{equation*}
+		\tau(a,b)=\operatorname{E}(Y^a-Y^b)
+	\end{equation*}
+	为处理$a$和$b$之间的\gls{ATE}。
+\end{definition}
+\begin{definition}
+	可以根据关心的量定义不同的指标，比如$\operatorname{E}(Y^a/Y^b)$等等。由于我们只是进行两两比较，所以也可以在$a,b$两个处理内部用$0,1$进行标记，下面若涉及这种记号的话将默认$a=1$。
+\end{definition}
+\begin{theorem}\label{theo:GFormulaIdentification}
+	在稳定个体处理值、一致性、可交换性和正值假设同时成立时，对任意$a,b\in\mathcal{A}$，处理$a$和$b$之间的平均潜在结果可以由观测数据分布识别：
+	\begin{equation*}
+		\operatorname{E}(Y^a)=\operatorname{E}[\operatorname{E}(Y\mid T=a,L)]
+	\end{equation*}
+	对任意$a,b\in\mathcal{A}$，平均因果效应可以写为：
+	\begin{equation*}
+		\tau(a,b)=\operatorname{E}[\operatorname{E}(Y\mid T=a,L)]-\operatorname{E}[\operatorname{E}(Y\mid T=b,L)]\qedhere
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由\cref{prop:ConditionalExpectation}(3)可知：
+	\begin{equation*}
+		E(Y^a)=E[E(Y^a\mid L)]
+	\end{equation*}
+	在可交换性假设和一致性假设下有：
+	\begin{equation*}
+		E(Y^a\mid L)=\operatorname{E}(Y^a\mid T=a,L)=\operatorname{E}(Y\mid T=a,L)
+	\end{equation*}
+	根据\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{equation*}
+		\tau(a,b)=\operatorname{E}(Y^a-Y^b)=\operatorname{E}(Y^a)-\operatorname{E}(Y^b)=\operatorname{E}[\operatorname{E}(Y\mid T=a,L)]-\operatorname{E}[\operatorname{E}(Y\mid T=b,L)]\qedhere
+	\end{equation*}
+\end{proof}
+
+\subsection{观察性研究}
+在随机试验中，处理分配通常可以通过随机化机制加以控制，从而使处理组与对照组在混杂因素上的分布尽可能接近。然而，在观察性研究中，研究者通常只能在数据已经产生之后进行分析，处理变量并不是随机分配的，而是受到个体特征、环境因素或其他背景变量的影响。因此，不同处理组之间的协变量分布往往并不平衡，若直接比较不同处理组的结局均值，所得差异可能同时包含处理效应和混杂因素造成的系统性偏差。\par
+在这种情形下，由于无法再通过试验设计或抽样过程事先控制混杂因素，一个自然的思路是在样本内部对不同个体赋予不同权重，使加权后的样本在协变量分布上尽可能模拟随机试验中的平衡状态。直观地说，对于某些在原始数据中过多出现的个体类型，应适当降低其权重；而对于某些较少出现但对平衡处理组与对照组十分重要的个体类型，则应提高其权重。
+\subsubsection{倾向性评分}
+\begin{definition}
+	称$P(T=a\mid L)$为处理$a$的\gls{PropensityScore}，记作$e_a(L)$，记：
+	\begin{equation*}
+		e(L)=\Big(e_{a_1}(L),e_{a_2}(L),\dots,e_{a_K}(L)\Big)
+	\end{equation*}
+\end{definition}
+\begin{note}
+	得到$T$和$L$后，可任意选择模型进行拟合与计算倾向性评分。
+\end{note}
+一
+\begin{property}\label{prop:PropensityScore}
+	在可交换性假设和正值假设成立时，倾向性评分具有如下性质：
+	\begin{enumerate}
+		\item 给定倾向性评分后，$L$对$T$不再提供额外信息，即：
+		\begin{equation*}
+			P\Big(T=a\mid L,e_a(L)\Big)=P\Big(T=a\mid e_a(L)\Big)=e_a(L)
+		\end{equation*}
+		\item $(Y^{a_1},\ldots,Y^{a_K})\perp\!\!\!\perp T\mid e(L)$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)注意到：
+	\begin{equation*}
+		P\Big(T=a\mid L,e_a(L)\Big)=P(T=a\mid L)=e_a(L)
+	\end{equation*}
+	由\cref{prop:ConditionalExpectation}(3)(1)可得：
+	\begin{align*}
+		P\Big(T=a\mid e_a(L)\Big)&=\operatorname{E}[I(T=a)\mid e_a(L)]=\operatorname{E}\{\operatorname{E}[I(T=a)\mid L]\mid e_a(L)\} \\
+		&=\operatorname{E}[e_a(L)\mid e_a(L)]=e_a(L)
+	\end{align*}
+	所以结论成立。\par
+	(2)记$Y^*=(Y^{a_1},Y^{a_2},\dots,Y^{a_K})$，由\cref{prop:ConditionalExpectation}(3)(1)和可交换性假设可得：
+	\begin{align*}
+		&P\Big(T=a\mid Y^*,e(L)\Big)=\operatorname{E}[I(T=a)\mid Y^*,e(L)] \\
+		=&\operatorname{E}\{\operatorname{E}[I(T=a)\mid Y^*,e(L),L]\mid Y^*,e(L)\} \\
+		=&\operatorname{E}\{\operatorname{E}[I(T=a)\mid Y^*,L]\mid Y^*,e(L)\} \\
+		=&\operatorname{E}\{\operatorname{E}[I(T=a)\mid L]\mid Y^*,e(L)\} \\
+		=&\operatorname{E}[e_a(L)\mid Y^*,e(L)]=e_a(L)
+	\end{align*}
+	而根据\cref{prop:ConditionalExpectation}(3)(1)可知：
+	\begin{align*}
+		&P\Big(T=a\mid e(L)\Big)=\operatorname{E}[I(T=a)\mid e(L)]=\operatorname{E}\{\operatorname{E}[I(T=a)\mid L]\mid e(L)\} \\
+		=&\operatorname{E}[e_a(L)\mid e(L)]=e_a(L)=P\Big(T=a\mid Y^*,e(L)\Big)
+	\end{align*}
+	所以结论成立。
+\end{proof}
+\begin{note}
+	由\cref{prop:PropensityScore}(2)可知，倾向性评分通过计算概率达到了对$L$进行降维的效果。
+\end{note}
+\subsubsection{逆概率加权}
+由\cref{prop:PropensityScore}可知，倾向性评分可以将高维协变量$L$压缩为处理分配概率。进一步地，在正值假设成立时，可以利用该概率构造样本权重，使观测数据中的处理组在加权后代表其所对应的潜在总体。其基本思想是：若某类个体接受处理$a$的概率较小，但实际观察到其接受了处理$a$，则该个体在处理$a$组中应被赋予较大的权重；反之，若某类个体接受处理$a$的概率较大，则其权重相对较小。
+\begin{definition}
+	在正值假设成立时，对任意$a\in\mathcal{A}$，称：
+	\begin{equation*}
+		w_a(T,L)=\frac{I(T=a)}{e_a(L)}
+	\end{equation*}
+	为处理$a$对应的\gls{InverseProbabilityWeight}。
+\end{definition}
+\begin{theorem}\label{theo:IPWIdentification}
+	在稳定个体处理值、一致性、可交换性和正值假设同时成立时，对任意$a\in\mathcal{A}$：
+	\begin{equation*}
+		\frac{I(T=a)Y}{e_a(L)}
+	\end{equation*}
+	是$(X,\mathscr{F})$上的随机变量，平均潜在结果可以表示为：
+	\begin{equation*}
+		\operatorname{E}(Y^a)=\operatorname{E}\left[\frac{I(T=a)Y}{e_a(L)}\right]
+	\end{equation*}
+	对任意$a,b\in\mathcal{A}$，处理$a$和处理$b$之间的平均因果效应可以写为：
+	\begin{equation*}
+		\tau(a,b)=\operatorname{E}\left[\frac{I(T=a)Y}{e_a(L)}\right]-\operatorname{E}\left[\frac{I(T=b)Y}{e_b(L)}\right]
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由正值假设可知$e_a(L)>0$。考虑函数：
+	\begin{equation*}
+		g(y,t,l)=\frac{I(t=a)y}{e_a(l)}
+	\end{equation*}
+	由\cref{prop:ProductSpaceProjectionMapping}、\cref{prop:SimpleFunction}(1)、\cref{prop:MeasurableFunction}(5.b)、正值性假设和\cref{prop:MeasurableFunction}(5.c)可知$g$是可测函数，由\cref{theo:ProductMeasurable}和\cref{prop:MeasurableMapping}(2)可知$\dfrac{I(T=a)Y}{e_a(L)}$是$
+	(X,\mathscr{F})$上的随机变量。\par
+	由\cref{prop:ConditionalExpectation}(3)和\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{equation*}
+		\operatorname{E}\left[\frac{I(T=a)Y}{e_a(L)}\right]=\operatorname{E}\left\{\operatorname{E}\left[\frac{I(T=a)Y}{e_a(L)}\mid L\right]\right\}=\operatorname{E}\left\{\frac{1}{e_a(L)}\operatorname{E}\left[I(T=a)Y\mid L\right]\right\}
+	\end{equation*}
+	根据一致性假设可知$I(T=a)Y=I(T=a)Y^a$，于是：
+	\begin{equation*}
+		\operatorname{E}\left[I(T=a)Y\mid L\right]=\operatorname{E}\left[I(T=a)Y^a\mid L\right]
+	\end{equation*}
+	由可交换性假设、\cref{prop:SimpleFunction}(1)、\cref{prop:Independent}(4)和\cref{prop:Expectation}(2)可知：
+	\begin{equation*}
+		\operatorname{E}\left[I(T=a)Y^a\mid L\right]=\operatorname{E}(Y^a\mid L)\operatorname{E}[I(T=a)\mid L]=\operatorname{E}(Y^a\mid L)e_a(L)
+	\end{equation*}
+	根据\cref{prop:ConditionalExpectation}(3)可得：
+	\begin{align*}
+		\operatorname{E}\left[\frac{I(T=a)Y}{e_a(L)}\right]=\operatorname{E}\left[\frac{1}{e_a(L)}\operatorname{E}(Y^a\mid L)e_a(L)\right]=\operatorname{E}(Y^a)
+	\end{align*}
+	由\cref{prop:MeasurableIntegral}(6)可知关于平均因果效应的结论成立。
+\end{proof}
+\begin{definition}
+	根据\cref{theo:IPWIdentification}，若观测到独立同分布样本$\{(Y_i,T_i,L_i)\}_{i=1}^n$，则定义$\operatorname{E}(Y^a)$的逆概率加权估计量为：
+	\begin{equation*}
+		\hat{\mu}_a^{\text{IPW}}=\frac{1}{n}\sum_{i=1}^n\frac{I(T_i=a)Y_i}{\hat{e}_a(L_i)}
+	\end{equation*}
+	相应地，定义处理$a$和处理$b$之间的平均因果效应估计量为：
+	\begin{equation*}
+		\hat{\tau}^{\text{IPW}}(a,b)=\frac{1}{n}\sum_{i=1}^n\frac{I(T_i=a)Y_i}{\hat e_a(L_i)}-\frac{1}{n}\sum_{i=1}^n\frac{I(T_i=b)Y_i}{\hat e_b(L_i)}
+	\end{equation*}
+\end{definition}
+\begin{property}\label{prop:IPWKnownPropensity}
+	若稳定个体处理值、一致性、可交换性和正值假设同时成立，样本$\{(Y_i,T_i,L_i)\}_{i=1}^n$独立同分布，对任意$a\in\mathcal{A}$，倾向性评分$e_a(L)$已知，定义：
+	\begin{equation*}
+		\hat{\mu}_a^{\text{IPW}}=\frac{1}{n}\sum_{i=1}^n\frac{I(T_i=a)Y_i}{e_a(L_i)}
+	\end{equation*}
+	记：
+	\begin{equation*}
+		\mu_a=\operatorname{E}(Y^a),\quad Z_a=\frac{I(T=a)Y}{e_a(L)}
+	\end{equation*}
+	则$\hat{\mu}_a^{\text{IPW}}$具有如下性质：
+	\begin{enumerate}
+		\item 无偏性：$\operatorname{E}\left(\hat{\mu}_a^{\text{IPW}}\right)=\mu_a$；
+		\item 相合性：若$\operatorname{E}(|Z_a|)<+\infty$，则$\hat{\mu}_a^{\text{IPW}}\overset{P}{\longrightarrow}\mu_a$；
+		\item 渐近正态性：若$0<\sigma_a^2=\operatorname{Var}(Z_a)<+\infty$，则：
+		\begin{equation*}
+			\sqrt{n}\frac{\hat{\mu}_a^{\text{IPW}}-\mu_a}{\sigma_a}\overset{d}{\longrightarrow}\operatorname{N}(0,1)
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	记：
+	\begin{equation*}
+		Z_{ai}=\frac{I(T_i=a)Y_i}{e_a(L_i)},\;i=1,2,\dots,n
+	\end{equation*}
+	由\cref{theo:IPWIdentification}可知：
+	\begin{equation*}
+		\operatorname{E}(Z_{ai})=\operatorname{E}\left[\frac{I(T_i=a)Y_i}{e_a(L_i)}\right]=\operatorname{E}(Y^a)=\mu_a
+	\end{equation*}\par
+	(1)由\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{align*}
+		\operatorname{E}\left(\hat{\mu}_a^{\text{IPW}}\right)=\operatorname{E}\left(\frac{1}{n}\sum_{i=1}^nZ_{ai}\right)=\frac{1}{n}\sum_{i=1}^n\operatorname{E}(Z_{ai})=\mu_a
+	\end{align*}\par
+	(2)考虑\cref{theo:IPWIdentification}证明过程中的可测函数：
+	\begin{equation*}
+		g(y,t,l)=\frac{I(t=a)y}{e_a(l)}
+	\end{equation*}
+	在\cref{theo:IPWIdentification}中我们已经证明了$(Y_i,T_i,L_i)$是可测映射（\cref{theo:ProductMeasurable}），结合\cref{prop:Independent}(4)可知$Z_{a1},Z_{a2},\dots,Z_{an}$是相互独立同分布的随机变量。由\info{大数定律}可得：
+	\begin{equation*}
+		\hat{\mu}_a^{\text{IPW}}=\frac{1}{n}\sum_{i=1}^nZ_{ai}\overset{P}{\longrightarrow}\operatorname{E}(Z_a)=\mu_a
+	\end{equation*}\par
+	(3)由(2)和\info{中心极限定理}即可得出结论。
+\end{proof}
+\begin{property}\label{prop:IPWATEKnownPropensity}
+	在\cref{prop:IPWKnownPropensity}的条件下，对任意$a,b\in\mathcal{A}$，定义：
+	\begin{equation*}
+		\hat{\tau}^{\text{IPW}}(a,b)=\frac{1}{n}\sum_{i=1}^n\left[\frac{I(T_i=a)Y_i}{e_a(L_i)}-\frac{I(T_i=b)Y_i}{e_b(L_i)}\right]
+	\end{equation*}
+	记：
+	\begin{equation*}
+		\psi_{ab}=\frac{I(T=a)Y}{e_a(L)}-\frac{I(T=b)Y}{e_b(L)}
+	\end{equation*}
+	则$\hat{\tau}^{\text{IPW}}(a,b)$具有如下性质：
+	\begin{enumerate}
+		\item 无偏性：$\operatorname{E}[\hat{\tau}^{\text{IPW}}(a,b)]=\tau^{\text{IPW}}(a,b)$；
+		\item 相合性：若$\operatorname{E}(|\psi_{ab}|)<+\infty$，则$\hat{\tau}_{ab}^{\text{IPW}}\overset{P}{\longrightarrow}\tau(a,b)$；
+		\item 渐进正态性：若$0<\sigma_{ab}^2=\operatorname{Var}(\psi_{ab})<+\infty$，则：
+		\begin{equation*}
+			\sqrt{n}\frac{\hat{\tau}^{\text{IPW}}(a,b)-\tau(a,b)}{\sigma_{ab}}\overset{d}{\longrightarrow}\operatorname{N}(0,1)
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	记：
+	\begin{equation*}
+		\psi_{abi}=\frac{I(T_i=a)Y_i}{e_a(L_i)}-\frac{I(T_i=b)Y_i}{e_b(L_i)}
+	\end{equation*}
+	由\cref{theo:IPWIdentification}和\cref{prop:MeasurableFunction}(5.a)可知$\psi_{abi}$是$(X,\mathscr{F})$上的随机变量，根据\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{equation*}
+		\operatorname{E}(\psi_{abi})=\operatorname{E}\left[\frac{I(T_i=a)Y_i}{e_a(L_i)}\right]-\operatorname{E}\left[\frac{I(T_i=b)Y_i}{e_b(L_i)}\right]=\operatorname{E}(Y^a)-\operatorname{E}(Y^b)=\tau(a,b)
+	\end{equation*}\par
+	(1)由\cref{prop:IPWKnownPropensity}(2)可知。若$\operatorname{E}(|\psi_{ab}|)<+\infty$，由\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{equation*}
+		\operatorname{E}(\hat{\tau}_{ab}^{\text{IPW}})=\operatorname{E}\left(\frac{1}{n}\sum_{i=1}^{n}\psi_{abi}\right)=\frac{1}{n}\sum_{i=1}^{n}\operatorname{E}(\psi_{abi})=\tau(a,b)
+	\end{equation*}\par
+	(2)类似\cref{theo:IPWIdentification}可以证明：
+	\begin{equation*}
+		g_{ab}(y,t,l)=\frac{I(t=a)y}{e_a(l)}-\frac{I(t=b)y}{e_b(l)}
+	\end{equation*}
+	为可测函数，类似\cref{prop:IPWKnownPropensity}(2)可以证明$\psi_{ab1},\psi_{ab2},\dots,\psi_{abn}$是相互独立同分布的随机变量。由\info{大数定律}可得：
+	\begin{equation*}
+		\hat{\tau}_{ab}^{\text{IPW}}=\frac{1}{n}\sum_{i=1}^{n}\psi_{abi}\overset{P}{\longrightarrow}\operatorname{E}(\psi_{ab})=\tau(a,b)
+	\end{equation*}\par
+	(3)由(2)和\info{中心极限定理}即可得出结论。
+\end{proof}
