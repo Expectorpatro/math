@@ -326,7 +326,7 @@
 \begin{definition}
 	设$f(x)$是$K[x]$中一个次数大于$0$的多项式。若$f(x)$在$K[x]$中的因式只有零次多项式及其相伴元，则称$f(x)$是数域$K$上的一个\gls{IrreduciblePolynomial}。
 \end{definition}
-\begin{property}
+\begin{property}\label{prop:IrreduciblePolynomial}
 	设$f(x)$是$K[x]$中的一个次数大于$0$的多项式，则下列叙述等价：
 	\begin{enumerate}
 		\item $f(x)$是不可约多项式；
@@ -341,9 +341,81 @@
 	$3\to4$：若此时$f(x)=p_1(x)p_2(x)$，其中$\deg p_1(x),\deg p_2(x)<\deg f(x)$，由\cref{prop:UnivariatePolynomialDivision}(4)可知$f(x)\mid p_1(x)p_2(x)$，于是$f(x)\mid p_1(x)$或$f(x)\mid p_2(x)$。根据\cref{prop:RingAlgebra}(3)可知$p_1(x),p_2(x)\ne0$，由\cref{prop:UnivariatePolynomialRing}(1)可知$\deg p_1(x)\geqslant\deg f(x)$或$\deg p_2(x)\geqslant\deg f(x)$，矛盾。\par
 	$4\to1$：若此时$f(x)$不是不可约多项式，则$f(x)$在$K[x]$中存在非零次多项式以及其相伴元的因式$g(x)$，于是$f(x)=h(x)g(x)$，$h(x)\in K[x]$。由\cref{prop:UnivariatePolynomialRing}(1)和条件可知$h(x)$和$g(x)$中一个是零次多项式一个与$f(x)$同次，根据\cref{prop:UnivariatePolynomialDivision}(7)可知矛盾。
 \end{proof}
-\begin{theorem}
-	$K[x]$中任意次数大于$0$的多项式$f(x)$都能唯一地分解为数域$K$上有限多个不可约多项式的乘积。
+\begin{theorem}\label{theo:UnivariatePolynomialDecomposition}
+	$K[x]$中任意次数大于$0$的多项式$f(x)$都能唯一地分解为数域$K$上有限多个不可约多项式的乘积，唯一性指的是若$f(x)$有两个满足条件的分解式：
+	\begin{equation*}
+		f(x)=\prod_{i=1}^{s}p_i(x)=\prod_{i=1}^{t}q_i(x),\quad p_i(x),q_i(x)\in K[x]
+	\end{equation*}
+	则$s=t$且排列因式顺序后有$p_i(x)\sim q_i(x),\;i=1,2,\dots,s$。
 \end{theorem}
 \begin{proof}
-	设$\deg f(x)=n$。当$n=1$时，由定义可验证得到$f(x)$不可约，结论成立
+	\textbf{存在性：}设$\deg f(x)=n$。当$n=1$时，由\cref{prop:UnivariatePolynomialRing}(1)可得$f(x)$不可约，结论成立。若结论对$n-1$次多项式成立，下证明对$n$次也成立。\par
+	若$f(x)$不可约，由\cref{prop:UnivariatePolynomialRing}(1)可知结论成立。若$f(x)$可约，根据定义和\cref{prop:UnivariatePolynomialRing}(1)可知存在$f_1,f_2(x)\in K[x]$满足：
+	\begin{equation*}
+		f(x)=f_1(x)f_2(x),\quad\deg f_i(x)<\deg f(x),\;i=1,2
+	\end{equation*}
+	根据归纳假设，$f_1(x)$和$f_2(x)$都可以被分解为有限个不可约多项式的乘积，于是$f(x)$可被分解为有限个不可约多项式的乘积。\par
+	\textbf{唯一性：}若$f(x)$有两个不同的分解式：
+	\begin{equation*}
+		f(x)=\prod_{i=1}^{s}p_i(x)=\prod_{i=1}^{t}q_i(x),\quad p_i(x),q_i(x)\in K[x]
+	\end{equation*}
+	当$s=1$时有$f(x)=p_1(x)$，因为$p_1(x),q_1(x)$不可约，$q_1(x)\mid f(x)=p_1(x)$，所以$p_1(x)\sim q_1(x)$。由\cref{prop:UnivariatePolynomialDivision}(7)可知此时只能有$s=t=1$、$p_1(x)=q_1(x)$，唯一性成立。若结论对$s-1$成立，下证明对$s$也成立。\par
+	因为$p_1(x)$是不可约多项式且$p_1(x)\mid f(x)=\prod\limits_{i=1}^{t}q_i(x)$，由\cref{prop:IrreduciblePolynomial}(3)可知存在$q_i(x)$满足$p_1(x)\mid q_i(x)$。因为$p_1(x),q_i(x)$不可约，所以$p_1(x)\sim q_i(x)$。交换顺序使得$i=1$，由\cref{prop:UnivariatePolynomialDivision}(7)和\cref{prop:UnivariatePolynomialRing}(3)可知存在$a\in K$使得：
+	\begin{equation*}
+		\prod_{i=2}^{s}p_i(x)=a\prod_{i=2}^{t}q_i(x)
+	\end{equation*}
+	根据归纳假设可知$s-1=t-1$且排列因式顺序后有$p_i(x)\sim q_i(x),\;i=2,3,\dots,s$，结论成立。
+\end{proof}
+\begin{definition}
+	设$f(x),p(x)\in K[x]$，$p(x)$为不可约多项式。若$p^k(x)\mid f(x)$且$p^{k+1}\nmid f(x)$，其中$k\geqslant1$，则称$p(x)$为$f(x)$的\gls{KFoldFactor}。若$k=1$，则称$p(x)$为$f(x)$的\gls{SimpleFactor}，否则称$p(x)$为$f(x)$的\gls{MultipleFactor}。
+\end{definition}
+\begin{definition}
+	设：
+	\begin{equation*}
+		f(x)=a_nx^n+a_{n-1}x^{n-1}+\cdots+a_1x+a_0\in K[x]
+	\end{equation*}
+	称：
+	\begin{equation*}
+		na_nx^{n-1}+(n-1)a_{n-1}x^{n-2}+\cdots+2a_2x+a_1
+	\end{equation*}
+	为$f(x)$的\textbf{一阶导数}，记作$f'(x)$。称$f'(x)$的导数为$f(x)$的二阶导数，更高阶的情况可类似定义。
+\end{definition}
+\begin{note}
+	可以验证上述定义满足导数的运算法则。
+\end{note}
+\begin{property}
+	设$f(x)\in K[x]$，则；
+	\begin{enumerate}
+		\item 若$p(x)\in K[x]$是$f(x)$的重因式，则$p(x)$是$f'(x)$的$k-1$重因式；
+		\item 不可约多项式$p(x)\in K[x]$是$f(x)$的重因式当且仅当$p(x)$是$f(x)$和$f'(x)$的公因式；
+		\item 若$\deg f(x)>0$，则$f(x)$有重因式当且仅当$f(x)$与$f'(x)$有次数大于$0$的公因式；
+		\item 若$\deg f(x)>0$，则$f(x)$没有重因式当且仅当$f(x)$与$f'(x)$互素；
+		\item 若$\deg f(x)>0$，则$f(x)$有无重因式不会随数域的扩大而改变。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由条件可知存在$g(x)\in K[x]$满足$f(x)=p^k(x)g(x)$，其中$p(x)\nmid g(x)$，于是：
+	\begin{equation*}
+		f'(x)=kp^{k-1}(x)p'(x)g(x)+p^k(x)g'(x)=p^{k-1}[kp'(x)g(x)+p(x)g'(x)]
+	\end{equation*}
+	即$p^{k-1}\mid f'(x)$，下只需证明$p^k(x)\nmid f'(x)$，即$p(x)\nmid kp'(x)g(x)$。由\cref{prop:IrreduciblePolynomial}(3)可知只需证明$p(x)\nmid kp'(x)$。\par
+	若$p(x)\mid kp'(x)$，则存在$h(x)\in K[x]$满足$kp'(x)=h(x)p(x)$，由\cref{prop:UnivariatePolynomialRing}(1)可知此时只能有$p'(x)=0$，于是$\deg p(x)=0$，矛盾，所以$p(x)\nmid kp'(x)$。\par
+	(2)\textbf{必要性：}若$p(x)$不是$f(x)$和$f'(x)$的公因式，由条件可知此时$p(x)\nmid f'(x)$，根据(1)可知矛盾。\par
+	\textbf{充分性：}由条件可知存在$g(x)\in K[x]$使得：
+	\begin{equation*}
+		f(x)=g(x)p(x),\quad f'(x)=g'(x)p(x)+g(x)p'(x)
+	\end{equation*}
+	因为$p(x)\mid f'(x)$，所以$p(x)\mid g(x)p'(x)$。仿照(1)中的证明可以得到$p(x)\nmid p'(x)$，由\cref{prop:IrreduciblePolynomial}(3)可知$p(x)\mid g(x)$，所以$p(x)$是$f(x)$的重因式。\par
+	(3)\textbf{必要性：}若$f(x)$有重因式，则存在不可约多项式$p(x)\in K[x]$和整数$k\geqslant2$，使得$p(x)$是$f(x)$的$k$重因式。由(2)可知，$p(x)$是$f(x)$和$f'(x)$的公因式。又因为$p(x)$不可约，所以$\deg p(x)>0$，即$f(x)$与$f'(x)$有次数大于$0$的公因式。\par
+	\textbf{充分性：}若$f(x)$与$f'(x)$有次数大于$0$的公因式，则存在$g(x)\in K[x]$满足：
+	\begin{equation*}
+		\deg g(x)>0,\quad g(x)\mid f(x),\quad g(x)\mid f'(x)
+	\end{equation*}
+	根据\cref{theo:UnivariatePolynomialDecomposition}可知$g(x)$至少有一个不可约因式。取不可约多项式$p(x)$满足$p(x)\mid g(x)$，由\cref{prop:UnivariatePolynomialDivision}(5)可知：
+	\begin{equation*}
+		p(x)\mid f(x),\quad p(x)\mid f'(x)
+	\end{equation*}
+	因此$p(x)$是$f(x)$和$f'(x)$的公因式。由(2)可知$p(x)$是$f(x)$的重因式，即$f(x)$有重因式。
+	(4)由(3)立即可得。\par
+	(5)由\cref{theo:MinimumNumberField}可知多项式的导数不会随数域的扩大而发生变化，根据\cref{prop:UnivariatePolynomialDivision}(9)或\cref{prop:CommonDivision}(6)立即可得出结论。
 \end{proof}
