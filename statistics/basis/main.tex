@@ -8,6 +8,12 @@
 	由定义可以看出，样本具有两重性，若将随机变量的观测看作样本，则样本是固定的，没有随机性，但在理论分析中我们往往研究的是具有随机性的样本，也即随机变量本身。换句话讲，抽样实施以前，样本被看作随机变量，抽样实施以后，样本是具体的。
 \end{note}
 \begin{definition}
+	设$(X,\mathscr{A},P)$为概率空间，$(Y,\mathscr{B})$为可测空间，总体为$Q$。若随机变量$\seq{X}{n}:(X,\mathscr{A})\longrightarrow(Y,\mathscr{B})$相互独立，并且具有相同的分布$Q$，则称$\mathbf{X}=(\seq{X}{n})$为来自$Q$的容量为$n$的\gls{SRS}。
+\end{definition}
+\begin{note}
+	简单随机抽样包含“同分布”和“相互独立”这两个抽样的基本要求。同分布保证每次抽样都来自同一总体$Q$，从而样本能够反映总体的概率规律；相互独立则保证样本间的相关性不会干扰抽样误差的度量，使样本量能够正确反映样本所包含的信息量。
+\end{note}
+\begin{definition}
 	设$\mathscr{P}$为可测空间$(X,\mathscr{A})$上的一个概率测度族，则称$(X,\mathscr{A},\mathscr{P})$为\gls{StatisticalStructure}或\gls{StatisticalModel}。若$\mathscr{P}$仅依赖于参数$\theta$，即：
 	\begin{equation*}
 		\mathscr{P}=\{P_{\theta}:\theta\in\Theta\}
@@ -15,12 +21,17 @@
 	其中$\Theta$为参数空间，则称此结构为\gls{ParametricStructure}，否则称为\gls{Non-parametricStructure}。
 \end{definition}
 \begin{note}
-	引入统计结构是因为在统计学中我们往往没有总体$P$的全部信息，它是不确定的，但我们会根据现有信息去假设$P$可能是怎样的，从而给出一族可能的概率测度$\mathscr{P}$，因此产生了统计学的两大问题：参数估计和假设检验。二者都是在获得样本后对$\mathscr{P}$进行分析的统计工具，其中参数估计又可分为点估计和区间估计。点估计分析$\mathscr{P}$中哪一个概率测度最有可能是真实总体，区间估计是为了得到一个尽可能小的$\mathscr{P}_0\subseteq\mathscr{P}$使得真实总体最有可能在这里面，假设检验分析对于$\mathscr{P}_1,\mathscr{P}_2\subseteq\mathscr{P}$，真实总体最有可能出现在哪一个之中。
+	引入统计结构是因为在统计学中我们往往没有总体$P$的全部信息，它是不确定的，但我们会根据现有信息去假设$P$可能是怎样的，从而给出一族可能的概率测度$\mathscr{P}$，因此产生了统计学的两大问题：参数估计和假设检验。二者都是在获得样本后对$\mathscr{P}$进行分析的统计工具，其中参数估计又可分为点估计和区间估计。点估计分析$\mathscr{P}$中哪一个概率测度最有可能是真实总体，区间估计是为了得到一个尽可能小的$\mathscr{P}_0\subseteq\mathscr{P}$使得真实总体最有可能在这里面，假设检验分析对于$\mathscr{P}_1,\mathscr{P}_2\subseteq\mathscr{P}$，真实总体最有可能出现在哪一个之中。\par
+	对于参数结构，我们往往希望能够用较简单的参数$\theta$来刻画复杂的概率测度$P$。这是因为概率测度本身是定义在$\sigma$代数$\mathscr{A}$上的集合函数，它需要描述每一个可测集$A\in\mathscr{A}$发生的概率$P(A)$，因而通常是一个非常复杂的对象。参数结构的作用就是把对概率测度族$\mathscr{P}$的研究转化为对参数空间$\Theta$的研究，用参数$\theta$来标记一个概率测度$P_{\theta}$。在这种意义下，参数可以看作概率测度的坐标，它使得原本复杂的测度对象能够被有限维或结构化的参数表示。\par 
+	但是，参数化并不自动保证这种表示是唯一的。也就是说，虽然每一个参数$\theta\in\Theta$都会给出一个概率测度$P_\theta$，但不同的参数可能给出完全相同的概率测度。此时即使样本量无限增大，也只能识别出真实概率测度$P$，而不能唯一确定产生它的参数$\theta$。因此，在参数结构中通常希望参数化映射$\theta\to P_\theta$是单射，即一个概率测度对应唯一一个参数。这个要求正是识别性问题的来源。
 \end{note}
+\begin{definition}
+	设$(X,\mathscr{F},\mathscr{P})$为参数结构，$\Theta$为参数空间。若存在不同的$\theta_1,\theta_2\in\Theta$使得$\mathscr{P}_{\theta_1}=\mathscr{P}_{\theta_2}$，则称参数$\theta$\gls{Non-identifiable}，否则称$\theta$\gls{Identifiable}。
+\end{definition}
 \begin{definition}
 	设$(X_1,\mathscr{A}_1,\mathscr{P}_1),(X_2,\mathscr{A}_2,\mathscr{P}_2),\dots,(X_n,\mathscr{A}_n,\mathscr{P}_n)$为$n$个统计结构，称：
 	\begin{equation*}
-		\left(\prod_{i=1}^nX_i,\prod_{i=1}^n\mathscr{A}_i\right,\prod_{i=1}^n\mathscr{P}_i\right)
+		\left(\prod_{i=1}^nX_i,\prod_{i=1}^n\mathscr{A}_i,\prod_{i=1}^n\mathscr{P}_i\right)
 	\end{equation*}
 	为它们的\gls{ProductStructure}。
 \end{definition}
@@ -206,15 +217,21 @@
 
 \subsection{充分统计量}
 \begin{definition}
-	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$为参数空间，$T$是可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$上的统计量。若对任意的$\theta\in\Theta$，样本$\mathbf{X}$在给定$T(\mathbf{X})$下的条件分布$P_{\theta}(\mathbf{X}|T(\mathbf{X}))$与参数$\theta$无关a.s.于$(Y,\mathscr{B},P_{\theta}T^{-1})$\info{这是茆书中的定义，点估计理论与ShaoJun都未提到a.s.，a.s.的对象是否有问题？条件分布是定义在原空间上的，为什么a.s.于推前测度？}，则称$T$为$\theta$的\gls{SufficientStatistic}，也称$T$为$\mathscr{P}$的充分统计量。
+	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$为参数空间，$T$是可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$上的统计量。若对任意的$\theta\in\Theta$，样本$\mathbf{X}$在给定$T(\mathbf{X})$下的条件分布$\{P_{\theta}(A|T(\mathbf{X})):A\in\sigma(\mathbf{X})\}$与参数$\theta$无关a.s.于$(Y,\mathscr{B},P_{\theta}T^{-1})$，则称$T$为$\theta$的\gls{SufficientStatistic}，也称$T$为$\mathscr{P}$的充分统计量。
 \end{definition}
 \begin{theorem}[Factorization Theorem]
 	\label{theo:FactorizationTheorem}
-	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$\mu$是控制测度，$\Theta$是参数空间，$T$是可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$上的统计量。$T$对$\mathscr{P}$充分当且仅当存在非负$\mathscr{B}$可测函数$g_\theta$和非负$\mathscr{A}$可测函数$h$使得：
+	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$\mu$是控制测度，$\Theta$是参数空间，$T$是可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$上的统计量。$T$为$\mathscr{P}$的充分统计量当且仅当存在非负的$\mathscr{B}$可测函数$g_\theta$和非负$\mathscr{A}$可测函数$h$使得：
 	\begin{equation*}
 		\forall\;\theta\in\Theta,\;\frac{\dif P_\theta}{\dif\mu}(x)=g_\theta[T(x)]h(x)\;\text{a.e.于}(X,\mathscr{A},\mu)
 	\end{equation*}
 \end{theorem}
+\begin{proof}
+	\textbf{(1)必要性：}对于任意的$A\in\sigma(T)$，
+	\begin{equation*}
+		P_{\theta}(A\mid)
+	\end{equation*}
+\end{proof}
 \begin{property}\label{prop:SufficientStatistic}
 	充分统计量具有如下性质：
 	\begin{enumerate}
@@ -284,11 +301,25 @@
 
 \subsection{指数族}
 \begin{definition}
+	设$(X,\mathscr{A},P)$为概率空间，$\mu$为其上的$\sigma$有限测度。若$P\ll\mu$，根据\cref{theo:RadonNikodym}，称：
+	\begin{equation*}
+		\operatorname{Supp}_{\mu}(P)=\left\{x\in X:\frac{\dif P}{\dif\mu}(x)>0\right\}
+	\end{equation*}
+	为$P$关于$\mu$的\gls{Support}。
+\end{definition}
+\begin{definition}
+	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$\mu$是控制测度，$\Theta$是参数空间。若存在可测集合$S\in\mathscr{A}$，使得对任意$\theta\in\Theta$都有
+	\begin{equation*}
+		\mu\Big(\left\{x\in X:\frac{\dif P_{\theta}}{\dif\mu}(x)>0\right\}\Delta S\Big)=0
+	\end{equation*}
+	则称$\mathscr{P}$关于$\mu$具有\gls{CommonSupport}$S$，或称该结构的支撑不依赖于参数$\theta$。
+\end{definition}
+\begin{definition}
 	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$\mu$是控制测度，$\Theta$是参数空间。若$\mathscr{P}$满足：
 	\begin{equation*}
 		\forall\;\theta\in\Theta,\;\frac{\dif P_{\theta}}{\dif\mu}(x)=\exp\left[\eta^{\top}(\theta)T(x)-\xi(\theta)\right]h(x)=C(\theta)\exp\left[\eta^{\top}(\theta)T(x)\right]h(x)
 	\end{equation*}
-	且支撑$\left\{x:\frac{\dif P_{\theta}}{\dif\mu}(x)>0\right\}$不依赖于未知参数$\theta$，则称$\mathscr{P}$是\gls{ExponentialFamily}。其中$\eta(\theta),T(x)\in\mathbb{R}^{n}$，$n$被称为该指数族的维数，$h$是非负Borel函数，$\xi(\theta)$是实值函数。称：
+	且该结构的支撑不依赖于未知参数$\theta$，则称$\mathscr{P}$是\gls{ExponentialFamily}。其中$\eta(\theta),T(x)\in\mathbb{R}^{n}$，$n$被称为该指数族的阶数，$h$是非负Borel函数，$\xi(\theta)$是实值函数。称：
 	\begin{equation*}
 		\frac{\dif P_{\theta}}{\dif\mu}(x)=\exp\left[\eta^{\top}T(x)-\xi(\eta)\right]h(x)=C(\eta)\exp\left[\eta^{\top}T(x)\right]h(x)
 	\end{equation*}
@@ -296,20 +327,33 @@
 	\begin{equation*}
 		\Xi=\left\{\eta:\int_{X}\exp\left[\eta^{\top}T(x)\right]h(x)\dif\mu<+\infty\right\}
 	\end{equation*}
-	为\gls{NaturalParameterSpace}。当$T(x)$或$\eta(\theta)$的各分量之间满足线性约束时，此时称$\theta$\textbf{不可识别}。若自然参数空间作为$\mathbb{R}^{n}$的子集包含一个开集，则称该指数族是\textbf{满秩的}。若自然参数之间满足非线性约束，称此时的指数族为\textbf{curved exponential family}。
+	为\gls{NaturalParameterSpace}。
 \end{definition}
 \begin{note}
-	指数族的很多很好的性质需要指数族是满秩的，请注意，自然参数空间有内点$\iff$自然参数空间中有开集$\iff$自然参数空间中含有一个开矩形。
+	在$n$阶指数族的标准形式中，虽然自然参数$\eta$被写为$\mathbb{R}^{n}$中的向量，但这并不意味着该指数族真的具有$n$个自由参数方向。例如设$n=2$，若自然参数空间为：
+	\begin{equation*}
+		\Xi=\left\{(\eta_1,\eta_2)\in\mathbb{R}^{2}:\eta_1=2\eta_2\right\}
+	\end{equation*}
+	则$\Xi$只是$\mathbb{R}^{2}$中的一条直线。尽管自然参数形式中出现了两个分量$\eta_1,\eta_2$，但它们不能独立变化，模型实际上只有一个自由参数方向。令$\eta_2=\gamma$，则$\eta_1=2\gamma$，于是：
+	\begin{equation*}
+		\eta_1T_1(x)+\eta_2T_2(x)=\gamma\left[2T_1(x)+T_2(x)\right]
+	\end{equation*}
+	由此可见，该指数族虽然形式上写成二维自然参数形式，但本质上只是一维自然参数族。\par
+	因此，在讨论指数族的阶数时，仅仅说明$T(x)\in\mathbb{R}^{n}$和$\eta\in\mathbb{R}^{n}$是不够的，还需要进一步要求自然参数空间$\Xi$在$\mathbb{R}^{n}$中确实具有$n$维变化范围。换言之，在某个自然参数点附近，$\eta$应当可以沿$\mathbb{R}^{n}$中的任意方向作充分小的扰动。
 \end{note}
+\begin{definition}
+	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$\mu$是控制测度，$\mathscr{P}$是$n$阶指数族。若自然参数空间$\Xi$含有$\mathbb{R}^{n}$中的非空开集，则称$\mathscr{P}$是满秩指数族，否则称其为非满秩指数族。
+\end{definition}
 \begin{property}\label{prop:ExponentialFamily}
-	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$\mu$是控制测度，$\mathscr{P}$是$n$维指数族，则：
+	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$\mu$是控制测度，$\mathscr{P}$是$n$阶指数族，则：
 	\begin{enumerate}
 		\item $\dfrac{\dif P_{\theta}}{\dif\mu}$表达式不唯一；
-		\item 对于$\xi(\theta)$和自然参数$\xi(\eta)$有：
+		\item 对于$\xi(\theta)$和$\xi(\eta)$有：
 		\begin{gather*}
 			\xi(\theta)=\ln\left\{\int_{X}\exp\left[\eta^{\top}(\theta)T(x)\right]h(x)\dif\mu\right\} \\
 			\xi(\eta)=\ln\left\{\int_{X}\exp\left[\eta^{\top}T(x)\right]h(x)\dif\mu\right\}
 		\end{gather*}
+		\item 若$\mathscr{P}$关于$\mu$具有共同支撑$S$，$\Xi$是自然参数空间，$\mathscr{P}$是满秩指数族，则自然参数$\eta$不可识别当且仅当存在非零的$\alpha\in\mathbb{R}^{n}$和$\beta\in\mathbb{R}^{}$使得$\alpha^{\top}T(x)=\beta\;$a.e.于$(S,S\cap\mathscr{A},\mu)$；
 		\item 有限个概率分布是指数族的相互独立的随机变量的联合概率分布仍为指数族，即指数族在简单抽样下是封闭的；
 		\item $\mathscr{P}$的自然参数空间$\Xi$是凸集；
 		\item 设$f$是$(X,\mathscr{A})$上的Borel函数，令：
@@ -317,28 +361,75 @@
 			G(\eta)=\int_{X}f(x)\exp[\eta^{\top}T(x)]h(x)\dif\mu
 		\end{equation*}
 		记$\Xi_0=\{\eta:G(\eta)\in\mathbb{R}^{}\}$。对$\Xi_0$的任意内点$a$，$G$在$a$点连续，且$G$在$a$点的任意阶偏导数都存在并可将求导与积分交换顺序。
-		\item 若$\mathscr{P}$满秩，$T(x)$或$\eta(\theta)$的各分量之间不满足线性约束或非线性约束；
 		\item $T(x)$是$\mathscr{P}$的充分统计量；
 		\item 若$\mathscr{P}$满秩，则$T(x)$是$\mathscr{P}$的极小充分统计量和完全统计量；
-		\item $\operatorname{E}_{\eta}(T_i)=\dfrac{\partial\xi(\eta)}{\partial\eta_i},\;\operatorname{Cov}_{\eta}(T_i,T_j)=\dfrac{\partial^2\xi(\eta)}{\partial\eta_i\partial\eta_j}$；
+		\item $\operatorname{E}_{\eta}(T_i)=\dfrac{\partial\xi(\eta)}{\partial\eta_i},\;\operatorname{Cov}_{\eta}(T_i,T_j)=\dfrac{\partial^2\xi(\eta)}{\partial\eta_j\partial\eta_i}$；
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)显然。\par
-	(2)概率测度在$X$上的积分应为$1$。\par
-	(3)\info{链接独立的联合密度函数}。\par
-	(4)设$\theta,\vartheta\in\Xi$且$\theta\ne\vartheta$。对任意的 $\alpha\in(0,1)$，将$h$吸收进$\mu$得到$\nu$，由\cref{ineq:holder-ineq-Lebesgue}可得：
+	(1)满秩变不满秩进行分解。\par
+	(2)概率测度在$X$上的值应为$1$。\par
+	(3)\textbf{必要性：}若参数$\eta$不可识别，则存在不同的$\eta_1,\eta_2\in\Xi$使得$P_{\eta_1}=P_{\eta_2}$。由\cref{theo:RadonNikodym}可知此时有：
+	\begin{equation*}
+		\frac{\dif P_{\eta_1}}{\dif\mu}=\frac{\dif P_{\eta_2}}{\dif\mu},\;\text{a.e.于}(X,\mathscr{A},\mu)
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\exp\left[\eta_1^{\top}T(x)-\xi(\eta_1)\right]h(x)=\exp\left[\eta_2^{\top}T(x)-\xi(\eta_2)\right]h(x),\;\text{a.e.于}(X,\mathscr{A},\mu)
+	\end{equation*}
+	于是存在$N\in\mathscr{A}$满足：
+	\begin{equation*}
+		\mu(N)=0,\quad\exp\left[\eta_1^{\top}T(x)-\xi(\eta_1)\right]h(x)=\exp\left[\eta_2^{\top}T(x)-\xi(\eta_2)\right]h(x),\;x\in N^c
+	\end{equation*}
+	对任意的$x\in S\backslash N$有：
+	\begin{equation*}
+		\eta_1^{\top}T(x)-\xi(\eta_1)=\eta_2^{\top}T(x)-\xi(\eta_2)
+	\end{equation*}
+	根据\cref{prop:SigmaField}(2)和\cref{prop:Measure}(3)（单调性）可知：
+	\begin{equation*}
+		0\leqslant\mu(S\cap N)\leqslant\mu(N)=0
+	\end{equation*}
+	所以$\mu(S\cap N)=0$，即：
+	\begin{equation*}
+		\eta_1^{\top}T(x)-\xi(\eta_1)=\eta_2^{\top}T(x)-\xi(\eta_2),\;\text{a.e.于}(S,S\cap\mathscr{A},\mu)
+	\end{equation*}
+	必要性成立。\par
+	\textbf{充分性：}若存在非零的$\alpha\in\mathbb{R}^n$和$\beta\in\mathbb{R}$使得$\alpha^{\top}T(x)=\beta\;$a.e.于$(S,S\cap\mathscr{A},\mu)$，任取$\Xi$中$\mathbb{R}^{n}$上非空开集上的$\eta_1$，于是存在充分小的$t\ne 0$使得$\eta_1+t\alpha$也在其中。由\cref{prop:MeasurableIntegral}(6)(8)可知：
 	\begin{align*}
-		&\int_{}\exp\left\{[\alpha\theta+(1-\alpha)\vartheta]^{\top}T(x)\right\}\dif\nu \\
+		&\int_{X}^{}\exp\left[(\eta_1+t\alpha)^\top T(x)\right]h(x)\dif\mu=\int_{S}^{}\exp\left[\eta_1^\top T(x)+t\alpha^\top T(x)\right]h(x)\dif\mu \\
+		=&\int_{S}^{}\exp\left[\eta_1^\top T(x)+t\beta\right]h(x)\dif\mu=\exp(t\beta)\int_{S}^{}\exp\left[\eta_1^\top T(x)\right]h(x)\dif\mu
+	\end{align*}
+	根据\cref{prop:ExponentialFamily}(2)可知$\xi(\eta_1+t\alpha)=\xi(\eta_1)+t\beta$，于是：
+	\begin{align*}
+		\frac{\dif P_{\eta_1+t\alpha}}{\dif\mu}(x)
+		&=\exp\left\{(\eta_1+t\alpha)^\top T(x)-\xi(\eta_1+t\alpha)\right\}h(x) \\
+		&=\exp\left\{\eta_1^\top T(x)+t\beta-\xi(\eta_1)-t\beta\right\}h(x) \\
+		&=\exp\left\{\eta_1^\top T(x)-\xi(\eta_1)\right\}h(x)=\frac{\dif P_{\eta_1}}{\dif\mu}(x)
+	\end{align*}
+	a.e.于$(S,S\cap\mathscr{A},\mu)$。注意到在$S^c$上有$h(x)=0$，上述二者也同时为$0$，所以根据\cref{prop:SigmaField}(6)可得：
+	\begin{equation*}
+		\frac{\dif P_{\eta_1+t\alpha}}{\dif\mu}=\frac{\dif P_{\eta_1}}{\dif\mu},\;\text{a.e.于}(X,\mathscr{A},\mu)
+	\end{equation*}
+	由\cref{theo:RadonNikodym}和\cref{prop:MeasurableIntegral}(8)可得$P_{\eta_1+t\alpha}=P_{\eta_1}$。因为$t\ne 0$且$\alpha\ne\mathbf{0}$，所以$\eta_1+t\alpha\ne\eta_1$， 自然参数$\eta$不可识别。\par
+	(4)由\cref{prop:Independent}(5.c)即可得到。\par
+	(5)设$\theta,\vartheta\in\Xi$且$\theta\ne\vartheta$。对任意的 $\alpha\in(0,1)$，定义：
+	\begin{equation*}
+		\forall\;A\in\mathscr{A},\;\nu(A)=\int_{A}h(x)\dif\mu
+	\end{equation*}
+	由\cref{prop:NonnegativeMeasurableIntegral}(2)(3)和\cref{theo:MeasurableCountableIntegral}可知$\nu$是$(X,\mathscr{A})$上的测度，并且$\nu\ll\mu$。根据\cref{theo:RadonNikodym}可知$h(x)$是$\nu$关于$\mu$的RN导数，由\cref{lem:IntChangeOfMeasure}和\cref{ineq:holder-ineq-Lebesgue}可得：
+	\begin{align*}
+		&\int_{}\exp\left\{[\alpha\theta+(1-\alpha)\vartheta]^{\top}T(x)\right\}h(x)\dif\mu \\
+		=&\int_{}\exp\left\{[\alpha\theta+(1-\alpha)\vartheta]^{\top}T(x)\right\}\dif\nu \\
 		=&\int_{}\exp\left[\alpha\theta^{\top}T(x)\right]\exp\left[(1-\alpha)\vartheta^{\top}T(x)\right]\dif\nu \\
 		\leqslant&\left\{\int_{}\exp\left[\theta^{\top}T(x)\right]\dif\nu\right\}^{\alpha}\left\{\int_{}\exp\left[\vartheta^{\top}T(x)\right]\dif\nu\right\}^{1-\alpha}<+\infty
-	\end{align*}\par
+	\end{align*}
+	即$\alpha\theta+(1-\alpha)\vartheta\in\Xi$，结论成立。\par
 	(7)由\cref{theo:FactorizationTheorem}立即可得。\par
 	(9)因为：
 	\begin{equation*}
 		\int_{X}\exp\left[\sum_{i=1}^{n}\eta_iT_i(x)-\xi(\eta)\right]h(x)\dif\mu=1
 	\end{equation*}
-	由(5)和\cref{prop:MeasurableIntegral}(6)可得\info{$C(\eta)$的可积性与Borel可测性}：
+	由(6)和\cref{prop:MeasurableIntegral}(6)可得：
 	\begin{gather*}
 		\frac{\partial}{\partial\eta_i}\int_{X}^{}\exp\left[\sum_{i=1}^{n}\eta_iT_i(x)-\xi(\eta)\right]h(x)\dif\mu=0 \\
 		\int_{X}^{}\left[T_i(x)-\frac{\partial \xi(\eta)}{\partial\eta_i}\right]\exp\left[\sum_{i=1}^{n}\eta_iT_i(x)-\xi(\eta)\right]h(x)\dif\mu=0 \\
@@ -347,11 +438,11 @@
 	\end{gather*}\par
 	对上式求关于$\eta_j$的导数，由\cref{prop:CovMat}(6)可得：
 	\begin{gather*}
-		\int_{X}^{}T_i(x)\left[T_j(x)-\frac{\partial \xi(\eta)}{\partial\eta_j}\right]\exp\left[\sum_{i=1}^{n}\eta_iT_i(x)-\xi(\eta)\right]h(x)\dif\mu=\frac{\partial^2 \xi(\eta)}{\partial\eta_i\partial\eta_j} \\
-		\int_{X}^{}T_i(x)T_j(x)p(x)\dif\mu-\int_{X}^{}T_i(x)\frac{\partial \xi(\eta)}{\partial\eta_j}p(x)\dif\mu=\frac{\partial^2 \xi(\eta)}{\partial\eta_i\partial\eta_j} \\
-		\operatorname{E}_{\eta}(T_iT_j)-\frac{\partial \xi(\eta)}{\partial\eta_j}\operatorname{E}_{\eta}(T_i)=\frac{\partial^2 \xi(\eta)}{\partial\eta_i\partial\eta_j} \\
-		\operatorname{E}_{\eta}(T_iT_j)-\operatorname{E}_{\eta}(T_i)\operatorname{E}_{\eta}(T_j)=\frac{\partial^2 \xi(\eta)}{\partial\eta_i\partial\eta_j} \\
-		\operatorname{Cov}_{\eta}(T_i,T_j)=\frac{\partial^2 \xi(\eta)}{\partial\eta_i\partial\eta_j}\qedhere
+		\int_{X}^{}T_i(x)\left[T_j(x)-\frac{\partial \xi(\eta)}{\partial\eta_j}\right]\exp\left[\sum_{i=1}^{n}\eta_iT_i(x)-\xi(\eta)\right]h(x)\dif\mu=\frac{\partial^2 \xi(\eta)}{\partial\eta_j\partial\eta_i} \\
+		\int_{X}^{}T_i(x)T_j(x)p(x)\dif\mu-\int_{X}^{}T_i(x)\frac{\partial \xi(\eta)}{\partial\eta_j}p(x)\dif\mu=\frac{\partial^2 \xi(\eta)}{\partial\eta_j\partial\eta_i} \\
+		\operatorname{E}_{\eta}(T_iT_j)-\frac{\partial \xi(\eta)}{\partial\eta_j}\operatorname{E}_{\eta}(T_i)=\frac{\partial^2 \xi(\eta)}{\partial\eta_j\partial\eta_i} \\
+		\operatorname{E}_{\eta}(T_iT_j)-\operatorname{E}_{\eta}(T_i)\operatorname{E}_{\eta}(T_j)=\frac{\partial^2 \xi(\eta)}{\partial\eta_j\partial\eta_i} \\
+		\operatorname{Cov}_{\eta}(T_i,T_j)=\frac{\partial^2 \xi(\eta)}{\partial\eta_j\partial\eta_i}\qedhere
 	\end{gather*}
 \end{proof}
 \begin{theorem}

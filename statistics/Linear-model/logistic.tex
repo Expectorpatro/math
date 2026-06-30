@@ -1,5 +1,13 @@
 \section{广义线性模型}
-
+在线性模型中，我们通过线性预测子$x_i^{\top}\beta$直接建模响应变量$y_i$的条件均值，即：
+\begin{equation*}
+	\mu_i=\operatorname{E}(y_i\mid x_i)=x_i^{\top}\beta
+\end{equation*}
+然而，当$y_i$服从Bernoulli分布、Poisson分布等非正态分布时，其条件均值$\mu_i$通常受到取值范围的限制。例如，Bernoulli分布的条件均值必须属于$(0,1)$，Poisson分布的条件均值必须为正数，因而不能直接令$\mu_i=x_i^{\top}\beta$。\par
+为了将线性模型中建模条件均值的思想推广到更广泛的响应变量分布，一个自然的想法是引入一个可逆的函数$g(\cdot)$，对条件均值$\mu_i$进行变换，使变换后的均值能够由线性预测子建模：
+\begin{equation*}
+	g(\mu_i)=\eta_i=x_i^{\top}\beta
+\end{equation*}
 \begin{definition}\label{model:GLM}
 	称以下模型为\textbf{广义线性模型}\footnote{注意区分广义最小二乘估计，两者的模型命名都是广义线性模型。}：
 	\begin{equation*}
@@ -7,88 +15,127 @@
 	\end{equation*}
 	其中$\{y_i\}$相互独立，$F$属于指数分布族，有：
 	\begin{equation*}
-		f(y_i;\theta_i,\phi)
-		= \exp\left\{
-		\frac{y_i\theta_i - b(\theta_i)}{a(\phi)} + c(y_i,\phi)
-		\right\}.
+		f(y_i;\theta_i,\phi)=\exp\left\{\frac{y_i\theta_i-b(\theta_i)}{a(\phi)}+c(y_i,\phi)\right\}
 	\end{equation*}
-	记
-	\[
-	\mu_i = \mathbb{E}(y_i \mid x_i) = b'(\theta_i), \qquad
-	\operatorname{Var}(y_i \mid x_i) = a(\phi)\, b''(\theta_i),
-	\]
-	并通过\textbf{链接函数} $g(\cdot)$ 将条件均值与线性预测子联系：
+	记：
 	\begin{equation*}
-		g(\mu_i) = \eta_i = x_i^{\top}\beta,
+		\mu_i=\operatorname{E}(y_i\mid x_i)=b'(\theta_i), \quad\operatorname{Var}(y_i\mid x_i)=a(\phi)b''(\theta_i)
 	\end{equation*}
-	其中 $x_i$ 为第 $i$ 个观测的 $p\times 1$ 特征向量，$\beta$ 为 $p\times 1$ 的回归系数向量，$\phi$ 为离散参数（dispersion parameter）。
-	
-	记
-	\[
-	\mu = (\mu_1,\mu_2,\dots,\mu_n)^{\top}, \quad
-	X = (x_1; x_2; \cdots; x_n), \quad
-	y = (y_1,y_2,\dots,y_n)^{\top}.
-	\]
+	并通过\gls{LinkFunction}$g(\cdot)$将条件均值与线性预测子联系：
+	\begin{equation*}
+		g(\mu_i)=\eta_i=x_i^{\top}\beta
+	\end{equation*}
+	其中$x_i$为第$i$个观测的$p\times1$特征向量，$\beta$为$p\times1$的回归系数向量，$\phi$为\gls{DispersionParameter}。\par
+	记：
+	\begin{equation*}
+		\mu=(\seq{\mu}{n})^{\top},\quad X=(\seq{x}{n}),\quad y=(\seq{y}{n})^{\top}
+	\end{equation*}
 \end{definition}
-
-
-
-
 
 \subsection{Logistic模型}
-\begin{definition}\label{model:Logistic}
+\begin{definition}\label{model:LogisticRegression}
 	称以下模型为\textbf{逻辑回归模型}：
 	\begin{equation*}
-		y_i|x_i\sim\operatorname{Bernoulli}(p_i),\quad
-		\operatorname{E}(y_i|x_i)=p_i =\operatorname{P}(y_i=1|x_i) =  \frac{1}{1+\exp(-x_i^{\top}\beta)}, \quad i=1,2,\dots,n
+		y_i\mid x_i\sim\operatorname{Bernoulli}(p_i),\quad\operatorname{E}(y_i\mid x_i)=p_i=\operatorname{P}(y_i=1\mid x_i)=\frac{1}{1+\exp(-x_i^{\top}\beta)},\quad i=1,2,\dots,n
 	\end{equation*}
-	其中 $y_i$相互独立，$x_i$ 为第 $i$ 个观测的 $p\times 1$ 特征向量，$\beta$ 为 $p\times1$ 的回归系数向量。记$p = (p_1,p_2,\dots,p_n)^{\top},\;X=(x_1;x_2;\cdots;x_n),\;y=(\seq{y}{n})$。
+	其中$y_i$相互独立，$x_i$为第$i$个观测的$p\times1$特征向量，$\beta$为$p\times1$的回归系数向量。记$p=(\seq{p}{n})^{\top},\;X=(x_1^{\top};x_2^{\top};\cdots;x_n^{\top}),\;y=(\seq{y}{n})^{\top}$。
 \end{definition}
-\begin{property}
-	对于\cref{model:Logistic}，有如下结论：
+\begin{property}\label{prop:LogisticRegression}
+	对于\cref{model:LogisticRegression}，有如下结论：
 	\begin{enumerate}
-		\item $\seq{y}{n}\in\{0,1\}^n$ 的条件概率函数为：
-		\begin{equation*}
-			L(\beta) = \prod_{i=1}^{n} p_i^{y_i}(1-p_i)^{1-y_i}
-		\end{equation*}
 		\item 模型的对数似然函数为：
 		\begin{equation*}
-			\ln L(\beta)=\sum_{i=1}^{n} \left[y_i\log(p_i)+(1-y_i)\log(1-p_i)\right]
+			\ln L(\beta)=\sum_{i=1}^{n}\left[y_i\log(p_i)+(1-y_i)\log(1-p_i)\right]
 		\end{equation*}
 		\item 模型的对数似然函数对$\beta$的梯度为：
 		\begin{equation*}
-			\frac{\dif\ln L(\beta)}{\dif\beta} = X^{\top}(y - p)
+			\frac{\dif\ln L(\beta)}{\dif\beta}=X^{\top}(y-p)
 		\end{equation*}
 		\item 模型的对数似然函数对$\beta$的Hesse矩阵为：
 		\begin{equation*}
-			\frac{\dif^2\ln L(\beta)}{\dif\beta\dif\beta^{\top}}=-X^{\top}\operatorname{diag}\{p_1(1-p_1),p_2(1-p_2),\dots,p_n(1-p_n)\}X
+			\frac{\dif^2\ln L(\beta)}{\dif\beta^{\top}\dif\beta}=-X^{\top}\operatorname{diag}\{p_1(1-p_1),p_2(1-p_2),\dots,p_n(1-p_n)\}X
 		\end{equation*}
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)由Bernulli分布的概率函数及$y_i$之间的独立性立即可得。\par
-	(2)由(1)立即可得。\par
-	(3) 对 $\ell(\beta)$ 求导：
-	\[
-	\frac{\dif\ln L(\beta)}{\dif \beta}
-	= \sum_{i=1}^n \left[ \frac{y_i}{p_i} - \frac{1 - y_i}{1 - p_i} \right] \cdot \frac{\dif p_i}{\dif \beta}
-	\]
+	(1)由Bernulli分布的概率函数及\cref{prop:Independent}(5.c)立即可得。\par
+	(2)对$\ell(\beta)$求导：
+	\begin{equation*}
+		\frac{\dif\ln L(\beta)}{\dif\beta}=\sum_{i=1}^n\left[\frac{y_i}{p_i}-\frac{1-y_i}{1-p_i}\right]\cdot\frac{\dif p_i}{\dif\beta}
+	\end{equation*}
 	而：
-	\[
-	\frac{\dif p_i}{\dif \beta}=-[1+\exp(-x_i^{\top}\beta)]^{-2}(-x_i)\exp(-x_i^{\top}\beta)=p_i(1 - p_i) x_i
-	\]
+	\begin{equation*}
+		\frac{\dif p_i}{\dif\beta}=-[1+\exp(-x_i^{\top}\beta)]^{-2}(-x_i)\exp(-x_i^{\top}\beta)=p_i(1-p_i)x_i
+	\end{equation*}
 	代入上式得：
 	\begin{align*}
 		\frac{\dif\ln L(\beta)}{\dif \beta}&=\sum_{i=1}^{n}\left[\frac{y_i}{p_i}-\frac{1-y_i}{1-p_i}\right]p_i(1-p_i)x_i=\sum_{i=1}^{n}[y_i(1-p_i)-(1-y_i)p_i]x_i \\
-		&=\sum_{i=1}^{n}(y_i-y_ip_i-p_i+y_ip_i)=\sum_{i=1}^n (y_i - p_i)x_i = X^{\top}(y - p)
+		&=\sum_{i=1}^{n}(y_i-y_ip_i-p_i+y_ip_i)x_i=\sum_{i=1}^n(y_i-p_i)x_i=X^{\top}(y-p)
 	\end{align*}\par
-	(4)对上式再求导：
+	(3)对上式再求导：
 	\begin{align*}
-		\frac{\dif^2 \ln L(\beta)}{\dif \beta \dif \beta^{\top}}
+		\frac{\dif^2\ln L(\beta)}{\dif\beta^{\top}\dif\beta}
 		&=-\sum_{i=1}^{n}\frac{\dif p_i}{\dif\beta}x_i^{\top}=-\sum_{i=1}^{n}p_i(1-p_i)x_ix_i^{\top} \\
 		&=-X^{\top}\operatorname{diag}\{p_1(1-p_1),p_2(1-p_2),\dots,p_n(1-p_n)\}X\qedhere
 	\end{align*}
 \end{proof}
+
+\subsection{Poisson回归}
+\begin{definition}\label{model:PoissonRegression}
+	称以下模型为\textbf{Poisson回归模型}：
+	\begin{equation*}
+		y_i\mid x_i\sim\operatorname{Poisson}(\lambda_i),\quad\operatorname{E}(y_i\mid x_i)=\operatorname{Var}(y_i\mid x_i)=\lambda_i=\exp(x_i^{\top}\beta),\quad i=1,2,\dots,n.
+	\end{equation*}
+	其中$y_i\in\mathbb{N}^{}$且相互独立，$x_i$为第$i$个观测的$p\times1$特征向量，$\beta$为$p\times1$的回归系数向量。记：
+	\begin{equation*}
+		\lambda=(\seq{\lambda}{n})^{\top},\quad X=(x_1^{\top};x_2^{\top};\cdots;x_n^{\top}),\quad y=(\seq{y}{n})^{\top}
+	\end{equation*}
+\end{definition}
+\begin{property}\label{prop:PoissonRegression}
+	对于\cref{model:PoissonRegression}，有如下结论：
+	\begin{enumerate}
+		\item 模型的对数似然函数为：
+		\begin{equation*}
+			\ln L(\beta)=\sum_{i=1}^{n}\left[x_i^T\beta y_i-\ln(y_i!)-\lambda_i\right]
+		\end{equation*}
+		\item 模型的对数似然函数关于$\beta$的梯度为：
+		\begin{equation*}
+			\frac{\dif\ln L(\beta)}{\dif\beta}=X^{\top}(y-\lambda)
+		\end{equation*}
+		\item 模型的对数似然函数关于$\beta$的Hesse矩阵为：
+		\begin{equation*}
+			\frac{\dif^2\ln L(\beta)}{\dif\beta^{\top}\dif\beta}=-X^{\top}\operatorname{diag}(\seq{\lambda}{n})X
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由Poisson分布的概率函数及\cref{prop:Independent}(5.c)立即可得。\par
+	(2)注意到：
+	\begin{equation*}
+		\frac{\dif(x_i^{\top}\beta)}{\dif\beta}=x_i,\quad\frac{\dif\lambda_i}{\dif\beta}=\frac{\dif\exp(x_i^{\top}\beta)}{\dif\beta}=\exp(x_i^{\top}\beta)x_i=\lambda_ix_i
+	\end{equation*}
+	所以：
+	\begin{align*}
+		\frac{\dif\ln L(\beta)}{\dif\beta}=\sum_{i=1}^{n}\left(y_ix_i-\lambda_ix_i\right)=\sum_{i=1}^{n}x_i(y_i-\lambda_i)=X^{\top}(y-\lambda)
+	\end{align*}\par
+	(3)对上式再求导：
+	\begin{equation*}
+		\frac{\dif^2\ln L(\beta)}{\dif\beta^{\top}\dif\beta}=-\sum_{i=1}^{n}\lambda_ix_ix_i^{\top}=-X^{\top}\operatorname{diag}(\seq{\lambda}{n})X\qedhere
+	\end{equation*}
+\end{proof}
+
+\subsection{统一理论}
+如果我们使用Newton法进行极大似然估计的求解，根据\cref{prop:LogisticRegression}(2)(3)和\cref{prop:PoissonRegression}(2)(3)，可以发现最后的迭代问题变成了求解下述线性方程组的问题：
+\begin{equation*}
+	X^{\top}WXz=X^{\top}(y-\mu)
+\end{equation*}
+这其实正是\cref{model:GeneralizedLinearModel}下的正则方程。\par
+能不能将这类推广的线性模型统一起来，用一个统一的公式去表达？如果可以的话，能不能尽量扩大这个统一形式的表达范围，使得囊括尽可能多的情况？我们需要来分析产生上述线性方程组的原因。设模型的参数为$\theta$。\par
+首先分析$\ln L(\beta)$关于$\beta$的梯度：
+\begin{equation*}
+	\frac{\dif\ln L(\beta)}{\dif\beta}=\frac{\dif\ln L(\beta)}{\dif\theta}\frac{\dif\theta}{\dif\beta}
+\end{equation*}
+均值和模型参数之间具有一个函数关系，同时均值和$\beta$之间也有函数关系，$X^{\top}(y-\mu)$中
 
 \section{矩阵的分解}
 %\begin{algorithm}[!ht]
