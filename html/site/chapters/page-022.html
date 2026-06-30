@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-Hans" xml:lang="zh-Hans"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>第 21 章 统计计算方法 – 你永远不知道一个强迫症能干出什么事情</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/page-023.html" rel="next">
+<link href="../chapters/page-021.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-7380dde18c49706d018cafaca6afd2e2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../sidebar.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-018.html">第 6 部分 统计学</a></li><li class="breadcrumb-item"><a href="../chapters/page-022.html"><span class="chapter-title"><span class="header-section-number">第 21 章</span> 统计计算方法</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="搜索" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">你永远不知道一个强迫症能干出什么事情</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="搜索"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">你永远不知道一个强迫症能干出什么事情</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-001.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">前言</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 1 部分 代数</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-002.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 1 章</span> 线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-003.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 2 章</span> 矩阵</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 2 部分 分析学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-004.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 3 章</span> 度量空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-005.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 4 章</span> 微积分</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-006.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 5 章</span> 广义积分</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-007.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 6 章</span> 级数</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-008.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 7 章</span> Fourier级数</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-009.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 8 章</span> 赋范线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-010.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 9 章</span> 常见度量空间与赋范线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-011.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 10 章</span> Banach空间上的有界线性算子</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 3 部分 概率论</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-012.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 11 章</span> 概率测度</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-013.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 12 章</span> 概率初步</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-014.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 13 章</span> 渐进理论初步</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 4 部分 最优化</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-015.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 14 章</span> 凸集</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-016.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 15 章</span> 规划问题</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 5 部分 不等式</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-017.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 16 章</span> 不等式</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 6 部分 统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-018.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 17 章</span> 统计初步</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-019.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 18 章</span> 点估计理论</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-020.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 19 章</span> 假设检验理论</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-021.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 20 章</span> 贝叶斯统计</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-022.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title"><span class="header-section-number">第 21 章</span> 统计计算方法</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-023.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 22 章</span> 线性模型</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-024.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 23 章</span> 多元统计</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-025.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 24 章</span> 方差分析</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-026.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 25 章</span> 部分实施问题</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-027.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">符号说明</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 6 部分 统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-028.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 26 章</span> 抽样调查</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-029.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 27 章</span> 时间序列分析</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-030.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 28 章</span> 机器学习</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-031.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 29 章</span> 因果推断</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 7 部分 非参数统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-032.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 30 章</span> 位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-033.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 31 章</span> 两样本位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-034.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 32 章</span> 多样本位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-035.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 33 章</span> Something else</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-036.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 34 章</span> 单调关联性</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-037.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">附录</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-038.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">后记</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">中英术语表</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目录</h2>
+   
+  <ul>
+  <li><a href="#id--911016f2" id="toc-id--911016f2" class="nav-link active" data-scroll-target="#id--911016f2"><span class="header-section-number">21.1</span> 非线性方程的求解</a>
+  <ul>
+  <li><a href="#id--9b1ab01e" id="toc-id--9b1ab01e" class="nav-link" data-scroll-target="#id--9b1ab01e"><span class="header-section-number">21.1.0.1</span> 二分法</a></li>
+  <li><a href="#id--e7fbf4a1" id="toc-id--e7fbf4a1" class="nav-link" data-scroll-target="#id--e7fbf4a1"><span class="header-section-number">21.1.0.2</span> 不动点迭代法</a></li>
+  <li><a href="#id--a55c8a5e" id="toc-id--a55c8a5e" class="nav-link" data-scroll-target="#id--a55c8a5e"><span class="header-section-number">21.1.0.3</span> 牛顿法</a></li>
+  </ul></li>
+  <li><a href="#id--a1e98721" id="toc-id--a1e98721" class="nav-link" data-scroll-target="#id--a1e98721"><span class="header-section-number">21.2</span> 插值法</a>
+  <ul>
+  <li><a href="#lagrange-0aa99525" id="toc-lagrange-0aa99525" class="nav-link" data-scroll-target="#lagrange-0aa99525"><span class="header-section-number">21.2.0.1</span> Lagrange插值多项式</a></li>
+  <li><a href="#newton-d4629e5c" id="toc-newton-d4629e5c" class="nav-link" data-scroll-target="#newton-d4629e5c"><span class="header-section-number">21.2.0.2</span> Newton插值多项式</a></li>
+  <li><a href="#hermite-6feeee7f" id="toc-hermite-6feeee7f" class="nav-link" data-scroll-target="#hermite-6feeee7f"><span class="header-section-number">21.2.0.3</span> Hermite插值</a></li>
+  </ul></li>
+  <li><a href="#id--952e35f8" id="toc-id--952e35f8" class="nav-link" data-scroll-target="#id--952e35f8"><span class="header-section-number">21.3</span> 变分法</a>
+  <ul>
+  <li><a href="#em-f307c3c2" id="toc-em-f307c3c2" class="nav-link" data-scroll-target="#em-f307c3c2"><span class="header-section-number">21.3.1</span> EM算法</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-018.html">第 6 部分 统计学</a></li><li class="breadcrumb-item"><a href="../chapters/page-022.html"><span class="chapter-title"><span class="header-section-number">第 21 章</span> 统计计算方法</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="id--6789b1c7" class="quarto-section-identifier"><span class="chapter-title"><span class="header-section-number">第 21 章</span> 统计计算方法</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="id--911016f2" class="level2">
+<h2 class="anchored" data-anchor-id="id--911016f2"><span class="header-section-number">21.1</span> 非线性方程的求解</h2>
+<section id="id--9b1ab01e" class="level4">
+<h4 class="anchored" data-anchor-id="id--9b1ab01e"><span class="header-section-number">21.1.0.1</span> 二分法</h4>
+<div id="method-21-1" class="method theorem-block env-method">
+<p><strong>Method 21.1</strong>. <strong>（Bisection Method）</strong></p>
+<p>设函数<span class="math inline">\(f\)</span>在<span class="math inline">\([a,b]\)</span>上连续，且满足<span class="math inline">\(f(a)f(b)&lt;0\)</span>。为求解非线性方程<span class="math inline">\(f(x)=0\)</span>，由<a href="../chapters/page-004.html#lem-IntermediateValueR-75b6e15a" data-reference-type="ref+label" data-reference="lem:IntermediateValueR">引理 3.3</a>可知，存在至少一个根<span class="math inline">\(x^{\star}\in(a,b)\)</span>。二分法通过反复对区间进行二等分来逐步缩小根所在的区间：令：</p>
+<p><span class="math display">\[\begin{equation*}
+c=\frac{a+b}{2}
+
+\end{equation*}\]</span></p>
+<p>若<span class="math inline">\(f(c)=0\)</span>，则<span class="math inline">\(c\)</span>即为方程的解；否则根据符号判定准则，取满足：</p>
+<p><span class="math display">\[\begin{equation*}
+f(a)f(c)&lt;0\quad\text{或}\quad f(c)f(b)&lt;0
+
+\end{equation*}\]</span></p>
+<p>的子区间作为新的区间<span class="math inline">\([a,b]\)</span>，并重复上述过程。</p>
+<p>经过<span class="math inline">\(n\)</span>次迭代后，所得区间长度不超过<span class="math inline">\((b-a)/2^n\)</span>，任意迭代点<span class="math inline">\(x_n\)</span>与真根<span class="math inline">\(x^{\star}\)</span>的误差满足：</p>
+<p><span class="math display">\[\begin{equation*}
+|x_n-x^{\star}|\leqslant\frac{b-a}{2^n}
+
+\end{equation*}\]</span></p>
+<p>因此，可通过给定误差容许值<span class="math inline">\(\varepsilon\)</span>，选取满足：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{b-a}{2^n}\leqslant\varepsilon
+
+\end{equation*}\]</span></p>
+<p>的最小整数<span class="math inline">\(n\)</span>来控制计算精度。</p>
+</div>
+</section>
+<section id="id--e7fbf4a1" class="level4">
+<h4 class="anchored" data-anchor-id="id--e7fbf4a1"><span class="header-section-number">21.1.0.2</span> 不动点迭代法</h4>
+<div id="method-21-2" class="method theorem-block env-method">
+<p><strong>Method 21.2</strong>. <strong>（Fixed-point Iteration Method）</strong></p>
+<p>为求解非线性方程<span class="math inline">\(f(x)=0\)</span>，可将其改写为等价的形式<span class="math inline">\(x=T(x)\)</span>，若<span class="math inline">\(T\)</span>是一个压缩映射，由<a href="../chapters/page-004.html#theo-ContractionMapTheorem-043e5e3d" data-reference-type="ref+label" data-reference="theo:ContractionMapTheorem">定理 3.20</a>可求得非线性方程的根。对于迭代次数问题，可用<a href="../chapters/page-004.html#theo-ContractionMapTheorem-043e5e3d" data-reference-type="ref+label" data-reference="theo:ContractionMapTheorem">定理 3.20</a>中的第二种误差估计公式来控制精度。</p>
+</div>
+<div id="definition-21-1" class="definition theorem-block env-definition">
+<p><strong>Definition 21.1</strong>. 设映射<span class="math inline">\(T\)</span>有不动点<span class="math inline">\(x^{\star}\)</span>。若存在<span class="math inline">\(x^{\star}\)</span>的邻域<span class="math inline">\(\bar{U}(x^{\star},\delta)\)</span>满足对任意的<span class="math inline">\(x\in\bar{U}(x^{\star},\delta)\)</span>，序列<span class="math inline">\(\{x_n=T^nx\}\to x^{\star}\)</span>，则称此时的迭代法<a href="../chapters/page-051.html#term-LocalConvergence" class="term" title="local convergence">局部收敛<span class="term-english">（local convergence）</span></a>。</p>
+</div>
+<div id="theo-FixedPointLocalConvergence-96b38307" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 21.1</strong>. 设映射<span class="math inline">\(T\)</span>有不动点<span class="math inline">\(x^{\star}\)</span>，<span class="math inline">\(T'\)</span>在<span class="math inline">\(x^{\star}\)</span>的某个邻域内连续，且<span class="math inline">\(|T'x^{\star}|&lt;1\)</span>，则此时的迭代法局部收敛。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>由条件和<a href="../chapters/page-004.html#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(5)可知存在<span class="math inline">\(x^{\star}\)</span>的邻域<span class="math inline">\(U\)</span>和<span class="math inline">\(L\)</span>，使得对任意的<span class="math inline">\(x\in U\)</span>有<span class="math inline">\(|T'x|\leqslant L&lt;1\)</span>。根据<a href="../chapters/page-005.html#theo-LagrangeMeanValueTheorem-810c186e" data-reference-type="ref+label" data-reference="theo:LagrangeMeanValueTheorem">定理 4.3</a>可知对任意的<span class="math inline">\(x'\in U\)</span>有：</p>
+<p><span class="math display">\[\begin{equation*}
+|Tx-Tx^{\star}|\leqslant L|x-x^{\star}|
+
+\end{equation*}\]</span></p>
+<p>即<span class="math inline">\(T\)</span>在<span class="math inline">\(x^{\star}\)</span>的某个闭邻域内是压缩映射，由<a href="../chapters/page-004.html#theo-RnComplete-67c1ecd6" data-reference-type="ref+label" data-reference="theo:RnComplete">定理 3.8</a>、<a href="../chapters/page-004.html#prop-CompleteMetricSpace-b7028330" data-reference-type="ref+label" data-reference="prop:CompleteMetricSpace">性质 3.2.6</a>(1)和<a href="../chapters/page-004.html#theo-ContractionMapTheorem-043e5e3d" data-reference-type="ref+label" data-reference="theo:ContractionMapTheorem">定理 3.20</a>可知此时的迭代法局部收敛。&nbsp;◻</p>
+</div>
+<div id="definition-21-2" class="definition theorem-block env-definition">
+<p><strong>Definition 21.2</strong>. 设迭代过程<span class="math inline">\(x_{n+1}=Tx_n\)</span>收敛于<span class="math inline">\(T\)</span>的不动点<span class="math inline">\(x^{\star}\)</span>。令<span class="math inline">\(\varepsilon_n=x_n-x^{\star}\)</span>，若有：</p>
+<p><span class="math display">\[\begin{equation*}
+\lim_{n\to+\infty}\frac{\varepsilon_{n+1}}{\varepsilon_n^p}=C\in\mathbb{R}^{}\setminus\{0\}
+
+\end{equation*}\]</span></p>
+<p>则称该迭代过程是<span class="math inline">\(p\)</span>阶收敛的。特别的，<span class="math inline">\(p=1\)</span>且<span class="math inline">\(|C|&lt;1\)</span>时称为<a href="../chapters/page-051.html#term-LinearConvergence" class="term" title="linear convergence">线性收敛<span class="term-english">（linear convergence）</span></a>，<span class="math inline">\(p&gt;1\)</span>时称为<a href="../chapters/page-058.html#term-SuperlinearConvergence" class="term" title="superlinear convergence">超线性收敛<span class="term-english">（superlinear convergence）</span></a>。</p>
+</div>
+<div id="theo-FixedPointOrderPConvergence-22fd4bc7" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 21.2</strong>. 设迭代过程<span class="math inline">\(x_{n+1}=Tx_n\)</span>。若对于<span class="math inline">\(p\in\mathbb{N}^+\)</span>，<span class="math inline">\(T^{(p)}\)</span>在<span class="math inline">\(T\)</span>的不动点<span class="math inline">\(x^{\star}\)</span>的某个邻域内连续，并且有：</p>
+<p><span class="math display">\[\begin{equation*}
+T'x^{\star}=T''x^{\star}=\cdots=T^{(p-1)}x^{\star}=0,\;T^{(p)}x^{\star}\ne0
+
+\end{equation*}\]</span></p>
+<p>则该迭代过程在<span class="math inline">\(x^{\star}\)</span>邻近是<span class="math inline">\(p\)</span>阶收敛的。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>由<span class="math inline">\(T'x^{\star}=0\)</span>和<a href="#theo-FixedPointLocalConvergence-96b38307" data-reference-type="ref+label" data-reference="theo:FixedPointLocalConvergence">定理 21.1</a>可知该迭代过程是局部收敛的。根据可得：</p>
+<p><span class="math display">\[\begin{equation*}
+Tx_n=Tx^{\star}+\frac{T^{(p)}\xi_n}{p!}(x_n-x^{\star})^p,\quad\xi_n\text{在$x_n$与$x^{\star}$之间}
+
+\end{equation*}\]</span></p>
+<p>所以：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{Tx_n-x^{\star}}{(x_n-x^{\star})^p}=\frac{T^{(p)}\xi_n}{p!}
+
+\end{equation*}\]</span></p>
+<p>由<span class="math inline">\(T^{(p)}\)</span>在<span class="math inline">\(x^{\star}\)</span>某个邻域内的连续性和<a href="../chapters/page-004.html#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(8.c)(4.a)可得：</p>
+<p><span class="math display">\[\begin{equation*}
+\lim_{n\to+\infty}\frac{Tx_n-x^{\star}}{(x_n-x^{\star})^p}=\lim_{n\to+\infty}\frac{T^{(p)}\xi_n}{p!}=\frac{1}{p!}T^{(p)}\left(\lim_{n\to+\infty}\xi_n\right)=\frac{T^{(p)}x^{\star}}{p!}
+
+\end{equation*}\]</span></p>
+<p>◻</p>
+</div>
+</section>
+<section id="id--a55c8a5e" class="level4">
+<h4 class="anchored" data-anchor-id="id--a55c8a5e"><span class="header-section-number">21.1.0.3</span> 牛顿法</h4>
+<div id="method-21-3" class="method theorem-block env-method">
+<p><strong>Method 21.3</strong>. <strong>（Newton Method）</strong></p>
+<p>设<span class="math inline">\(f\)</span>在根<span class="math inline">\(x^{\star}\)</span>的某个邻域内是<span class="math inline">\(C^2\)</span>类函数，且满足<span class="math inline">\(f(x^{\star})=0,\;f'(x^{\star})\ne0\)</span>。为求解非线性方程<span class="math inline">\(f(x)=0\)</span>，牛顿法对<span class="math inline">\(f\)</span>在当前迭代点<span class="math inline">\(x_n\)</span>处作一阶Taylor展开，得到：</p>
+<p><span class="math display">\[\begin{equation*}
+f(x)\approx f(x_n)+f'(x_n)(x-x_n)
+
+\end{equation*}\]</span></p>
+<p>令上式为<span class="math inline">\(0\)</span>得到迭代格式为：</p>
+<p><span class="math display">\[\begin{equation*}
+x_{n+1}=x_n-\frac{f(x_n)}{f'(x_n)}
+
+\end{equation*}\]</span></p>
+<p>牛顿法的迭代函数为：</p>
+<p><span class="math display">\[\begin{equation*}
+Tx=x-\frac{f(x)}{f'(x)}
+
+\end{equation*}\]</span></p>
+<p>于是有：</p>
+<p><span class="math display">\[\begin{equation*}
+T'x=1-\frac{[f'(x)]^2-f(x)f''(x)}{[f'(x)]^2}=\frac{f(x)f''(x)}{[f'(x)]^2}
+
+\end{equation*}\]</span></p>
+<p>根据<a href="#theo-FixedPointOrderPConvergence-22fd4bc7" data-reference-type="ref+label" data-reference="theo:FixedPointOrderPConvergence">定理 21.2</a>可知牛顿法至少是二阶收敛的。</p>
+</div>
+</section>
+</section>
+<section id="id--a1e98721" class="level2">
+<h2 class="anchored" data-anchor-id="id--a1e98721"><span class="header-section-number">21.2</span> 插值法</h2>
+<div id="definition-21-3" class="definition theorem-block env-definition">
+<p><strong>Definition 21.3</strong>. 设函数<span class="math inline">\(f\)</span>在<span class="math inline">\([a,b]\)</span>上有定义，且已知在点<span class="math inline">\(a\leqslant x_0&lt;x_1&lt;\cdots&lt;x_n\leqslant b\)</span>上的值<span class="math inline">\(y_0,y_1,\dots,y_n\)</span>。若存在一个简单函数<span class="math inline">\(P(x)\)</span>使得：</p>
+<p><span class="math display">\[\begin{equation*}
+P(x_i)=y_i,\quad i=0,1,\dots,n
+
+\end{equation*}\]</span></p>
+<p>则称<span class="math inline">\(P\)</span>为<span class="math inline">\(f\)</span>的<a href="../chapters/page-048.html#term-InterpolatingFunction" class="term" title="interpolating function">插值函数<span class="term-english">（interpolating function）</span></a>，点<span class="math inline">\(x_0,x_1,\dots,x_n\)</span>被称为<a href="../chapters/page-048.html#term-InterpolationNodes" class="term" title="interpolation nodes">插值节点<span class="term-english">（interpolation nodes）</span></a>，<span class="math inline">\([a,b]\)</span>为<a href="../chapters/page-048.html#term-InterpolationInterval" class="term" title="interpolation interval">插值区间<span class="term-english">（interpolation interval）</span></a>，求插值函数<span class="math inline">\(P\)</span>的方法称为<a href="../chapters/page-048.html#term-InterpolationMethod" class="term" title="interpolation method">插值法<span class="term-english">（interpolation method）</span></a>。若<span class="math inline">\(P\)</span>是不超过<span class="math inline">\(n\)</span>次的多项式，即：</p>
+<p><span class="math display">\[\begin{equation*}
+P(x)=\sum_{i=0}^{n}a_ix^i,\quad a_i\in\mathbb{R}^{},\;i=0,1,\dots,n
+
+\end{equation*}\]</span></p>
+<p>则称<span class="math inline">\(P\)</span>为<a href="../chapters/page-048.html#term-InterpolationPolynomial" class="term" title="interpolation polynomial">插值多项式<span class="term-english">（interpolation polynomial）</span></a>，对应的插值法被称为<a href="../chapters/page-055.html#term-PolynomialInterpolation" class="term" title="polynomial interpolation">多项式插值<span class="term-english">（polynomial interpolation）</span></a>。若<span class="math inline">\(P\)</span>是分段的多项式，则称对应的插值法为<a href="../chapters/page-055.html#term-PiecewiseInterpolation" class="term" title="piecewise interpolation">分段插值<span class="term-english">（piecewise interpolation）</span></a>。</p>
+</div>
+<div id="theo-ExistenceUniquenessInterpolationPolynomial-038c6458" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 21.3</strong>. 设函数<span class="math inline">\(f\)</span>在<span class="math inline">\([a,b]\)</span>上有定义，且已知在点<span class="math inline">\(a\leqslant x_0&lt;x_1&lt;\cdots&lt;x_n\leqslant b\)</span>上的值<span class="math inline">\(y_0,y_1,\dots,y_n\)</span>。<span class="math inline">\(f\)</span>在<span class="math inline">\([a,b]\)</span>上次数不超过<span class="math inline">\(n\)</span>的插值多项式存在且唯一。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>设<span class="math inline">\(P(x)=\sum\limits_{i=0}^{n}a_ix^i\)</span>，则由条件可得到：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{pmatrix}
+1 &amp; x_0 &amp; x_0^2 &amp; \cdots &amp; x_0^n \\
+1 &amp; x_1 &amp; x_1^2 &amp; \cdots &amp; x_1^n \\
+\vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+1 &amp; x_n &amp; x_n^2 &amp; \cdots &amp; x_n^n
+\end{pmatrix}
+\begin{pmatrix}
+a_0 \\
+a_1 \\
+\vdots \\
+a_n
+\end{pmatrix}
+=
+\begin{pmatrix}
+y_0 \\
+y_1 \\
+\vdots \\
+y_n
+\end{pmatrix}
+
+\end{equation*}\]</span></p>
+<p>根据<a href="../chapters/page-003.html#prop-Determinant-426491e3" data-reference-type="ref+label" data-reference="prop:Determinant">性质 2.1.7</a>(13)、<a href="../chapters/page-002.html#prop-Rank-99b0b0fd" data-reference-type="ref+label" data-reference="prop:Rank">性质 1.1.3</a>(1)和<a href="../chapters/page-003.html#theo-SolutionOfSLE2-e572bbac" data-reference-type="ref+label" data-reference="theo:SolutionOfSLE2">定理 2.4</a>(2)可知上述线性方程组的解存在且唯一，即<span class="math inline">\(f\)</span>在<span class="math inline">\([a,b]\)</span>上次数不超过<span class="math inline">\(n\)</span>的插值多项式存在且唯一。&nbsp;◻</p>
+</div>
+<section id="lagrange-0aa99525" class="level4">
+<h4 class="anchored" data-anchor-id="lagrange-0aa99525"><span class="header-section-number">21.2.0.1</span> Lagrange插值多项式</h4>
+<div id="definition-21-4" class="definition theorem-block env-definition">
+<p><strong>Definition 21.4</strong>. 若<span class="math inline">\(n\)</span>次多项式<span class="math inline">\(l_i(x),\;i=0,1,\dots,n\)</span>在<span class="math inline">\(n+1\)</span>个节点<span class="math inline">\(x_0&lt;x_1&lt;\cdots&lt;x_n\)</span>上满足：</p>
+<p><span class="math display">\[\begin{equation*}
+l_i(x_j)=
+\begin{cases}
+1,&amp; i=j \\
+0,&amp; i\ne j
+\end{cases},\quad
+i,j=0,1,\dots,n
+
+\end{equation*}\]</span></p>
+<p>则称<span class="math inline">\(l_0(x),l_1(x),\dots,l_n(x)\)</span>为节点<span class="math inline">\(x_0,x_1,\dots,x_n\)</span>上的<span class="math inline">\(n\)</span>次<a href="../chapters/page-048.html#term-InterpolationBasisFunctions" class="term" title="interpolation basis functions">插值基函数<span class="term-english">（interpolation basis functions）</span></a>。</p>
+</div>
+<div id="definition-21-5" class="definition theorem-block env-definition">
+<p><strong>Definition 21.5</strong>. 设函数<span class="math inline">\(f\)</span>在<span class="math inline">\([a,b]\)</span>上有定义，且已知在点<span class="math inline">\(a\leqslant x_0&lt;x_1&lt;\cdots&lt;x_n\leqslant b\)</span>上的值<span class="math inline">\(y_0,y_1,\dots,y_n\)</span>。定义：</p>
+<p><span class="math display">\[\begin{equation*}
+l_i(x)=\frac{(x-x_0)(x-x_1)\dots(x-x_{i-1})(x-x_{i+1})\dots(x-x_n)}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)},\quad i=0,1,\dots,n
+
+\end{equation*}\]</span></p>
+<p>称：</p>
+<p><span class="math display">\[\begin{equation*}
+L_n(x)\coloneq\sum_{i=0}^{n}y_il_i(x)
+
+\end{equation*}\]</span></p>
+<p>为<span class="math inline">\(f\)</span>在节点<span class="math inline">\(x_0,x_1,\dots,x_n\)</span>上的<a href="../chapters/page-051.html#term-LagrangeInterpolationPolynomial" class="term" title="Lagrange interpolation polynomial">拉格朗日插值多项式<span class="term-english">（Lagrange interpolation polynomial）</span></a>。</p>
+</div>
+<div id="prop-LagrangeInterpolationPolynomial-f81f7fdb" class="property theorem-block env-property">
+<p><strong>Property 21.2.1</strong>. 设函数<span class="math inline">\(f\)</span>在<span class="math inline">\([a,b]\)</span>上有定义，且已知在点<span class="math inline">\(a\leqslant x_0&lt;x_1&lt;\cdots&lt;x_n\leqslant b\)</span>上的值<span class="math inline">\(y_0,y_1,\dots,y_n\)</span>，<span class="math inline">\(f\in C^n([a,b])\)</span>，<span class="math inline">\(f^{(n+1)}\)</span>在<span class="math inline">\((a,b)\)</span>上存在，<span class="math inline">\(L_n\)</span>为<span class="math inline">\(f\)</span>在节点<span class="math inline">\(x_0,x_1,\dots,x_n\)</span>上的Lagrange插值多项式。<span class="math inline">\(L_n\)</span>具有如下性质：</p>
+<ol type="1">
+<li><p>记<span class="math inline">\(w_{n+1}(x)=(x-x_0)(x-x_1)\cdots(x-x_n)\)</span>，则：</p>
+<p><span class="math display">\[\begin{equation*}
+                L_n(x)=\sum_{i=0}^{n}y_i\frac{w_{n+1}(x)}{(x-x_i)w_{n+1}'(x_i)}
+
+    \end{equation*}\]</span></p></li>
+<li><p>对于任意的<span class="math inline">\(x\in[a,b]\)</span>，有误差估计：</p>
+<p><span class="math display">\[\begin{equation*}
+                f(x)-L_n(x)=\frac{f^{(n+1)}(\xi)}{(n+1)!}w_{n+1}(x)
+
+    \end{equation*}\]</span></p>
+<p>其中<span class="math inline">\(\xi\in(a,b)\)</span>；</p></li>
+<li><p><span class="math inline">\(\sum\limits_{i=0}^{n}x_i^ml_i(x)=x^m(m\leqslant n)\)</span>；</p></li>
+<li><p><span class="math inline">\(L_n\)</span>有如下形式：</p>
+<p><span class="math display">\[\begin{equation*}
+                L_n(x)=\frac{\sum\limits_{i=0}^{n}y_i\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}{\sum\limits_{i=0}^{n}\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}
+
+    \end{equation*}\]</span></p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)由可知：</p>
+<p><span class="math display">\[\begin{equation*}
+w_{n+1}'(x_i)=(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)
+
+\end{equation*}\]</span></p>
+<p>于是：</p>
+<p><span class="math display">\[\begin{equation*}
+l_i(x)=\frac{w_{n+1}(x)}{(x-x_i)w_{n+1}'(x_i)}
+
+\end{equation*}\]</span></p>
+<p>(2)由条件可设<span class="math inline">\(f(x)-L_n(x)=K(x)w_{n+1}(x)\)</span>，其中<span class="math inline">\(K(x)\)</span>是一个待定函数。作辅助函数：</p>
+<p><span class="math display">\[\begin{equation*}
+\varphi(t)=f(t)-L_n(t)-K(x)w_{n+1}(t)
+
+\end{equation*}\]</span></p>
+<p>由<a href="../chapters/page-004.html#prop-RMap-d00343b3" data-reference-type="ref+label" data-reference="prop:RMap">性质 3.3.3</a>(5.b)和<a href="../chapters/page-005.html#prop-FrechetDifferential-9f3018f4" data-reference-type="ref+label" data-reference="prop:FrechetDifferential">性质 4.1.1</a>(4)可知<span class="math inline">\(\varphi^{(n)}\)</span>在<span class="math inline">\([a,b]\)</span>上连续，<span class="math inline">\(\varphi^{(n+1)}\)</span>在<span class="math inline">\((a,b)\)</span>上存在。因为<span class="math inline">\(\varphi\)</span>在<span class="math inline">\(x_0,x_1,\dots,x_n\)</span>和<span class="math inline">\(x\)</span>处均为<span class="math inline">\(0\)</span>，所以<span class="math inline">\(\varphi\)</span>在<span class="math inline">\([a,b]\)</span>上有<span class="math inline">\(n+2\)</span>个零点，根据<a href="../chapters/page-004.html#prop-RMap-d00343b3" data-reference-type="ref+label" data-reference="prop:RMap">性质 3.3.3</a>(5.b)、<a href="../chapters/page-005.html#prop-FrechetDifferential-9f3018f4" data-reference-type="ref+label" data-reference="prop:FrechetDifferential">性质 4.1.1</a>(4)和<a href="../chapters/page-005.html#theo-RolleTheorem-766c8119" data-reference-type="ref+label" data-reference="theo:RolleTheorem">定理 4.2</a>可知<span class="math inline">\(\varphi'\)</span>在<span class="math inline">\(\varphi\)</span>的两个零点间至少存在一个零点，所以<span class="math inline">\(\varphi'\)</span>在<span class="math inline">\([a,b]\)</span>上至少存在<span class="math inline">\(n+1\)</span>个零点。对<span class="math inline">\(\varphi'\)</span>再使用<a href="../chapters/page-005.html#theo-RolleTheorem-766c8119" data-reference-type="ref+label" data-reference="theo:RolleTheorem">定理 4.2</a>可知<span class="math inline">\(\varphi''\)</span>在<span class="math inline">\([a,b]\)</span>上至少存在<span class="math inline">\(n\)</span>个零点。依此类推可知<span class="math inline">\(\varphi^{(n+1)}\)</span>在<span class="math inline">\((a,b)\)</span>上至少存在一个零点<span class="math inline">\(\xi\)</span>，即：</p>
+<p><span class="math display">\[\begin{equation*}
+\varphi^{(n+1)}(\xi)=f^{(n+1)}(\xi)-K(x)(n+1)!=0
+
+\end{equation*}\]</span></p>
+<p>于是：</p>
+<p><span class="math display">\[\begin{equation*}
+K(x)=\frac{f^{(n+1)}(\xi)}{(n+1)!}
+
+\end{equation*}\]</span></p>
+<p>即：</p>
+<p><span class="math display">\[\begin{equation*}
+f(x)-L_n(x)=\frac{f^{(n+1)}(\xi)}{(n+1)!}w_{n+1}(x)
+
+\end{equation*}\]</span></p>
+<p>(3)设<span class="math inline">\(f=x^m\)</span>，由(2)即可得出结论。</p>
+<p>(4)在(3)中取<span class="math inline">\(m=0\)</span>，由(1)(3)可得：</p>
+<p><span class="math display">\[\begin{equation*}
+1=\sum_{i=0}^{n}l_i(x)=\sum_{i=0}^{n}\frac{w_{n+1}(x)}{(x-x_i)w_{n+1}'(x_i)}=w_{n+1}(x)\sum_{i=0}^{n}\frac{1}{(x-x_i)w_{n+1}'(x_i)}
+
+\end{equation*}\]</span></p>
+<p>所以：</p>
+<p><span class="math display">\[\begin{equation*}
+w_{n+1}(x)=\frac{1}{\sum\limits_{i=0}^{n}\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}
+
+\end{equation*}\]</span></p>
+<p>于是有：</p>
+<p><span class="math display">\[\begin{align*}
+L_n(x)&amp;=\sum_{i=0}^{n}y_i\frac{w_{n+1}(x)}{(x-x_i)w_{n+1}'(x_i)}=w_{n+1}(x)\sum_{i=0}^{n}y_i\frac{1}{(x-x_i)w_{n+1}'(x_i)} \\
+&amp;=\frac{\sum\limits_{i=0}^{n}y_i\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}{\sum\limits_{i=0}^{n}\dfrac{1}{(x-x_i)w_{n+1}'(x_i)}}
+
+\end{align*}\]</span></p>
+<p>◻</p>
+</div>
+<div id="note-21-1" class="note theorem-block env-note">
+<p><strong>note 21.1</strong>. <a href="#prop-LagrangeInterpolationPolynomial-f81f7fdb" data-reference-type="ref+label" data-reference="prop:LagrangeInterpolationPolynomial">性质 21.2.1</a>(4)中<span class="math inline">\(L_n\)</span>的形式又被称为<strong>Barycentric形式</strong>。该表示形式在数学上与拉格朗日插值多项式完全等价，但在数值计算中避免了高次多项式乘积的显式计算，即计算：</p>
+<p><span class="math display">\[\begin{equation*}
+w_{n+1}(x)=(x-x_0)(x-x_1)\cdots(x-x_n)
+
+\end{equation*}\]</span></p>
+<p>从而减少了由大数乘积和相消所引起的数值误差，具有显著更优的稳定性。基于上述原因，在实际数值计算中通常优先采用Barycentric形式来实现多项式插值。</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-linenos="" data-breaklines=""><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> scipy.interpolate <span class="im">import</span> BarycentricInterpolator</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    x_nodes <span class="op">=</span> np.array([<span class="fl">0.0</span>,<span class="fl">1.0</span>,<span class="fl">2.0</span>,<span class="fl">3.0</span>])</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    y_nodes <span class="op">=</span> np.array([<span class="fl">1.0</span>,<span class="fl">2.0</span>,<span class="fl">0.0</span>,<span class="fl">5.0</span>])</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    interp <span class="op">=</span> BarycentricInterpolator(x_nodes,y_nodes)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(interp(<span class="fl">1.5</span>))</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="newton-d4629e5c" class="level4">
+<h4 class="anchored" data-anchor-id="newton-d4629e5c"><span class="header-section-number">21.2.0.2</span> Newton插值多项式</h4>
+<div id="definition-21-6" class="definition theorem-block env-definition">
+<p><strong>Definition 21.6</strong>. 设函数<span class="math inline">\(f\)</span>在<span class="math inline">\([a,b]\)</span>上有定义，<span class="math inline">\(a\leqslant x_0&lt;x_1&lt;\cdots&lt;x_n\leqslant b\)</span>。记<span class="math inline">\(f[x_0]=f(x_0)\)</span>，称：</p>
+<p><span class="math display">\[\begin{equation*}
+f[x_0,x_n]=\frac{f(x_n)-f(x_0)}{x_n-x_0}
+
+\end{equation*}\]</span></p>
+<p>为<span class="math inline">\(f\)</span>关于点<span class="math inline">\(x_0,x_n\)</span>的<a href="../chapters/page-045.html#term-FirstOrderDividedDifference" class="term" title="first-order divided difference">一阶均差<span class="term-english">（first-order divided difference）</span></a>。称：</p>
+<p><span class="math display">\[\begin{equation*}
+f[x_0,x_1,\dots,x_n]=\frac{f[x_1,x_2,\dots,x_n]-f[x_0,x_1,\dots,x_{n-1}]}{x_n-x_0}
+
+\end{equation*}\]</span></p>
+<p>为<span class="math inline">\(f\)</span>的<a href="../chapters/page-053.html#term-NthOrderDividedDifference" class="term" title="n-th order divided difference">n阶均差<span class="term-english">（n-th order divided difference）</span></a>。</p>
+</div>
+<div id="prop-DividedDifference-5296d68b" class="property theorem-block env-property">
+<p><strong>Property 21.2.2</strong>. 设函数<span class="math inline">\(f\)</span>在<span class="math inline">\([a,b]\)</span>上有定义，<span class="math inline">\(a\leqslant x_0&lt;x_1&lt;\cdots&lt;x_n\leqslant b\)</span>。均差具有如下性质：</p>
+<ol type="1">
+<li><p><span class="math inline">\(f\)</span>的<span class="math inline">\(n\)</span>阶均差可以表示为<span class="math inline">\(f(x_0),f(x_1),\dots,f(x_n)\)</span>的线性组合：</p>
+<p><span class="math display">\[\begin{equation*}
+                f[x_0,x_1,\dots,x_n]=\sum_{i=0}^{n}\frac{f(x_i)}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)}
+
+    \end{equation*}\]</span></p></li>
+<li><p><span class="math inline">\(f[x_0,x_1,\dots,x_n]\)</span>对<span class="math inline">\(\{x_0,x_1,\dots,x_n\}\)</span>的任意顺序置换保持不变；</p></li>
+<li><p>对任意的<span class="math inline">\(\alpha,\beta\in\mathbb{R}^{}\)</span>和<span class="math inline">\([a,b]\)</span>上的函数<span class="math inline">\(g\)</span>，有：</p>
+<p><span class="math display">\[\begin{equation*}
+                (\alpha f+\beta g)[x_0,x_1,\dots,x_n]=\alpha f[x_0,x_1,\dots,x_n]+\beta g[x_0,x_1,\dots,x_n]
+
+    \end{equation*}\]</span></p></li>
+<li><p>若<span class="math inline">\(f\in C^n([a,b])\)</span>，则存在<span class="math inline">\(\xi\in[a,b]\)</span>使得：</p>
+<p><span class="math display">\[\begin{equation*}
+                f[x_0,x_1,\dots,x_n]=\frac{f^{(n)}(\xi)}{n!}
+
+    \end{equation*}\]</span></p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)使用数学归纳法。当<span class="math inline">\(n=1\)</span>时有：</p>
+<p><span class="math display">\[\begin{equation*}
+f[x_0,x_1]=\frac{f(x_1)-f(x_0)}{x_1-x_0}=\frac{f(x_0)}{x_0-x_1}+\frac{f(x_1)}{x_1-x_0}
+
+\end{equation*}\]</span></p>
+<p>结论成立。设结论对<span class="math inline">\(n-1\)</span>成立，下面证明结论对<span class="math inline">\(n\)</span>也成立。</p>
+<p>根据归纳假设：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;f[x_0,x_1,\dots,x_n]=\frac{f[x_1,x_2,\dots,x_n]-f[x_0,x_1,\dots,x_{n-1}]}{x_n-x_0} \\
+=&amp;\frac{1}{x_n-x_0}\left[\sum_{i=1}^{n}\frac{f(x_i)}{(x_i-x_1)(x_i-x_2)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)}\right. \\
+&amp;\left.-\sum_{i=0}^{n-1}\frac{f(x_i)}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_{n-1})}\right]  \\
+=&amp;\frac{f(x_n)}{(x_n-x_0)(x_n-x_1)\dots(x_n-x_{n-1})}+\frac{f(x_0)}{(x_0-x_1)(x_0-x_2)\dots(x_0-x_n)} \\
+&amp;+\sum_{i=1}^{n-1}\left[\frac{f(x_i)}{(x_n-x_0)(x_i-x_1)(x_i-x_2)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)}\right. \\
+&amp;\left.-\frac{f(x_i)}{(x_n-x_0)(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_{n-1})}\right]
+
+\end{align*}\]</span></p>
+<p>对于最后一项：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;\sum_{i=1}^{n-1}\left[\frac{(x_i-x_0)f(x_i)}{(x_n-x_0)(x_i-x_0)(x_i-x_1)(x_i-x_2)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)}\right. \\
+&amp;\left.-\frac{(x_i-x_n)f(x_i)}{(x_n-x_0)(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_{n-1})(x_i-x_n)}\right] \\
+=&amp;\sum_{i=1}^{n-1}\frac{(x_i-x_0)f(x_i)-(x_i-x_n)f(x_i)}{(x_n-x_0)(x_i-x_0)(x_i-x_1)(x_i-x_2)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)} \\
+=&amp;\sum_{i=1}^{n-1}\frac{(x_n-x_0)f(x_i)}{(x_n-x_0)(x_i-x_0)(x_i-x_1)(x_i-x_2)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)} \\
+=&amp;\sum_{i=1}^{n-1}\frac{f(x_i)}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)}
+
+\end{align*}\]</span></p>
+<p>所以结论成立。</p>
+<p>(2)由(1)立即可得。</p>
+<p>(3)由(1)立即可得。</p>
+<p>(4)令<span class="math inline">\(L_{n-1}\)</span>为<span class="math inline">\(f\)</span>在节点<span class="math inline">\(x_0,x_1,\dots,x_{n-1}\)</span>上的Lagrange插值多项式，作辅助函数：</p>
+<p><span class="math display">\[\begin{equation*}
+\varphi(x)=f(x)-L_{n-1}(x)-f[x_0,x_1,\dots,x_n]w_n(x)
+
+\end{equation*}\]</span></p>
+<p>由<span class="math inline">\(L_{n-1}\)</span>的定义可知<span class="math inline">\(f-L_{n-1}\)</span>在节点<span class="math inline">\(x_0,x_1,\dots,x_{n-1}\)</span>上为<span class="math inline">\(0\)</span>，而<span class="math inline">\(w_n\)</span>在节点<span class="math inline">\(x_0,x_1,\dots,x_{n-1}\)</span>上为<span class="math inline">\(0\)</span>，所以<span class="math inline">\(x_0,x_1,\dots,x_{n-1}\)</span>是<span class="math inline">\(\varphi\)</span>的零点。注意到：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;f(x_n)-L_{n-1}(x_n)-f[x_0,x_1,\dots,x_n]w_n(x_n) \\
+=&amp;f(x_n)-\sum_{i=0}^{n-1}\frac{f(x_i)(x_n-x_0)(x_n-x_1)\dots(x_n-x_{i-1})(x_n-x_{i+1})\dots(x_n-x_{n-1})}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_{n-1})} \\
+&amp;-\sum_{i=0}^{n}\frac{f(x_i)(x_n-x_0)(x_n-x_1)\cdots(x_n-x_{n-1})}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)} \\
+=&amp;f(x_n)-\sum_{i=0}^{n-1}\frac{f(x_i)(x_n-x_0)(x_n-x_1)\dots(x_n-x_{i-1})(x_n-x_{i+1})\dots(x_n-x_{n-1})}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_{n-1})} \\
+&amp;-f(x_n)-\sum_{i=0}^{n-1}\frac{f(x_i)(x_n-x_0)(x_n-x_1)\cdots(x_n-x_{n-1})}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)} \\
+=&amp;-\sum_{i=0}^{n-1}\frac{f(x_i)(x_n-x_0)(x_n-x_1)\dots(x_n-x_{n-1})}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_{n-1})(x_n-x_i)} \\
+&amp;-\sum_{i=0}^{n-1}\frac{f(x_i)(x_n-x_0)(x_n-x_1)\cdots(x_n-x_{n-1})}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)}=0
+
+\end{align*}\]</span></p>
+<p>所以<span class="math inline">\(x_n\)</span>也是<span class="math inline">\(\varphi\)</span>的零点。根据<a href="../chapters/page-004.html#prop-RMap-d00343b3" data-reference-type="ref+label" data-reference="prop:RMap">性质 3.3.3</a>(5.b)、<a href="../chapters/page-005.html#prop-FrechetDifferential-9f3018f4" data-reference-type="ref+label" data-reference="prop:FrechetDifferential">性质 4.1.1</a>(4)和<a href="../chapters/page-005.html#theo-RolleTheorem-766c8119" data-reference-type="ref+label" data-reference="theo:RolleTheorem">定理 4.2</a>可知<span class="math inline">\(\varphi'\)</span>在<span class="math inline">\([a,b]\)</span>上存在<span class="math inline">\(n\)</span>个零点。对<span class="math inline">\(\varphi'\)</span>再使用<a href="../chapters/page-005.html#theo-RolleTheorem-766c8119" data-reference-type="ref+label" data-reference="theo:RolleTheorem">定理 4.2</a>可知<span class="math inline">\(\varphi''\)</span>在<span class="math inline">\([a,b]\)</span>上存在<span class="math inline">\(n-1\)</span>个零点。依此类推可知<span class="math inline">\(\varphi^{(n)}\)</span>在<span class="math inline">\([a,b]\)</span>上存在一个零点<span class="math inline">\(\xi\)</span>，即：</p>
+<p><span class="math display">\[\begin{equation*}
+\varphi^{(n)}(\xi)=f^{(n)}(\xi)-f[x_0,x_1,\dots,x_n]n!=0
+
+\end{equation*}\]</span></p>
+<p>所以：</p>
+<p><span class="math display">\[\begin{equation*}
+f[x_0,x_1,\dots,x_n]=\frac{f^{(n)}(\xi)}{n!}
+
+\end{equation*}\]</span></p>
+<p>◻</p>
+</div>
+<div id="definition-21-7" class="definition theorem-block env-definition">
+<p><strong>Definition 21.7</strong>. 设函数<span class="math inline">\(f\)</span>在<span class="math inline">\([a,b]\)</span>上有定义，且已知在点<span class="math inline">\(a\leqslant x_0&lt;x_1&lt;\cdots&lt;x_n\leqslant b\)</span>上的值<span class="math inline">\(y_0,y_1,\dots,y_n\)</span>。称：</p>
+<p><span class="math display">\[\begin{equation*}
+P_n(x)=f[x_0]+f[x_0,x_1](x-x_0)+f[x_0,x_1,x_2](x-x_0)(x-x_1)+\cdots+f[x_0,x_1,\dots,x_n]\prod_{i=0}^{n-1}(x-x_i)
+
+\end{equation*}\]</span></p>
+<p>为<span class="math inline">\(f\)</span>在节点<span class="math inline">\(x_0,x_1,\dots,x_n\)</span>上的<a href="../chapters/page-053.html#term-NewtonInterpolationPolynomial" class="term" title="Newton interpolation polynomial">牛顿插值多项式<span class="term-english">（Newton interpolation polynomial）</span></a>。</p>
+</div>
+<div id="prop-NewtonInterpolationPolynomial-fe56a039" class="property theorem-block env-property">
+<p><strong>Property 21.2.3</strong>. Newton插值多项式与Lagrange插值多项式等价。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>设函数<span class="math inline">\(f\)</span>在<span class="math inline">\([a,b]\)</span>上有定义，且已知在点<span class="math inline">\(a\leqslant x_0&lt;x_1&lt;\cdots&lt;x_n\leqslant b\)</span>上的值<span class="math inline">\(y_0,y_1,\dots,y_n\)</span>。因为<span class="math inline">\(f\)</span>在节点<span class="math inline">\(x_0,x_1,\dots,x_n\)</span>上的Newton插值多项式<span class="math inline">\(P_n\)</span>的次数不超过<span class="math inline">\(n\)</span>，根据<a href="#theo-ExistenceUniquenessInterpolationPolynomial-038c6458" data-reference-type="ref+label" data-reference="theo:ExistenceUniquenessInterpolationPolynomial">定理 21.3</a>只需证明<span class="math inline">\(P_n(x_i)=f(x_i),\;i=0,1,\dots,n\)</span>。</p>
+<p>使用数学归纳法。当<span class="math inline">\(i=0\)</span>时由<span class="math inline">\(P_n\)</span>的定义可知<span class="math inline">\(P_n(x_0)=f(x_0)\)</span>，设结论对<span class="math inline">\(n-1\)</span>成立，下面证明结论对<span class="math inline">\(n\)</span>也成立。</p>
+<p>对于：</p>
+<p><span class="math display">\[\begin{equation*}
+P_n(x)=P_{n-1}(x)+f[x_0,x_1,\dots,x_n]w_n(x)
+
+\end{equation*}\]</span></p>
+<p>因为对任意的<span class="math inline">\(i=0,1,\dots,n-1\)</span>有<span class="math inline">\(w_n(x_i)=0\)</span>，所以由归纳假设可知：</p>
+<p><span class="math display">\[\begin{equation*}
+P_n(x_i)=P_{n-1}(x_i)=f(x_i),\quad i=0,1,\dots,n-1
+
+\end{equation*}\]</span></p>
+<p>下面证明<span class="math inline">\(P_n(x_n)=f(x_n)\)</span>。</p>
+<p>作辅助函数<span class="math inline">\(R(x)=f(x)-P_{n-1}(x)\)</span>，于是有：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{R(x_n)}{w_n(x_n)}=\frac{f(x_n)-P_{n-1}(x_n)}{w_n(x_n)}
+
+\end{equation*}\]</span></p>
+<p>由<a href="#prop-DividedDifference-5296d68b" data-reference-type="ref+label" data-reference="prop:DividedDifference">性质 21.2.2</a>(1)可得：</p>
+<p><span class="math display">\[\begin{equation*}
+R[x_0,x_1,\dots,x_n]=\sum_{i=0}^{n}\frac{R(x_i)}{(x_i-x_0)(x_i-x_1)\dots(x_i-x_{i-1})(x_i-x_{i+1})\dots(x_i-x_n)}=\frac{R(x_n)}{w_n(x_n)}
+
+\end{equation*}\]</span></p>
+<p>所以：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{f(x_n)-P_{n-1}(x_n)}{w_n(x_n)}=R[x_0,x_1,\dots,x_n]
+
+\end{equation*}\]</span></p>
+<p>根据<a href="#prop-DividedDifference-5296d68b" data-reference-type="ref+label" data-reference="prop:DividedDifference">性质 21.2.2</a>(3)可知：</p>
+<p><span class="math display">\[\begin{equation*}
+R[x_0,x_1,\dots,x_n]=f[x_0,x_1,\dots,x_n]-P_{n-1}[x_0,x_1,\dots,x_n]
+
+\end{equation*}\]</span></p>
+<p>因为<span class="math inline">\(P_{n-1}\)</span>的次数不超过<span class="math inline">\(n-1\)</span>，由<a href="#prop-DividedDifference-5296d68b" data-reference-type="ref+label" data-reference="prop:DividedDifference">性质 21.2.2</a>(4)可知<span class="math inline">\(P_{n-1}[x_0,x_1,\dots,x_n]=0\)</span>，于是有：</p>
+<p><span class="math display">\[\begin{equation*}
+R[x_0,x_1,\dots,x_n]=f[x_0,x_1,\dots,x_n]
+
+\end{equation*}\]</span></p>
+<p>所以：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{f(x_n)-P_{n-1}(x_n)}{w_n(x_n)}=f[x_0,x_1,\dots,x_n]
+
+\end{equation*}\]</span></p>
+<p>即：</p>
+<p><span class="math display">\[\begin{equation*}
+P_{n-1}(x_n)=f(x_n)-f[x_0,x_1,\dots,x_n]w_n(x_n)
+
+\end{equation*}\]</span></p>
+<p>于是：</p>
+<p><span class="math display">\[\begin{equation*}
+P_n(x_n)=P_{n-1}(x_n)+f[x_0,x_1,\dots,x_n]w_n(x_n)=f(x_n)
+
+\end{equation*}\]</span></p>
+<p>◻</p>
+</div>
+<div id="note-21-2" class="note theorem-block env-note">
+<p><strong>note 21.2</strong>. 根据<a href="#prop-NewtonInterpolationPolynomial-fe56a039" data-reference-type="ref+label" data-reference="prop:NewtonInterpolationPolynomial">性质 21.2.3</a>，Newton插值多项式和Lagrange插值多项式是等价的，于是它具有了Lagrange插值多项式的全部性质。既然等价，那为什么要研究它呢？</p>
+<p>从构造方式看，Lagrange插值是一次性使用全部节点进行整体构造，而Newton插值具有天然的递推性。当新增插值节点时，Lagrange插值多项式通常需要重新计算，而Newton插值多项式只需增加一个新的均差项即可完成更新，这使其在逐点插值与在线计算中具有明显优势。</p>
+</div>
+</section>
+<section id="hermite-6feeee7f" class="level4">
+<h4 class="anchored" data-anchor-id="hermite-6feeee7f"><span class="header-section-number">21.2.0.3</span> Hermite插值</h4>
+<div id="definition-21-8" class="definition theorem-block env-definition">
+<p><strong>Definition 21.8</strong>. 设函数<span class="math inline">\(f\)</span>在<span class="math inline">\([a,b]\)</span>上有定义，且已知<span class="math inline">\(f^{(j)}(x_i)\)</span>，<span class="math inline">\(i=0,1,\dots,n,\;j=0,1,\dots,m_i\)</span>，其中<span class="math inline">\(a\leqslant x_0&lt;x_1&lt;\cdots&lt;x_n\leqslant b\)</span>。令<span class="math inline">\(N=\sum\limits_{i=0}^{n}m_i-1\)</span>，称满足：</p>
+<p><span class="math display">\[\begin{equation*}
+H^{(j)}_N(x_i)=f^{(j)}(x_i),\quad i=0,1,\dots,n,\;j=0,1,\dots,m_i
+
+\end{equation*}\]</span></p>
+<p>的不超过<span class="math inline">\(N\)</span>次的多项式<span class="math inline">\(H_N(x)\)</span>为<a href="../chapters/page-047.html#term-HermiteInterpolationPolynomial" class="term" title="Hermite interpolation polynomial">埃尔米特插值多项式<span class="term-english">（Hermite interpolation polynomial）</span></a>。</p>
+</div>
+<div id="definition-21-9" class="definition theorem-block env-definition">
+<p><strong>Definition 21.9</strong>. 定义：</p>
+<p><span class="math display">\[\begin{equation*}
+f[\underbrace{x,x,\dots,x}_{n+1\text{个}x}]\coloneq\frac{f^{(n)}(x)}{n!}
+
+\end{equation*}\]</span></p>
+</div>
+<div id="prop-HermiteInterpolationPolynomial-05389b60" class="property theorem-block env-property">
+<p><strong>Property 21.2.4</strong>. 设函数<span class="math inline">\(f\)</span>在<span class="math inline">\([a,b]\)</span>上有定义，且已知<span class="math inline">\(f^{(j)}(x_i)\)</span>，<span class="math inline">\(i=0,1,\dots,n,\;j=0,1,\dots,m_i\)</span>，其中<span class="math inline">\(a\leqslant x_0&lt;x_1&lt;\cdots&lt;x_n\leqslant b\)</span>，<span class="math inline">\(N=\sum\limits_{i=0}^{n}m_i-1\)</span>。Hermite插值多项式具有如下性质：</p>
+<ol type="1">
+<li><p>Hermite插值多项式存在且唯一；</p></li>
+<li><p>若将每个节点<span class="math inline">\(x_i\)</span>重复<span class="math inline">\(m_i+1\)</span>次，按重复顺序排列为<span class="math inline">\(y_0,y_1,\dots,y_M\)</span>，则：</p>
+<p><span class="math display">\[\begin{equation*}
+                H_N(x)=f[y_0]+f[y_0,y_1](x-y_0)+\cdots+f[y_0,y_1,\dots,y_M]\prod_{i=0}^{M-1}(x-y_i)
+
+    \end{equation*}\]</span></p></li>
+</ol>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-breaklines="" data-linenos=""><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> scipy.interpolate <span class="im">import</span> KroghInterpolator</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Hermite interpolation data</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># f(0) = 1, f'(0) = 0</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># f(1) = 2, f'(1) = -1</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> np.array([<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">1.0</span>, <span class="fl">1.0</span>])</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">0.0</span>, <span class="fl">2.0</span>, <span class="op">-</span><span class="fl">1.0</span>])</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Hermite interpolation</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    hermite_poly <span class="op">=</span> KroghInterpolator(x, y)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># evaluate</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    x_eval <span class="op">=</span> np.linspace(<span class="fl">0.0</span>, <span class="fl">1.0</span>, <span class="dv">100</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    y_eval <span class="op">=</span> hermite_poly(x_eval)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(hermite_poly(<span class="fl">0.5</span>))</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="id--952e35f8" class="level2">
+<h2 class="anchored" data-anchor-id="id--952e35f8"><span class="header-section-number">21.3</span> 变分法</h2>
+<div id="definition-21-10" class="definition theorem-block env-definition">
+<p><strong>Definition 21.10</strong>. 设<span class="math inline">\(\varphi,\mu\)</span>是可测空间<span class="math inline">\((X,\mathscr{F})\)</span>上的概率测度，<span class="math inline">\(\varphi\ll\mu\)</span>，根据<a href="../chapters/page-012.html#theo-RadonNikodym-fd20b306" data-reference-type="ref+label" data-reference="theo:RadonNikodym">定理 11.35</a>，称：</p>
+<p><span class="math display">\[\begin{equation*}
+\int_{X}\ln\frac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}(x)\mathop{}\!\mathrm{d}\varphi
+
+\end{equation*}\]</span></p>
+<p>为<span class="math inline">\(\varphi\)</span>关于<span class="math inline">\(\mu\)</span>的<a href="../chapters/page-050.html#term-KullbackLeiblerDivergence" class="term" title="Kullback–Leibler divergence">KL散度<span class="term-english">（Kullback–Leibler divergence）</span></a> ，记为<span class="math inline">\(\operatorname{KL}(\varphi\|\mu)\)</span>。</p>
+</div>
+<div id="note-21-3" class="note theorem-block env-note">
+<p><strong>note 21.3</strong>. 设<span class="math inline">\(\mu\)</span>是可测空间<span class="math inline">\((X,\mathscr{F})\)</span>上的概率测度，我们希望求解<span class="math inline">\(\mu\)</span>但是它很难求解，<a href="../chapters/page-061.html#term-VariationalMethod" class="term" title="variational method">变分法<span class="term-english">（variational method）</span></a>的思想就是取一族形式简单、便于计算的概率函数，并在这一族分布中找到一个最接近<span class="math inline">\(p\)</span>的。由<a href="../chapters/page-017.html#ineq-Gibbs-ac5aa063" data-reference-type="ref+label" data-reference="ineq:Gibbs">不等式 20</a>可以看出KL散度可以被用来衡量分布之间的差异性。</p>
+</div>
+<div id="note-21-4" class="note theorem-block env-note">
+<p><strong>note 21.4</strong>. 在贝叶斯统计中，我们需要求解后验分布<span class="math inline">\(p(y\mid x)\)</span>，变分法提供了一个视角。</p>
+<p>设<span class="math inline">\(y\mid x\)</span>的概率分布为<span class="math inline">\(\varphi\)</span>，其近似概率分布为<span class="math inline">\(\psi\)</span>，<span class="math inline">\(\varphi,\psi\ll\mu\)</span>，<span class="math inline">\(\varphi,\psi,\mu\)</span>是可测空间<span class="math inline">\((X,\mathscr{F})\)</span>上的概率测度，根据<a href="../chapters/page-012.html#theo-RadonNikodym-fd20b306" data-reference-type="ref+label" data-reference="theo:RadonNikodym">定理 11.35</a>，记：</p>
+<p><span class="math display">\[\begin{equation*}
+q(y)=\frac{\mathop{}\!\mathrm{d}\psi}{\mathop{}\!\mathrm{d}\mu},\quad p(y\mid x)=\frac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}
+
+\end{equation*}\]</span></p>
+<p>由<a href="../chapters/page-012.html#prop-RadonNikodym-40d93ffc" data-reference-type="ref+label" data-reference="prop:RadonNikodym">性质 11.6.3</a>(5)和<a href="../chapters/page-012.html#lem-IntChangeOfMeasure-673686c1" data-reference-type="ref+label" data-reference="lem:IntChangeOfMeasure">引理 11.10</a>可知：</p>
+<p><span class="math display">\[\begin{equation*}
+\operatorname{KL}(\psi\|\varphi)=\int_{X}\ln\frac{\mathop{}\!\mathrm{d}\psi}{\mathop{}\!\mathrm{d}\varphi}\mathop{}\!\mathrm{d}\psi=\int_{X}\ln\left(\frac{\mathop{}\!\mathrm{d}\psi}{\mathop{}\!\mathrm{d}\mu}\Big/\frac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}\right)\mathop{}\!\mathrm{d}\psi=\int_{X}\ln\frac{q(y)}{p(y\mid x)}q(y)\mathop{}\!\mathrm{d}\mu
+
+\end{equation*}\]</span></p>
+<p>由于KL散度公式中存在未知的<span class="math inline">\(p(y\mid x)\)</span>，于是需要将其转变为易于求解的形式。由和<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;\operatorname{KL}(\psi\|\varphi)=\int_{X}q(y)\ln\frac{q(y)}{p(y\mid x)}\mathop{}\!\mathrm{d}\mu=\int_{X}q(y)[\ln q(y)-\ln p(y\mid x)]\mathop{}\!\mathrm{d}\mu \\
+=&amp;\int_{X}q(y)[\ln q(y)-\ln p(y,x)+\ln p(x)]\mathop{}\!\mathrm{d}\mu \\
+=&amp;\int_{X}q(y)[\ln q(y)-\ln p(y,x)]\mathop{}\!\mathrm{d}\mu+\int_{X}q(y)\ln p(x)\mathop{}\!\mathrm{d}\mu \\
+=&amp;\int_{X}q(y)[\ln q(y)-\ln p(y,x)]\mathop{}\!\mathrm{d}\mu+\ln p(x)\int_{X}q(y)\mathop{}\!\mathrm{d}\mu \\
+=&amp;\int_{X}q(y)[\ln q(y)-\ln p(y,x)]\mathop{}\!\mathrm{d}\mu+\ln p(x)
+
+\end{align*}\]</span></p>
+<p>于是根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
+<p><span class="math display">\[\begin{equation*}
+\ln p(x)=\int_{X}q(y)[\ln p(y,x)-\ln q(y)]\mathop{}\!\mathrm{d}\mu+\operatorname{KL}(\psi\|\varphi)
+
+\end{equation*}\]</span></p>
+<p>因为<span class="math inline">\(\ln p(x)\)</span>与<span class="math inline">\(y\)</span>无关，所以最小化<span class="math inline">\(\operatorname{KL}(q\| p)\)</span>等价于最大化<span class="math inline">\(\int_{X}q(y)[\ln p(y,x)-\ln q(y)]\mathop{}\!\mathrm{d}\mu\)</span>。</p>
+</div>
+<div id="definition-21-11" class="definition theorem-block env-definition">
+<p><strong>Definition 21.11</strong>. 在前述框架下，称：</p>
+<p><span class="math display">\[\begin{equation*}
+\int_{X}q(y)[\ln p(y,x)-\ln q(y)]\mathop{}\!\mathrm{d}\mu
+
+\end{equation*}\]</span></p>
+<p>为<a href="../chapters/page-044.html#term-ELBO" class="term" title="evidence lower bound">证据下界<span class="term-english">（evidence lower bound）</span></a>，记做<span class="math inline">\(L(q,x)\)</span>。</p>
+</div>
+<section id="em-f307c3c2" class="level3">
+<h3 class="anchored" data-anchor-id="em-f307c3c2"><span class="header-section-number">21.3.1</span> EM算法</h3>
+<p>在极大似然估计中，若观测变量<span class="math inline">\(f\)</span>为从可控参数结构<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>到可测空间<span class="math inline">\((Y,\mathscr{B})\)</span>上的可测映射，参数空间为<span class="math inline">\(\Theta\)</span>，控制测度为<span class="math inline">\(\mu\)</span>，根据<a href="../chapters/page-012.html#theo-RadonNikodym-fd20b306" data-reference-type="ref+label" data-reference="theo:RadonNikodym">定理 11.35</a>，记<span class="math inline">\(\dfrac{\mathop{}\!\mathrm{d}P_{\theta}}{\mathop{}\!\mathrm{d}\mu}(f)=p_{\theta}(f)\)</span>，那么目标函数可以写成：</p>
+<p><span class="math display">\[\begin{equation*}
+\hat{\theta}=\underset{\theta}{\arg\max}\ln p_{\theta}(f)
+\end{equation*}\]</span></p>
+<p>然而，在许多含有潜在结构的统计模型中，观测变量<span class="math inline">\(f\)</span>本身的概率分布并不容易直接写出。真正容易描述的，往往是它在某些无法观测的隐变量<span class="math inline">\(g\)</span>给定条件下的条件分布。有时，隐变量<span class="math inline">\(g\)</span>本身的分布也不是单纯的辅助工具，而是我们希望估计和理解的对象。</p>
+<p>但是在引入隐变量之后，我们需要通过对隐变量积分，才能得到观测变量的边际似然。设<span class="math inline">\(g\)</span>为概率空间<span class="math inline">\((X,\mathscr{A},P)\)</span>到可测空间<span class="math inline">\((Z,\mathscr{C})\)</span>上的可测映射，<span class="math inline">\(Pg^{-1}\ll\nu\)</span>，根据<a href="../chapters/page-012.html#theo-RadonNikodym-fd20b306" data-reference-type="ref+label" data-reference="theo:RadonNikodym">定理 11.35</a>，记<span class="math inline">\(\dfrac{\mathop{}\!\mathrm{d}Pg^{-1}}{\mathop{}\!\mathrm{d}\nu}=q(g)\)</span>，由和<a href="../chapters/page-012.html#lem-IntChangeOfMeasure-673686c1" data-reference-type="ref+label" data-reference="lem:IntChangeOfMeasure">引理 11.10</a>可得：</p>
+<p><span class="math display">\[\begin{equation*}
+p_{\theta}(f)=\int_{Z}p_{\theta}(f\mid g)\mathop{}\!\mathrm{d}Pg^{-1}=\int_{Z}q(g)p_{\theta}(f\mid g)\mathop{}\!\mathrm{d}\nu
+\end{equation*}\]</span></p>
+<p>原本我们只是想最大化一个对数似然函数，但由于隐变量无法观测，观测数据的概率必须通过积分得到，这使得目标函数通常难以直接优化。EM算法(Expectation-Maximization Algorithm)正是为了解决这类问题而提出的。</p>
+<p>由<a href="../chapters/page-017.html#ineq-Jensen-4973d767" data-reference-type="ref+label" data-reference="ineq:Jensen">不等式 19</a>、和<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;\ln p_{\theta}(f)=\ln\int_{Z}q(g)p_{\theta}(f\mid g)\mathop{}\!\mathrm{d}\nu=\ln\operatorname{E}[p_{\theta}(f\mid g)]\geqslant\operatorname{E}[\ln p_{\theta}(f\mid g)] \\
+=&amp;\int_{Z}q(g)[\ln p_{\theta}(f\mid g)]\mathop{}\!\mathrm{d}\nu=\int_{Z}q(g)[\ln p_{\theta}(f,g)-\ln q(g)]\mathop{}\!\mathrm{d}\nu \\
+=&amp;\int_{Z}q(g)\ln p_{\theta}(f,g)\mathop{}\!\mathrm{d}\nu-\int_{Z}q(g)\ln q(g)\mathop{}\!\mathrm{d}\nu
+\end{align*}\]</span></p>
+<p>记：</p>
+<p><span class="math display">\[\begin{equation*}
+L(q,y)=\int_{Z}q(g)\ln p_{\theta}(f,g)\mathop{}\!\mathrm{d}\nu-\int_{Z}q(g)\ln q(g)\mathop{}\!\mathrm{d}\nu
+\end{equation*}\]</span></p>
+<p>则有:</p>
+<p><span class="math display">\[\begin{equation*}
+L(q,y)\leqslant\ln p_{\theta}(f)
+\end{equation*}\]</span></p>
+<p>这个<span class="math inline">\(L(q,y)\)</span>就是边际对数似然<span class="math inline">\(\ln p_{\theta}(f)\)</span>的一个下界。</p>
+<p>EM算法的基本思想就是：既然直接最大化<span class="math inline">\(\ln p_{\theta}(f)\)</span>比较困难，那么可以转而反复提高这个下界。若一组<span class="math inline">\(\hat{q},\hat{\theta}\)</span>使得<span class="math inline">\(L(q,y)\)</span>达到最大，则<span class="math inline">\(\hat{\theta}\)</span>也应该是<span class="math inline">\(\theta\)</span>的极大似然估计。</p>
+<p>进一步地，由<a href="../chapters/page-012.html#prop-RadonNikodym-40d93ffc" data-reference-type="ref+label" data-reference="prop:RadonNikodym">性质 11.6.3</a>(5)、<a href="../chapters/page-012.html#lem-IntChangeOfMeasure-673686c1" data-reference-type="ref+label" data-reference="lem:IntChangeOfMeasure">引理 11.10</a>和可知这个下界与真实边际对数似然之间的差距可以精确写成一个KL散度：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;\operatorname{KL}[q(g)\|p_{\theta}(g\mid f)]=\int_{Z}q(g)\ln\frac{q(g)}{p_{\theta}(g\mid f)}\mathop{}\!\mathrm{d}\nu \\
+=&amp;\int_{Z}q(g)\ln q(g)\mathop{}\!\mathrm{d}\nu-
+\int_{Z}q(g)\ln p_{\theta}(g\mid f)\mathop{}\!\mathrm{d}\nu \\
+=&amp;\int_{Z}q(g)\ln q(g)\mathop{}\!\mathrm{d}\nu-\int_{Z}q(g)\ln p_{\theta}(f,g)\mathop{}\!\mathrm{d}\nu+\ln p_{\theta}(f)
+\end{align*}\]</span></p>
+<p>于是：</p>
+<p><span class="math display">\[\begin{equation*}
+\ln p_{\theta}(f)=L(q,y)+\operatorname{KL}[q(g)\|p_{\theta}(g\mid f)]
+\end{equation*}\]</span></p>
+<div id="method-21-4" class="method theorem-block env-method">
+<p><strong>Method 21.4</strong>. <strong>（Expectation-Maximization Algorithm）</strong></p>
+<p>EM算法可以理解为对<span class="math inline">\(L(q,y)\)</span>进行坐标上升。具体地说，在第<span class="math inline">\(t\)</span>轮迭代中，假设当前参数为<span class="math inline">\(\theta^{(t)}\)</span>。EM算法交替更新<span class="math inline">\(q\)</span>和<span class="math inline">\(\theta\)</span>。</p>
+<p>首先固定<span class="math inline">\(\theta=\theta^{(t)}\)</span>，求解<span class="math inline">\(q^{(t+1)}\)</span>使得最大化<span class="math inline">\(L(q^{(t+1)},y)\)</span>。由于：</p>
+<p><span class="math display">\[\begin{equation*}
+\ln p_{\theta^{(t)}}(f)=L(q^{(t+1)},y)+\operatorname{KL}[q^{(t+1)}(g)\|p_{\theta^{(t)}}(g\mid f)]
+
+\end{equation*}\]</span></p>
+<p>而左边与<span class="math inline">\(q\)</span>无关，是一个定值，所以最大化<span class="math inline">\(L(q^{(t+1)},y)\)</span>等价于最小化<span class="math inline">\(\operatorname{KL}[q^{(t+1)}(g)\|p_{\theta^{(t)}}(g\mid f)]\)</span>。当<span class="math inline">\(q^{(t+1)}(g)=p_{\theta^{(t)}}(g\mid f)\)</span>时，KL散度达到最小值<span class="math inline">\(0\)</span>。因此，EM算法的E步就是在当前参数<span class="math inline">\(\theta^{(t)}\)</span>下计算隐变量的后验分布。</p>
+<p>接着固定<span class="math inline">\(q=q^{(t+1)}\)</span>，最大化<span class="math inline">\(L(q^{(t+1)},y)\)</span>。因为：</p>
+<p><span class="math display">\[\begin{equation*}
+L[q^{(t+1)},y]=\int_{Z}q^{(t+1)}(g)\ln p_{\theta}(f,g)\mathop{}\!\mathrm{d}\nu-\int_{Z}q^{(t+1)}(g)\ln q^{(t+1)}(g)\mathop{}\!\mathrm{d}\nu
+
+\end{equation*}\]</span></p>
+<p>其中第二项不含<span class="math inline">\(\theta\)</span>，所以关于<span class="math inline">\(\theta\)</span>的优化等价于：</p>
+<p><span class="math display">\[\begin{equation*}
+\theta^{(t+1)}=\underset{\theta}{\arg\max}\int_{Z}q^{(t+1)}(g)\ln p_{\theta}(f,g)\mathop{}\!\mathrm{d}\nu
+
+\end{equation*}\]</span></p>
+<p>代入：</p>
+<p><span class="math display">\[\begin{equation*}
+q^{(t+1)}(g)=p_{\theta^{(t)}}(g\mid f)
+
+\end{equation*}\]</span></p>
+<p>得到：</p>
+<p><span class="math display">\[\begin{equation*}
+\theta^{(t+1)}=\underset{\theta}{\arg\max}\int_{Z}p_{\theta^{(t)}}(g\mid f)\ln p_{\theta}(f,g)\mathop{}\!\mathrm{d}\nu
+
+\end{equation*}\]</span></p>
+<p>对于这个优化问题，我们就可以使用一般的极大似然估计去做了。</p>
+<p>上述第一步被称之为<span class="math inline">\(E\)</span>步，第二步被称之为<span class="math inline">\(M\)</span>步，称：</p>
+<p><span class="math display">\[\begin{equation*}
+\int_{Z}q^{(t+1)}(g)\ln p_{\theta}(f,g)\mathop{}\!\mathrm{d}\nu
+
+\end{equation*}\]</span></p>
+<p>为Q函数。</p>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/page-021.html" class="pagination-link" aria-label="[第 20 章]{.header-section-number} 贝叶斯统计">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title"><span class="header-section-number">第 20 章</span> 贝叶斯统计</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/page-023.html" class="pagination-link" aria-label="[第 22 章]{.header-section-number} 线性模型">
+        <span class="nav-page-text"><span class="chapter-title"><span class="header-section-number">第 22 章</span> 线性模型</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

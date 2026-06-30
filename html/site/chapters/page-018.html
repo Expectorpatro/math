@@ -1,0 +1,2219 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-Hans" xml:lang="zh-Hans"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>第 17 章 统计初步 – 你永远不知道一个强迫症能干出什么事情</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/page-019.html" rel="next">
+<link href="../chapters/page-017.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-7380dde18c49706d018cafaca6afd2e2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../sidebar.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-018.html">第 6 部分 统计学</a></li><li class="breadcrumb-item"><a href="../chapters/page-018.html"><span class="chapter-title"><span class="header-section-number">第 17 章</span> 统计初步</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="搜索" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">你永远不知道一个强迫症能干出什么事情</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="搜索"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">你永远不知道一个强迫症能干出什么事情</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-001.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">前言</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 1 部分 代数</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-002.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 1 章</span> 线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-003.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 2 章</span> 矩阵</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 2 部分 分析学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-004.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 3 章</span> 度量空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-005.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 4 章</span> 微积分</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-006.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 5 章</span> 广义积分</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-007.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 6 章</span> 级数</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-008.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 7 章</span> Fourier级数</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-009.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 8 章</span> 赋范线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-010.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 9 章</span> 常见度量空间与赋范线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-011.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 10 章</span> Banach空间上的有界线性算子</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 3 部分 概率论</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-012.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 11 章</span> 概率测度</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-013.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 12 章</span> 概率初步</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-014.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 13 章</span> 渐进理论初步</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 4 部分 最优化</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-015.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 14 章</span> 凸集</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-016.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 15 章</span> 规划问题</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 5 部分 不等式</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-017.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 16 章</span> 不等式</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 6 部分 统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-018.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title"><span class="header-section-number">第 17 章</span> 统计初步</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-019.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 18 章</span> 点估计理论</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-020.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 19 章</span> 假设检验理论</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-021.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 20 章</span> 贝叶斯统计</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-022.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 21 章</span> 统计计算方法</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-023.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 22 章</span> 线性模型</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-024.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 23 章</span> 多元统计</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-025.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 24 章</span> 方差分析</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-026.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 25 章</span> 部分实施问题</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-027.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">符号说明</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 6 部分 统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-028.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 26 章</span> 抽样调查</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-029.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 27 章</span> 时间序列分析</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-030.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 28 章</span> 机器学习</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-031.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 29 章</span> 因果推断</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 7 部分 非参数统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-032.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 30 章</span> 位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-033.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 31 章</span> 两样本位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-034.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 32 章</span> 多样本位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-035.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 33 章</span> Something else</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-036.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 34 章</span> 单调关联性</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-037.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">附录</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-038.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">后记</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">中英术语表</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目录</h2>
+   
+  <ul>
+  <li><a href="#id--2833a076" id="toc-id--2833a076" class="nav-link active" data-scroll-target="#id--2833a076"><span class="header-section-number">17.1</span> 基于测度论的统计简介</a>
+  <ul>
+  <li><a href="#id--22279fff" id="toc-id--22279fff" class="nav-link" data-scroll-target="#id--22279fff"><span class="header-section-number">17.1.1</span> 次序统计量</a></li>
+  <li><a href="#id--bcbc510d" id="toc-id--bcbc510d" class="nav-link" data-scroll-target="#id--bcbc510d"><span class="header-section-number">17.1.2</span> 充分统计量</a>
+  <ul class="collapse">
+  <li><a href="#id--9ab7c1ef" id="toc-id--9ab7c1ef" class="nav-link" data-scroll-target="#id--9ab7c1ef"><span class="header-section-number">17.1.2.1</span> 极小充分统计量</a></li>
+  </ul></li>
+  <li><a href="#id--c5497746" id="toc-id--c5497746" class="nav-link" data-scroll-target="#id--c5497746"><span class="header-section-number">17.1.3</span> 完全性</a></li>
+  <li><a href="#id--0fbeb2d7" id="toc-id--0fbeb2d7" class="nav-link" data-scroll-target="#id--0fbeb2d7"><span class="header-section-number">17.1.4</span> 指数族</a></li>
+  </ul></li>
+  <li><a href="#id--9907757c" id="toc-id--9907757c" class="nav-link" data-scroll-target="#id--9907757c"><span class="header-section-number">17.2</span> 抽样分布</a>
+  <ul>
+  <li><a href="#id--799dc790" id="toc-id--799dc790" class="nav-link" data-scroll-target="#id--799dc790"><span class="header-section-number">17.2.1</span> 一维总体</a></li>
+  <li><a href="#id--9f1cfbd4" id="toc-id--9f1cfbd4" class="nav-link" data-scroll-target="#id--9f1cfbd4"><span class="header-section-number">17.2.2</span> 多维总体</a></li>
+  <li><a href="#id--4be296ec" id="toc-id--4be296ec" class="nav-link" data-scroll-target="#id--4be296ec"><span class="header-section-number">17.2.3</span> 多维正态总体参数的检验</a>
+  <ul class="collapse">
+  <li><a href="#id--2c57a0be" id="toc-id--2c57a0be" class="nav-link" data-scroll-target="#id--2c57a0be"><span class="header-section-number">17.2.3.1</span> 均值的检验</a></li>
+  <li><a href="#id--30939897" id="toc-id--30939897" class="nav-link" data-scroll-target="#id--30939897"><span class="header-section-number">17.2.3.2</span> 两总体均值的比较</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-018.html">第 6 部分 统计学</a></li><li class="breadcrumb-item"><a href="../chapters/page-018.html"><span class="chapter-title"><span class="header-section-number">第 17 章</span> 统计初步</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="id--d99621a7" class="quarto-section-identifier"><span class="chapter-title"><span class="header-section-number">第 17 章</span> 统计初步</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="id--2833a076" class="level2">
+<h2 class="anchored" data-anchor-id="id--2833a076"><span class="header-section-number">17.1</span> 基于测度论的统计简介</h2>
+<div id="definition-17-1" class="definition theorem-block env-definition">
+<p><strong>Definition 17.1</strong>. 设<span class="math inline">\((X,\mathscr{A},P)\)</span>为概率空间，<span class="math inline">\(f\)</span>是从可测空间<span class="math inline">\((X,\mathscr{A})\)</span>到可测空间<span class="math inline">\((Y,\mathscr{B})\)</span>上的随机变量。称概率测度<span class="math inline">\(Pf^{-1}\)</span>为<a href="../chapters/page-055.html#term-Population" class="term" title="population">总体<span class="term-english">（population）</span></a>，<span class="math inline">\(f\)</span>的观测和<span class="math inline">\(f\)</span>都被称为<a href="../chapters/page-058.html#term-Sample" class="term" title="sample">样本<span class="term-english">（sample）</span></a>，称<span class="math inline">\(f\)</span>的观测的数目为<a href="../chapters/page-058.html#term-SampleSize" class="term" title="sample size">样本量<span class="term-english">（sample size）</span></a>，总体的数字特征即为<span class="math inline">\(f\)</span>的数字特征。</p>
+</div>
+<div id="note-17-1" class="note theorem-block env-note">
+<p><strong>note 17.1</strong>. 由定义可以看出，样本具有两重性，若将随机变量的观测看作样本，则样本是固定的，没有随机性，但在理论分析中我们往往研究的是具有随机性的样本，也即随机变量本身。换句话讲，抽样实施以前，样本被看作随机变量，抽样实施以后，样本是具体的。</p>
+</div>
+<div id="definition-17-2" class="definition theorem-block env-definition">
+<p><strong>Definition 17.2</strong>. 设<span class="math inline">\((X,\mathscr{A},P)\)</span>为概率空间，<span class="math inline">\((Y,\mathscr{B})\)</span>为可测空间，总体为<span class="math inline">\(Q\)</span>。若随机变量<span class="math inline">\(X_1, X_2, \dots, X_{n}:(X,\mathscr{A})\longrightarrow(Y,\mathscr{B})\)</span>相互独立，并且具有相同的分布<span class="math inline">\(Q\)</span>，则称<span class="math inline">\(\mathbf{X}=(X_1, X_2, \dots, X_{n})\)</span>为来自<span class="math inline">\(Q\)</span>的容量为<span class="math inline">\(n\)</span>的<a href="../chapters/page-058.html#term-webscope-6c98d99d34-SRS" class="term" title="simple random sample">简单随机样本<span class="term-english">（simple random sample）</span></a>。</p>
+</div>
+<div id="note-17-2" class="note theorem-block env-note">
+<p><strong>note 17.2</strong>. 简单随机抽样包含”同分布”和”相互独立”这两个抽样的基本要求。同分布保证每次抽样都来自同一总体<span class="math inline">\(Q\)</span>，从而样本能够反映总体的概率规律；相互独立则保证样本间的相关性不会干扰抽样误差的度量，使样本量能够正确反映样本所包含的信息量。</p>
+</div>
+<div id="definition-17-3" class="definition theorem-block env-definition">
+<p><strong>Definition 17.3</strong>. 设<span class="math inline">\(\mathscr{P}\)</span>为可测空间<span class="math inline">\((X,\mathscr{A})\)</span>上的一个概率测度族，则称<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>为<a href="../chapters/page-058.html#term-StatisticalStructure" class="term" title="statistical structure">统计结构<span class="term-english">（statistical structure）</span></a>或<a href="../chapters/page-058.html#term-StatisticalModel" class="term" title="statistical model">统计模型<span class="term-english">（statistical model）</span></a>。若<span class="math inline">\(\mathscr{P}\)</span>仅依赖于参数<span class="math inline">\(\theta\)</span>，即：</p>
+<p><span class="math display">\[\begin{equation*}
+\mathscr{P}=\{P_{\theta}:\theta\in\Theta\}
+
+\end{equation*}\]</span></p>
+<p>其中<span class="math inline">\(\Theta\)</span>为参数空间，则称此结构为<a href="../chapters/page-055.html#term-ParametricStructure" class="term" title="parametric structure">参数结构<span class="term-english">（parametric structure）</span></a>，否则称为<a href="../chapters/page-053.html#term-Non-parametricStructure" class="term" title="non-parametric structure">非参数结构<span class="term-english">（non-parametric structure）</span></a>。</p>
+</div>
+<div id="note-17-3" class="note theorem-block env-note">
+<p><strong>note 17.3</strong>. 引入统计结构是因为在统计学中我们往往没有总体<span class="math inline">\(P\)</span>的全部信息，它是不确定的，但我们会根据现有信息去假设<span class="math inline">\(P\)</span>可能是怎样的，从而给出一族可能的概率测度<span class="math inline">\(\mathscr{P}\)</span>，因此产生了统计学的两大问题：参数估计和假设检验。二者都是在获得样本后对<span class="math inline">\(\mathscr{P}\)</span>进行分析的统计工具，其中参数估计又可分为点估计和区间估计。点估计分析<span class="math inline">\(\mathscr{P}\)</span>中哪一个概率测度最有可能是真实总体，区间估计是为了得到一个尽可能小的<span class="math inline">\(\mathscr{P}_0\subseteq\mathscr{P}\)</span>使得真实总体最有可能在这里面，假设检验分析对于<span class="math inline">\(\mathscr{P}_1,\mathscr{P}_2\subseteq\mathscr{P}\)</span>，真实总体最有可能出现在哪一个之中。</p>
+<p>对于参数结构，我们往往希望能够用较简单的参数<span class="math inline">\(\theta\)</span>来刻画复杂的概率测度<span class="math inline">\(P\)</span>。这是因为概率测度本身是定义在<span class="math inline">\(\sigma\)</span>代数<span class="math inline">\(\mathscr{A}\)</span>上的集合函数，它需要描述每一个可测集<span class="math inline">\(A\in\mathscr{A}\)</span>发生的概率<span class="math inline">\(P(A)\)</span>，因而通常是一个非常复杂的对象。参数结构的作用就是把对概率测度族<span class="math inline">\(\mathscr{P}\)</span>的研究转化为对参数空间<span class="math inline">\(\Theta\)</span>的研究，用参数<span class="math inline">\(\theta\)</span>来标记一个概率测度<span class="math inline">\(P_{\theta}\)</span>。在这种意义下，参数可以看作概率测度的坐标，它使得原本复杂的测度对象能够被有限维或结构化的参数表示。</p>
+<p>但是，参数化并不自动保证这种表示是唯一的。也就是说，虽然每一个参数<span class="math inline">\(\theta\in\Theta\)</span>都会给出一个概率测度<span class="math inline">\(P_\theta\)</span>，但不同的参数可能给出完全相同的概率测度。此时即使样本量无限增大，也只能识别出真实概率测度<span class="math inline">\(P\)</span>，而不能唯一确定产生它的参数<span class="math inline">\(\theta\)</span>。因此，在参数结构中通常希望参数化映射<span class="math inline">\(\theta\to P_\theta\)</span>是单射，即一个概率测度对应唯一一个参数。这个要求正是识别性问题的来源。</p>
+</div>
+<div id="definition-17-4" class="definition theorem-block env-definition">
+<p><strong>Definition 17.4</strong>. 设<span class="math inline">\((X,\mathscr{F},\mathscr{P})\)</span>为参数结构，<span class="math inline">\(\Theta\)</span>为参数空间。若存在不同的<span class="math inline">\(\theta_1,\theta_2\in\Theta\)</span>使得<span class="math inline">\(\mathscr{P}_{\theta_1}=\mathscr{P}_{\theta_2}\)</span>，则称参数<span class="math inline">\(\theta\)</span><a href="../chapters/page-053.html#term-Non-identifiable" class="term" title="non-identifiable">不可识别<span class="term-english">（non-identifiable）</span></a>，否则称<span class="math inline">\(\theta\)</span><a href="../chapters/page-048.html#term-Identifiable" class="term" title="identifiable">可识别<span class="term-english">（identifiable）</span></a>。</p>
+</div>
+<div id="definition-17-5" class="definition theorem-block env-definition">
+<p><strong>Definition 17.5</strong>. 设<span class="math inline">\((X_1,\mathscr{A}_1,\mathscr{P}_1),(X_2,\mathscr{A}_2,\mathscr{P}_2),\dots,(X_n,\mathscr{A}_n,\mathscr{P}_n)\)</span>为<span class="math inline">\(n\)</span>个统计结构，称：</p>
+<p><span class="math display">\[\begin{equation*}
+\left(\prod_{i=1}^nX_i,\prod_{i=1}^n\mathscr{A}_i,\prod_{i=1}^n\mathscr{P}_i\right)
+
+\end{equation*}\]</span></p>
+<p>为它们的<a href="../chapters/page-055.html#term-ProductStructure" class="term" title="product structure">乘积结构<span class="term-english">（product structure）</span></a>。</p>
+</div>
+<div id="definition-17-6" class="definition theorem-block env-definition">
+<p><strong>Definition 17.6</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>为统计结构。若可测空间<span class="math inline">\((X,\mathscr{A})\)</span>上存在一个<span class="math inline">\(\sigma\)</span>有限测度<span class="math inline">\(\mu\)</span>满足对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>有<span class="math inline">\(P\ll\mu\)</span>，则称<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是<a href="../chapters/page-042.html#term-Controllable" class="term" title="controllable">可控的<span class="term-english">（controllable）</span></a>，称<span class="math inline">\(\mu\)</span>为对应的<a href="../chapters/page-042.html#term-ControllingMeasure" class="term" title="controlling measure">控制测度<span class="term-english">（controlling measure）</span></a>。</p>
+</div>
+<div id="definition-17-7" class="definition theorem-block env-definition">
+<p><strong>Definition 17.7</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>为统计结构，<span class="math inline">\(T\)</span>是可测空间<span class="math inline">\((X,\mathscr{A})\)</span>到可测空间<span class="math inline">\((Y,\mathscr{B})\)</span>的可测映射。若<span class="math inline">\(T\)</span>不依赖于<span class="math inline">\(\mathscr{P}\)</span>，则称<span class="math inline">\(T\)</span>为<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>上的<a href="../chapters/page-058.html#term-Statistic" class="term" title="statistic">统计量<span class="term-english">（statistic）</span></a>。统计量的概率分布称为<a href="../chapters/page-058.html#term-SamplingDistribution" class="term" title="sampling distribution">抽样分布<span class="term-english">（sampling distribution）</span></a>或<a href="../chapters/page-048.html#term-InducedDistribution" class="term" title="induced distribution">诱导分布<span class="term-english">（induced distribution）</span></a>。</p>
+</div>
+<section id="id--22279fff" class="level3">
+<h3 class="anchored" data-anchor-id="id--22279fff"><span class="header-section-number">17.1.1</span> 次序统计量</h3>
+<div id="definition-17-8" class="definition theorem-block env-definition">
+<p><strong>Definition 17.8</strong>. 设<span class="math inline">\(f_1, f_2, \dots, f_{n}\)</span>为可测空间<span class="math inline">\((X,\mathscr{A})\)</span>上的随机变量，对每个<span class="math inline">\(x\in X\)</span>，将其按大小排列为<span class="math inline">\(f_{(1)}\leqslant f_{(2)}\leqslant\cdots\leqslant f_{(n)}\)</span>，若存在相等的情况则可随意排列，由此可得到新的函数<span class="math inline">\(f_{(1)},f_{(2)},\dots,f_{(n)}\)</span>，称<span class="math inline">\((f_{(1)},f_{(2)},\dots,f_{(n)})\)</span>为<span class="math inline">\(f_1, f_2, \dots, f_{n}\)</span>的<a href="../chapters/page-054.html#term-OrderStatistic" class="term" title="order statistic">次序统计量<span class="term-english">（order statistic）</span></a>。</p>
+</div>
+<div id="prop-OrderStatistics-e2fb63c7" class="property theorem-block env-property">
+<p><strong>Property 17.1.1</strong>. 设<span class="math inline">\(f_1, f_2, \dots, f_{n}\)</span>为可测空间<span class="math inline">\((X,\mathscr{A})\)</span>上的随机变量，<span class="math inline">\((f_{(1)},f_{(2)},\dots,f_{(n)})\)</span>为<span class="math inline">\(f_1, f_2, \dots, f_{n}\)</span>的次序统计量。对任意的<span class="math inline">\(i=1,2,\dots,n\)</span>，<span class="math inline">\(f_{(i)}\)</span>是<span class="math inline">\((X,\mathscr{A})\)</span>上的随机变量。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>注意到对任意的<span class="math inline">\(i=1,2,\dots,n\)</span>和任意的<span class="math inline">\(a\in\mathbb{R}^{}\)</span>，<span class="math inline">\(f_{(i)}\)</span>是从<span class="math inline">\(X\)</span>到<span class="math inline">\(\mathbb{R}\)</span>上的映射，并且有：</p>
+<p><span class="math display">\[\begin{equation*}
+\{f_{(i)}\leqslant a\}=\left\{\sum_{j=1}^{n}I_{\{f_j\leqslant a\}}\geqslant i\right\}
+
+\end{equation*}\]</span></p>
+<p>由<a href="../chapters/page-012.html#prop-MeasurableFunction-4dbcbd65" data-reference-type="ref+label" data-reference="prop:MeasurableFunction">性质 11.3.3</a>(1.b)、<a href="../chapters/page-012.html#prop-SimpleFunction-f55e53f8" data-reference-type="ref+label" data-reference="prop:SimpleFunction">性质 11.3.2</a>(3)(1)、<a href="../chapters/page-012.html#prop-MeasurableFunction-4dbcbd65" data-reference-type="ref+label" data-reference="prop:MeasurableFunction">性质 11.3.3</a>(5.a)(1.d)即可得到<span class="math inline">\(\{f_{(i)}\leqslant a\}\in\mathscr{A}\)</span>，于是<span class="math inline">\(f_{(i)}\)</span>是<span class="math inline">\((X,\mathscr{A})\)</span>上的随机变量。&nbsp;◻</p>
+</div>
+<div id="lem-OrderStatistics-597ed04e" class="lemma theorem-block env-lemma theorem">
+<p><span class="theorem-title"><strong>引理 18.1</strong></span> <strong>Lemma 17.1</strong>. 设总体的分布函数为<span class="math inline">\(F(x)\)</span>，概率函数为<span class="math inline">\(f(x)\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{n}\)</span>为从总体中抽取的简单样本，则有：</p>
+<p><span class="math display">\[\begin{equation*}
+\underset{a&lt;x_1&lt;\cdots&lt;x_n&lt;b}{\int\cdots\int}f(x_1)\cdots f(x_n)\mathop{}\!\mathrm{d}x_1\cdots\mathop{}\!\mathrm{d}x_n=\frac{1}{n!}[F(b)-F(a)]^n
+
+\end{equation*}\]</span></p>
+<p>其中<span class="math inline">\(a,b\in\overline{\mathbb{R}}\)</span>。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>因为<span class="math inline">\(X_1, X_2, \dots, X_{n}\)</span>独立同分布，所以：</p>
+<p><span class="math display">\[\begin{equation*}
+\int_{a}^{b}\cdots\int_{a}^{b}f(x_1)\cdots f(x_n)\mathop{}\!\mathrm{d}x_1\cdots\mathop{}\!\mathrm{d}x_n=\left[\int_{a}^{b}f(x_1)\mathop{}\!\mathrm{d}x_1\right]^n=[F(b)-F(a)]^n
+
+\end{equation*}\]</span></p>
+<p>在这个区域上对<span class="math inline">\(x_1, x_2, \dots, x_{n}\)</span>的排序结果一共有<span class="math inline">\(n!\)</span>种（不考虑等于的情况，测度为<span class="math inline">\(0\)</span>，不影响积分结果），每种排序都是等可能的，于是结论成立。&nbsp;◻</p>
+</div>
+<div id="theo-OrderStatisticsDist-d3103cbf" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.1</strong>. 设<span class="math inline">\(X_1, X_2, \dots, X_{n}\)</span>是测度空间<span class="math inline">\((X,\mathscr{A},P)\)</span>上独立同分布的随机变量，分布函数和概率函数分别为<span class="math inline">\(F(x),f(x)\)</span>。</p>
+<ol type="1">
+<li><p>令<span class="math inline">\(Y_i=X_{(i)},\;i=1,2,\dots,n\)</span>，则次序统计量<span class="math inline">\((Y_1, Y_2, \dots, Y_{n})\)</span>的联合概率函数为：</p>
+<p><span class="math display">\[\begin{equation*}
+                p(y_1, y_2, \dots, y_{n})=
+                \begin{cases}
+                    n!f(y_1)f(y_2)\cdots f(y_n),&amp;y_1&lt;y_2&lt;\cdots&lt;y_n \\
+                    0,&amp;\text{其它}
+                \end{cases}
+
+    \end{equation*}\]</span></p></li>
+<li><p>次序统计量中任意<span class="math inline">\(m\geqslant2\)</span>个分量<span class="math inline">\(Y_{i_1},Y_{i_2},\dots,Y_{i_m},\;i_1&lt;i_2&lt;\cdots&lt;i_m\)</span>的联合概率函数为：</p>
+<p><span class="math display">\[\begin{equation*}
+                p(y_{i_1},y_{i_2},\dots,y_{i_m})=
+                \begin{cases}
+                    n!\prod\limits_{j=1}^{m}f(y_{i_j})\left\{\prod\limits_{k=2}^{m}\frac{1}{(i_k-i_{k-1}-1)!}[F(y_{i_k})-F(y_{i_{k-1}})]^{i_k-i_{k-1}-1}\right\} &amp; \\
+                    \quad\frac{F^{i_1-1}(y_{i_1})}{(i_1-1)!}\frac{[1-F(y_{i_m})]^{n-i_m}}{(n-i_m)!},\quad y_{i_1}&lt;y_{i_2}&lt;\cdots&lt;y_{i_m} \\
+                    0, \quad\text{其他}
+                \end{cases}
+
+    \end{equation*}\]</span></p></li>
+<li><p>次序统计量中单个分量<span class="math inline">\(Y_{m},\;m=1,2,\dots,n\)</span>的概率函数为：</p>
+<p><span class="math display">\[\begin{equation*}
+                p(y_{m})=n!f(y_m)\frac{F^{m-1}(y_m)}{(m-1)!}\frac{[1-F(y_m)]^{n-m}}{(n-m)!}
+
+    \end{equation*}\]</span></p></li>
+<li><p>对于任意的<span class="math inline">\(i,j=1,2,\dots,n\)</span>满足<span class="math inline">\(i&lt;j\)</span>，令<span class="math inline">\(V=Y_j-Y_i\)</span>，则有：</p>
+<p><span class="math display">\[\begin{equation*}
+                p(v)=\int_{-\infty}^{+\infty}p(u,v)\mathop{}\!\mathrm{d}u
+
+    \end{equation*}\]</span></p>
+<p>其中：</p>
+<p><span class="math display">\[\begin{equation*}
+                p(u,v)=
+                \begin{cases}
+                    \dfrac{n!f(u)f(u+v)}{(i-1)!(j-i-1)!(n-j)!}F^{i-1}(u)[F(u+v)-F(u)]^{j-i-1} \\
+                    \quad\quad[1-F(u+v)]^{n-j},&amp;v&gt;0 \\
+                    0,&amp;\text{其它}
+                \end{cases}
+
+    \end{equation*}\]</span></p></li>
+<li><p>次序统计量<span class="math inline">\((Y_1, Y_2, \dots, Y_{n})\)</span>极差<span class="math inline">\(V\)</span>的概率函数为：</p>
+<p><span class="math display">\[\begin{equation*}
+                p(v)=\int_{-\infty}^{+\infty}p(u,v)\mathop{}\!\mathrm{d}u
+
+    \end{equation*}\]</span></p>
+<p>其中：</p>
+<p><span class="math display">\[\begin{equation*}
+                p(u,v)=
+                \begin{cases}
+                    n(n-1)f(u)f(u+v)[F(u+v)-F(u)]^{n-2},&amp;v&gt;0 \\
+                    0,&amp;\text{其它}
+                \end{cases}
+
+    \end{equation*}\]</span></p>
+<p>分布函数为：</p>
+<p><span class="math display">\[\begin{equation*}
+                F(V\leqslant x)=\int_{-\infty}^{+\infty}nf(u)[F(u+x)-F(u)]^{n-1}\mathop{}\!\mathrm{d}u
+
+    \end{equation*}\]</span></p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)在<span class="math inline">\(\mathbb{R}^{n}\)</span>中划分<span class="math inline">\(n!\)</span>个区域，每个区域分别对应着一个<span class="math inline">\(i_1, i_2, \dots, i_{n}\)</span>使得<span class="math inline">\(x_{i1}&lt;x_{i2}&lt;\cdots&lt;x_{in}\)</span>，因为<span class="math inline">\(x_1, x_2, \dots, x_{n}\)</span>的排列一共有<span class="math inline">\(n!\)</span>种，所以这<span class="math inline">\(n!\)</span>个区域加上包括等于号的一些零测集就构成了整个<span class="math inline">\(\mathbb{R}^{n}\)</span>。因为次序统计量的概率函数也是在<span class="math inline">\(\mathbb{R}^{n}\)</span>上的一个概率测度，则可以对每个划分的区域求<span class="math inline">\((Y_1, Y_2, \dots, Y_{n})\)</span>的概率测度，再对所有区域求和，即可得到次序统计量的联合概率函数。这个过程类似于全概率公式。</p>
+<p>任取一个上述区域<span class="math inline">\(A\)</span>作变换：</p>
+<p><span class="math display">\[\begin{equation*}
+y_j=x_{i_j},\;j=1,2,\dots,n,\;x_{i1}&lt;x_{i2}&lt;\cdots&lt;x_{in}
+
+\end{equation*}\]</span></p>
+<p>则该变换的Jacobi行列式为<span class="math inline">\(|\mathbf{J}|=|I_n|=1\)</span>，因为<span class="math inline">\(X_1, X_2, \dots, X_{n}\)</span>是简单样本，所以在该区域上的：</p>
+<p><span class="math display">\[\begin{equation*}
+p(y_1, y_2, \dots, y_{n}|A)=
+\begin{cases}
+\prod\limits_{i=1}^{n}f(x_i)=\prod\limits_{i=1}^{n}f(y_i),&amp;y_1&lt;y_2&lt;\cdots&lt;y_n \\
+0,&amp;\text{其它}
+\end{cases}
+
+\end{equation*}\]</span></p>
+<p>由区域的任意性可得在整个<span class="math inline">\(\mathbb{R}^{n}\)</span>上：</p>
+<p><span class="math display">\[\begin{equation*}
+p(y_1, y_2, \dots, y_{n})=
+\begin{cases}
+n!f(y_1)f(y_2)\cdots f(y_n),&amp;y_1&lt;y_2&lt;\cdots&lt;y_n \\
+0,&amp;\text{其它}
+\end{cases}
+
+\end{equation*}\]</span></p>
+<p>(2)注意到<span class="math inline">\(Y_{(i_1)},Y_{(i_2)},\dots,Y_{(i_m)}\)</span>的联合概率函数是次序统计量的边缘概率函数，所以由(1)和<a href="#lem-OrderStatistics-597ed04e" data-reference-type="ref+label" data-reference="lem:OrderStatistics">引理 17.1</a>可得：</p>
+<p><span class="math display">\[\begin{align*}
+p(y_{i_1},y_{i_2},\dots,y_{i_m})
+&amp;=\underset{-\infty&lt;y_1&lt;\cdots&lt;y_n&lt;+\infty}{\int\cdots\int}n!f(y_1)f(y_2)\cdots f(y_n)\mathop{}\!\mathrm{d}y_1\cdots\mathop{}\!\mathrm{d}y_{i_1-1} \\
+&amp;\quad\mathop{}\!\mathrm{d}y_{i_1+1}\cdots\mathop{}\!\mathrm{d}y_{i_2-1}\mathop{}\!\mathrm{d}y_{i_2+1}\cdots\mathop{}\!\mathrm{d}y_{i_m-1}\mathop{}\!\mathrm{d}y_{i_m+1}\cdots\mathop{}\!\mathrm{d}y_n \\
+&amp;=n!\prod_{j=1}^{m}f(y_{i_j})\underset{-\infty&lt;y_1&lt;\cdots&lt;y_{i_1}}{\int\cdots\int}f(y_1)\cdots f(y_{i_1-1})\mathop{}\!\mathrm{d}y_1\cdots\mathop{}\!\mathrm{d}y_{i_1-1} \\
+&amp;\quad\times\underset{y_{i_1}&lt;y_{i_1+1}&lt;y_{i_1+2}&lt;\cdots&lt;y_{i_2}}{\int\cdots\int}f(y_{i_1+1})\cdots f(y_{i_2-1})\mathop{}\!\mathrm{d}y_{i_1+1}\cdots\mathop{}\!\mathrm{d}y_{i_2-1} \\
+&amp;\quad\cdots\cdots \\
+&amp;\quad\times\underset{y_{i_m}&lt;y_{i_m+1}&lt;y_{i_m+2}&lt;\cdots&lt;+\infty}{\int\cdots\int}f(y_{i_m+1})\cdots f(y_n)\mathop{}\!\mathrm{d}y_{i_m+1}\cdots\mathop{}\!\mathrm{d}y_n \\
+&amp;=n!\prod_{j=1}^{m}f(y_{i_j})\frac{1}{(i_1-1)!}F^{i_1-1}(y_{i_1})\frac{1}{(i_2-i_1-1)!}[F(y_{i_2})-F(y_{i_1})]^{i_2-i_1-1} \\
+&amp;\quad\cdots\frac{1}{(n-i_m)!}[1-F(y_{i_m})]^{n-i_m} \\
+&amp;=n!\prod_{j=1}^{m}f(y_{i_j})\frac{1}{(i_1-1)!}F^{i_1-1}(y_{i_1})\frac{1}{(n-i_m)!}[1-F(y_{i_m})]^{n-i_m} \\
+&amp;\quad\left\{\prod_{k=2}^{m}\frac{1}{(i_k-i_{k-1}-1)!}[F(y_{i_k})-F(y_{i_{k-1}})]^{i_k-i_{k-1}-1}\right\}
+
+\end{align*}\]</span></p>
+<p>(3)类似(2)的过程即可得到，省略。</p>
+<p>(4)使用增补变量法，做变换：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+U=Y_i \\
+V=Y_j-Y_i
+\end{cases}
+\Leftrightarrow
+\begin{cases}
+Y_i=U \\
+Y_j=V+U
+\end{cases}
+
+\end{equation*}\]</span></p>
+<p>该变换的Jacobi行列式为：</p>
+<p><span class="math display">\[\begin{equation*}
+|\mathbf{J}|=
+\begin{vmatrix}
+1 &amp; 0 \\
+1 &amp; 1
+\end{vmatrix}
+=1
+
+\end{equation*}\]</span></p>
+<p>由(2)可得<span class="math inline">\((Y_i,Y_j)\)</span>的联合概率函数：</p>
+<p><span class="math display">\[\begin{equation*}
+p(y_i,y_j)=
+\begin{cases}
+\dfrac{n!f(y_i)f(y_j)}{(i-1)!(j-i-1)!(n-j)!}F^{i-1}(y_i)[F(y_j)-F(y_i)]^{j-i-1} \\
+\quad\quad[1-F(y_j)]^{n-j},&amp;y_i&lt;y_j \\
+0,&amp;\text{其它}
+\end{cases}
+
+\end{equation*}\]</span></p>
+<p>于是：</p>
+<p><span class="math display">\[\begin{equation*}
+p(u,v)=
+\begin{cases}
+\dfrac{n!f(u)f(u+v)}{(i-1)!(j-i-1)!(n-j)!}F^{i-1}(u)[F(u+v)-F(u)]^{j-i-1} \\
+\quad\quad[1-F(u+v)]^{n-j},&amp;v&gt;0 \\
+0,&amp;\text{其它}
+\end{cases}
+
+\end{equation*}\]</span></p>
+<p>所以：</p>
+<p><span class="math display">\[\begin{equation*}
+p(v)=\int_{-\infty}^{+\infty}p(u,v)\mathop{}\!\mathrm{d}u
+
+\end{equation*}\]</span></p>
+<p>(5)由(4)立即可得概率函数。对于分布函数有：</p>
+<p><span class="math display">\[\begin{align*}
+F(V\leqslant x)&amp;=\int_{-\infty}^x\int_{-\infty}^{+\infty}g(u,v)\mathop{}\!\mathrm{d}u\mathop{}\!\mathrm{d}v =\int_{-\infty}^0\int_{-\infty}^{+\infty}0\mathop{}\!\mathrm{d}u\mathop{}\!\mathrm{d}v \\
+&amp;\quad+\int_{0}^x\int_{-\infty}^{+\infty}n(n-1)f(u)f(u+v)[F(u+v)-F(u)]^{n-2}\mathop{}\!\mathrm{d}u\mathop{}\!\mathrm{d}v \\
+&amp;=\int_{-\infty}^{+\infty}\mathop{}\!\mathrm{d}u\int_{0}^xn(n-1)f(u)f(u+v)[F(u+v)-F(u)]^{n-2}\mathop{}\!\mathrm{d}v \\
+&amp;=\int_{-\infty}^{+\infty}nf(u)[F(u+v)-F(u)]^{n-1}\Big|_0^x\mathop{}\!\mathrm{d}u \\
+&amp;=\int_{-\infty}^{+\infty}nf(u)[F(u+x)-F(u)]^{n-1}\mathop{}\!\mathrm{d}u
+
+\end{align*}\]</span></p>
+<p>◻</p>
+</div>
+</section>
+<section id="id--bcbc510d" class="level3">
+<h3 class="anchored" data-anchor-id="id--bcbc510d"><span class="header-section-number">17.1.2</span> 充分统计量</h3>
+<div id="definition-17-9" class="definition theorem-block env-definition">
+<p><strong>Definition 17.9</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>为参数空间，<span class="math inline">\(T\)</span>是可测空间<span class="math inline">\((X,\mathscr{A})\)</span>到可测空间<span class="math inline">\((Y,\mathscr{B})\)</span>上的统计量。若对任意的<span class="math inline">\(\theta\in\Theta\)</span>，样本<span class="math inline">\(\mathbf{X}\)</span>在给定<span class="math inline">\(T(\mathbf{X})\)</span>下的条件分布<span class="math inline">\(\{P_{\theta}(A|T(\mathbf{X})):A\in\sigma(\mathbf{X})\}\)</span>与参数<span class="math inline">\(\theta\)</span>无关a.s.于<span class="math inline">\((Y,\mathscr{B},P_{\theta}T^{-1})\)</span>，则称<span class="math inline">\(T\)</span>为<span class="math inline">\(\theta\)</span>的<a href="../chapters/page-058.html#term-SufficientStatistic" class="term" title="sufficient statistic">充分统计量<span class="term-english">（sufficient statistic）</span></a>，也称<span class="math inline">\(T\)</span>为<span class="math inline">\(\mathscr{P}\)</span>的充分统计量。</p>
+</div>
+<div id="theo-FactorizationTheorem-7db5092c" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.2</strong>. <strong>（Factorization Theorem）</strong></p>
+<p>设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控参数结构，<span class="math inline">\(\mu\)</span>是控制测度，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(T\)</span>是可测空间<span class="math inline">\((X,\mathscr{A})\)</span>到可测空间<span class="math inline">\((Y,\mathscr{B})\)</span>上的统计量。<span class="math inline">\(T\)</span>为<span class="math inline">\(\mathscr{P}\)</span>的充分统计量当且仅当存在非负的<span class="math inline">\(\mathscr{B}\)</span>可测函数<span class="math inline">\(g_\theta\)</span>和非负<span class="math inline">\(\mathscr{A}\)</span>可测函数<span class="math inline">\(h\)</span>使得：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;\theta\in\Theta,\;\frac{\mathop{}\!\mathrm{d}P_\theta}{\mathop{}\!\mathrm{d}\mu}(x)=g_\theta[T(x)]h(x)\;\text{a.e.于}(X,\mathscr{A},\mu)
+
+\end{equation*}\]</span></p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span><strong>(1)必要性：</strong>对于任意的<span class="math inline">\(A\in\sigma(T)\)</span>，</p>
+<p><span class="math display">\[\begin{equation*}
+P_{\theta}(A\mid)
+
+\end{equation*}\]</span></p>
+<p>◻</p>
+</div>
+<div id="prop-SufficientStatistic-1235eed8" class="property theorem-block env-property">
+<p><strong>Property 17.1.2</strong>. 充分统计量具有如下性质：</p>
+<ol type="1">
+<li><p>设<span class="math inline">\((\mathbb{R},\mathcal{B},\mathscr{P})\)</span>为统计结构，则其上的次序统计量是<span class="math inline">\(\mathscr{P}\)</span>的充分统计量；</p></li>
+<li><p>充分统计量的可逆变换仍为充分统计量；</p></li>
+</ol>
+</div>
+<section id="id--9ab7c1ef" class="level4">
+<h4 class="anchored" data-anchor-id="id--9ab7c1ef"><span class="header-section-number">17.1.2.1</span> 极小充分统计量</h4>
+<div id="definition-17-10" class="definition theorem-block env-definition">
+<p><strong>Definition 17.10</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是统计结构，<span class="math inline">\(T\)</span>是可测空间<span class="math inline">\((X,\mathscr{A})\)</span>到可测空间<span class="math inline">\((Y,\mathscr{B})\)</span>上对<span class="math inline">\(\mathscr{P}\)</span>充分的统计量。若对任意<span class="math inline">\(\mathscr{P}\)</span>的充分统计量<span class="math inline">\(S\)</span>存在<span class="math inline">\((Y,\mathscr{B})\)</span>到<span class="math inline">\((Y,\mathscr{B})\)</span>上的可测映射<span class="math inline">\(\varphi\)</span>满足：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;P\in\mathscr{P},\;T=\varphi(S)\;a.s.\text{于}(X,\mathscr{A},P)
+
+\end{equation*}\]</span></p>
+<p>则称<span class="math inline">\(T\)</span>为<span class="math inline">\(\mathscr{P}\)</span>的<a href="../chapters/page-052.html#term-MinimalSufficientStatistic" class="term" title="minimal sufficient statistic">极小充分统计量<span class="term-english">（minimal sufficient statistic）</span></a>。</p>
+</div>
+<div id="prop-MinimalSufficientStatistic-0814ccda" class="property theorem-block env-property">
+<p><strong>Property 17.1.3</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是统计结构，<span class="math inline">\(T\)</span>是可测空间<span class="math inline">\((X,\mathscr{A})\)</span>到可测空间<span class="math inline">\((Y,\mathscr{B})\)</span>上的统计量。极小充分统计量具有如下性质：</p>
+<ol type="1">
+<li><p>在<span class="math inline">\(X\)</span>为欧氏空间且<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控结构的条件下，极小充分统计量一定存在；</p></li>
+<li><p>极小充分统计量的可逆可测变换仍为极小充分统计量；</p></li>
+<li><p>若将可由一个可逆的可测映射a.s.互变的两个极小充分统计量视为同一个统计量，则极小充分统计量在此意义下是唯一的；</p></li>
+<li><p>若<span class="math inline">\(T\)</span>是<span class="math inline">\(\mathscr{P}_0\subseteq\mathscr{P}\)</span>的极小充分统计量且是<span class="math inline">\(\mathscr{P}\)</span>的充分统计量，对任意的<span class="math inline">\(P\in\mathscr{P}_0\;\)</span>a.s.就对任意的<span class="math inline">\(P\in\mathscr{P}\;\)</span>a.s.，则<span class="math inline">\(T\)</span>是<span class="math inline">\(\mathscr{P}\)</span>的极小充分统计量；</p></li>
+<li><p>若<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控参数结构，<span class="math inline">\(X\)</span>是欧氏空间，<span class="math inline">\(\mu\)</span>是控制测度，<span class="math inline">\(\Theta\)</span>为参数空间，则如果满足：</p>
+<p><span class="math display">\[\begin{equation*}
+                \forall\;x,y\in X,\;\forall\;\theta\in\Theta,\;\frac{\mathop{}\!\mathrm{d}P_\theta}{\mathop{}\!\mathrm{d}\mu}(x)=\frac{\mathop{}\!\mathrm{d}P_\theta}{\mathop{}\!\mathrm{d}\mu}(y)f(x,y)\Rightarrow T(x)=T(y)
+
+    \end{equation*}\]</span></p>
+<p>其中<span class="math inline">\(f\)</span>是一个可测函数，则<span class="math inline">\(T\)</span>是<span class="math inline">\(\mathscr{P}\)</span>的极小充分统计量；</p></li>
+<li><p>若<span class="math inline">\(\mathscr{P}=\{P_n\},\;n=0,1,2,\dots\)</span>，则统计量：</p>
+<p><span class="math display">\[\begin{equation*}
+                T(x)=\left(\frac{P_1(x)}{P_0(x)},\frac{P_2(x)}{P_0(x)},\dots\right)
+
+    \end{equation*}\]</span></p>
+<p>是<span class="math inline">\(\mathscr{P}\)</span>的极小充分统计量；</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)不予证明。</p>
+<p>(2)由定义即可得出。</p>
+<p>(3)</p>
+<p>(4)设<span class="math inline">\(S\)</span>是<span class="math inline">\(\mathscr{P}\)</span>的充分统计量，所以<span class="math inline">\(S\)</span>也是<span class="math inline">\(\mathscr{P}_0\)</span>的充分统计量，于是存在可测映射<span class="math inline">\(\varphi\)</span>使得：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;P\in\mathscr{P}_0,\;T=\varphi(S)\;a.s.\text{于}(X,\mathscr{A},P)
+
+\end{equation*}\]</span></p>
+<p>由条件即可得到：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;P\in\mathscr{P},\;T=\varphi(S)\;a.s.\text{于}(X,\mathscr{A},P)
+
+\end{equation*}\]</span></p>
+<p>(5)&nbsp;◻</p>
+</div>
+</section>
+</section>
+<section id="id--c5497746" class="level3">
+<h3 class="anchored" data-anchor-id="id--c5497746"><span class="header-section-number">17.1.3</span> 完全性</h3>
+<div id="definition-17-11" class="definition theorem-block env-definition">
+<p><strong>Definition 17.11</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(T\)</span>是可测空间<span class="math inline">\((X,\mathscr{A})\)</span>到可测空间<span class="math inline">\((Y,\mathscr{B})\)</span>上的统计量。若对任意的Borel函数<span class="math inline">\(f\)</span>有：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;\theta\in\Theta,\;\int_{X}f[T(x)]\mathop{}\!\mathrm{d}P_{\theta}=0\Rightarrow f[T(x)]=0\;a.s.\text{于}(X,\mathscr{A},P_{\theta})
+
+\end{equation*}\]</span></p>
+<p>则称<span class="math inline">\(T\)</span>为<a href="../chapters/page-042.html#term-CompleteStatistic" class="term" title="complete statistic">完全统计量<span class="term-english">（complete statistic）</span></a>，称<span class="math inline">\(\mathscr{P}T^{-1}\)</span>是<strong>完全的</strong>。若对任意的有界Borel函数有上述结论，则称<span class="math inline">\(T\)</span>为<a href="../chapters/page-041.html#term-BoundedlyCompleteStatistic" class="term" title="boundedly complete statistic">有界完全统计量<span class="term-english">（boundedly complete statistic）</span></a>。</p>
+</div>
+<div id="prop-CompleteStatistic-badc4eee" class="property theorem-block env-property">
+<p><strong>Property 17.1.4</strong>. 完全统计量具有如下性质：</p>
+<ol type="1">
+<li><p>完全统计量是有界完备统计量；</p></li>
+<li><p>完全（有界完全）统计量的可测变换仍是完全（有界完全）统计量；</p></li>
+<li><p>充分完全统计量是极小充分统计量；</p></li>
+</ol>
+</div>
+</section>
+<section id="id--0fbeb2d7" class="level3">
+<h3 class="anchored" data-anchor-id="id--0fbeb2d7"><span class="header-section-number">17.1.4</span> 指数族</h3>
+<div id="definition-17-12" class="definition theorem-block env-definition">
+<p><strong>Definition 17.12</strong>. 设<span class="math inline">\((X,\mathscr{A},P)\)</span>为概率空间，<span class="math inline">\(\mu\)</span>为其上的<span class="math inline">\(\sigma\)</span>有限测度。若<span class="math inline">\(P\ll\mu\)</span>，根据<a href="../chapters/page-012.html#theo-RadonNikodym-fd20b306" data-reference-type="ref+label" data-reference="theo:RadonNikodym">定理 11.35</a>，称：</p>
+<p><span class="math display">\[\begin{equation*}
+\operatorname{Supp}_{\mu}(P)=\left\{x\in X:\frac{\mathop{}\!\mathrm{d}P}{\mathop{}\!\mathrm{d}\mu}(x)&gt;0\right\}
+
+\end{equation*}\]</span></p>
+<p>为<span class="math inline">\(P\)</span>关于<span class="math inline">\(\mu\)</span>的<a href="../chapters/page-058.html#term-Support" class="term" title="support">支撑<span class="term-english">（support）</span></a>。</p>
+</div>
+<div id="definition-17-13" class="definition theorem-block env-definition">
+<p><strong>Definition 17.13</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控参数结构，<span class="math inline">\(\mu\)</span>是控制测度，<span class="math inline">\(\Theta\)</span>是参数空间。若存在可测集合<span class="math inline">\(S\in\mathscr{A}\)</span>，使得对任意<span class="math inline">\(\theta\in\Theta\)</span>都有</p>
+<p><span class="math display">\[\begin{equation*}
+\mu\Big(\left\{x\in X:\frac{\mathop{}\!\mathrm{d}P_{\theta}}{\mathop{}\!\mathrm{d}\mu}(x)&gt;0\right\}\Delta S\Big)=0
+
+\end{equation*}\]</span></p>
+<p>则称<span class="math inline">\(\mathscr{P}\)</span>关于<span class="math inline">\(\mu\)</span>具有<a href="../chapters/page-042.html#term-CommonSupport" class="term" title="common support">共同支撑<span class="term-english">（common support）</span></a><span class="math inline">\(S\)</span>，或称该结构的支撑不依赖于参数<span class="math inline">\(\theta\)</span>。</p>
+</div>
+<div id="definition-17-14" class="definition theorem-block env-definition">
+<p><strong>Definition 17.14</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控参数结构，<span class="math inline">\(\mu\)</span>是控制测度，<span class="math inline">\(\Theta\)</span>是参数空间。若<span class="math inline">\(\mathscr{P}\)</span>满足：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;\theta\in\Theta,\;\frac{\mathop{}\!\mathrm{d}P_{\theta}}{\mathop{}\!\mathrm{d}\mu}(x)=\exp\left[\eta^{\top}(\theta)T(x)-\xi(\theta)\right]h(x)=C(\theta)\exp\left[\eta^{\top}(\theta)T(x)\right]h(x)
+
+\end{equation*}\]</span></p>
+<p>且该结构的支撑不依赖于未知参数<span class="math inline">\(\theta\)</span>，则称<span class="math inline">\(\mathscr{P}\)</span>是<a href="../chapters/page-044.html#term-ExponentialFamily" class="term" title="exponential family">指数族<span class="term-english">（exponential family）</span></a>。其中<span class="math inline">\(\eta(\theta),T(x)\in\mathbb{R}^{n}\)</span>，<span class="math inline">\(n\)</span>被称为该指数族的阶数，<span class="math inline">\(h\)</span>是非负Borel函数，<span class="math inline">\(\xi(\theta)\)</span>是实值函数。称：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{\mathop{}\!\mathrm{d}P_{\theta}}{\mathop{}\!\mathrm{d}\mu}(x)=\exp\left[\eta^{\top}T(x)-\xi(\eta)\right]h(x)=C(\eta)\exp\left[\eta^{\top}T(x)\right]h(x)
+
+\end{equation*}\]</span></p>
+<p>为指数族的<a href="../chapters/page-042.html#term-CanonicalForm" class="term" title="canonical form">标准形式<span class="term-english">（canonical form）</span></a>，此时的新参数<span class="math inline">\(\eta\)</span>被称为<a href="../chapters/page-053.html#term-NaturalParameter" class="term" title="natural parameter">自然参数<span class="term-english">（natural parameter）</span></a>，称：</p>
+<p><span class="math display">\[\begin{equation*}
+\Xi=\left\{\eta:\int_{X}\exp\left[\eta^{\top}T(x)\right]h(x)\mathop{}\!\mathrm{d}\mu&lt;+\infty\right\}
+
+\end{equation*}\]</span></p>
+<p>为<a href="../chapters/page-053.html#term-NaturalParameterSpace" class="term" title="natural parameter space">自然参数空间<span class="term-english">（natural parameter space）</span></a>。</p>
+</div>
+<div id="note-17-4" class="note theorem-block env-note">
+<p><strong>note 17.4</strong>. 在<span class="math inline">\(n\)</span>阶指数族的标准形式中，虽然自然参数<span class="math inline">\(\eta\)</span>被写为<span class="math inline">\(\mathbb{R}^{n}\)</span>中的向量，但这并不意味着该指数族真的具有<span class="math inline">\(n\)</span>个自由参数方向。例如设<span class="math inline">\(n=2\)</span>，若自然参数空间为：</p>
+<p><span class="math display">\[\begin{equation*}
+\Xi=\left\{(\eta_1,\eta_2)\in\mathbb{R}^{2}:\eta_1=2\eta_2\right\}
+
+\end{equation*}\]</span></p>
+<p>则<span class="math inline">\(\Xi\)</span>只是<span class="math inline">\(\mathbb{R}^{2}\)</span>中的一条直线。尽管自然参数形式中出现了两个分量<span class="math inline">\(\eta_1,\eta_2\)</span>，但它们不能独立变化，模型实际上只有一个自由参数方向。令<span class="math inline">\(\eta_2=\gamma\)</span>，则<span class="math inline">\(\eta_1=2\gamma\)</span>，于是：</p>
+<p><span class="math display">\[\begin{equation*}
+\eta_1T_1(x)+\eta_2T_2(x)=\gamma\left[2T_1(x)+T_2(x)\right]
+
+\end{equation*}\]</span></p>
+<p>由此可见，该指数族虽然形式上写成二维自然参数形式，但本质上只是一维自然参数族。</p>
+<p>因此，在讨论指数族的阶数时，仅仅说明<span class="math inline">\(T(x)\in\mathbb{R}^{n}\)</span>和<span class="math inline">\(\eta\in\mathbb{R}^{n}\)</span>是不够的，还需要进一步要求自然参数空间<span class="math inline">\(\Xi\)</span>在<span class="math inline">\(\mathbb{R}^{n}\)</span>中确实具有<span class="math inline">\(n\)</span>维变化范围。换言之，在某个自然参数点附近，<span class="math inline">\(\eta\)</span>应当可以沿<span class="math inline">\(\mathbb{R}^{n}\)</span>中的任意方向作充分小的扰动。</p>
+</div>
+<div id="definition-17-15" class="definition theorem-block env-definition">
+<p><strong>Definition 17.15</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控参数结构，<span class="math inline">\(\mu\)</span>是控制测度，<span class="math inline">\(\mathscr{P}\)</span>是<span class="math inline">\(n\)</span>阶指数族。若自然参数空间<span class="math inline">\(\Xi\)</span>含有<span class="math inline">\(\mathbb{R}^{n}\)</span>中的非空开集，则称<span class="math inline">\(\mathscr{P}\)</span>是满秩指数族，否则称其为非满秩指数族。</p>
+</div>
+<div id="prop-ExponentialFamily-efe0ea47" class="property theorem-block env-property">
+<p><strong>Property 17.1.5</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控参数结构，<span class="math inline">\(\mu\)</span>是控制测度，<span class="math inline">\(\mathscr{P}\)</span>是<span class="math inline">\(n\)</span>阶指数族，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(\dfrac{\mathop{}\!\mathrm{d}P_{\theta}}{\mathop{}\!\mathrm{d}\mu}\)</span>表达式不唯一；</p></li>
+<li><p>对于<span class="math inline">\(\xi(\theta)\)</span>和<span class="math inline">\(\xi(\eta)\)</span>有：</p>
+<p><span class="math display">\[\begin{gather*}
+                \xi(\theta)=\ln\left\{\int_{X}\exp\left[\eta^{\top}(\theta)T(x)\right]h(x)\mathop{}\!\mathrm{d}\mu\right\} \\
+                \xi(\eta)=\ln\left\{\int_{X}\exp\left[\eta^{\top}T(x)\right]h(x)\mathop{}\!\mathrm{d}\mu\right\}
+
+    \end{gather*}\]</span></p></li>
+<li><p>若<span class="math inline">\(\mathscr{P}\)</span>关于<span class="math inline">\(\mu\)</span>具有共同支撑<span class="math inline">\(S\)</span>，<span class="math inline">\(\Xi\)</span>是自然参数空间，<span class="math inline">\(\mathscr{P}\)</span>是满秩指数族，则自然参数<span class="math inline">\(\eta\)</span>不可识别当且仅当存在非零的<span class="math inline">\(\alpha\in\mathbb{R}^{n}\)</span>和<span class="math inline">\(\beta\in\mathbb{R}^{}\)</span>使得<span class="math inline">\(\alpha^{\top}T(x)=\beta\;\)</span>a.e.于<span class="math inline">\((S,S\cap\mathscr{A},\mu)\)</span>；</p></li>
+<li><p>有限个概率分布是指数族的相互独立的随机变量的联合概率分布仍为指数族，即指数族在简单抽样下是封闭的；</p></li>
+<li><p><span class="math inline">\(\mathscr{P}\)</span>的自然参数空间<span class="math inline">\(\Xi\)</span>是凸集；</p></li>
+<li><p>设<span class="math inline">\(f\)</span>是<span class="math inline">\((X,\mathscr{A})\)</span>上的Borel函数，令：</p>
+<p><span class="math display">\[\begin{equation*}
+                G(\eta)=\int_{X}f(x)\exp[\eta^{\top}T(x)]h(x)\mathop{}\!\mathrm{d}\mu
+
+    \end{equation*}\]</span></p>
+<p>记<span class="math inline">\(\Xi_0=\{\eta:G(\eta)\in\mathbb{R}^{}\}\)</span>。对<span class="math inline">\(\Xi_0\)</span>的任意内点<span class="math inline">\(a\)</span>，<span class="math inline">\(G\)</span>在<span class="math inline">\(a\)</span>点连续，且<span class="math inline">\(G\)</span>在<span class="math inline">\(a\)</span>点的任意阶偏导数都存在并可将求导与积分交换顺序。</p></li>
+<li><p><span class="math inline">\(T(x)\)</span>是<span class="math inline">\(\mathscr{P}\)</span>的充分统计量；</p></li>
+<li><p>若<span class="math inline">\(\mathscr{P}\)</span>满秩，则<span class="math inline">\(T(x)\)</span>是<span class="math inline">\(\mathscr{P}\)</span>的极小充分统计量和完全统计量；</p></li>
+<li><p><span class="math inline">\(\operatorname{E}_{\eta}(T_i)=\dfrac{\partial\xi(\eta)}{\partial\eta_i},\;\operatorname{Cov}_{\eta}(T_i,T_j)=\dfrac{\partial^2\xi(\eta)}{\partial\eta_j\partial\eta_i}\)</span>；</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)满秩变不满秩进行分解。</p>
+<p>(2)概率测度在<span class="math inline">\(X\)</span>上的值应为<span class="math inline">\(1\)</span>。</p>
+<p>(3)<strong>必要性：</strong>若参数<span class="math inline">\(\eta\)</span>不可识别，则存在不同的<span class="math inline">\(\eta_1,\eta_2\in\Xi\)</span>使得<span class="math inline">\(P_{\eta_1}=P_{\eta_2}\)</span>。由<a href="../chapters/page-012.html#theo-RadonNikodym-fd20b306" data-reference-type="ref+label" data-reference="theo:RadonNikodym">定理 11.35</a>可知此时有：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{\mathop{}\!\mathrm{d}P_{\eta_1}}{\mathop{}\!\mathrm{d}\mu}=\frac{\mathop{}\!\mathrm{d}P_{\eta_2}}{\mathop{}\!\mathrm{d}\mu},\;\text{a.e.于}(X,\mathscr{A},\mu)
+
+\end{equation*}\]</span></p>
+<p>即：</p>
+<p><span class="math display">\[\begin{equation*}
+\exp\left[\eta_1^{\top}T(x)-\xi(\eta_1)\right]h(x)=\exp\left[\eta_2^{\top}T(x)-\xi(\eta_2)\right]h(x),\;\text{a.e.于}(X,\mathscr{A},\mu)
+
+\end{equation*}\]</span></p>
+<p>于是存在<span class="math inline">\(N\in\mathscr{A}\)</span>满足：</p>
+<p><span class="math display">\[\begin{equation*}
+\mu(N)=0,\quad\exp\left[\eta_1^{\top}T(x)-\xi(\eta_1)\right]h(x)=\exp\left[\eta_2^{\top}T(x)-\xi(\eta_2)\right]h(x),\;x\in N^c
+
+\end{equation*}\]</span></p>
+<p>对任意的<span class="math inline">\(x\in S\backslash N\)</span>有：</p>
+<p><span class="math display">\[\begin{equation*}
+\eta_1^{\top}T(x)-\xi(\eta_1)=\eta_2^{\top}T(x)-\xi(\eta_2)
+
+\end{equation*}\]</span></p>
+<p>根据<a href="../chapters/page-012.html#prop-SigmaField-4168a9ce" data-reference-type="ref+label" data-reference="prop:SigmaField">性质 11.1.6</a>(2)和<a href="../chapters/page-012.html#prop-Measure-9acfc4ac" data-reference-type="ref+label" data-reference="prop:Measure">性质 11.2.1</a>(3)（单调性）可知：</p>
+<p><span class="math display">\[\begin{equation*}
+0\leqslant\mu(S\cap N)\leqslant\mu(N)=0
+
+\end{equation*}\]</span></p>
+<p>所以<span class="math inline">\(\mu(S\cap N)=0\)</span>，即：</p>
+<p><span class="math display">\[\begin{equation*}
+\eta_1^{\top}T(x)-\xi(\eta_1)=\eta_2^{\top}T(x)-\xi(\eta_2),\;\text{a.e.于}(S,S\cap\mathscr{A},\mu)
+
+\end{equation*}\]</span></p>
+<p>必要性成立。</p>
+<p><strong>充分性：</strong>若存在非零的<span class="math inline">\(\alpha\in\mathbb{R}^n\)</span>和<span class="math inline">\(\beta\in\mathbb{R}\)</span>使得<span class="math inline">\(\alpha^{\top}T(x)=\beta\;\)</span>a.e.于<span class="math inline">\((S,S\cap\mathscr{A},\mu)\)</span>，任取<span class="math inline">\(\Xi\)</span>中<span class="math inline">\(\mathbb{R}^{n}\)</span>上非空开集上的<span class="math inline">\(\eta_1\)</span>，于是存在充分小的<span class="math inline">\(t\ne 0\)</span>使得<span class="math inline">\(\eta_1+t\alpha\)</span>也在其中。由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)(8)可知：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;\int_{X}^{}\exp\left[(\eta_1+t\alpha)^\top T(x)\right]h(x)\mathop{}\!\mathrm{d}\mu=\int_{S}^{}\exp\left[\eta_1^\top T(x)+t\alpha^\top T(x)\right]h(x)\mathop{}\!\mathrm{d}\mu \\
+=&amp;\int_{S}^{}\exp\left[\eta_1^\top T(x)+t\beta\right]h(x)\mathop{}\!\mathrm{d}\mu=\exp(t\beta)\int_{S}^{}\exp\left[\eta_1^\top T(x)\right]h(x)\mathop{}\!\mathrm{d}\mu
+
+\end{align*}\]</span></p>
+<p>根据<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(2)可知<span class="math inline">\(\xi(\eta_1+t\alpha)=\xi(\eta_1)+t\beta\)</span>，于是：</p>
+<p><span class="math display">\[\begin{align*}
+\frac{\mathop{}\!\mathrm{d}P_{\eta_1+t\alpha}}{\mathop{}\!\mathrm{d}\mu}(x)
+&amp;=\exp\left\{(\eta_1+t\alpha)^\top T(x)-\xi(\eta_1+t\alpha)\right\}h(x) \\
+&amp;=\exp\left\{\eta_1^\top T(x)+t\beta-\xi(\eta_1)-t\beta\right\}h(x) \\
+&amp;=\exp\left\{\eta_1^\top T(x)-\xi(\eta_1)\right\}h(x)=\frac{\mathop{}\!\mathrm{d}P_{\eta_1}}{\mathop{}\!\mathrm{d}\mu}(x)
+
+\end{align*}\]</span></p>
+<p>a.e.于<span class="math inline">\((S,S\cap\mathscr{A},\mu)\)</span>。注意到在<span class="math inline">\(S^c\)</span>上有<span class="math inline">\(h(x)=0\)</span>，上述二者也同时为<span class="math inline">\(0\)</span>，所以根据<a href="../chapters/page-012.html#prop-SigmaField-4168a9ce" data-reference-type="ref+label" data-reference="prop:SigmaField">性质 11.1.6</a>(6)可得：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{\mathop{}\!\mathrm{d}P_{\eta_1+t\alpha}}{\mathop{}\!\mathrm{d}\mu}=\frac{\mathop{}\!\mathrm{d}P_{\eta_1}}{\mathop{}\!\mathrm{d}\mu},\;\text{a.e.于}(X,\mathscr{A},\mu)
+
+\end{equation*}\]</span></p>
+<p>由<a href="../chapters/page-012.html#theo-RadonNikodym-fd20b306" data-reference-type="ref+label" data-reference="theo:RadonNikodym">定理 11.35</a>和<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(8)可得<span class="math inline">\(P_{\eta_1+t\alpha}=P_{\eta_1}\)</span>。因为<span class="math inline">\(t\ne 0\)</span>且<span class="math inline">\(\alpha\ne\mathbf{0}\)</span>，所以<span class="math inline">\(\eta_1+t\alpha\ne\eta_1\)</span>， 自然参数<span class="math inline">\(\eta\)</span>不可识别。</p>
+<p>(4)由<a href="../chapters/page-013.html#prop-Independent-c50d54ba" data-reference-type="ref+label" data-reference="prop:Independent">性质 12.2.1</a>(5.c)即可得到。</p>
+<p>(5)设<span class="math inline">\(\theta,\vartheta\in\Xi\)</span>且<span class="math inline">\(\theta\ne\vartheta\)</span>。对任意的 <span class="math inline">\(\alpha\in(0,1)\)</span>，定义：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;A\in\mathscr{A},\;\nu(A)=\int_{A}h(x)\mathop{}\!\mathrm{d}\mu
+
+\end{equation*}\]</span></p>
+<p>由<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(2)(3)和<a href="../chapters/page-012.html#theo-MeasurableCountableIntegral-112b1a70" data-reference-type="ref+label" data-reference="theo:MeasurableCountableIntegral">定理 11.27</a>可知<span class="math inline">\(\nu\)</span>是<span class="math inline">\((X,\mathscr{A})\)</span>上的测度，并且<span class="math inline">\(\nu\ll\mu\)</span>。根据<a href="../chapters/page-012.html#theo-RadonNikodym-fd20b306" data-reference-type="ref+label" data-reference="theo:RadonNikodym">定理 11.35</a>可知<span class="math inline">\(h(x)\)</span>是<span class="math inline">\(\nu\)</span>关于<span class="math inline">\(\mu\)</span>的RN导数，由<a href="../chapters/page-012.html#lem-IntChangeOfMeasure-673686c1" data-reference-type="ref+label" data-reference="lem:IntChangeOfMeasure">引理 11.10</a>和<a href="../chapters/page-017.html#ineq-holder-ineq-Lebesgue-1c603ef4" data-reference-type="ref+label" data-reference="ineq:holder-ineq-Lebesgue">不等式 9</a>可得：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;\int_{}\exp\left\{[\alpha\theta+(1-\alpha)\vartheta]^{\top}T(x)\right\}h(x)\mathop{}\!\mathrm{d}\mu \\
+=&amp;\int_{}\exp\left\{[\alpha\theta+(1-\alpha)\vartheta]^{\top}T(x)\right\}\mathop{}\!\mathrm{d}\nu \\
+=&amp;\int_{}\exp\left[\alpha\theta^{\top}T(x)\right]\exp\left[(1-\alpha)\vartheta^{\top}T(x)\right]\mathop{}\!\mathrm{d}\nu \\
+\leqslant&amp;\left\{\int_{}\exp\left[\theta^{\top}T(x)\right]\mathop{}\!\mathrm{d}\nu\right\}^{\alpha}\left\{\int_{}\exp\left[\vartheta^{\top}T(x)\right]\mathop{}\!\mathrm{d}\nu\right\}^{1-\alpha}&lt;+\infty
+
+\end{align*}\]</span></p>
+<p>即<span class="math inline">\(\alpha\theta+(1-\alpha)\vartheta\in\Xi\)</span>，结论成立。</p>
+<p>(7)由<a href="#theo-FactorizationTheorem-7db5092c" data-reference-type="ref+label" data-reference="theo:FactorizationTheorem">定理 17.2</a>立即可得。</p>
+<p>(9)因为：</p>
+<p><span class="math display">\[\begin{equation*}
+\int_{X}\exp\left[\sum_{i=1}^{n}\eta_iT_i(x)-\xi(\eta)\right]h(x)\mathop{}\!\mathrm{d}\mu=1
+
+\end{equation*}\]</span></p>
+<p>由(6)和<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
+<p><span class="math display">\[\begin{gather*}
+\frac{\partial}{\partial\eta_i}\int_{X}^{}\exp\left[\sum_{i=1}^{n}\eta_iT_i(x)-\xi(\eta)\right]h(x)\mathop{}\!\mathrm{d}\mu=0 \\
+\int_{X}^{}\left[T_i(x)-\frac{\partial \xi(\eta)}{\partial\eta_i}\right]\exp\left[\sum_{i=1}^{n}\eta_iT_i(x)-\xi(\eta)\right]h(x)\mathop{}\!\mathrm{d}\mu=0 \\
+\int_{X}^{}T_i(x)\exp\left[\sum_{i=1}^{n}\eta_iT_i(x)-\xi(\eta)\right]h(x)\mathop{}\!\mathrm{d}\mu=\frac{\partial \xi(\eta)}{\partial\eta_i}\int_{X}^{}\exp\left[\sum_{i=1}^{n}\eta_iT_i(x)-\xi(\eta)\right]h(x)\mathop{}\!\mathrm{d}\mu \\
+\operatorname{E}_{\eta}(T_i)=\frac{\partial \xi(\eta)}{\partial\eta_i}
+
+\end{gather*}\]</span></p>
+<p>对上式求关于<span class="math inline">\(\eta_j\)</span>的导数，由<a href="../chapters/page-013.html#prop-CovMat-3a62d09d" data-reference-type="ref+label" data-reference="prop:CovMat">性质 12.3.4</a>(6)可得：</p>
+<p><span class="math display">\[\begin{gather*}
+\int_{X}^{}T_i(x)\left[T_j(x)-\frac{\partial \xi(\eta)}{\partial\eta_j}\right]\exp\left[\sum_{i=1}^{n}\eta_iT_i(x)-\xi(\eta)\right]h(x)\mathop{}\!\mathrm{d}\mu=\frac{\partial^2 \xi(\eta)}{\partial\eta_j\partial\eta_i} \\
+\int_{X}^{}T_i(x)T_j(x)p(x)\mathop{}\!\mathrm{d}\mu-\int_{X}^{}T_i(x)\frac{\partial \xi(\eta)}{\partial\eta_j}p(x)\mathop{}\!\mathrm{d}\mu=\frac{\partial^2 \xi(\eta)}{\partial\eta_j\partial\eta_i} \\
+\operatorname{E}_{\eta}(T_iT_j)-\frac{\partial \xi(\eta)}{\partial\eta_j}\operatorname{E}_{\eta}(T_i)=\frac{\partial^2 \xi(\eta)}{\partial\eta_j\partial\eta_i} \\
+\operatorname{E}_{\eta}(T_iT_j)-\operatorname{E}_{\eta}(T_i)\operatorname{E}_{\eta}(T_j)=\frac{\partial^2 \xi(\eta)}{\partial\eta_j\partial\eta_i} \\
+\operatorname{Cov}_{\eta}(T_i,T_j)=\frac{\partial^2 \xi(\eta)}{\partial\eta_j\partial\eta_i}
+
+\end{gather*}\]</span></p>
+<p>◻</p>
+</div>
+<div id="theorem-17-3" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.3</strong>. 设<span class="math inline">\(X\sim\operatorname{Binom}(n,p),\;p\in(0,1)\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>是<span class="math inline">\(X\)</span>的一个样本，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>的分布是指数族，其标准形式、自然参数、<span class="math inline">\(C(\eta)\)</span>、<span class="math inline">\(T(x)\)</span>和<span class="math inline">\(h(x)\)</span>分别为：</p>
+<p><span class="math display">\[\begin{gather*}
+                p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(1+e^{\eta})^{-mn}\exp\left(\eta\sum_{i=1}^{m}x_i\right)\prod_{i=1}^{m}\left[\binom{n}{x_i}I_{\mathbb{N}_0}(x_i)\right] \\
+                \eta=\ln\left(\frac{p}{1-p}\right),\quad C(\eta)=(1+e^{\eta})^{-mn} \\ T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}\left[\binom{n}{x_i}I_{\mathbb{N}_0}(x_i)\right]
+
+    \end{gather*}\]</span></p>
+<p>自然参数空间为<span class="math inline">\(\mathbb{R}^{}\)</span>；</p></li>
+<li><p><span class="math inline">\(\sum\limits_{i=1}^{m}X_i\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)由二项分布的定义可以得到：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+=&amp;\prod_{i=1}^{m}\left[\binom{n}{x_i}p^{x_i}(1-p)^{n-x_i}I_{\mathbb{N}_0}(x_i)\right]=\prod_{i=1}^{m}\left[\binom{n}{x_i}\left(\frac{p}{1-p}\right)^{x_i}(1-p)^nI_{\mathbb{N}_0}(x_i)\right] \\
+=&amp;(1-p)^{mn}\exp\left[\ln\left(\frac{p}{1-p}\right)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\left[\binom{n}{x_i}I_{\mathbb{N}_0}(x_i)\right]
+
+\end{align*}\]</span></p>
+<p>令：</p>
+<p><span class="math display">\[\begin{equation*}
+\eta=\ln\left(\frac{p}{1-p}\right)
+
+\end{equation*}\]</span></p>
+<p>可解得：</p>
+<p><span class="math display">\[\begin{equation*}
+p=\frac{e^{\eta}}{e^{\eta}+1}
+
+\end{equation*}\]</span></p>
+<p>于是有：</p>
+<p><span class="math display">\[\begin{equation*}
+C(\eta)=(1-p)^{mn}=\left(\frac{1}{e^{\eta}+1}\right)^{mn}=(1+e^{\eta})^{-mn}
+
+\end{equation*}\]</span></p>
+<p>根据<span class="math inline">\(\eta\)</span>与<span class="math inline">\(p\)</span>的关系可得<span class="math inline">\(\eta\in\mathbb{R}^{}\)</span>。</p>
+<p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
+</div>
+<div id="theorem-17-4" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.4</strong>. 设<span class="math inline">\(X\sim\operatorname{NB}(r,p),\;p\in(0,1)\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>是<span class="math inline">\(X\)</span>的一个样本，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>的分布是指数族，其标准形式、自然参数、<span class="math inline">\(C(\eta)\)</span>、<span class="math inline">\(T(x)\)</span>和<span class="math inline">\(h(x)\)</span>分别为：</p>
+<p><span class="math display">\[\begin{gather*}
+                \begin{aligned}
+                    &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+                    =&amp;(1-e^{\eta})^{mr}\exp\left(\eta\sum_{i=1}^{m}x_i\right)\prod_{i=1}^{m}\left[\binom{x_i+r-1}{r-1}I_{\mathbb{N}_0}(x_i)\right]
+                \end{aligned} \\
+                \eta=\ln(1-p),\quad C(\eta)=(1-e^{\eta})^{mr} \\
+                T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}\left[\binom{x_i+r-1}{r-1}I_{\mathbb{N}_0}(x_i)\right]
+
+    \end{gather*}\]</span></p>
+<p>自然参数空间为<span class="math inline">\(\mathbb{R}^{-}\)</span>；</p></li>
+<li><p><span class="math inline">\(\sum\limits_{i=1}^{m}X_i\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)由负二项分布的定义可以得到：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+=&amp;\prod_{i=1}^{m}\left[\binom{x_i+r-1}{r-1}p^r(1-p)^{x_i}I_{\mathbb{N}_0}(x_i)\right] \\
+=&amp;p^{mr}\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\left[\binom{x_i+r-1}{r-1}I_{\mathbb{N}_0}(x_i)\right]
+
+\end{align*}\]</span></p>
+<p>令<span class="math inline">\(\eta=\ln(1-p)\)</span>，可解得<span class="math inline">\(p=1-e^{\eta}\)</span>，于是有<span class="math inline">\(C(\eta)=p^{mr}=(1-e^{\eta})^{mr}\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(p\)</span>的关系可得<span class="math inline">\(\eta\in\mathbb{R}^{-}\)</span>。</p>
+<p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
+</div>
+<div id="theorem-17-5" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.5</strong>. 设<span class="math inline">\(X\sim\operatorname{Poisson}(\lambda),\;\lambda\in\mathbb{R}^+\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>是<span class="math inline">\(X\)</span>的一个样本，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>的分布是指数族，其标准形式、自然参数、<span class="math inline">\(C(\eta)\)</span>、<span class="math inline">\(T(x)\)</span>和<span class="math inline">\(h(x)\)</span>分别为：</p>
+<p><span class="math display">\[\begin{gather*}
+                p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\exp(-me^{\eta})\exp\left(\eta\sum_{i=1}^{m}x_i\right)\prod_{i=1}^{m}\frac{I_{\mathbb{N}_0}(x_i)}{x_i!} \\
+                \eta=\ln\lambda,\quad C(\eta)=\exp(-me^{\eta}),\quad T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}\frac{I_{\mathbb{N}_0}(x_i)}{x_i!}
+
+    \end{gather*}\]</span></p>
+<p>自然参数空间为<span class="math inline">\(\mathbb{R}^{}\)</span>；</p></li>
+<li><p><span class="math inline">\(\sum\limits_{i=1}^{m}X_i\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)由Poisson分布的定义可以得到：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+=&amp;\prod_{i=1}^{m}\left(\frac{\lambda^{x_i}}{x_i!}e^{-\lambda}I_{\mathbb{N}_0}(x_i)\right) =e^{-m\lambda}\exp\left[\ln(\lambda)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\frac{I_{\mathbb{N}_0}(x_i)}{x_i!}
+
+\end{align*}\]</span></p>
+<p>令<span class="math inline">\(\eta=\ln\lambda\)</span>，可解得<span class="math inline">\(\lambda=e^{\eta}\)</span>，于是有<span class="math inline">\(C(\eta)=e^{-m\lambda}=\exp(-me^{\eta})\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(\lambda\)</span>的关系可得<span class="math inline">\(\eta\in\mathbb{R}^{}\)</span>。</p>
+<p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
+</div>
+<div id="theorem-17-6" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.6</strong>. 设<span class="math inline">\(X\sim\operatorname{Power}(\theta),\;\theta\in\mathbb{R}^{+}\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>是<span class="math inline">\(X\)</span>的一个样本，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>的分布是指数族，其标准形式、自然参数、<span class="math inline">\(C(\eta)\)</span>、<span class="math inline">\(T(x)\)</span>和<span class="math inline">\(h(x)\)</span>分别为：</p>
+<p><span class="math display">\[\begin{gather*}
+                p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(\eta+1)^m\exp\left(\eta\sum_{i=1}^{m}\ln x_i\right)\prod_{i=1}^{m}I_{(0,1)}(x_i) \\
+                \eta=\theta-1,\quad C(\eta)=(\eta+1)^m,\quad
+                T(x)=\sum_{i=1}^{m}\ln x_i,\quad h(x)=\prod_{i=1}^{m}I_{(0,1)}(x_i)
+
+    \end{gather*}\]</span></p>
+<p>自然参数空间为<span class="math inline">\((-1,+\infty)\)</span>；</p></li>
+<li><p><span class="math inline">\(\sum\limits_{i=1}^{m}\ln X_i\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)由幂分布的定义可以得到：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+=&amp;\prod_{i=1}^{m}\left[\theta x_i^{\theta-1}I_{(0,1)}(x_i)\right]=\theta^m\exp\left[(\theta-1)\sum_{i=1}^{m}\ln x_i\right]\prod_{i=1}^{m}I_{(0,1)}(x_i)
+
+\end{align*}\]</span></p>
+<p>令<span class="math inline">\(\eta=\theta-1\)</span>，于是有<span class="math inline">\(C(\eta)=\theta^{m}=(\eta+1)^m\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(\theta\)</span>的关系可得<span class="math inline">\(\eta\in(-1,+\infty)\)</span>。</p>
+<p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
+</div>
+<div id="theorem-17-7" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.7</strong>. 设<span class="math inline">\(X\sim\operatorname{Weibull}(n,\theta),\;\theta\in\mathbb{R}^{+}\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>是<span class="math inline">\(X\)</span>的一个样本，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>的分布是指数族，其标准形式、自然参数、<span class="math inline">\(C(\eta)\)</span>、<span class="math inline">\(T(x)\)</span>和<span class="math inline">\(h(x)\)</span>分别为：</p>
+<p><span class="math display">\[\begin{gather*}
+                p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(-\eta)^{m}\exp\left(\eta\sum_{i=1}^{m}x_i^n\right)\prod_{i=1}^{m}\left[nx_i^{n-1}I_{(0,+\infty)}(x_i)\right] \\
+                \eta=-\theta^{-n},\quad C(\eta)=(-\eta)^{m},\quad
+                T(x)=\sum_{i=1}^{m}x_i^n,\quad h(x)=\prod_{i=1}^{m}\left[nx_i^{n-1}I_{(0,+\infty)}(x_i)\right]
+
+    \end{gather*}\]</span></p>
+<p>自然参数空间为<span class="math inline">\(\mathbb{R}^{-}\)</span>；</p></li>
+<li><p><span class="math inline">\(\sum\limits_{i=1}^{m}X_i^n\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)由Weibull分布的定义可以得到：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+=&amp;\prod_{i=1}^{m}\left\{nx_i^{n-1}\theta^{-n}\exp\left[-\left(\frac{x_i}{\theta}\right)^n\right]I_{(0,+\infty)}(x_i)\right\} \\
+=&amp;\theta^{-mn}\exp\left(-\frac{1}{\theta^n}\sum_{i=1}^{m}x_i^n\right)\prod_{i=1}^{m}\left[nx_i^{n-1}I_{(0,+\infty)}(x_i)\right]
+
+\end{align*}\]</span></p>
+<p>令<span class="math inline">\(\eta=-\theta^{-n}\)</span>，于是有<span class="math inline">\(C(\eta)=\theta^{-mn}=(-\eta)^{m}\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(\theta\)</span>的关系可得<span class="math inline">\(\eta\in\mathbb{R}^{-}\)</span>。</p>
+<p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
+</div>
+<div id="theorem-17-8" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.8</strong>. 设<span class="math inline">\(X\sim\operatorname{Pareto}(\alpha,\beta),\;\beta\in\mathbb{R}^{+}\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>是<span class="math inline">\(X\)</span>的一个样本，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>的分布是指数族，其标准形式、自然参数、<span class="math inline">\(C(\eta)\)</span>、<span class="math inline">\(T(x)\)</span>和<span class="math inline">\(h(x)\)</span>分别为：</p>
+<p><span class="math display">\[\begin{gather*}
+                \begin{aligned}
+                    &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+                    =&amp;(-\eta-1)^m\alpha^{-m(\eta+1)}\exp\left(\eta\sum_{i=1}^{m}\ln x_i\right)\prod_{i=1}^{m}I_{(\alpha,+\infty)}(x_i)
+                \end{aligned} \\
+                \eta=-(\beta+1),\quad C(\eta)=(-\eta-1)^m\alpha^{-m(\eta+1)} \\
+                T(x)=\sum_{i=1}^{m}\ln x_i,\quad h(x)=\prod_{i=1}^{m}I_{(\alpha,+\infty)}(x_i)
+
+    \end{gather*}\]</span></p>
+<p>自然参数空间为<span class="math inline">\((-\infty,-1)\)</span>；</p></li>
+<li><p><span class="math inline">\(\sum\limits_{i=1}^{m}\ln X_i\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)由Pareto分布的定义可以得到：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+=&amp;\prod_{i=1}^{m}\left[\beta\alpha^{\beta}x_i^{-(\beta+1)}I_{(\alpha,+\infty)}(x_i)\right]=\beta^m\alpha^{m\beta}\exp\left[-(\beta+1)\sum_{i=1}^{m}\ln x_i\right]\prod_{i=1}^{m}I_{(\alpha,+\infty)}(x_i)
+
+\end{align*}\]</span></p>
+<p>令<span class="math inline">\(\eta=-(\beta+1)\)</span>，于是有<span class="math inline">\(C(\eta)=\beta^{m}\alpha^{m\beta}=(-\eta-1)^m\alpha^{-m(\eta+1)}\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(\beta\)</span>的关系可得<span class="math inline">\(\eta\in(-\infty,-1)\)</span>。</p>
+<p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
+</div>
+<div id="theorem-17-9" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.9</strong>. 设<span class="math inline">\(X\sim\operatorname{N}(\mu,\sigma^2),\;\mu\in\mathbb{R}^{},\sigma^2&gt;0\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>是<span class="math inline">\(X\)</span>的一个样本，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>的分布是指数族，其标准形式、自然参数、<span class="math inline">\(C(\eta)\)</span>、<span class="math inline">\(T(x)\)</span>和<span class="math inline">\(h(x)\)</span>分别为：</p>
+<p><span class="math display">\[\begin{gather*}
+                \begin{aligned}
+                    &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+                    =&amp;\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right)\exp\left(\eta_1\sum_{i=1}^{m}x_i^2+\eta_2\sum_{i=1}^{m}x_i\right)
+                \end{aligned} \\
+                \eta=\left(-\frac{1}{2\sigma^2},\frac{\mu}{\sigma^2}\right),\quad C(\eta)=\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right) \\
+                T(x)=\left(\sum_{i=1}^{m}x_i^2,\sum_{i=1}^{m}x_i\right),\quad h(x)=1
+
+    \end{gather*}\]</span></p>
+<p>自然参数空间为<span class="math inline">\(\mathbb{R}^-\times\mathbb{R}^{}\)</span>；</p></li>
+<li><p><span class="math inline">\(\left(\sum\limits_{i=1}^{m}X_i^2,\sum\limits_{i=1}^{m}X_i\right)\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)由正态分布的定义可以得到：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\prod_{i=1}^{m}\left\{(2\pi\sigma^2)^{-\frac{1}{2}}\exp\left[-\frac{(x_i-\mu)^2}{2\sigma^2}\right]\right\} \\
+=&amp;(2\pi\sigma^2)^{-\frac{m}{2}}\prod_{i=1}^{m}\left[\exp\left(-\frac{x_i^2-2x_i\mu+\mu^2}{2\sigma^2}\right)\right] \\
+=&amp;(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^{m}x_i^2+\frac{\mu}{\sigma^2}\sum_{i=1}^{m}x_i-\frac{m\mu^2}{2\sigma^2}\right) \\
+=&amp;(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^{m}x_i^2+\frac{\mu}{\sigma^2}\sum_{i=1}^{m}x_i\right)
+
+\end{align*}\]</span></p>
+<p>令：</p>
+<p><span class="math display">\[\begin{equation*}
+\eta=\left(-\frac{1}{2\sigma^2},\frac{\mu}{\sigma^2}\right)
+
+\end{equation*}\]</span></p>
+<p>可解得：</p>
+<p><span class="math display">\[\begin{equation*}
+\mu=-\frac{\eta_2}{2\eta_1},\quad\sigma^2=-\frac{1}{2\eta_1}
+
+\end{equation*}\]</span></p>
+<p>于是有：</p>
+<p><span class="math display">\[\begin{equation*}
+C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right)
+
+\end{equation*}\]</span></p>
+<p>由<span class="math inline">\(\eta\)</span>与<span class="math inline">\((\mu,\sigma^2)\)</span>的关系即可得到<span class="math inline">\(\eta\in\mathbb{R}^{-}\times\mathbb{R}^{}\)</span>。</p>
+<p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
+</div>
+<div id="theorem-17-10" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.10</strong>. 设<span class="math inline">\(X\sim\operatorname{LN}(\mu,\sigma^2),\;\mu\in\mathbb{R}^{},\sigma^2&gt;0\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>是<span class="math inline">\(X\)</span>的一个样本，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>的分布是指数族，其标准形式、自然参数、<span class="math inline">\(C(\eta)\)</span>、<span class="math inline">\(T(x)\)</span>和<span class="math inline">\(h(x)\)</span>分别为：</p>
+<p><span class="math display">\[\begin{gather*}
+                \begin{aligned}
+                    &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+                    =&amp;\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right)\exp\left(\eta_1\sum_{i=1}^{m}\ln^2 x_i+\eta_2\sum_{i=1}^{m}\ln x_i\right)\prod_{i=1}^{m}\frac{I_{(0,+\infty)}(x_i)}{x_i}
+                \end{aligned} \\
+                \eta=\left(-\frac{1}{2\sigma^2},\frac{\mu}{\sigma^2}\right),\quad C(\eta)=\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right) \\
+                T(x)=\left(\sum_{i=1}^{m}\ln^2 x_i,\sum_{i=1}^{m}\ln x_i\right),\quad h(x)=\prod_{i=1}^{m}\frac{I_{(0,+\infty)}(x_i)}{x_i}
+
+    \end{gather*}\]</span></p>
+<p>自然参数空间为<span class="math inline">\(\mathbb{R}^{-}\times\mathbb{R}^{}\)</span>；</p></li>
+<li><p><span class="math inline">\(\left(\sum\limits_{i=1}^{m}\ln^2 X_i,\sum\limits_{i=1}^{m}\ln X_i\right)\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；；</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)由对数正态分布的定义可以得到：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+=&amp;\prod_{i=1}^{m}\left\{(2\pi\sigma^2)^{-\frac{1}{2}}\frac{1}{x_i}\exp\left[-\frac{(\ln x_i-\mu)^2}{2\sigma^2}\right]I_{(0,+\infty)}(x_i)\right\} \\
+=&amp;(2\pi\sigma^2)^{-\frac{m}{2}}\prod_{i=1}^{m}\left[\exp\left(-\frac{\ln^2 x_i-2\mu\ln x_i+\mu^2}{2\sigma^2}\right)\frac{I_{(0,+\infty)}(x_i)}{x_i}\right] \\
+=&amp;(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^{m}\ln^2 x_i+\frac{\mu}{\sigma^2}\sum_{i=1}^{m}\ln x_i-\frac{m\mu^2}{2\sigma^2}\right)\prod_{i=1}^{m}\frac{I_{(0,+\infty)}(x_i)}{x_i} \\
+=&amp;(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^{m}\ln^2 x_i+\frac{\mu}{\sigma^2}\sum_{i=1}^{m}\ln x_i\right)\prod_{i=1}^{m}\frac{I_{(0,+\infty)}(x_i)}{x_i}
+
+\end{align*}\]</span></p>
+<p>令：</p>
+<p><span class="math display">\[\begin{equation*}
+\eta=\left(-\frac{1}{2\sigma^2},\frac{\mu}{\sigma^2}\right)
+
+\end{equation*}\]</span></p>
+<p>可解得：</p>
+<p><span class="math display">\[\begin{equation*}
+\mu=-\frac{\eta_2}{2\eta_1},\quad\sigma^2=-\frac{1}{2\eta_1}
+
+\end{equation*}\]</span></p>
+<p>于是有：</p>
+<p><span class="math display">\[\begin{equation*}
+C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right)
+
+\end{equation*}\]</span></p>
+<p>由<span class="math inline">\(\eta\)</span>与<span class="math inline">\((\mu,\sigma^2)\)</span>的关系即可得到<span class="math inline">\(\eta\in\mathbb{R}^{-}\times\mathbb{R}^{}\)</span>。</p>
+<p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
+</div>
+<div id="theorem-17-11" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.11</strong>. 设<span class="math inline">\(X\sim\operatorname{Exp}(\lambda),\;\lambda\in\mathbb{R}^{+}\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>是<span class="math inline">\(X\)</span>的一个样本，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>的分布是指数族，其标准形式、自然参数、<span class="math inline">\(C(\eta)\)</span>、<span class="math inline">\(T(x)\)</span>和<span class="math inline">\(h(x)\)</span>分别为：</p>
+<p><span class="math display">\[\begin{gather*}
+                p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) =(-\eta)^m\lambda^m\exp\left(\eta\sum_{i=1}^{m}x_i\right)\prod_{i=1}^mI_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i) \\
+                \eta=-\lambda,\quad C(\eta)=(-\eta)^m,\quad
+                T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}I_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)
+
+    \end{gather*}\]</span></p>
+<p>自然参数空间为<span class="math inline">\(\mathbb{R}^{-}\)</span>；</p></li>
+<li><p><span class="math inline">\(\sum\limits_{i=1}^{m}X_i\)</span>为该分布族的充分统计量、完备统计量、极小充分统计量；</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)由指数分布的定义可以得到：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+=&amp;\prod_{i=1}^{m}\left[\lambda\exp(-\lambda x_i)I_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)\right]=\lambda^m\exp\left(-\lambda\sum_{i=1}^{m}x_i\right)\prod_{i=1}^mI_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)
+
+\end{align*}\]</span></p>
+<p>令<span class="math inline">\(\eta=-\lambda\)</span>，于是有<span class="math inline">\(C(\eta)=\lambda^m=(-\eta)^m\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(\lambda\)</span>的关系可得<span class="math inline">\(\eta\in\mathbb{R}^{-}\)</span>。</p>
+<p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
+</div>
+<div id="theorem-17-12" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.12</strong>. 设<span class="math inline">\(X\sim\operatorname{Laplace}(\theta),\;\theta\in\mathbb{R}^{+}\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>是<span class="math inline">\(X\)</span>的一个样本，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>的分布是指数族，其标准形式、自然参数、<span class="math inline">\(C(\eta)\)</span>、<span class="math inline">\(T(x)\)</span>和<span class="math inline">\(h(x)\)</span>分别为：</p>
+<p><span class="math display">\[\begin{gather*}
+                p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) =(-\eta)^m\exp\left(\eta\sum_{i=1}^{m}|x_i|\right) \\
+                \eta=-\theta^{-1},\quad C(\eta)=(-\eta)^m,\quad
+                T(x)=\sum_{i=1}^{m}|x_i|,\quad h(x)=1
+
+    \end{gather*}\]</span></p>
+<p>自然参数空间为<span class="math inline">\(\mathbb{R}^{-}\)</span>；</p></li>
+<li><p><span class="math inline">\(\sum\limits_{i=1}^{m}|X_i|\)</span>为该分布族的充分统计量、完备统计量、极小充分统计量；</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)由Laplace分布的定义可以得到：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+=&amp;\prod_{i=1}^{m}\left[\frac{1}{\theta}\exp\left(-\frac{|x_i|}{\theta}\right)\right]=\frac{1}{\theta^m}\exp\left(-\frac{1}{\theta}\sum_{i=1}^{m}|x_i|\right)
+
+\end{align*}\]</span></p>
+<p>令<span class="math inline">\(\eta=-\theta^{-1}\)</span>，于是有<span class="math inline">\(C(\eta)=\theta^{-m}=(-\eta)^m\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(\theta\)</span>的关系可得<span class="math inline">\(\eta\in\mathbb{R}^{-}\)</span>。</p>
+<p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
+</div>
+<div id="theorem-17-13" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.13</strong>. 设<span class="math inline">\(X\sim\operatorname{Rayleigh}(\lambda),\;\lambda\in\mathbb{R}^{+}\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>是<span class="math inline">\(X\)</span>的一个样本，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>的分布是指数族，其标准形式、自然参数、<span class="math inline">\(C(\eta)\)</span>、<span class="math inline">\(T(x)\)</span>和<span class="math inline">\(h(x)\)</span>分别为：</p>
+<p><span class="math display">\[\begin{gather*}
+                p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) =(-\eta)^m\exp\left(\eta\sum_{i=1}^{m}x_i^2\right)\prod_{i=1}^{m}\left[2x_iI_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)\right] \\
+                \eta=-\lambda,\quad C(\eta)=(-\eta)^m,\quad
+                T(x)=\sum_{i=1}^{m}x_i^2,\quad h(x)=\prod_{i=1}^{m}\left[2x_iI_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)\right]
+
+    \end{gather*}\]</span></p>
+<p>自然参数空间为<span class="math inline">\(\mathbb{R}^{-}\)</span>；</p></li>
+<li><p><span class="math inline">\(\sum\limits_{i=1}^{m}X_i^2\)</span>为该分布族的充分统计量、完备统计量、极小充分统计量；</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)由Rayleigh分布的定义可以得到：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\prod_{i=1}^{m}\left[2\lambda x_i\exp(-\lambda x_i^2)I_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)\right] \\
+=&amp;\lambda^m\exp\left(-\lambda\sum_{i=1}^{m}x_i^2\right)\prod_{i=1}^{m}\left[2x_iI_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)\right]
+
+\end{align*}\]</span></p>
+<p>令<span class="math inline">\(\eta=-\lambda\)</span>，于是有<span class="math inline">\(C(\eta)=\lambda^{m}=(-\eta)^m\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(\lambda\)</span>的关系可得<span class="math inline">\(\eta\in\mathbb{R}^{-}\)</span>。</p>
+<p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
+</div>
+<div id="theorem-17-14" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.14</strong>. 设<span class="math inline">\(X\sim\operatorname{Gamma}(\alpha,\lambda),\;\alpha,\lambda\in\mathbb{R}^{+}\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>是<span class="math inline">\(X\)</span>的一个样本，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>的分布是指数族，其标准形式、自然参数、<span class="math inline">\(C(\eta)\)</span>、<span class="math inline">\(T(x)\)</span>和<span class="math inline">\(h(x)\)</span>分别为：</p>
+<p><span class="math display">\[\begin{gather*}
+                \begin{aligned}
+                    &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+                    =&amp;\frac{(-\eta_2)^{m(\eta_1+1)}}{\Gamma^m(\eta_1+1)}\exp\left[\eta_1\sum_{i=1}^{m}\ln x_i+\eta_2\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}I_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)
+                \end{aligned} \\
+                \eta=(\alpha-1,-\lambda),\quad C(\eta)=\frac{(-\eta_2)^{m(\eta_1+1)}}{\Gamma^m(\eta_1+1)} \\
+                T(x)=\left(\sum_{i=1}^{m}\ln x_i,\sum_{i=1}^{m}x_i\right),\quad h(x)=\prod_{i=1}^{m}I_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)
+
+    \end{gather*}\]</span></p>
+<p>自然参数空间为<span class="math inline">\((-1,+\infty)\times\mathbb{R}^{-}\)</span>；</p></li>
+<li><p><span class="math inline">\(\left(\sum\limits_{i=1}^{m}\ln X_i,\sum\limits_{i=1}^{m}X_i\right)\)</span>为该分布族的充分统计量、完备统计量、极小充分统计量；</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)由Gamma分布的定义可以得到：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\prod_{i=1}^{m}\left[\frac{\lambda^{\alpha}}{\Gamma(\alpha)}x_i^{\alpha-1}e^{-\lambda x_i}I_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)\right] \\
+=&amp;\frac{\lambda^{m\alpha}}{\Gamma^m(\alpha)}\exp\left[(\alpha-1)\sum_{i=1}^{m}\ln x_i-\lambda\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}I_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)
+
+\end{align*}\]</span></p>
+<p>令<span class="math inline">\(\eta=(\alpha-1,-\lambda)\)</span>，于是有：</p>
+<p><span class="math display">\[\begin{equation*}
+C(\eta)=\frac{\lambda^{m\alpha}}{\Gamma^m(\alpha)}=\frac{(-\eta_2)^{m(\eta_1+1)}}{\Gamma^m(\eta_1+1)}
+
+\end{equation*}\]</span></p>
+<p>由<span class="math inline">\(\eta\)</span>与<span class="math inline">\((\alpha,\lambda)\)</span>的关系可得<span class="math inline">\(\eta\in(-1,+\infty)\times\mathbb{R}^{-}\)</span>。</p>
+<p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
+</div>
+<div id="theorem-17-15" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.15</strong>. 设<span class="math inline">\(X\sim\operatorname{Beta}(\alpha,\beta),\;\alpha,\beta\in\mathbb{R}^{+}\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>是<span class="math inline">\(X\)</span>的一个样本，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>的分布是指数族，其标准形式、自然参数、<span class="math inline">\(C(\eta)\)</span>、<span class="math inline">\(T(x)\)</span>和<span class="math inline">\(h(x)\)</span>分别为：</p>
+<p><span class="math display">\[\begin{gather*}
+                \begin{aligned}
+                    &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
+                    =&amp;\left[\frac{\Gamma(\eta_1+\eta_2+2)}{\Gamma(\eta_1+1)\Gamma(\eta_2+1)}\right]^m\exp\left[\eta_1\sum_{i=1}^{m}\ln x_i+\eta_2\sum_{i=1}^{m}\ln(1-x_i)\right]\prod_{i=1}^{m}I_{(0,1)}(x_i)
+                \end{aligned} \\
+                \eta=(\alpha-1,\beta-1),\quad C(\eta)=\left[\frac{\Gamma(\eta_1+\eta_2+2)}{\Gamma(\eta_1+1)\Gamma(\eta_2+1)}\right]^m \\
+                T(x)=\left(\sum_{i=1}^{m}\ln x_i,\sum_{i=1}^{m}\ln(1-x_i)\right),\quad h(x)=\prod_{i=1}^{m}I_{(0,1)}(x_i)
+
+    \end{gather*}\]</span></p>
+<p>自然参数空间为<span class="math inline">\((-1,+\infty)\times(-1,+\infty)\)</span>；</p></li>
+<li><p><span class="math inline">\(\left(\sum\limits_{i=1}^{m}\ln X_i,\sum\limits_{i=1}^{m}\ln(1-X_i)\right)\)</span>为该分布族的充分统计量、完备统计量、极小充分统计量；</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)由Beta分布的定义可以得到：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\prod_{i=1}^{m}\left[\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}x_i^{\alpha-1}(1-x_i)^{\beta-1}I_{(0,1)}(x_i)\right] \\
+=&amp;\left[\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}\right]^m\exp\left[(\alpha-1)\sum_{i=1}^{m}\ln x_i+(\beta-1)\sum_{i=1}^{m}\ln(1-x_i)\right]\prod_{i=1}^{m}I_{(0,1)}(x_i)
+
+\end{align*}\]</span></p>
+<p>令<span class="math inline">\(\eta=(\alpha-1,\beta-1)\)</span>，于是有：</p>
+<p><span class="math display">\[\begin{equation*}
+C(\eta)=\left[\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}\right]^m=\left[\frac{\Gamma(\eta_1+\eta_2+2)}{\Gamma(\eta_1+1)\Gamma(\eta_2+1)}\right]^m
+
+\end{equation*}\]</span></p>
+<p>由<span class="math inline">\(\eta\)</span>与<span class="math inline">\((\alpha,\beta)\)</span>的关系可得<span class="math inline">\(\eta\in(-1,+\infty)\times(-1,+\infty)\)</span>。</p>
+<p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
+</div>
+</section>
+</section>
+<section id="id--9907757c" class="level2">
+<h2 class="anchored" data-anchor-id="id--9907757c"><span class="header-section-number">17.2</span> 抽样分布</h2>
+<section id="id--799dc790" class="level3">
+<h3 class="anchored" data-anchor-id="id--799dc790"><span class="header-section-number">17.2.1</span> 一维总体</h3>
+<div id="theo-SamplingDist1-c2da99ba" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.16</strong>. 设<span class="math inline">\(X_1, X_2, \dots, X_{m}\;\text{i.i.d.}\sim \operatorname{N}(\mu,\sigma^2)\)</span>，<span class="math inline">\(Y_1, Y_2, \dots, Y_{n}\;\text{i.i.d.}\sim \operatorname{N}(\nu,\sigma^2)\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>和<span class="math inline">\(Y_1, Y_2, \dots, Y_{n}\)</span>相互独立，<span class="math inline">\(\overline{X},\overline{Y}\)</span>为样本均值，<span class="math inline">\(S_X^2,S_Y^2\)</span>为样本方差，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(\overline{X}\sim N\left(\mu,\dfrac{\sigma^2}{m}\right)\)</span>；</p></li>
+<li><p><span class="math inline">\(\dfrac{(m-1)S_X^2}{\sigma^2}\sim\chi_{m-1}^2\)</span>；</p></li>
+<li><p><span class="math inline">\(\overline{X}\)</span>与<span class="math inline">\(S_X^2\)</span>独立；</p></li>
+<li><p><span class="math inline">\(\dfrac{\sqrt{m}(\overline{X}-\mu)}{S_X}\sim \operatorname{t}_{m-1}\)</span>；</p></li>
+<li><p><span class="math inline">\(\dfrac{\overline{X}-\overline{Y}-(\mu-\nu)}{S_w}\sqrt{\dfrac{m+n}{mn}}\sim \operatorname{t}_{m+n-2}\)</span>，其中：</p>
+<p><span class="math display">\[\begin{equation*}
+                (m+n-2)S_w^2=(m-1)S_X^2+(n-1)S_Y^2
+
+    \end{equation*}\]</span></p></li>
+<li><p>若<span class="math inline">\(X_1, X_2, \dots, X_{m}\;\text{i.i.d.}\sim \operatorname{N}(\mu,\sigma_1^2)\)</span>，<span class="math inline">\(Y_1, Y_2, \dots, Y_{n}\;\text{i.i.d.}\sim \operatorname{N}(\nu,\sigma_2^2)\)</span>，其它条件不变，则：</p>
+<p><span class="math display">\[\begin{equation*}
+                \frac{S_X^2\sigma_2^2}{S_Y^2\sigma_1^2}\sim \operatorname{F}_{m-1,n-1}
+
+    \end{equation*}\]</span></p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>令<span class="math inline">\(\mathbf{X}=(X_1, X_2, \dots, X_{m})^{\top},\;\mathbf{Y}=(Y_1, Y_2, \dots, Y_{n})^{\top}\)</span>。因为<span class="math inline">\(X_1, X_2, \dots, X_{m}\;\text{i.i.d.}\sim \operatorname{N}(\mu,\sigma^2)\)</span>，<span class="math inline">\(Y_1, Y_2, \dots, Y_{n}\;\text{i.i.d.}\sim \operatorname{N}(\nu,\sigma^2)\)</span>，所以<span class="math inline">\(\mathbf{X}\sim N_m(\boldsymbol{\mu},\Sigma_m),\;\mathbf{Y}\sim N_n(\boldsymbol{\nu},\Sigma_n)\)</span>，其中：</p>
+<p><span class="math display">\[\begin{equation*}
+\boldsymbol{\mu}=\mu\mathbf{1}_m,\quad\Sigma_m=\sigma^2I_m,\quad\boldsymbol{\nu}=\nu\mathbf{1}_n,\quad\Sigma_n=\sigma^2I_n
+
+\end{equation*}\]</span></p>
+<p>(1)令<span class="math inline">\(m\)</span>维行向量<span class="math inline">\(c=\left(\dfrac{1}{m},\dfrac{1}{m},\dots,\dfrac{1}{m}\right)\)</span>， 由<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(2)可知：</p>
+<p><span class="math display">\[\begin{equation*}
+\overline{X}=c\mathbf{X}\sim \operatorname{N}(c\boldsymbol{\mu},c\Sigma c^{\top})
+
+\end{equation*}\]</span></p>
+<p>而：</p>
+<p><span class="math display">\[\begin{equation*}
+c\boldsymbol{\mu}=\sum_{i=1}^{m}\frac{\mu}{m}=\mu,\;c\Sigma c^{\top}=\sum_{i=1}^{m}\frac{\sigma^2}{m^2}=\frac{\sigma^2}{m}
+
+\end{equation*}\]</span></p>
+<p>所以<span class="math inline">\(\overline{X}\sim N\left(\mu,\dfrac{\sigma^2}{m}\right)\)</span>。</p>
+<p>(2)由Schmidit正交化可知存在正交矩阵：</p>
+<p><span class="math display">\[\begin{equation*}
+A=
+\begin{pmatrix}
+\frac{1}{\sqrt{m}} &amp; \frac{1}{\sqrt{m}} &amp; \cdots &amp; \frac{1}{\sqrt{m}} \\
+a_{21} &amp; a_{22} &amp; \cdots &amp; a_{2m} \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+a_{m1} &amp; a_{m2} &amp; \cdots &amp; a_{mm}
+\end{pmatrix}
+
+\end{equation*}\]</span></p>
+<p>令<span class="math inline">\(\mathbf{Z}=A\mathbf{X}\)</span>，由<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(2)可知<span class="math inline">\(\mathbf{Z}\sim N_m(A\boldsymbol{\mu},\sigma^2I_m)\)</span>。由<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(3)可知<span class="math inline">\(\mathbf{Z}_i\sim \operatorname{N}(\mu_i,\sigma^2)\)</span>，其中：</p>
+<p><span class="math display">\[\begin{equation*}
+\mu_i=\mu\sum_{j=1}^{m}a_{ij}
+
+\end{equation*}\]</span></p>
+<p>因为<span class="math inline">\(A\)</span>是一个正交矩阵，所以：</p>
+<p><span class="math display">\[\begin{equation*}
+\mu_i=\sqrt{m}\mu\sum_{j=1}^{m}\frac{1}{\sqrt{m}}a_{ij}=\sqrt{m}\mu\left(\dfrac{1}{\sqrt{m}},\dfrac{1}{\sqrt{m}},\dots,\dfrac{1}{\sqrt{m}}\right)(a_{i1},a_{i2},\dots,a_{im})^{\top}=0
+
+\end{equation*}\]</span></p>
+<p>由<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(2)即可得：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{\mathbf{Z}_i}{\sigma}\sim \operatorname{N}(0,1),\;\forall\;i=1,2,\dots,m
+
+\end{equation*}\]</span></p>
+<p>因为<span class="math inline">\(\mathbf{Z}=A\mathbf{X}\)</span>，所以：</p>
+<p><span class="math display">\[\begin{equation*}
+\mathbf{Z}_1=\frac{1}{\sqrt{m}}\sum_{i=1}^{m}X_i=\sqrt{m}\overline{X}
+
+\end{equation*}\]</span></p>
+<p>因为：</p>
+<p><span class="math display">\[\begin{equation*}
+\mathbf{Z}^{\top}\mathbf{Z}=\sum_{i=1}^{m}\mathbf{Z}_i^2=\mathbf{X}^{\top}A^{\top}A\mathbf{X}=\mathbf{X}^{\top}\mathbf{X}=\sum_{i=1}^{m}X_i^2
+
+\end{equation*}\]</span></p>
+<p>于是：</p>
+<p><span class="math display">\[\begin{equation*}
+(m-1)S_X^2=\sum_{i=1}^{m}(X_i-\overline{X})^2=\sum_{i=1}^{m}X_i^2-m\overline{X}^2=\sum_{i=1}^{m}\mathbf{Z}_i^2-\mathbf{Z}_1^2=\sum_{i=2}^{m}\mathbf{Z}_i^2
+
+\end{equation*}\]</span></p>
+<p>所以：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{(m-1)S_X^2}{\sigma^2}=\sum_{i=2}^{m}\left(\frac{\mathbf{Z}_i}{\sigma}\right)^2\sim\chi_{m-1}^2
+
+\end{equation*}\]</span></p>
+<p>(3)由(2)的证明过程可得<span class="math inline">\(\mathbf{Z}\sim N_m(A\boldsymbol{\mu},\sigma^2I_m)\)</span>，根据<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(8)可知<span class="math inline">\(\mathbf{Z}_1, \mathbf{Z}_2, \dots, \mathbf{Z}_{m}\)</span>相互独立。而：</p>
+<p><span class="math display">\[\begin{equation*}
+S_X^2=\frac{\sum\limits_{i=2}^{m}\mathbf{Z}_i^2}{(m-1)},\;\overline{X}=\frac{\mathbf{Z}_1}{\sqrt{m}}
+
+\end{equation*}\]</span></p>
+<p>所以<span class="math inline">\(S_X^2\)</span>与<span class="math inline">\(\overline{X}\)</span>独立。</p>
+<p>(4)对<span class="math inline">\(\overline{X}\)</span>进行标准化可得：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{\overline{X}-\mu}{\sqrt{\frac{\sigma^2}{m}}}=\frac{\sqrt{m}(\overline{X}-\mu)}{\sigma}\sim\operatorname{N}(0,1)
+
+\end{equation*}\]</span></p>
+<p>由(2)和(3)进一步可得：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{\dfrac{\sqrt{m}(\overline{X}-\mu)}{\sigma}}{\sqrt{\dfrac{(m-1)S_X^2}{\sigma^2(m-1)}}}=\frac{\sqrt{m}(\overline{X}-\mu)}{S_X}\sim \operatorname{t}_{m-1}
+
+\end{equation*}\]</span></p>
+<p>(5)由(1)（得到<span class="math inline">\(\overline{X}\)</span>和<span class="math inline">\(\overline{Y}\)</span>的分布）、<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>与<span class="math inline">\(Y_1, Y_2, \dots, Y_{n}\)</span>相互独立（由<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(6)得到二维随机向量<span class="math inline">\((\overline{X},\overline{Y})^{\top}\)</span>的分布）和<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(2)（对<span class="math inline">\((\overline{X},\overline{Y})^{\top}\)</span>用二维行向量<span class="math inline">\((1,-1)\)</span>做线性变换）可得：</p>
+<p><span class="math display">\[\begin{equation*}
+\overline{X}-\overline{Y}\sim N\left(\mu-\nu,\frac{\sigma^2}{m}+\frac{\sigma^2}{n}\right)
+
+\end{equation*}\]</span></p>
+<p>于是：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{\overline{X}-\overline{Y}-(\mu-\nu)}{\sqrt{\dfrac{m+n}{mn}\sigma^2}}\sim \operatorname{N}(0,1)
+
+\end{equation*}\]</span></p>
+<p>由(2)可得：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{(m-1)S_X^2}{\sigma^2}\sim\chi_{m-1}^2,\;
+\frac{(n-1)S_Y^2}{\sigma^2}\sim\chi_{n-1}^2
+
+\end{equation*}\]</span></p>
+<p>由<a href="../chapters/page-013.html#prop-Chi2Distribution-e2511e63" data-reference-type="ref+label" data-reference="prop:Chi2Distribution">性质 12.4.7</a>(1)可得：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{(m-1)S_X^2+(n-1)S_Y^2}{\sigma^2}\sim\chi_{m+n-2}^2
+
+\end{equation*}\]</span></p>
+<p>于是：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{(m+n-2)S_w^2}{\sigma^2}\sim\chi_{m+n-2}^2
+
+\end{equation*}\]</span></p>
+<p>由(3)可得<span class="math inline">\(\overline{X}\)</span>与<span class="math inline">\(S_X^2\)</span>独立、<span class="math inline">\(\overline{Y}\)</span>与<span class="math inline">\(S_Y^2\)</span>独立，所以：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{\dfrac{\overline{X}-\overline{Y}-(\mu-\nu)}{\sqrt{\dfrac{m+n}{mn}\sigma^2}}}{\sqrt{\dfrac{(m+n-2)S_w^2}{\sigma^2(m+n-2)}}}=\frac{\overline{X}-\overline{Y}-(\mu-\nu)}{S_w}\sqrt{\dfrac{m+n}{mn}}\sim \operatorname{t}_{m+n-2}
+
+\end{equation*}\]</span></p>
+<p>(6)由(2)可知：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{(m-1)S_X^2}{\sigma_1^2}\sim\chi_{m-1}^2,\;
+\frac{(n-1)S_Y^2}{\sigma_2^2}\sim\chi_{n-1}^2
+
+\end{equation*}\]</span></p>
+<p>因为<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>和<span class="math inline">\(Y_1, Y_2, \dots, Y_{n}\)</span>相互独立，所以上两式也相互独立。由<span class="math inline">\(F\)</span>分布的定义即可得：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{\dfrac{(m-1)S_X^2}{\sigma_1^2(m-1)}}{\dfrac{(n-1)S_Y^2}{\sigma_2^2(n-1)}}=\frac{S_X^2\sigma_2^2}{S_Y^2\sigma_1^2}\sim \operatorname{F}_{m-1,n-1}
+
+\end{equation*}\]</span></p>
+<p>◻</p>
+</div>
+</section>
+<section id="id--9f1cfbd4" class="level3">
+<h3 class="anchored" data-anchor-id="id--9f1cfbd4"><span class="header-section-number">17.2.2</span> 多维总体</h3>
+<div id="theo-MultiVariateSamplingDist-558485ef" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.17</strong>. 设<span class="math inline">\(\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_m}\;\text{i.i.d.}\sim\operatorname{N}_p(\boldsymbol{\mu},\Sigma)\)</span>，<span class="math inline">\(\mathbf{Y_1},\mathbf{Y_2},\dots,\mathbf{Y_n}\;\text{i.i.d.}\sim \operatorname{N}_p(\boldsymbol{\nu},\Sigma)\)</span>，<span class="math inline">\(\Sigma&gt;\mathbf{0}\)</span>，<span class="math inline">\(\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_m}\)</span>和<span class="math inline">\(\mathbf{Y_1},\mathbf{Y_2},\dots,\mathbf{Y_n}\)</span>相互独立，<span class="math inline">\(\overline{\mathbf{X}},\overline{\mathbf{Y}}\)</span>为样本均值向量，<span class="math inline">\(S_X,S_Y\)</span>为样本协方差矩阵，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(\overline{\mathbf{X}}\sim\operatorname{N}_p\left(\boldsymbol{\mu},\dfrac{1}{m}\Sigma\right)\)</span>；</p></li>
+<li><p><span class="math inline">\((m-1)S_X\sim\operatorname{W}_p(m-1,\Sigma)\)</span>；</p></li>
+<li><p><span class="math inline">\(\overline{\mathbf{X}}\)</span>与<span class="math inline">\(S_X\)</span>相互独立；</p></li>
+<li><p><span class="math inline">\(m(\overline{\mathbf{X}}-\boldsymbol{\mu})^{\top}S_X^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu})\sim T^2(p,m-1)\)</span>；</p></li>
+<li><p>若<span class="math inline">\(\boldsymbol{\mu}=\boldsymbol{\nu}\)</span>，则<span class="math inline">\(\dfrac{mn}{m+n}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})^{\top}S_{w}^{-1}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})\sim T^2(p,m+n-2)\)</span>，其中：</p>
+<p><span class="math display">\[\begin{equation*}
+                (m+n-2)S_w=(m-1)S_X+(n-1)S_Y
+
+    \end{equation*}\]</span></p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)</p>
+<p>(2)</p>
+<p>(3)</p>
+<p>(4)由(1)(2)(3)和<a href="../chapters/page-013.html#prop-T-2-0e93aa22" data-reference-type="ref+label" data-reference="prop:T^2">性质 12.5.2</a>(1)可得：</p>
+<p><span class="math display">\[\begin{equation*}
+(m-1)m(\overline{\mathbf{X}}-\boldsymbol{\mu})^{\top}[(m-1)S_X]^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu})=m(\overline{\mathbf{X}}-\boldsymbol{\mu})^{\top}S_X^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu})\sim T^2(p,m-1)
+
+\end{equation*}\]</span></p>
+<p>(5)由(1)（得到<span class="math inline">\(\overline{\mathbf{X}}\)</span>和<span class="math inline">\(\overline{\mathbf{Y}}\)</span>的分布）、<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(2)（得到<span class="math inline">\(-\overline{\mathbf{Y}}\)</span>的分布）、<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(7)以及<span class="math inline">\(\overline{\mathbf{X}}\)</span>与<span class="math inline">\(\overline{\mathbf{Y}}\)</span>的独立性可得</p>
+<p><span class="math display">\[\begin{equation*}
+\overline{\mathbf{X}}-\overline{\mathbf{Y}}\sim \operatorname{N}_p\left(\boldsymbol{\mu}-\boldsymbol{\nu},\frac{\Sigma}{m}+\frac{\Sigma}{n}\right)
+
+\end{equation*}\]</span></p>
+<p>于是当<span class="math inline">\(\boldsymbol{\mu}=\boldsymbol{\nu}\)</span>时由<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(2)可得：</p>
+<p><span class="math display">\[\begin{equation*}
+\overline{\mathbf{X}}-\overline{\mathbf{Y}}-(\mu-\nu)=\overline{\mathbf{X}}-\overline{\mathbf{Y}}\sim \operatorname{N}_p\left(\mathbf{0},\frac{\Sigma}{m}+\frac{\Sigma}{n}\right)
+
+\end{equation*}\]</span></p>
+<p>由(2)、<span class="math inline">\(\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_m}\)</span>和<span class="math inline">\(\mathbf{Y_1},\mathbf{Y_2},\dots,\mathbf{Y_m}\)</span>之间的独立性以及<a href="../chapters/page-013.html#prop-Wishart-cbd93bd1" data-reference-type="ref+label" data-reference="prop:Wishart">性质 12.5.1</a>(1)可得：</p>
+<p><span class="math display">\[\begin{gather*}
+(m-1)S_X\sim\operatorname{W}_p(m-1,\Sigma),\quad(n-1)S_Y\sim\operatorname{W}_p(n-1,\Sigma) \\
+(m+n-2)S_w=(m-1)S_X+(n-1)S_Y\sim\operatorname{W}_p(m+n-2,\Sigma)
+
+\end{gather*}\]</span></p>
+<p>于是：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;\frac{m+n-2}{\dfrac{m+n}{mn}}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})^{\top}[(m+n-2)S_{w}]^{-1}(\overline{\mathbf{X}}-\overline{\mathbf{Y}}) \\
+=&amp;\frac{mn}{m+n}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})^{\top}S_{w}^{-1}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})\sim T^2(p,m+n-2)
+
+\end{align*}\]</span></p>
+<p>◻</p>
+</div>
+</section>
+<section id="id--4be296ec" class="level3">
+<h3 class="anchored" data-anchor-id="id--4be296ec"><span class="header-section-number">17.2.3</span> 多维正态总体参数的检验</h3>
+<section id="id--2c57a0be" class="level4">
+<h4 class="anchored" data-anchor-id="id--2c57a0be"><span class="header-section-number">17.2.3.1</span> 均值的检验</h4>
+<div id="theorem-17-18" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.18</strong>. 设<span class="math inline">\(\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_n}\;\text{i.i.d.}\sim\operatorname{N}_p(\boldsymbol{\mu},\Sigma)\)</span>，<span class="math inline">\(\Sigma&gt;\mathbf{0}\)</span>，<span class="math inline">\(\overline{\mathbf{X}}\)</span>为样本均值向量，<span class="math inline">\(S\)</span>为样本协方差矩阵。假设检验问题：</p>
+<p><span class="math display">\[\begin{equation*}
+H_0:\boldsymbol{\mu}=\boldsymbol{\mu}_0,\quad H_1:\boldsymbol{\mu}\ne\boldsymbol{\mu}_0
+
+\end{equation*}\]</span></p>
+<p>的检验统计量与拒绝域为：</p>
+<p><span class="math display">\[\begin{gather*}
+\begin{cases}
+\chi_0^2=n(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)^{\top}\Sigma^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)\sim\chi_p^2,&amp;\Sigma\text{已知} \\
+T^2=n(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)^{\top}S^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)\sim T^2(p,n-1),&amp;\Sigma\text{未知}
+\end{cases} \\
+\begin{cases}
+\{\chi_0^2&gt;\chi_p^2(\alpha)\},&amp;\Sigma\text{已知} \\
+\{T^2&gt;T^2_{p,n-1}(\alpha)\},&amp;\Sigma\text{未知} \\
+\end{cases}
+
+\end{gather*}\]</span></p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span><strong>(1)<span class="math inline">\(\;\Sigma\)</span>已知：</strong>因为<span class="math inline">\(\Sigma&gt;\mathbf{0}\)</span>，由<a href="../chapters/page-037.html#prop-ReverseSquareRootMat-b43b1d39" data-reference-type="ref+label" data-reference="prop:ReverseSquareRootMat">性质 34.9.4</a>(1)可知<span class="math inline">\(\Sigma^{-\frac{1}{2}},\Sigma^{-1}\)</span>存在。在原价设成立的情况下，由<a href="../chapters/page-013.html#theo-MatNormalLinearTransform-28e169ca" data-reference-type="ref+label" data-reference="theo:MatNormalLinearTransform">定理 12.13</a>和<a href="#theo-MultiVariateSamplingDist-558485ef" data-reference-type="ref+label" data-reference="theo:MultiVariateSamplingDist">定理 17.17</a>(1)可知：</p>
+<p><span class="math display">\[\begin{equation*}
+\sqrt{n}\Sigma^{-\frac{1}{2}}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)\sim\operatorname{N}_p(\mathbf{0},I_p)
+
+\end{equation*}\]</span></p>
+<p>由<a href="../chapters/page-037.html#prop-ReverseSquareRootMat-b43b1d39" data-reference-type="ref+label" data-reference="prop:ReverseSquareRootMat">性质 34.9.4</a>(3)可得：</p>
+<p><span class="math display">\[\begin{align*}
+n(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)^{\top}\Sigma^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)
+&amp;=(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)^{\top}\left(\frac{1}{n}\Sigma\right)^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0) \\
+&amp;=(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)^{\top}\left(\sqrt{n}\Sigma^{-\frac{1}{2}}\right)^{2}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0) \\
+&amp;=[\sqrt{n}\Sigma^{-\frac{1}{2}}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)]^{\top}[\sqrt{n}\Sigma^{-\frac{1}{2}}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)]\sim\chi^2_p
+
+\end{align*}\]</span></p>
+<p>上式值越大，说明样本均值与<span class="math inline">\(\mu_0\)</span>的Mahalanobis距离越大，所以拒绝域取右侧单尾。</p>
+<p><strong>(2)<span class="math inline">\(\;\Sigma\)</span>未知：</strong>由<a href="#theo-MultiVariateSamplingDist-558485ef" data-reference-type="ref+label" data-reference="theo:MultiVariateSamplingDist">定理 17.17</a>(4)可得统计量的分布，而<span class="math inline">\(S\)</span>是<span class="math inline">\(\Sigma\)</span>的无偏估计，所以该统计量值越大说明样本均值与<span class="math inline">\(\mu_0\)</span>的Mahalanobis距离越大，拒绝域取右侧单尾。&nbsp;◻</p>
+</div>
+</section>
+<section id="id--30939897" class="level4">
+<h4 class="anchored" data-anchor-id="id--30939897"><span class="header-section-number">17.2.3.2</span> 两总体均值的比较</h4>
+<div id="theorem-17-19" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 17.19</strong>. 设<span class="math inline">\(\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_m}\;\text{i.i.d.}\sim\operatorname{N}_p(\boldsymbol{\mu},\Sigma),\;\mathbf{Y_1},\mathbf{Y_2},\dots,\mathbf{Y_n}\;\text{i.i.d.}\sim\operatorname{N}_p(\boldsymbol{\nu},\Sigma)\)</span>，<span class="math inline">\(\Sigma&gt;\mathbf{0}\)</span>，<span class="math inline">\(\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_m}\)</span>和<span class="math inline">\(\mathbf{Y_1},\mathbf{Y_2},\dots,\mathbf{Y_n}\)</span>相互独立，<span class="math inline">\(\overline{\mathbf{X}},\overline{\mathbf{Y}}\)</span>为样本均值向量，<span class="math inline">\(S_X,S_Y\)</span>为样本协方差矩阵。假设检验问题：</p>
+<p><span class="math display">\[\begin{equation*}
+H_0:\boldsymbol{\mu}=\boldsymbol{\nu},\quad H_1:\boldsymbol{\mu}\ne\boldsymbol{\nu}
+
+\end{equation*}\]</span></p>
+<p>的检验统计量与拒绝域为：</p>
+<p><span class="math display">\[\begin{equation*}
+T^2=\frac{mn}{m+n}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})^{\top}S_{w}^{-1}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})\sim T^2(p,m+n-2),\quad\{T^2&gt;T^2_{p,m+n-2}(\alpha)\}
+
+\end{equation*}\]</span></p>
+<p>其中<span class="math inline">\((m+n-2)S_w=(m-1)S_X+(n-1)S_Y\)</span>。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>由<a href="#theo-MultiVariateSamplingDist-558485ef" data-reference-type="ref+label" data-reference="theo:MultiVariateSamplingDist">定理 17.17</a>(4)可得统计量的分布，该统计量值越大说明两个总体均值相近的可能性越小，所以拒绝域取右侧单尾。&nbsp;◻</p>
+</div>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/page-017.html" class="pagination-link" aria-label="[第 16 章]{.header-section-number} 不等式">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title"><span class="header-section-number">第 16 章</span> 不等式</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/page-019.html" class="pagination-link" aria-label="[第 18 章]{.header-section-number} 点估计理论">
+        <span class="nav-page-text"><span class="chapter-title"><span class="header-section-number">第 18 章</span> 点估计理论</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

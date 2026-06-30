@@ -1,0 +1,2519 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-Hans" xml:lang="zh-Hans"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>第 24 章 方差分析 – 你永远不知道一个强迫症能干出什么事情</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/page-026.html" rel="next">
+<link href="../chapters/page-024.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-7380dde18c49706d018cafaca6afd2e2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../sidebar.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-018.html">第 6 部分 统计学</a></li><li class="breadcrumb-item"><a href="../chapters/page-025.html"><span class="chapter-title"><span class="header-section-number">第 24 章</span> 方差分析</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="搜索" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">你永远不知道一个强迫症能干出什么事情</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="搜索"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">你永远不知道一个强迫症能干出什么事情</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-001.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">前言</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 1 部分 代数</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-002.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 1 章</span> 线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-003.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 2 章</span> 矩阵</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 2 部分 分析学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-004.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 3 章</span> 度量空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-005.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 4 章</span> 微积分</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-006.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 5 章</span> 广义积分</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-007.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 6 章</span> 级数</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-008.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 7 章</span> Fourier级数</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-009.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 8 章</span> 赋范线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-010.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 9 章</span> 常见度量空间与赋范线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-011.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 10 章</span> Banach空间上的有界线性算子</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 3 部分 概率论</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-012.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 11 章</span> 概率测度</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-013.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 12 章</span> 概率初步</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-014.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 13 章</span> 渐进理论初步</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 4 部分 最优化</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-015.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 14 章</span> 凸集</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-016.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 15 章</span> 规划问题</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 5 部分 不等式</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-017.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 16 章</span> 不等式</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 6 部分 统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-018.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 17 章</span> 统计初步</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-019.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 18 章</span> 点估计理论</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-020.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 19 章</span> 假设检验理论</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-021.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 20 章</span> 贝叶斯统计</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-022.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 21 章</span> 统计计算方法</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-023.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 22 章</span> 线性模型</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-024.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 23 章</span> 多元统计</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-025.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title"><span class="header-section-number">第 24 章</span> 方差分析</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-026.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 25 章</span> 部分实施问题</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-027.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">符号说明</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 6 部分 统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-028.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 26 章</span> 抽样调查</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-029.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 27 章</span> 时间序列分析</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-030.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 28 章</span> 机器学习</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-031.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 29 章</span> 因果推断</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 7 部分 非参数统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-032.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 30 章</span> 位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-033.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 31 章</span> 两样本位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-034.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 32 章</span> 多样本位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-035.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 33 章</span> Something else</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-036.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 34 章</span> 单调关联性</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-037.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">附录</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-038.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">后记</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">中英术语表</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目录</h2>
+   
+  <ul>
+  <li><a href="#id--75f0d886" id="toc-id--75f0d886" class="nav-link active" data-scroll-target="#id--75f0d886"><span class="header-section-number">24.0.0.1</span> 按因子数对方差分析进行分类</a></li>
+  <li><a href="#id--185b09eb" id="toc-id--185b09eb" class="nav-link" data-scroll-target="#id--185b09eb"><span class="header-section-number">24.0.0.2</span> 按因子水平的选取方式对方差分析进行分类</a></li>
+  <li><a href="#id-1-5c228f8c" id="toc-id-1-5c228f8c" class="nav-link" data-scroll-target="#id-1-5c228f8c"><span class="header-section-number">24.1</span> 多重假设检验</a>
+  <ul>
+  <li><a href="#id--01eb619d" id="toc-id--01eb619d" class="nav-link" data-scroll-target="#id--01eb619d"><span class="header-section-number">24.1.1</span> 正交对比</a>
+  <ul class="collapse">
+  <li><a href="#id--fbad0a46" id="toc-id--fbad0a46" class="nav-link" data-scroll-target="#id--fbad0a46"><span class="header-section-number">24.1.1.1</span> 正交对比的定义</a></li>
+  <li><a href="#id--881d5275" id="toc-id--881d5275" class="nav-link" data-scroll-target="#id--881d5275"><span class="header-section-number">24.1.1.2</span> 目的</a></li>
+  <li><a href="#id--3a997d55" id="toc-id--3a997d55" class="nav-link" data-scroll-target="#id--3a997d55"><span class="header-section-number">24.1.1.3</span> 假设的检验方法</a></li>
+  <li><a href="#ssa-eb36509d" id="toc-ssa-eb36509d" class="nav-link" data-scroll-target="#ssa-eb36509d"><span class="header-section-number">24.1.1.4</span> 正交对比与SSA的关系</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#id--3f987ac7" id="toc-id--3f987ac7" class="nav-link" data-scroll-target="#id--3f987ac7"><span class="header-section-number">24.2</span> 随机效应下的单因子方差分析</a>
+  <ul>
+  <li><a href="#id--81f2993d" id="toc-id--81f2993d" class="nav-link" data-scroll-target="#id--81f2993d"><span class="header-section-number">24.2.1</span> 统计模型</a></li>
+  <li><a href="#id--6b0424cb" id="toc-id--6b0424cb" class="nav-link" data-scroll-target="#id--6b0424cb"><span class="header-section-number">24.2.2</span> 统计假设</a></li>
+  <li><a href="#id-1-eed00999" id="toc-id-1-eed00999" class="nav-link" data-scroll-target="#id-1-eed00999"><span class="header-section-number">24.2.3</span> 方差分析</a>
+  <ul class="collapse">
+  <li><a href="#id--c8213f0c" id="toc-id--c8213f0c" class="nav-link" data-scroll-target="#id--c8213f0c"><span class="header-section-number">24.2.3.1</span> 偏差平方和的分解</a></li>
+  <li><a href="#id--996650b5" id="toc-id--996650b5" class="nav-link" data-scroll-target="#id--996650b5"><span class="header-section-number">24.2.3.2</span> 各平方和的期望</a></li>
+  <li><a href="#id--c03c1426" id="toc-id--c03c1426" class="nav-link" data-scroll-target="#id--c03c1426"><span class="header-section-number">24.2.3.3</span> 统计量及其分布</a></li>
+  <li><a href="#id--c8079616" id="toc-id--c8079616" class="nav-link" data-scroll-target="#id--c8079616"><span class="header-section-number">24.2.3.4</span> 拒绝域</a></li>
+  </ul></li>
+  <li><a href="#id--a3ed23e8" id="toc-id--a3ed23e8" class="nav-link" data-scroll-target="#id--a3ed23e8"><span class="header-section-number">24.2.4</span> 方差分析表</a></li>
+  <li><a href="#id-3-f4f1a59f" id="toc-id-3-f4f1a59f" class="nav-link" data-scroll-target="#id-3-f4f1a59f"><span class="header-section-number">24.2.5</span> 参数估计</a>
+  <ul class="collapse">
+  <li><a href="#id--a38a7e82" id="toc-id--a38a7e82" class="nav-link" data-scroll-target="#id--a38a7e82"><span class="header-section-number">24.2.5.1</span> 点估计</a></li>
+  <li><a href="#id-1-25f5044d" id="toc-id-1-25f5044d" class="nav-link" data-scroll-target="#id-1-25f5044d"><span class="header-section-number">24.2.5.2</span> 区间估计</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#id--833d454f" id="toc-id--833d454f" class="nav-link" data-scroll-target="#id--833d454f"><span class="header-section-number">24.3</span> 可加效应下的两因子方差分析</a>
+  <ul>
+  <li><a href="#id-1-5c987afc" id="toc-id-1-5c987afc" class="nav-link" data-scroll-target="#id-1-5c987afc"><span class="header-section-number">24.3.1</span> 统计假设</a></li>
+  <li><a href="#id-1-b4f4b882" id="toc-id-1-b4f4b882" class="nav-link" data-scroll-target="#id-1-b4f4b882"><span class="header-section-number">24.3.2</span> 偏差平方和的分解</a>
+  <ul class="collapse">
+  <li><a href="#sse" id="toc-sse" class="nav-link" data-scroll-target="#sse"><span class="header-section-number">24.3.2.1</span> SSe</a></li>
+  <li><a href="#ssa" id="toc-ssa" class="nav-link" data-scroll-target="#ssa"><span class="header-section-number">24.3.2.2</span> SSA</a></li>
+  <li><a href="#ssb" id="toc-ssb" class="nav-link" data-scroll-target="#ssb"><span class="header-section-number">24.3.2.3</span> SSB</a></li>
+  <li><a href="#id--5558d257" id="toc-id--5558d257" class="nav-link" data-scroll-target="#id--5558d257"><span class="header-section-number">24.3.2.4</span> 总偏差平方和分解公式</a></li>
+  </ul></li>
+  <li><a href="#id--7919df3c" id="toc-id--7919df3c" class="nav-link" data-scroll-target="#id--7919df3c"><span class="header-section-number">24.3.3</span> 检验统计量</a>
+  <ul class="collapse">
+  <li><a href="#varepsilon-d095d44d" id="toc-varepsilon-d095d44d" class="nav-link" data-scroll-target="#varepsilon-d095d44d"><span class="header-section-number">24.3.3.1</span> 关于<span class="math inline">\(\varepsilon\)</span>的一些结论</a></li>
+  <li><a href="#ssa-67c87093" id="toc-ssa-67c87093" class="nav-link" data-scroll-target="#ssa-67c87093"><span class="header-section-number">24.3.3.2</span> SSA的期望</a></li>
+  <li><a href="#ssb-051392a4" id="toc-ssb-051392a4" class="nav-link" data-scroll-target="#ssb-051392a4"><span class="header-section-number">24.3.3.3</span> SSB的期望</a></li>
+  <li><a href="#sse-42ecb8dc" id="toc-sse-42ecb8dc" class="nav-link" data-scroll-target="#sse-42ecb8dc"><span class="header-section-number">24.3.3.4</span> SSe的期望</a></li>
+  <li><a href="#id--c0ab39b9" id="toc-id--c0ab39b9" class="nav-link" data-scroll-target="#id--c0ab39b9"><span class="header-section-number">24.3.3.5</span> 构建统计量</a></li>
+  </ul></li>
+  <li><a href="#id--985921f3" id="toc-id--985921f3" class="nav-link" data-scroll-target="#id--985921f3"><span class="header-section-number">24.3.4</span> 统计量的分布</a></li>
+  <li><a href="#id-1-d7294c51" id="toc-id-1-d7294c51" class="nav-link" data-scroll-target="#id-1-d7294c51"><span class="header-section-number">24.3.5</span> 方差分析表</a></li>
+  <li><a href="#id-4-b661de4e" id="toc-id-4-b661de4e" class="nav-link" data-scroll-target="#id-4-b661de4e"><span class="header-section-number">24.3.6</span> 参数估计</a>
+  <ul class="collapse">
+  <li><a href="#id-1-27796635" id="toc-id-1-27796635" class="nav-link" data-scroll-target="#id-1-27796635"><span class="header-section-number">24.3.6.1</span> 点估计</a></li>
+  </ul></li>
+  <li><a href="#id--fe2c308e" id="toc-id--fe2c308e" class="nav-link" data-scroll-target="#id--fe2c308e"><span class="header-section-number">24.3.7</span> 多重比较问题</a></li>
+  <li><a href="#id--eeccdecf" id="toc-id--eeccdecf" class="nav-link" data-scroll-target="#id--eeccdecf"><span class="header-section-number">24.3.8</span> 等重复试验情形</a>
+  <ul class="collapse">
+  <li><a href="#id--e00d6239" id="toc-id--e00d6239" class="nav-link" data-scroll-target="#id--e00d6239"><span class="header-section-number">24.3.8.1</span> 等重复试验下的方差分析表</a></li>
+  <li><a href="#id-5-4c7975c0" id="toc-id-5-4c7975c0" class="nav-link" data-scroll-target="#id-5-4c7975c0"><span class="header-section-number">24.3.8.2</span> 参数估计</a></li>
+  <li><a href="#id-1-d236670e" id="toc-id-1-d236670e" class="nav-link" data-scroll-target="#id-1-d236670e"><span class="header-section-number">24.3.8.3</span> 多重比较问题</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#id--77d980ce" id="toc-id--77d980ce" class="nav-link" data-scroll-target="#id--77d980ce"><span class="header-section-number">24.4</span> 交互效应下的两因子方差分析</a>
+  <ul>
+  <li><a href="#id-1-166e33a7" id="toc-id-1-166e33a7" class="nav-link" data-scroll-target="#id-1-166e33a7"><span class="header-section-number">24.4.1</span> 统计模型</a></li>
+  <li><a href="#id-2-07b78315" id="toc-id-2-07b78315" class="nav-link" data-scroll-target="#id-2-07b78315"><span class="header-section-number">24.4.2</span> 统计假设</a></li>
+  <li><a href="#id-2-9aabf1c5" id="toc-id-2-9aabf1c5" class="nav-link" data-scroll-target="#id-2-9aabf1c5"><span class="header-section-number">24.4.3</span> 偏差平方和的分解</a>
+  <ul class="collapse">
+  <li><a href="#id-1-bd64fcb6" id="toc-id-1-bd64fcb6" class="nav-link" data-scroll-target="#id-1-bd64fcb6"><span class="header-section-number">24.4.3.1</span> 总偏差平方和分解公式</a></li>
+  </ul></li>
+  <li><a href="#id-1-4913c2c4" id="toc-id-1-4913c2c4" class="nav-link" data-scroll-target="#id-1-4913c2c4"><span class="header-section-number">24.4.4</span> 检验统计量</a></li>
+  <li><a href="#id-1-e190af9b" id="toc-id-1-e190af9b" class="nav-link" data-scroll-target="#id-1-e190af9b"><span class="header-section-number">24.4.5</span> 统计量的分布</a></li>
+  <li><a href="#id-2-9f6748fe" id="toc-id-2-9f6748fe" class="nav-link" data-scroll-target="#id-2-9f6748fe"><span class="header-section-number">24.4.6</span> 方差分析表</a></li>
+  <li><a href="#id-6-f4450fb2" id="toc-id-6-f4450fb2" class="nav-link" data-scroll-target="#id-6-f4450fb2"><span class="header-section-number">24.4.7</span> 参数估计</a>
+  <ul class="collapse">
+  <li><a href="#id-2-431337f9" id="toc-id-2-431337f9" class="nav-link" data-scroll-target="#id-2-431337f9"><span class="header-section-number">24.4.7.1</span> 点估计</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#id--937acc9a" id="toc-id--937acc9a" class="nav-link" data-scroll-target="#id--937acc9a"><span class="header-section-number">24.5</span> 随机效应下的两因子方差分析</a>
+  <ul>
+  <li><a href="#id-2-2bc4f9c6" id="toc-id-2-2bc4f9c6" class="nav-link" data-scroll-target="#id-2-2bc4f9c6"><span class="header-section-number">24.5.1</span> 统计模型</a></li>
+  <li><a href="#id-3-b43e79e0" id="toc-id-3-b43e79e0" class="nav-link" data-scroll-target="#id-3-b43e79e0"><span class="header-section-number">24.5.2</span> 统计假设</a></li>
+  <li><a href="#id-2-d8c14992" id="toc-id-2-d8c14992" class="nav-link" data-scroll-target="#id-2-d8c14992"><span class="header-section-number">24.5.3</span> 方差分析</a>
+  <ul class="collapse">
+  <li><a href="#id-3-e89ed930" id="toc-id-3-e89ed930" class="nav-link" data-scroll-target="#id-3-e89ed930"><span class="header-section-number">24.5.3.1</span> 偏差平方和的分解</a></li>
+  <li><a href="#id-1-a174be2a" id="toc-id-1-a174be2a" class="nav-link" data-scroll-target="#id-1-a174be2a"><span class="header-section-number">24.5.3.2</span> 各平方和的期望</a></li>
+  <li><a href="#id-1-3e1b3106" id="toc-id-1-3e1b3106" class="nav-link" data-scroll-target="#id-1-3e1b3106"><span class="header-section-number">24.5.3.3</span> 统计量及其分布</a></li>
+  <li><a href="#id-1-f1acd460" id="toc-id-1-f1acd460" class="nav-link" data-scroll-target="#id-1-f1acd460"><span class="header-section-number">24.5.3.4</span> 拒绝域</a></li>
+  </ul></li>
+  <li><a href="#id-3-f45a896c" id="toc-id-3-f45a896c" class="nav-link" data-scroll-target="#id-3-f45a896c"><span class="header-section-number">24.5.4</span> 方差分析表</a></li>
+  <li><a href="#id-7-0a6f40a2" id="toc-id-7-0a6f40a2" class="nav-link" data-scroll-target="#id-7-0a6f40a2"><span class="header-section-number">24.5.5</span> 参数估计</a>
+  <ul class="collapse">
+  <li><a href="#id-3-a1ed193b" id="toc-id-3-a1ed193b" class="nav-link" data-scroll-target="#id-3-a1ed193b"><span class="header-section-number">24.5.5.1</span> 点估计</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#id--483b8093" id="toc-id--483b8093" class="nav-link" data-scroll-target="#id--483b8093"><span class="header-section-number">24.6</span> 混合模型下的两因子方差分析</a>
+  <ul>
+  <li><a href="#id-3-4afe25ee" id="toc-id-3-4afe25ee" class="nav-link" data-scroll-target="#id-3-4afe25ee"><span class="header-section-number">24.6.1</span> 统计模型</a></li>
+  <li><a href="#id-4-c2e3ee7d" id="toc-id-4-c2e3ee7d" class="nav-link" data-scroll-target="#id-4-c2e3ee7d"><span class="header-section-number">24.6.2</span> 统计假设</a></li>
+  <li><a href="#id-3-4a385960" id="toc-id-3-4a385960" class="nav-link" data-scroll-target="#id-3-4a385960"><span class="header-section-number">24.6.3</span> 方差分析</a>
+  <ul class="collapse">
+  <li><a href="#id-4-80b81f3e" id="toc-id-4-80b81f3e" class="nav-link" data-scroll-target="#id-4-80b81f3e"><span class="header-section-number">24.6.3.1</span> 偏差平方和的分解</a></li>
+  <li><a href="#id-2-91b7058d" id="toc-id-2-91b7058d" class="nav-link" data-scroll-target="#id-2-91b7058d"><span class="header-section-number">24.6.3.2</span> 各平方和的期望</a></li>
+  <li><a href="#id-2-7c5c1251" id="toc-id-2-7c5c1251" class="nav-link" data-scroll-target="#id-2-7c5c1251"><span class="header-section-number">24.6.3.3</span> 统计量及其分布</a></li>
+  <li><a href="#id-2-00e66dca" id="toc-id-2-00e66dca" class="nav-link" data-scroll-target="#id-2-00e66dca"><span class="header-section-number">24.6.3.4</span> 拒绝域</a></li>
+  </ul></li>
+  <li><a href="#id-4-00c29c28" id="toc-id-4-00c29c28" class="nav-link" data-scroll-target="#id-4-00c29c28"><span class="header-section-number">24.6.4</span> 方差分析表</a></li>
+  <li><a href="#id--b01da1b8" id="toc-id--b01da1b8" class="nav-link" data-scroll-target="#id--b01da1b8"><span class="header-section-number">24.6.5</span> 多重比较比较问题</a></li>
+  <li><a href="#id-8-314a0fba" id="toc-id-8-314a0fba" class="nav-link" data-scroll-target="#id-8-314a0fba"><span class="header-section-number">24.6.6</span> 参数估计</a>
+  <ul class="collapse">
+  <li><a href="#id-4-6e6b5b72" id="toc-id-4-6e6b5b72" class="nav-link" data-scroll-target="#id-4-6e6b5b72"><span class="header-section-number">24.6.6.1</span> 点估计</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-018.html">第 6 部分 统计学</a></li><li class="breadcrumb-item"><a href="../chapters/page-025.html"><span class="chapter-title"><span class="header-section-number">第 24 章</span> 方差分析</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="id--560512a3" class="quarto-section-identifier"><span class="chapter-title"><span class="header-section-number">第 24 章</span> 方差分析</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>这章讨论方差分析问题。方差分析的目的是判断因子的水平不同是否会对试验结果造成显著差异。</p>
+<section id="id--75f0d886" class="level4">
+<h4 class="anchored" data-anchor-id="id--75f0d886"><span class="header-section-number">24.0.0.1</span> 按因子数对方差分析进行分类</h4>
+<p>可按试验的因子数对方差分析进行分类：</p>
+<ol type="1">
+<li><p>单因子方差分析：讨论单个因子的水平变动对试验结果造成的影响。</p></li>
+<li><p>多因子方差分析：讨论多个因子的水平变动对试验结果的影响，也讨论多个因子水平的组合对试验结果造成的额外影响。</p></li>
+</ol>
+</section>
+<section id="id--185b09eb" class="level4">
+<h4 class="anchored" data-anchor-id="id--185b09eb"><span class="header-section-number">24.0.0.2</span> 按因子水平的选取方式对方差分析进行分类</h4>
+<p>可按因子水平的选取方式对方差分析进行分类：</p>
+<ol type="1">
+<li><p>固定效应模型：试验中选择的因子的水平是在试验前由试验人按主观意图指定好的，只希望得到适用于这些水平的结论。在多因子方差分析中可进一步分类：</p>
+<ul>
+<li><p>可加效应模型：仅讨论各因子对试验结果影响的大小。</p></li>
+<li><p>交互效应模型：不仅讨论各因子对试验结果影响的大小，也讨论因子的水平组合对试验结果造成的额外影响。</p></li>
+</ul></li>
+<li><p>随机效应模型：试验中选择的因子的水平是从全部可能的水平中随机选择的一个样本，希望得到适用于全部水平（无论是否参与试验）的结论。</p></li>
+<li><p>混合模型：仅存在于多因子方差分析，部分因子的水平在试验前由试验人按主观意图指定，另一部分因子的水平是随机选定的。</p></li>
+</ol>
+</section>
+<section id="id-1-5c228f8c" class="level2">
+<h2 class="anchored" data-anchor-id="id-1-5c228f8c"><span class="header-section-number">24.1</span> 多重假设检验</h2>
+<section id="id--01eb619d" class="level3">
+<h3 class="anchored" data-anchor-id="id--01eb619d"><span class="header-section-number">24.1.1</span> 正交对比</h3>
+<p>仅讨论等重复情况下对比系数向量标准化（即模长为<span class="math inline">\(1\)</span>）的正交对比。</p>
+<section id="id--fbad0a46" class="level4">
+<h4 class="anchored" data-anchor-id="id--fbad0a46"><span class="header-section-number">24.1.1.1</span> 正交对比的定义</h4>
+<p>对比有一种特殊情况，即正交对比：</p>
+<div id="definition-24-1" class="definition theorem-block env-definition">
+<p><strong>Definition 24.1</strong>. <span class="math inline">\(c=\sum\limits_{i=1}^ac_i\mu_i\)</span>和<span class="math inline">\(d=\sum\limits_{i=1}^ad_i\mu_i\)</span>是两个对比。若：</p>
+<p><span class="math display">\[\begin{equation*}
+\sum_{i=1}^ac_id_i=0
+
+\end{equation*}\]</span></p>
+<p>则称这两个对比为正交对比。</p>
+</div>
+</section>
+<section id="id--881d5275" class="level4">
+<h4 class="anchored" data-anchor-id="id--881d5275"><span class="header-section-number">24.1.1.2</span> 目的</h4>
+<p>由对比空间的维数可知，线性无关的正交对比组最多有<span class="math inline">\(a-1\)</span>个对比。而正交对比即是为了检验任意<span class="math inline">\(a-1\)</span>个对比的值是否为<span class="math inline">\(0\)</span>：</p>
+<p><span class="math display">\[\begin{gather*}
+c^1=\sum_{i=1}^ac_{1,i}\mu_i \\
+c^2=\sum_{i=1}^ac_{2,i}\mu_i \\
+\cdots\cdots \\
+c^{(a-1)}=\sum_{i=1}^ac_{a-1,i}\mu_i
+\end{gather*}\]</span></p>
+</section>
+<section id="id--3a997d55" class="level4">
+<h4 class="anchored" data-anchor-id="id--3a997d55"><span class="header-section-number">24.1.1.3</span> 假设的检验方法</h4>
+<p>只需注意到此时：</p>
+<p><span class="math display">\[\begin{equation*}
+SScj=\frac{\left(\sum\limits_{i=1}^ac_{j,i}\bar{y}_{i.}\right)^2}{\sum\limits_{i=1}^a\dfrac{c_{j,i}^2}{m}}=m\left(\sum\limits_{i=1}^ac_{j,i}\bar{y}_{i.}\right)^2
+\end{equation*}\]</span></p>
+<p>剩余步骤与对比一样。</p>
+</section>
+<section id="ssa-eb36509d" class="level4">
+<h4 class="anchored" data-anchor-id="ssa-eb36509d"><span class="header-section-number">24.1.1.4</span> 正交对比与SSA的关系</h4>
+<p>上述对比的一个无偏估计为：</p>
+<p><span class="math display">\[\begin{gather*}
+\hat{c}^1=\sum_{i=1}^ac_{1,i}\bar{y}_{i.} \\
+\hat{c}^2=\sum_{i=1}^ac_{2,i}\bar{y}_{i.} \\
+\cdots\cdots \\
+\hat{c}^{(a-1)}=\sum_{i=1}^ac_{a-1,i}\bar{y}_{i.}
+\end{gather*}\]</span></p>
+<p>令：</p>
+<p><span class="math display">\[\begin{equation*}
+\hat{c}^{a}=\sum_{i=1}^a\frac{1}{\sqrt{a}}\bar{y}_{i.}
+\end{equation*}\]</span></p>
+<p>需要注意这并不是一个对比。</p>
+<p>注意到：</p>
+<p><span class="math display">\[\begin{equation*}
+(\hat{c}^1,\hat{c}^2,\dots,\hat{c}^a)'=A(\bar{y}_{1.},\bar{y}_{2.},\dots,\bar{y}_{a.})'
+\end{equation*}\]</span></p>
+<p>这之中的矩阵<span class="math inline">\(A\)</span>是一个正交矩阵。所以：</p>
+<p><span class="math display">\[\begin{equation*}
+(\hat{c}^1)^2+(\hat{c}^2)^2+\cdots+(\hat{c}^a)^2=\sum_{i=1}^a\bar{y}_{i.}^2
+\end{equation*}\]</span></p>
+<p>于是：</p>
+<p><span class="math display">\[\begin{align*}
+(\hat{c}^1)^2+(\hat{c}^2)^2+\cdots+(\hat{c}^{a-1})^2
+&amp;=\sum_{i=1}^a\bar{y}_{i.}^2-\frac{1}{a}\left(\sum\limits_{i=1}^a\bar{y}_{i.}\right)^2 \\
+&amp;=\sum_{i=1}^a\left(\frac{y_{i.}}{m}\right)^2-\frac{1}{a}\left(\frac{\sum_{i=1}^am\bar{y}_{i.}}{m}\right)^2 \\
+&amp;=\sum_{i=1}^a\frac{y_{i.}^2}{m^2}-\frac{y_{..}^2}{am^2} \\
+&amp;=\frac{1}{m}SSA
+\end{align*}\]</span></p>
+<p>再由：</p>
+<p><span class="math display">\[\begin{equation*}
+SScj=\frac{\left(\sum\limits_{i=1}^ac_{j,i}\bar{y}_{i.}\right)^2}{\sum\limits_{i=1}^a\dfrac{c_{j,i}^2}{m}}=\frac{(\hat{c}^j)^2}{\frac{1}{m}}=m(\hat{c}^j)^2
+\end{equation*}\]</span></p>
+<p>所以：</p>
+<p><span class="math display">\[\begin{equation*}
+SSc1+SSc2+\cdots+SSc(a-1)=SSA
+\end{equation*}\]</span></p>
+</section>
+</section>
+</section>
+<section id="id--3f987ac7" class="level2">
+<h2 class="anchored" data-anchor-id="id--3f987ac7"><span class="header-section-number">24.2</span> 随机效应下的单因子方差分析</h2>
+<table class="caption-top table">
+<caption>随机效应下的单因子试验数据</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">水平</th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(A_1\)</span> $y</td>
+<td>_{11}$ $y</td>
+<td>_{12}$ $\</td>
+<td>cdots$ $y</td>
+<td>_{1n_1}$</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(A_2\)</span> $y</td>
+<td>_{21}$ $y</td>
+<td>_{22}$ $\</td>
+<td>cdots$ $y</td>
+<td>_{2n_2}$</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\vdots\)</span> $</td>
+<td>$ $</td>
+<td>$</td>
+<td>$</td>
+<td>$</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(A_a\)</span> $y</td>
+<td>_{a1}$ $y</td>
+<td>_{a2}$ $\</td>
+<td>cdots$ $y</td>
+<td>_{an_a}$</td>
+</tr>
+</tbody>
+</table>
+<p>其中<span class="math inline">\(y_{ij}\)</span>表示在第<span class="math inline">\(i\)</span>个水平<span class="math inline">\(A_i\)</span>下第<span class="math inline">\(j\)</span>次重复试验的观察值。记<span class="math inline">\(n=\sum\limits_{i=1}^{a}n_i\)</span>。</p>
+<section id="id--81f2993d" class="level3">
+<h3 class="anchored" data-anchor-id="id--81f2993d"><span class="header-section-number">24.2.1</span> 统计模型</h3>
+<div id="model-random-effect-one-way-anova-63ea209d" class="equation-block">
+<p>随机效应下的单因子方差分析统计模型为：</p>
+<p><span class="math display">\[\begin{equation*}
+\tag{24.1}
+\begin{cases}
+y_{ij}=\mu+\tau_i+\varepsilon_{ij} \\
+\text{诸}\tau_i\quad\mathrm{i.i.d.~}N(0,\sigma_\tau^2) \\
+\text{诸}\varepsilon_{ij}\quad\mathrm{i.i.d.~}N(0,\sigma^2) \\
+\text{诸}\varepsilon_{ij}\text{、诸}\tau_i\text{相互独立}
+\end{cases}
+\qquad i=1,2,\cdots,a,\;j=1,2,\cdots,n_i
+\end{equation*}\]</span></p>
+<p>称<span class="math inline">\(\mu\)</span>为一般平均（这里表示因子对数据的一般影响），<span class="math inline">\(\tau_i\)</span>为因子A的第<span class="math inline">\(i\)</span>个水品的随机效应。</p>
+</div>
+</section>
+<section id="id--6b0424cb" class="level3">
+<h3 class="anchored" data-anchor-id="id--6b0424cb"><span class="header-section-number">24.2.2</span> 统计假设</h3>
+<p>随机效应下单因素方差分析检验的统计假设为：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+H_0:\sigma_\tau^2=0 \\
+H_1:\sigma_\tau^2&gt;0
+\end{cases}
+\end{equation*}\]</span></p>
+<p>需要注意的是，此时拒绝零假设意味着因子的全部水平（不论是否参与过试验）之间有显著差异。</p>
+</section>
+<section id="id-1-eed00999" class="level3">
+<h3 class="anchored" data-anchor-id="id-1-eed00999"><span class="header-section-number">24.2.3</span> 方差分析</h3>
+<section id="id--c8213f0c" class="level4">
+<h4 class="anchored" data-anchor-id="id--c8213f0c"><span class="header-section-number">24.2.3.1</span> 偏差平方和的分解</h4>
+<p>由于与固定效应情况下三个平方和的定义完全相同，所以随机效应下偏差平方和分解公式与之前一模一样。</p>
+<p><span class="math display">\[\begin{gather*}
+SST=SSA+SSe \\
+SSA=\sum_{i=1}^an_i(\bar{y}_{i.}-\bar{y}_{..})^2 \\
+SSe=\sum_{i=1}^a\sum_{j=1}^{n_i}(y_{ij}-\bar{y}_{i.})^2=\sum_{i=1}^a\sum_{j=1}^{n_i}(\varepsilon_{ij}-\bar{\varepsilon}_{i.})^2
+\end{gather*}\]</span></p>
+</section>
+<section id="id--996650b5" class="level4">
+<h4 class="anchored" data-anchor-id="id--996650b5"><span class="header-section-number">24.2.3.2</span> 各平方和的期望</h4>
+<p>先计算SSA与SSe的期望。</p>
+<p><span class="math display">\[\begin{equation*}
+E(SSe)=(n-a)\sigma^2,\;E(SSA)=\left(n-\frac{\sum\limits_{i=1}^an_i^2}{n}\right)\sigma_\tau^2+(a-1)\sigma^2
+\end{equation*}\]</span></p>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)因为数据结构的形式完全一样，所以SSe的期望与固定效应情形下的一模一样。</p>
+<p>(2)注意到<span class="math inline">\(\tau_i\)</span>的形式发生变化，<span class="math inline">\(E(SSA)\)</span>需要重新求解。</p>
+<p><span class="math display">\[\begin{align*}
+\bar{y}_{i.}-\bar{y}_{..}
+&amp;=\mu+\tau_i+\bar{\varepsilon}_{i.}-\frac{1}{n}\sum_{k=1}^a\sum_{j=1}^{n_k}(\mu+\tau_k+\varepsilon_{kj}) \\
+&amp;=\mu+\tau_i+\bar{\varepsilon}_{i.}-\frac{1}{n}\left(n\mu+\sum_{k=1}^an_k\tau_k+\varepsilon_{..}\right) \\
+&amp;=\tau_i-\frac{\sum\limits_{k=1}^an_k\tau_k}{n}+\bar{\varepsilon}_{i.}-\bar{\varepsilon}_{..}
+
+\end{align*}\]</span></p>
+<p><span class="math display">\[\begin{align*}
+E(SSA)
+&amp;=E\left[\sum_{i=1}^an_i\left(\tau_i-\frac{\sum\limits_{k=1}^an_k\tau_k}{n}+\bar{\varepsilon}_{i.}-\bar{\varepsilon}_{..}\right)^2\right] \\
+&amp;=E\left\{\sum_{i=1}^an_i\left[\tau_i^2+\left(\frac{\sum\limits_{k=1}^an_k\tau_k}{n}\right)^2+\bar{\varepsilon}_{i.}^2+\bar{\varepsilon}_{..}^2-2\tau_i\frac{\sum\limits_{k=1}^an_k\tau_k}{n}+2\tau_i\bar{\varepsilon}_{i.}-2\tau_i\bar{\varepsilon}_{..}-2\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..}\right]\right\} \\
+&amp;=\sum_{i=1}^an_iE(\tau_i^2)+\sum_{i=1}^an_iE(\bar{\varepsilon}_{i.}^2)+\sum_{i=1}^an_iE(\bar{\varepsilon}_{..}^2)-2\sum_{i=1}^an_iE(\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..})-\frac{\sum\limits_{i=1}^an_i^2E(\tau_i^2)}{n} \\
+&amp;=\sum_{i=1}^an_i\sigma_\tau^2+\sum_{i=1}^an_i\frac{\sigma^2}{n_i}+\sum_{i=1}^an_i\frac{\sigma^2}{n}-2\sum_{i=1}^an_i\frac{\sigma^2}{n}-\frac{\sum\limits_{i=1}^an_i^2\sigma_\tau^2}{n} \\
+&amp;=\left(n-\frac{\sum_{i=1}^an_i^2}{n}\right)\sigma_\tau^2+(a-1)\sigma^2
+
+\end{align*}\]</span></p>
+<p>◻</p>
+</div>
+</section>
+<section id="id--c03c1426" class="level4">
+<h4 class="anchored" data-anchor-id="id--c03c1426"><span class="header-section-number">24.2.3.3</span> 统计量及其分布</h4>
+<p>称<span class="math inline">\(\frac{SSA}{a-1}\)</span>为因子A的均方和，记为MSA；称<span class="math inline">\(\frac{SSe}{n-a}\)</span>为误差均方和，记为MSe。</p>
+<p>由前述，MSe是<span class="math inline">\(\sigma^2\)</span>的无偏估计，而当零假设成立时，MSA也是<span class="math inline">\(\sigma^2\)</span>的一个无偏估计。如果二者比值很大，即MSA比MSe大很多（<span class="math inline">\(\left(\frac{n^2-\sum_{i=1}^an_i^2}{n(a-1)}\right)\sigma_\tau^2\)</span>很大），我们就有理由怀疑零假设。由此构建统计量：</p>
+<p><span class="math display">\[\begin{equation*}
+F=\frac{MSA}{MSe}=\frac{\frac{SSA}{a-1}}{\frac{SSe}{n-a}}
+\end{equation*}\]</span></p>
+<p>在该统计量的情况下，<span class="math inline">\(H_0\)</span>的拒绝域是右向单尾的。</p>
+<p>由于在假设<span class="math inline">\(H_0\)</span>成立时，随机效应模型与固定效应模型的观察值<span class="math inline">\(y_{ij}\)</span>的数据结构的形式完全一样，所以在随机效应模型中仍然有：</p>
+<p><span class="math display">\[\begin{equation*}
+F\sim F(a-1,\;n-a)
+\end{equation*}\]</span></p>
+</section>
+<section id="id--c8079616" class="level4">
+<h4 class="anchored" data-anchor-id="id--c8079616"><span class="header-section-number">24.2.3.4</span> 拒绝域</h4>
+<p>综上所述，显著性水平为<span class="math inline">\(\alpha\)</span>时的拒绝域为：</p>
+<p><span class="math display">\[\begin{equation*}
+F&gt;F_{1-\alpha}(a-1,\;n-a)
+\end{equation*}\]</span></p>
+</section>
+</section>
+<section id="id--a3ed23e8" class="level3">
+<h3 class="anchored" data-anchor-id="id--a3ed23e8"><span class="header-section-number">24.2.4</span> 方差分析表</h3>
+<table class="caption-top table">
+<caption>随机效应下单因子试验方差分析表</caption>
+<thead>
+<tr class="header">
+<th>来源 平</th>
+<th>方和 自</th>
+<th>由度 均</th>
+<th>方和 F值</th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>因子A S</td>
+<td>SA $</td>
+<td>f_A=a-1$ $</td>
+<td>$ $</td>
+<td>F=$</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>误差 S</td>
+<td>Se $</td>
+<td>f_e=n-a$ $</td>
+<td>$</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>总 SS</td>
+<td>T $f</td>
+<td>_T=n-1$</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>平方和公式可按下列公式计算：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+SST=\sum\limits_{i=1}^a\sum\limits_{j=1}^{n_i}y_{ij}^2-\frac{y_{..}^2}{n} \\
+SSA=\sum\limits_{i=1}^a\frac{y_{i.}^2}{n_i}-\frac{y_{..}^2}{n} \\
+SSe=SST-SSA
+\end{cases}
+\end{equation*}\]</span></p>
+</section>
+<section id="id-3-f4f1a59f" class="level3">
+<h3 class="anchored" data-anchor-id="id-3-f4f1a59f"><span class="header-section-number">24.2.5</span> 参数估计</h3>
+<p>我们此时关心方差分量的估计。</p>
+<section id="id--a38a7e82" class="level4">
+<h4 class="anchored" data-anchor-id="id--a38a7e82"><span class="header-section-number">24.2.5.1</span> 点估计</h4>
+<p>由SSA、SSe期望的计算，可给出各方差分量的无偏点估计如下：</p>
+<p><span class="math display">\[\begin{gather*}
+\hat{\sigma^2}=MSe \\
+\hat{\sigma^2}_\tau=\frac{n(a-1)(MSA-MSe)}{n^2-\sum\limits_{i=1}^an_i^2}
+\end{gather*}\]</span></p>
+<p>这里需要注意的是，<span class="math inline">\(\hat{\sigma^2}_\tau\)</span>有可能小于<span class="math inline">\(0\)</span>，这是由估计方法决定的。</p>
+</section>
+<section id="id-1-25f5044d" class="level4">
+<h4 class="anchored" data-anchor-id="id-1-25f5044d"><span class="header-section-number">24.2.5.2</span> 区间估计</h4>
+<p>考虑<span class="math inline">\(\sigma^2\)</span>的区间估计。因为：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{SSe}{\sigma^2}\sim\chi^2(n-a)
+\end{equation*}\]</span></p>
+<p>所以显著性水平为<span class="math inline">\(\alpha\)</span>时，<span class="math inline">\(\sigma^2\)</span>的置信区间为：</p>
+<p><span class="math display">\[\begin{equation*}
+\left(\frac{SSe}{\chi_{\alpha/2}^2(n-a)},\;\frac{SSe}{\chi_{1-\alpha/2}^2(n-a)}\right)
+\end{equation*}\]</span></p>
+</section>
+</section>
+</section>
+<section id="id--833d454f" class="level2">
+<h2 class="anchored" data-anchor-id="id--833d454f"><span class="header-section-number">24.3</span> 可加效应下的两因子方差分析</h2>
+<p>可加效应模型一般不必进行重复实验，每个水平组合下只做一次实验就够了。</p>
+<section id="id-1-5c987afc" class="level3">
+<h3 class="anchored" data-anchor-id="id-1-5c987afc"><span class="header-section-number">24.3.1</span> 统计假设</h3>
+<p>可加效应下的两因子方差分析需要检验如下两个零假设：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+H_{01}:\tau_1=\tau_2=\cdots=\tau_a=0, \\
+H_{02}:\beta_1=\beta_2=\cdots=\beta_b=0
+\end{cases}
+\end{equation*}\]</span></p>
+</section>
+<section id="id-1-b4f4b882" class="level3">
+<h3 class="anchored" data-anchor-id="id-1-b4f4b882"><span class="header-section-number">24.3.2</span> 偏差平方和的分解</h3>
+<p>记：</p>
+<p><span class="math display">\[\begin{gather*}
+y_{..}=\sum_{i=1}^a\sum_{j=1}^by_{ij},\quad
+\bar{y}_{..}=\frac{y_{..}}{ab} \\
+y_{i.}=\sum_{j=1}^by_{ij},\quad
+\bar{y}_{i.}=\frac{y_{i.}}{b},\quad i=1,2,\dots,a \\
+y_{.j}=\sum_{i=1}^ay_{ij},\quad
+\bar{y}_{.j}=\frac{y_{.j}}{a},\quad j=1,2,\dots,b
+\end{gather*}\]</span></p>
+<p>全部数据之间的差异可用下述总偏差平方和表示：</p>
+<p><span class="math display">\[\begin{equation*}
+SST=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\bar{y}_{..})^2
+\end{equation*}\]</span></p>
+<p>引起数据<span class="math inline">\(y_{ij}\)</span>之间差异的原因有三点：</p>
+<ol type="1">
+<li><p>因子A的<span class="math inline">\(a\)</span>个水平对试验结果的影响不同。</p></li>
+<li><p>因子B的<span class="math inline">\(b\)</span>个水平对试验结果的影响不同。</p></li>
+<li><p>试验具有误差。</p></li>
+</ol>
+<p>为了区分并比较这三个原因对数据的影响，需要对SST进行分解：</p>
+<p><span class="math display">\[\begin{align*}
+SST
+&amp;=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\bar{y}_{..})^2 \\
+&amp;=\sum_{i=1}^a\sum_{j=1}^b\left[(\bar{y}_{i.}-\bar{y}_{..})+(\bar{y}_{.j}-\bar{y}_{..})+(y_{ij}-\bar{y}_{i.}-\bar{y}_{.j}+\bar{y}_{..})\right]^2 \\
+&amp;=\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{i.}-\bar{y}_{..})^2+\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{.j}-\bar{y}_{..})^2+\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\bar{y}_{i.}-\bar{y}_{.j}+\bar{y}_{..})^2 \\
+&amp;\quad+2\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{i.}-\bar{y}_{..})(\bar{y}_{.j}-\bar{y}_{..}) \\
+&amp;\quad+2\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{i.}-\bar{y}_{..})(y_{ij}-\bar{y}_{i.}-\bar{y}_{.j}+\bar{y}_{..}) \\
+&amp;\quad+2\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{.j}-\bar{y}_{..})(y_{ij}-\bar{y}_{i.}-\bar{y}_{.j}+\bar{y}_{..})
+\end{align*}\]</span></p>
+<p>由定义可发现上式后三项为<span class="math inline">\(0\)</span>（第三项需要注意交换求和顺序）。</p>
+<section id="sse" class="level4">
+<h4 class="anchored" data-anchor-id="sse"><span class="header-section-number">24.3.2.1</span> SSe</h4>
+<p>记：</p>
+<p><span class="math display">\[\begin{gather*}
+SSe=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\bar{y}_{i.}-\bar{y}_{.j}+\bar{y}_{..})^2 \\
+\varepsilon_{..}=\sum_{i=1}^a\sum_{j=1}^b\varepsilon_{ij},\quad
+\bar{\varepsilon}_{..}=\frac{\varepsilon_{..}}{ab} \\
+\varepsilon_{i.}=\sum_{j=1}^b\varepsilon_{ij},\quad
+\bar{\varepsilon}_{i.}=\frac{1}{b}\sum_{j=1}^b\varepsilon_{ij},\quad i=1,2,\dots,a \\
+\varepsilon_{.j}=\sum_{i=1}^a\varepsilon_{ij},\quad
+\bar{\varepsilon}_{.j}=\frac{1}{a}\sum_{i=1}^a\varepsilon_{ij},\quad j=1,2,\dots,b \\
+\bar{\tau}=\frac{1}{a}\sum_{i=1}^a\tau_i=0,\quad
+\bar{\beta}=\frac{1}{b}\sum_{j=1}^b\beta_j=0
+\end{gather*}\]</span></p>
+<p>则有：</p>
+<p><span class="math display">\[\begin{align*}
+SSe
+&amp;=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\bar{y}_{i.}-\bar{y}_{.j}+\bar{y}_{..})^2 \\
+&amp;=\sum_{i=1}^a\sum_{j=1}^b(\mu+\tau_i+\beta_j+\varepsilon_{ij}-\mu-\tau_i-\bar{\beta}-\bar{\varepsilon}_{i.}-\mu-\bar{\tau}-\beta_j-\bar{\varepsilon}_{.j}+\mu+\bar{\tau}+\bar{\beta}+\bar{\varepsilon}_{..})^2 \\
+&amp;=\sum_{i=1}^a\sum_{j=1}^b(\varepsilon_{ij}-\bar{\varepsilon}_{i.}-\bar{\varepsilon}_{.j}+\bar{\varepsilon}_{..})^2
+\end{align*}\]</span></p>
+<p>因为该项完全是由误差引起的，所以称之为误差平方和。</p>
+</section>
+<section id="ssa" class="level4">
+<h4 class="anchored" data-anchor-id="ssa"><span class="header-section-number">24.3.2.2</span> SSA</h4>
+<p>记：</p>
+<p><span class="math display">\[\begin{equation*}
+SSA=\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{i.}-\bar{y}_{..})^2=b\sum_{i=1}^a(\bar{y}_{i.}-\bar{y}_{..})^2
+\end{equation*}\]</span></p>
+<p>可以发现：</p>
+<p><span class="math display">\[\begin{align*}
+SSA&amp;=b\sum_{i=1}^a(\bar{y}_{i.}-\bar{y}_{..})^2 \\
+&amp;=b\sum_{i=1}^a(\mu+\tau_i+\bar{\beta}+\bar{\varepsilon}_{i.}-\mu-\bar{\tau}-\bar{\beta}-\bar{\varepsilon}_{..})^2 \\
+&amp;=b\sum_{i=1}^a(\tau_i+\bar{\varepsilon}_{i.}-\bar{\varepsilon}_{..})^2
+\end{align*}\]</span></p>
+<p>其中的随机误差都是平均过的，期望值不变而且方差缩小了。所以这个平方和虽然受到水平变动和随机误差两方面的影响，但是当因子A的不同水平对试验结果有显著差异的时候，它主要受到因子A水平变动的影响。所以称该平方和为因子A的平方和。</p>
+</section>
+<section id="ssb" class="level4">
+<h4 class="anchored" data-anchor-id="ssb"><span class="header-section-number">24.3.2.3</span> SSB</h4>
+<p>记：</p>
+<p><span class="math display">\[\begin{equation*}
+SSB=\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{.j}-\bar{y}_{..})^2=a\sum_{j=1}^b(\bar{y}_{.j}-\bar{y}_{..})^2
+\end{equation*}\]</span></p>
+<p>可以发现：</p>
+<p><span class="math display">\[\begin{align*}
+SSB&amp;=a\sum_{j=1}^b(\bar{y}_{.j}-\bar{y}_{..})^2 \\
+&amp;=a\sum_{j=1}^b(\mu+\bar{\tau}+\beta_j+\bar{\varepsilon}_{.j}-\mu-\bar{\tau}-\bar{\beta}-\bar{\varepsilon}_{..})^2 \\
+&amp;=a\sum_{j=1}^b(\beta_j+\bar{\varepsilon}_{.j}-\bar{\varepsilon}_{..})^2
+\end{align*}\]</span></p>
+<p>其中的随机误差都是平均过的，期望值不变而且方差缩小了。所以这个平方和虽然受到水平变动和随机误差两方面的影响，但是当因子B的不同水平对试验结果有显著差异的时候，它主要受到因子B水平变动的影响。所以称该平方和为因子B的平方和。</p>
+</section>
+<section id="id--5558d257" class="level4">
+<h4 class="anchored" data-anchor-id="id--5558d257"><span class="header-section-number">24.3.2.4</span> 总偏差平方和分解公式</h4>
+<p>综上，总偏差平方和有如下分解公式：</p>
+<p><span class="math display">\[\begin{equation*}
+SST=SSA+SSB+SSe
+\end{equation*}\]</span></p>
+</section>
+</section>
+<section id="id--7919df3c" class="level3">
+<h3 class="anchored" data-anchor-id="id--7919df3c"><span class="header-section-number">24.3.3</span> 检验统计量</h3>
+<section id="varepsilon-d095d44d" class="level4">
+<h4 class="anchored" data-anchor-id="varepsilon-d095d44d"><span class="header-section-number">24.3.3.1</span> 关于<span class="math inline">\(\varepsilon\)</span>的一些结论</h4>
+<p>下给出关于<span class="math inline">\(\varepsilon\)</span>的一些结论：</p>
+<p><span class="math display">\[\begin{gather*}
+\bar{\varepsilon}_{i.}\sim N(0,\frac{\sigma^2}{b}),\quad\bar{\varepsilon}_{.j}\sim
+N(0,\frac{\sigma^2}{a}),\quad\bar{\varepsilon}_{..}\sim N(0,\frac{\sigma^2}{ab}) \\
+E(\varepsilon_{ij}^2)=\sigma^2,\quad
+E(\bar{\varepsilon}_{i.}^2)=\frac{\sigma^2}{b},\quad
+E(\bar{\varepsilon}_{.j}^2)=\frac{\sigma^2}{a},\quad
+E(\bar{\varepsilon}_{..}^2)=\frac{\sigma^2}{ab} \\
+E(\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..})=\frac{\sigma^2}{ab},\quad
+E(\varepsilon_{.j}\bar{\varepsilon}_{..})=\frac{\sigma^2}{ab}
+\end{gather*}\]</span></p>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>正态分布的三个结论可直接由独立正态随机变量的线性运算求得。</p>
+<p><span class="math display">\[\begin{align*}
+E(\bar{\varepsilon}_{ij}^2)&amp;=Var(\bar{\varepsilon}_{ij})+[E(\bar{\varepsilon}_{ij})]^2=\sigma^2 \\
+E(\bar{\varepsilon}_{i.}^2)&amp;=Var(\bar{\varepsilon}_{i.})+[E(\bar{\varepsilon}_{i.})]^2=\frac{\sigma^2}{b} \\
+E(\bar{\varepsilon}_{.j}^2)&amp;=Var(\bar{\varepsilon}_{.j})+[E(\bar{\varepsilon}_{.j})]^2=\frac{\sigma^2}{a} \\
+E(\bar{\varepsilon}_{..}^2)&amp;=Var(\bar{\varepsilon}_{..})+[E(\bar{\varepsilon}_{..})]^2=\frac{\sigma^2}{ab}
+
+\end{align*}\]</span></p>
+<p>下求<span class="math inline">\(E(\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..})\)</span>：</p>
+<p><span class="math display">\[\begin{align*}
+E(\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..})
+&amp;=E\left[\left(\frac{1}{b}\sum_{j=1}^b\varepsilon_{ij}\right)\left(\frac{1}{ab}\sum_{i=1}^a\sum_{j=1}^b\varepsilon_{ij}\right)\right] \\
+&amp;=\frac{1}{ab^2}E\left(\sum_{j=1}^b\varepsilon_{ij}^2\right) \\
+&amp;=\frac{1}{ab^2}\sum_{j=1}^bE(\varepsilon_{ij}^2) \\
+&amp;=\frac{\sigma^2}{ab}
+
+\end{align*}\]</span></p>
+<p>下求<span class="math inline">\(E(\varepsilon_{.j}\bar{\varepsilon}_{..})\)</span>：</p>
+<p><span class="math display">\[\begin{align*}
+E(\varepsilon_{.j}\bar{\varepsilon}_{..})
+&amp;=E\left[\left(\frac{1}{a}\sum_{i=1}^a\varepsilon_{ij}\right)\left(\frac{1}{ab}\sum_{i=1}^a\sum_{j=1}^b\varepsilon_{ij}\right)\right] \\
+&amp;=\frac{1}{a^2b}E\left(\sum_{i=1}^a\varepsilon_{ij}^2\right) \\
+&amp;=\frac{1}{ab^2}\sum_{i=1}^aE(\varepsilon_{ij}^2) \\
+&amp;=\frac{\sigma^2}{ab}
+
+\end{align*}\]</span></p>
+<p>◻</p>
+</div>
+</section>
+<section id="ssa-67c87093" class="level4">
+<h4 class="anchored" data-anchor-id="ssa-67c87093"><span class="header-section-number">24.3.3.2</span> SSA的期望</h4>
+<p>下求SSA的期望：</p>
+<p><span class="math display">\[\begin{align*}
+E(SSA)
+&amp;=E\left[b\sum_{i=1}^a(\tau_i+\bar{\varepsilon}_{i.}-\bar{\varepsilon}_{..})^2\right] \\
+&amp;=E\left[b\sum_{i=1}^a(\tau_i^2+\bar{\varepsilon}_{i.}^2+\bar{\varepsilon}_{..}^2+2\tau_i\bar{\varepsilon}_{i.}-2\tau_i\bar{\varepsilon}_{..}-2\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..})\right] \\
+&amp;=b\sum_{i=1}^a\tau_i^2+b\sum_{i=1}^aE(\bar{\varepsilon}_{i.}^2)+b\sum_{i=1}^aE(\bar{\varepsilon}_{..}^2)-\frac{2b}{ab^2}\sum_{i=1}^a\sum_{j=1}^bE(\varepsilon_{ij}^2) \\
+&amp;=b\sum_{i=1}^a\tau_i^2+ba\frac{\sigma^2}{b}+ab\frac{\sigma^2}{ab}-\frac{2b}{ab^2}ab\sigma^2 \\
+&amp;=b\sum_{i=1}^a\tau_i^2+(a-1)\sigma^2
+\end{align*}\]</span></p>
+</section>
+<section id="ssb-051392a4" class="level4">
+<h4 class="anchored" data-anchor-id="ssb-051392a4"><span class="header-section-number">24.3.3.3</span> SSB的期望</h4>
+<p>下求SSB的期望：</p>
+<p><span class="math display">\[\begin{align*}
+E(SSB)
+&amp;=E\left[a\sum_{j=1}^b(\beta_j+\bar{\varepsilon}_{.j}-\bar{\varepsilon}_{..})^2\right] \\
+&amp;=E\left[a\sum_{j=1}^b(\beta_j^2+\bar{\varepsilon}_{.j}^2+\bar{\varepsilon}_{..}^2+2\beta_j\bar{\varepsilon}_{.j}-2\beta_j\bar{\varepsilon}_{..}-2\bar{\varepsilon}_{.j}\bar{\varepsilon}_{..})\right] \\
+&amp;=a\sum_{j=1}^b\beta_j^2+a\sum_{j=1}^bE(\bar{\varepsilon}_{.j}^2)+a\sum_{j=1}^bE(\bar{\varepsilon}_{..}^2)-\frac{2a}{a^2b}\sum_{i=1}^a\sum_{j=1}^bE(\varepsilon_{ij}^2) \\
+&amp;=a\sum_{j=1}^b\beta_j^2+ab\frac{\sigma^2}{a}+ab\frac{\sigma^2}{ab}-\frac{2a}{a^2b}ab\sigma^2 \\
+&amp;=a\sum_{j=1}^b\beta_j^2+(b-1)\sigma^2
+\end{align*}\]</span></p>
+</section>
+<section id="sse-42ecb8dc" class="level4">
+<h4 class="anchored" data-anchor-id="sse-42ecb8dc"><span class="header-section-number">24.3.3.4</span> SSe的期望</h4>
+<p>下求SSe的期望（把均值展开，利用独立性就可以得到结果）：</p>
+<p><span class="math display">\[\begin{align*}
+E(SSe)
+&amp;=E\left[\sum_{i=1}^a\sum_{j=1}^b(\varepsilon_{ij}-\bar{\varepsilon}_{i.}-\bar{\varepsilon}_{.j}+\bar{\varepsilon}_{..})^2\right] \\
+&amp;=E\left[\sum_{i=1}^a\sum_{j=1}^b(\varepsilon_{ij}^2+\bar{\varepsilon}_{i.}^2+\bar{\varepsilon}_{.j}^2+\bar{\varepsilon}_{..}^2
+-2\varepsilon_{ij}\bar{\varepsilon}_{i.}-2\varepsilon_{ij}\bar{\varepsilon}_{.j}+2\varepsilon_{ij}\bar{\varepsilon}_{..}
++2\bar{\varepsilon}_{i.}\bar{\varepsilon}_{.j}-2\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..}-2\bar{\varepsilon}_{.j}\bar{\varepsilon}_{..})\right] \\
+&amp;=(a-1)(b-1)\sigma^2
+\end{align*}\]</span></p>
+</section>
+<section id="id--c0ab39b9" class="level4">
+<h4 class="anchored" data-anchor-id="id--c0ab39b9"><span class="header-section-number">24.3.3.5</span> 构建统计量</h4>
+<p>称<span class="math inline">\(\frac{SSA}{a-1}\)</span>为因子A的均方和，记为MSA；称<span class="math inline">\(\frac{SSB}{b-1}\)</span>为因子B的均方和，记为MSB；称<span class="math inline">\(\frac{SSe}{(a-1)(b-1)}\)</span>为误差均方和，记为MSe。</p>
+<p>由前述，MSe是<span class="math inline">\(\sigma^2\)</span>的无偏估计，而当零假设成立时，MSA和MSB也是<span class="math inline">\(\sigma^2\)</span>的一个无偏估计。如果MSA、MSB与MSe比值很大，即MSA、MSB比MSe大很多（<span class="math inline">\(b\sum\limits_{i=1}^a\tau_i^2,\;a\sum\limits_{j=1}^b\beta_j^2\)</span>很大），我们就有理由怀疑零假设。。由此构建统计量：</p>
+<p><span class="math display">\[\begin{gather*}
+F_A=\frac{MSA}{MSe}=\frac{\frac{SSA}{a-1}}{\frac{SSe}{(a-1)(b-1)}} \\
+F_B=\frac{MSB}{MSe}=\frac{\frac{SSB}{b-1}}{\frac{SSe}{(a-1)(b-1)}}  
+\end{gather*}\]</span></p>
+<p>在这些统计量的情况下，<span class="math inline">\(H_{01},\;H_{02}\)</span>的拒绝域是右向单尾的。下求统计量的分布。</p>
+</section>
+</section>
+<section id="id--985921f3" class="level3">
+<h3 class="anchored" data-anchor-id="id--985921f3"><span class="header-section-number">24.3.4</span> 统计量的分布</h3>
+<p>上述统计量服从如下分布：</p>
+<p><span class="math display">\[\begin{gather*}
+F_A\sim F(a-1,\;(a-1)(b-1)) \\
+F_B\sim F(b-1,\;(a-1)(b-1))
+\end{gather*}\]</span></p>
+<p>所以<span class="math inline">\(H_{01},\;H_{02}\)</span>在显著性水平为<span class="math inline">\(\alpha\)</span>时的拒绝域为：</p>
+<p><span class="math display">\[\begin{gather*}
+F_A&gt;F_{1-\alpha}(a-1,\;(a-1)(b-1)) \\
+F_B&gt;F_{1-\alpha}(b-1,\;(a-1)(b-1))
+\end{gather*}\]</span></p>
+</section>
+<section id="id-1-d7294c51" class="level3">
+<h3 class="anchored" data-anchor-id="id-1-d7294c51"><span class="header-section-number">24.3.5</span> 方差分析表</h3>
+<table class="caption-top table">
+<caption>无重复可加效应下两因子试验方差分析表</caption>
+<thead>
+<tr class="header">
+<th>来源 平</th>
+<th>方和 自</th>
+<th>由度 均</th>
+<th>方和 F值</th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>因子A S</td>
+<td>SA $</td>
+<td>f_A=a-1$ $</td>
+<td>$ $</td>
+<td>F=$</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>因子B S</td>
+<td>SB $</td>
+<td>f_B=b-1$ $</td>
+<td>$ $</td>
+<td>F=$</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>误差 S</td>
+<td>Se $</td>
+<td>f_e=(a-1)(b-1)$ $</td>
+<td>$</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>总 SS</td>
+<td>T $f</td>
+<td>_T=ab-1$</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>平方和公式可按下列公式计算：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+SST=\sum\limits_{i=1}^a\sum\limits_{j=1}^by_{ij}^2-\frac{y_{..}^2}{ab} \\
+SSA=\sum\limits_{i=1}^a\frac{y_{i.}^2}{b}-\frac{y_{..}^2}{ab} \\
+SSB=\sum\limits_{j=1}^b\frac{y_{.j}^2}{a}-\frac{y_{..}^2}{ab} \\
+SSe=SST-SSA-SSB
+\end{cases}
+\end{equation*}\]</span></p>
+</section>
+<section id="id-4-b661de4e" class="level3">
+<h3 class="anchored" data-anchor-id="id-4-b661de4e"><span class="header-section-number">24.3.6</span> 参数估计</h3>
+<p>可加效应下的两因子方差分析有四类参数：<span class="math inline">\(\mu\)</span>，诸<span class="math inline">\(\tau_i\)</span>，诸<span class="math inline">\(\beta_j\)</span>和<span class="math inline">\(\sigma^2\)</span>。下讨论这四类参数的点估计问题。</p>
+<section id="id-1-27796635" class="level4">
+<h4 class="anchored" data-anchor-id="id-1-27796635"><span class="header-section-number">24.3.6.1</span> 点估计</h4>
+<p>参数的点估计如下：</p>
+<p><span class="math display">\[\begin{gather*}
+\hat{\sigma^2}=MSe \\
+\hat{\mu}=\bar{y}_{..} \\
+\hat{\tau}_i=\bar{y}_{i.}-\bar{y}_{..},\;i=1,2,\dots,a \\
+\hat{\beta}_j=\bar{y}_{.j}-\bar{y}_{..},\;j=1,2,\dots,b
+\end{gather*}\]</span></p>
+<p>其中<span class="math inline">\(\hat{\mu},\;\hat{\tau}_i,\;\hat{\beta}_j\)</span>是使用最小二乘估计得到的。</p>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>分别用<span class="math inline">\(\hat{\mu},\;\hat{\tau}_i,\;\hat{\beta}_j\)</span>表示<span class="math inline">\(\mu\)</span>，诸<span class="math inline">\(\tau_i\)</span>和诸<span class="math inline">\(\beta_j\)</span>的估计，用<span class="math inline">\(\hat{y}_{ij}=\hat{\mu}+\hat{\tau}_i+\hat{\beta}_j\)</span>表示<span class="math inline">\(y_{ij}\)</span>的估计，<span class="math inline">\(i=1,2,\dots,a,\;j=1,2,\dots,b\)</span>。损失函数为：</p>
+<p><span class="math display">\[\begin{equation*}
+L=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\hat{y}_{ij})^2=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\hat{\mu}-\hat{\tau}_i-\hat{\beta}_j)^2
+
+\end{equation*}\]</span></p>
+<p>最小二乘解需要满足：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+\vspace{2ex}
+\dfrac{\partial L}{\partial\hat{\mu}}=0, \\
+\vspace{2ex}
+\dfrac{\partial L}{\partial\hat{\tau}_i}=0,\quad
+i=1,2,\dots,a \\
+\vspace{2ex}
+\dfrac{\partial L}{\partial\hat{\beta}_j}=0,\quad
+j=1,2,\dots,b \\
+\vspace{2ex}
+\sum\limits_{i=1}^a\hat{\tau}_i=0 \\
+\vspace{2ex}
+\sum\limits_{j=1}^b\hat{\beta}_j=0
+\end{cases}
+
+\end{equation*}\]</span></p>
+<p>上式即可解出结果。&nbsp;◻</p>
+</div>
+</section>
+</section>
+<section id="id--fe2c308e" class="level3">
+<h3 class="anchored" data-anchor-id="id--fe2c308e"><span class="header-section-number">24.3.7</span> 多重比较问题</h3>
+<p>如果此时某因子显著，则需要对它的各水平均值采用Duncan多重比较法去判断哪些水平之间存在显著差异。此时的水平均值即为在另一因子各水平下的均值。</p>
+</section>
+<section id="id--eeccdecf" class="level3">
+<h3 class="anchored" data-anchor-id="id--eeccdecf"><span class="header-section-number">24.3.8</span> 等重复试验情形</h3>
+<section id="id--e00d6239" class="level4">
+<h4 class="anchored" data-anchor-id="id--e00d6239"><span class="header-section-number">24.3.8.1</span> 等重复试验下的方差分析表</h4>
+<table class="caption-top table">
+<caption>可加效应下两因子等重复试验方差分析表</caption>
+<thead>
+<tr class="header">
+<th>来源 平</th>
+<th>方和 自</th>
+<th>由度 均</th>
+<th>方和 F值</th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>因子A S</td>
+<td>SA $</td>
+<td>f_A=a-1$ $</td>
+<td>$ $</td>
+<td>F=$</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>因子B S</td>
+<td>SB $</td>
+<td>f_B=b-1$ $</td>
+<td>$ $</td>
+<td>F=$</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>误差 S</td>
+<td>Se $</td>
+<td>f_e=abm-a-b+1$ $</td>
+<td>$</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>总 SS</td>
+<td>T $f</td>
+<td>_T=abm-1$</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>其中<span class="math inline">\(m\)</span>为重复实验次数。平方和公式可按下列公式计算：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+SST=\sum\limits_{i=1}^a\sum\limits_{j=1}^b\sum\limits_{k=1}^my_{ijk}^2-\frac{y_{...}^2}{abm} \\
+SSA=\sum\limits_{i=1}^a\frac{y_{i..}^2}{bm}-\frac{y_{...}^2}{abm} \\
+SSB=\sum\limits_{j=1}^b\frac{y_{.j.}^2}{am}-\frac{y_{..}^2}{abm} \\
+SSe=SST-SSA-SSB
+\end{cases}
+\end{equation*}\]</span></p>
+<p>其中：</p>
+<p><span class="math display">\[\begin{gather*}
+y_{...}=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^my_{ijk} \\
+y_{i..}=\sum_{j=1}^b\sum_{k=1}^my_{ijk},\quad i=1,2,\dots,a \\
+y_{.j.}=\sum_{i=1}^a\sum_{k=1}^my_{ijk},\quad j=1,2,\dots,b
+\end{gather*}\]</span></p>
+</section>
+<section id="id-5-4c7975c0" class="level4">
+<h4 class="anchored" data-anchor-id="id-5-4c7975c0"><span class="header-section-number">24.3.8.2</span> 参数估计</h4>
+<p>参数的点估计如下：</p>
+<p><span class="math display">\[\begin{gather*}
+\hat{\mu}=\bar{y}_{...} \\
+\hat{\tau}_i=\bar{y}_{i..}-\bar{y}_{...},\;i=1,2,\dots,a \\
+\hat{\beta}_j=\bar{y}_{.j.}-\bar{y}_{...},\;j=1,2,\dots,b
+\end{gather*}\]</span></p>
+</section>
+<section id="id-1-d236670e" class="level4">
+<h4 class="anchored" data-anchor-id="id-1-d236670e"><span class="header-section-number">24.3.8.3</span> 多重比较问题</h4>
+<p>此时的Duncan多重比较过程与无重复试验的情况完全一样，只是需要注意：</p>
+<p><span class="math display">\[\begin{gather*}
+A:R_p&gt;r_{1-\alpha}(p,f)\sqrt{\frac{MSe}{bm}} \\
+B:R_p&gt;r_{1-\alpha}(p,f)\sqrt{\frac{MSe}{am}}
+\end{gather*}\]</span></p>
+</section>
+</section>
+</section>
+<section id="id--77d980ce" class="level2">
+<h2 class="anchored" data-anchor-id="id--77d980ce"><span class="header-section-number">24.4</span> 交互效应下的两因子方差分析</h2>
+<p>仅讨论等重复情形。</p>
+<table class="caption-top table">
+<caption>等重复两因子试验数据表</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><span class="math inline">\(B_1\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(B_2\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(\cdots\)</span></th>
+<th style="text-align: left;"><span class="math inline">\(B_b\)</span></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(A_1\)</span> $y</td>
+<td style="text-align: center;"><em>{111}, y</em>{112}, , y_{11m}$ $y</td>
+<td style="text-align: center;"><em>{121}, y</em>{122}, , y_{12m}$ $</td>
+<td style="text-align: left;">$ $y</td>
+<td><em>{1b1}, y</em>{1b2}, , y_{1bm}$</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(A_2\)</span> $y</td>
+<td style="text-align: center;"><em>{211}, y</em>{212}, , y_{21m}$ $y</td>
+<td style="text-align: center;"><em>{221}, y</em>{222}, , y_{22m}$ $</td>
+<td style="text-align: left;">$ $y</td>
+<td><em>{2b1}, y</em>{2b2}, , y_{2bm}$</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\vdots\)</span> $</td>
+<td style="text-align: center;">$ $</td>
+<td style="text-align: center;">$</td>
+<td style="text-align: left;">$</td>
+<td>$</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(A_a\)</span> $y</td>
+<td style="text-align: center;"><em>{a11}, y</em>{a12}, , y_{a1m}$ $y</td>
+<td style="text-align: center;"><em>{a21}, y</em>{a22}, , y_{a2m}$ $</td>
+<td style="text-align: left;">$ $y</td>
+<td><em>{ab1}, y</em>{ab2}, , y_{abm}$</td>
+</tr>
+</tbody>
+</table>
+<p>其中<span class="math inline">\(y_{ijk}\)</span>表示在因子A的第<span class="math inline">\(i\)</span>个水平<span class="math inline">\(A_i\)</span>和因子B的第<span class="math inline">\(j\)</span>个水平<span class="math inline">\(B_j\)</span>下第<span class="math inline">\(k\)</span>次重复试验的观察值。</p>
+<section id="id-1-166e33a7" class="level3">
+<h3 class="anchored" data-anchor-id="id-1-166e33a7"><span class="header-section-number">24.4.1</span> 统计模型</h3>
+<div id="model-interaction-effect-two-way-anova-55975f07" class="equation-block">
+<p>由可加效应下的两因子方差分析模型（见<a href="../chapters/page-023.html#model-additive-effect-two-way-anova-1c347e2a" data-reference-type="ref+label" data-reference="model:additive-effect-two-way-anova">公式 22.2</a>），如果：</p>
+<p><span class="math display">\[\begin{equation*}
+\mu_{ij}\ne \mu+\tau_i+\beta_j
+\end{equation*}\]</span></p>
+<p>则记：</p>
+<p><span class="math display">\[\begin{equation*}
+(\tau\beta)_{ij}=\mu_{ij}-(\mu+\tau_i+\beta_j),\quad i=1,2,\dots,a,\;j=1,2,\dots,b
+\end{equation*}\]</span></p>
+<p>称<span class="math inline">\((\tau\beta)_{ij}\)</span>为因子A的水平<span class="math inline">\(A_i\)</span>和因子B的水平<span class="math inline">\(B_j\)</span>的交互效应。它表示两个因子的主效应之外，由于水平搭配而引起的新的效应。所有交互效应的全体称为交互作用，记为AB或A<span class="math inline">\(\times\)</span>B。交互效应应满足如下条件：</p>
+<p><span class="math display">\[\begin{gather*}
+\sum_{j=1}^b(\tau\beta)_{ij}=0,\quad i=1,2,\dots,a \\
+\sum_{i=1}^a(\tau\beta)_{ij}=0,\quad j=1,2,\dots,b
+\end{gather*}\]</span></p>
+<p>此时的统计模型即为：</p>
+<p><span class="math display">\[\begin{equation*}
+\tag{24.2}
+\begin{cases}
+y_{ijk}=\mu+\tau_i+\beta_j+(\tau\beta)_{ij}+\varepsilon_{ijk} \\
+\text{诸}\varepsilon_{ijk}\quad\mathrm{i.i.d.~}N(0,\sigma^2) \\
+s.t.\quad\sum\limits_{i=1}^a\tau_i=0,\quad\sum\limits_{j=1}^b\beta_j=0 \\
+\qquad\;\;\sum\limits_{j=1}^b(\tau\beta)_{ij}=0,\quad   \sum\limits_{i=1}^a(\tau\beta)_{ij}=0 \\
+i=1,2,\dots,a,\;j=1,2,\dots,b,\;k=1,2,\dots,m
+\end{cases}
+\end{equation*}\]</span></p>
+</div>
+</section>
+<section id="id-2-07b78315" class="level3">
+<h3 class="anchored" data-anchor-id="id-2-07b78315"><span class="header-section-number">24.4.2</span> 统计假设</h3>
+<p>交互效应下的两因子方差分析需要检验如下三个零假设：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+H_{01}:\tau_1=\tau_2=\cdots=\tau_a=0, \\
+H_{02}:\beta_1=\beta_2=\cdots=\beta_b=0 \\
+H_{03}:(\tau\beta)_{ij}=0,\;\forall\;i,j
+\end{cases}
+\end{equation*}\]</span></p>
+</section>
+<section id="id-2-9aabf1c5" class="level3">
+<h3 class="anchored" data-anchor-id="id-2-9aabf1c5"><span class="header-section-number">24.4.3</span> 偏差平方和的分解</h3>
+<p>记：</p>
+<p><span class="math display">\[\begin{gather*}
+y_{...}=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^my_{ijk},\quad
+\bar{y}_{...}=\frac{y_{...}}{abm} \\
+y_{i..}=\sum_{j=1}^b\sum_{k=1}^my_{ijk},\quad
+\bar{y}_{i..}=\frac{y_{i..}}{bm},\quad i=1,2,\dots,a \\
+y_{.j.}=\sum_{i=1}^a\sum_{k=1}^my_{ijk},\quad
+\bar{y}_{.j.}=\frac{y_{.j.}}{am},\quad j=1,2,\dots,b \\
+y_{ij.}=\sum_{k=1}^my_{ijk},\quad
+\bar{y}_{ij.}=\frac{y_{ij.}}{m}
+\end{gather*}\]</span></p>
+<p>全部数据之间的差异可用下述总偏差平方和表示：</p>
+<p><span class="math display">\[\begin{equation*}
+SST=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\bar{y}_{..})^2
+\end{equation*}\]</span></p>
+<p>引起数据<span class="math inline">\(y_{ij}\)</span>之间差异的原因有四点：</p>
+<ol type="1">
+<li><p>因子A的<span class="math inline">\(a\)</span>个水平对试验结果的影响不同。</p></li>
+<li><p>因子B的<span class="math inline">\(b\)</span>个水平对试验结果的影响不同。</p></li>
+<li><p>因子A和因子B的交互作用。</p></li>
+<li><p>试验具有误差。</p></li>
+</ol>
+<p>为了区分并比较这四个原因对数据的影响，需要对SST进行分解：</p>
+<p><span class="math display">\[\begin{align*}
+SST
+&amp;=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^m(y_{ijk}-\bar{y}_{...})^2 \\
+&amp;=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^m\left[(\bar{y}_{i..}-\bar{y}_{...})+(\bar{y}_{.j.}-\bar{y}_{...})+(\bar{y}_{ij.}-\bar{y}_{i..}-\bar{y}_{.j.}+\bar{y}_{...})+(y_{ijk}-\bar{y}_{ij.})\right]^2 \\
+&amp;=bm\sum_{i=1}^a(\bar{y}_{i..}-\bar{y}_{...})^2+am\sum_{j=1}^b(\bar{y}_{.j.}-\bar{y}_{...})^2+m\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{ij.}-\bar{y}_{i..}-\bar{y}_{.j.}+\bar{y}_{...})^2+\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^m(y_{ijk}-\bar{y}_{ij.})^2
+\end{align*}\]</span></p>
+<p>仿照单因子方差分析、可加效应下的两因子方差分析的做法，仍可以分别定义：</p>
+<p><span class="math display">\[\begin{gather*}
+SSA=bm\sum_{i=1}^a(\bar{y}_{i..}-\bar{y}_{...})^2=bm\sum_{i=1}^a(\tau_i+\bar{\varepsilon}_{i..}-\bar{\varepsilon}_{...})^2 \\
+SSB=am\sum_{j=1}^b(\bar{y}_{.j.}-\bar{y}_{...})^2=am\sum_{j=1}^b(\beta_j+\bar{\varepsilon}_{.j.}-\bar{\varepsilon}_{...})^2 \\
+SSAB=m\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{ij.}-\bar{y}_{i..}-\bar{y}_{.j.}+\bar{y}_{...})^2=m\sum_{i=1}^a\sum_{j=1}^b\left[(\tau\beta)_{ij}+\bar{\varepsilon}_{ij.}-\bar{\varepsilon}_{i..}-\bar{\varepsilon}_{.j.}+3\bar{\varepsilon}_{...}\right]^2 \\
+SSe=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^m(y_{ijk}-\bar{y}_{ij.})^2=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^m(\varepsilon_{ijk}-\bar{\varepsilon}_{ij.})^2
+\end{gather*}\]</span></p>
+<p>分别称如上公式为：因子A的偏差平方和、因子B的偏差平方和、因子A与因子B的交互作用的偏差平方和、误差平方和。</p>
+<section id="id-1-bd64fcb6" class="level4">
+<h4 class="anchored" data-anchor-id="id-1-bd64fcb6"><span class="header-section-number">24.4.3.1</span> 总偏差平方和分解公式</h4>
+<p>综上，总偏差平方和有如下分解公式：</p>
+<p><span class="math display">\[\begin{equation*}
+SST=SSA+SSB++SSAB+SSe
+\end{equation*}\]</span></p>
+</section>
+</section>
+<section id="id-1-4913c2c4" class="level3">
+<h3 class="anchored" data-anchor-id="id-1-4913c2c4"><span class="header-section-number">24.4.4</span> 检验统计量</h3>
+<p>仿照单因子方差分析、可加效应下的两因子方差分析的做法，仍可以求得有关<span class="math inline">\(\varepsilon\)</span>的一系列结论，以及各偏差平方和的期望。这里直接列出结论：</p>
+<p><span class="math display">\[\begin{gather*}
+E(SSA)=(a-1)\sigma^2+bm\sum_{i=1}^a\tau_i^2 \\
+E(SSB)=(b-1)\sigma^2+am\sum_{j=1}^b\beta_j^2 \\
+E(SSAB)=(a-1)(b-1)\sigma^2+m\sum_{i=1}^a\sum_{j=1}^b(\tau\beta)_{ij}^2 \\
+E(SSe)=ab(m-1)\sigma^2
+\end{gather*}\]</span></p>
+<p>称<span class="math inline">\(\frac{SSA}{a-1}\)</span>为因子A的均方和，记为MSA；称<span class="math inline">\(\frac{SSB}{b-1}\)</span>为因子B的均方和，记为MSB；称<span class="math inline">\(\frac{SSAB}{(a-1)(b-1)}\)</span>为因子A与因子B的交互作用的均方和，记为MSAB；称<span class="math inline">\(\frac{SSe}{ab(m-1)}\)</span>为误差均方和，记为MSe。</p>
+<p>由前述，MSe是<span class="math inline">\(\sigma^2\)</span>的无偏估计，而当零假设成立时，MSA、MSB、MSAB也是<span class="math inline">\(\sigma^2\)</span>的一个无偏估计。如果MSA、MSB、MSAB与MSe比值很大，即MSA、MSB、MSAB比MSe大很多（<span class="math inline">\(b\sum\limits_{i=1}^a\tau_i^2,\;a\sum\limits_{j=1}^b\beta_j^2,\;m\sum\limits_{i=1}^a\sum\limits_{j=1}^b(\tau\beta)_{ij}^2\)</span>很大），我们就有理由怀疑零假设。由此构建统计量：</p>
+<p><span class="math display">\[\begin{gather*}
+F_A=\frac{MSA}{MSe}=\frac{\frac{SSA}{a-1}}{\frac{SSe}{ab(m-1)}} \\
+F_B=\frac{MSB}{MSe}=\frac{\frac{SSB}{b-1}}{\frac{SSe}{ab(m-1)}} \\
+F_{AB}=\frac{MSAB}{MSe}=\frac{\frac{SSAB}{(a-1)(b-1)}}{\frac{SSe}{ab(m-1)}}
+\end{gather*}\]</span></p>
+<p>在这些统计量的情况下，<span class="math inline">\(H_{01},\;H_{02},\;H_{03}\)</span>的拒绝域是右向单尾的。下求统计量的分布。</p>
+</section>
+<section id="id-1-e190af9b" class="level3">
+<h3 class="anchored" data-anchor-id="id-1-e190af9b"><span class="header-section-number">24.4.5</span> 统计量的分布</h3>
+<p>上述统计量服从如下分布：</p>
+<p><span class="math display">\[\begin{gather*}
+F_A\sim F(a-1,\;ab(m-1)) \\
+F_B\sim F(b-1,\;ab(m-1)) \\
+F_{AB}\sim F((a-1)(b-1),\;ab(m-1))
+\end{gather*}\]</span></p>
+<p>所以<span class="math inline">\(H_{01},\;H_{02}\)</span>在显著性水平为<span class="math inline">\(\alpha\)</span>时的拒绝域为：</p>
+<p><span class="math display">\[\begin{gather*}
+F_A&gt;F_{1-\alpha}(a-1,\;ab(m-1)) \\
+F_B&gt;F_{1-\alpha}(b-1,\;ab(m-1)) \\
+F_{AB}&gt;F_{1-\alpha}((a-1)(b-1),\;ab(m-1))
+\end{gather*}\]</span></p>
+</section>
+<section id="id-2-9f6748fe" class="level3">
+<h3 class="anchored" data-anchor-id="id-2-9f6748fe"><span class="header-section-number">24.4.6</span> 方差分析表</h3>
+<table class="caption-top table">
+<caption>等重复交互效应下两因子试验方差分析表</caption>
+<thead>
+<tr class="header">
+<th>来源 平方</th>
+<th>和 自由</th>
+<th>度 均方</th>
+<th>和 F值</th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>因子A SSA</td>
+<td>$f_</td>
+<td>A=a-1$ $</td>
+<td>rac{SSA}{a-1}$ $F=</td>
+<td>$</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>因子B SSB</td>
+<td>$f_</td>
+<td>B=b-1$ $</td>
+<td>rac{SSB}{b-1}$ $F=</td>
+<td>$</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>交互作用AB S</td>
+<td>SAB $</td>
+<td>f_{AB}=(a-1)(b-1)$ $</td>
+<td>$ $</td>
+<td>F=$</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>误差 SSe</td>
+<td>$f_e</td>
+<td>=ab(m-1)$ $</td>
+<td>ac{SSe}{ab(m-1)}$</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>总 SST</td>
+<td>$f_T=</td>
+<td>abm-1$</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>平方和公式可按下列公式计算：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+SST=\sum\limits_{i=1}^a\sum\limits_{j=1}^b\sum\limits_{k=1}^my_{ijk}^2-\frac{y_{...}^2}{abm} \\
+SSA=\sum\limits_{i=1}^a\frac{y_{i..}^2}{bm}-\frac{y_{...}^2}{abm} \\
+SSB=\sum\limits_{j=1}^b\frac{y_{.j.}^2}{am}-\frac{y_{...}^2}{abm} \\
+SSAB=\sum\limits_{i=1}^a\sum\limits_{j=1}^b\frac{y_{ij.}^2}{m}-\frac{y_{...}^2}{abm}-SSA-SSB \\
+SSe=SST-SSA-SSB-SSAB
+\end{cases}
+\end{equation*}\]</span></p>
+</section>
+<section id="id-6-f4450fb2" class="level3">
+<h3 class="anchored" data-anchor-id="id-6-f4450fb2"><span class="header-section-number">24.4.7</span> 参数估计</h3>
+<p>交互效应下的两因子方差分析有五类参数：<span class="math inline">\(\mu\)</span>，诸<span class="math inline">\(\tau_i\)</span>，诸<span class="math inline">\(\beta_j\)</span>，诸<span class="math inline">\((\tau\beta)_{ij}\)</span>和<span class="math inline">\(\sigma^2\)</span>。下讨论这五类参数的点估计问题。</p>
+<section id="id-2-431337f9" class="level4">
+<h4 class="anchored" data-anchor-id="id-2-431337f9"><span class="header-section-number">24.4.7.1</span> 点估计</h4>
+<p>参数的点估计如下：</p>
+<p><span class="math display">\[\begin{gather*}
+\hat{\sigma^2}=MSe \\
+\hat{\mu}=\bar{y}_{...} \\
+\hat{\tau}_i=\bar{y}_{i..}-\bar{y}_{...},\quad
+\hat{\beta}_j=\bar{y}_{.j.}-\bar{y}_{...} \\
+\widehat{(\tau\beta)}_{ij}=\bar{y}_{ij.}-\bar{y}_{i..}-\bar{y}_{.j.}+\bar{y}_{...} \\
+i=1,2,\dots,a,\;j=1,2,\dots,b
+\end{gather*}\]</span></p>
+<p>证明过程与之前类似。</p>
+</section>
+</section>
+</section>
+<section id="id--937acc9a" class="level2">
+<h2 class="anchored" data-anchor-id="id--937acc9a"><span class="header-section-number">24.5</span> 随机效应下的两因子方差分析</h2>
+<p>仅讨论等重复、有交互作用情形。</p>
+<table class="caption-top table">
+<caption>等重复两因子试验数据表</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><span class="math inline">\(B_1\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(B_2\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(\cdots\)</span></th>
+<th style="text-align: left;"><span class="math inline">\(B_b\)</span></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(A_1\)</span> $y</td>
+<td style="text-align: center;"><em>{111}, y</em>{112}, , y_{11m}$ $y</td>
+<td style="text-align: center;"><em>{121}, y</em>{122}, , y_{12m}$ $</td>
+<td style="text-align: left;">$ $y</td>
+<td><em>{1b1}, y</em>{1b2}, , y_{1bm}$</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(A_2\)</span> $y</td>
+<td style="text-align: center;"><em>{211}, y</em>{212}, , y_{21m}$ $y</td>
+<td style="text-align: center;"><em>{221}, y</em>{222}, , y_{22m}$ $</td>
+<td style="text-align: left;">$ $y</td>
+<td><em>{2b1}, y</em>{2b2}, , y_{2bm}$</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\vdots\)</span> $</td>
+<td style="text-align: center;">$ $</td>
+<td style="text-align: center;">$</td>
+<td style="text-align: left;">$</td>
+<td>$</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(A_a\)</span> $y</td>
+<td style="text-align: center;"><em>{a11}, y</em>{a12}, , y_{a1m}$ $y</td>
+<td style="text-align: center;"><em>{a21}, y</em>{a22}, , y_{a2m}$ $</td>
+<td style="text-align: left;">$ $y</td>
+<td><em>{ab1}, y</em>{ab2}, , y_{abm}$</td>
+</tr>
+</tbody>
+</table>
+<p>其中<span class="math inline">\(y_{ijk}\)</span>表示在因子A的第<span class="math inline">\(i\)</span>个水平<span class="math inline">\(A_i\)</span>和因子B的第<span class="math inline">\(j\)</span>个水平<span class="math inline">\(B_j\)</span>下第<span class="math inline">\(k\)</span>次重复试验的观察值。</p>
+<section id="id-2-2bc4f9c6" class="level3">
+<h3 class="anchored" data-anchor-id="id-2-2bc4f9c6"><span class="header-section-number">24.5.1</span> 统计模型</h3>
+<div id="model-random-effect-two-way-anova-2a0b1d6e" class="equation-block">
+<p>此时的统计模型为：</p>
+<p><span class="math display">\[\begin{equation*}
+\tag{24.3}
+\begin{cases}
+y_{ijk}=\mu+\tau_i+\beta_j+(\tau\beta)_{ij}+\varepsilon_{ijk} \\
+\text{诸}\varepsilon_{ijk}\quad\mathrm{i.i.d.~}N(0,\sigma^2) \\
+\text{诸}\tau_i\quad\mathrm{i.i.d.~}N(0,\sigma_\tau^2) \\
+\text{诸}\beta_j\quad\mathrm{i.i.d.~}N(0,\sigma_\beta^2) \\
+\text{诸}(\tau\beta)_{ij}\quad\mathrm{i.i.d.~}N(0,\sigma_{\tau\beta}^2) \\
+\text{诸}\varepsilon_{ijk}\text{、诸}\tau_i\text{、诸}\beta_j\text{、诸}(\tau\beta)_{ij}\text{相互独立} \\
+i=1,2,\dots,a,\;j=1,2,\dots,b,\;k=1,2,\dots,m
+\end{cases}
+\end{equation*}\]</span></p>
+</div>
+</section>
+<section id="id-3-b43e79e0" class="level3">
+<h3 class="anchored" data-anchor-id="id-3-b43e79e0"><span class="header-section-number">24.5.2</span> 统计假设</h3>
+<p>此时需要检验如下三个零假设：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+H_{01}:\sigma_\tau^2=0, \\
+H_{02}:\sigma_\beta^2=0 \\
+H_{03}:\sigma_{\tau\beta}^2=0
+\end{cases}
+\end{equation*}\]</span></p>
+</section>
+<section id="id-2-d8c14992" class="level3">
+<h3 class="anchored" data-anchor-id="id-2-d8c14992"><span class="header-section-number">24.5.3</span> 方差分析</h3>
+<section id="id-3-e89ed930" class="level4">
+<h4 class="anchored" data-anchor-id="id-3-e89ed930"><span class="header-section-number">24.5.3.1</span> 偏差平方和的分解</h4>
+<p>由于与交互效应情况下五个平方和的定义完全相同，所以随机效应下偏差平方和分解公式与之前一模一样。</p>
+<p><span class="math display">\[\begin{gather*}
+SST=SSA+SSB+SSAB+SSe \\
+SSA=bm\sum_{i=1}^a(\bar{y}_{i..}-\bar{y}_{...})^2=bm\sum_{i=1}^a(\tau_i+\bar{\varepsilon}_{i..}-\bar{\varepsilon}_{...})^2 \\
+SSB=am\sum_{j=1}^b(\bar{y}_{.j.}-\bar{y}_{...})^2=am\sum_{j=1}^b(\beta_j+\bar{\varepsilon}_{.j.}-\bar{\varepsilon}_{...})^2 \\
+SSAB=m\sum_{i=1}^a\sum_{j=1}^b(\bar{y}_{ij.}-\bar{y}_{i..}-\bar{y}_{.j.}+\bar{y}_{...})^2=m\sum_{i=1}^a\sum_{j=1}^b\left[(\tau\beta)_{ij}+\bar{\varepsilon}_{ij.}-\bar{\varepsilon}_{i..}-\bar{\varepsilon}_{.j.}+3\bar{\varepsilon}_{...}\right]^2 \\
+SSe=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^m(y_{ijk}-\bar{y}_{ij.})^2=\sum_{i=1}^a\sum_{j=1}^b\sum_{k=1}^m(\varepsilon_{ijk}-\bar{\varepsilon}_{ij.})^2
+\end{gather*}\]</span></p>
+</section>
+<section id="id-1-a174be2a" class="level4">
+<h4 class="anchored" data-anchor-id="id-1-a174be2a"><span class="header-section-number">24.5.3.2</span> 各平方和的期望</h4>
+<p>这里直接列出各平方和的期望，证明是容易的。</p>
+<p><span class="math display">\[\begin{gather*}
+E(SSA)=(a-1)\sigma^2+m(a-1)\sigma_{\tau\beta}^2+(a-1)bm\sigma_\tau^2  \\
+E(SSB)=(b-1)\sigma^2+m(b-1)\sigma_{\tau\beta}^2+(b-1)am\sigma_{\beta}^2 \\
+E(SSAB)=(a-1)(b-1)\sigma^2+m(a-1)(b-1)\sigma_{\tau\beta}^2 \\
+E(SSe)=ab(m-1)\sigma^2
+\end{gather*}\]</span></p>
+</section>
+<section id="id-1-3e1b3106" class="level4">
+<h4 class="anchored" data-anchor-id="id-1-3e1b3106"><span class="header-section-number">24.5.3.3</span> 统计量及其分布</h4>
+<p>称<span class="math inline">\(\frac{SSA}{a-1}\)</span>为因子A的均方和，记为MSA；称<span class="math inline">\(\frac{SSB}{b-1}\)</span>为因子B的均方和，记为MSB；称<span class="math inline">\(\frac{SSAB}{(a-1)(b-1)}\)</span>为因子A与因子B的交互作用的均方和，记为MSAB；称<span class="math inline">\(\frac{SSe}{ab(m-1)}\)</span>为误差均方和，记为MSe。</p>
+<p>由前述，MSe是<span class="math inline">\(\sigma^2\)</span>的无偏估计。在<span class="math inline">\(H_{01}\)</span>成立时，MSA是<span class="math inline">\(\sigma^2+m\sigma_{\tau\beta}^2\)</span>的无偏估计；在<span class="math inline">\(H_{02}\)</span>成立时，MSA是<span class="math inline">\(\sigma^2+m\sigma_{\tau\beta}^2\)</span>的无偏估计；在<span class="math inline">\(H_{03}\)</span>成立时，MSAB是<span class="math inline">\(\sigma^2\)</span>的无偏估计。如果MSA与MSAB比值很大，则有理由怀疑<span class="math inline">\(H_01\)</span>；如果MSB与MSAB比值很大，则有理由怀疑<span class="math inline">\(H_02\)</span>；如果MSAB与MSe比值很大，则有理由怀疑<span class="math inline">\(H_03\)</span>。由此构建统计量：</p>
+<p><span class="math display">\[\begin{gather*}
+F_A=\frac{MSA}{MSAB}=\frac{\frac{SSA}{a-1}}{\frac{SSAB}{(a-1)(b-1)}} \\
+F_B=\frac{MSB}{MSAB}=\frac{\frac{SSB}{b-1}}{\frac{SSAB}{(a-1)(b-1)}} \\
+F_{AB}=\frac{MSAB}{MSe}=\frac{\frac{SSAB}{(a-1)(b-1)}}{\frac{SSe}{ab(m-1)}}
+\end{gather*}\]</span></p>
+<p>在这些统计量的情况下，<span class="math inline">\(H_{01},\;H_{02},\;H_{03}\)</span>的拒绝域是右向单尾的。</p>
+<p>由于在假设<span class="math inline">\(H_{01},\;H_{02},\;H_{03}\)</span>成立时，随机效应模型与可加效应模型的观察值<span class="math inline">\(y_{ijk}\)</span>的数据结构的形式完全一样，所以在随机效应模型中仍然有：</p>
+<p><span class="math display">\[\begin{gather*}
+F_A\sim F(a-1,\;(a-1)(b-1)) \\
+F_B\sim F(b-1,\;(a-1)(b-1)) \\
+F_{AB}\sim F((a-1)(b-1),\;ab(m-1))
+\end{gather*}\]</span></p>
+</section>
+<section id="id-1-f1acd460" class="level4">
+<h4 class="anchored" data-anchor-id="id-1-f1acd460"><span class="header-section-number">24.5.3.4</span> 拒绝域</h4>
+<p>综上所述，显著性水平为<span class="math inline">\(\alpha\)</span>时的拒绝域为：</p>
+<p><span class="math display">\[\begin{gather*}
+F_A&gt;F_{1-\alpha}(a-1,\;(a-1)(b-1)) \\
+F_B&gt;F_{1-\alpha}(b-1,\;(a-1)(b-1)) \\
+F_{AB}&gt;F_{1-\alpha}((a-1)(b-1),\;ab(m-1))
+\end{gather*}\]</span></p>
+</section>
+</section>
+<section id="id-3-f45a896c" class="level3">
+<h3 class="anchored" data-anchor-id="id-3-f45a896c"><span class="header-section-number">24.5.4</span> 方差分析表</h3>
+<table class="caption-top table">
+<caption>等重复、有交互作用的随机效应下两因子试验方差分析表</caption>
+<thead>
+<tr class="header">
+<th>来源 平方</th>
+<th>和 自由</th>
+<th>度 均方</th>
+<th>和 F值</th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>因子A SSA</td>
+<td>$f_</td>
+<td>A=a-1$ $</td>
+<td>rac{SSA}{a-1}$ $F=</td>
+<td>$</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>因子B SSB</td>
+<td>$f_</td>
+<td>B=b-1$ $</td>
+<td>rac{SSB}{b-1}$ $F=</td>
+<td>$</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>交互作用AB S</td>
+<td>SAB $</td>
+<td>f_{AB}=(a-1)(b-1)$ $</td>
+<td>$ $</td>
+<td>F=$</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>误差 SSe</td>
+<td>$f_e</td>
+<td>=ab(m-1)$ $</td>
+<td>ac{SSe}{ab(m-1)}$</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>总 SST</td>
+<td>$f_T=</td>
+<td>abm-1$</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>平方和公式可按下列公式计算：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+SST=\sum\limits_{i=1}^a\sum\limits_{j=1}^b\sum\limits_{k=1}^my_{ijk}^2-\frac{y_{...}^2}{abm} \\
+SSA=\sum\limits_{i=1}^a\frac{y_{i..}^2}{bm}-\frac{y_{...}^2}{abm} \\
+SSB=\sum\limits_{j=1}^b\frac{y_{.j.}^2}{am}-\frac{y_{...}^2}{abm} \\
+SSAB=\sum\limits_{i=1}^a\sum\limits_{j=1}^b\frac{y_{ij.}^2}{m}-\frac{y_{...}^2}{abm}-SSA-SSB \\
+SSe=SST-SSA-SSB-SSAB
+\end{cases}
+\end{equation*}\]</span></p>
+</section>
+<section id="id-7-0a6f40a2" class="level3">
+<h3 class="anchored" data-anchor-id="id-7-0a6f40a2"><span class="header-section-number">24.5.5</span> 参数估计</h3>
+<p>我们此时关心方差分量的估计。</p>
+<section id="id-3-a1ed193b" class="level4">
+<h4 class="anchored" data-anchor-id="id-3-a1ed193b"><span class="header-section-number">24.5.5.1</span> 点估计</h4>
+<p>由SSA、SSB、SSAB、SSe期望的计算，可给出各方差分量的无偏点估计如下：</p>
+<p><span class="math display">\[\begin{gather*}
+\hat{\sigma^2}=MSe \\
+\hat{\sigma^2}_\tau=\frac{MSA-MSAB}{bm} \\
+\hat{\sigma^2}_\beta=\frac{MSB-MSAB}{am} \\
+\hat{\sigma^2}_{\tau\beta}=\frac{MSAB-MSe}{m}
+\end{gather*}\]</span></p>
+</section>
+</section>
+</section>
+<section id="id--483b8093" class="level2">
+<h2 class="anchored" data-anchor-id="id--483b8093"><span class="header-section-number">24.6</span> 混合模型下的两因子方差分析</h2>
+<p>仅讨论等重复情形。</p>
+<table class="caption-top table">
+<caption>等重复两因子试验数据表</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><span class="math inline">\(B_1\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(B_2\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(\cdots\)</span></th>
+<th style="text-align: left;"><span class="math inline">\(B_b\)</span></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(A_1\)</span> $y</td>
+<td style="text-align: center;"><em>{111}, y</em>{112}, , y_{11m}$ $y</td>
+<td style="text-align: center;"><em>{121}, y</em>{122}, , y_{12m}$ $</td>
+<td style="text-align: left;">$ $y</td>
+<td><em>{1b1}, y</em>{1b2}, , y_{1bm}$</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(A_2\)</span> $y</td>
+<td style="text-align: center;"><em>{211}, y</em>{212}, , y_{21m}$ $y</td>
+<td style="text-align: center;"><em>{221}, y</em>{222}, , y_{22m}$ $</td>
+<td style="text-align: left;">$ $y</td>
+<td><em>{2b1}, y</em>{2b2}, , y_{2bm}$</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\vdots\)</span> $</td>
+<td style="text-align: center;">$ $</td>
+<td style="text-align: center;">$</td>
+<td style="text-align: left;">$</td>
+<td>$</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(A_a\)</span> $y</td>
+<td style="text-align: center;"><em>{a11}, y</em>{a12}, , y_{a1m}$ $y</td>
+<td style="text-align: center;"><em>{a21}, y</em>{a22}, , y_{a2m}$ $</td>
+<td style="text-align: left;">$ $y</td>
+<td><em>{ab1}, y</em>{ab2}, , y_{abm}$</td>
+</tr>
+</tbody>
+</table>
+<p>其中<span class="math inline">\(y_{ijk}\)</span>表示在因子A的第<span class="math inline">\(i\)</span>个水平<span class="math inline">\(A_i\)</span>和因子B的第<span class="math inline">\(j\)</span>个水平<span class="math inline">\(B_j\)</span>下第<span class="math inline">\(k\)</span>次重复试验的观察值。设因子A是固定地，因子B是随机的。</p>
+<section id="id-3-4afe25ee" class="level3">
+<h3 class="anchored" data-anchor-id="id-3-4afe25ee"><span class="header-section-number">24.6.1</span> 统计模型</h3>
+<div id="model-mixed-two-way-anova-df334814" class="equation-block">
+<p>此时的统计模型为：</p>
+<p><span class="math display">\[\begin{equation*}
+\tag{24.4}
+\begin{cases}
+y_{ijk}=\mu+\tau_i+\beta_j+(\tau\beta)_{ij}+\varepsilon_{ijk} \\
+\text{诸}\varepsilon_{ijk}\quad\mathrm{i.i.d.~}N(0,\sigma^2) \\
+\text{诸}\beta_j\quad\mathrm{i.i.d.~}N(0,\sigma_\beta^2) \\
+\text{诸}(\tau\beta)_{ij}\quad\mathrm{i.i.d.~}N(0,\frac{a-1}{a}\sigma_{\tau\beta}^2) \\
+\sum\limits_{i=1}^a\tau_i=0,\quad\sum\limits_{i=1}^a(\tau\beta)_{ij}=0 \\
+\text{诸}(\tau\beta)_{ij}\text{彼此之间是不相关的} \\
+i=1,2,\dots,a,\;j=1,2,\dots,b,\;k=1,2,\dots,m
+\end{cases}
+\end{equation*}\]</span></p>
+<p>这里<span class="math inline">\((\tau\beta)_{ij}\)</span>的方差写成这样是为了让底下的计算更加简洁。</p>
+</div>
+</section>
+<section id="id-4-c2e3ee7d" class="level3">
+<h3 class="anchored" data-anchor-id="id-4-c2e3ee7d"><span class="header-section-number">24.6.2</span> 统计假设</h3>
+<p>此时需要检验如下三个零假设：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+H_{01}:\tau_1=\tau_2=\cdots=\tau_a=0, \\
+H_{02}:\sigma_\beta^2=0 \\
+H_{03}:\sigma_{\tau\beta}^2=0
+\end{cases}
+\end{equation*}\]</span></p>
+</section>
+<section id="id-3-4a385960" class="level3">
+<h3 class="anchored" data-anchor-id="id-3-4a385960"><span class="header-section-number">24.6.3</span> 方差分析</h3>
+<section id="id-4-80b81f3e" class="level4">
+<h4 class="anchored" data-anchor-id="id-4-80b81f3e"><span class="header-section-number">24.6.3.1</span> 偏差平方和的分解</h4>
+<p>公式仍然成立：</p>
+<p><span class="math display">\[\begin{equation*}
+SST=SSA+SSB+SSAB+SSe
+\end{equation*}\]</span></p>
+</section>
+<section id="id-2-91b7058d" class="level4">
+<h4 class="anchored" data-anchor-id="id-2-91b7058d"><span class="header-section-number">24.6.3.2</span> 各平方和的期望</h4>
+<p>这里直接列出各平方和的期望。</p>
+<p><span class="math display">\[\begin{gather*}
+E(MSA)=\sigma^2+m\sigma_{\tau\beta}^2+\frac{bm\sum\limits_{i=1}^a\tau_i^2}{a-1} \\
+E(MSB)=\sigma^2+am\sigma_\beta^2 \\
+E(MSAB)=\sigma^2+m\sigma_{\tau\beta}^2 \\
+E(MSe)=\sigma^2
+\end{gather*}\]</span></p>
+</section>
+<section id="id-2-7c5c1251" class="level4">
+<h4 class="anchored" data-anchor-id="id-2-7c5c1251"><span class="header-section-number">24.6.3.3</span> 统计量及其分布</h4>
+<p>统计量及其分布如下：</p>
+<p><span class="math display">\[\begin{gather*}
+F_A=\frac{MSA}{MSAB}\sim F(a-1,\;(a-1)(b-1)) \\
+F_B=\frac{MSB}{MSe}\sim F(b-1,\;ab(m-1)) \\
+F_{AB}=\frac{MSAB}{MSe}\sim F((a-1)(b-1),\;ab(m-1))
+\end{gather*}\]</span></p>
+</section>
+<section id="id-2-00e66dca" class="level4">
+<h4 class="anchored" data-anchor-id="id-2-00e66dca"><span class="header-section-number">24.6.3.4</span> 拒绝域</h4>
+<p>显著性水平为<span class="math inline">\(\alpha\)</span>时的拒绝域为：</p>
+<p><span class="math display">\[\begin{gather*}
+F_A&gt;F_{1-\alpha}(a-1,\;(a-1)(b-1)) \\
+F_B&gt;F_{1-\alpha}(b-1,\;ab(m-1)) \\
+F_{AB}&gt;F_{1-\alpha}((a-1)(b-1),\;ab(m-1))
+\end{gather*}\]</span></p>
+</section>
+</section>
+<section id="id-4-00c29c28" class="level3">
+<h3 class="anchored" data-anchor-id="id-4-00c29c28"><span class="header-section-number">24.6.4</span> 方差分析表</h3>
+<table class="caption-top table">
+<caption>等重复、有交互作用的混合模型下两因子试验方差分析表</caption>
+<thead>
+<tr class="header">
+<th>来源 平方和</th>
+<th style="text-align: right;">自由度</th>
+<th style="text-align: right;">均方和</th>
+<th style="text-align: center;">F值</th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>因子A（固定） S</td>
+<td style="text-align: right;">SA $</td>
+<td style="text-align: right;">f_A=a-1$ $</td>
+<td style="text-align: center;">$ $</td>
+<td>F=$</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>因子B（随机） S</td>
+<td style="text-align: right;">SB $</td>
+<td style="text-align: right;">f_B=b-1$ $</td>
+<td style="text-align: center;">$ $</td>
+<td>F=$</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>交互作用AB SS</td>
+<td style="text-align: right;">AB $f</td>
+<td style="text-align: right;">_{AB}=(a-1)(b-1)$ $\</td>
+<td style="text-align: center;">frac{SSAB}{(a-1)(b-1)}$ $F</td>
+<td>=$</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>误差 SSe</td>
+<td style="text-align: right;">$f_e=</td>
+<td style="text-align: right;">ab(m-1)$ $</td>
+<td style="text-align: center;">c{SSe}{ab(m-1)}$</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>总 SST</td>
+<td style="text-align: right;">$f_T=a</td>
+<td style="text-align: right;">bm-1$</td>
+<td style="text-align: center;"></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>平方和公式可按下列公式计算：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+SST=\sum\limits_{i=1}^a\sum\limits_{j=1}^b\sum\limits_{k=1}^my_{ijk}^2-\frac{y_{...}^2}{abm} \\
+SSA=\sum\limits_{i=1}^a\frac{y_{i..}^2}{bm}-\frac{y_{...}^2}{abm} \\
+SSB=\sum\limits_{j=1}^b\frac{y_{.j.}^2}{am}-\frac{y_{...}^2}{abm} \\
+SSAB=\sum\limits_{i=1}^a\sum\limits_{j=1}^b\frac{y_{ij.}^2}{m}-\frac{y_{...}^2}{abm}-SSA-SSB \\
+SSe=SST-SSA-SSB-SSAB
+\end{cases}
+\end{equation*}\]</span></p>
+</section>
+<section id="id--b01da1b8" class="level3">
+<h3 class="anchored" data-anchor-id="id--b01da1b8"><span class="header-section-number">24.6.5</span> 多重比较比较问题</h3>
+<p>如果固定因子A显著，则可使用Duncan多重比较法，但此时需要注意拒绝域应修改为如下形式：</p>
+<p><span class="math display">\[\begin{equation*}
+A:R_p&gt;r_{1-\alpha}(p,f)\sqrt{\frac{MSAB}{bm}}
+\end{equation*}\]</span></p>
+</section>
+<section id="id-8-314a0fba" class="level3">
+<h3 class="anchored" data-anchor-id="id-8-314a0fba"><span class="header-section-number">24.6.6</span> 参数估计</h3>
+<section id="id-4-6e6b5b72" class="level4">
+<h4 class="anchored" data-anchor-id="id-4-6e6b5b72"><span class="header-section-number">24.6.6.1</span> 点估计</h4>
+<p>下给出混合模型参数的点估计：</p>
+<p><span class="math display">\[\begin{gather*}
+\hat{\mu}=\bar{y}_{...},\quad\hat{\tau}_i=\bar{y}_{i..}-\bar{y}_{...},\quad i=1,2,\dots,a \\
+\hat{\sigma^2}=MSe,\quad\hat{\sigma^2}_\beta=\frac{MSB-MSe}{am},\quad\hat{\sigma^2}_{\tau\beta}=\frac{MSAB-MSe}{m}
+\end{gather*}\]</span></p>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/page-024.html" class="pagination-link" aria-label="[第 23 章]{.header-section-number} 多元统计">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title"><span class="header-section-number">第 23 章</span> 多元统计</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/page-026.html" class="pagination-link" aria-label="[第 25 章]{.header-section-number} 部分实施问题">
+        <span class="nav-page-text"><span class="chapter-title"><span class="header-section-number">第 25 章</span> 部分实施问题</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

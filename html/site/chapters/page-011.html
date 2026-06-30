@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-Hans" xml:lang="zh-Hans"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>第 10 章 Banach空间上的有界线性算子 – 你永远不知道一个强迫症能干出什么事情</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/page-012.html" rel="next">
+<link href="../chapters/page-010.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-7380dde18c49706d018cafaca6afd2e2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../sidebar.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-004.html">第 2 部分 分析学</a></li><li class="breadcrumb-item"><a href="../chapters/page-011.html"><span class="chapter-title"><span class="header-section-number">第 10 章</span> Banach空间上的有界线性算子</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="搜索" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">你永远不知道一个强迫症能干出什么事情</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="搜索"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">你永远不知道一个强迫症能干出什么事情</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-001.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">前言</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 1 部分 代数</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-002.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 1 章</span> 线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-003.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 2 章</span> 矩阵</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 2 部分 分析学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-004.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 3 章</span> 度量空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-005.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 4 章</span> 微积分</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-006.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 5 章</span> 广义积分</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-007.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 6 章</span> 级数</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-008.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 7 章</span> Fourier级数</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-009.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 8 章</span> 赋范线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-010.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 9 章</span> 常见度量空间与赋范线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-011.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title"><span class="header-section-number">第 10 章</span> Banach空间上的有界线性算子</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 3 部分 概率论</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-012.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 11 章</span> 概率测度</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-013.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 12 章</span> 概率初步</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-014.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 13 章</span> 渐进理论初步</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 4 部分 最优化</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-015.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 14 章</span> 凸集</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-016.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 15 章</span> 规划问题</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 5 部分 不等式</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-017.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 16 章</span> 不等式</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 6 部分 统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-018.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 17 章</span> 统计初步</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-019.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 18 章</span> 点估计理论</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-020.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 19 章</span> 假设检验理论</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-021.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 20 章</span> 贝叶斯统计</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-022.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 21 章</span> 统计计算方法</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-023.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 22 章</span> 线性模型</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-024.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 23 章</span> 多元统计</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-025.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 24 章</span> 方差分析</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-026.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 25 章</span> 部分实施问题</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-027.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">符号说明</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 6 部分 统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-028.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 26 章</span> 抽样调查</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-029.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 27 章</span> 时间序列分析</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-030.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 28 章</span> 机器学习</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-031.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 29 章</span> 因果推断</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 7 部分 非参数统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-032.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 30 章</span> 位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-033.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 31 章</span> 两样本位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-034.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 32 章</span> 多样本位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-035.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 33 章</span> Something else</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-036.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 34 章</span> 单调关联性</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-037.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">附录</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-038.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">后记</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">中英术语表</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目录</h2>
+   
+  <ul>
+  <li><a href="#id--e38f67cf" id="toc-id--e38f67cf" class="nav-link active" data-scroll-target="#id--e38f67cf"><span class="header-section-number">10.1</span> 有界线性算子空间</a>
+  <ul>
+  <li><a href="#id--7c543918" id="toc-id--7c543918" class="nav-link" data-scroll-target="#id--7c543918"><span class="header-section-number">10.1.1</span> 有界线性算子空间的范数</a></li>
+  <li><a href="#id--e6938bb0" id="toc-id--e6938bb0" class="nav-link" data-scroll-target="#id--e6938bb0"><span class="header-section-number">10.1.2</span> 有界线性算子空间中的依算子范数收敛</a>
+  <ul class="collapse">
+  <li><a href="#id--60f2b092" id="toc-id--60f2b092" class="nav-link" data-scroll-target="#id--60f2b092"><span class="header-section-number">10.1.2.1</span> 依算子范数收敛与一致收敛的等价性</a></li>
+  </ul></li>
+  <li><a href="#id--8e3c2656" id="toc-id--8e3c2656" class="nav-link" data-scroll-target="#id--8e3c2656"><span class="header-section-number">10.1.3</span> 有界线性算子空间中的强收敛</a></li>
+  <li><a href="#id--c795f3d8" id="toc-id--c795f3d8" class="nav-link" data-scroll-target="#id--c795f3d8"><span class="header-section-number">10.1.4</span> 有界线性算子空间的完备性</a></li>
+  <li><a href="#id--933362f3" id="toc-id--933362f3" class="nav-link" data-scroll-target="#id--933362f3"><span class="header-section-number">10.1.5</span> 有界线性算子的乘法</a>
+  <ul class="collapse">
+  <li><a href="#id--bfa72cc1" id="toc-id--bfa72cc1" class="nav-link" data-scroll-target="#id--bfa72cc1"><span class="header-section-number">10.1.5.1</span> 算子乘法的性质</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#banach-7bdff1e0" id="toc-banach-7bdff1e0" class="nav-link" data-scroll-target="#banach-7bdff1e0"><span class="header-section-number">10.2</span> Banach空间上有界线性算子的四大定理</a>
+  <ul>
+  <li><a href="#id--aed928a1" id="toc-id--aed928a1" class="nav-link" data-scroll-target="#id--aed928a1"><span class="header-section-number">10.2.1</span> 开映射定理</a></li>
+  <li><a href="#id--a1a3c395" id="toc-id--a1a3c395" class="nav-link" data-scroll-target="#id--a1a3c395"><span class="header-section-number">10.2.2</span> 逆算子定理</a>
+  <ul class="collapse">
+  <li><a href="#id--6b7dc602" id="toc-id--6b7dc602" class="nav-link" data-scroll-target="#id--6b7dc602"><span class="header-section-number">10.2.2.1</span> 等价范数与拓扑同构</a></li>
+  </ul></li>
+  <li><a href="#id--bd095668" id="toc-id--bd095668" class="nav-link" data-scroll-target="#id--bd095668"><span class="header-section-number">10.2.3</span> 闭图像定理</a>
+  <ul class="collapse">
+  <li><a href="#id--1860bba0" id="toc-id--1860bba0" class="nav-link" data-scroll-target="#id--1860bba0"><span class="header-section-number">10.2.3.1</span> 图像的定义</a></li>
+  <li><a href="#id--6743b60a" id="toc-id--6743b60a" class="nav-link" data-scroll-target="#id--6743b60a"><span class="header-section-number">10.2.3.2</span> 闭算子的定义</a></li>
+  <li><a href="#id--b1556aba" id="toc-id--b1556aba" class="nav-link" data-scroll-target="#id--b1556aba"><span class="header-section-number">10.2.3.3</span> 有界线性算子何时是闭算子</a></li>
+  <li><a href="#id--a7a3bb37" id="toc-id--a7a3bb37" class="nav-link" data-scroll-target="#id--a7a3bb37"><span class="header-section-number">10.2.3.4</span> 闭的线性算子何时有界</a></li>
+  </ul></li>
+  <li><a href="#id--ce6e7b19" id="toc-id--ce6e7b19" class="nav-link" data-scroll-target="#id--ce6e7b19"><span class="header-section-number">10.2.4</span> 共鸣定理</a></li>
+  </ul></li>
+  <li><a href="#id--ac63ad3c" id="toc-id--ac63ad3c" class="nav-link" data-scroll-target="#id--ac63ad3c"><span class="header-section-number">10.3</span> 有界线性泛函</a>
+  <ul>
+  <li><a href="#id--9aaf8767" id="toc-id--9aaf8767" class="nav-link" data-scroll-target="#id--9aaf8767"><span class="header-section-number">10.3.1</span> 有界线性泛函的延拓</a></li>
+  </ul></li>
+  <li><a href="#id--59c59ee8" id="toc-id--59c59ee8" class="nav-link" data-scroll-target="#id--59c59ee8"><span class="header-section-number">10.4</span> 对偶空间与伴随算子</a>
+  <ul>
+  <li><a href="#id--2a2f24f2" id="toc-id--2a2f24f2" class="nav-link" data-scroll-target="#id--2a2f24f2"><span class="header-section-number">10.4.1</span> 对偶空间</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-004.html">第 2 部分 分析学</a></li><li class="breadcrumb-item"><a href="../chapters/page-011.html"><span class="chapter-title"><span class="header-section-number">第 10 章</span> Banach空间上的有界线性算子</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="banach-59cdfd18" class="quarto-section-identifier"><span class="chapter-title"><span class="header-section-number">第 10 章</span> Banach空间上的有界线性算子</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="id--e38f67cf" class="level2">
+<h2 class="anchored" data-anchor-id="id--e38f67cf"><span class="header-section-number">10.1</span> 有界线性算子空间</h2>
+<section id="id--7c543918" class="level3">
+<h3 class="anchored" data-anchor-id="id--7c543918"><span class="header-section-number">10.1.1</span> 有界线性算子空间的范数</h3>
+<div id="theorem-10-1" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.1</strong>. 设<span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>都是赋范线性空间，用<span class="math inline">\(\mathscr{B}(X,Y)\)</span>表示<span class="math inline">\(X\)</span>到<span class="math inline">\(Y\)</span>上的所有有界线性算子构成的空间<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>。在<span class="math inline">\(\mathscr{B}(X,Y)\)</span>中定义线性运算如下：</p>
+<p><span class="math display">\[\begin{gather*}
+(T_1+T_2)x=T_1x+T_2x \\
+(\alpha T)x=\alpha Tx
+
+\end{gather*}\]</span></p>
+<p>其中<span class="math inline">\(T,T_1,T_2\in\mathscr{B}(X,Y)\)</span>，<span class="math inline">\(\alpha\)</span>是一个数。<span class="math inline">\(\mathscr{B}(X,Y)\)</span>在该线性运算下构成一个线性空间。定义<span class="math inline">\(\mathscr{B}(X,Y)\)</span>中的范数如下：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;T\in\mathscr{B}(X,Y),\;||T||=\sup_{\{x\in X:x\ne\mathbf{0}\}}\frac{||Tx||}{||x||}
+
+\end{equation*}\]</span></p>
+<p>则<span class="math inline">\(\mathscr{B}(X,Y)\)</span>构成一个赋范线性空间。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)非负性和(2)数乘是显然的。</p>
+<p>(3)三角不等式：</p>
+<p><span class="math display">\[\begin{align*}
+||T_1+T_2||
+&amp;=\sup_{\{x\in X:x\ne\mathbf{0}\}}\frac{||(T_1+T_2)x||}{||x||} \\
+&amp;\leqslant\sup_{\{x\in X:x\ne\mathbf{0}\}}\frac{||T_1x||+||T_2x||}{||x||} \\
+&amp;\leqslant\sup_{\{x\in X:x\ne\mathbf{0}\}}\frac{||T_1x||}{||x||}+
+\sup_{\{x\in X:x\ne\mathbf{0}\}}\frac{||T_2x||}{||x||} \\
+&amp;=||T_1||+||T_2||  
+
+\end{align*}\]</span></p>
+<p>◻</p>
+</div>
+<p>如上定义的范数公式有如下性质：</p>
+<div id="theorem-10-2" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.2</strong>. (1)<span class="math inline">\(\forall\;x\in X,\;||Tx||\leqslant||T||\;||x||\)</span>。 (2)<span class="math inline">\(||T||=\underset{\{x\in X:||x||\leqslant1\}}{\sup}||Tx||=\underset{\{x\in X:||x||=1\}}{\sup}||Tx||\)</span>。</p>
+</div>
+<p>证明是显然的，(1)中只需再验证<span class="math inline">\(X\)</span>中的零元，(2)可由范数定义中的数乘与线性算子的数乘直接推出。</p>
+</section>
+<section id="id--e6938bb0" class="level3">
+<h3 class="anchored" data-anchor-id="id--e6938bb0"><span class="header-section-number">10.1.2</span> 有界线性算子空间中的依算子范数收敛</h3>
+<div id="definition-10-1" class="definition theorem-block env-definition">
+<p><strong>Definition 10.1</strong>. 设<span class="math inline">\(\{T_n\}\in\mathscr{B}\)</span>。若<span class="math inline">\(\{T_n\}\)</span>依<span class="math inline">\(\mathscr{B}\)</span>中的范数收敛于<span class="math inline">\(T\in\mathscr{B}\)</span>，即：</p>
+<p><span class="math display">\[\begin{equation*}
+\lim_{n\to+\infty}||T_n-T||=0
+
+\end{equation*}\]</span></p>
+<p>则称<span class="math inline">\(\{T_n\}\)</span>依算子范数收敛于<span class="math inline">\(T\)</span>或<span class="math inline">\(\{T_n\}\)</span>依一致算子拓扑收敛于<span class="math inline">\(T\)</span>。</p>
+</div>
+<section id="id--60f2b092" class="level4">
+<h4 class="anchored" data-anchor-id="id--60f2b092"><span class="header-section-number">10.1.2.1</span> 依算子范数收敛与一致收敛的等价性</h4>
+<div id="theorem-10-3" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.3</strong>. 设<span class="math inline">\(\{T_n\}\in\mathscr{B}(X,Y)\)</span>。<span class="math inline">\(\{T_n\}\)</span>依一致算子拓扑收敛于<span class="math inline">\(T\in\mathscr{B}(X,Y)\)</span>的充分必要条件为<span class="math inline">\(\{T_n\}\)</span>在<span class="math inline">\(X\)</span>中的任意有界集上一致收敛于<span class="math inline">\(T\)</span>。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(1)必要性：任取<span class="math inline">\(A\subset X\)</span>为有界集。由<span class="math inline">\(A\)</span>的有界性：</p>
+<p><span class="math display">\[\begin{equation*}
+\exists\;K&gt;0,\;\forall\;x\in A,\;||x||\leqslant K
+
+\end{equation*}\]</span></p>
+<p>因此：</p>
+<p><span class="math display">\[\begin{equation*}
+||T_nx-Tx||=||(T_n-T)x||\leqslant||T_n-T||\;||x||\leqslant K||T_n-T||
+
+\end{equation*}\]</span></p>
+<p>由<span class="math inline">\(\lim\limits_{n\to+\infty}||T_n-T||=0\)</span>可得：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;||T_n-T||&lt;\frac{\varepsilon}{K}
+
+\end{equation*}\]</span></p>
+<p>于是：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;\forall\;x\in A,\;||T_nx-Tx||&lt;\varepsilon
+
+\end{equation*}\]</span></p>
+<p>(2)充分性：在<span class="math inline">\(X\)</span>中取单位球面<span class="math inline">\(S=\{x\in X:||x||=1\}\)</span>。显然<span class="math inline">\(S\)</span>是一个有界集，由一致收敛可得：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;\forall\;x\in X,\;||T_nx-Tx||&lt;\varepsilon
+
+\end{equation*}\]</span></p>
+<p>于是：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;||T_n-T||=\sup_{x\in X,||x||=1}||T_nx-Tx||\leqslant\varepsilon
+
+\end{equation*}\]</span></p>
+<p>即<span class="math inline">\(\{T_n\}\)</span>依算子范数收敛到<span class="math inline">\(T\)</span>。&nbsp;◻</p>
+</div>
+<p>由以上定理，<span class="math inline">\(\{T_n\}\)</span>依算子收敛于<span class="math inline">\(T\)</span>又称为<span class="math inline">\(\{T_n\}\)</span>依一致算子拓扑收敛于<span class="math inline">\(T\)</span>。</p>
+</section>
+</section>
+<section id="id--8e3c2656" class="level3">
+<h3 class="anchored" data-anchor-id="id--8e3c2656"><span class="header-section-number">10.1.3</span> 有界线性算子空间中的强收敛</h3>
+<div id="definition-10-2" class="definition theorem-block env-definition">
+<p><strong>Definition 10.2</strong>. 设<span class="math inline">\(\{T_n\}\in\mathscr{B}(X,Y)\)</span>。若：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;x\in X,\;\lim_{n\to+\infty}||T_nx-Tx||=0
+
+\end{equation*}\]</span></p>
+<p>则称<span class="math inline">\(\{T_n\}\)</span><a href="../chapters/page-058.html#term-StrongConvergence" class="term" title="strong convergence">强收敛<span class="term-english">（strong convergence）</span></a>到<span class="math inline">\(T\)</span>或依强算子拓扑收敛于<span class="math inline">\(T\)</span>。</p>
+</div>
+</section>
+<section id="id--c795f3d8" class="level3">
+<h3 class="anchored" data-anchor-id="id--c795f3d8"><span class="header-section-number">10.1.4</span> 有界线性算子空间的完备性</h3>
+<div id="theorem-10-4" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.4</strong>. 若<span class="math inline">\(Y\)</span>是Banach空间，则<span class="math inline">\(\mathscr{B}(X,Y)\)</span>也是Banach空间。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>设<span class="math inline">\(\{T_n\}\)</span>是<span class="math inline">\(\mathscr{B}(X,Y)\)</span>中的一个Cauchy点列，那么：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m&gt;N,\;m&gt;n,\;||T_m-T_n||&lt;\varepsilon
+
+\end{equation*}\]</span></p>
+<p>此时有：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;x\in X,\;||T_mx-T_nx||\leqslant||T_m-T_n||\;||x||&lt;\varepsilon||x||
+
+\end{equation*}\]</span></p>
+<p>因此<span class="math inline">\(\{T_nx\}\)</span>（<span class="math inline">\(x\)</span>为定值）是<span class="math inline">\(Y\)</span>中的Cauchy点列。因为<span class="math inline">\(Y\)</span>完备，所以<span class="math inline">\(\{T_nx\}\)</span>在<span class="math inline">\(Y\)</span>中收敛于一个元素，记为<span class="math inline">\(y\)</span>，即：</p>
+<p><span class="math display">\[\begin{equation*}
+\lim_{n\to+\infty}T_nx=y
+
+\end{equation*}\]</span></p>
+<p>定义算子<span class="math inline">\(T:Tx=y\)</span>，即：</p>
+<p><span class="math display">\[\begin{equation*}
+Tx=\lim_{n\to+\infty}T_nx=y
+
+\end{equation*}\]</span></p>
+<p>下证明<span class="math inline">\(T\)</span>是定义在<span class="math inline">\(X\)</span>上而值域包含在<span class="math inline">\(Y\)</span>中的有界线性算子，且是<span class="math inline">\(\{T_n\}\)</span>依一致算子拓扑收敛的极限。其中<span class="math inline">\(T\)</span>定义域与值域是显然的。</p>
+<p>设<span class="math inline">\(x_1,x_2\in X\)</span>，可得（第一行到第二行利用了<span class="math inline">\(T_n\)</span>的可加性，第二行到第三行利用了范数极限的可加运算）：</p>
+<p><span class="math display">\[\begin{align*}
+T(x_1+x_2)&amp;=\lim_{n\to+\infty}T_n(x_1+x_2) \\
+&amp;=\lim_{n\to+\infty}(T_nx_1+T_nx_2) \\
+&amp;=\lim_{n\to+\infty}T_nx_1+\lim_{n\to+\infty}T_nx_2 \\
+&amp;=Tx_1+Tx_2
+
+\end{align*}\]</span></p>
+<p>可加性得证。设<span class="math inline">\(x_3\in X\)</span>，<span class="math inline">\(\alpha\)</span>是一个数，可得（第二步到第三步利用了<span class="math inline">\(T_n\)</span>的齐次性，第三步到第四步利用了范数极限的数乘运算）：</p>
+<p><span class="math display">\[\begin{equation*}
+T(\alpha x_3)=\lim_{n\to+\infty}T_n(\alpha x_3)=\lim_{n\to+\infty}\alpha T_nx_3=\alpha\lim_{n\to+\infty}T_nx_3=\alpha Tx_3
+
+\end{equation*}\]</span></p>
+<p>齐次性得证。综上，<span class="math inline">\(T\)</span>是线性算子。</p>
+<p>注意到：</p>
+<p><span class="math display">\[\begin{equation*}
+|\;||T_n||-||T_m||\;|\leqslant||T_n-T_m||\to0
+
+\end{equation*}\]</span></p>
+<p>所以<span class="math inline">\(\{||T_n||\}\)</span>是Cauchy序列。因此<span class="math inline">\(\{||T_n||\}\)</span>有界，即：</p>
+<p><span class="math display">\[\begin{equation*}
+\exists\;M&gt;0,\;\forall\;n\in\mathbb{N}^+,\;||T_n||\leqslant M
+
+\end{equation*}\]</span></p>
+<p>由范数的连续性：</p>
+<p><span class="math display">\[\begin{equation*}
+||Tx||=||\lim_{n\to+\infty}T_nx||\leqslant\lim_{n\to+\infty}||T_n||\;||x||\leqslant M||x||
+
+\end{equation*}\]</span></p>
+<p>有界性得证。</p>
+<p>因为：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m&gt;N,\;m&gt;n,\;\forall\;x\in X,\;||T_mx-T_nx||&lt;\varepsilon||x||
+
+\end{equation*}\]</span></p>
+<p>在上式中取<span class="math inline">\(m\to+\infty\)</span>，可得（第一步到第二步利用范数的连续性，第三步到第四步利用<span class="math inline">\(\mathscr{B}(X,Y)\)</span>中线性运算的定义，注意到此时已经证得<span class="math inline">\(T\in\mathscr{B}(X,Y)\)</span>）：</p>
+<p><span class="math display">\[\begin{align*}
+\lim_{m\to+\infty}||T_mx-T_nx||=||\lim_{m\to+\infty}T_mx-T_nx||=||Tx-T_nx||=||(T-T_n)x||\leqslant\varepsilon\;||x||
+
+\end{align*}\]</span></p>
+<p>此时即有：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;x\in X,\;\frac{||(T-T_n)x||}{||x||}\leqslant\varepsilon
+
+\end{equation*}\]</span></p>
+<p>也即<span class="math inline">\(||T-T_n||\to0\)</span>。依一致算子拓扑收敛得证。</p>
+<p>综上，<span class="math inline">\(\mathscr{B}(X,Y)\)</span>是Banach空间。&nbsp;◻</p>
+</div>
+</section>
+<section id="id--933362f3" class="level3">
+<h3 class="anchored" data-anchor-id="id--933362f3"><span class="header-section-number">10.1.5</span> 有界线性算子的乘法</h3>
+<div id="definition-10-3" class="definition theorem-block env-definition">
+<p><strong>Definition 10.3</strong>. 设<span class="math inline">\(X,Y,Z\)</span>都是赋范线性空间。对<span class="math inline">\(T_1\in\mathscr{B}(X,Y)\)</span>，<span class="math inline">\(T_2\in\mathscr{B}(Y,Z)\)</span>，定义<span class="math inline">\(T_1\)</span>与<span class="math inline">\(T_2\)</span>的<a href="../chapters/page-055.html#term-ProductOfOperators" class="term" title="product of operators">算子乘积<span class="term-english">（product of operators）</span></a><span class="math inline">\(T_2T_1\)</span>如下：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;x\in X,\;(T_2T_1)x=T_2(T_1x)
+
+\end{equation*}\]</span></p>
+<p><span class="math inline">\(T^n\)</span>表示<span class="math inline">\(n\)</span>个<span class="math inline">\(T\)</span>相乘，<span class="math inline">\(T^0\)</span>表示单位算子<span class="math inline">\(I\)</span>。</p>
+</div>
+<section id="id--bfa72cc1" class="level4">
+<h4 class="anchored" data-anchor-id="id--bfa72cc1"><span class="header-section-number">10.1.5.1</span> 算子乘法的性质</h4>
+<div id="property-10-1-1" class="property theorem-block env-property">
+<p><strong>Property 10.1.1</strong>. 设<span class="math inline">\(X,Y,Z,K\)</span>都是赋范线性空间。</p>
+<ol type="1">
+<li><p>结合律：</p>
+<p><span class="math display">\[\begin{equation*}
+                (T_3T_2)T_1=T_3(T_2T_1),\;(\alpha T_2)T_1=\alpha T_2T_1,\;
+                T_2(\alpha T_1)=\alpha(T_2T_1)
+
+    \end{equation*}\]</span></p>
+<p>这里<span class="math inline">\(T_1\in\mathscr{B}(X,Y),\;T_2\in\mathscr{B}_(Y,Z),\;T_3\in\mathscr{B}(Z,K)\)</span>。</p></li>
+<li><p>分配律：</p>
+<p><span class="math display">\[\begin{equation*}
+                T_3(T_1+T_2)=T_3T_1+T_3T_2,\;(T_2+T_3)T_1=T_2T_1+T_3T_1
+
+    \end{equation*}\]</span></p>
+<p>第一个式子中<span class="math inline">\(T_1,T_2\in\mathscr{B}(X,Y),\;T_3\in\mathscr{B}(Y,Z)\)</span>。<br>
+第二个式子中<span class="math inline">\(T_3,T_2\in\mathscr{B}(Y,Z),\;T_1\in\mathscr{B}(X,Y)\)</span>。</p></li>
+<li><p>当<span class="math inline">\(T_1\in\mathscr{B}(X,Y),\;T_2\in\mathscr{B}(Y,Z)\)</span>时，<span class="math inline">\(T_2T_1\in\mathscr{B}(X,Z)\)</span>，且有<span class="math inline">\(||T_2T_1||\leqslant||T_2||\;||T_1||\)</span>。</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>只证(3)。(1)(2)证了没多大意思。对任意的<span class="math inline">\(x\in X\)</span>，有：</p>
+<p><span class="math display">\[\begin{equation*}
+||T_2T_1x||=||T_2(T_1)x||\leqslant||T_2||\;||T_1x||\leqslant||T_2||\;||T_1||\;||x||
+
+\end{equation*}\]</span></p>
+<p>即：</p>
+<p><span class="math display">\[\begin{equation*}
+\frac{||T_2T_1x||}{||x||}\leqslant||T_2||\;||T_1||
+
+\end{equation*}\]</span></p>
+<p>由上确界的不等式性可得：</p>
+<p><span class="math display">\[\begin{equation*}
+||T_2T_1||\leqslant||T_2||\;||T_1||
+
+\end{equation*}\]</span></p>
+<p>◻</p>
+</div>
+</section>
+</section>
+</section>
+<section id="banach-7bdff1e0" class="level2">
+<h2 class="anchored" data-anchor-id="banach-7bdff1e0"><span class="header-section-number">10.2</span> Banach空间上有界线性算子的四大定理</h2>
+<section id="id--aed928a1" class="level3">
+<h3 class="anchored" data-anchor-id="id--aed928a1"><span class="header-section-number">10.2.1</span> 开映射定理</h3>
+<div id="definition-10-4" class="definition theorem-block env-definition">
+<p><strong>Definition 10.4</strong>. 设<span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>都是赋范线性空间。如果映射<span class="math inline">\(T\)</span>把<span class="math inline">\(X\)</span>中的任何开集映成<span class="math inline">\(Y\)</span>中的开集，则称<span class="math inline">\(T\)</span>为<a href="../chapters/page-054.html#term-OpenMap" class="term" title="open mapping">开映射<span class="term-english">（open mapping）</span></a>。</p>
+</div>
+<div id="theorem-10-5" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.5</strong>. <strong>（开映射定理）</strong></p>
+<p>设<span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>都是Banach空间。如果有界线性算子<span class="math inline">\(T\)</span>把<span class="math inline">\(X\)</span>映成<span class="math inline">\(Y\)</span>中的某个第二型集<span class="math inline">\(F\)</span>，则：</p>
+<ol type="1">
+<li><p><span class="math inline">\(\exists\;K&gt;0,\;\forall\;y\in Y,\;\exists\;x\in X,\;Tx=y,\;||x||\leqslant K||Tx||\)</span>。</p></li>
+<li><p><span class="math inline">\(T\)</span>是开映射。</p></li>
+</ol>
+</div>
+</section>
+<section id="id--a1a3c395" class="level3">
+<h3 class="anchored" data-anchor-id="id--a1a3c395"><span class="header-section-number">10.2.2</span> 逆算子定理</h3>
+<div id="theorem-10-6" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.6</strong>. 设<span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>都是Banach空间。如果有界线性算子<span class="math inline">\(T\)</span>把<span class="math inline">\(X\)</span>映成<span class="math inline">\(Y\)</span>中的某个第二型集<span class="math inline">\(F\)</span>且<span class="math inline">\(T\)</span>是单射，则<span class="math inline">\(T\)</span>存在有界逆算子。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>由开映射定理，<span class="math inline">\(T\)</span>是满射，所以<span class="math inline">\(T\)</span>是双射，因此<span class="math inline">\(T^{-1}\)</span>存在。任取<span class="math inline">\(Y\)</span>中一个有界集，记为<span class="math inline">\(E\)</span>，由开映射定理：</p>
+<p><span class="math display">\[\begin{equation*}
+\exists\;K&gt;0,\;\forall\;y\in E,\;||T^{-1}y||\leqslant K||y||
+
+\end{equation*}\]</span></p>
+<p>因为<span class="math inline">\(E\)</span>有界，所以<span class="math inline">\(\exists\;M&gt;0,\;||y||\leqslant M\)</span>，于是<span class="math inline">\(\forall\;y\in E,\;||T^{-1}y||\leqslant KM\)</span>，即<span class="math inline">\(T^{-1}E\)</span>是有界集。由<span class="math inline">\(E\)</span>的任意性，<span class="math inline">\(T^{-1}\)</span>将任意有界集映成有界集，故<span class="math inline">\(T^{-1}\)</span>有界。&nbsp;◻</p>
+</div>
+<section id="id--6b7dc602" class="level4">
+<h4 class="anchored" data-anchor-id="id--6b7dc602"><span class="header-section-number">10.2.2.1</span> 等价范数与拓扑同构</h4>
+<div id="theorem-10-7" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.7</strong>. <span class="math inline">\(X\)</span>是线性空间，<span class="math inline">\(||\cdot||_1,\;||\cdot||_2\)</span>是定义在<span class="math inline">\(X\)</span>上的两个范数，<span class="math inline">\(X\)</span>按照这两个范数均为赋范线性空间。<span class="math inline">\((X,||\cdot||_1)\)</span>与<span class="math inline">\((X,||\cdot||_2)\)</span>拓扑同构的充分必要条件为<span class="math inline">\(||\cdot||_1,\;||\cdot||_2\)</span>等价。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>设<span class="math inline">\(T\)</span>为<span class="math inline">\(X\)</span>上的单位算子，显然<span class="math inline">\(T\)</span>是线性算子。</p>
+<p>必要性：因为<span class="math inline">\((X,||\cdot||_1)\)</span>与<span class="math inline">\((X,||\cdot||_2)\)</span>拓扑同构，所以<span class="math inline">\(T\)</span>连续，进而<span class="math inline">\(T\)</span>有界，即<span class="math inline">\(\exists\;K_2&gt;0,\;\forall\;x\in X,\;||Tx||\leqslant K_2||x||\)</span>，也即<span class="math inline">\(||x||_2\leqslant K_2||x||_1\)</span>。因为<span class="math inline">\(T^{-1}\)</span>连续，所以<span class="math inline">\(T^{-1}\)</span>有界，即<span class="math inline">\(\exists\;M&gt;0,\;\forall\;x\in X,\;||T^{-1}x||\leqslant M||x||\)</span>，即<span class="math inline">\(||x||_1\leqslant M||x||_2\)</span>，令<span class="math inline">\(K_1=\frac{1}{M}\)</span>即可得到<span class="math inline">\(K_1||x||_1\leqslant||x||_2\)</span>。综上，<span class="math inline">\(\exists\;K_1,K_2&gt;0,\;\forall\;x\in X,\;K_1||x||_1\leqslant||x_2||\leqslant||x||_1\)</span>，即范数<span class="math inline">\(||\cdot||_1,\;||\cdot||_2\)</span>等价。</p>
+<p>充分性：任取<span class="math inline">\((X,||\cdot||_1)\)</span>中的一个有界集<span class="math inline">\(E\)</span>，有<span class="math inline">\(\exists\;M&gt;0,\;\forall\;x\in E,\;||x||_1&lt;M\)</span>。因为范数<span class="math inline">\(||\cdot||_1,\;||\cdot||_2\)</span>等价，所以<span class="math inline">\(\exists\;K_2&gt;0,\;\forall\;x\in(X,||\cdot||_1),\;||Tx||=||x||_2\leqslant K_2||x||_1=K_2M\)</span>，即<span class="math inline">\(T\)</span>是有界线性算子，所以<span class="math inline">\(T\)</span>连续。同理，<span class="math inline">\(T^{-1}\)</span>也是连续有界线性算子。综上，<span class="math inline">\((X,||\cdot||_1)\)</span>与<span class="math inline">\((X,||\cdot||_2)\)</span>拓扑同构。&nbsp;◻</p>
+</div>
+<div id="corollary-10-1" class="corollary theorem-block env-corollary">
+<p><strong>Corollary 10.1</strong>. <span class="math inline">\((X,||\cdot||_1)\)</span>与<span class="math inline">\((X,||\cdot||_2)\)</span>都是Banach空间。若：</p>
+<p><span class="math display">\[\begin{equation*}
+\exists\;K&gt;0,\;\forall\;x\in X,\;||x||_2\leqslant K||x||_1
+
+\end{equation*}\]</span></p>
+<p>则<span class="math inline">\(||\cdot||_1,\;||\cdot||_2\)</span>等价，<span class="math inline">\((X,||\cdot||_1)\)</span>与<span class="math inline">\((X,||\cdot||_2)\)</span>拓扑同构。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>设<span class="math inline">\(T\)</span>为<span class="math inline">\(X\)</span>上的单位算子，显然<span class="math inline">\(T\)</span>是双射并且是线性算子。由条件中的不等式可知<span class="math inline">\(T\)</span>有界，因此<span class="math inline">\(T\)</span>连续。<span class="math inline">\((X,||\cdot||_2)\)</span>是Banach空间，所以<span class="math inline">\((X,||\cdot||_2)\)</span>是第二型集。因为<span class="math inline">\(T\)</span>把<span class="math inline">\((X,||\cdot||_1)\)</span>映成第二型集<span class="math inline">\((X,||\cdot||_2)\)</span>且<span class="math inline">\(T\)</span>是单射，由逆算子定理，<span class="math inline">\(T^{-1}\)</span>存在且有界。易证<span class="math inline">\(T^{-1}\)</span>也是线性算子，因此<span class="math inline">\(T^{-1}\)</span>连续。综上，<span class="math inline">\((X,||\cdot||_1)\)</span>与<span class="math inline">\((X,||\cdot||_2)\)</span>拓扑同构，从而<span class="math inline">\(||\cdot||_1,\;||\cdot||_2\)</span>等价。&nbsp;◻</p>
+</div>
+</section>
+</section>
+<section id="id--bd095668" class="level3">
+<h3 class="anchored" data-anchor-id="id--bd095668"><span class="header-section-number">10.2.3</span> 闭图像定理</h3>
+<p>若<span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>都是赋范线性空间，则在下列讨论中，<span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>的直和<span class="math inline">\(X\oplus Y\)</span>中的范数均定义为：<span class="math inline">\(||(x,y)||=||x||+||y||,\;(x,y)\in X\oplus Y\)</span>。</p>
+<section id="id--1860bba0" class="level4">
+<h4 class="anchored" data-anchor-id="id--1860bba0"><span class="header-section-number">10.2.3.1</span> 图像的定义</h4>
+<div id="definition-10-5" class="definition theorem-block env-definition">
+<p><strong>Definition 10.5</strong>. <span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>都是线性空间，<span class="math inline">\(T\)</span>是定义在<span class="math inline">\(X\)</span>的某个子空间<span class="math inline">\(E\)</span>上且值域包含在<span class="math inline">\(Y\)</span>中的线性算子。<span class="math inline">\(X\oplus Y\)</span>中所有形如<span class="math inline">\((x,Tx),\;x\in E\)</span>的元素构成的集合<span class="math inline">\(\{(x,Tx)\}\)</span>称为<span class="math inline">\(T\)</span>的<a href="../chapters/page-046.html#term-Graph" class="term" title="graph">图像<span class="term-english">（graph）</span></a>，记为<span class="math inline">\(G_T\)</span>。</p>
+</div>
+</section>
+<section id="id--6743b60a" class="level4">
+<h4 class="anchored" data-anchor-id="id--6743b60a"><span class="header-section-number">10.2.3.2</span> 闭算子的定义</h4>
+<div id="definition-10-6" class="definition theorem-block env-definition">
+<p><strong>Definition 10.6</strong>. <span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>都是线性空间，<span class="math inline">\(T\)</span>是定义在<span class="math inline">\(X\)</span>的某个子空间<span class="math inline">\(E\)</span>上且值域包含在<span class="math inline">\(Y\)</span>中的线性算子。如果<span class="math inline">\(T\)</span>的图像<span class="math inline">\(G_T\)</span>是<span class="math inline">\(X\oplus Y\)</span>中的闭子空间，则称<span class="math inline">\(T\)</span>为<a href="../chapters/page-042.html#term-ClosedOperator" class="term" title="closed operator">闭算子<span class="term-english">（closed operator）</span></a>。</p>
+</div>
+<div id="theorem-10-8" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.8</strong>. <span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>都是赋范线性空间，<span class="math inline">\(T\)</span>是定义在<span class="math inline">\(X\)</span>的某个子空间<span class="math inline">\(E\)</span>上且值域包含在<span class="math inline">\(Y\)</span>中的线性算子。<span class="math inline">\(T\)</span>为闭算子的充分必要条件为：对任意的<span class="math inline">\(\{x_n\}\subset E\)</span>，若<span class="math inline">\(\{x_n\}\to x\in X,\;\{Tx_n\}\to y\in Y\)</span>，则<span class="math inline">\((x,y)\in G_T\)</span>。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>充分性：任取<span class="math inline">\((x,y)\in\overline{G_T}\)</span>，则：</p>
+<p><span class="math display">\[\begin{equation*}
+\exists\;\{x_n\}\in E,\;\{(x_n,Tx_n)\}\to(x,y)
+
+\end{equation*}\]</span></p>
+<p>由<span class="math inline">\(X\oplus Y\)</span>中范数的定义可得到：</p>
+<p><span class="math display">\[\begin{equation*}
+||(x,y)-(x_n,Tx_n)||=||(x-x_n,y-Tx_n)||=||x-x_n||+||y-Tx_n||\to0
+
+\end{equation*}\]</span></p>
+<p>所以<span class="math inline">\(\{x_n\}\to x,\;\{Tx_n\}\to y\)</span>，<span class="math inline">\((x,y)\in G_T\)</span>。由<span class="math inline">\((x,y)\)</span>的任意性，<span class="math inline">\(T\)</span>是闭算子。</p>
+<p>必要性：对任意的<span class="math inline">\(\{x_n\}\subset E\)</span>，若<span class="math inline">\(\{x_n\}\to x\in X,\;\{Tx_n\}\to y\in Y\)</span>，就有：</p>
+<p><span class="math display">\[\begin{equation*}
+||(x,y)-(x_n,Tx_n)||=||(x-x_n,y-Tx_n)||=||x-x_n||+||y-Tx_n||\to0
+
+\end{equation*}\]</span></p>
+<p>所以<span class="math inline">\(\{(x_n,Tx_n)\}\to(x,y)\)</span>。因为<span class="math inline">\(T\)</span>是闭算子，所以<span class="math inline">\((x,y)\in G_T\)</span>。&nbsp;◻</p>
+</div>
+</section>
+<section id="id--b1556aba" class="level4">
+<h4 class="anchored" data-anchor-id="id--b1556aba"><span class="header-section-number">10.2.3.3</span> 有界线性算子何时是闭算子</h4>
+<div id="theorem-10-9" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.9</strong>. <span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>都是赋范线性空间，<span class="math inline">\(T\)</span>是定义在<span class="math inline">\(X\)</span>的某个子空间<span class="math inline">\(E\)</span>上且值域包含在<span class="math inline">\(Y\)</span>中的有界线性算子。<span class="math inline">\(T\)</span>是闭算子的充分必要条件为<span class="math inline">\(E\)</span>是<span class="math inline">\(X\)</span>的闭子空间。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>充分性：任取<span class="math inline">\((x,y)\in\overline{G_T}\)</span>，则<span class="math inline">\(\exists\;\{(x_n,y_n)\}\in G_T\)</span>并且<span class="math inline">\(\{(x_n,y_n)\}\to (x,y)\)</span>。由<span class="math inline">\(X\oplus Y\)</span>中范数的定义可得到<span class="math inline">\(\{x_n\}\to x,\;\{Tx_n\}\to y\)</span>。由于<span class="math inline">\(E\)</span>是<span class="math inline">\(X\)</span>的闭子空间，所以<span class="math inline">\(x\in E\)</span>。因为<span class="math inline">\(T\)</span>是有界线性算子，所以<span class="math inline">\(T\)</span>是连续的，于是<span class="math inline">\(Tx=y\)</span>，<span class="math inline">\((x,y)\in G_T\)</span>。由<span class="math inline">\((x,y)\)</span>的任意性，<span class="math inline">\(T\)</span>是闭算子。</p>
+<p>必要性：任取<span class="math inline">\(x\in\overline{E}\)</span>，则<span class="math inline">\(\exists\;\{x_n\}\in E\)</span>并且<span class="math inline">\(\{x_n\}\to x\)</span>。因为<span class="math inline">\(T\)</span>是有界线性算子，所以<span class="math inline">\(T\)</span>连续，所以<span class="math inline">\(\{Tx_n\}\to Tx\)</span>。由<span class="math inline">\(X\oplus Y\)</span>中范数的定义，<span class="math inline">\(\{(x_n,Tx_n)\}\to(x,y)\)</span>。因为<span class="math inline">\(T\)</span>是闭算子，所以<span class="math inline">\((x,y)\in G_T\)</span>，即<span class="math inline">\(x\in E\)</span>，故<span class="math inline">\(E\)</span>是<span class="math inline">\(X\)</span>的闭子空间。&nbsp;◻</p>
+</div>
+</section>
+<section id="id--a7a3bb37" class="level4">
+<h4 class="anchored" data-anchor-id="id--a7a3bb37"><span class="header-section-number">10.2.3.4</span> 闭的线性算子何时有界</h4>
+<div id="theorem-10-10" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.10</strong>. <strong>（closed graph theorem）</strong></p>
+<p>设<span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>都是Banach空间，<span class="math inline">\(T\)</span>是<span class="math inline">\(X\)</span>到<span class="math inline">\(Y\)</span>的线性算子。<span class="math inline">\(T\)</span>有界的充分必要条件为<span class="math inline">\(T\)</span>是闭算子。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>充分性：因为<span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>都是Banach空间，所以<span class="math inline">\(X\oplus Y\)</span>也是Banach空间。因为<span class="math inline">\(T\)</span>是闭算子，所以<span class="math inline">\(G_T\)</span>是<span class="math inline">\(X\oplus Y\)</span>的闭子空间，于是<span class="math inline">\(G_T\)</span>也是Banach空间。定义<span class="math inline">\(G_T\)</span>到<span class="math inline">\(X\)</span>的算子<span class="math inline">\(\tilde{T}\)</span>：</p>
+<p><span class="math display">\[\begin{equation*}
+\tilde{T}(x,Tx)=x
+
+\end{equation*}\]</span></p>
+<p>显然<span class="math inline">\(\tilde{T}\)</span>是满映射。若<span class="math inline">\(\tilde{T}\)</span>不是单射，则<span class="math inline">\(\exists\;x\in X\)</span>使得<span class="math inline">\(\exists\;y_1,y_2\in Y,\;y_1\ne y_2,\;Tx=y_1,Tx=y_2\)</span>，那么<span class="math inline">\(T\)</span>就不是映射，所以<span class="math inline">\(\tilde{T}\)</span>是单射。于是<span class="math inline">\(\tilde{T}\)</span>是双射。</p>
+<p>设<span class="math inline">\(a\)</span>是数，<span class="math inline">\((y,Ty)\in G_T\)</span>。由<span class="math inline">\(T\)</span>的线性性可推出：</p>
+<p><span class="math display">\[\begin{gather*}
+\tilde{T}[(x,Tx)+(y,Ty)]=\tilde{T}(x+y,Tx+Ty)=\tilde{T}[x+y,T(x+y)]=x+y=\tilde{T}(x,Tx)+\tilde{T}(y,Ty) \\
+\tilde{T}[a(x,Tx)]=\tilde{T}(ax,aTx)=\tilde{T}(ax,Tax)=ax=a\tilde{T}(x,Tx)
+
+\end{gather*}\]</span></p>
+<p>即<span class="math inline">\(\tilde{T}\)</span>是线性算子。</p>
+<p>由逆算子定理，<span class="math inline">\(\tilde{T}\)</span>存在有界的逆算子<span class="math inline">\(\tilde{T}^{-1}\)</span>。于是对任意的<span class="math inline">\(x\in X\)</span>，因为<span class="math inline">\((x,Tx)=\tilde{T}^{-1}x\)</span>，所以：</p>
+<p><span class="math display">\[\begin{equation*}
+||(x,Tx)||\leqslant||\tilde{T}^{-1}||\;||x||
+
+\end{equation*}\]</span></p>
+<p>即：</p>
+<p><span class="math display">\[\begin{equation*}
+||Tx||\leqslant||\tilde{T}^{-1}||\;||x||
+
+\end{equation*}\]</span></p>
+<p>所以<span class="math inline">\(T\)</span>有界。</p>
+<p>必要性：任取<span class="math inline">\((x,y)\in\overline{G_T}\)</span>，则<span class="math inline">\(\exists\;\{(x_n,y_n)\}\in G_T\)</span>并且<span class="math inline">\(\{(x_n,y_n)\}\to (x,y)\)</span>。由<span class="math inline">\(X\oplus Y\)</span>中范数的定义可得到<span class="math inline">\(\{x_n\}\to x,\;\{Tx_n\}\to y\)</span>。因为<span class="math inline">\(T\)</span>有界，所以<span class="math inline">\(T\)</span>连续，于是<span class="math inline">\(\{Tx_n\}\to Tx=y\)</span>，所以<span class="math inline">\((x,y)\in G_T\)</span>。由<span class="math inline">\((x,y)\)</span>的任意性，<span class="math inline">\(G_T\)</span>是闭子空间，<span class="math inline">\(T\)</span>是闭算子。&nbsp;◻</p>
+</div>
+</section>
+</section>
+<section id="id--ce6e7b19" class="level3">
+<h3 class="anchored" data-anchor-id="id--ce6e7b19"><span class="header-section-number">10.2.4</span> 共鸣定理</h3>
+<div id="definition-10-7" class="definition theorem-block env-definition">
+<p><strong>Definition 10.7</strong>. 设<span class="math inline">\(X\)</span>是线性空间，<span class="math inline">\(T\)</span>是定义在<span class="math inline">\(E\)</span>上的泛函。若对任意的<span class="math inline">\(x,y\in X\)</span>，有：</p>
+<p><span class="math display">\[\begin{equation*}
+T(x+y)\leqslant Tx+Ty
+
+\end{equation*}\]</span></p>
+<p>则称<span class="math inline">\(T\)</span>是次可加的。若对任意的<span class="math inline">\(\alpha\geqslant0\)</span>和<span class="math inline">\(\forall\;x\in X\)</span>，有：</p>
+<p><span class="math display">\[\begin{equation*}
+T(\alpha x)=\alpha Tx
+
+\end{equation*}\]</span></p>
+<p>则称<span class="math inline">\(T\)</span>是正齐次的。</p>
+</div>
+<div id="theorem-10-11" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.11</strong>. <strong>（resonance theorem）</strong></p>
+<p><span class="math inline">\(\{T_i:i\in I\}\)</span>是Banach空间<span class="math inline">\(X\)</span>到赋范线性空间<span class="math inline">\(Y\)</span>上的有界线性算子族。若：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;x\in X,\;\sup_{i\in I}||T_ix||&lt;+\infty
+
+\end{equation*}\]</span></p>
+<p>则<span class="math inline">\(\{||T_i||:i\in I\}\)</span>有界，即<span class="math inline">\(\{T_i:i\in I\}\)</span>一致有界。</p>
+</div>
+<div id="theorem-10-12" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.12</strong>. <span class="math inline">\(\{T_n\}\)</span>是Banach空间<span class="math inline">\(X\)</span>到Banach空间<span class="math inline">\(Y\)</span>上的有界线性算子列。<span class="math inline">\(\{T_n\}\)</span>按强算子拓扑收敛于某一算子<span class="math inline">\(T\in\mathscr{B}(X,Y)\)</span>的充分必要条件为：</p>
+<ol type="1">
+<li><p><span class="math inline">\(\{T_n\}\)</span>一致有界。</p></li>
+<li><p>存在<span class="math inline">\(X\)</span>中的稠密子集<span class="math inline">\(E\)</span>，使得对任意的<span class="math inline">\(x\in E\)</span>，<span class="math inline">\(\{T_nx\}\)</span>在<span class="math inline">\(Y\)</span>中收敛。</p></li>
+</ol>
+<p>此时还有：</p>
+<p><span class="math display">\[\begin{equation*}
+||T||\leqslant\varliminf||T_n||
+
+\end{equation*}\]</span></p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>必要性：&nbsp;◻</p>
+</div>
+<div id="theorem-10-13" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.13</strong>. 设<span class="math inline">\(X,Y\)</span>都是Banach空间，则<span class="math inline">\(\mathscr{B}(X,Y)\)</span>关于算子列按强算子拓扑收敛是完备的。</p>
+</div>
+</section>
+</section>
+<section id="id--ac63ad3c" class="level2">
+<h2 class="anchored" data-anchor-id="id--ac63ad3c"><span class="header-section-number">10.3</span> 有界线性泛函</h2>
+<section id="id--9aaf8767" class="level3">
+<h3 class="anchored" data-anchor-id="id--9aaf8767"><span class="header-section-number">10.3.1</span> 有界线性泛函的延拓</h3>
+<div id="definition-10-8" class="definition theorem-block env-definition">
+<p><strong>Definition 10.8</strong>. 设<span class="math inline">\(X\)</span>是线性空间，<span class="math inline">\(f_1\)</span>和<span class="math inline">\(f_2\)</span>分别为定义在<span class="math inline">\(X\)</span>的子空间<span class="math inline">\(E_1\)</span>和<span class="math inline">\(E_2\)</span>上的线性泛函。如果满足：</p>
+<ol type="1">
+<li><p><span class="math inline">\(E_1\subset E_2\)</span></p></li>
+<li><p><span class="math inline">\(\forall\;x\in E_1,\;f_1(x)=f_2(x)\)</span></p></li>
+</ol>
+<p>则称<span class="math inline">\(f_2\)</span>是<span class="math inline">\(f_1\)</span>在<span class="math inline">\(E_2\)</span>上的一个<a href="../chapters/page-042.html#term-Continuation" class="term" title="continuation">延拓<span class="term-english">（continuation）</span></a>。</p>
+</div>
+<div id="theorem-10-14" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.14</strong>. 设<span class="math inline">\(E\)</span>是实线性空间<span class="math inline">\(X\)</span>的子空间，<span class="math inline">\(f\)</span>是定义在<span class="math inline">\(E\)</span>上的实线性泛函，<span class="math inline">\(g\)</span>是定义在<span class="math inline">\(X\)</span>上的次可加正齐次泛函，<span class="math inline">\(f\)</span>和<span class="math inline">\(g\)</span>之间满足：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;x\in E,\;f(x)\leqslant g(x)
+
+\end{equation*}\]</span></p>
+<p>则必定存在定义在<span class="math inline">\(X\)</span>上的实线性泛函<span class="math inline">\(F\)</span>，满足：</p>
+<ol type="1">
+<li><p><span class="math inline">\(F\)</span>是<span class="math inline">\(f\)</span>在<span class="math inline">\(X\)</span>上的一个延拓；</p></li>
+<li><p>当<span class="math inline">\(x\in X\)</span>时，有<span class="math inline">\(F(x)\leqslant g(x)\)</span>。</p></li>
+</ol>
+</div>
+<div id="corollary-10-2" class="corollary theorem-block env-corollary">
+<p><strong>Corollary 10.2</strong>. 设<span class="math inline">\(f\)</span>是复赋范线性空间<span class="math inline">\(X\)</span>上的有界线性泛函，令：</p>
+<p><span class="math display">\[\begin{equation*}
+\varphi(x)=\operatorname{Re}f(x),\;\forall\;x\in X
+
+\end{equation*}\]</span></p>
+<p>则<span class="math inline">\(\varphi\)</span>是<span class="math inline">\(X\)</span>上的有界实线性泛函，且：</p>
+<p><span class="math display">\[\begin{gather*}
+f(x)=\varphi(x)-i\varphi(ix) \\
+||\varphi||\leqslant||f||
+
+\end{gather*}\]</span></p>
+</div>
+<div id="theorem-10-15" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.15</strong>. <strong>（Hahn-Banach theorem）</strong></p>
+<p>设<span class="math inline">\(E\)</span>是赋范线性空间<span class="math inline">\(X\)</span>的子空间，<span class="math inline">\(f\)</span>是定义在<span class="math inline">\(E\)</span>上的有界线性泛函，则<span class="math inline">\(f\)</span>可以延拓到整个<span class="math inline">\(X\)</span>上且保持范数不变。</p>
+</div>
+<div id="corollary-10-3" class="corollary theorem-block env-corollary">
+<p><strong>Corollary 10.3</strong>. 设<span class="math inline">\(E\)</span>是赋范线性空间<span class="math inline">\(X\)</span>的子空间，<span class="math inline">\(x_0\in X\setminus E\)</span>。若：</p>
+<p><span class="math display">\[\begin{equation*}
+d(x_0,E)=\inf_{x\in E}||x_0-x||=\delta&gt;0
+
+\end{equation*}\]</span></p>
+<p>则存在<span class="math inline">\(X\)</span>上的有界线性泛函<span class="math inline">\(f\)</span>，使得：</p>
+<p><span class="math display">\[\begin{equation*}
+||f||=1,\;f(x_0)=\delta
+
+\end{equation*}\]</span></p>
+<p>而对任意的<span class="math inline">\(x\in E\)</span>，有<span class="math inline">\(f(x)=0\)</span>。</p>
+<p>于是有：</p>
+<ol type="1">
+<li><p><span class="math inline">\(x_0\in\overline{E}\)</span>的充分必要条件为：对<span class="math inline">\(X\)</span>上任一满足对任意的<span class="math inline">\(x\in E\)</span>，都有<span class="math inline">\(f(x)=0\)</span>的有界线性泛函<span class="math inline">\(f\)</span>，有<span class="math inline">\(f(x_0)=0\)</span>。</p></li>
+<li><p>设<span class="math inline">\(x_0\in X\)</span>，<span class="math inline">\(E\subset X\)</span>，则<span class="math inline">\(x_0\)</span>可以用<span class="math inline">\(E\)</span>中元素的线性组合以任意精度逼近的充分必要条件是对<span class="math inline">\(X\)</span>上任一有界线性泛函<span class="math inline">\(f\)</span>，当对任意的<span class="math inline">\(x\in E\)</span>，都有<span class="math inline">\(f(x)=0\)</span>时，<span class="math inline">\(f(x_0)=0\)</span>。</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>(2)<strong>充分性：</strong>如果此时<span class="math inline">\(x_0\notin\overline{E}\)</span>，则<span class="math inline">\(d(x_0,E)&gt;0\)</span>，由前述，存在<span class="math inline">\(X\)</span>上的有界线性泛函<span class="math inline">\(f\)</span>，对任意的<span class="math inline">\(x\in E\)</span>，有<span class="math inline">\(f(x)=0\)</span>，且<span class="math inline">\(f(x_0)=d(x_0,E)&gt;0\)</span>，矛盾。</p>
+<p><strong>必要性：</strong>若<span class="math inline">\(x_0\in E\)</span>，在这种情况下则显然<span class="math inline">\(f(x_0)=0\)</span>；若<span class="math inline">\(x_0\in E'\)</span>，则存在<span class="math inline">\(\{x_n\}\subset E\)</span>，使得<span class="math inline">\(\{x_n\}\to x_0\)</span>。由有界线性算子的连续性可得：</p>
+<p><span class="math display">\[\begin{equation*}
+f(x_0)=f\left(\lim_{n\to+\infty}x_n\right)=\lim_{n\to+\infty}f(x_n)=0
+
+\end{equation*}\]</span></p>
+<p>(3)设<span class="math inline">\(E_1\)</span>是由<span class="math inline">\(E\)</span>张成的子空间，<span class="math inline">\(x_0\)</span>可以用<span class="math inline">\(E\)</span>中元素的线性组合以任意精度逼近的充分必要条件是<span class="math inline">\(x_0\in\overline{E_1}\)</span>。由(2)可得，<span class="math inline">\(x_0\in\overline{E_1}\)</span>的充分必要条件为：对<span class="math inline">\(X\)</span>上任一满足对任意的<span class="math inline">\(x\in E_1\)</span>，都有<span class="math inline">\(f(x)=0\)</span>的有界线性泛函<span class="math inline">\(f\)</span>，有<span class="math inline">\(f(x_0)=0\)</span>。因为对<span class="math inline">\(E\)</span>生成的子空间<span class="math inline">\(E_1\)</span>满足该条件，则显然对<span class="math inline">\(E\)</span>也满足（只要把<span class="math inline">\(E\)</span>中某个元素的系数取为<span class="math inline">\(1\)</span>，其它元素系数取为<span class="math inline">\(0\)</span>即可）。&nbsp;◻</p>
+</div>
+<div id="corollary-10-4" class="corollary theorem-block env-corollary">
+<p><strong>Corollary 10.4</strong>. 设<span class="math inline">\(X\)</span>是赋范线性空间，且<span class="math inline">\(X\ne\{\mathbf{0}\}\)</span>，则对任意的<span class="math inline">\(x\in X,\;x\ne\mathbf{0}\)</span>，存在<span class="math inline">\(X\)</span>上的有界线性泛函<span class="math inline">\(f\)</span>使得：</p>
+<p><span class="math display">\[\begin{equation*}
+||f||=1,\;f(x_0)=||x_0||
+
+\end{equation*}\]</span></p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span><span class="math inline">\(\{\mathbf{0}\}\)</span>是<span class="math inline">\(X\)</span>的一个子空间，由上一个推论可直接得到对任意的<span class="math inline">\(x\in X,\;x\ne\mathbf{0}\)</span>，存在<span class="math inline">\(X\)</span>上的有界线性泛函<span class="math inline">\(f\)</span>使得：</p>
+<p><span class="math display">\[\begin{equation*}
+||f||=1,\;f(x_0)=d(x_0,\{\mathbf{0}\})=||x_0-\mathbf{0}||=||x_0||
+
+\end{equation*}\]</span></p>
+<p>◻</p>
+</div>
+</section>
+</section>
+<section id="id--59c59ee8" class="level2">
+<h2 class="anchored" data-anchor-id="id--59c59ee8"><span class="header-section-number">10.4</span> 对偶空间与伴随算子</h2>
+<section id="id--2a2f24f2" class="level3">
+<h3 class="anchored" data-anchor-id="id--2a2f24f2"><span class="header-section-number">10.4.1</span> 对偶空间</h3>
+<div id="definition-10-9" class="definition theorem-block env-definition">
+<p><strong>Definition 10.9</strong>. 将<span class="math inline">\(X\)</span>上所有有界线性泛函构成的赋范线性空间称为<span class="math inline">\(X\)</span>的<a href="../chapters/page-043.html#term-DualSpace" class="term" title="dual space">对偶空间<span class="term-english">（dual space）</span></a>，记为<span class="math inline">\(E*\)</span>。</p>
+</div>
+<div id="theorem-10-16" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 10.16</strong>. <span class="math inline">\(E*\)</span>依一致算子拓扑收敛是Banach空间。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>根据定义，<span class="math inline">\(E*=\mathscr{B}(E,K)\)</span>，其中<span class="math inline">\(K\)</span>为复数域或实数域。因为<span class="math inline">\(K\)</span>完备，所以<span class="math inline">\(E*\)</span>也完备，即<span class="math inline">\(E*\)</span>是一个Banach空间。&nbsp;◻</p>
+</div>
+
+
+</section>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>若不作特殊说明，有界线性算子的定义域均假定为<span class="math inline">\(X\)</span>。<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/page-010.html" class="pagination-link" aria-label="[第 9 章]{.header-section-number} 常见度量空间与赋范线性空间">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title"><span class="header-section-number">第 9 章</span> 常见度量空间与赋范线性空间</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/page-012.html" class="pagination-link" aria-label="[第 11 章]{.header-section-number} 概率测度">
+        <span class="nav-page-text"><span class="chapter-title"><span class="header-section-number">第 11 章</span> 概率测度</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
