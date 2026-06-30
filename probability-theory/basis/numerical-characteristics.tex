@@ -40,7 +40,7 @@
 		&\int_{\mathbb{R}^{}}g(x)\dif Pf^{-1}=\int_{(\mathbb{R}^{}\setminus D)\bigcup\left(\underset{n=1}{\overset{+\infty}{\cup}}\{x_n\}\right)}g(x)\dif Pf^{-1} \\
 		=&\int_{\mathbb{R}^{}\setminus D}g(x)\dif Pf^{-1}+\sum_{n=1}^{+\infty}\int_{\{x_n\}}g(x)\dif Pf^{-1}=\sum_{n=1}^{+\infty}g(x_n)P(f=x_n)fv
 	\end{align*}\par
-	(2)由\cref{prop:MeasurableFunction}(11)（可以证明$g(\seq{x}{n})=x_1x_2\cdots x_n$在$\mathbb{R}^{n}$上连续）和\cref{prop:Independent}(5.c)即可得到。
+	(2)由\cref{prop:MeasurableFunction}(11)（可以证明$g(\seq{x}{n})=x_1x_2\cdots x_n$在$\mathbb{R}^{n}$上连续）和\cref{prop:Independent}(5.d)即可得到。
 \end{proof}
 \begin{note}
 	很多教材在上述定理中写的并不是$g$对pushforward measure$Pf^{-1}$进行积分，而是对$f$的分布函数$F$进行积分。$F$是一个测度吗？$F$与$Pf^{-1}$等价吗？显然并不是。由L-S测度处的讨论可以看出$F$可唯一确定$Pf^{-1}$，所以可使用$F$来代表$Pf^{-1}$。
@@ -81,13 +81,37 @@
 	\end{equation*}
 	则称$\operatorname{E}(f|\mathscr{A})$为$f$关于$\mathscr{A}$的\gls{ConditionalExpectation}。当$\mathscr{A}=\sigma(g)$且$g$是$(X,\mathscr{F})$到可测空间 $(Y,\mathscr{B})$的可测映射时，称$\operatorname{E}(f|g)\coloneq\operatorname{E}[f|\sigma(g)]$为$f$关于$g$的条件期望（由\cref{lem:PreimageSigmaField}可知$\sigma(g)$为$\mathscr{F}$的子$\sigma$域）。分别称：
 	\begin{equation*}
-		P(A|\mathscr{A})\coloneq\operatorname{E}(I_A|\mathscr{A}),\quad P(A|g)\coloneq P[A|\sigma(g)]
+		P(A|\mathscr{A})\coloneq\operatorname{E}(I_A|\mathscr{A}),\quad P(A|g)\coloneq P(A|\sigma(g))
 	\end{equation*}
-	为事件$A\in\mathscr{F}$关于$\mathscr{A}$的\gls{ConditionalProbability}和事件$A\in\mathscr{F}$关于$g$的条件概率（$I_A$在$X$上积分存在）。当给定多个子$\sigma$域$\mathscr{A}_1,\mathscr{A}_2,\dots,\mathscr{A}_n\subseteq\mathscr{F}$时，约定：
+	为事件$A\in\mathscr{F}$关于$\mathscr{A}$的\gls{ConditionalProbability}和事件$A\in\mathscr{F}$关于$g$的条件概率（\cref{prop:SimpleFunction}(1)，$I_A$在$X$上积分存在）。当给定多个子$\sigma$域$\mathscr{A}_1,\mathscr{A}_2,\dots,\mathscr{A}_n\subseteq\mathscr{F}$时，约定：
 	\begin{equation*}
 		\operatorname{E}(f\mid\mathscr{A}_1,\mathscr{A}_2,\dots,\mathscr{A}_n)\coloneq\operatorname{E}\left[f\mid\sigma\left(\underset{i=1}{\overset{n}{\cup}}\mathscr{A}_i\right)\right]
 	\end{equation*}
 \end{definition}
+\begin{theorem}\label{theo:SigmaAMeasurableFunction}
+	设$f$为可测空间$(X,\mathscr{F})$上的随机变量，$\mathscr{F}=\{\varnothing,A,A^c,X\}$，则$f=a_1I_{A}(x)+a_2I_{A^c}(x)$，其中$a_1,a_2\in\mathbb{R}^{}$。
+\end{theorem}
+\begin{proof}
+	只需证明$f$在$A$上只能取一个值，同理可知$f$在$A^c$上只能取一个值。\par
+	若存在$x_1,x_2\in A$使得$f(x_1)=\alpha,\;f(x_2)=\beta$，$\alpha\in\beta$，由\cref{prop:BorelSigmaField}(1.b)可知：
+	\begin{equation*}
+		f^{-1}\left[\left(-\infty,\frac{\alpha+\beta}{2}\right)\right]\notin\mathscr{F}
+	\end{equation*}
+	于是$f$不可测，矛盾，即$f$在$A$上只能取一个值。
+\end{proof}
+\begin{note}
+	我们需要对抽象的条件概率以及条件期望的定义做一个解释，先从$\mathscr{A}=\sigma(B)=\{\varnothing,B,B^c,X\}$来谈起，其中$B\in\mathscr{F}$。\par
+	根据\cref{theo:SigmaAMeasurableFunction}，$\operatorname{E}(I_A\mid\mathscr{A})=a_1I_B(x)+a_2I_{B^c}(x)$，其中$a_1,a_2\in\mathbb{R}^{}$。由\cref{prop:MeasurableIntegral}(6)、\cref{prop:SigmaField}(2)(4)和\cref{theo:MeasurableCountableIntegral}可得：
+	\begin{gather*}
+		\int_{B}\operatorname{E}(I_A\mid\mathscr{A})\dif P=\int_{B}[a_1I_B(x)+a_2I_{B^c}(x)\dif P=a_1P(B) \\
+		\int_{B}I_A(x)\dif P=\int_{A\cap B}I_A(x)\dif\mu+\int_{B\backslash A}I_A(x)\dif\mu=P(A\cap B)
+	\end{gather*}
+	所以：
+	\begin{equation*}
+		a_1=\frac{P(A\cap B)}{P(B)}
+	\end{equation*}
+	即条件概率$P(A\mid\mathscr{A})$在$B$和$B^c$上的取值和初等概率论是一致的。
+\end{note}
 \begin{property}\label{prop:ConditionalExpectation}
 	设$f,g$是概率空间$(X,\mathscr{F},P)$上在$X$上积分存在的随机变量，$\mathscr{A},\mathscr{B}$是$\mathscr{F}$的子$\sigma$域，则：
 	\begin{enumerate}
