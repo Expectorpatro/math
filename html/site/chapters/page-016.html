@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-Hans" xml:lang="zh-Hans"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>第 15 章 规划问题 – 你永远不知道一个强迫症能干出什么事情</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/page-017.html" rel="next">
+<link href="../chapters/page-015.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-7380dde18c49706d018cafaca6afd2e2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../sidebar.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-015.html">第 4 部分 最优化</a></li><li class="breadcrumb-item"><a href="../chapters/page-016.html"><span class="chapter-title"><span class="header-section-number">第 15 章</span> 规划问题</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="搜索" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">你永远不知道一个强迫症能干出什么事情</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="搜索"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">你永远不知道一个强迫症能干出什么事情</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-001.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">前言</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 1 部分 代数</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-002.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 1 章</span> 线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-003.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 2 章</span> 矩阵</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 2 部分 分析学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-004.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 3 章</span> 度量空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-005.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 4 章</span> 微积分</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-006.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 5 章</span> 广义积分</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-007.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 6 章</span> 级数</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-008.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 7 章</span> Fourier级数</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-009.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 8 章</span> 赋范线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-010.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 9 章</span> 常见度量空间与赋范线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-011.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 10 章</span> Banach空间上的有界线性算子</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 3 部分 概率论</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-012.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 11 章</span> 概率测度</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-013.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 12 章</span> 概率初步</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-014.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 13 章</span> 渐进理论初步</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 4 部分 最优化</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-015.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 14 章</span> 凸集</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-016.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title"><span class="header-section-number">第 15 章</span> 规划问题</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 5 部分 不等式</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-017.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 16 章</span> 不等式</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 6 部分 统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-018.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 17 章</span> 统计初步</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-019.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 18 章</span> 点估计理论</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-020.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 19 章</span> 假设检验理论</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-021.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 20 章</span> 贝叶斯统计</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-022.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 21 章</span> 统计计算方法</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-023.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 22 章</span> 线性模型</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-024.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 23 章</span> 多元统计</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-025.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 24 章</span> 方差分析</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-026.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 25 章</span> 部分实施问题</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-027.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">符号说明</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 6 部分 统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-028.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 26 章</span> 抽样调查</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-029.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 27 章</span> 时间序列分析</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-030.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 28 章</span> 机器学习</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-031.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 29 章</span> 因果推断</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 7 部分 非参数统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-032.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 30 章</span> 位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-033.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 31 章</span> 两样本位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-034.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 32 章</span> 多样本位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-035.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 33 章</span> Something else</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-036.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 34 章</span> 单调关联性</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-037.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">附录</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-038.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">后记</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">中英术语表</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目录</h2>
+   
+  <ul>
+  <li><a href="#id--99efa8dd" id="toc-id--99efa8dd" class="nav-link active" data-scroll-target="#id--99efa8dd"><span class="header-section-number">15.1</span> 线性规划</a>
+  <ul>
+  <li><a href="#id--f727be91" id="toc-id--f727be91" class="nav-link" data-scroll-target="#id--f727be91"><span class="header-section-number">15.1.1</span> 线性规划的标准形</a>
+  <ul class="collapse">
+  <li><a href="#id--530b2e88" id="toc-id--530b2e88" class="nav-link" data-scroll-target="#id--530b2e88"><span class="header-section-number">15.1.1.1</span> 标准形的基本解</a></li>
+  </ul></li>
+  <li><a href="#id--5e79d893" id="toc-id--5e79d893" class="nav-link" data-scroll-target="#id--5e79d893"><span class="header-section-number">15.1.2</span> 线性规划解的性质</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-015.html">第 4 部分 最优化</a></li><li class="breadcrumb-item"><a href="../chapters/page-016.html"><span class="chapter-title"><span class="header-section-number">第 15 章</span> 规划问题</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="id--2233225d" class="quarto-section-identifier"><span class="chapter-title"><span class="header-section-number">第 15 章</span> 规划问题</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="id--99efa8dd" class="level2">
+<h2 class="anchored" data-anchor-id="id--99efa8dd"><span class="header-section-number">15.1</span> 线性规划</h2>
+<section id="id--f727be91" class="level3">
+<h3 class="anchored" data-anchor-id="id--f727be91"><span class="header-section-number">15.1.1</span> 线性规划的标准形</h3>
+<p>线性规划问题的数学模型有各种不同的形式，如：</p>
+<ol type="1">
+<li><p>最大化或最小化目标函数；</p></li>
+<li><p>约束条件有<span class="math inline">\(\leqslant,\;\geqslant\;=\)</span>三种情况；</p></li>
+<li><p>决策变量一般有非负性要求，但有时又可能没有。</p></li>
+</ol>
+<p>为了以统一的方式求解线性规划问题，规定了一种线性规划的标准形式，非标准形可以转化为标准形。</p>
+<div id="definition-15-1" class="definition theorem-block env-definition">
+<p><strong>Definition 15.1</strong>. 规定线性规划问题的<strong>标准形式</strong>为：</p>
+<ol type="1">
+<li><p>最小化目标函数；</p></li>
+<li><p>约束条件为等式且右端常数项非负；</p></li>
+<li><p>决策变量非负。</p></li>
+</ol>
+<p>于是线性规划问题可以写为如下矩阵形式：</p>
+<p><span class="math display">\[\begin{gather*}
+\min z=C^{\top}X \\
+\operatorname{s.t.}
+\begin{cases}
+AX=\beta \\
+X\geqslant\mathbf{0}
+\end{cases}
+
+\end{gather*}\]</span></p>
+<p>称<span class="math inline">\(C=(c_1,c_2,\dots,c_n)\)</span>为<strong>价值向量</strong>，其中每个分量为<strong>价值系数</strong>，<span class="math inline">\(\beta\)</span>为<strong>资源向量</strong>。系数矩阵<span class="math inline">\(A\in M_{m\times n}(\mathbb{R})\)</span>行满秩，即<span class="math inline">\(\operatorname{rank}(A)=m\)</span>。称<span class="math inline">\(A\)</span>的秩<span class="math inline">\(m\)</span>为LP问题的<strong>阶数</strong>，<span class="math inline">\(A\)</span>的列数<span class="math inline">\(n\)</span>为LP问题的<strong>维数</strong>。</p>
+</div>
+<div id="theorem-15-1" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 15.1</strong>. 每个线性规划问题都可以化成标准形式。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>考虑每种不符合标准形式的情况：</p>
+<p><strong>最大化目标函数：</strong>若LP问题的目标函数为：</p>
+<p><span class="math display">\[\begin{equation*}
+\max z=C^{\top}X
+
+\end{equation*}\]</span></p>
+<p>则可将其转化为：</p>
+<p><span class="math display">\[\begin{equation*}
+\min z'=-C^{\top}X
+
+\end{equation*}\]</span></p>
+<p>显然转化前后的LP问题是等价的。</p>
+<p><strong>约束条件右端常数项为负数：</strong>若LP问题的约束条件为<span class="math inline">\(Ax=\beta\)</span>和<span class="math inline">\(\alpha^{\top}x=b&lt;0\)</span>，则可将其转化为：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{pmatrix}
+A \\
+-\alpha^{\top}
+\end{pmatrix}
+x
+=
+\begin{pmatrix}
+\beta \\
+-b
+\end{pmatrix}
+
+\end{equation*}\]</span></p>
+<p>显然转化前后的LP问题是等价的。</p>
+<p><strong>约束条件中含<span class="math inline">\(\leqslant\)</span>：</strong>若LP问题的约束条件为<span class="math inline">\(Ax=\beta\)</span>和<span class="math inline">\(\alpha^{\top}x\leqslant b\)</span>，则可将约束条件转化为：</p>
+<p><span class="math display">\[\begin{gather*}
+\begin{pmatrix}
+A &amp; \mathbf{0} \\
+\alpha^{\top} &amp; 1
+\end{pmatrix}
+\begin{pmatrix}
+x \\
+y
+\end{pmatrix}
+=
+\begin{pmatrix}
+\beta \\
+b
+\end{pmatrix} \\
+X'=(X,y)^{\top}\geqslant\mathbf{0}
+
+\end{gather*}\]</span></p>
+<p>显然转化前后的LP问题是等价的。称新引入的变量<span class="math inline">\(y\)</span>为<a href="../chapters/page-058.html#term-SlackVariable" class="term" title="slack variable">松弛变量<span class="term-english">（slack variable）</span></a>。</p>
+<p><strong>约束条件中含<span class="math inline">\(\geqslant\)</span>：</strong>若LP问题的约束条件为<span class="math inline">\(Ax=\beta\)</span>和<span class="math inline">\(\alpha^{\top}x\geqslant b\)</span>，则可将约束条件转化为：</p>
+<p><span class="math display">\[\begin{gather*}
+\begin{pmatrix}
+A &amp; \mathbf{0} \\
+\alpha^{\top} &amp; -1
+\end{pmatrix}
+\begin{pmatrix}
+x \\
+y
+\end{pmatrix}
+=
+\begin{pmatrix}
+\beta \\
+b
+\end{pmatrix} \\
+X'=(X,y)^{\top}\geqslant\mathbf{0}
+
+\end{gather*}\]</span></p>
+<p>显然转化前后的LP问题是等价的。称新引入的变量<span class="math inline">\(y\)</span>为<a href="../chapters/page-058.html#term-SurplusVariable" class="term" title="surplus variable">剩余变量<span class="term-english">（surplus variable）</span></a>。</p>
+<p><strong>决策变量中含负值变量：</strong>若LP问题为：</p>
+<p><span class="math display">\[\begin{gather*}
+\min z=(C,c)^{\top}(X,x)^{\top} \\
+s.t.
+\begin{cases}
+(A,\alpha)(X,x)^{\top}=\beta \\
+X\geqslant\mathbf{0} \\
+x&lt;0
+\end{cases}
+
+\end{gather*}\]</span></p>
+<p>则作变换<span class="math inline">\(x'=-x\)</span>，将该LP问题转化为：</p>
+<p><span class="math display">\[\begin{gather*}
+\min z=(C,-c)^{\top}(X,x')^{\top} \\
+s.t.
+\begin{cases}
+(A,-\alpha)(X,x')^{\top}=\beta \\
+X'=(X,x')^{\top}\geqslant\mathbf{0}
+\end{cases}
+
+\end{gather*}\]</span></p>
+<p>显然转化前后的LP问题是等价的。</p>
+<p><strong>决策变量中含自由变量<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>：</strong>若LP问题为：</p>
+<p><span class="math display">\[\begin{gather*}
+\min z=(C,c)^{\top}(X,x)^{\top} \\
+s.t.
+\begin{cases}
+(A,\alpha)(X,x)^{\top}=\beta \\
+X\geqslant\mathbf{0}
+\end{cases}
+
+\end{gather*}\]</span></p>
+<p>可引入新变量<span class="math inline">\(x_1,x_2\)</span>，将该LP问题转化为：</p>
+<p><span class="math display">\[\begin{gather*}
+\min z=(C,c,-c)^{\top}(X,x_1,x_2)^{\top} \\
+s.t.
+\begin{cases}
+(A,\alpha,-\alpha)(X,x_1,x_2)^{\top}=\beta \\
+X'=(X,x_1,x_2)^{\top}\geqslant\mathbf{0}
+\end{cases}
+
+\end{gather*}\]</span></p>
+<p>显然转化前后的LP问题是等价的。&nbsp;◻</p>
+</div>
+<section id="id--530b2e88" class="level4">
+<h4 class="anchored" data-anchor-id="id--530b2e88"><span class="header-section-number">15.1.1.1</span> 标准形的基本解</h4>
+<div id="definition-15-2" class="definition theorem-block env-definition">
+<p><strong>Definition 15.2</strong>. 对于标准形LP问题中约束条件的系数矩阵<span class="math inline">\(A=(\alpha_1, \alpha_2, \dots, \alpha_{n})\in M_{m\times n}(\mathbb{R})\)</span>，称由其列向量组的一个基<span class="math inline">\(\alpha_{i_1},\alpha_{i_2},\dots,\alpha_{i_m}\)</span>构成的矩阵<span class="math inline">\((\alpha_{i_1},\alpha_{i_2},\dots,\alpha_{i_m})\)</span>为该LP问题的一个<strong>基矩阵</strong>（简称<strong>基</strong>），其中的每一个向量<span class="math inline">\(\alpha_{i_j},\;j=1,2,\dots,m\)</span>称为该LP问题的<strong>基向量</strong>，<span class="math inline">\(A\)</span>中剩余的<span class="math inline">\(n-m\)</span>个列向量<span class="math inline">\(\alpha_{j_1},\alpha_{j_2},\dots,\alpha_{j_{n-m}}\)</span>称为<strong>非基向量</strong>。分别称基向量对应的变量和非基向量对应的变量为<strong>基变量</strong>、<strong>非基变量</strong>。分别称所有基变量构成的向量<span class="math inline">\((x_{i_1},x_{i_2},\dots,x_{i_m})\)</span>和非基变量构成的向量<span class="math inline">\((x_{j_1},x_{j_2},\dots,x_{j_{n-m}})\)</span>为<strong>基变矢</strong>、<strong>非基变矢</strong>。对系数矩阵<span class="math inline">\(A\)</span>的列向量、决策变量<span class="math inline">\(x\)</span>和资源向量<span class="math inline">\(\beta=(b_1,b_2,\dots,b_n)^{\top}\)</span>作顺序的重排，可以得到：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;\quad(\alpha_{i_1},\alpha_{i_2},\dots,\alpha_{i_m},\alpha_{j_1},\alpha_{j_2},\dots,\alpha_{j_{n-m}})(x_{i_1},x_{i_2},\dots,x_{i_m},x_{j_1},x_{j_2},\dots,x_{j_{n-m}})^{\top} \\
+&amp;=(b_{i_1},b_{i_2},\dots,b_{i_m},b_{j_1},b_{j_2},\dots,b_{j_{n-m}})^{\top}
+
+\end{align*}\]</span></p>
+<p>将该方程重新写作：</p>
+<p><span class="math display">\[\begin{equation*}
+(B,C)(X_1,X_2)^{\top}=\beta'
+
+\end{equation*}\]</span></p>
+<p>其中<span class="math inline">\(B\)</span>对应基矩阵，<span class="math inline">\(C\)</span>对应非基向量构成的矩阵，<span class="math inline">\(X_1\)</span>为基变矢，<span class="math inline">\(X_2\)</span>为非基变矢。令<span class="math inline">\(X_2=\mathbf{0}\)</span>，可得出方程的一个解：</p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+X_1=B^{-1}\beta' \\
+X_2=\mathbf{0}
+\end{cases}
+
+\end{equation*}\]</span></p>
+<p>称该解为约束方程组的一个关于基矩阵<span class="math inline">\(B\)</span>的<strong>基本解</strong>，也称之为该标准形LP问题的一个基本解。若基本解中存在基变量值为<span class="math inline">\(0\)</span>，则称之为<strong>退化基本解</strong>。若某个基本解达到标准形LP问题的最优解，则称之为<strong>最优基本解</strong>。称满足非负性约束<span class="math inline">\(X\geqslant\mathbf{0}\)</span>的基本解为<a href="../chapters/page-041.html#term-BasicFeasibleSolution" class="term" title="basic feasible solution">基本可行解<span class="term-english">（basic feasible solution）</span></a>，若它是退化的，则称之为<strong>退化基本可行解</strong>。称基本可行解对应的基矩阵为<strong>可行基</strong>，称最优基本解对应的基矩阵为<strong>最优基</strong>。</p>
+</div>
+</section>
+</section>
+<section id="id--5e79d893" class="level3">
+<h3 class="anchored" data-anchor-id="id--5e79d893"><span class="header-section-number">15.1.2</span> 线性规划解的性质</h3>
+<div id="lemma-15-1" class="lemma theorem-block env-lemma">
+<p><strong>Lemma 15.1</strong>. 对于<span class="math inline">\(m\)</span>阶<span class="math inline">\(n\)</span>维标准形LP问题，<span class="math inline">\(A=(a_1, a_2, \dots, a_{n})\)</span>、<span class="math inline">\(E\)</span>分别为其系数矩阵和可行域，则<span class="math inline">\(x=(x_1,x_2,\dots,x_n)\in E\)</span>是基本可行解的充分必要条件为：对于<span class="math inline">\(I=\{i:x_i&gt;0,i=1,2,\dots,n\}\)</span>，由<span class="math inline">\(a_i,\;i\in I\)</span>构成的向量组线性无关。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span><strong>必要性：</strong>由基本可行解的定义直接得到。</p>
+<p><strong>充分性：</strong>&nbsp;◻</p>
+</div>
+<div id="property-15-1-1" class="property theorem-block env-property">
+<p><strong>Property 15.1.1</strong>. 线性规划的解具有如下性质：</p>
+<ol type="1">
+<li><p>LP问题解的可行域是凸集；</p></li>
+<li><p>LP问题的基本可行解与可行域的极点一一对应；</p></li>
+<li><p><strong>线性规划基本定理</strong></p>
+<ul>
+<li><p>若LP问题有可行解，则必有基本可行解；</p></li>
+<li><p>若LP问题有最优解，则必有最优基本解。</p></li>
+</ul></li>
+<li><p>若LP问题的可行域不是空集，则可行域至少有一个极点；</p></li>
+<li><p>LP问题可行域的极点必为有限多个。</p></li>
+</ol>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>设<span class="math inline">\(m\)</span>阶<span class="math inline">\(n\)</span>维LP问题如下：</p>
+<p><span class="math display">\[\begin{gather*}
+\max z=C^{\top}X \\
+s.t.
+\begin{cases}
+AX=\beta \\
+X\geqslant\mathbf{0}
+\end{cases}
+
+\end{gather*}\]</span></p>
+<p>其可行域为<span class="math inline">\(E\)</span>，<span class="math inline">\(A=(a_1, a_2, \dots, a_{n})\in M_{m\times n}(\mathbb{R}),\;x=(x_1,x_2,\dots,x_n)^{\top}\)</span>。</p>
+<p>(1)显然：</p>
+<p><span class="math display">\[\begin{equation*}
+E=\{x\in\mathbb{R}^{n}:Ax=\beta,x\geqslant\mathbf{0}\}
+
+\end{equation*}\]</span></p>
+<p>任取<span class="math inline">\(x_1,x_2\in E\)</span>，则对任意的<span class="math inline">\(0\leqslant\alpha\leqslant1\)</span>有：</p>
+<p><span class="math display">\[\begin{gather*}
+A[\alpha x_1+(1-\alpha)x_2]=\alpha Ax_1+(1-\alpha)Ax_2=\alpha\beta+(1-\alpha)\beta=\beta \\
+\alpha x_1+(1-\alpha)x_2\geqslant0
+
+\end{gather*}\]</span></p>
+<p>所以<span class="math inline">\(\alpha x_1+(1-\alpha)x_2\in E\)</span>，<span class="math inline">\(E\)</span>是一个凸集。</p>
+<p>(2)<strong>基本可行解必是极点：</strong>要证基本可行解<span class="math inline">\(x\)</span>必是极点，即证<span class="math inline">\(x\)</span>不能表示为<span class="math inline">\(E\)</span>内不同的两点<span class="math inline">\(x_1,x_2\)</span>的严格凸组合。假设<span class="math inline">\(x\)</span>可以表示为<span class="math inline">\(x_1,x_2\)</span>的严格凸组合，即存在<span class="math inline">\(0&lt;\alpha&lt;1\)</span>，使得<span class="math inline">\(x=\alpha x_1+(1-\alpha)x_2\)</span>。因为<span class="math inline">\(x\)</span>是基本解，所以<span class="math inline">\(x\)</span>的非基变量都为<span class="math inline">\(0\)</span>，于是<span class="math inline">\(x_1,x_2\)</span>对应部分也都为<span class="math inline">\(0\)</span>。设<span class="math inline">\(x\)</span>对应的基矩阵是<span class="math inline">\(B\)</span>，则<span class="math inline">\(x=B^{-1}\beta\)</span>，此时也必有<span class="math inline">\(x_1=x_2=B^{-1}\beta\)</span>（考虑基本解的求解过程，<span class="math inline">\(B\)</span>对应的非基变量全为<span class="math inline">\(0\)</span>），于是<span class="math inline">\(x=x_1=x_2\)</span>，所以<span class="math inline">\(x\)</span>不可以表示为可行域内不同的两点的严格凸组合，矛盾，<span class="math inline">\(x\)</span>是极点。</p>
+<p><strong>极点必是基本可行解：</strong>要证极点<span class="math inline">\(x\)</span>必是基本可行解，即证存在基矩阵<span class="math inline">\(B\)</span>使得<span class="math inline">\(x=B^{-1}\beta\)</span>。由极点定义，<span class="math inline">\(x\)</span>不能表示为<span class="math inline">\(E\)</span>内不同的两点<span class="math inline">\(x_1,x_2\)</span>的严格凸组合，即不存在<span class="math inline">\(0&lt;\alpha&lt;1\)</span>和<span class="math inline">\(E\)</span>内不同的两点<span class="math inline">\(x_1,x_2\)</span>使得<span class="math inline">\(x=\alpha x_1+(1-\alpha)x_2\)</span>，&nbsp;◻</p>
+</div>
+
+
+</section>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>即对该变量的取值无任何要求。<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/page-015.html" class="pagination-link" aria-label="[第 14 章]{.header-section-number} 凸集">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title"><span class="header-section-number">第 14 章</span> 凸集</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/page-017.html" class="pagination-link" aria-label="[第 16 章]{.header-section-number} 不等式">
+        <span class="nav-page-text"><span class="chapter-title"><span class="header-section-number">第 16 章</span> 不等式</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

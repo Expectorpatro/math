@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-Hans" xml:lang="zh-Hans"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>第 32 章 多样本位置检验 – 你永远不知道一个强迫症能干出什么事情</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/page-035.html" rel="next">
+<link href="../chapters/page-033.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-7380dde18c49706d018cafaca6afd2e2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../sidebar.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-032.html">第 7 部分 非参数统计学</a></li><li class="breadcrumb-item"><a href="../chapters/page-034.html"><span class="chapter-title"><span class="header-section-number">第 32 章</span> 多样本位置检验</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="搜索" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">你永远不知道一个强迫症能干出什么事情</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="搜索"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">你永远不知道一个强迫症能干出什么事情</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-001.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">前言</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 1 部分 代数</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-002.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 1 章</span> 线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-003.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 2 章</span> 矩阵</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 2 部分 分析学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-004.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 3 章</span> 度量空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-005.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 4 章</span> 微积分</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-006.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 5 章</span> 广义积分</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-007.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 6 章</span> 级数</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-008.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 7 章</span> Fourier级数</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-009.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 8 章</span> 赋范线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-010.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 9 章</span> 常见度量空间与赋范线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-011.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 10 章</span> Banach空间上的有界线性算子</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 3 部分 概率论</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-012.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 11 章</span> 概率测度</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-013.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 12 章</span> 概率初步</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-014.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 13 章</span> 渐进理论初步</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 4 部分 最优化</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-015.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 14 章</span> 凸集</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-016.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 15 章</span> 规划问题</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 5 部分 不等式</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-017.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 16 章</span> 不等式</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 6 部分 统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-018.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 17 章</span> 统计初步</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-019.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 18 章</span> 点估计理论</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-020.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 19 章</span> 假设检验理论</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-021.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 20 章</span> 贝叶斯统计</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-022.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 21 章</span> 统计计算方法</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-023.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 22 章</span> 线性模型</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-024.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 23 章</span> 多元统计</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-025.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 24 章</span> 方差分析</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-026.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 25 章</span> 部分实施问题</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-027.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">符号说明</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 6 部分 统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-028.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 26 章</span> 抽样调查</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-029.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 27 章</span> 时间序列分析</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-030.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 28 章</span> 机器学习</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-031.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 29 章</span> 因果推断</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 7 部分 非参数统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-032.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 30 章</span> 位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-033.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 31 章</span> 两样本位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-034.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title"><span class="header-section-number">第 32 章</span> 多样本位置检验</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-035.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 33 章</span> Something else</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-036.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 34 章</span> 单调关联性</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-037.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">附录</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-038.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">后记</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">中英术语表</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目录</h2>
+   
+  <ul>
+  <li><a href="#id-6-fc4d0064" id="toc-id-6-fc4d0064" class="nav-link active" data-scroll-target="#id-6-fc4d0064"><span class="header-section-number">32.1</span> 目的</a></li>
+  <li><a href="#id--f553635f" id="toc-id--f553635f" class="nav-link" data-scroll-target="#id--f553635f"><span class="header-section-number">32.2</span> 本章各方法的简单总结</a></li>
+  <li><a href="#kruskal-wallis-531aca40" id="toc-kruskal-wallis-531aca40" class="nav-link" data-scroll-target="#kruskal-wallis-531aca40"><span class="header-section-number">32.3</span> Kruskal-Wallis检验</a>
+  <ul>
+  <li><a href="#id-4-b60d8bc3" id="toc-id-4-b60d8bc3" class="nav-link" data-scroll-target="#id-4-b60d8bc3"><span class="header-section-number">32.3.0.1</span> 适用条件</a></li>
+  <li><a href="#id-1-fbaa0375" id="toc-id-1-fbaa0375" class="nav-link" data-scroll-target="#id-1-fbaa0375"><span class="header-section-number">32.3.0.2</span> 假设</a></li>
+  <li><a href="#id-6-02981507" id="toc-id-6-02981507" class="nav-link" data-scroll-target="#id-6-02981507"><span class="header-section-number">32.3.0.3</span> 原理</a></li>
+  <li><a href="#id-3-b5c60ca4" id="toc-id-3-b5c60ca4" class="nav-link" data-scroll-target="#id-3-b5c60ca4"><span class="header-section-number">32.3.0.4</span> 大样本近似</a></li>
+  <li><a href="#id-1-33c3b353" id="toc-id-1-33c3b353" class="nav-link" data-scroll-target="#id-1-33c3b353"><span class="header-section-number">32.3.0.5</span> 打结</a></li>
+  <li><a href="#id-7-9eb221ae" id="toc-id-7-9eb221ae" class="nav-link" data-scroll-target="#id-7-9eb221ae"><span class="header-section-number">32.3.0.6</span> 代码</a></li>
+  </ul></li>
+  <li><a href="#jonckheere-terpstra-11eeb669" id="toc-jonckheere-terpstra-11eeb669" class="nav-link" data-scroll-target="#jonckheere-terpstra-11eeb669"><span class="header-section-number">32.4</span> Jonckheere-Terpstra检验</a>
+  <ul>
+  <li><a href="#id-7-8c34ae1f" id="toc-id-7-8c34ae1f" class="nav-link" data-scroll-target="#id-7-8c34ae1f"><span class="header-section-number">32.4.0.1</span> 目的</a></li>
+  <li><a href="#id-5-f11955a2" id="toc-id-5-f11955a2" class="nav-link" data-scroll-target="#id-5-f11955a2"><span class="header-section-number">32.4.0.2</span> 适用条件</a></li>
+  <li><a href="#id-2-07cd1472" id="toc-id-2-07cd1472" class="nav-link" data-scroll-target="#id-2-07cd1472"><span class="header-section-number">32.4.0.3</span> 假设</a></li>
+  <li><a href="#id-7-85bef065" id="toc-id-7-85bef065" class="nav-link" data-scroll-target="#id-7-85bef065"><span class="header-section-number">32.4.0.4</span> 原理</a></li>
+  <li><a href="#id-4-1ddfef5b" id="toc-id-4-1ddfef5b" class="nav-link" data-scroll-target="#id-4-1ddfef5b"><span class="header-section-number">32.4.0.5</span> 大样本近似</a></li>
+  <li><a href="#id-2-83061a80" id="toc-id-2-83061a80" class="nav-link" data-scroll-target="#id-2-83061a80"><span class="header-section-number">32.4.0.6</span> 打结</a></li>
+  <li><a href="#id-8-f6e9c219" id="toc-id-8-f6e9c219" class="nav-link" data-scroll-target="#id-8-f6e9c219"><span class="header-section-number">32.4.0.7</span> 代码</a></li>
+  </ul></li>
+  <li><a href="#friedman-4d31940d" id="toc-friedman-4d31940d" class="nav-link" data-scroll-target="#friedman-4d31940d"><span class="header-section-number">32.5</span> Friedman秩和检验</a>
+  <ul>
+  <li><a href="#id-6-81bdb0bb" id="toc-id-6-81bdb0bb" class="nav-link" data-scroll-target="#id-6-81bdb0bb"><span class="header-section-number">32.5.0.1</span> 适用条件</a></li>
+  <li><a href="#id-3-ca46e15d" id="toc-id-3-ca46e15d" class="nav-link" data-scroll-target="#id-3-ca46e15d"><span class="header-section-number">32.5.0.2</span> 假设</a></li>
+  <li><a href="#id-8-3554bddd" id="toc-id-8-3554bddd" class="nav-link" data-scroll-target="#id-8-3554bddd"><span class="header-section-number">32.5.0.3</span> 原理</a></li>
+  <li><a href="#id-5-37dbfbfe" id="toc-id-5-37dbfbfe" class="nav-link" data-scroll-target="#id-5-37dbfbfe"><span class="header-section-number">32.5.0.4</span> 大样本近似</a></li>
+  <li><a href="#id-3-9b04a59b" id="toc-id-3-9b04a59b" class="nav-link" data-scroll-target="#id-3-9b04a59b"><span class="header-section-number">32.5.0.5</span> 打结</a></li>
+  <li><a href="#id--7bcc4679" id="toc-id--7bcc4679" class="nav-link" data-scroll-target="#id--7bcc4679"><span class="header-section-number">32.5.0.6</span> 成对数据的比较</a></li>
+  <li><a href="#id-9-b46a5963" id="toc-id-9-b46a5963" class="nav-link" data-scroll-target="#id-9-b46a5963"><span class="header-section-number">32.5.0.7</span> 代码</a></li>
+  </ul></li>
+  <li><a href="#page-8b45dee0" id="toc-page-8b45dee0" class="nav-link" data-scroll-target="#page-8b45dee0"><span class="header-section-number">32.6</span> Page检验</a>
+  <ul>
+  <li><a href="#id-8-8acac56e" id="toc-id-8-8acac56e" class="nav-link" data-scroll-target="#id-8-8acac56e"><span class="header-section-number">32.6.0.1</span> 目的</a></li>
+  <li><a href="#id-7-dfb07454" id="toc-id-7-dfb07454" class="nav-link" data-scroll-target="#id-7-dfb07454"><span class="header-section-number">32.6.0.2</span> 适用条件</a></li>
+  <li><a href="#id-4-f197e43b" id="toc-id-4-f197e43b" class="nav-link" data-scroll-target="#id-4-f197e43b"><span class="header-section-number">32.6.0.3</span> 假设</a></li>
+  <li><a href="#id-9-b4dde70f" id="toc-id-9-b4dde70f" class="nav-link" data-scroll-target="#id-9-b4dde70f"><span class="header-section-number">32.6.0.4</span> 原理</a></li>
+  <li><a href="#id-6-009e7732" id="toc-id-6-009e7732" class="nav-link" data-scroll-target="#id-6-009e7732"><span class="header-section-number">32.6.0.5</span> 大样本近似</a></li>
+  <li><a href="#id-4-a1cae5a9" id="toc-id-4-a1cae5a9" class="nav-link" data-scroll-target="#id-4-a1cae5a9"><span class="header-section-number">32.6.0.6</span> 打结</a></li>
+  <li><a href="#page-28643370" id="toc-page-28643370" class="nav-link" data-scroll-target="#page-28643370"><span class="header-section-number">32.6.0.7</span> 对区组、水平进行重复时的page检验</a></li>
+  <li><a href="#id-10-127a44e4" id="toc-id-10-127a44e4" class="nav-link" data-scroll-target="#id-10-127a44e4"><span class="header-section-number">32.6.0.8</span> 代码</a></li>
+  </ul></li>
+  <li><a href="#cochran-21fff466" id="toc-cochran-21fff466" class="nav-link" data-scroll-target="#cochran-21fff466"><span class="header-section-number">32.7</span> Cochran检验</a>
+  <ul>
+  <li><a href="#id-9-08fcd799" id="toc-id-9-08fcd799" class="nav-link" data-scroll-target="#id-9-08fcd799"><span class="header-section-number">32.7.0.1</span> 目的</a></li>
+  <li><a href="#id-8-888e92fd" id="toc-id-8-888e92fd" class="nav-link" data-scroll-target="#id-8-888e92fd"><span class="header-section-number">32.7.0.2</span> 适用条件</a></li>
+  <li><a href="#id-5-ca656e27" id="toc-id-5-ca656e27" class="nav-link" data-scroll-target="#id-5-ca656e27"><span class="header-section-number">32.7.0.3</span> 假设</a></li>
+  <li><a href="#id-10-643ba938" id="toc-id-10-643ba938" class="nav-link" data-scroll-target="#id-10-643ba938"><span class="header-section-number">32.7.0.4</span> 原理</a></li>
+  <li><a href="#id-7-42341b1d" id="toc-id-7-42341b1d" class="nav-link" data-scroll-target="#id-7-42341b1d"><span class="header-section-number">32.7.0.5</span> 大样本近似</a></li>
+  <li><a href="#id-11-d0c0db04" id="toc-id-11-d0c0db04" class="nav-link" data-scroll-target="#id-11-d0c0db04"><span class="header-section-number">32.7.0.6</span> 代码</a></li>
+  </ul></li>
+  <li><a href="#durbin-6cf47d83" id="toc-durbin-6cf47d83" class="nav-link" data-scroll-target="#durbin-6cf47d83"><span class="header-section-number">32.8</span> Durbin检验</a>
+  <ul>
+  <li><a href="#id-9-a11ab7f7" id="toc-id-9-a11ab7f7" class="nav-link" data-scroll-target="#id-9-a11ab7f7"><span class="header-section-number">32.8.0.1</span> 适用条件</a></li>
+  <li><a href="#id-6-ee5a4082" id="toc-id-6-ee5a4082" class="nav-link" data-scroll-target="#id-6-ee5a4082"><span class="header-section-number">32.8.0.2</span> 假设</a></li>
+  <li><a href="#id-11-d0107304" id="toc-id-11-d0107304" class="nav-link" data-scroll-target="#id-11-d0107304"><span class="header-section-number">32.8.0.3</span> 原理</a></li>
+  <li><a href="#id-8-07f88c89" id="toc-id-8-07f88c89" class="nav-link" data-scroll-target="#id-8-07f88c89"><span class="header-section-number">32.8.0.4</span> 大样本近似</a></li>
+  <li><a href="#id-12-04690521" id="toc-id-12-04690521" class="nav-link" data-scroll-target="#id-12-04690521"><span class="header-section-number">32.8.0.5</span> 代码</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-032.html">第 7 部分 非参数统计学</a></li><li class="breadcrumb-item"><a href="../chapters/page-034.html"><span class="chapter-title"><span class="header-section-number">第 32 章</span> 多样本位置检验</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="id--7482e9d6" class="quarto-section-identifier"><span class="chapter-title"><span class="header-section-number">第 32 章</span> 多样本位置检验</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="id-6-fc4d0064" class="level2">
+<h2 class="anchored" data-anchor-id="id-6-fc4d0064"><span class="header-section-number">32.1</span> 目的</h2>
+<p>利用样本中各响应值的位置信息，判断各水平间是否存在差异或某种趋势。</p>
+</section>
+<section id="id--f553635f" class="level2">
+<h2 class="anchored" data-anchor-id="id--f553635f"><span class="header-section-number">32.2</span> 本章各方法的简单总结</h2>
+<ol type="1">
+<li><p>所有方法都要求各水平的总体分布之间是相似的，仅仅是位置参数可能有些差异。</p></li>
+<li><p>Kruskal-Wallis与Friedman、Durbin对称，都是检验各水平响应值的位置参数是否一致（即各水平在该响应值下是否有差异）。Kruskal是在各水平不相关的情况下使用的，Freidman是在完全区组设计下、各水平之间由于区组问题不独立时使用的，而Durbin是在不完全区组设计下、各区组之间独立时使用的。同时Kruskal-Wallis、Durbin要求数据是连续型的，Friedman则无此类要求。</p></li>
+<li><p>Jonckheere-Terpstra与page对称，都是检验各水平响应值的位置参数是否有顺序关系，Jonckheere-Terpstra是在各水平不相关的情况下使用的，page是在完全区组设计下、各水平之间由于区组问题不独立时使用的。同时Jonckheere-Terpstra要求数据是连续型的，page则无此类要求。</p></li>
+<li><p>Cochran与Friedman对应，Cochran是完全区组设计、二元响应情况下检验各水平是否存在差异的方法。</p></li>
+<li><p>Friedman与下一章Kendall检验是一致的。Kendall一般用在判断评估者的主观评估是否一致，而Friedman则是客观的判断水平之间是否有差异。</p></li>
+</ol>
+</section>
+<section id="kruskal-wallis-531aca40" class="level2">
+<h2 class="anchored" data-anchor-id="kruskal-wallis-531aca40"><span class="header-section-number">32.3</span> Kruskal-Wallis检验</h2>
+<section id="id-4-b60d8bc3" class="level4">
+<h4 class="anchored" data-anchor-id="id-4-b60d8bc3"><span class="header-section-number">32.3.0.1</span> 适用条件</h4>
+<p>各响应值在水平间和水平内是独立的，水平之间分布是相似的，数据是连续型的。</p>
+</section>
+<section id="id-1-fbaa0375" class="level4">
+<h4 class="anchored" data-anchor-id="id-1-fbaa0375"><span class="header-section-number">32.3.0.2</span> 假设</h4>
+<p>假设<span class="math inline">\(k\)</span>个水平有分布函数<span class="math inline">\(F_i(x)=F(x-\theta_i),\;i=1,2,\dots,k\)</span>，则检验假设可写为：</p>
+<p><span class="math display">\[\begin{equation}
+H_0:\theta_1=\theta_2=\cdots=\theta_n\Leftrightarrow
+H_1:\text{至少有一个等号不成立}\notag
+\end{equation}\]</span></p>
+</section>
+<section id="id-6-02981507" class="level4">
+<h4 class="anchored" data-anchor-id="id-6-02981507"><span class="header-section-number">32.3.0.3</span> 原理</h4>
+<p>将所有水平的响应值混合后排序，得到每一个响应值对应于所有数据的秩，类似于方差分析中MSA的构成，若水平间的秩和差异大，则应怀疑零假设。由此构建以下Kruskal-Wallis统计量（其中<span class="math inline">\(\bar{R_i}\)</span>表示第<span class="math inline">\(i\)</span>个水平秩的平均值，<span class="math inline">\(\bar{R}\)</span>表示所有响应值秩的平均值）：</p>
+<p><span class="math display">\[\begin{equation}
+H=\frac{12}{N(N+1)}\sum_{i=1}^kn_i(\bar{R_i}-\bar{R})^2=\frac{12}{N(N+1)}\sum_{i=1}^k\frac{R_i^2}{n_i}-3(N+1)\notag
+\end{equation}\]</span></p>
+<p>如果备择假设成立，那么统计量的值应该是偏大的，因此只考虑上侧的单侧检验问题。</p>
+<p>若想求精确结果，需要满足数据中不存在结（即数据中不存在相同的数值），对每种秩分配计算对应的<span class="math inline">\(H\)</span>值，便能得到此时统计量<span class="math inline">\(H\)</span>的分布。</p>
+</section>
+<section id="id-3-b5c60ca4" class="level4">
+<h4 class="anchored" data-anchor-id="id-3-b5c60ca4"><span class="header-section-number">32.3.0.4</span> 大样本近似</h4>
+<p>在大样本的情况下，若零假设成立，有如下近似分布：</p>
+<p><span class="math display">\[\begin{equation}
+H\sim\chi^2_{(k-1)}\notag
+\end{equation}\]</span></p>
+</section>
+<section id="id-1-33c3b353" class="level4">
+<h4 class="anchored" data-anchor-id="id-1-33c3b353"><span class="header-section-number">32.3.0.5</span> 打结</h4>
+<p>若存在打结的情况，将H作以下修正，然后利用大样本近似公式进行计算：</p>
+<p><span class="math display">\[\begin{equation}
+H_C=\frac{H}{1-\sum\limits_{i=1}^g(\tau_i^3-\tau_i)/(N^3-N)}\notag
+\end{equation}\]</span></p>
+</section>
+<section id="id-7-9eb221ae" class="level4">
+<h4 class="anchored" data-anchor-id="id-7-9eb221ae"><span class="header-section-number">32.3.0.6</span> 代码</h4>
+<p>这是R语言stats包中的函数，只提供大样本近似，并且不包含连续性修正。x表示各水平的response值，g对应于factor标签。也可以只传入x，此时x需要是一个包含所有水平响应值的列表，各水平之间分隔开。</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-bgcolor="white" data-linenos="" data-frame="single" data-numbersep="5pt" data-breaklines="" data-mathescape=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kruskal.test</span>(x, g)</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+<p>以下是自编代码，x表示各水平的response值，y对应于factor标签。也可以只传入x，此时x需要是一个数据框，第一列是response值，第二列是factor标签。提供精确检验、大样本近似、连续性修正与打结校正功能。精确检验需要gtools包，同时测试了一下一个水平8个数据一共24个数据permutation就要占到14个G的内存以上，慎用精确检验。</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-bgcolor="white" data-linenos="" data-frame="single" data-numbersep="5pt" data-breaklines=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>kruskal_wallis.test <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">exact =</span> <span class="cn">FALSE</span>, <span class="at">correct =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.data.frame</span>(x) <span class="sc">&amp;&amp;</span> <span class="fu">ncol</span>(x) <span class="sc">==</span> <span class="dv">2</span>) {</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    DNAME <span class="ot">&lt;-</span> <span class="fu">deparse</span>(<span class="fu">substitute</span>(x))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> x[, <span class="dv">2</span>]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> x[, <span class="dv">1</span>]</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">is.vector</span>(x)) {</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.null</span>(y)) </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">stop</span>(<span class="st">"Error: x must have two columns or y is provided."</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(y) <span class="sc">!=</span> <span class="fu">length</span>(x)) </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">stop</span>(<span class="st">"Error: x and y must have the same length."</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    DNAME <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="fu">deparse</span>(<span class="fu">substitute</span>(x)), <span class="st">"and"</span>, <span class="fu">deparse</span>(<span class="fu">substitute</span>(y)))</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">"Error: x must be a data frame with 2 columns or a vector."</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  METHOD <span class="ot">&lt;-</span> <span class="st">"Kruskal-Wallis test"</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  TIES <span class="ot">&lt;-</span> <span class="fu">table</span>(x)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">any</span>(TIES <span class="sc">&gt;</span> <span class="dv">1</span>)) {</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    ties <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {ties <span class="ot">&lt;-</span> <span class="cn">FALSE</span>}</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  unique_y <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">unique</span>(y))</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  rank_x <span class="ot">&lt;-</span> <span class="fu">rank</span>(x)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  R_i <span class="ot">&lt;-</span> <span class="fu">sapply</span>(unique_y, <span class="cf">function</span>(i) <span class="fu">sum</span>(rank_x[y <span class="sc">==</span> i]))</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  n_i <span class="ot">&lt;-</span> <span class="fu">sapply</span>(unique_y, <span class="cf">function</span>(i) <span class="fu">sum</span>(y <span class="sc">==</span> i))</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  N <span class="ot">&lt;-</span> <span class="fu">length</span>(x)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  STATISTIC <span class="ot">&lt;-</span> <span class="fu">setNames</span>((<span class="dv">12</span> <span class="sc">/</span> (N <span class="sc">*</span> (N <span class="sc">+</span> <span class="dv">1</span>)) <span class="sc">*</span> <span class="fu">sum</span>(R_i<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> n_i) <span class="sc">-</span> <span class="dv">3</span> <span class="sc">*</span> (N <span class="sc">+</span> <span class="dv">1</span>)) </span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>                        <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">sum</span>(TIES<span class="sc">^</span><span class="dv">3</span> <span class="sc">-</span> TIES) <span class="sc">/</span> (N<span class="sc">^</span><span class="dv">3</span> <span class="sc">-</span> N)), <span class="st">"H"</span>)</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span>exact <span class="sc">||</span> ties) {</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    df <span class="ot">&lt;-</span> <span class="fu">length</span>(unique_y) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span>correct) {</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>      p_value <span class="ot">&lt;-</span> <span class="fu">pchisq</span>(STATISTIC, <span class="at">df =</span> df, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>      METHOD <span class="ot">&lt;-</span> <span class="fu">paste</span>(METHOD, <span class="st">"with continuity correction"</span>)</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>      p_value <span class="ot">&lt;-</span> <span class="fu">pchisq</span>(STATISTIC <span class="sc">-</span> <span class="fl">0.5</span>, <span class="at">df =</span> df, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    H.cal <span class="ot">&lt;-</span> <span class="cf">function</span>(rank_x, y) {</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>      R_i <span class="ot">&lt;-</span> <span class="fu">sapply</span>(unique_y, <span class="cf">function</span>(i) <span class="fu">sum</span>(rank_x[y <span class="sc">==</span> i]))</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>      (<span class="dv">12</span> <span class="sc">/</span> (N <span class="sc">*</span> (N <span class="sc">+</span> <span class="dv">1</span>)) <span class="sc">*</span> <span class="fu">sum</span>(R_i<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> n_i) <span class="sc">-</span> <span class="dv">3</span> <span class="sc">*</span> (N <span class="sc">+</span> <span class="dv">1</span>))</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    METHOD <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">"test"</span>, <span class="st">"exact test"</span>, METHOD, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(gtools)</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    all_permutations <span class="ot">&lt;-</span> <span class="fu">permutations</span>(N, N)</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    Hs <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(all_permutations), <span class="cf">function</span>(i) {</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>      <span class="fu">H.cal</span>(all_permutations[i, ], y)</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    p_value <span class="ot">&lt;-</span> <span class="fu">mean</span>(Hs <span class="sc">&gt;=</span> STATISTIC)</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>  RVAL <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">statistic =</span> STATISTIC, <span class="at">p.value =</span> p_value, </span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>               <span class="at">method =</span> METHOD, <span class="at">data.name =</span> DNAME)</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(RVAL) <span class="ot">&lt;-</span> <span class="st">"htest"</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>  RVAL</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="jonckheere-terpstra-11eeb669" class="level2">
+<h2 class="anchored" data-anchor-id="jonckheere-terpstra-11eeb669"><span class="header-section-number">32.4</span> Jonckheere-Terpstra检验</h2>
+<section id="id-7-8c34ae1f" class="level4">
+<h4 class="anchored" data-anchor-id="id-7-8c34ae1f"><span class="header-section-number">32.4.0.1</span> 目的</h4>
+<p>检验水平的位置参数是否呈现出上升趋势，若想检验是否呈现出下降趋势，改变水平顺序就行了。</p>
+</section>
+<section id="id-5-f11955a2" class="level4">
+<h4 class="anchored" data-anchor-id="id-5-f11955a2"><span class="header-section-number">32.4.0.2</span> 适用条件</h4>
+<p>各响应值在水平间和水平内是独立的，水平之间分布是相似的，数据是连续型的。这里与Kruskal-Wallis检验的条件是一样的。</p>
+</section>
+<section id="id-2-07cd1472" class="level4">
+<h4 class="anchored" data-anchor-id="id-2-07cd1472"><span class="header-section-number">32.4.0.3</span> 假设</h4>
+<p>假设<span class="math inline">\(k\)</span>个水平有分布函数<span class="math inline">\(F_i(x)=F(x-\theta_i),\;i=1,2,\dots,k\)</span>，则检验假设可写为：</p>
+<p><span class="math display">\[\begin{equation}
+H_0:\theta_1=\theta_2=\cdots=\theta_n\Leftrightarrow
+H_1:\theta_1\leqslant\theta_2\leqslant\cdots\leqslant\theta_n\notag
+\end{equation}\]</span></p>
+</section>
+<section id="id-7-85bef065" class="level4">
+<h4 class="anchored" data-anchor-id="id-7-85bef065"><span class="header-section-number">32.4.0.4</span> 原理</h4>
+<p>假设一共有<span class="math inline">\(k\)</span>个水平，每个水平中有<span class="math inline">\(n_i\)</span>个响应值(<span class="math inline">\(i=1,2,\dots,k\)</span>)，响应值用<span class="math inline">\(X_{ij}\)</span>表示(<span class="math inline">\(i=1,2,\dots,k,\;j=1,2,\dots,n_i\)</span>)，由此构建以下JT统计量(J)：</p>
+<p><span class="math display">\[\begin{gather*}
+U_{ij}=\left|X_{ia}&lt;X_{jb},\;a=1,2,\dots,n_i,\;b=1,2,\dots,n_j\right| \\
+J=\sum_{i&lt;j}U_{ij}
+\end{gather*}\]</span></p>
+<p>在备择假设成立的情况下，某个水平中的观测值会比后面水平中的观测值小，水平间的<span class="math inline">\(U_{ij}\)</span>会比较大，<span class="math inline">\(J\)</span>也会比较大。因此在<span class="math inline">\(J\)</span>比较大的时候，有理由怀疑零假设。由此可看出这里只考虑上侧的单侧检验问题。</p>
+<p>若想求精确检验的结果，需要满足数据中没有结（即所有数据中没有相同的数值），然后对每一种秩分配情况计算<span class="math inline">\(J\)</span>的值（秩的大小关系便反映了数据之间的大小关系），即可得到<span class="math inline">\(J\)</span>的精确分布。</p>
+</section>
+<section id="id-4-1ddfef5b" class="level4">
+<h4 class="anchored" data-anchor-id="id-4-1ddfef5b"><span class="header-section-number">32.4.0.5</span> 大样本近似</h4>
+<p>在<span class="math inline">\(\min\limits_in_i\to+\infty\)</span>时，有以下近似公式：</p>
+<p><span class="math display">\[\begin{equation}
+Z=\frac{J-(N^2-\sum\limits_{i=1}^k)/4}{\sqrt{[N^2(2N+3)-\sum\limits_{i=1}^kn_i^2(2n_i+3)]/72}}\sim N(0,\;1)\notag
+\end{equation}\]</span></p>
+</section>
+<section id="id-2-83061a80" class="level4">
+<h4 class="anchored" data-anchor-id="id-2-83061a80"><span class="header-section-number">32.4.0.6</span> 打结</h4>
+<p>当数据中存在相同数值时，要进行修正：</p>
+<p><span class="math display">\[\begin{gather*}
+U_{ij}=\left|X_{ia}&lt;X_{jb},\;a=1,2,\dots,n_i,\;b=1,2,\dots,n_j\right|+ \\
+\frac{1}{2}\left|X_{ia}=X_{jb},\;a=1,2,\dots,n_i,\;b=1,2,\dots,n_j\right| \\
+J=\sum_{i&lt;j}U_{ij}
+\end{gather*}\]</span></p>
+</section>
+<section id="id-8-f6e9c219" class="level4">
+<h4 class="anchored" data-anchor-id="id-8-f6e9c219"><span class="header-section-number">32.4.0.7</span> 代码</h4>
+<p>x表示各水平的response值，y对应于factor标签。也可以只传入x，此时x需要是一个数据框，第一列是response值，第二列是factor标签。提供精确检验、大样本近似、连续性修正与打结校正功能。精确检验需要gtools包，同时测试了一下一个水平8个数据一共24个数据permutation就要占到14个G的内存以上，慎用精确检验。</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-bgcolor="white" data-linenos="" data-frame="single" data-numbersep="5pt" data-breaklines=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>JT.test <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">exact =</span> <span class="cn">FALSE</span>, <span class="at">correct =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.data.frame</span>(x) <span class="sc">&amp;&amp;</span> <span class="fu">ncol</span>(x) <span class="sc">==</span> <span class="dv">2</span>) {</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    DNAME <span class="ot">&lt;-</span> <span class="fu">deparse</span>(<span class="fu">substitute</span>(x))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> x[, <span class="dv">2</span>]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> x[, <span class="dv">1</span>]</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">is.vector</span>(x)) {</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.null</span>(y)) </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">stop</span>(<span class="st">"Error: x must have two columns or y is provided."</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(y) <span class="sc">!=</span> <span class="fu">length</span>(x)) </span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">stop</span>(<span class="st">"Error: x and y must have the same length."</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    DNAME <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="fu">deparse</span>(<span class="fu">substitute</span>(x)), <span class="st">"and"</span>, <span class="fu">deparse</span>(<span class="fu">substitute</span>(y)))</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">"Error: x must be a data frame with 2 columns or a vector."</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  J.cal <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y, k) {</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    U <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>(k <span class="sc">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> (i <span class="sc">+</span> <span class="dv">1</span>)<span class="sc">:</span>k) {</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        xi <span class="ot">&lt;-</span> x[y<span class="sc">==</span>i]</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        xj <span class="ot">&lt;-</span> x[y<span class="sc">==</span>j]</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        ties <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">outer</span>(xi, xj, <span class="st">"=="</span>) <span class="sc">*</span> <span class="dv">1</span>)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        U <span class="ot">&lt;-</span> U <span class="sc">+</span> <span class="fu">sum</span>(<span class="fu">outer</span>(xi, xj, <span class="st">"&lt;"</span>) <span class="sc">*</span> <span class="dv">1</span>) <span class="sc">+</span> ties <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    U</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  METHOD <span class="ot">&lt;-</span> <span class="st">"Jonckheere-Terpstra test"</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> <span class="fu">max</span>(y)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  U <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>(k <span class="sc">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> (i <span class="sc">+</span> <span class="dv">1</span>)<span class="sc">:</span>k) {</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>      xi <span class="ot">&lt;-</span> x[y<span class="sc">==</span>i]</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>      xj <span class="ot">&lt;-</span> x[y<span class="sc">==</span>j]</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>      ties <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">outer</span>(xi, xj, <span class="st">"=="</span>) <span class="sc">*</span> <span class="dv">1</span>)</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (ties <span class="sc">&gt;</span> <span class="dv">0</span>) {exact <span class="ot">&lt;-</span> <span class="cn">FALSE</span>}</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>      U <span class="ot">&lt;-</span> U <span class="sc">+</span> <span class="fu">sum</span>(<span class="fu">outer</span>(xi, xj, <span class="st">"&lt;"</span>) <span class="sc">*</span> <span class="dv">1</span>) <span class="sc">+</span> ties <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>  STATISTIC <span class="ot">&lt;-</span> <span class="fu">setNames</span>(U, <span class="st">"J"</span>)</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span>exact) {</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    ni <span class="ot">&lt;-</span> <span class="fu">table</span>(y)</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    N <span class="ot">&lt;-</span> <span class="fu">sum</span>(ni)</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>    Z <span class="ot">&lt;-</span> (STATISTIC <span class="sc">-</span> (N<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> <span class="fu">sum</span>(ni<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">/</span> <span class="dv">4</span>) <span class="sc">/</span> <span class="fu">sqrt</span>((N<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> (<span class="dv">2</span> <span class="sc">*</span> N <span class="sc">+</span> <span class="dv">3</span>) <span class="sc">-</span> <span class="fu">sum</span>(ni<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> (<span class="dv">2</span> <span class="sc">*</span> ni <span class="sc">+</span> <span class="dv">3</span>))) <span class="sc">/</span> <span class="dv">72</span>)</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span>correct) {</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>      p_value <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(Z, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>      p_value <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(Z <span class="sc">-</span> <span class="fl">0.5</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>      METHOD <span class="ot">&lt;-</span> <span class="fu">paste</span>(METHOD, <span class="st">"with continuity correction"</span>)</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>    METHOD <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">"test"</span>, <span class="st">"exact test"</span>, METHOD, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(gtools)</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>    n <span class="ot">&lt;-</span> <span class="fu">length</span>(x)</span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>    all_permutations <span class="ot">&lt;-</span> <span class="fu">permutations</span>(n, n)</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>    JTs <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(all_permutations), <span class="cf">function</span>(i) {</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>      <span class="fu">J.cal</span>(all_permutations[i, ], y, k)</span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>    p_value <span class="ot">&lt;-</span> <span class="fu">mean</span>(JTs <span class="sc">&gt;=</span> STATISTIC)</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>  RVAL <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">statistic =</span> STATISTIC, <span class="at">p.value =</span> p_value, </span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>               <span class="at">method =</span> METHOD, <span class="at">data.name =</span> DNAME)</span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(RVAL) <span class="ot">&lt;-</span> <span class="st">"htest"</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>  RVAL</span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="friedman-4d31940d" class="level2">
+<h2 class="anchored" data-anchor-id="friedman-4d31940d"><span class="header-section-number">32.5</span> Friedman秩和检验</h2>
+<section id="id-6-81bdb0bb" class="level4">
+<h4 class="anchored" data-anchor-id="id-6-81bdb0bb"><span class="header-section-number">32.5.0.1</span> 适用条件</h4>
+<p>各水平间并不独立（因为还有区组的影响），采用完全区组设计，水平之间分布是相似的，连续型与离散型数据都可以。</p>
+</section>
+<section id="id-3-ca46e15d" class="level4">
+<h4 class="anchored" data-anchor-id="id-3-ca46e15d"><span class="header-section-number">32.5.0.2</span> 假设</h4>
+<p>假设<span class="math inline">\(k\)</span>个水平有分布函数<span class="math inline">\(F_i(x)=F(x-\theta_i),\;i=1,2,\dots,k\)</span>，则检验假设可写为：</p>
+<p><span class="math display">\[\begin{equation}
+H_0:\theta_1=\theta_2=\cdots=\theta_n\Leftrightarrow
+H_1:\text{至少有一个等号不成立}\notag
+\end{equation}\]</span></p>
+</section>
+<section id="id-8-3554bddd" class="level4">
+<h4 class="anchored" data-anchor-id="id-8-3554bddd"><span class="header-section-number">32.5.0.3</span> 原理</h4>
+<p>假设有<span class="math inline">\(k\)</span>个水平、<span class="math inline">\(b\)</span>个区组。<span id="sec-friedman-0a523500" data-label="sec:friedman检验原理"></span></p>
+<p>因为各区组之间是有影响的，无法把各响应值混在一起排序。选择在各个区组内计算所有响应值的秩，<span class="math inline">\(R_{ij}\)</span>表示在第<span class="math inline">\(j\)</span>个区组中水平<span class="math inline">\(i\)</span>的秩，<span class="math inline">\(R_i=\sum\limits_{j=1}^bR_{ij},\;i=1,2,\dots,k\)</span>，定义如下Friedman统计量:</p>
+<p><span class="math display">\[\begin{equation}
+Q=\frac{12}{bk(k+1)}\sum_{i=1}^k(R_i-\frac{b(k+1)}{2})^2=\frac{12}{bk(k+1)}\sum_{i=1}^kR_i^2-3b(k+1)\notag
+\end{equation}\]</span></p>
+<p>易证<span class="math inline">\(\frac{b(k+1)}{2}=\bar{R_i}\)</span>（只需注意此时秩是针对区组内而言）。在零假设成立的情况下，各水平之间的秩和与均值相比不应相差过大，也就是<span class="math inline">\(Q\)</span>值不应太大，若<span class="math inline">\(Q\)</span>值过大，则有理由怀疑零假设。由此可看出这里只考虑上侧的单侧检验问题。</p>
+</section>
+<section id="id-5-37dbfbfe" class="level4">
+<h4 class="anchored" data-anchor-id="id-5-37dbfbfe"><span class="header-section-number">32.5.0.4</span> 大样本近似</h4>
+<p>在大样本的情况下（<span class="math inline">\(b\to+\infty\)</span>），若零假设成立，有如下近似分布：</p>
+<p><span class="math display">\[\begin{equation}
+Q\sim\chi^2_{(k-1)}\notag
+\end{equation}\]</span></p>
+</section>
+<section id="id-3-9b04a59b" class="level4">
+<h4 class="anchored" data-anchor-id="id-3-9b04a59b"><span class="header-section-number">32.5.0.5</span> 打结</h4>
+<p>在某个区组存在结的时候，利用下式进行修正（其中<span class="math inline">\(\tau_{ij}\)</span>表示第<span class="math inline">\(j\)</span>个区组的第<span class="math inline">\(i\)</span>个结统计量）：</p>
+<p><span class="math display">\[\begin{equation}
+Q_C=\frac{Q}{1-C},\;C=\frac{\sum\limits_{i,\;j}(\tau_{ij}^3-\tau_{ij})}{bk(k^2-1)}\notag
+\end{equation}\]</span></p>
+</section>
+<section id="id--7bcc4679" class="level4">
+<h4 class="anchored" data-anchor-id="id--7bcc4679"><span class="header-section-number">32.5.0.6</span> 成对数据的比较</h4>
+<p>类似于邓肯多重比较法，有时需要比较某两个水平之间是否存在差异，那么在大样本的情况下，如果零假设为：<span class="math inline">\(i\)</span>水平与<span class="math inline">\(j\)</span>水平之间没有差异，那么如果下式成立（其中<span class="math inline">\(\alpha\)</span>是检验的显著性水平）：</p>
+<p><span class="math display">\[\begin{gather*}
+\left|R_i-R_j&gt;Z_{\frac{\alpha^{\star}}{2}}\sqrt{b(k+1)k/6}\right| \\
+\alpha^{\star}=\frac{\alpha}{k(k-1)/2}
+\end{gather*}\]</span></p>
+<p>则可拒绝零假设。可以看出这是一个很保守的检验，<span class="math inline">\(\alpha^{\star}\)</span>其实是做了多重假设检验的校正。</p>
+</section>
+<section id="id-9-b46a5963" class="level4">
+<h4 class="anchored" data-anchor-id="id-9-b46a5963"><span class="header-section-number">32.5.0.7</span> 代码</h4>
+<p>以下是自编代码，提供精确计算、大样本近似、连续性修正与打结校正功能。x可以是一个三列的数据框，第一列表示response值，第二列表示factor，第三列表示block。x也可以是一个向量，表示response，此时必须传入factor和block。</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-bgcolor="white" data-linenos="" data-frame="single" data-numbersep="5pt" data-breaklines=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>friedman.test <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">factor =</span> <span class="cn">NULL</span>, <span class="at">block =</span> <span class="cn">NULL</span>, </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">exact =</span> <span class="cn">FALSE</span>, <span class="at">correct =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.data.frame</span>(x)) {</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">ncol</span>(x) <span class="sc">==</span> <span class="dv">3</span>) {</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>      response <span class="ot">&lt;-</span> x[[<span class="dv">1</span>]]</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>      factor <span class="ot">&lt;-</span> x[[<span class="dv">2</span>]]</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>      block <span class="ot">&lt;-</span> x[[<span class="dv">3</span>]]</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>      DNAME <span class="ot">&lt;-</span> <span class="fu">deparse</span>(<span class="fu">substitute</span>(x))</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">is.vector</span>(x)) {</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.null</span>(factor) <span class="sc">||</span> <span class="fu">is.null</span>(block)) {</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">stop</span>(<span class="st">"Error: factor and block must be provided when x is a vector."</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    response <span class="ot">&lt;-</span> x</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    DNAME <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="fu">deparse</span>(<span class="fu">substitute</span>(x)), <span class="st">", "</span>, </span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">deparse</span>(<span class="fu">substitute</span>(factor)), <span class="st">" and "</span>, </span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">deparse</span>(<span class="fu">substitute</span>(block)), <span class="at">sep =</span> <span class="st">""</span>)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">"Error: x must be either a data frame with three columns or a vector."</span>)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  Q.call <span class="ot">&lt;-</span> <span class="cf">function</span>(ranks, factors) {</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    R_i <span class="ot">&lt;-</span> <span class="fu">tapply</span>(ranks, factors, sum)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="dv">12</span> <span class="sc">/</span> (b <span class="sc">*</span> k <span class="sc">*</span> (k <span class="sc">+</span> <span class="dv">1</span>)) <span class="sc">*</span> <span class="fu">sum</span>(R_i<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> <span class="dv">3</span> <span class="sc">*</span> b <span class="sc">*</span> (k <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>  METHOD <span class="ot">&lt;-</span> <span class="st">"Friedman rank sum test"</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(factor))</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(block))</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  rank <span class="ot">&lt;-</span> <span class="fu">ave</span>(response, block, <span class="at">FUN =</span> rank)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  STATISTIC <span class="ot">&lt;-</span> <span class="fu">setNames</span>(<span class="fu">Q.call</span>(rank, factor), <span class="st">"Q"</span>)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>  TIES <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">tapply</span>(response, block, table))</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">any</span>(<span class="fu">sapply</span>(TIES, <span class="cf">function</span>(x) <span class="fu">any</span>(x <span class="sc">&gt;</span> <span class="dv">1</span>)))) {</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    ties <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {ties <span class="ot">&lt;-</span> <span class="cn">FALSE</span>}</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span>exact <span class="sc">||</span> ties) {</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    Qc <span class="ot">&lt;-</span> STATISTIC <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">sum</span>(TIES<span class="sc">^</span><span class="dv">3</span> <span class="sc">-</span> TIES) <span class="sc">/</span> (b <span class="sc">*</span> k <span class="sc">*</span> (k<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> <span class="dv">1</span>)))</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="sc">!</span>correct) {</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>        p_value <span class="ot">&lt;-</span> <span class="fu">pchisq</span>(Qc, k <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>        p_value <span class="ot">&lt;-</span> <span class="fu">pchisq</span>(Qc <span class="sc">-</span> <span class="fl">0.5</span>, k <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>        METHOD <span class="ot">&lt;-</span> <span class="fu">paste</span>(METHOD, <span class="st">"with continuity correction"</span>)</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    METHOD <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">"test"</span>, <span class="st">"exact test"</span>, METHOD, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(gtools)</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    possible_ranks <span class="ot">&lt;-</span> <span class="fu">permutations</span>(k, k)</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    all_combinations <span class="ot">&lt;-</span> <span class="fu">permutations</span>(<span class="fu">nrow</span>(possible_ranks), b, <span class="at">repeats.allowed =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    Qs <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(all_combinations), <span class="cf">function</span>(i) {</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>      b_combs <span class="ot">&lt;-</span> possible_ranks[all_combinations[i, ], ]</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>      rank_i <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(b_combs)</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>      <span class="fu">Q.call</span>(rank_i, factor)</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    p_value <span class="ot">&lt;-</span> <span class="fu">mean</span>(Qs <span class="sc">&gt;=</span> STATISTIC)</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>  RVAL <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">statistic =</span> STATISTIC, <span class="at">p.value =</span> p_value, </span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>               <span class="at">method =</span> METHOD, <span class="at">data.name =</span> DNAME)</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(RVAL) <span class="ot">&lt;-</span> <span class="st">"htest"</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>  RVAL</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="page-8b45dee0" class="level2">
+<h2 class="anchored" data-anchor-id="page-8b45dee0"><span class="header-section-number">32.6</span> Page检验</h2>
+<section id="id-8-8acac56e" class="level4">
+<h4 class="anchored" data-anchor-id="id-8-8acac56e"><span class="header-section-number">32.6.0.1</span> 目的</h4>
+<p>检验水平的位置参数是否呈现出上升趋势，若想检验是否呈现出下降趋势，改变水平顺序就行了。</p>
+</section>
+<section id="id-7-dfb07454" class="level4">
+<h4 class="anchored" data-anchor-id="id-7-dfb07454"><span class="header-section-number">32.6.0.2</span> 适用条件</h4>
+<p>各水平间并不独立（因为还有区组的影响），采用完全区组设计，水平之间分布是相似的，离散型数据与连续型数据都可以。</p>
+</section>
+<section id="id-4-f197e43b" class="level4">
+<h4 class="anchored" data-anchor-id="id-4-f197e43b"><span class="header-section-number">32.6.0.3</span> 假设</h4>
+<p>假设<span class="math inline">\(k\)</span>个水平有分布函数<span class="math inline">\(F_i(x)=F(x-\theta_i),\;i=1,2,\dots,k\)</span>，则检验假设可写为：</p>
+<p><span class="math display">\[\begin{equation}
+H_0:\theta_1=\theta_2=\cdots=\theta_n\Leftrightarrow
+H_1:\theta_1\leqslant\theta_2\leqslant\cdots\leqslant\theta_n\notag
+\end{equation}\]</span></p>
+</section>
+<section id="id-9-b4dde70f" class="level4">
+<h4 class="anchored" data-anchor-id="id-9-b4dde70f"><span class="header-section-number">32.6.0.4</span> 原理</h4>
+<p>假设有<span class="math inline">\(k\)</span>个水平、<span class="math inline">\(b\)</span>个区组。</p>
+<p>因为各区组之间是有影响的，无法把各响应值混在一起排序。选择在各个区组内计算所有响应值的秩，<span class="math inline">\(R_{ij}\)</span>表示在第<span class="math inline">\(j\)</span>个区组中水平<span class="math inline">\(i\)</span>的秩，<span class="math inline">\(R_i=\sum\limits_{j=1}^bR_{ij},\;i=1,2,\dots,k\)</span>，定义如下Page统计量：</p>
+<p><span class="math display">\[\begin{equation}
+L=\sum_{i=1}^kiR_i\notag
+\end{equation}\]</span></p>
+<p>如果备择假设是正确的，那么对<span class="math inline">\(R_i\)</span>进行加权求和可以对统计量起到一个放大的作用，那么<span class="math inline">\(L\)</span>就会很大。因此在<span class="math inline">\(L\)</span>比较大的时候，有理由怀疑零假设。由此可看出这里只考虑上侧的单侧检验问题。</p>
+<p>若想求精确检验的结果，需要满足数据中没有结（即每个区组中都没有相同的数值），然后对每一种秩分配情况计算<span class="math inline">\(L\)</span>的值（秩的大小关系便反映了数据之间的大小关系），即可得到<span class="math inline">\(L\)</span>的精确分布。</p>
+</section>
+<section id="id-6-009e7732" class="level4">
+<h4 class="anchored" data-anchor-id="id-6-009e7732"><span class="header-section-number">32.6.0.5</span> 大样本近似</h4>
+<p>在大样本的情况下（<span class="math inline">\(b\to+\infty\)</span>），有如下正态近似：</p>
+<p><span class="math display">\[\begin{gather*}
+Z=\frac{L-\mu_L}{\sigma_L}\sim N(0,\;1) \\
+\mu_L=\frac{bk(k+1)^2}{4},\;\sigma_L^2=\frac{b(k^3-k)^2}{144(k-1)}
+\end{gather*}\]</span></p>
+</section>
+<section id="id-4-a1cae5a9" class="level4">
+<h4 class="anchored" data-anchor-id="id-4-a1cae5a9"><span class="header-section-number">32.6.0.6</span> 打结</h4>
+<p>若存在打结的情况，需要对正态近似的<span class="math inline">\(\sigma_L^2\)</span>作如下修正（其中<span class="math inline">\(\tau_{ij}\)</span>表示第<span class="math inline">\(j\)</span>个区组的第<span class="math inline">\(i\)</span>个结统计量）：</p>
+<p><span class="math display">\[\begin{equation}
+\sigma_L^2=k(k^2-1)\frac{bk(k^2-1)-\sum_i\sum_j(\tau_{ij}^3-\tau_{ij})}{144(k-1)}\notag
+\end{equation}\]</span></p>
+</section>
+<section id="page-28643370" class="level4">
+<h4 class="anchored" data-anchor-id="page-28643370"><span class="header-section-number">32.6.0.7</span> 对区组、水平进行重复时的page检验</h4>
+<p>在区组和水平之间不存在交互作用，并且所有<span class="math inline">\((i,\;j)\)</span>位置的重复数都相同时（假设都是<span class="math inline">\(n\)</span>），有如下正态近似（也考虑了到打结的修正）：</p>
+<p><span class="math display">\[\begin{gather*}
+Z=\frac{L-\mu_L}{\sigma_L}\sim N(0,\;1) \\
+\mu_L=\frac{nbk(k+1)(nk+1)}{4} \\
+\sigma_L^2=nk(k^2-1)\frac{nbk(n^2k^2-1)-\sum_i\sum_j(\tau_{ij}^3-\tau_{ij})}{144(nk-1)}
+\end{gather*}\]</span></p>
+</section>
+<section id="id-10-127a44e4" class="level4">
+<h4 class="anchored" data-anchor-id="id-10-127a44e4"><span class="header-section-number">32.6.0.8</span> 代码</h4>
+<p>以下是自编代码，提供重复、精确计算、大样本近似、连续性修正与打结校正功能。当对区组与水平进行重复时，x必须是一个数据框，每一列是一次重复的结果，也必须传入factor与block，此时只提供大样本近似。当不进行重复时，x可以是一个三列的数据框，第一列表示response值，第二列表示factor，第三列表示block。请注意，检验顺序与输入的factor顺序是一致的，建议对照二维表<strong>逐行</strong>输入（行是水平，检验顺序即为行的顺序，列是区组）。如果出现打结的情况，结统计量按照计算公式进行计算，<span class="math inline">\(L\)</span>统计量的秩部分取结的平均秩（例：数据为1、1、3、4，有重复值1，则秩为1.5、1.5、3、4）。</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-bgcolor="white" data-linenos="" data-frame="single" data-numbersep="5pt" data-breaklines=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>page.test <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">factor =</span> <span class="cn">NULL</span>, <span class="at">block =</span> <span class="cn">NULL</span>, </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">exact =</span> <span class="cn">FALSE</span>, <span class="at">correct =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">repeated =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (repeated) {</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (exact) {</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">stop</span>(<span class="st">"Error: exact cannot be TRUE when repeated is TRUE."</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.data.frame</span>(x) <span class="sc">||</span> <span class="fu">ncol</span>(x) <span class="sc">==</span> <span class="dv">1</span>) {</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">stop</span>(<span class="st">"Error: x must be a data frame with more than one column when repeated is TRUE."</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.null</span>(factor) <span class="sc">||</span> <span class="fu">is.null</span>(block)) {</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">stop</span>(<span class="st">"Error: factor and block must be provided when repeated is TRUE."</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    DNAME <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="fu">deparse</span>(<span class="fu">substitute</span>(x)), <span class="st">", "</span>, </span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">deparse</span>(<span class="fu">substitute</span>(factor)), <span class="st">" and "</span>, </span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">deparse</span>(<span class="fu">substitute</span>(block)), <span class="at">sep =</span> <span class="st">""</span>)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.data.frame</span>(x)) {</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">ncol</span>(x) <span class="sc">==</span> <span class="dv">3</span>) {</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        response <span class="ot">&lt;-</span> x[[<span class="dv">1</span>]]</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        factor <span class="ot">&lt;-</span> x[[<span class="dv">2</span>]]</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>        block <span class="ot">&lt;-</span> x[[<span class="dv">3</span>]]</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        DNAME <span class="ot">&lt;-</span> <span class="fu">deparse</span>(<span class="fu">substitute</span>(x))</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">is.vector</span>(x)) {</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">is.null</span>(factor) <span class="sc">||</span> <span class="fu">is.null</span>(block)) {</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        <span class="fu">stop</span>(<span class="st">"Error: factor and block must be provided when x is a vector."</span>)</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>      response <span class="ot">&lt;-</span> x</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>      DNAME <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="fu">deparse</span>(<span class="fu">substitute</span>(x)), <span class="st">", "</span>, </span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">deparse</span>(<span class="fu">substitute</span>(factor)), <span class="st">" and "</span>, </span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">deparse</span>(<span class="fu">substitute</span>(block)), <span class="at">sep =</span> <span class="st">""</span>)</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>      <span class="fu">stop</span>(<span class="st">"Error: x must be either a data frame with three columns or a vector."</span>)</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>  L.call <span class="ot">&lt;-</span> <span class="cf">function</span>(ranks, factors, num_fac) {</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    R_i <span class="ot">&lt;-</span> <span class="fu">tapply</span>(ranks, factors, sum)</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>(<span class="fu">seq_len</span>(num_fac) <span class="sc">*</span> R_i)</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>  compute_z <span class="ot">&lt;-</span> <span class="cf">function</span>(statistic, k, b, repeat_n, ties){</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>    mu <span class="ot">&lt;-</span> repeat_n <span class="sc">*</span> b <span class="sc">*</span> k <span class="sc">*</span> (k <span class="sc">+</span> <span class="dv">1</span>)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="dv">4</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>    sigma2 <span class="ot">&lt;-</span> repeat_n <span class="sc">*</span> k <span class="sc">*</span> (k<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> </span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>      (repeat_n <span class="sc">*</span> b <span class="sc">*</span> k <span class="sc">*</span> (repeat_n<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> k<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">-</span> <span class="fu">sum</span>(ties<span class="sc">^</span><span class="dv">3</span> <span class="sc">-</span> ties)) <span class="sc">/</span> </span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>      (<span class="dv">144</span> <span class="sc">*</span> (repeat_n <span class="sc">*</span> k <span class="sc">-</span> <span class="dv">1</span>))</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    (statistic <span class="sc">-</span> mu) <span class="sc">/</span> <span class="fu">sqrt</span>(sigma2)</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>  METHOD <span class="ot">&lt;-</span> <span class="st">"Page test"</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(factor))</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(block))</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (repeated) {</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>    repeat_n <span class="ot">&lt;-</span> <span class="fu">ncol</span>(x)</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    Ls <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span>repeat_n, <span class="cf">function</span>(repeat_idx) {</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>      response <span class="ot">&lt;-</span> x[[repeat_idx]]</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>      rank <span class="ot">&lt;-</span> <span class="fu">ave</span>(response, block, <span class="at">FUN =</span> rank)</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>      <span class="fu">L.call</span>(rank, factor, k)</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>    STATISTIC <span class="ot">&lt;-</span> <span class="fu">setNames</span>(<span class="fu">sum</span>(Ls), <span class="st">"L"</span>)</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    TIES <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span>repeat_n, <span class="cf">function</span>(repeat_idx) {</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>      <span class="fu">unlist</span>(<span class="fu">tapply</span>(x[[repeat_idx]], block, table))</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>    })) </span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>    Z <span class="ot">&lt;-</span> <span class="fu">compute_z</span>(STATISTIC, k, b, repeat_n, TIES)</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span>correct) {</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>      p_value <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(Z, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>      p_value <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(Z <span class="sc">-</span> <span class="fl">0.5</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>      METHOD <span class="ot">&lt;-</span> <span class="fu">paste</span>(METHOD, <span class="st">"with continuity correction"</span>)</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>    rank <span class="ot">&lt;-</span> <span class="fu">ave</span>(response, block, <span class="at">FUN =</span> rank)</span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>    STATISTIC <span class="ot">&lt;-</span> <span class="fu">setNames</span>(<span class="fu">L.call</span>(rank, factor, k), <span class="st">"L"</span>)</span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>    TIES <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">tapply</span>(response, block, table))</span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">any</span>(<span class="fu">sapply</span>(TIES, <span class="cf">function</span>(x) <span class="fu">any</span>(x <span class="sc">&gt;</span> <span class="dv">1</span>)))) {</span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>      ties <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {ties <span class="ot">&lt;-</span> <span class="cn">FALSE</span>}</span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span>exact <span class="sc">||</span> ties) {</span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>      Z <span class="ot">&lt;-</span> <span class="fu">compute_z</span>(STATISTIC, k, b, <span class="dv">1</span>, TIES)</span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="sc">!</span>correct) {</span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>        p_value <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(Z, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>        p_value <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(Z <span class="sc">-</span> <span class="fl">0.5</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>        METHOD <span class="ot">&lt;-</span> <span class="fu">paste</span>(METHOD, <span class="st">"with continuity correction"</span>)</span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>      METHOD <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">"test"</span>, <span class="st">"exact test"</span>, METHOD, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>      <span class="fu">library</span>(gtools)</span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a>      possible_ranks <span class="ot">&lt;-</span> <span class="fu">permutations</span>(k, k)</span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>      all_combinations <span class="ot">&lt;-</span> <span class="fu">permutations</span>(<span class="fu">nrow</span>(possible_ranks), b, <span class="at">repeats.allowed =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a>      Ls <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(all_combinations), <span class="cf">function</span>(i) {</span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a>        b_combs <span class="ot">&lt;-</span> possible_ranks[all_combinations[i, ], ]</span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>        rank_i <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(b_combs)</span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>        <span class="fu">L.call</span>(rank_i, factor, k)</span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>      })</span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>      p_value <span class="ot">&lt;-</span> <span class="fu">mean</span>(Ls <span class="sc">&gt;=</span> STATISTIC)</span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a>  RVAL <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">statistic =</span> STATISTIC, <span class="at">p.value =</span> p_value, </span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a>               <span class="at">method =</span> METHOD, <span class="at">data.name =</span> DNAME)</span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(RVAL) <span class="ot">&lt;-</span> <span class="st">"htest"</span></span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a>  RVAL</span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="cochran-21fff466" class="level2">
+<h2 class="anchored" data-anchor-id="cochran-21fff466"><span class="header-section-number">32.7</span> Cochran检验</h2>
+<section id="id-9-08fcd799" class="level4">
+<h4 class="anchored" data-anchor-id="id-9-08fcd799"><span class="header-section-number">32.7.0.1</span> 目的</h4>
+<p>检验完全区组设计、二元响应情况下，各水平之间是否存在差异。</p>
+</section>
+<section id="id-8-888e92fd" class="level4">
+<h4 class="anchored" data-anchor-id="id-8-888e92fd"><span class="header-section-number">32.7.0.2</span> 适用条件</h4>
+<p>完全区组设计，二元响应。</p>
+</section>
+<section id="id-5-ca656e27" class="level4">
+<h4 class="anchored" data-anchor-id="id-5-ca656e27"><span class="header-section-number">32.7.0.3</span> 假设</h4>
+<p>假设<span class="math inline">\(k\)</span>个水平有分布函数<span class="math inline">\(F_i(x)=F(x-\theta_i),\;i=1,2,\dots,k\)</span>，则检验假设可写为：</p>
+<p><span class="math display">\[\begin{equation}
+H_0:\theta_1=\theta_2=\cdots=\theta_n\Leftrightarrow
+H_1:\text{至少有一个等号不成立}\notag
+\end{equation}\]</span></p>
+</section>
+<section id="id-10-643ba938" class="level4">
+<h4 class="anchored" data-anchor-id="id-10-643ba938"><span class="header-section-number">32.7.0.4</span> 原理</h4>
+<p>假设有<span class="math inline">\(k\)</span>个水平、<span class="math inline">\(b\)</span>个区组。</p>
+<p>令<span class="math inline">\(L_j\)</span>表示第<span class="math inline">\(j\)</span>个区组中为<span class="math inline">\(1\)</span>的数目的总和，<span class="math inline">\(N_i\)</span>表示第<span class="math inline">\(i\)</span>个水平中为<span class="math inline">\(1\)</span>的数目的总和，即<span class="math inline">\(L_j=\sum\limits_{i=1}^kx_{ij},\;j=1,2,\;b,\;N_i=\sum\limits_{j=1}^bx_{ij},\;i=1,2,\;k\)</span>。</p>
+<p>在零假设成立的情况下，各水平之间无差异，那么对于每个<span class="math inline">\(j\)</span>而言，<span class="math inline">\(L_j\)</span>个<span class="math inline">\(1\)</span>在 所有水平中出现的概率是相同的，这个概率依赖于具体的<span class="math inline">\(L_j\)</span>。由此定义如下Cochran统计量：</p>
+<p><span class="math display">\[\begin{equation}
+Q=\frac{k(k-1)\sum\limits_{i=1}^k(N_i-\bar{N})^2}{kN-\sum\limits_{j=1}^bL_j^2}=\frac{k(k-1)\sum\limits_{i=1}^kN_i^2-(k-1)N^2}{kN-\sum\limits_{j=1}^bL_j^2}\notag
+\end{equation}\]</span></p>
+<p>其中<span class="math inline">\(\bar{N}=\dfrac{1}{k}\sum\limits_{i=1}^kN_i,\;N=\sum\limits_{i=1}^kN_i\)</span>。易证，若<span class="math inline">\(L_j=0\)</span>或<span class="math inline">\(L_j=k\)</span>，那么这个区组的数据可以删除，对<span class="math inline">\(Q\)</span>值没有影响（与前面的原理是相合的）。</p>
+<p>若想进行精确检验</p>
+</section>
+<section id="id-7-42341b1d" class="level4">
+<h4 class="anchored" data-anchor-id="id-7-42341b1d"><span class="header-section-number">32.7.0.5</span> 大样本近似</h4>
+<p>在大样本的情况下（<span class="math inline">\(b\to+\infty\)</span>），若零假设成立，有如下近似分布：</p>
+<p><span class="math display">\[\begin{equation}
+Q\sim\chi^2_{(k-1)}\notag
+\end{equation}\]</span></p>
+</section>
+<section id="id-11-d0c0db04" class="level4">
+<h4 class="anchored" data-anchor-id="id-11-d0c0db04"><span class="header-section-number">32.7.0.6</span> 代码</h4>
+<p>以下是自编代码，需要传入一个数据框，行为水平列为区组。提供大样本近似与连续性修正。</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-bgcolor="white" data-linenos="" data-frame="single" data-numbersep="5pt" data-breaklines=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cochran.test <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">exact =</span> <span class="cn">FALSE</span>, <span class="at">correct =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.data.frame</span>(x)) {</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">"Error: x must be a data frame."</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  DNAME <span class="ot">&lt;-</span> <span class="fu">deparse</span>(<span class="fu">substitute</span>(x))</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  METHOD <span class="ot">&lt;-</span> <span class="st">"Cochran test"</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  Ni <span class="ot">&lt;-</span> <span class="fu">apply</span>(x, <span class="dv">1</span>, sum)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  Lj <span class="ot">&lt;-</span> <span class="fu">apply</span>(x, <span class="dv">2</span>, sum)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  N <span class="ot">&lt;-</span> <span class="fu">sum</span>(Ni)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> <span class="fu">nrow</span>(x)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  STATISTIC <span class="ot">&lt;-</span> (k <span class="sc">*</span> (k<span class="dv">-1</span>) <span class="sc">*</span> <span class="fu">sum</span>(Ni<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> (k <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> N<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> (k <span class="sc">*</span> N <span class="sc">-</span> <span class="fu">sum</span>(Lj<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  STATISTIC <span class="ot">&lt;-</span> <span class="fu">setNames</span>(STATISTIC, <span class="st">"Q"</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span>exact) {</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span>correct){</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>      p_value <span class="ot">&lt;-</span> <span class="fu">pchisq</span>(STATISTIC, k <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>      p_value <span class="ot">&lt;-</span> <span class="fu">pchisq</span>(STATISTIC <span class="sc">-</span> <span class="fl">0.5</span>, k <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>      METHOD <span class="ot">&lt;-</span> <span class="fu">paste</span>(METHOD, <span class="st">"with continuity correction"</span>)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    METHOD <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">"test"</span>, <span class="st">"exact test"</span>, METHOD, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># exact test</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  RVAL <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">statistic =</span> STATISTIC, <span class="at">p.value =</span> p_value, </span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>               <span class="at">method =</span> METHOD, <span class="at">data.name =</span> DNAME)</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(RVAL) <span class="ot">&lt;-</span> <span class="st">"htest"</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>  RVAL</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="durbin-6cf47d83" class="level2">
+<h2 class="anchored" data-anchor-id="durbin-6cf47d83"><span class="header-section-number">32.8</span> Durbin检验</h2>
+<section id="id-9-a11ab7f7" class="level4">
+<h4 class="anchored" data-anchor-id="id-9-a11ab7f7"><span class="header-section-number">32.8.0.1</span> 适用条件</h4>
+<p>不完全区组设计，水平之间分布是相似的，数据是连续型的。</p>
+</section>
+<section id="id-6-ee5a4082" class="level4">
+<h4 class="anchored" data-anchor-id="id-6-ee5a4082"><span class="header-section-number">32.8.0.2</span> 假设</h4>
+<p>假设<span class="math inline">\(k\)</span>个水平有分布函数<span class="math inline">\(F_i(x)=F(x-\theta_i),\;i=1,2,\dots,k\)</span>，则检验假设可写为：</p>
+<p><span class="math display">\[\begin{equation}
+H_0:\theta_1=\theta_2=\cdots=\theta_n\Leftrightarrow
+H_1:\text{至少有一个等号不成立}\notag
+\end{equation}\]</span></p>
+</section>
+<section id="id-11-d0107304" class="level4">
+<h4 class="anchored" data-anchor-id="id-11-d0107304"><span class="header-section-number">32.8.0.3</span> 原理</h4>
+<p>假设有<span class="math inline">\(k\)</span>个水平、<span class="math inline">\(b\)</span>个区组，每个区组中含<span class="math inline">\(t\)</span>个处理，每个处理出现在<span class="math inline">\(r\)</span>个区组中。</p>
+<p>因为各区组之间是有影响的，无法把各响应值混在一起排序。选择在各个区组内计算所有响应值的秩，<span class="math inline">\(R_{ij}\)</span>表示在第<span class="math inline">\(j\)</span>个区组中水平<span class="math inline">\(i\)</span>的秩，<span class="math inline">\(R_i=\sum\limits_{j}R_{ij},\;i=1,2,\dots,k\)</span>，定义如下Durbin统计量:</p>
+<p><span class="math display">\[\begin{equation}
+D=\frac{12(k-1)}{rk(t^2-1)}\sum_{i=1}^k(R_i-\frac{r(t+1)}{2})^2=\frac{12(k-1)}{rk(t^2-1)}\sum_{i=1}^kR_i^2-\frac{3r(k-1)(t+1)}{t-1}\notag
+\end{equation}\]</span></p>
+<p>在零假设成立的情况下，各水平之间的秩和与均值相比不应相差过大，也就是<span class="math inline">\(D\)</span>值不应太大，若<span class="math inline">\(D\)</span>值过大，则有理由怀疑零假设。由此可看出这里只考虑上侧的单侧检验问题。同时，可以看出Durbin统计量在完全区组设计(<span class="math inline">\(t=k,\;r=b\)</span>)的时候和Friedman统计量是完全一样的。</p>
+</section>
+<section id="id-8-07f88c89" class="level4">
+<h4 class="anchored" data-anchor-id="id-8-07f88c89"><span class="header-section-number">32.8.0.4</span> 大样本近似</h4>
+<p>在大样本的情况下（<span class="math inline">\(r\to+\infty\)</span>），若零假设成立，有如下近似分布：</p>
+<p><span class="math display">\[\begin{equation}
+D\sim\chi^2_{(k-1)}\notag
+\end{equation}\]</span></p>
+<p>在某个区组存在结的时候，利用下式进行修正（其中<span class="math inline">\(\tau_{ij}\)</span>表示第<span class="math inline">\(j\)</span>个区组的第<span class="math inline">\(i\)</span>个结统计量）：</p>
+<p><span class="math display">\[\begin{gather*}
+D_C=\frac{(k-1)\sum_{i=1}^k(R_i-\frac{r(t+1)}{2})^2}{A-C} \\
+A=\sum_i\sum_jR_{ij}^2,\;C=\frac{bt(t+1)^2}{4}
+\end{gather*}\]</span></p>
+</section>
+<section id="id-12-04690521" class="level4">
+<h4 class="anchored" data-anchor-id="id-12-04690521"><span class="header-section-number">32.8.0.5</span> 代码</h4>
+<p>以下是自编代码，会检查输入的数据是否满足不完全区组设计的平衡性。提供精确计算、大样本近似、连续性修正与打结校正功能。x可以是一个三列的数据框，第一列表示response值，第二列表示factor，第三列表示block。x也可以是一个向量，表示response，此时必须传入factor和block。</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-bgcolor="white" data-linenos="" data-frame="single" data-numbersep="5pt" data-breaklines=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>durbin.test <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">factor =</span> <span class="cn">NULL</span>, <span class="at">block =</span> <span class="cn">NULL</span>, </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">exact =</span> <span class="cn">FALSE</span>, <span class="at">correct =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.data.frame</span>(x)) {</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">ncol</span>(x) <span class="sc">==</span> <span class="dv">3</span>) {</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>      response <span class="ot">&lt;-</span> x[[<span class="dv">1</span>]]</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>      factor <span class="ot">&lt;-</span> x[[<span class="dv">2</span>]]</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>      block <span class="ot">&lt;-</span> x[[<span class="dv">3</span>]]</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      DNAME <span class="ot">&lt;-</span> <span class="fu">deparse</span>(<span class="fu">substitute</span>(x))</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">is.vector</span>(x)) {</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.null</span>(factor) <span class="sc">||</span> <span class="fu">is.null</span>(block)) {</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">stop</span>(<span class="st">"Error: factor and block must be provided when x is a vector."</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    response <span class="ot">&lt;-</span> x</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    DNAME <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="fu">deparse</span>(<span class="fu">substitute</span>(x)), <span class="st">", "</span>, </span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">deparse</span>(<span class="fu">substitute</span>(factor)), <span class="st">" and "</span>, </span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">deparse</span>(<span class="fu">substitute</span>(block)), <span class="at">sep =</span> <span class="st">""</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">"Error: x must be either a data frame with three columns or a vector."</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  num_r <span class="ot">&lt;-</span> <span class="fu">table</span>(factor)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  num_t <span class="ot">&lt;-</span> <span class="fu">table</span>(block)</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(<span class="fu">unique</span>(num_r)) <span class="sc">!=</span> <span class="dv">1</span>) {</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">"Error: The design is not balanced. </span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="st">         Each treatment must appear in the same number of blocks."</span>)</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(<span class="fu">unique</span>(num_t)) <span class="sc">!=</span> <span class="dv">1</span>) {</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">"Error: The design is not balanced. </span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="st">         Each block must contain the same number of treatments."</span>)</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>  D.call <span class="ot">&lt;-</span> <span class="cf">function</span>(ranks, factors) {</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    R_i <span class="ot">&lt;-</span> <span class="fu">tapply</span>(ranks, factors, sum)</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    <span class="dv">12</span> <span class="sc">*</span> (k <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> (r <span class="sc">*</span> k <span class="sc">*</span> (t<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> <span class="dv">1</span>)) <span class="sc">*</span> <span class="fu">sum</span>(R_i<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> </span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>      <span class="dv">3</span> <span class="sc">*</span> r <span class="sc">*</span> (k <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> (t <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">/</span> (t <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>  METHOD <span class="ot">&lt;-</span> <span class="st">"Friedman rank sum test"</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(factor))</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>  b <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(block))</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>  r <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(num_r[<span class="dv">1</span>])</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>  t <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(num_t[<span class="dv">1</span>])</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>  rank <span class="ot">&lt;-</span> <span class="fu">ave</span>(response, block, <span class="at">FUN =</span> rank)</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>  STATISTIC <span class="ot">&lt;-</span> <span class="fu">setNames</span>(<span class="fu">D.call</span>(rank, factor), <span class="st">"D"</span>)</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>  TIES <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">tapply</span>(response, block, table))</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">any</span>(<span class="fu">sapply</span>(TIES, <span class="cf">function</span>(x) <span class="fu">any</span>(x <span class="sc">&gt;</span> <span class="dv">1</span>)))) {</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    ties <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {ties <span class="ot">&lt;-</span> <span class="cn">FALSE</span>}</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span>exact <span class="sc">||</span> ties) {</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>    Dc <span class="ot">&lt;-</span> (k <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="fu">sum</span>((<span class="fu">tapply</span>(rank, factor, sum) <span class="sc">-</span> r <span class="sc">*</span> (t <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">/</span> <span class="dv">2</span>)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>      (<span class="fu">sum</span>(rank<span class="sc">^</span><span class="dv">2</span>) <span class="sc">-</span> b <span class="sc">*</span> t <span class="sc">*</span> (t <span class="sc">+</span> <span class="dv">1</span>)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="dv">4</span>)</span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span>correct) {</span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>      p_value <span class="ot">&lt;-</span> <span class="fu">pchisq</span>(Dc, k <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>      p_value <span class="ot">&lt;-</span> <span class="fu">pchisq</span>(Dc <span class="sc">-</span> <span class="fl">0.5</span>, k <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>      METHOD <span class="ot">&lt;-</span> <span class="fu">paste</span>(METHOD, <span class="st">"with continuity correction"</span>)</span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>    METHOD <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">"test"</span>, <span class="st">"exact test"</span>, METHOD, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(gtools)</span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>    possible_ranks <span class="ot">&lt;-</span> <span class="fu">permutations</span>(t, t)</span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>    all_combinations <span class="ot">&lt;-</span> <span class="fu">permutations</span>(<span class="fu">nrow</span>(possible_ranks), b, <span class="at">repeats.allowed =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>    Ds <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(all_combinations), <span class="cf">function</span>(i) {</span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>      b_combs <span class="ot">&lt;-</span> possible_ranks[all_combinations[i, ], ]</span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>      rank_i <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(b_combs)</span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>      <span class="fu">D.call</span>(rank_i, factor)</span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>    p_value <span class="ot">&lt;-</span> <span class="fu">mean</span>(Ds <span class="sc">&gt;=</span> STATISTIC)</span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>  RVAL <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">statistic =</span> STATISTIC, <span class="at">p.value =</span> p_value, </span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a>               <span class="at">method =</span> METHOD, <span class="at">data.name =</span> DNAME)</span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(RVAL) <span class="ot">&lt;-</span> <span class="st">"htest"</span></span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a>  RVAL</span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/page-033.html" class="pagination-link" aria-label="[第 31 章]{.header-section-number} 两样本位置检验">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title"><span class="header-section-number">第 31 章</span> 两样本位置检验</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/page-035.html" class="pagination-link" aria-label="[第 33 章]{.header-section-number} Something else">
+        <span class="nav-page-text"><span class="chapter-title"><span class="header-section-number">第 33 章</span> Something else</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
