@@ -41,10 +41,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-7380dde18c49706d018cafaca6afd2e2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -73,6 +77,140 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
+<script>
+(() => {
+  "use strict";
+
+  const storageKey = "textbook-color-scheme";
+  const quartoStorageKey = "quarto-color-scheme";
+
+  const readStoredTheme = () => {
+    try {
+      const value = window.localStorage.getItem(storageKey);
+      return value === "dark" || value === "light" ? value : null;
+    } catch (_error) {
+      return null;
+    }
+  };
+
+  const writeStorage = (key, value) => {
+    try {
+      window.localStorage.setItem(key, value);
+    } catch (_error) {
+      // Storage may be unavailable in a locked-down browser. The current page
+      // still switches normally; only cross-page persistence is affected.
+    }
+  };
+
+  const writeTheme = (theme) => {
+    writeStorage(storageKey, theme);
+    writeStorage(
+      quartoStorageKey,
+      theme === "dark" ? "alternate" : "default"
+    );
+  };
+
+  // Quarto reads its own sentinel at the beginning of <body>. Mirror our
+  // durable preference into it while still in <head>, preventing a white flash
+  // and making the correct theme active before the page is painted.
+  const storedTheme = readStoredTheme();
+  if (storedTheme) {
+    writeTheme(storedTheme);
+  }
+
+  const currentTheme = () =>
+    document.body.classList.contains("quarto-dark") ? "dark" : "light";
+
+  const updateButton = (button) => {
+    const isDark = currentTheme() === "dark";
+    const targetName = isDark ? "浅色" : "深色";
+    const icon = button.querySelector("i");
+    icon.className = isDark
+      ? "bi bi-sun-fill"
+      : "bi bi-moon-stars-fill";
+    button.setAttribute("aria-label", `切换到${targetName}模式`);
+    button.setAttribute("title", `切换到${targetName}模式`);
+    button.setAttribute("aria-pressed", String(isDark));
+  };
+
+  const applyTheme = (theme, button) => {
+    const wantsDark = theme === "dark";
+    const isDark = currentTheme() === "dark";
+
+    if (wantsDark !== isDark && typeof window.quartoToggleColorScheme === "function") {
+      // Force Quarto's next toggle toward the requested state even if its own
+      // sentinel and the body class have somehow drifted apart.
+      writeStorage(
+        quartoStorageKey,
+        wantsDark ? "default" : "alternate"
+      );
+      window.quartoToggleColorScheme();
+    }
+
+    writeTheme(theme);
+    updateButton(button);
+  };
+
+  const mountThemeToggle = () => {
+    if (document.getElementById("textbook-theme-toggle")) {
+      return;
+    }
+
+    const button = document.createElement("button");
+    button.id = "textbook-theme-toggle";
+    button.type = "button";
+    button.className = "btn textbook-theme-toggle";
+    button.innerHTML = '<i class="bi" aria-hidden="true"></i>';
+
+    const placeThemeToggle = () => {
+      const tocTitle = document.querySelector("#TOC #toc-title");
+      const useToc = Boolean(
+        tocTitle && window.matchMedia("(min-width: 992px)").matches
+      );
+
+      document
+        .querySelectorAll(".textbook-toc-title-with-toggle")
+        .forEach((element) => {
+          element.classList.remove("textbook-toc-title-with-toggle");
+        });
+
+      if (useToc) {
+        tocTitle.classList.add("textbook-toc-title-with-toggle");
+        tocTitle.appendChild(button);
+        button.classList.add("textbook-theme-toggle-in-toc");
+        button.classList.remove("textbook-theme-toggle-floating");
+      } else {
+        document.body.appendChild(button);
+        button.classList.add("textbook-theme-toggle-floating");
+        button.classList.remove("textbook-theme-toggle-in-toc");
+      }
+    };
+
+    placeThemeToggle();
+    window.addEventListener("resize", placeThemeToggle);
+
+    const initialTheme = readStoredTheme() || currentTheme();
+    applyTheme(initialTheme, button);
+
+    button.addEventListener("click", () => {
+      const nextTheme = currentTheme() === "dark" ? "light" : "dark";
+      applyTheme(nextTheme, button);
+    });
+
+    window.addEventListener("pageshow", () => {
+      applyTheme(readStoredTheme() || currentTheme(), button);
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mountThemeToggle, {
+      once: true,
+    });
+  } else {
+    mountThemeToggle();
+  }
+})();
+</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -108,7 +246,169 @@ window.Quarto = {
 <link rel="stylesheet" href="../sidebar.css">
 </head>
 
-<body class="nav-sidebar docked quarto-light">
+<body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -133,6 +433,9 @@ window.Quarto = {
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="../">你永远不知道一个强迫症能干出什么事情</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="切换深色模式"><i class="bi"></i></a>
+</div>
     </div>
       </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
@@ -626,6 +929,7 @@ window.Quarto = {
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
+
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-017.html">第 5 部分 不等式</a></li><li class="breadcrumb-item"><a href="../chapters/page-017.html"><span class="chapter-title"><span class="header-section-number">第 16 章</span> 不等式</span></a></li></ol></nav>
 <div class="quarto-title">
@@ -1254,47 +1558,68 @@ f\bigl(\lambda x+(1-\lambda)y\bigr)\leqslant\lambda f(x)+(1-\lambda)f(y)
 <h3 class="anchored" data-anchor-id="jensen-e764f6f5"><span class="header-section-number">16.5.1</span> Jensen不等式</h3>
 <div id="theorem-16-18" class="theorem theorem-block env-theorem">
 <div id="ineq-Jensen-4973d767" class="equation-block">
-<p><strong>Theorem 16.18</strong>. 设<span class="math inline">\((X,\mathscr{F},P)\)</span>是一个概率空间，<span class="math inline">\(\mathscr{A}\subseteq\mathscr{F}\)</span>，<span class="math inline">\(f\)</span>是<span class="math inline">\((X,\mathscr{F})\)</span>上可积的Borel函数，<span class="math inline">\(\varphi\)</span>为<span class="math inline">\((\mathbb{R}^{},\mathcal{B})\)</span>上的Borel函数且是<span class="math inline">\(\mathbb{R}^{}\)</span>上的凸函数，<span class="math inline">\(\varphi\circ f\)</span>在<span class="math inline">\(X\)</span>上可积，则有：</p>
+<p><strong>Theorem 16.18</strong>. 设<span class="math inline">\((X,\mathscr{F},P)\)</span>是一个概率空间，<span class="math inline">\(\mathscr{A}\subseteq\mathscr{F}\)</span>且是<span class="math inline">\(\sigma\)</span>代数，<span class="math inline">\(f\)</span>是<span class="math inline">\((X,\mathscr{F})\)</span>上可积的Borel函数，<span class="math inline">\(\varphi\)</span>为<span class="math inline">\((\mathbb{R}^{},\mathcal{B}(\mathbb{R}^{}))\)</span>上的Borel函数且是<span class="math inline">\(\mathbb{R}^{}\)</span>上的凸函数，<span class="math inline">\(\varphi\circ f\)</span>在<span class="math inline">\((X,\mathscr{F})\)</span>上可积，则有：</p>
 <p><span class="math display">\[\begin{equation*}
 \tag{19}
-\varphi[\operatorname{E}(f|\mathscr{A})]\leqslant\operatorname{E}(\varphi\circ f|\mathscr{A})
+\varphi[\operatorname{E}(f|\mathscr{A})]\leqslant\operatorname{E}(\varphi\circ f|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
 
 \end{equation*}\]</span></p>
-<p>等号成立a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>的一个充分条件为<span class="math inline">\(f=\operatorname{E}(f|\mathscr{A})\;\)</span>a.s.于<span class="math inline">\(X\)</span>。若<span class="math inline">\(\varphi\)</span>是严格凸的，则等号成立a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>的充要条件为<span class="math inline">\(f=\operatorname{E}(f|\mathscr{A})\;\)</span>a.s.于<span class="math inline">\(X\)</span>。</p>
+<p>等号成立a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>的一个充分条件为<span class="math inline">\(f=\operatorname{E}(f|\mathscr{A})\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>。若<span class="math inline">\(\varphi\)</span>是严格凸的，则等号成立a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>的充要条件为<span class="math inline">\(f=\operatorname{E}(f|\mathscr{A})\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>。</p>
 </div>
 </div>
 <div class="proof-block proof">
-<p><span class="proof-title"><em>证明</em>. </span>令：</p>
+<p><span class="proof-title"><em>证明</em>. </span>设：</p>
 <p><span class="math display">\[\begin{equation*}
-x_0=\operatorname{E}(f|\mathscr{A})
+\mathcal{L}=\{(a,b)\in\mathbb{R}^{2}:ax+b\leqslant\varphi(x),\;\forall\;x\in\mathbb{R}^{}\}
 
 \end{equation*}\]</span></p>
-<p>根据<a href="../chapters/page-015.html#prop-ConvexFunction-60c4bc79" data-reference-type="ref+label" data-reference="prop:ConvexFunction">性质 14.0.8</a>(3)可知存在<span class="math inline">\(a,b\in\mathbb{R}^{}\)</span>使得：</p>
+<p>由<a href="../chapters/page-015.html#prop-ConvexFunction-60c4bc79" data-reference-type="ref+label" data-reference="prop:ConvexFunction">性质 14.0.8</a>(4)可知<span class="math inline">\(\mathcal{L}\ne\varnothing\)</span>，于是对任意的<span class="math inline">\((a,b)\in\mathcal{L}\)</span>有<span class="math inline">\(af+b\leqslant\varphi\circ f\)</span>，根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)和<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(5)(1)可知可对<span class="math inline">\(af+b\)</span>求关于<span class="math inline">\(\mathscr{A}\)</span>的条件期望，由<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(5)(1)可知可对<span class="math inline">\(\varphi\circ f\)</span>求关于<span class="math inline">\(\mathscr{A}\)</span>的条件期望，于是根据<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(4)(5)(1)可知：</p>
 <p><span class="math display">\[\begin{equation*}
-\forall\;x\in\mathbb{R}^{},\;ax+b\leqslant\varphi(x)
+\operatorname{E}(\varphi\circ f\mid\mathscr{A})\geqslant\operatorname{E}(af+b\mid\mathscr{A})=a\operatorname{E}(f\mid\mathscr{A})+b\operatorname{E}(1\mid\mathscr{A})=a\operatorname{E}(f\mid\mathscr{A})+b
 
 \end{equation*}\]</span></p>
-<p>并满足<span class="math inline">\(ax_0+b=\varphi(x_0)\)</span>。根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(7)，令<span class="math inline">\(x=f(\omega)\)</span>对两侧求关于<span class="math inline">\(\mathscr{A}\)</span>的条件期望，由<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(5)(1)可得：</p>
-<p><span class="math display">\[\begin{gather*}
-\operatorname{E}(af+b|\mathscr{A})=a\operatorname{E}(f|\mathscr{A})+b\operatorname{E}(1|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P) \\ a\operatorname{E}(f|\mathscr{A})+b\operatorname{E}(1|\mathscr{A})=a\operatorname{E}(f|\mathscr{A})+b\;\text{a.s.于}(X,\mathscr{A},P)
-
-\end{gather*}\]</span></p>
-<p>根据<a href="../chapters/page-012.html#prop-Measure-9acfc4ac" data-reference-type="ref+label" data-reference="prop:Measure">性质 11.2.1</a>(3)（次有限可加性）和测度的非负性可知<span class="math inline">\(\operatorname{E}(af+b|\mathscr{A})=a\operatorname{E}(f|\mathscr{A})+b\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>。显然<span class="math inline">\(af(\omega)+b\)</span>在<span class="math inline">\(X\)</span>上可积，由<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(4)、<a href="../chapters/page-012.html#prop-Measure-9acfc4ac" data-reference-type="ref+label" data-reference="prop:Measure">性质 11.2.1</a>(3)（次有限可加性）和测度的非负性即可得：</p>
+<p>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>。由<a href="../chapters/page-015.html#prop-ConvexFunction-60c4bc79" data-reference-type="ref+label" data-reference="prop:ConvexFunction">性质 14.0.8</a>(4)和可知：</p>
 <p><span class="math display">\[\begin{equation*}
-a\operatorname{E}(f|\mathscr{A})+b=\varphi[\operatorname{E}(f|\mathscr{A})]\leqslant\operatorname{E}(\varphi\circ f|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
+\sup_{a,b\in\mathcal{L}}a\operatorname{E}(f\mid\mathscr{A})+b=\varphi[\operatorname{E}(f\mid\mathscr{A})]\leqslant\operatorname{E}(\varphi\circ f\mid\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
 
 \end{equation*}\]</span></p>
-<p>当<span class="math inline">\(f=\operatorname{E}(f|\mathscr{A})\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>时，<span class="math inline">\(\varphi(f)=\varphi[\operatorname{E}(f|\mathscr{A})]\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>，因为<span class="math inline">\(\varphi\circ f\in L_1(X)\)</span>，根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(8)可知<span class="math inline">\(\varphi[\operatorname{E}(f|\mathscr{A})]\in L_1(X)\)</span>。由<a href="../chapters/page-012.html#prop-MeasurableMapping-34bb2891" data-reference-type="ref+label" data-reference="prop:MeasurableMapping">性质 11.3.1</a>(2)和<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(1)可得<span class="math inline">\(\operatorname{E}\{\varphi[\operatorname{E}(f|\mathscr{A})]|\mathscr{A}\}=\varphi[\operatorname{E}(f|\mathscr{A})]\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>。由<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(4)、<a href="../chapters/page-012.html#prop-Measure-9acfc4ac" data-reference-type="ref+label" data-reference="prop:Measure">性质 11.2.1</a>(3)（次有限可加性）和测度的非负性可得：</p>
+<p>当<span class="math inline">\(f=\operatorname{E}(f|\mathscr{A})\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>时，<span class="math inline">\(\varphi\circ f=\varphi[\operatorname{E}(f|\mathscr{A})]\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>且<span class="math inline">\(f\)</span>可视作<span class="math inline">\(\mathscr{A}\)</span>可测的，根据<a href="../chapters/page-012.html#prop-MeasurableMapping-34bb2891" data-reference-type="ref+label" data-reference="prop:MeasurableMapping">性质 11.3.1</a>(2)可知<span class="math inline">\(\varphi\circ f\)</span>是<span class="math inline">\(\mathscr{A}\)</span>可测的，由<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(1)可知<span class="math inline">\(\operatorname{E}(\varphi\circ f\mid\mathscr{A})=\varphi\circ f\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>，根据<a href="../chapters/page-012.html#prop-Measure-9acfc4ac" data-reference-type="ref+label" data-reference="prop:Measure">性质 11.2.1</a>(3)（次有限可加性）和测度的非负性可知：</p>
 <p><span class="math display">\[\begin{equation*}
-\operatorname{E}(\varphi\circ f|\mathscr{A})=\operatorname{E}\{\varphi[\operatorname{E}(f|\mathscr{A})]|\mathscr{A}\}=\varphi[\operatorname{E}(f|\mathscr{A})]\;\text{a.s.于}(X,\mathscr{A},P)
+\varphi[\operatorname{E}(f|\mathscr{A})]=\operatorname{E}(\varphi\circ f|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
 
 \end{equation*}\]</span></p>
-<p>当<span class="math inline">\(\varphi\)</span>严格凸时，对任意的<span class="math inline">\(x\in\mathbb{R}^{}\setminus\{x_0\}\)</span>有<span class="math inline">\(ax+b&lt;\varphi(x)\)</span>。若<span class="math inline">\(\varphi[\operatorname{E}(f|\mathscr{A})]=\operatorname{E}(\varphi\circ f|\mathscr{A})\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>，则：</p>
+<p>当<span class="math inline">\(\varphi\)</span>严格凸且等号成立a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>时，由<a href="../chapters/page-015.html#prop-ConvexFunction-60c4bc79" data-reference-type="ref+label" data-reference="prop:ConvexFunction">性质 14.0.8</a>(4)可知对任意<span class="math inline">\(t\in\mathbb{R}\)</span>存在<span class="math inline">\(c(t)\in\mathbb{R}\)</span>使得对任意<span class="math inline">\(u\in\mathbb{R}\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
-\operatorname{E}\{\varphi[\operatorname{E}(f|\mathscr{A})]\}=\operatorname{E}[\operatorname{E}(\varphi\circ f|\mathscr{A})]=\operatorname{E}(\varphi\circ f)
+\varphi(u)\geqslant\varphi(t)+c(t)(u-t)
 
 \end{equation*}\]</span></p>
-<p>◻</p>
+<p>且上式在<span class="math inline">\(u\neq t\)</span>时严格成立，于是：</p>
+<p><span class="math display">\[\begin{equation*}
+\varphi\circ f\geqslant\varphi[\operatorname{E}(f|\mathscr{A})]+c[\operatorname{E}(f|\mathscr{A})][f-\operatorname{E}(f|\mathscr{A})]
+
+\end{equation*}\]</span></p>
+<p>并且在；</p>
+<p><span class="math display">\[\begin{equation*}
+\{x\in X:f\ne\operatorname{E}(f|\mathscr{A})\}
+
+\end{equation*}\]</span></p>
+<p>上严格成立。记：</p>
+<p><span class="math display">\[\begin{equation*}
+H=\varphi\circ f-\varphi[\operatorname{E}(f|\mathscr{A})]-c[\operatorname{E}(f|\mathscr{A})][f-\operatorname{E}(f|\mathscr{A})]
+
+\end{equation*}\]</span></p>
+<p>则<span class="math inline">\(H\geqslant 0\)</span>，且：</p>
+<p><span class="math display">\[\begin{equation*}
+H=0\quad\Longleftrightarrow\quad f=\operatorname{E}(f|\mathscr{A})
+
+\end{equation*}\]</span></p>
+<p>对<span class="math inline">\(H\)</span>取关于<span class="math inline">\(\mathscr{A}\)</span>的条件期望（和之前类似说明其存在性），由<a href="../chapters/page-012.html#prop-MeasurableMapping-34bb2891" data-reference-type="ref+label" data-reference="prop:MeasurableMapping">性质 11.3.1</a>(2)、<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(1)(5)、<a href="../chapters/page-012.html#prop-Measure-9acfc4ac" data-reference-type="ref+label" data-reference="prop:Measure">性质 11.2.1</a>(3)（次有限可加性）和测度的非负性可得：</p>
+<p><span class="math display">\[\begin{align*}
+\operatorname{E}(H|\mathscr{A})&amp;=\operatorname{E}(\varphi\circ f|\mathscr{A})-\varphi[\operatorname{E}(f|\mathscr{A})]-c[\operatorname{E}(f|\mathscr{A})]\operatorname{E}[f-\operatorname{E}(f|\mathscr{A})\mid\mathscr{A}] \\
+&amp;=\operatorname{E}(\varphi\circ f|\mathscr{A})-\varphi[\operatorname{E}(f|\mathscr{A})]=0\;\text{a.s.于}(X,\mathscr{A},P)
+
+\end{align*}\]</span></p>
+<p>即<span class="math inline">\(f=\operatorname{E}(f|\mathscr{A})\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>。&nbsp;◻</p>
 </div>
 </section>
 <section id="gibbs-88032ba7" class="level3">
@@ -1444,6 +1769,19 @@ P\left(\frac{1}{n}\sum_{i=1}^{n}[f_i-\operatorname{E}(f_i)]\geqslant t\right)\le
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
     const anchorJS = new window.AnchorJS();
     anchorJS.options = {

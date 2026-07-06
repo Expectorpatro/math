@@ -41,10 +41,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-7380dde18c49706d018cafaca6afd2e2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -73,6 +77,140 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
+<script>
+(() => {
+  "use strict";
+
+  const storageKey = "textbook-color-scheme";
+  const quartoStorageKey = "quarto-color-scheme";
+
+  const readStoredTheme = () => {
+    try {
+      const value = window.localStorage.getItem(storageKey);
+      return value === "dark" || value === "light" ? value : null;
+    } catch (_error) {
+      return null;
+    }
+  };
+
+  const writeStorage = (key, value) => {
+    try {
+      window.localStorage.setItem(key, value);
+    } catch (_error) {
+      // Storage may be unavailable in a locked-down browser. The current page
+      // still switches normally; only cross-page persistence is affected.
+    }
+  };
+
+  const writeTheme = (theme) => {
+    writeStorage(storageKey, theme);
+    writeStorage(
+      quartoStorageKey,
+      theme === "dark" ? "alternate" : "default"
+    );
+  };
+
+  // Quarto reads its own sentinel at the beginning of <body>. Mirror our
+  // durable preference into it while still in <head>, preventing a white flash
+  // and making the correct theme active before the page is painted.
+  const storedTheme = readStoredTheme();
+  if (storedTheme) {
+    writeTheme(storedTheme);
+  }
+
+  const currentTheme = () =>
+    document.body.classList.contains("quarto-dark") ? "dark" : "light";
+
+  const updateButton = (button) => {
+    const isDark = currentTheme() === "dark";
+    const targetName = isDark ? "浅色" : "深色";
+    const icon = button.querySelector("i");
+    icon.className = isDark
+      ? "bi bi-sun-fill"
+      : "bi bi-moon-stars-fill";
+    button.setAttribute("aria-label", `切换到${targetName}模式`);
+    button.setAttribute("title", `切换到${targetName}模式`);
+    button.setAttribute("aria-pressed", String(isDark));
+  };
+
+  const applyTheme = (theme, button) => {
+    const wantsDark = theme === "dark";
+    const isDark = currentTheme() === "dark";
+
+    if (wantsDark !== isDark && typeof window.quartoToggleColorScheme === "function") {
+      // Force Quarto's next toggle toward the requested state even if its own
+      // sentinel and the body class have somehow drifted apart.
+      writeStorage(
+        quartoStorageKey,
+        wantsDark ? "default" : "alternate"
+      );
+      window.quartoToggleColorScheme();
+    }
+
+    writeTheme(theme);
+    updateButton(button);
+  };
+
+  const mountThemeToggle = () => {
+    if (document.getElementById("textbook-theme-toggle")) {
+      return;
+    }
+
+    const button = document.createElement("button");
+    button.id = "textbook-theme-toggle";
+    button.type = "button";
+    button.className = "btn textbook-theme-toggle";
+    button.innerHTML = '<i class="bi" aria-hidden="true"></i>';
+
+    const placeThemeToggle = () => {
+      const tocTitle = document.querySelector("#TOC #toc-title");
+      const useToc = Boolean(
+        tocTitle && window.matchMedia("(min-width: 992px)").matches
+      );
+
+      document
+        .querySelectorAll(".textbook-toc-title-with-toggle")
+        .forEach((element) => {
+          element.classList.remove("textbook-toc-title-with-toggle");
+        });
+
+      if (useToc) {
+        tocTitle.classList.add("textbook-toc-title-with-toggle");
+        tocTitle.appendChild(button);
+        button.classList.add("textbook-theme-toggle-in-toc");
+        button.classList.remove("textbook-theme-toggle-floating");
+      } else {
+        document.body.appendChild(button);
+        button.classList.add("textbook-theme-toggle-floating");
+        button.classList.remove("textbook-theme-toggle-in-toc");
+      }
+    };
+
+    placeThemeToggle();
+    window.addEventListener("resize", placeThemeToggle);
+
+    const initialTheme = readStoredTheme() || currentTheme();
+    applyTheme(initialTheme, button);
+
+    button.addEventListener("click", () => {
+      const nextTheme = currentTheme() === "dark" ? "light" : "dark";
+      applyTheme(nextTheme, button);
+    });
+
+    window.addEventListener("pageshow", () => {
+      applyTheme(readStoredTheme() || currentTheme(), button);
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mountThemeToggle, {
+      once: true,
+    });
+  } else {
+    mountThemeToggle();
+  }
+})();
+</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -108,7 +246,169 @@ window.Quarto = {
 <link rel="stylesheet" href="../sidebar.css">
 </head>
 
-<body class="nav-sidebar docked quarto-light">
+<body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -133,6 +433,9 @@ window.Quarto = {
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="../">你永远不知道一个强迫症能干出什么事情</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="切换深色模式"><i class="bi"></i></a>
+</div>
     </div>
       </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
@@ -642,6 +945,7 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-028.html">第 6 部分 统计学</a></li><li class="breadcrumb-item"><a href="../chapters/page-030.html"><span class="chapter-title"><span class="header-section-number">第 28 章</span> 机器学习</span></a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title"><span id="id--38484299" class="quarto-section-identifier"><span class="chapter-title"><span class="header-section-number">第 28 章</span> 机器学习</span></span></h1>
@@ -734,6 +1038,7 @@ window.Quarto = {
 <div id="note-28-4" class="note theorem-block env-note">
 <p><strong>note 28.4</strong>. ROC曲线反映了阈值变化对<span class="math inline">\(\operatorname{TPR}\)</span>与<span class="math inline">\(\operatorname{FPR}\)</span>的权衡。<span class="math inline">\(\operatorname{AUROC}\)</span>独立于具体阈值，是比较不同模型总体区分能力的常用指标，取值范围通常在<span class="math inline">\([0.5,1]\)</span>，<span class="math inline">\(0.5\)</span>表示随机猜测（对任意的<span class="math inline">\(t\in[0,1]\)</span>有<span class="math inline">\(\operatorname{FPR}(t)=\operatorname{TPR}(t)\)</span>，模型判断正类为正类的概率和模型判断负类为正类的概率一致），<span class="math inline">\(1\)</span>表示完美分类。</p>
 <figure data-latex-placement="H" class="figure">
+<img src="../_tikz/tikz-1ac9f70b119c1383.png" class="tikz-image figure-img" style="width:92.0%">
 <figcaption>
 ROC曲线示意
 </figcaption>
@@ -745,6 +1050,7 @@ ROC曲线示意
 <div id="note-28-5" class="note theorem-block env-note">
 <p><strong>note 28.5</strong>. 相比<span class="math inline">\(\operatorname{AUROC}\)</span>，<span class="math inline">\(\operatorname{AUPRC}\)</span>更关注正类的表现，因而在正负样本严重不平衡时更加敏感。较高的<span class="math inline">\(\operatorname{AUPRC}\)</span>表明模型性能较好。</p>
 <figure data-latex-placement="H" class="figure">
+<img src="../_tikz/tikz-0ef0260724d2db6a.png" class="tikz-image figure-img" style="width:92.0%">
 <figcaption>
 PR曲线示意
 </figcaption>
@@ -898,46 +1204,218 @@ H(p,q)\geqslant\sum_{i=1}^np_i\log p_i=H(p,p)
 </section>
 <section id="id--642df3fd" class="level3">
 <h3 class="anchored" data-anchor-id="id--642df3fd"><span class="header-section-number">28.2.2</span> 决策树</h3>
-<div class="algorithm">
-<div class="algorithmic">
+<div id="algorithm-28-1" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 28.1</span> <span class="algorithm-title">Classification and Regression Tree</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
 <p><strong>Input:</strong> dataset <span class="math inline">\(\mathcal{D}\)</span>, feature set <span class="math inline">\(\mathcal{F}\)</span>, maximum depth <span class="math inline">\(D_{\max}\)</span>, minimum samples to split <span class="math inline">\(N_{\text{split}}\)</span>, minimum samples per leaf <span class="math inline">\(N_{\text{leaf}}\)</span>, minimum impurity decrease <span class="math inline">\(\Delta_{\min}\)</span>, criterion</p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
 <p><strong>Output:</strong> Decision tree node <span class="math inline">\(T\)</span></p>
-<p>a leaf node predicting the majority class with class distribution:</p>
+</div>
+<div class="algorithm-line algorithm-function algorithm-depth-0" data-depth="0" data-line="3">
+<p><strong>function</strong> <span class="smallcaps">BuildTree</span>(<span class="math inline">\(\mathcal{D}, d\)</span>)</p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="4">
+<p><strong>if</strong> <span class="math inline">\(|\mathcal{D}| &lt; N_{\text{split}}\)</span> <strong>or</strong> <span class="math inline">\(d = D_{\max}\)</span> <strong>or</strong> all labels in <span class="math inline">\(\mathcal{D}\)</span> are identical <strong>or</strong> no feature in <span class="math inline">\(\mathcal{F}\)</span> exhibits variation on <span class="math inline">\(\mathcal{D}\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="5">
+<p><strong>return</strong> a leaf node predicting the majority class with class distribution:</p>
 <p><span class="math display">\[\begin{equation*}
 \left\{p_i=\frac{n_i}{|\mathcal{D}|}:n_i=|\{(x,y)\in\mathcal{D}:y=i\}|,\;i=1,2,\dots,m,\;m=\text{number of classes}\right\}
 
 \end{equation*}\]</span></p>
 <p>or the constant minimizing the chosen criterion (for regression) on <span class="math inline">\(\mathcal{D}\)</span></p>
-<p><span class="math inline">\(I_{\text{parent}}\gets\Call{NodeImpurity}{\mathcal{D}, \text{criterion}}\)</span></p>
-<p><span class="math inline">\((F, \tau, I_{\text{split}}) \gets \Call{FindBestSplit}{\mathcal{D}, \mathcal{F}, \text{criterion}, N_{\text{leaf}}}\)</span> Leaf node with prediction and class distribution or constant</p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="6">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="7">
+<p><span class="math inline">\(I_{\text{parent}}\gets\operatorname{NodeImpurity}\!\left(\mathcal{D}, \text{criterion}\right)\)</span><em>（Compute parent node impurity）</em></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="8">
+<p><span class="math inline">\((F, \tau, I_{\text{split}}) \gets \operatorname{FindBestSplit}\!\left(\mathcal{D}, \mathcal{F}, \text{criterion}, N_{\text{leaf}}\right)\)</span><em>（Search best binary split）</em></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="9">
+<p><strong>if</strong> <span class="math inline">\((F, \tau, I_{\text{split}})=\texttt{None}\)</span> <span class="math inline">\(\Delta=I_{\text{parent}}-I_{\text{split}}&lt;\Delta_{\min}\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="10">
+<p><strong>return</strong> Leaf node with prediction and class distribution or constant</p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="11">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="12">
 <p><span class="math inline">\(\mathcal{D}_L \gets \{(x,y)\in\mathcal{D}:x[F]\leqslant\tau\}\)</span>, <span class="math inline">\(\mathcal{D}_R \gets \{(x,y)\in\mathcal{D}:x[F]&gt;\tau\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="13">
 <p>Initialize node <span class="math inline">\(T \gets \{\text{type: "node"}, \text{feature: } F, \text{threshold: } \tau,
-\text{impurity decrease: }\Delta\}\)</span> <span class="math inline">\(T.\text{left} \gets \Call{BuildTree}{\mathcal{D}_L, d+1}\)</span>, <span class="math inline">\(T.\text{right} \gets \Call{BuildTree}{\mathcal{D}_R, d+1}\)</span> <span class="math inline">\(T\)</span></p>
+\text{impurity decrease: }\Delta\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="14">
+<p><span class="math inline">\(T.\text{left} \gets \operatorname{BuildTree}\!\left(\mathcal{D}_L, d+1\right)\)</span>, <span class="math inline">\(T.\text{right} \gets \operatorname{BuildTree}\!\left(\mathcal{D}_R, d+1\right)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="15">
+<p><strong>return</strong> <span class="math inline">\(T\)</span></p>
+</div>
+<div class="algorithm-line algorithm-function-end algorithm-depth-0" data-depth="0" data-line="16">
+<p><strong>end function</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="17">
+<p><strong>return</strong> <span class="smallcaps">BuildTree</span>(<span class="math inline">\(\mathcal{D}, 0\)</span>)</p>
 </div>
 </div>
-<div class="algorithm">
-<div class="algorithmic">
-<p><strong>Input:</strong> node dataset <span class="math inline">\(\mathcal{D}\)</span>, criterion <strong>Output:</strong> node impurity <span class="math inline">\(I(\mathcal{D})\)</span></p>
+</div>
+<div id="algorithm-28-2" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 28.2</span> <span class="algorithm-title">Node Impurity Function</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p><strong>Input:</strong> node dataset <span class="math inline">\(\mathcal{D}\)</span>, criterion</p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>Output:</strong> node impurity <span class="math inline">\(I(\mathcal{D})\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="3">
 <p><span class="math inline">\(n \gets |\mathcal{D}|\)</span></p>
-<p>Let class label set be <span class="math inline">\(\{1,\dots,m\}\)</span> <span class="math inline">\(n_i \gets |\{(x,y)\in\mathcal{D}:y=i\}|\)</span>, <span class="math inline">\(p_i \gets \dfrac{n_i}{n}\)</span></p>
-<p><span class="math inline">\(I(\mathcal{D}) \gets 1 - \sum\limits_{i=1}^m p_i^2\)</span> <span class="math inline">\(I(\mathcal{D}) \gets - \sum\limits_{i=1}^m p_i \log p_i\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-0" data-depth="0" data-line="4">
+<p><strong>if</strong> criterion <span class="math inline">\(\in \{\texttt{gini}, \texttt{entropy}, \texttt{cross entropy}\}\)</span> <strong>then</strong> <em>（Classification impurity）</em></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="5">
+<p>Let class label set be <span class="math inline">\(\{1,\dots,m\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="6">
+<p><span class="math inline">\(n_i \gets |\{(x,y)\in\mathcal{D}:y=i\}|\)</span>, <span class="math inline">\(p_i \gets \dfrac{n_i}{n}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="7">
+<p><strong>if</strong> criterion = <code>gini</code> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="8">
+<p><span class="math inline">\(I(\mathcal{D}) \gets 1 - \sum\limits_{i=1}^m p_i^2\)</span></p>
+</div>
+<div class="algorithm-line algorithm-elsif algorithm-depth-1" data-depth="1" data-line="9">
+<p><strong>else if</strong> criterion = <code>entropy</code> <strong>or</strong> <code>cross entropy</code> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="10">
+<p><span class="math inline">\(I(\mathcal{D}) \gets - \sum\limits_{i=1}^m p_i \log p_i\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="11">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-elsif algorithm-depth-0" data-depth="0" data-line="12">
+<p><strong>else if</strong> criterion <span class="math inline">\(\in \{\texttt{squared error}, \texttt{absolute error}\}\)</span> <strong>then</strong> <em>（Regression impurity）</em></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="13">
+<p><strong>if</strong> criterion = <code>squared error</code> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="14">
 <p><span class="math inline">\(\bar{y} \gets \dfrac{1}{n} \sum\limits_{(x,y)\in\mathcal{D}} y\)</span>, <span class="math inline">\(I(\mathcal{D}) \gets \dfrac{1}{n} \sum\limits_{(x,y)\in\mathcal{D}} (y-\bar{y})^2\)</span></p>
+</div>
+<div class="algorithm-line algorithm-elsif algorithm-depth-1" data-depth="1" data-line="15">
+<p><strong>else if</strong> criterion = <code>absolute error</code> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="16">
 <p><span class="math inline">\(m \gets \operatorname{median}\{y:(x,y)\in\mathcal{D}\}\)</span>, <span class="math inline">\(I(\mathcal{D}) \gets \dfrac{1}{n} \sum\limits_{(x,y)\in\mathcal{D}} |y-m|\)</span></p>
-<p><span class="math inline">\(I(\mathcal{D})\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="17">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-0" data-depth="0" data-line="18">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="19">
+<p><strong>return</strong> <span class="math inline">\(I(\mathcal{D})\)</span></p>
 </div>
 </div>
-<div class="algorithm">
-<div class="algorithmic">
-<p><strong>Input:</strong> dataset <span class="math inline">\(\mathcal{D}\)</span>, feature set <span class="math inline">\(\mathcal{F}\)</span>, criterion, minimum samples per leaf <span class="math inline">\(N_{\text{leaf}}\)</span> <strong>Output:</strong> best split <span class="math inline">\((F, \tau, I_{\text{split}})\)</span> or <code>None</code></p>
+</div>
+<div id="algorithm-28-3" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 28.3</span> <span class="algorithm-title">Find the Best Split</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p><strong>Input:</strong> dataset <span class="math inline">\(\mathcal{D}\)</span>, feature set <span class="math inline">\(\mathcal{F}\)</span>, criterion, minimum samples per leaf <span class="math inline">\(N_{\text{leaf}}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>Output:</strong> best split <span class="math inline">\((F, \tau, I_{\text{split}})\)</span> or <code>None</code></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="3">
 <p>Initialize: <span class="math inline">\(I_{\text{split}} \gets +\infty\)</span>, <span class="math inline">\((F,\tau) \gets \texttt{None}\)</span></p>
-<p><strong>continue</strong></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="4">
+<p><strong>for</strong> each feature <span class="math inline">\(F' \in \mathcal{F}\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="5">
+<p><strong>if</strong> all samples in <span class="math inline">\(\mathcal{D}\)</span> have identical values on <span class="math inline">\(F'\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="6">
+<p><strong>continue</strong> <em>（This feature cannot be split）</em></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="7">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="8">
 <p>Generate candidate thresholds <span class="math inline">\(\{\tau'\}\)</span> from sorted unique values of feature <span class="math inline">\(F'\)</span></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-1" data-depth="1">
+<p><em>（Typically midpoints between consecutive distinct values）</em></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="9">
+<p><strong>for</strong> each threshold <span class="math inline">\(\tau'\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="10">
 <p><span class="math inline">\(\mathcal{D}_L \gets \{(x,y)\in\mathcal{D}: x[F']\leqslant\tau'\}\)</span>, <span class="math inline">\(\mathcal{D}_R \gets \{(x,y)\in\mathcal{D}: x[F'] &gt; \tau'\}\)</span></p>
-<p><strong>continue</strong></p>
-<p><span class="math inline">\(I_L \gets \Call{NodeImpurity}{\mathcal{D}_L, \text{criterion}}\)</span>, <span class="math inline">\(I_R \gets \Call{NodeImpurity}{\mathcal{D}_R, \text{criterion}}\)</span> <span class="math inline">\(I_{\text{split}}' \gets \dfrac{|\mathcal{D}_L|}{|\mathcal{D}|} I_L
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-2" data-depth="2" data-line="11">
+<p><strong>if</strong> <span class="math inline">\(|\mathcal{D}_L| &lt; N_{\text{leaf}}\)</span> <strong>or</strong> <span class="math inline">\(|\mathcal{D}_R| &lt; N_{\text{leaf}}\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="12">
+<p><strong>continue</strong> <em>（Violates min_samples_leaf）</em></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-2" data-depth="2" data-line="13">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="14">
+<p><span class="math inline">\(I_L \gets \operatorname{NodeImpurity}\!\left(\mathcal{D}_L, \text{criterion}\right)\)</span>, <span class="math inline">\(I_R \gets \operatorname{NodeImpurity}\!\left(\mathcal{D}_R, \text{criterion}\right)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="15">
+<p><span class="math inline">\(I_{\text{split}}' \gets \dfrac{|\mathcal{D}_L|}{|\mathcal{D}|} I_L
         + \dfrac{|\mathcal{D}_R|}{|\mathcal{D}|} I_R\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-2" data-depth="2" data-line="16">
+<p><strong>if</strong> <span class="math inline">\(I_{\text{split}}' &lt; I_{\text{split}}\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="17">
 <p><span class="math inline">\(I_{\text{split}}' \gets I_{\text{split}}\)</span>, <span class="math inline">\((F,\tau) \gets (F',\tau')\)</span></p>
-<p><code>None</code> <span class="math inline">\((F,\tau, I_{\text{split}})\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-2" data-depth="2" data-line="18">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="19">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="20">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-0" data-depth="0" data-line="21">
+<p><strong>if</strong> <span class="math inline">\((F,\tau) = \texttt{None}\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="22">
+<p><strong>return</strong> <code>None</code></p>
+</div>
+<div class="algorithm-line algorithm-else algorithm-depth-0" data-depth="0" data-line="23">
+<p><strong>else</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="24">
+<p><strong>return</strong> <span class="math inline">\((F,\tau, I_{\text{split}})\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-0" data-depth="0" data-line="25">
+<p><strong>end if</strong></p>
+</div>
 </div>
 </div>
 <p>上述算法基于<a href="../chapters/page-042.html#term-CART" class="term" title="classification and regression tree">分类回归树<span class="term-english">（classification and regression tree）</span></a>框架，采用自顶向下的递归贪心策略生成二叉树结构。树的生长过程由函数<span class="smallcaps">BuildTree</span>控制，并在每个节点通过搜索最优特征与阈值对<span class="math inline">\((F,\tau)\)</span>实现二叉划分。</p>
@@ -1024,20 +1502,50 @@ P\left(S_B&gt;\frac{B}{2}\right)&amp;=P\left(\frac{S_B-Bp}{\sqrt{B^2\rho p(1-p)}
 </div>
 <section id="gbdt" class="level4">
 <h4 class="anchored" data-anchor-id="gbdt"><span class="header-section-number">28.2.4.1</span> GBDT</h4>
-<div class="algorithm">
-<div class="algorithmic">
-<p><strong>Input:</strong> training set <span class="math inline">\(\mathcal{D}_{\mathrm{train}}=\{(x_i,y_i)\}_{i=1}^n\)</span>, validation set <span class="math inline">\(\mathcal{D}_{\mathrm{val}}=\{(x_i^{(v)},y_i^{(v)})\}_{i=1}^{n_v}\)</span>, loss function <span class="math inline">\(\ell(y,F(x))\)</span>, number of boosting iterations <span class="math inline">\(B\)</span>, learning rate <span class="math inline">\(\eta\)</span>, early-stopping patience <span class="math inline">\(P\)</span>, tolerance <span class="math inline">\(\varepsilon\)</span>, tree-building parameters for</p>
+<div id="algorithm-28-4" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 28.4</span> <span class="algorithm-title">Gradient Boosting Decision Tree</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p><strong>Input:</strong> training set <span class="math inline">\(\mathcal{D}_{\mathrm{train}}=\{(x_i,y_i)\}_{i=1}^n\)</span>, validation set <span class="math inline">\(\mathcal{D}_{\mathrm{val}}=\{(x_i^{(v)},y_i^{(v)})\}_{i=1}^{n_v}\)</span>, loss function <span class="math inline">\(\ell(y,F(x))\)</span>, number of boosting iterations <span class="math inline">\(B\)</span>, learning rate <span class="math inline">\(\eta\)</span>, early-stopping patience <span class="math inline">\(P\)</span>, tolerance <span class="math inline">\(\varepsilon\)</span>, tree-building parameters for <span class="smallcaps">BuildTree</span>(<span class="math inline">\(\cdot\)</span>)</p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
 <p><strong>Output:</strong> Additive model <span class="math inline">\(F_{\hat{b}}(x)\)</span></p>
-<p>Initialize the model prediction with a common output <span class="math inline">\(F_0(x)\)</span> for all samples <em>For classification, this output is the empirical distribution of the training samples.</em> <em>for regression, it is the constant minimizing the empirical loss on the training set.</em></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="3">
+<p>Initialize the model prediction with a common output <span class="math inline">\(F_0(x)\)</span> for all samples</p>
+</div>
+<div class="algorithm-line algorithm-statex algorithm-depth-0" data-depth="0">
+<p><em>For classification, this output is the empirical distribution of the training samples.</em></p>
+</div>
+<div class="algorithm-line algorithm-statex algorithm-depth-0" data-depth="0">
+<p><em>for regression, it is the constant minimizing the empirical loss on the training set.</em></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="4">
 <p><span class="math inline">\(\hat{b}\gets 0\)</span>, <span class="math inline">\(c_{\mathrm{stop}}\gets 0\)</span>, <span class="math inline">\(L_{\mathrm{best}}\gets +\infty\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="5">
+<p><strong>for</strong> <span class="math inline">\(b=1,2,\dots,B\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="6">
 <p>Compute pseudo-residuals for all training samples</p>
 <p><span class="math display">\[\begin{equation*}
 r_{ib}\gets-\nabla\ell[y_i,F_{b-1}(x_i)],
 \quad i=1,2,\dots,n
 
 \end{equation*}\]</span></p>
-<p>Fit a regression tree <span class="math inline">\(T_b\gets\Call{BuildTree}{\{(x_i,r_{ib})\}_{i=1}^n}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="7">
+<p>Fit a regression tree <span class="math inline">\(T_b\gets\operatorname{BuildTree}\!\left(\{(x_i,r_{ib})\}_{i=1}^n\right)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="8">
 <p>Let the leaf rigions of <span class="math inline">\(T_b\)</span> be <span class="math inline">\(R_{1b},R_{2b},\dots,R_{J_bb}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="9">
+<p><strong>for</strong> <span class="math inline">\(j=1,2,\dots,J_b\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="10">
 <p>Compute the optimal leaf output on region <span class="math inline">\(R_{jb}\)</span></p>
 <p><span class="math display">\[\begin{equation*}
 \gamma_{jb}\gets
@@ -1046,12 +1554,47 @@ r_{ib}\gets-\nabla\ell[y_i,F_{b-1}(x_i)],
 \ell[y_i,F_{b-1}(x_i)+\gamma]
 
 \end{equation*}\]</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="11">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="12">
 <p>Define the <span class="math inline">\(b\)</span>-th base learner <span class="math inline">\(f_b(x)\gets\sum\limits_{j=1}^{J_b}\gamma_{jb}I(x\in R_{jb})\)</span> and update the additive model <span class="math inline">\(F_b(x)\gets F_{b-1}(x)+\eta f_b(x)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="13">
 <p>Evaluate the validation loss <span class="math inline">\(L_b\gets
 \dfrac{1}{n_v}\sum\limits_{i=1}^{n_v}\ell[y_i^{(v)},F_b(x_i^{(v)})]\)</span></p>
-<p><span class="math inline">\(L_{\mathrm{best}}\gets L_b\)</span>, <span class="math inline">\(\hat b\gets b\)</span>, <span class="math inline">\(c_{\mathrm{stop}}\gets 0\)</span> <span class="math inline">\(c_{\mathrm{stop}}\gets c_{\mathrm{stop}}+1\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="14">
+<p><strong>if</strong> <span class="math inline">\(L_b&lt;L_{\mathrm{best}}-\varepsilon\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="15">
+<p><span class="math inline">\(L_{\mathrm{best}}\gets L_b\)</span>, <span class="math inline">\(\hat b\gets b\)</span>, <span class="math inline">\(c_{\mathrm{stop}}\gets 0\)</span></p>
+</div>
+<div class="algorithm-line algorithm-else algorithm-depth-1" data-depth="1" data-line="16">
+<p><strong>else</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="17">
+<p><span class="math inline">\(c_{\mathrm{stop}}\gets c_{\mathrm{stop}}+1\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="18">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="19">
+<p><strong>if</strong> <span class="math inline">\(c_{\mathrm{stop}}\geqslant P\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="20">
 <p><strong>break</strong></p>
-<p><span class="math inline">\(F_{\hat{b}}(x)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="21">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="22">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="23">
+<p><strong>return</strong> <span class="math inline">\(F_{\hat{b}}(x)\)</span></p>
+</div>
 </div>
 </div>
 </section>
@@ -1149,26 +1692,99 @@ H_R=H-H_L
 \end{align*}\]</span></p>
 <p>由于我们希望目标函数尽可能小，因此只有当<span class="math inline">\(\Delta&lt;0\)</span>时，分裂才会使目标函数下降，也才是有利的分裂。</p>
 <p>这就是XGBoost中用于评估一个候选分裂是否值得采用的分裂增益公式。XGBoost将树结构的生长过程直接纳入了统一的优化框架之中（GBDT是分开的），使得每一次分裂都具有明确的目标函数解释。</p>
-<div class="algorithm">
-<div class="algorithmic">
-<p><strong>Input:</strong> training set <span class="math inline">\(\mathcal{D}_{\mathrm{train}}=\{(x_i,y_i)\}_{i=1}^n\)</span>, validation set <span class="math inline">\(\mathcal{D}_{\mathrm{val}}=\{(x_i^{(v)},y_i^{(v)})\}_{i=1}^{n_v}\)</span>, loss function <span class="math inline">\(\ell(y,\hat y)\)</span>, number of boosting iterations <span class="math inline">\(B\)</span>, learning rate <span class="math inline">\(\eta\)</span>, regularization parameters <span class="math inline">\(\lambda,\gamma\)</span>, early-stopping patience <span class="math inline">\(P\)</span>, tolerance <span class="math inline">\(\varepsilon\)</span>, tree-building parameters for</p>
+<div id="algorithm-28-5" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 28.5</span> <span class="algorithm-title">Extreme Gradient Boosting</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p><strong>Input:</strong> training set <span class="math inline">\(\mathcal{D}_{\mathrm{train}}=\{(x_i,y_i)\}_{i=1}^n\)</span>, validation set <span class="math inline">\(\mathcal{D}_{\mathrm{val}}=\{(x_i^{(v)},y_i^{(v)})\}_{i=1}^{n_v}\)</span>, loss function <span class="math inline">\(\ell(y,\hat y)\)</span>, number of boosting iterations <span class="math inline">\(B\)</span>, learning rate <span class="math inline">\(\eta\)</span>, regularization parameters <span class="math inline">\(\lambda,\gamma\)</span>, early-stopping patience <span class="math inline">\(P\)</span>, tolerance <span class="math inline">\(\varepsilon\)</span>, tree-building parameters for <span class="smallcaps">BuildTree</span>(<span class="math inline">\(\cdot\)</span>)</p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
 <p><strong>Output:</strong> Additive model <span class="math inline">\(\hat y_{\hat b}(x)\)</span></p>
-<p>Initialize the model prediction with a common output <span class="math inline">\(F_0(x)\)</span> for all samples <em>For classification, this output is the empirical distribution of the training samples.</em> <em>for regression, it is the constant minimizing the empirical loss on the training set.</em></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="3">
+<p>Initialize the model prediction with a common output <span class="math inline">\(F_0(x)\)</span> for all samples</p>
+</div>
+<div class="algorithm-line algorithm-statex algorithm-depth-0" data-depth="0">
+<p><em>For classification, this output is the empirical distribution of the training samples.</em></p>
+</div>
+<div class="algorithm-line algorithm-statex algorithm-depth-0" data-depth="0">
+<p><em>for regression, it is the constant minimizing the empirical loss on the training set.</em></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="4">
 <p><span class="math inline">\(\hat b\gets 0\)</span>, <span class="math inline">\(c_{\mathrm{stop}}\gets 0\)</span>, <span class="math inline">\(L_{\mathrm{best}}\gets +\infty\)</span></p>
-<p>Compute first- and second-order statistics for all training samples: <span class="math inline">\(g_{ib}\gets \dfrac{\partial\ell(y_i,F)}{\partial F}\big|_{F=F_{b-1}(x_i)},\;h_{ib}\gets \dfrac{\partial^2\ell(y_i,F)}{\partial F^2}\big|_{F=F_{b-1}(x_i)},\;i=1,2,\dots,n\)</span></p>
-<p>Fit a regression tree structure <span class="math inline">\(T_b\gets\Call{BuildTree}{\{(x_i,g_{ib},h_{ib})\}_{i=1}^n,\lambda,\gamma}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="5">
+<p><strong>for</strong> <span class="math inline">\(b=1,2,\dots,B\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="6">
+<p>Compute first- and second-order statistics for all training samples:</p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="7">
+<p><span class="math inline">\(g_{ib}\gets \dfrac{\partial\ell(y_i,F)}{\partial F}\big|_{F=F_{b-1}(x_i)},\;h_{ib}\gets \dfrac{\partial^2\ell(y_i,F)}{\partial F^2}\big|_{F=F_{b-1}(x_i)},\;i=1,2,\dots,n\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="8">
+<p>Fit a regression tree structure <span class="math inline">\(T_b\gets\operatorname{BuildTree}\!\left(\{(x_i,g_{ib},h_{ib})\}_{i=1}^n,\lambda,\gamma\right)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="9">
 <p>Let the leaf regions of <span class="math inline">\(T_b\)</span> be <span class="math inline">\(R_{1b},R_{2b},\dots,R_{J_b b}\)</span></p>
-<p>Compute aggregated statistics on region <span class="math inline">\(R_{jb}\)</span> <span class="math inline">\(G_{jb}\gets\sum\limits_{x_i\in R_{jb}}g_{ib},\quad H_{jb}\gets\sum\limits_{x_i\in R_{jb}}h_{ib}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="10">
+<p><strong>for</strong> <span class="math inline">\(j=1,2,\dots,J_b\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="11">
+<p>Compute aggregated statistics on region <span class="math inline">\(R_{jb}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="12">
+<p><span class="math inline">\(G_{jb}\gets\sum\limits_{x_i\in R_{jb}}g_{ib},\quad H_{jb}\gets\sum\limits_{x_i\in R_{jb}}h_{ib}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="13">
 <p>Compute the optimal leaf output</p>
 <p><span class="math display">\[\begin{equation*}
 w_{jb}\gets-\frac{G_{jb}}{H_{jb}+\lambda}
 
 \end{equation*}\]</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="14">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="15">
 <p>Define the <span class="math inline">\(b\)</span>-th base learner <span class="math inline">\(f_b(x)\gets\sum\limits_{j=1}^{J_b}w_{jb}I(x\in R_{jb})\)</span> and update the additive model <span class="math inline">\(F_b(x)\gets F_{b-1}(x)+\eta f_b(x)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="16">
 <p>Evaluate the validation loss <span class="math inline">\(L_b\gets\frac{1}{n_v}\sum\limits_{i=1}^{n_v}\ell[y_i^{(v)},F_b(x_i^{(v)})]\)</span></p>
-<p><span class="math inline">\(L_{\mathrm{best}}\gets L_b\)</span>, <span class="math inline">\(\hat b\gets b\)</span>, <span class="math inline">\(c_{\mathrm{stop}}\gets 0\)</span> <span class="math inline">\(c_{\mathrm{stop}}\gets c_{\mathrm{stop}}+1\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="17">
+<p><strong>if</strong> <span class="math inline">\(L_b&lt;L_{\mathrm{best}}-\varepsilon\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="18">
+<p><span class="math inline">\(L_{\mathrm{best}}\gets L_b\)</span>, <span class="math inline">\(\hat b\gets b\)</span>, <span class="math inline">\(c_{\mathrm{stop}}\gets 0\)</span></p>
+</div>
+<div class="algorithm-line algorithm-else algorithm-depth-1" data-depth="1" data-line="19">
+<p><strong>else</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="20">
+<p><span class="math inline">\(c_{\mathrm{stop}}\gets c_{\mathrm{stop}}+1\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="21">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="22">
+<p><strong>if</strong> <span class="math inline">\(c_{\mathrm{stop}}\geqslant P\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="23">
 <p><strong>break</strong></p>
-<p><span class="math inline">\(F_{\hat b}(x)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="24">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="25">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="26">
+<p><strong>return</strong> <span class="math inline">\(F_{\hat b}(x)\)</span></p>
+</div>
 </div>
 </div>
 </section>
@@ -1349,7 +1965,12 @@ f=f_1+f_2,\quad f_1\in Y_n,\;f_2\in Y_n^{\perp}
 <section id="id--4cc38cf8" class="level2">
 <h2 class="anchored" data-anchor-id="id--4cc38cf8"><span class="header-section-number">28.5</span> 神经网络</h2>
 <div class="center">
-
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../_tikz/tikz-69962cfe66dec504.png" class="tikz-image img-fluid figure-img" style="width:92.0%"></p>
+<figcaption>image</figcaption>
+</figure>
+</div>
 </div>
 <div id="definition-28-24" class="definition theorem-block env-definition">
 <p><strong>Definition 28.24</strong>. 若映射<span class="math inline">\(f_\theta:\mathbb{R}^m\rightarrow\mathbb{R}^n\)</span>可以表示为若干线性变换与逐元素非线性映射的复合：</p>
@@ -1388,6 +2009,7 @@ f_\theta(x)=\phi^{(L)}\!\circ \phi^{(L-1)} \circ \cdots \circ \phi^{(1)}(x)
 <p>为<a href="../chapters/page-058.html#term-SigmoidFunction" class="term" title="sigmoid function">sigmoid函数<span class="term-english">（sigmoid function）</span></a>。</p>
 </div>
 <figure data-latex-placement="H" class="figure">
+<img src="../_tikz/tikz-c58bfdf4593d996a.png" class="tikz-image figure-img" style="width:92.0%">
 <figcaption>
 Sigmoid 激活函数<span class="math inline"><span class="math inline">\(\sigma(x)=\dfrac{1}{1+e^{-x}}\)</span></span>
 </figcaption>
@@ -1401,6 +2023,7 @@ Sigmoid 激活函数<span class="math inline"><span class="math inline">\(\sigma
 <p>为<a href="../chapters/page-059.html#term-TanhFunction" class="term" title="tanh function">双曲正切函数<span class="term-english">（tanh function）</span></a>。</p>
 </div>
 <figure data-latex-placement="H" class="figure">
+<img src="../_tikz/tikz-5c65c7c7fb8eb098.png" class="tikz-image figure-img" style="width:92.0%">
 <figcaption>
 Tanh 激活函数 <span class="math inline">tanh (<em>x</em>)</span>
 </figcaption>
@@ -1414,6 +2037,7 @@ Tanh 激活函数 <span class="math inline">tanh (<em>x</em>)</span>
 <p>为<a href="../chapters/page-057.html#term-ReLU" class="term" title="rectified linear unit">整流线型单元<span class="term-english">（rectified linear unit）</span></a>。</p>
 </div>
 <figure data-latex-placement="H" class="figure">
+<img src="../_tikz/tikz-159b1076cd14ac56.png" class="tikz-image figure-img" style="width:92.0%">
 <figcaption>
 ReLU 激活函数 <span class="math inline"><em>σ</em>(<em>x</em>) = max (0, <em>x</em>)</span>
 </figcaption>
@@ -1432,6 +2056,7 @@ x,&amp; x&gt;0 \\
 <p>为<a href="../chapters/page-051.html#term-LeakyRectifiedLinearUnit" class="term" title="leaky ReLU">泄漏整流线性单元<span class="term-english">（leaky ReLU）</span></a>。</p>
 </div>
 <figure data-latex-placement="H" class="figure">
+<img src="../_tikz/tikz-962f5fd8c34d6587.png" class="tikz-image figure-img" style="width:92.0%">
 <figcaption>
 Leaky ReLU 激活函数（<span class="math inline"><em>α</em> = 0.1</span>）
 </figcaption>
@@ -1449,6 +2074,7 @@ x, &amp; x&gt;0 \\
 <p>为<a href="../chapters/page-044.html#term-ELU" class="term" title="Exponential Linear Unit">指数线性单元<span class="term-english">（Exponential Linear Unit）</span></a>。</p>
 </div>
 <figure data-latex-placement="H" class="figure">
+<img src="../_tikz/tikz-e2a921361b286aaa.png" class="tikz-image figure-img" style="width:92.0%">
 <figcaption>
 ELU 激活函数（<span class="math inline"><em>α</em> = 1</span>）
 </figcaption>
@@ -1497,41 +2123,105 @@ ELU 激活函数（<span class="math inline"><em>α</em> = 1</span>）
 <div id="definition-28-35" class="definition theorem-block env-definition">
 <p><strong>Definition 28.35</strong>. 称对整个训练集<span class="math inline">\(\mathcal{D}\)</span>完整遍历一次的过程为一<a href="../chapters/page-044.html#term-Epoch" class="term" title="epoch">轮<span class="term-english">（epoch）</span></a>。</p>
 </div>
-<div class="algorithm">
-<div class="algorithmic">
-<p><strong>Input:</strong> initial parameter <span class="math inline">\(\theta_0\)</span>, learning rate <span class="math inline">\(\eta\)</span>, number of iterations <span class="math inline">\(T\)</span>, training set <span class="math inline">\(\mathcal{D}\)</span> Compute the empirical risk <span class="math inline">\(\widehat{\mathcal{R}}(\theta_t)\)</span> on the whole dataset <span class="math inline">\(\mathcal{D}\)</span> Compute the full gradient <span class="math inline">\(g_t=\mathop{}\!\mathrm{d}\widehat{\mathcal{R}}(\theta_t)\)</span> Update the parameter:</p>
+<div id="algorithm-28-6" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 28.6</span> <span class="algorithm-title">Batch Gradient Descent</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p><strong>Input:</strong> initial parameter <span class="math inline">\(\theta_0\)</span>, learning rate <span class="math inline">\(\eta\)</span>, number of iterations <span class="math inline">\(T\)</span>, training set <span class="math inline">\(\mathcal{D}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>for</strong> <span class="math inline">\(t = 1,2,\dots,T\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="3">
+<p>Compute the empirical risk <span class="math inline">\(\widehat{\mathcal{R}}(\theta_t)\)</span> on the whole dataset <span class="math inline">\(\mathcal{D}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="4">
+<p>Compute the full gradient <span class="math inline">\(g_t=\mathop{}\!\mathrm{d}\widehat{\mathcal{R}}(\theta_t)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="5">
+<p>Update the parameter:</p>
 <p><span class="math display">\[\begin{equation*}
 \theta_{t+1} \gets \theta_t - \eta\, g_t
 
 \end{equation*}\]</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="6">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="7">
 <p><strong>Return:</strong> final parameter estimate <span class="math inline">\(\theta_T\)</span></p>
 </div>
 </div>
-<div class="algorithm">
-<div class="algorithmic">
-<p><strong>Input:</strong> initial parameter <span class="math inline">\(\theta_0\)</span>, learning rate <span class="math inline">\(\eta\)</span>, number of iterations <span class="math inline">\(T\)</span>, training set <span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n\)</span> Randomly sample one data point <span class="math inline">\((x_{i_t}, y_{i_t})\)</span> from <span class="math inline">\(\mathcal{D}\)</span> Compute the stochastic gradient</p>
+</div>
+<div id="algorithm-28-7" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 28.7</span> <span class="algorithm-title">Stochastic Gradient Descent (SGD)</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p><strong>Input:</strong> initial parameter <span class="math inline">\(\theta_0\)</span>, learning rate <span class="math inline">\(\eta\)</span>, number of iterations <span class="math inline">\(T\)</span>, training set <span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>for</strong> <span class="math inline">\(t = 1,2,\dots,T\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="3">
+<p>Randomly sample one data point <span class="math inline">\((x_{i_t}, y_{i_t})\)</span> from <span class="math inline">\(\mathcal{D}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="4">
+<p>Compute the stochastic gradient</p>
 <p><span class="math display">\[
 g_t = \mathop{}\!\mathrm{d}L[f(x_{i_t};\theta_t), y_{i_t}]
 \]</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="5">
 <p>Update the parameter:</p>
 <p><span class="math display">\[
 \theta_{t+1} \gets \theta_t - \eta\, g_t
 \]</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="6">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="7">
 <p><strong>Return:</strong> final parameter estimate <span class="math inline">\(\theta_T\)</span></p>
 </div>
 </div>
-<div class="algorithm">
-<div class="algorithmic">
-<p><strong>Input:</strong> initial parameter <span class="math inline">\(\theta_0\)</span>, learning rate <span class="math inline">\(\eta\)</span>, number of iterations <span class="math inline">\(T\)</span>, training set <span class="math inline">\(\mathcal{D}\)</span>, batch size <span class="math inline">\(B\)</span> Randomly sample a mini-batch <span class="math inline">\(\mathcal{B}_t \subseteq \mathcal{D}\)</span> with <span class="math inline">\(|\mathcal{B}_t| = B\)</span> Compute the mini-batch gradient</p>
+</div>
+<div id="algorithm-28-8" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 28.8</span> <span class="algorithm-title">Mini-batch Gradient Descent</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p><strong>Input:</strong> initial parameter <span class="math inline">\(\theta_0\)</span>, learning rate <span class="math inline">\(\eta\)</span>, number of iterations <span class="math inline">\(T\)</span>, training set <span class="math inline">\(\mathcal{D}\)</span>, batch size <span class="math inline">\(B\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>for</strong> <span class="math inline">\(t = 1,2,\dots,T\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="3">
+<p>Randomly sample a mini-batch <span class="math inline">\(\mathcal{B}_t \subseteq \mathcal{D}\)</span> with <span class="math inline">\(|\mathcal{B}_t| = B\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="4">
+<p>Compute the mini-batch gradient</p>
 <p><span class="math display">\[
 g_t = \frac{1}{B} \sum_{(x_i,y_i)\in \mathcal{B}_t}
 \mathop{}\!\mathrm{d}L[f(x_i;\theta_t), y_i]
 \]</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="5">
 <p>Update the parameter:</p>
 <p><span class="math display">\[
 \theta_{t+1} \gets \theta_t - \eta\, g_t
 \]</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="6">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="7">
 <p><strong>Return:</strong> final parameter estimate <span class="math inline">\(\theta_T\)</span></p>
+</div>
 </div>
 </div>
 </section>
@@ -1541,19 +2231,51 @@ g_t = \frac{1}{B} \sum_{(x_i,y_i)\in \mathcal{B}_t}
 <section id="recurrent-neural-network-rnn-b2b3accd" class="level4">
 <h4 class="anchored" data-anchor-id="recurrent-neural-network-rnn-b2b3accd"><span class="header-section-number">28.5.2.1</span> 循环神经网络（Recurrent Neural Network, RNN）</h4>
 <figure data-latex-placement="H" class="figure">
+<img src="../_tikz/tikz-8f99bed870a48b03.png" class="tikz-image figure-img" style="width:92.0%">
 <figcaption>
 单个时间步的RNN单元计算结构
 </figcaption>
 </figure>
 <figure data-latex-placement="H" class="figure">
+<img src="../_tikz/tikz-3ca1c12a948c3fea.png" class="tikz-image figure-img" style="width:92.0%">
 <figcaption>
 循环神经网络结构示意图
 </figcaption>
 </figure>
-<div class="algorithm">
-<div class="algorithmic">
-<p>Input sequence <span class="math inline">\(\{x_t^{(1)}\}_{t=1}^T\)</span>, parameters <span class="math inline">\(\{W_h^{(l)}, W_x^{(l)}, b_h^{(l)}\}_{l=1}^{L}\)</span>, activation functions <span class="math inline">\(\phi(\cdot)\)</span></p>
-<p>Hidden states <span class="math inline">\(\{h_t^{(L)}\}_{t=1}^{T}\)</span> Initialize hidden states <span class="math inline">\(h_0^{(l)} = \mathbf{0}\)</span> for all <span class="math inline">\(l = 1,\dots,L\)</span> <span class="math inline">\(x_t^{(l)} \gets h_t^{(l-1)}\)</span> <span class="math inline">\(h_t^{(l)}
+<div id="source-alg-stacked_rnn_forward-b405f43f" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 28.9</span> <span class="algorithm-title">Forward Propagation of a Multi-layer RNN</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>输入：</strong> Input sequence <span class="math inline">\(\{x_t^{(1)}\}_{t=1}^T\)</span>, parameters <span class="math inline">\(\{W_h^{(l)}, W_x^{(l)}, b_h^{(l)}\}_{l=1}^{L}\)</span>, activation functions <span class="math inline">\(\phi(\cdot)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>输出：</strong> Hidden states <span class="math inline">\(\{h_t^{(L)}\}_{t=1}^{T}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p>Initialize hidden states <span class="math inline">\(h_0^{(l)} = \mathbf{0}\)</span> for all <span class="math inline">\(l = 1,\dots,L\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>for</strong> <span class="math inline">\(t = 1\)</span> <strong>to</strong> <span class="math inline">\(T\)</span> <strong>do</strong> <em>（Iterate over time steps）</em></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="3">
+<p><strong>for</strong> <span class="math inline">\(l= 1\)</span> <strong>to</strong> <span class="math inline">\(L\)</span> <strong>do</strong> <em>（Iterate over layers）</em></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-2" data-depth="2" data-line="4">
+<p><strong>if</strong> <span class="math inline">\(l\ne1\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="5">
+<p><span class="math inline">\(x_t^{(l)} \gets h_t^{(l-1)}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-3" data-depth="3">
+<p><em>（Output of previous layer as current input）</em></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-2" data-depth="2" data-line="6">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="7">
+<p><span class="math inline">\(h_t^{(l)}
 \gets
 \phi\left(
 W_h^{(l)} h_{t-1}^{(l)}
@@ -1563,6 +2285,13 @@ W_h^{(l)} h_{t-1}^{(l)}
         b_h^{(l)}
         \right)\)</span></p>
 </div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="8">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="9">
+<p><strong>end for</strong></p>
+</div>
+</div>
 </div>
 <div id="note-28-15" class="note theorem-block env-note">
 <p><strong>note 28.15</strong>. 由于隐藏状态不断累积先前信息，RNN 能够捕捉序列中的依赖关系。</p>
@@ -1570,42 +2299,92 @@ W_h^{(l)} h_{t-1}^{(l)}
 </section>
 <section id="long-short-term-memory-lstm-41eaa6e2" class="level4">
 <h4 class="anchored" data-anchor-id="long-short-term-memory-lstm-41eaa6e2"><span class="header-section-number">28.5.2.2</span> 长短期记忆网络（Long Short-Term Memory, LSTM）</h4>
-<div class="algorithm">
-<div class="algorithmic">
-<p>Input sequence <span class="math inline">\(\{x_t^{(1)}\}_{t=1}^T\)</span>, parameters <span class="math inline">\(\{W_f^{(l)},W_i^{(l)},W_c^{(l)},W_o^{(l)},b_f^{(l)},b_i^{(l)},b_c^{(l)},b_o^{(l)}\}_{l=1}^{L}\)</span></p>
-<p>Hidden states <span class="math inline">\(\{h_t^{(l)}\}_{l=1}^{L}\)</span> and cell states <span class="math inline">\(\{c_t^{(l)}\}_{l=1}^{L}\)</span></p>
+<div id="source-alg-stacked_lstm_forward-9fa79308" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 28.10</span> <span class="algorithm-title">Forward Propagation of a Multi-layer LSTM</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>输入：</strong> Input sequence <span class="math inline">\(\{x_t^{(1)}\}_{t=1}^T\)</span>, parameters <span class="math inline">\(\{W_f^{(l)},W_i^{(l)},W_c^{(l)},W_o^{(l)},b_f^{(l)},b_i^{(l)},b_c^{(l)},b_o^{(l)}\}_{l=1}^{L}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>输出：</strong> Hidden states <span class="math inline">\(\{h_t^{(l)}\}_{l=1}^{L}\)</span> and cell states <span class="math inline">\(\{c_t^{(l)}\}_{l=1}^{L}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
 <p>Initialize <span class="math inline">\(h_0^{(l)}=\mathbf{0},\; c_0^{(l)}=\mathbf{0}\)</span> for all <span class="math inline">\(l=1,\dots,L\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>for</strong> <span class="math inline">\(t=1\)</span> <strong>to</strong> <span class="math inline">\(T\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-1" data-depth="1">
+<p><em>（Iterate over time steps）</em></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="3">
+<p><strong>for</strong> <span class="math inline">\(l=1\)</span> <strong>to</strong> <span class="math inline">\(L\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-2" data-depth="2">
+<p><em>（Iterate over layers）</em></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-2" data-depth="2" data-line="4">
+<p><strong>if</strong> <span class="math inline">\(l\ne 1\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="5">
 <p><span class="math inline">\(x_t^{(l)} \gets h_t^{(l-1)}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-3" data-depth="3">
+<p><em>（Input from the previous layer）</em></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-2" data-depth="2" data-line="6">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="7">
 <p>Forget gate: controls how much of <span class="math inline">\(c_{t-1}^{(l)}\)</span> is retained</p>
 <p><span class="math display">\[\begin{equation*}
 f_t^{(l)} \gets \sigma\!\left(W_f^{(l)}[h_{t-1}^{(l)},x_t^{(l)}]+b_f^{(l)}\right)
 
 \end{equation*}\]</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="8">
 <p>Input gate: controls how much new information is written</p>
 <p><span class="math display">\[\begin{equation*}
 i_t^{(l)} \gets \sigma\!\left(W_i^{(l)}[h_{t-1}^{(l)},x_t^{(l)}]+b_i^{(l)}\right)
 
 \end{equation*}\]</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="9">
 <p>Candidate cell state: new content to be added</p>
 <p><span class="math display">\[\begin{equation*}
 \tilde c_t^{(l)} \gets \tanh\!\left(W_c^{(l)}[h_{t-1}^{(l)},x_t^{(l)}]+b_c^{(l)}\right)
 
 \end{equation*}\]</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="10">
 <p>Cell state update: forget old + write new</p>
 <p><span class="math display">\[\begin{equation*}
 c_t^{(l)} \gets f_t^{(l)}\odot c_{t-1}^{(l)} + i_t^{(l)}\odot \tilde c_t^{(l)}
 
 \end{equation*}\]</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="11">
 <p>Output gate: controls exposure of cell state</p>
 <p><span class="math display">\[\begin{equation*}
 o_t^{(l)} \gets \sigma\!\left(W_o^{(l)}[h_{t-1}^{(l)},x_t^{(l)}]+b_o^{(l)}\right)
 
 \end{equation*}\]</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="12">
 <p>Hidden state: gated and activated cell state</p>
 <p><span class="math display">\[\begin{equation*}
 h_t^{(l)} \gets o_t^{(l)}\odot \tanh(c_t^{(l)})
 
 \end{equation*}\]</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="13">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="14">
+<p><strong>end for</strong></p>
+</div>
 </div>
 </div>
 <div id="note-28-16" class="note theorem-block env-note">
@@ -1615,32 +2394,78 @@ h_t^{(l)} \gets o_t^{(l)}\odot \tanh(c_t^{(l)})
 </section>
 <section id="gated-recurrent-unit-gru-202febd7" class="level4">
 <h4 class="anchored" data-anchor-id="gated-recurrent-unit-gru-202febd7"><span class="header-section-number">28.5.2.3</span> 门控循环单元（Gated Recurrent Unit, GRU）</h4>
-<div class="algorithm">
-<div class="algorithmic">
-<p>Input sequence <span class="math inline">\(\{x_t^{(1)}\}_{t=1}^T\)</span>, parameters <span class="math inline">\(\{W_z^{(l)},W_r^{(l)},W_h^{(l)},b_z^{(l)},b_r^{(l)},b_h^{(l)}\}_{l=1}^{L}\)</span></p>
-<p>Hidden states <span class="math inline">\(\{h_t^{(l)}\}_{l=1}^{L}\)</span></p>
+<div id="source-alg-stacked_gru_forward-d6f395e7" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 28.11</span> <span class="algorithm-title">Forward Propagation of a Multi-layer GRU</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>输入：</strong> Input sequence <span class="math inline">\(\{x_t^{(1)}\}_{t=1}^T\)</span>, parameters <span class="math inline">\(\{W_z^{(l)},W_r^{(l)},W_h^{(l)},b_z^{(l)},b_r^{(l)},b_h^{(l)}\}_{l=1}^{L}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>输出：</strong> Hidden states <span class="math inline">\(\{h_t^{(l)}\}_{l=1}^{L}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
 <p>Initialize <span class="math inline">\(h_0^{(l)}=\mathbf{0}\)</span> for all <span class="math inline">\(l=1,\dots,L\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>for</strong> <span class="math inline">\(t=1\)</span> <strong>to</strong> <span class="math inline">\(T\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-1" data-depth="1">
+<p><em>（Iterate over time steps）</em></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="3">
+<p><strong>for</strong> <span class="math inline">\(l=1\)</span> <strong>to</strong> <span class="math inline">\(L\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-2" data-depth="2">
+<p><em>（Iterate over layers）</em></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-2" data-depth="2" data-line="4">
+<p><strong>if</strong> <span class="math inline">\(l\ne 1\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="5">
 <p><span class="math inline">\(x_t^{(l)} \gets h_t^{(l-1)}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-3" data-depth="3">
+<p><em>（Input from the previous layer）</em></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-2" data-depth="2" data-line="6">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="7">
 <p>Update gate: controls how much of the past state is retained</p>
 <p><span class="math display">\[\begin{equation*}
 z_t^{(l)} \gets \sigma\!\left(W_z^{(l)}[h_{t-1}^{(l)},x_t^{(l)}]+b_z^{(l)}\right)
 
 \end{equation*}\]</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="8">
 <p>Reset gate: controls how much past information is ignored</p>
 <p><span class="math display">\[\begin{equation*}
 r_t^{(l)} \gets \sigma\!\left(W_r^{(l)}[h_{t-1}^{(l)},x_t^{(l)}]+b_r^{(l)}\right)
 
 \end{equation*}\]</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="9">
 <p>Candidate hidden state: new content to be written</p>
 <p><span class="math display">\[\begin{equation*}
 \tilde h_t^{(l)} \gets \tanh\!\left(W_h^{(l)}[r_t^{(l)}\odot h_{t-1}^{(l)},x_t^{(l)}]+b_h^{(l)}\right)
 
 \end{equation*}\]</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="10">
 <p>Hidden state update: interpolate between old and new</p>
 <p><span class="math display">\[\begin{equation*}
 h_t^{(l)} \gets (1-z_t^{(l)})\odot h_{t-1}^{(l)} + z_t^{(l)}\odot \tilde h_t^{(l)}
 
 \end{equation*}\]</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="11">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="12">
+<p><strong>end for</strong></p>
+</div>
 </div>
 </div>
 <div id="note-28-17" class="note theorem-block env-note">
@@ -1691,6 +2516,7 @@ S_{i,j}=\sum_{u=1}^h\sum_{v=1}^wK_{u,v}X_{i+u-1,j+v-1}
 <p><strong>Definition 28.37</strong>. 称矩阵<span class="math inline">\(K=(K_{u,v})\in M_{h\times w}(\mathbb{R}^{})\)</span>为<a href="../chapters/page-042.html#term-ConvolutionKernel" class="term" title="convolution kernel">卷积核<span class="term-english">（convolution kernel）</span></a>。</p>
 </div>
 <figure data-latex-placement="htbp" class="figure">
+<img src="../_tikz/tikz-c4ccfa530852d212.png" class="tikz-image figure-img" style="width:92.0%">
 <figcaption>
 二维离散卷积的滑动窗口与输出位置对应关系示意图
 </figcaption>
@@ -1729,6 +2555,7 @@ u=1,\dots,h,\; v=1,\dots,w \,\bigr\}
 <p>典型的卷积神经网络由特征提取阶段和分类阶段两部分组成。特征提取阶段由 <span class="math inline">\(L\)</span> 个堆叠的特征提取块构成，每一块通常包含卷积层、非线性激活函数以及池化层，用于逐层从原始输入中提取由低级到高级的层级化表示。卷积层通过局部加权运算提取空间局部模式，激活函数引入非线性变换，而池化层则通过降采样操作增强模型的平移不变性并降低特征分辨率。</p>
 <p>在完成多层特征抽取之后，网络进入分类阶段。该阶段首先将高维特征图展平成一维向量，并通过若干全连接层对特征进行全局整合，最终由Softmax层输出关于各类别的预测概率。</p>
 <figure data-latex-placement="t" class="figure">
+<img src="../_tikz/tikz-f1eae66fca6e3928.png" class="tikz-image figure-img" style="width:92.0%">
 <figcaption>
 卷积神经网络结构示意图
 </figcaption>
@@ -1742,6 +2569,19 @@ u=1,\dots,h,\; v=1,\dots,w \,\bigr\}
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
     const anchorJS = new window.AnchorJS();
     anchorJS.options = {

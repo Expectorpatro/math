@@ -31,6 +31,35 @@
 	\end{enumerate}
 \end{property}
 \begin{proof}
+	(1)若$\theta^{\star}$是$\theta$的最大似然估计，则：
+	\begin{equation*}
+		L(\theta^{\star},\mathbf{X})=\sup_{\theta\in\Theta}L(\theta,\mathbf{X})
+	\end{equation*}
+	记$\Gamma=g(\Theta)$。由于$g$未必是单射，所以同一个$\gamma\in\Gamma$可能对应多个$\theta\in\Theta$，因此定义：
+	\begin{equation*}
+		\forall\;\gamma\in\Gamma,\quad L_g(\gamma,\mathbf{X})=\sup_{\theta\in\Theta:g(\theta)=\gamma}L(\theta,\mathbf{X})
+	\end{equation*}
+	对任意$\gamma\in\Gamma$，有：
+	\begin{equation*}
+		\{\theta\in\Theta:g(\theta)=\gamma\}\subseteq \Theta
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		L_g(\gamma,\mathbf{X})=\sup_{\theta\in\Theta:g(\theta)=\gamma}L(\theta,\mathbf{X})\leqslant\sup_{\theta\in\Theta}L(\theta,\mathbf{X})=L(\theta^{\star},\mathbf{X})
+	\end{equation*}\par
+	当$\gamma=g(\theta^{\star})$时，由于：
+	\begin{equation*}
+		\theta^{\star}\in\{\theta\in\Theta:g(\theta)=g(\theta^{\star})\}
+	\end{equation*}
+	因此：
+	\begin{equation*}
+		L_g[g(\theta^{\star}),\mathbf{X}]=\sup_{\theta\in\Theta:g(\theta)=g(\theta^{\star})}L(\theta,\mathbf{X})\geqslant L(\theta^{\star},\mathbf{X})
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		L_g[g(\theta^{\star}),\mathbf{X}]=L(\theta^{\star},\mathbf{X})=\sup_{\gamma\in\Gamma}L_g(\gamma,\mathbf{X})
+	\end{equation*}
+	即$g(\theta^{\star})$是$g(\theta)$的最大似然估计，极大似然估计具有不变性。\par
 %	(2)设$\mathscr{P}$为$n$维指数族，$\mathbf{X}=(\seq{X}{m})$，则有：
 %	\begin{gather*}
 %		L(\eta,\mathbf{X})=\prod_{i=1}^{m}C(\eta)\exp\left[\eta^{\top}T(X_i)\right]h(X_i) \\
@@ -43,11 +72,32 @@
 	\end{equation*}
 	于是有：
 	\begin{equation*}
-		\ell[\theta,\mathbf{X}]=\ln g_{\theta}[T(\mathbf{X})]+\ln h(\mathbf{X})
+		\ell[\theta,\mathbf{X}]=\ln g_{\theta}[T(\mathbf{X})]+\ln h(\mathbf{X}),\;\text{a.e.于}(X,\mathscr{A},\mu)
 	\end{equation*}
 	上式最大化等价于$g_{\theta}[T(\mathbf{X})]$最大化，即：
 	\begin{equation*}
-		\delta(\mathbf{X})=\underset{\theta\in\Theta}{\arg\max\ln g_{\theta}[T(\mathbf{X})]}
+		\delta(\mathbf{X})=\underset{\theta\in\Theta}{\arg\max}\ln g_{\theta}[T(\mathbf{X})]
 	\end{equation*}
-	由$\delta(\mathbf{X})$的存在性与唯一性，$\delta(\mathbf{X})$必为$T(\mathbf{X})$的函数。
+	下面证明$\delta(\mathbf{X})$确为$T(\mathbf{X})$的函数。任取两个样本点
+	$\mathbf{x}_1,\mathbf{x}_2$，若
+	\begin{equation*}
+		T(\mathbf{X}_1)=T(\mathbf{X}_2)
+	\end{equation*}
+	则对任意$\theta\in\Theta$，有
+	\begin{equation*}
+		\ln g_{\theta}[T(\mathbf{X}_1)]=\ln g_{\theta}[T(\mathbf{X}_2)]
+	\end{equation*}
+	因此二者关于$\theta$的极大化问题完全相同，即：
+	\begin{equation*}
+		\underset{\theta\in\Theta}{\arg\max}\ln g_{\theta}[T(\mathbf{X}_1)]=\underset{\theta\in\Theta}{\arg\max}\ln g_{\theta}[T(\mathbf{X}_2)]
+	\end{equation*}
+	由于$\delta(\mathbf{X})$存在且唯一，所以上述极大点均为单点集，从而极大似然估计：
+	\begin{equation*}
+		\delta(\mathbf{X}_1)=\delta(\mathbf{X}_2)
+	\end{equation*}
+	这说明只要两个样本点给出相同的充分统计量取值，则其对应的最大似然估计相同。于是可在$T(\mathbf{X})$的值域上定义函数$\varphi$：
+	\begin{equation*}
+		\varphi(t)=\delta(\mathbf{X}),\;T(\mathbf{X})=t,\quad\text{a.s.于}(X,\mathscr{A},\mu)
+	\end{equation*}
+	上式定义良好，故$\delta(\mathbf{X})$必为$T(\mathbf{X})$的函数。
 \end{proof}

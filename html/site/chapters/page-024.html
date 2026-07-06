@@ -41,10 +41,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-7380dde18c49706d018cafaca6afd2e2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -73,6 +77,140 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
+<script>
+(() => {
+  "use strict";
+
+  const storageKey = "textbook-color-scheme";
+  const quartoStorageKey = "quarto-color-scheme";
+
+  const readStoredTheme = () => {
+    try {
+      const value = window.localStorage.getItem(storageKey);
+      return value === "dark" || value === "light" ? value : null;
+    } catch (_error) {
+      return null;
+    }
+  };
+
+  const writeStorage = (key, value) => {
+    try {
+      window.localStorage.setItem(key, value);
+    } catch (_error) {
+      // Storage may be unavailable in a locked-down browser. The current page
+      // still switches normally; only cross-page persistence is affected.
+    }
+  };
+
+  const writeTheme = (theme) => {
+    writeStorage(storageKey, theme);
+    writeStorage(
+      quartoStorageKey,
+      theme === "dark" ? "alternate" : "default"
+    );
+  };
+
+  // Quarto reads its own sentinel at the beginning of <body>. Mirror our
+  // durable preference into it while still in <head>, preventing a white flash
+  // and making the correct theme active before the page is painted.
+  const storedTheme = readStoredTheme();
+  if (storedTheme) {
+    writeTheme(storedTheme);
+  }
+
+  const currentTheme = () =>
+    document.body.classList.contains("quarto-dark") ? "dark" : "light";
+
+  const updateButton = (button) => {
+    const isDark = currentTheme() === "dark";
+    const targetName = isDark ? "浅色" : "深色";
+    const icon = button.querySelector("i");
+    icon.className = isDark
+      ? "bi bi-sun-fill"
+      : "bi bi-moon-stars-fill";
+    button.setAttribute("aria-label", `切换到${targetName}模式`);
+    button.setAttribute("title", `切换到${targetName}模式`);
+    button.setAttribute("aria-pressed", String(isDark));
+  };
+
+  const applyTheme = (theme, button) => {
+    const wantsDark = theme === "dark";
+    const isDark = currentTheme() === "dark";
+
+    if (wantsDark !== isDark && typeof window.quartoToggleColorScheme === "function") {
+      // Force Quarto's next toggle toward the requested state even if its own
+      // sentinel and the body class have somehow drifted apart.
+      writeStorage(
+        quartoStorageKey,
+        wantsDark ? "default" : "alternate"
+      );
+      window.quartoToggleColorScheme();
+    }
+
+    writeTheme(theme);
+    updateButton(button);
+  };
+
+  const mountThemeToggle = () => {
+    if (document.getElementById("textbook-theme-toggle")) {
+      return;
+    }
+
+    const button = document.createElement("button");
+    button.id = "textbook-theme-toggle";
+    button.type = "button";
+    button.className = "btn textbook-theme-toggle";
+    button.innerHTML = '<i class="bi" aria-hidden="true"></i>';
+
+    const placeThemeToggle = () => {
+      const tocTitle = document.querySelector("#TOC #toc-title");
+      const useToc = Boolean(
+        tocTitle && window.matchMedia("(min-width: 992px)").matches
+      );
+
+      document
+        .querySelectorAll(".textbook-toc-title-with-toggle")
+        .forEach((element) => {
+          element.classList.remove("textbook-toc-title-with-toggle");
+        });
+
+      if (useToc) {
+        tocTitle.classList.add("textbook-toc-title-with-toggle");
+        tocTitle.appendChild(button);
+        button.classList.add("textbook-theme-toggle-in-toc");
+        button.classList.remove("textbook-theme-toggle-floating");
+      } else {
+        document.body.appendChild(button);
+        button.classList.add("textbook-theme-toggle-floating");
+        button.classList.remove("textbook-theme-toggle-in-toc");
+      }
+    };
+
+    placeThemeToggle();
+    window.addEventListener("resize", placeThemeToggle);
+
+    const initialTheme = readStoredTheme() || currentTheme();
+    applyTheme(initialTheme, button);
+
+    button.addEventListener("click", () => {
+      const nextTheme = currentTheme() === "dark" ? "light" : "dark";
+      applyTheme(nextTheme, button);
+    });
+
+    window.addEventListener("pageshow", () => {
+      applyTheme(readStoredTheme() || currentTheme(), button);
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mountThemeToggle, {
+      once: true,
+    });
+  } else {
+    mountThemeToggle();
+  }
+})();
+</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -108,7 +246,169 @@ window.Quarto = {
 <link rel="stylesheet" href="../sidebar.css">
 </head>
 
-<body class="nav-sidebar docked quarto-light">
+<body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -133,6 +433,9 @@ window.Quarto = {
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="../">你永远不知道一个强迫症能干出什么事情</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="切换深色模式"><i class="bi"></i></a>
+</div>
     </div>
       </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
@@ -644,6 +947,7 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-018.html">第 6 部分 统计学</a></li><li class="breadcrumb-item"><a href="../chapters/page-024.html"><span class="chapter-title"><span class="header-section-number">第 23 章</span> 多元统计</span></a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title"><span id="id--d51efb3c" class="quarto-section-identifier"><span class="chapter-title"><span class="header-section-number">第 23 章</span> 多元统计</span></span></h1>
@@ -786,14 +1090,74 @@ Y_i=\varphi_i^{\top}\mathbf{X},\;\operatorname{Var}(Y_i)=\varphi_i^{\top}\Sigma\
 <section id="id--b07e5ec7" class="level4">
 <h4 class="anchored" data-anchor-id="id--b07e5ec7"><span class="header-section-number">23.1.3.2</span> 相关矩阵导出主成分</h4>
 <p>上面我们都是对协方差矩阵的特征值分解进行计算，但在现实中，各变量的量纲可能不一样，这就导致各变量方差的量级会不一样，方差越大，由<a href="#prop-PCA-5d690524" data-reference-type="ref+label" data-reference="prop:PCA">性质 23.1.1</a>(2)可知必然会导致该变量在主成分构成中的占比变大，但此时的大方差可能仅仅是因为量纲的不同，从变异系数的角度可能各变量的波动差距没有那么明显。为了消除量纲带来的影响，我们会对数据进行标准化，注意到标准化后数据的协方差矩阵即为相关矩阵，此时将相关矩阵作对应的特征值分解即可。但需要注意：标准化后<strong>各变量方差相等均为<span class="math inline">\(1\)</span>，损失了部分信息</strong>，所以会使得<strong>标准化后的各变量在对主成分构成中的作用趋于相等</strong>。因此，取值范围在同量级的数据建议使用协方差矩阵直接求解主成分，若变量之间数量级差异较大，再使用相关矩阵求解主成分。</p>
-<div class="algorithm">
-<div class="algorithmic">
-<p><strong>Input:</strong> 原始数据矩阵 <span class="math inline">\(\mathbf{X}\)</span> <strong>Output:</strong> 主成分得分 <span class="math inline">\(\mathbf{Y}\)</span>，选定的主成分个数 <span class="math inline">\(k\)</span></p>
-<p>将<span class="math inline">\(\mathbf{X}\)</span>标准化得到<span class="math inline">\(\mathbf{Z}\)</span> 保留原始数据 <span class="math inline">\(\mathbf{Z} = \mathbf{X}\)</span></p>
-<p>删除或合并相关变量 保留原始变量</p>
-<p>计算协方差矩阵：<span class="math inline">\(\Sigma = \text{cov}(\mathbf{Z})\)</span>，对 <span class="math inline">\(\Sigma\)</span> 进行特征值分解：<span class="math inline">\(\Sigma = A \Lambda A^{\top}\)</span> 初始化 <span class="math inline">\(k \gets 1\)</span>, 累计贡献率 <span class="math inline">\(\gets 0\)</span></p>
-<p>选择第 <span class="math inline">\(k\)</span> 个主成分，更新累计贡献率 <span class="math inline">\(k \gets k + 1\)</span></p>
+<div id="algorithm-23-1" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 23.1</span> <span class="algorithm-title">主成分分析（PCA）</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p><strong>Input:</strong> 原始数据矩阵 <span class="math inline">\(\mathbf{X}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>Output:</strong> 主成分得分 <span class="math inline">\(\mathbf{Y}\)</span>，选定的主成分个数 <span class="math inline">\(k\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-0" data-depth="0" data-line="3">
+<p><strong>if</strong> 变量量纲差异明显 <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="4">
+<p>将<span class="math inline">\(\mathbf{X}\)</span>标准化得到<span class="math inline">\(\mathbf{Z}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-else algorithm-depth-0" data-depth="0" data-line="5">
+<p><strong>else</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="6">
+<p>保留原始数据 <span class="math inline">\(\mathbf{Z} = \mathbf{X}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-0" data-depth="0" data-line="7">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-0" data-depth="0" data-line="8">
+<p><strong>if</strong> 存在多重共线性（最小特征值 <span class="math inline">\(\approx 0\)</span>） <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="9">
+<p>删除或合并相关变量</p>
+</div>
+<div class="algorithm-line algorithm-else algorithm-depth-0" data-depth="0" data-line="10">
+<p><strong>else</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="11">
+<p>保留原始变量</p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-0" data-depth="0" data-line="12">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="13">
+<p>计算协方差矩阵：<span class="math inline">\(\Sigma = \text{cov}(\mathbf{Z})\)</span>，对 <span class="math inline">\(\Sigma\)</span> 进行特征值分解：<span class="math inline">\(\Sigma = A \Lambda A^{\top}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="14">
+<p>初始化 <span class="math inline">\(k \gets 1\)</span>, 累计贡献率 <span class="math inline">\(\gets 0\)</span></p>
+</div>
+<div class="algorithm-line algorithm-repeat algorithm-depth-0" data-depth="0" data-line="15">
+<p><strong>repeat</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="16">
+<p>选择第 <span class="math inline">\(k\)</span> 个主成分，更新累计贡献率</p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="17">
+<p><strong>if</strong> 累计贡献率 <span class="math inline">\(&lt;\)</span> 阈值 <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="18">
+<p><span class="math inline">\(k \gets k + 1\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="19">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-until algorithm-depth-0" data-depth="0" data-line="20">
+<p><strong>until</strong> 累计贡献率 <span class="math inline">\(\geqslant\)</span> 阈值</p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="21">
 <p>计算主成分得分：<span class="math inline">\(\mathbf{Y}=A_k\mathbf{Z}\)</span>（<span class="math inline">\(A_k\)</span>为矩阵<span class="math inline">\(A\)</span>的前<span class="math inline">\(k\)</span>行构成的矩阵），输出 <span class="math inline">\(\mathbf{Y}\)</span> 和 <span class="math inline">\(k\)</span></p>
+</div>
 </div>
 </div>
 </section>
@@ -977,12 +1341,40 @@ l_m^{\top}
 \end{equation*}\]</span></p>
 <p>令<span class="math inline">\(\hat{\sigma}_i^2=\sigma_{ii}-\hat{h}_i^2\)</span>，继续上面的迭代过程以得到稳定的近似解。</p>
 </div>
-<div class="algorithm">
-<div class="algorithmic">
-<p><strong>Input:</strong> 协方差矩阵 <span class="math inline">\(\Sigma\)</span>，初始特殊方差估计 <span class="math inline">\(\hat{\sigma}^2_1, \ldots, \hat{\sigma}^2_m\)</span>，目标因子数 <span class="math inline">\(n\)</span> <strong>Output:</strong> 因子载荷矩阵估计 <span class="math inline">\(\hat{A}\)</span>，特殊方差估计 <span class="math inline">\(\hat{\sigma}_i^2\)</span></p>
-<p>初始化 <span class="math inline">\(\hat{\sigma}_i^2\)</span> 为合理值 构造矩阵 <span class="math inline">\(\widehat{AA^{\top}} = \Sigma - \operatorname{diag}(\hat{\sigma}_1^2, \ldots, \hat{\sigma}_m^2)\)</span> 对 <span class="math inline">\(\widehat{AA^{\top}}\)</span> 做特征值分解，得到部分特征值 <span class="math inline">\(\hat{\lambda}_1 \geqslant \cdots \geqslant \hat{\lambda}_n\)</span>，及对应单位正交特征向量 <span class="math inline">\(\hat{l}_1, \ldots, \hat{l}_n\)</span> 构造因子载荷矩阵估计： <span class="math inline">\(\hat{A}=(\hat{a}_{ij}) = \begin{pmatrix}
+<div id="algorithm-23-2" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 23.2</span> <span class="algorithm-title">主因子法求解因子分析</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p><strong>Input:</strong> 协方差矩阵 <span class="math inline">\(\Sigma\)</span>，初始特殊方差估计 <span class="math inline">\(\hat{\sigma}^2_1, \ldots, \hat{\sigma}^2_m\)</span>，目标因子数 <span class="math inline">\(n\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>Output:</strong> 因子载荷矩阵估计 <span class="math inline">\(\hat{A}\)</span>，特殊方差估计 <span class="math inline">\(\hat{\sigma}_i^2\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="3">
+<p>初始化 <span class="math inline">\(\hat{\sigma}_i^2\)</span> 为合理值</p>
+</div>
+<div class="algorithm-line algorithm-repeat algorithm-depth-0" data-depth="0" data-line="4">
+<p><strong>repeat</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="5">
+<p>构造矩阵 <span class="math inline">\(\widehat{AA^{\top}} = \Sigma - \operatorname{diag}(\hat{\sigma}_1^2, \ldots, \hat{\sigma}_m^2)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="6">
+<p>对 <span class="math inline">\(\widehat{AA^{\top}}\)</span> 做特征值分解，得到部分特征值 <span class="math inline">\(\hat{\lambda}_1 \geqslant \cdots \geqslant \hat{\lambda}_n\)</span>，及对应单位正交特征向量 <span class="math inline">\(\hat{l}_1, \ldots, \hat{l}_n\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="7">
+<p>构造因子载荷矩阵估计： <span class="math inline">\(\hat{A}=(\hat{a}_{ij}) = \begin{pmatrix}
 \sqrt{\hat{\lambda}_1} \hat{l}_1 &amp; \cdots &amp; \sqrt{\hat{\lambda}_n} \hat{l}_n
-\end{pmatrix}\)</span> 令 <span class="math inline">\(\hat{h}_i^2 = \sum\limits_{j=1}^n \hat{a}_{ij}^2\)</span>，更新 <span class="math inline">\(\hat{\sigma}_i^2 = \sigma_{ii} - \hat{h}_i^2,\;i=1,2,\dots,m\)</span></p>
+\end{pmatrix}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="8">
+<p>令 <span class="math inline">\(\hat{h}_i^2 = \sum\limits_{j=1}^n \hat{a}_{ij}^2\)</span>，更新 <span class="math inline">\(\hat{\sigma}_i^2 = \sigma_{ii} - \hat{h}_i^2,\;i=1,2,\dots,m\)</span></p>
+</div>
+<div class="algorithm-line algorithm-until algorithm-depth-0" data-depth="0" data-line="9">
+<p><strong>until</strong> 特殊方差估计 <span class="math inline">\(\hat{\sigma}_i^2\)</span> 收敛或达到最大迭代次数</p>
+</div>
 </div>
 </div>
 </section>
@@ -1801,30 +2193,108 @@ b=\binom{n}{2}-a-(B-a)-(A-a)=\binom{n}{2}-A-B+a
 </section>
 <section id="k-means" class="level3">
 <h3 class="anchored" data-anchor-id="k-means"><span class="header-section-number">23.5.2</span> K-means</h3>
-<div class="algorithm">
-<div class="algorithmic">
-<p>Data points <span class="math inline">\(X=\{x_n\}_{i=1}^{n}\subseteq\mathbb{R}^m\)</span>; number of clusters <span class="math inline">\(K\)</span>; maximum number of iterations <span class="math inline">\(T\)</span>; tolerance <span class="math inline">\(\varepsilon\)</span> Cluster assignments <span class="math inline">\(\{C_1,\dots,C_K\}\)</span>; centroids <span class="math inline">\(\{\mu_1,\dots,\mu_K\}\)</span></p>
-<p>Select the first centroid <span class="math inline">\(\mu_1\)</span> uniformly at random from <span class="math inline">\(X\)</span> <span class="math inline">\(D_i^2 \gets \min\limits_{1\leqslant j &lt; k} \|x_i - \mu_j\|^2\)</span> Select <span class="math inline">\(\mu_k\)</span> from <span class="math inline">\(X\)</span> with probability</p>
+<div id="source-alg-Kmeans-cc5aa12b" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 23.3</span> <span class="algorithm-title">K-means Clustering (Lloyd’s Algorithm)</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>输入：</strong> Data points <span class="math inline">\(X=\{x_n\}_{i=1}^{n}\subseteq\mathbb{R}^m\)</span>; number of clusters <span class="math inline">\(K\)</span>; maximum number of iterations <span class="math inline">\(T\)</span>; tolerance <span class="math inline">\(\varepsilon\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>输出：</strong> Cluster assignments <span class="math inline">\(\{C_1,\dots,C_K\}\)</span>; centroids <span class="math inline">\(\{\mu_1,\dots,\mu_K\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p>Select the first centroid <span class="math inline">\(\mu_1\)</span> uniformly at random from <span class="math inline">\(X\)</span></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-0" data-depth="0">
+<p><em>（Initialization step）</em></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>for</strong> <span class="math inline">\(k=2\)</span> to <span class="math inline">\(K\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="3">
+<p><strong>for</strong> each data point <span class="math inline">\(x_i \in \mathcal{X}\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="4">
+<p><span class="math inline">\(D_i^2 \gets \min\limits_{1\leqslant j &lt; k} \|x_i - \mu_j\|^2\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="5">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="6">
+<p>Select <span class="math inline">\(\mu_k\)</span> from <span class="math inline">\(X\)</span> with probability</p>
 <p><span class="math display">\[
 P(x_i) = \frac{D_i^2}{\sum\limits_{j=1}^n D_j^2}
 \]</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="7">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="8">
+<p><strong>for</strong> <span class="math inline">\(t=1\)</span> to <span class="math inline">\(T\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-1" data-depth="1">
+<p><em>（Assignment step）</em></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="9">
+<p><strong>for</strong> each data point <span class="math inline">\(x_i\in X\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="10">
 <p><span class="math inline">\(y_i \gets \underset{k=1,2,\dots,K}{\arg\min}\|x_i-\mu_k\|^2\)</span>, assign <span class="math inline">\(x_i\)</span> to cluster <span class="math inline">\(C_{y_i}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="11">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="12">
+<p><strong>for</strong> <span class="math inline">\(k=1\)</span> to <span class="math inline">\(K\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-2" data-depth="2">
+<p><em>（Update step）</em></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="13">
 <p><span class="math inline">\(\mu_k^{\text{new}} \gets \dfrac{1}{|C_k|}
 \sum\limits_{x_i\in C_k} x_i\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="14">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="15">
+<p><strong>if</strong> <span class="math inline">\(\max\limits_{k} \|\mu_k^{\text{new}}-\mu_k\| &lt; \varepsilon\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="16">
 <p><strong>break</strong></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="17">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="18">
 <p><span class="math inline">\(\mu_k \gets \mu_k^{\text{new}},\;\forall\;k=1,\dots,K\)</span></p>
 </div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="19">
+<p><strong>end for</strong></p>
 </div>
-<p><span class="reference-missing" data-reference="alg:Kmeans">[缺失引用：alg:Kmeans]</span>给出了经典的K-means聚类算法（亦称Lloyd算法）的完整流程。该算法的目标是在给定样本集合的情况下，将样本划分为<span class="math inline">\(K\)</span>个互不相交的簇，使得簇内样本在欧氏距离意义下尽可能紧密。从优化角度看，K-means试图最小化如下的类内平方和目标函数：</p>
+</div>
+</div>
+<p><a href="#source-alg-Kmeans-cc5aa12b" data-reference-type="ref+label" data-reference="alg:Kmeans">算法 23.3</a>给出了经典的K-means聚类算法（亦称Lloyd算法）的完整流程。该算法的目标是在给定样本集合的情况下，将样本划分为<span class="math inline">\(K\)</span>个互不相交的簇，使得簇内样本在欧氏距离意义下尽可能紧密。从优化角度看，K-means试图最小化如下的类内平方和目标函数：</p>
 <p><span class="math display">\[\begin{equation*}
 \Phi(\{\mu_k\},\{C_k\})=\sum_{k=1}^K\sum_{x_i\in C_k}\|x_i-\mu_k\|^2
 \end{equation*}\]</span></p>
-<p>由于每一次分配或更新步骤都会使目标函数<span class="math inline">\(\Phi\)</span>的值非增，且<span class="math inline">\(\Phi\)</span>在下界零处有界，根据<a href="../chapters/page-004.html#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(7)可知K-means算法在有限步内必然收敛到某一局部最优解。然而，由于目标函数是非凸的，算法的最终结果依赖于初始中心的选取，这也是在实际应用中通常采用k-means++初始化（即<span class="reference-missing" data-reference="alg:Kmeans">[缺失引用：alg:Kmeans]</span>中的1-7步）而非完全随机初始化的原因。</p>
+<p>由于每一次分配或更新步骤都会使目标函数<span class="math inline">\(\Phi\)</span>的值非增，且<span class="math inline">\(\Phi\)</span>在下界零处有界，根据<a href="../chapters/page-004.html#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(7)可知K-means算法在有限步内必然收敛到某一局部最优解。然而，由于目标函数是非凸的，算法的最终结果依赖于初始中心的选取，这也是在实际应用中通常采用k-means++初始化（即<a href="#source-alg-Kmeans-cc5aa12b" data-reference-type="ref+label" data-reference="alg:Kmeans">算法 23.3</a>中的1-7步）而非完全随机初始化的原因。</p>
 <section id="k-modes" class="level4">
 <h4 class="anchored" data-anchor-id="k-modes"><span class="header-section-number">23.5.2.1</span> K-modes</h4>
-<div class="algorithm">
-<div class="algorithmic">
-<p>Categorical data <span class="math inline">\(X=\{x_i\}_{i=1}^n\)</span>, where <span class="math inline">\(x_i=(x_{i1},\dots,x_{ip})\)</span>; number of clusters <span class="math inline">\(K\)</span>; maximum number of iterations <span class="math inline">\(T\)</span> Cluster assignments <span class="math inline">\(\{C_1,\dots,C_K\}\)</span>; modes <span class="math inline">\(\{m_1,\dots,m_K\}\)</span></p>
+<div id="source-alg-Kmodes-2f9b988b" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 23.4</span> <span class="algorithm-title">K-modes Clustering Algorithm with Cao Initialization</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>输入：</strong> Categorical data <span class="math inline">\(X=\{x_i\}_{i=1}^n\)</span>, where <span class="math inline">\(x_i=(x_{i1},\dots,x_{ip})\)</span>; number of clusters <span class="math inline">\(K\)</span>; maximum number of iterations <span class="math inline">\(T\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>输出：</strong> Cluster assignments <span class="math inline">\(\{C_1,\dots,C_K\}\)</span>; modes <span class="math inline">\(\{m_1,\dots,m_K\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
 <p>For each categorical variable <span class="math inline">\(j=1,\dots,p\)</span>, let <span class="math inline">\(\mathcal C_j\)</span> denote its set of possible categories. For each <span class="math inline">\(c\in\mathcal C_j\)</span>, compute</p>
 <p><span class="math display">\[
 f_j(c)
@@ -1832,7 +2302,18 @@ f_j(c)
 \frac{1}{n}
 \sum_{i=1}^n I(x_{ij}=c)
 \]</span></p>
-<p>Define sample density: <span class="math inline">\(\mathrm{dens}(x_i)=\sum\limits_{j=1}^p f_j(x_{ij})\)</span> Select the first mode: <span class="math inline">\(m_1 \gets \underset{x_i\in X}{\arg\max}\;\mathrm{dens}(x_i)\)</span> Select</p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
+<p>Define sample density: <span class="math inline">\(\mathrm{dens}(x_i)=\sum\limits_{j=1}^p f_j(x_{ij})\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="3">
+<p>Select the first mode: <span class="math inline">\(m_1 \gets \underset{x_i\in X}{\arg\max}\;\mathrm{dens}(x_i)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="4">
+<p><strong>for</strong> <span class="math inline">\(k=2\)</span> to <span class="math inline">\(K\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="5">
+<p>Select</p>
 <p><span class="math display">\[
 m_k \gets \underset{x_i\in X}{\arg\max}
 \Bigl(
@@ -1840,40 +2321,146 @@ m_k \gets \underset{x_i\in X}{\arg\max}
 \min_{1\leqslant r&lt;k}\sum_{j=1}^p I(x_{ij}\neq m_{rj})
 \Bigr)
 \]</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="6">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="7">
+<p><strong>for</strong> <span class="math inline">\(t=1\)</span> to <span class="math inline">\(T\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-1" data-depth="1">
+<p><em>（Assignment step）</em></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="8">
+<p><strong>for</strong> each data point <span class="math inline">\(x_i\in X\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="9">
 <p><span class="math inline">\(y_i \gets \underset{k=1,2,\dots,K}{\arg\min}
 \sum\limits_{j=1}^p I(x_{ij}\neq m_{kj})\)</span>, assign <span class="math inline">\(x_i\)</span> to cluster <span class="math inline">\(C_{y_i}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="10">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="11">
+<p><strong>for</strong> <span class="math inline">\(k=1\)</span> to <span class="math inline">\(K\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-2" data-depth="2">
+<p><em>（Update step）</em></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-2" data-depth="2" data-line="12">
+<p><strong>for</strong> <span class="math inline">\(j=1\)</span> to <span class="math inline">\(p\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="13">
 <p><span class="math inline">\(m_{kj} \gets \operatorname{mode}\{x_{ij}:x_i\in C_k\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-2" data-depth="2" data-line="14">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="15">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="16">
+<p><strong>if</strong> cluster assignments do not change <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="17">
 <p><strong>break</strong></p>
 </div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="18">
+<p><strong>end if</strong></p>
 </div>
-<p><span class="reference-missing" data-reference="alg:Kmodes">[缺失引用：alg:Kmodes]</span> 给出了K-modes聚类算法的标准形式。该算法专门用于处理分类型数据，其目标是在简单匹配不相似度下最小化类内不一致性。对应的优化目标函数为：</p>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="19">
+<p><strong>end for</strong></p>
+</div>
+</div>
+</div>
+<p><a href="#source-alg-Kmodes-2f9b988b" data-reference-type="ref+label" data-reference="alg:Kmodes">算法 23.4</a> 给出了K-modes聚类算法的标准形式。该算法专门用于处理分类型数据，其目标是在简单匹配不相似度下最小化类内不一致性。对应的优化目标函数为：</p>
 <p><span class="math display">\[\begin{equation*}
 \Psi({m_k},{C_k})=
 \sum_{k=1}^K\sum_{x_i\in C_k}\sum_{j=1}^p I(x_{ij}\neq m_{kj})
 \end{equation*}\]</span></p>
-<p>该目标函数在簇分配或逐维众数更新时均单调不增，因此算法在有限步内收敛到某一局部最优解。与K-means类似，由于目标函数的非凸性，K-modes的结果依赖于初始化方式，实际应用中通常采用Cao初始化（即<span class="reference-missing" data-reference="alg:Kmodes">[缺失引用：alg:Kmodes]</span>中的1-6步）。</p>
+<p>该目标函数在簇分配或逐维众数更新时均单调不增，因此算法在有限步内收敛到某一局部最优解。与K-means类似，由于目标函数的非凸性，K-modes的结果依赖于初始化方式，实际应用中通常采用Cao初始化（即<a href="#source-alg-Kmodes-2f9b988b" data-reference-type="ref+label" data-reference="alg:Kmodes">算法 23.4</a>中的1-6步）。</p>
 <p>Cao初始化的核心思想在于：初始聚类原型应当同时具备代表性和区分性。具体而言，算法首先通过各分类变量的经验频率刻画样本在全体数据中的密度，从而选取在每一维上均取高频类别的样本作为第一个初始中心，该样本可被视为总体经验分布下的一个典型点。随后，在选取其余初始中心时，Cao初始化在保证中心密度较高的同时，引入与已有中心之间的简单匹配不相似度，以避免多个初始原型集中于同一高频区域。</p>
 </section>
 <section id="k-prototypes" class="level4">
 <h4 class="anchored" data-anchor-id="k-prototypes"><span class="header-section-number">23.5.2.2</span> K-prototypes</h4>
-<div class="algorithm">
-<div class="algorithmic">
-<p>Mixed-type data <span class="math inline">\(X=\{x_i=(x_i^{(n)},x_i^{(c)})\}_{i=1}^n\)</span>; number of clusters <span class="math inline">\(K\)</span>; trade-off parameter <span class="math inline">\(\gamma&gt;0\)</span>; maximum number of iterations <span class="math inline">\(T\)</span> Cluster assignments <span class="math inline">\(\{C_1,\dots,C_K\}\)</span>; prototypes <span class="math inline">\(\{(\mu_k,m_k)\}_{k=1}^K\)</span></p>
+<div id="source-alg-Kprototypes-80ef9a55" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 23.5</span> <span class="algorithm-title">K-prototypes Clustering Algorithm</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>输入：</strong> Mixed-type data <span class="math inline">\(X=\{x_i=(x_i^{(n)},x_i^{(c)})\}_{i=1}^n\)</span>; number of clusters <span class="math inline">\(K\)</span>; trade-off parameter <span class="math inline">\(\gamma&gt;0\)</span>; maximum number of iterations <span class="math inline">\(T\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>输出：</strong> Cluster assignments <span class="math inline">\(\{C_1,\dots,C_K\}\)</span>; prototypes <span class="math inline">\(\{(\mu_k,m_k)\}_{k=1}^K\)</span></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-0" data-depth="0">
+<p><em>（Initialization step）</em></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
 <p>Initialize numerical prototypes <span class="math inline">\(\mu_1,\dots,\mu_K\)</span> by applying K-means++ initialization</p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
 <p>Initialize categorical prototypes <span class="math inline">\(m_1,\dots,m_K\)</span> by applying Cao initialization</p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="3">
+<p><strong>for</strong> <span class="math inline">\(t=1\)</span> to <span class="math inline">\(T\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-1" data-depth="1">
+<p><em>（Assignment step）</em></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="4">
+<p><strong>for</strong> each data point <span class="math inline">\(x_i\in X\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="5">
 <p><span class="math inline">\(y_i \gets \underset{k=1,2,\dots,K}{\arg\min}
 \Big(
 \|x_i^{(n)}-\mu_k\|^2
 +
 \gamma\sum\limits_{j=1}^q I(x_{ij}^{(c)}\neq m_{kj})
 \Big)\)</span>, assign <span class="math inline">\(x_i\)</span> to cluster <span class="math inline">\(C_{y_i}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="6">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="7">
+<p><strong>for</strong> <span class="math inline">\(k=1\)</span> to <span class="math inline">\(K\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-comment algorithm-depth-2" data-depth="2">
+<p><em>（Update step）</em></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="8">
 <p><span class="math inline">\(\mu_k \gets \dfrac{1}{|C_k|}
-\sum\limits_{x_i\in C_k} x_i^{(n)}\)</span> <span class="math inline">\(m_{kj} \gets
+\sum\limits_{x_i\in C_k} x_i^{(n)}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-2" data-depth="2" data-line="9">
+<p><strong>for</strong> <span class="math inline">\(j=1\)</span> to <span class="math inline">\(\dim(x_i^{(c)})\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="10">
+<p><span class="math inline">\(m_{kj} \gets
 \operatorname{mode}\{x_{ij}^{(c)}:x_i\in C_k\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-2" data-depth="2" data-line="11">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="12">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="13">
+<p><strong>if</strong> cluster assignments do not change <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="14">
 <p><strong>break</strong></p>
 </div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="15">
+<p><strong>end if</strong></p>
 </div>
-<p><span class="reference-missing" data-reference="alg:Kprototypes">[缺失引用：alg:Kprototypes]</span> 描述了K-prototypes聚类算法的完整流程。该算法同时处理数值型与分类型变量，其优化目标为：</p>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="16">
+<p><strong>end for</strong></p>
+</div>
+</div>
+</div>
+<p><a href="#source-alg-Kprototypes-80ef9a55" data-reference-type="ref+label" data-reference="alg:Kprototypes">算法 23.5</a> 描述了K-prototypes聚类算法的完整流程。该算法同时处理数值型与分类型变量，其优化目标为：</p>
 <p><span class="math display">\[\begin{equation*}
 \Omega({\mu_k,m_k},{C_k})=
 \sum_{k=1}^K\sum_{x_i\in C_k}
@@ -1884,14 +2471,65 @@ m_k \gets \underset{x_i\in X}{\arg\max}
 </section>
 <section id="id--c34b79e0" class="level3">
 <h3 class="anchored" data-anchor-id="id--c34b79e0"><span class="header-section-number">23.5.3</span> 凝聚型层次聚类</h3>
-<div class="algorithm">
-<div class="algorithmic">
-<p>Data points <span class="math inline">\(X=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m\)</span>; linkage criterion <span class="math inline">\(L\)</span>; distance metric <span class="math inline">\(\rho(\cdot,\cdot)\)</span>; target number of clusters <span class="math inline">\(K\)</span> <strong>or</strong> distance threshold <span class="math inline">\(h_0\)</span> Cluster assignments <span class="math inline">\(\{C_1,\dots,C_{K}\}\)</span>; merge history (dendrogram)</p>
-<p>Initialize clusters <span class="math inline">\(C_i \gets \{x_i\}\)</span> for <span class="math inline">\(i=1,\dots,n\)</span> Compute initial pairwise dissimilarities <span class="math inline">\(D_L(C_p,C_q)\)</span></p>
-<p><span class="math inline">\((p,q)\gets \underset{p\neq q}{\arg\min}D_L(C_p,C_q)\)</span> <strong>break</strong> Merge clusters <span class="math inline">\(C_p\)</span> and <span class="math inline">\(C_q\)</span> into <span class="math inline">\(C_{\text{new}}\)</span> Record merge height <span class="math inline">\(D_L(C_p,C_q)\)</span> Remove <span class="math inline">\(C_p,C_q\)</span> and add <span class="math inline">\(C_{\text{new}}\)</span> Update dissimilarities involving <span class="math inline">\(C_{\text{new}}\)</span> <strong>break</strong></p>
+<div id="source-alg-AgglomerativeHierarchicalClustering-bbd75add" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 23.6</span> <span class="algorithm-title">Agglomerative Hierarchical Clustering</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>输入：</strong> Data points <span class="math inline">\(X=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m\)</span>; linkage criterion <span class="math inline">\(L\)</span>; distance metric <span class="math inline">\(\rho(\cdot,\cdot)\)</span>; target number of clusters <span class="math inline">\(K\)</span> <strong>or</strong> distance threshold <span class="math inline">\(h_0\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>输出：</strong> Cluster assignments <span class="math inline">\(\{C_1,\dots,C_{K}\}\)</span>; merge history (dendrogram)</p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p>Initialize clusters <span class="math inline">\(C_i \gets \{x_i\}\)</span> for <span class="math inline">\(i=1,\dots,n\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
+<p>Compute initial pairwise dissimilarities <span class="math inline">\(D_L(C_p,C_q)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-while algorithm-depth-0" data-depth="0" data-line="3">
+<p><strong>while</strong> stopping criterion not satisfied <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="4">
+<p><span class="math inline">\((p,q)\gets \underset{p\neq q}{\arg\min}D_L(C_p,C_q)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="5">
+<p><strong>if</strong> <span class="math inline">\(D_L(C_p,C_q) &gt; h_0\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="6">
+<p><strong>break</strong></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="7">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="8">
+<p>Merge clusters <span class="math inline">\(C_p\)</span> and <span class="math inline">\(C_q\)</span> into <span class="math inline">\(C_{\text{new}}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="9">
+<p>Record merge height <span class="math inline">\(D_L(C_p,C_q)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="10">
+<p>Remove <span class="math inline">\(C_p,C_q\)</span> and add <span class="math inline">\(C_{\text{new}}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="11">
+<p>Update dissimilarities involving <span class="math inline">\(C_{\text{new}}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="12">
+<p><strong>if</strong> number of clusters <span class="math inline">\(= K\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="13">
+<p><strong>break</strong></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="14">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-while-end algorithm-depth-0" data-depth="0" data-line="15">
+<p><strong>end while</strong></p>
 </div>
 </div>
-<p><span class="reference-missing" data-reference="alg:AgglomerativeHierarchicalClustering">[缺失引用：alg:AgglomerativeHierarchicalClustering]</span>给出了<a href="../chapters/page-040.html#term-AgglomerativeHierarchicalClustering" class="term" title="agglomerative hierarchical clustering">凝聚型层次聚类<span class="term-english">（agglomerative hierarchical clustering）</span></a>的基本流程。算法从最细粒度的划分开始，将每一个样本视为一个单独的簇。随后，在当前簇集合中，根据预先选定的簇间距离准则（linkage criterion），反复选择距离最近的两个簇并将其合并。该合并过程持续进行，直到簇的数量减少至预先指定的目标簇数<span class="math inline">\(K\)</span>，或最小簇间距离大于给定值<span class="math inline">\(h_0\)</span>。</p>
+</div>
+<p><a href="#source-alg-AgglomerativeHierarchicalClustering-bbd75add" data-reference-type="ref+label" data-reference="alg:AgglomerativeHierarchicalClustering">算法 23.6</a>给出了<a href="../chapters/page-040.html#term-AgglomerativeHierarchicalClustering" class="term" title="agglomerative hierarchical clustering">凝聚型层次聚类<span class="term-english">（agglomerative hierarchical clustering）</span></a>的基本流程。算法从最细粒度的划分开始，将每一个样本视为一个单独的簇。随后，在当前簇集合中，根据预先选定的簇间距离准则（linkage criterion），反复选择距离最近的两个簇并将其合并。该合并过程持续进行，直到簇的数量减少至预先指定的目标簇数<span class="math inline">\(K\)</span>，或最小簇间距离大于给定值<span class="math inline">\(h_0\)</span>。</p>
 <p>层次聚类的核心在于如何定义两个簇之间的距离。设<span class="math inline">\(A,B\subseteq X\)</span>为两个簇，<span class="math inline">\(\rho\)</span> 为样本空间中的距离度量，则簇间距离<span class="math inline">\(D_L(A,B)\)</span>由 linkage 准则给出。不同的 linkage 定义对应着不同的几何偏好与聚类行为。</p>
 <p>常见的 linkage 定义如下：</p>
 <ol type="1">
@@ -1903,18 +2541,107 @@ m_k \gets \underset{x_i\in X}{\arg\max}
 </section>
 <section id="dbscan" class="level3">
 <h3 class="anchored" data-anchor-id="dbscan"><span class="header-section-number">23.5.4</span> DBSCAN</h3>
-<div class="algorithm">
-<div class="algorithmic">
-<p>Data points <span class="math inline">\(X=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m\)</span>; neighborhood radius <span class="math inline">\(\varepsilon\)</span>; minimum number of points <span class="math inline">\(\operatorname{MinPts}\)</span> Cluster assignments <span class="math inline">\(\{C_1,\dots,C_K\}\)</span>; noise set <span class="math inline">\(\mathcal{N}\)</span></p>
-<p>Mark all points as <strong>unvisited</strong> <span class="math inline">\(K \gets 0\)</span>, <span class="math inline">\(\mathcal{N}\gets\varnothing\)</span></p>
-<p><strong>continue</strong> Mark <span class="math inline">\(x_i\)</span> as visited <span class="math inline">\(N_\varepsilon(x_i)\gets\{x_j\in X: \rho(x_j,x_i)\leqslant\varepsilon\}\)</span></p>
-<p>Label <span class="math inline">\(x_i\)</span> as <strong>noise</strong>; <span class="math inline">\(\mathcal{N}\gets \mathcal{N}\cup\{x_i\}\)</span> <span class="math inline">\(K\gets K+1\)</span> Create new cluster <span class="math inline">\(C_K\)</span> and add <span class="math inline">\(x_i\)</span> to <span class="math inline">\(C_K\)</span> <span class="math inline">\(S \gets N_\varepsilon(x_i)\setminus\{x_i\}\)</span></p>
+<div id="source-alg-DBSCAN-a3a8a5e4" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 23.7</span> <span class="algorithm-title">DBSCAN (Density-Based Spatial Clustering of Applications with Noise)</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>输入：</strong> Data points <span class="math inline">\(X=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m\)</span>; neighborhood radius <span class="math inline">\(\varepsilon\)</span>; minimum number of points <span class="math inline">\(\operatorname{MinPts}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>输出：</strong> Cluster assignments <span class="math inline">\(\{C_1,\dots,C_K\}\)</span>; noise set <span class="math inline">\(\mathcal{N}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p>Mark all points as <strong>unvisited</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
+<p><span class="math inline">\(K \gets 0\)</span>, <span class="math inline">\(\mathcal{N}\gets\varnothing\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="3">
+<p><strong>for</strong> each point <span class="math inline">\(x_i\in X\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="4">
+<p><strong>if</strong> <span class="math inline">\(x_i\)</span> is visited <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="5">
+<p><strong>continue</strong></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="6">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="7">
+<p>Mark <span class="math inline">\(x_i\)</span> as visited</p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="8">
+<p><span class="math inline">\(N_\varepsilon(x_i)\gets\{x_j\in X: \rho(x_j,x_i)\leqslant\varepsilon\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="9">
+<p><strong>if</strong> <span class="math inline">\(|N_\varepsilon(x_i)|&lt;\operatorname{MinPts}\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="10">
+<p>Label <span class="math inline">\(x_i\)</span> as <strong>noise</strong>; <span class="math inline">\(\mathcal{N}\gets \mathcal{N}\cup\{x_i\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-else algorithm-depth-1" data-depth="1" data-line="11">
+<p><strong>else</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="12">
+<p><span class="math inline">\(K\gets K+1\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="13">
+<p>Create new cluster <span class="math inline">\(C_K\)</span> and add <span class="math inline">\(x_i\)</span> to <span class="math inline">\(C_K\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="14">
+<p><span class="math inline">\(S \gets N_\varepsilon(x_i)\setminus\{x_i\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-while algorithm-depth-2" data-depth="2" data-line="15">
+<p><strong>while</strong> <span class="math inline">\(S\ne \varnothing\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="16">
 <p>Select <span class="math inline">\(x_p\in S\)</span> and remove it from <span class="math inline">\(S\)</span></p>
-<p>Mark <span class="math inline">\(x_p\)</span> as visited <span class="math inline">\(N_\varepsilon(x_p)\gets\{x_j\in X: \rho(x_j,x_p)\leqslant\varepsilon\}\)</span> <span class="math inline">\(S \gets S \cup [N_\varepsilon(x_p)\setminus\{x_p\}]\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-3" data-depth="3" data-line="17">
+<p><strong>if</strong> <span class="math inline">\(x_p\)</span> is not visited <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-4" data-depth="4" data-line="18">
+<p>Mark <span class="math inline">\(x_p\)</span> as visited</p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-4" data-depth="4" data-line="19">
+<p><span class="math inline">\(N_\varepsilon(x_p)\gets\{x_j\in X: \rho(x_j,x_p)\leqslant\varepsilon\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-4" data-depth="4" data-line="20">
+<p><strong>if</strong> <span class="math inline">\(|N_\varepsilon(x_p)|\geqslant\operatorname{MinPts}\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-5" data-depth="5" data-line="21">
+<p><span class="math inline">\(S \gets S \cup [N_\varepsilon(x_p)\setminus\{x_p\}]\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-4" data-depth="4" data-line="22">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-3" data-depth="3" data-line="23">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-3" data-depth="3" data-line="24">
+<p><strong>if</strong> <span class="math inline">\(x_p\)</span> is <strong>unvisited</strong> or <strong>noise</strong> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-4" data-depth="4" data-line="25">
 <p>Add <span class="math inline">\(x_p\)</span> to <span class="math inline">\(C_K\)</span>; <span class="math inline">\(\mathcal{N}\gets \mathcal{N}\setminus\{x_p\}\)</span></p>
 </div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-3" data-depth="3" data-line="26">
+<p><strong>end if</strong></p>
 </div>
-<p><span class="reference-missing" data-reference="alg:DBSCAN">[缺失引用：alg:DBSCAN]</span>给出了DBSCAN算法的完整流程。与基于中心的K-means不同，DBSCAN不依赖簇中心或簇数量的预先设定，而是通过样本在空间中的密度分布来刻画簇结构。</p>
+<div class="algorithm-line algorithm-while-end algorithm-depth-2" data-depth="2" data-line="27">
+<p><strong>end while</strong></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="28">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="29">
+<p><strong>end for</strong></p>
+</div>
+</div>
+</div>
+<p><a href="#source-alg-DBSCAN-a3a8a5e4" data-reference-type="ref+label" data-reference="alg:DBSCAN">算法 23.7</a>给出了DBSCAN算法的完整流程。与基于中心的K-means不同，DBSCAN不依赖簇中心或簇数量的预先设定，而是通过样本在空间中的密度分布来刻画簇结构。</p>
 <p>给定半径参数<span class="math inline">\(\varepsilon\)</span>与最小点数阈值<span class="math inline">\(\operatorname{MinPts}\)</span>，定义点<span class="math inline">\(x_i\)</span>的<span class="math inline">\(\varepsilon\)</span>-邻域为：</p>
 <p><span class="math display">\[\begin{equation*}
 N_\varepsilon(x_i)=\{x_j\in X:\|x_j-x_i\|\leqslant\varepsilon\}
@@ -1925,28 +2652,124 @@ N_\varepsilon(x_i)=\{x_j\in X:\|x_j-x_i\|\leqslant\varepsilon\}
 </section>
 <section id="optics" class="level3">
 <h3 class="anchored" data-anchor-id="optics"><span class="header-section-number">23.5.5</span> OPTICS</h3>
-<div class="algorithm">
-<div class="algorithmic">
-<p>Data points <span class="math inline">\(X=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m\)</span>; maximum neighborhood radius <span class="math inline">\(\varepsilon_{\max}\)</span>; minimum number of points <span class="math inline">\(\operatorname{MinPts}\)</span> Cluster ordering <span class="math inline">\(\mathcal{O}\)</span>; reachability distances <span class="math inline">\(\{d_{\text{reach}}(x_i)\}\)</span></p>
-<p>Mark all points as <strong>unprocessed</strong> Initialize <span class="math inline">\(d_{\text{reach}}(x_i)\gets +\infty\)</span> for all <span class="math inline">\(x_i\)</span> and empty ordering list <span class="math inline">\(\mathcal{O}\)</span></p>
+<div id="source-alg-OPTICS-e2ed3953" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 23.8</span> <span class="algorithm-title">OPTICS (Ordering Points To Identify the Clustering Structure)</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>输入：</strong> Data points <span class="math inline">\(X=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m\)</span>; maximum neighborhood radius <span class="math inline">\(\varepsilon_{\max}\)</span>; minimum number of points <span class="math inline">\(\operatorname{MinPts}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>输出：</strong> Cluster ordering <span class="math inline">\(\mathcal{O}\)</span>; reachability distances <span class="math inline">\(\{d_{\text{reach}}(x_i)\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p>Mark all points as <strong>unprocessed</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
+<p>Initialize <span class="math inline">\(d_{\text{reach}}(x_i)\gets +\infty\)</span> for all <span class="math inline">\(x_i\)</span> and empty ordering list <span class="math inline">\(\mathcal{O}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="3">
+<p><strong>for</strong> each point <span class="math inline">\(x_i\in X\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="4">
+<p><strong>if</strong> <span class="math inline">\(x_i\)</span> is processed <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="5">
 <p><strong>continue</strong></p>
-<p>Compute neighborhood <span class="math inline">\(N_{\varepsilon_{\max}}(x_i)\)</span> Mark <span class="math inline">\(x_i\)</span> as processed; Append <span class="math inline">\(x_i\)</span> to <span class="math inline">\(\mathcal{O}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="6">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="7">
+<p>Compute neighborhood <span class="math inline">\(N_{\varepsilon_{\max}}(x_i)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="8">
+<p>Mark <span class="math inline">\(x_i\)</span> as processed; Append <span class="math inline">\(x_i\)</span> to <span class="math inline">\(\mathcal{O}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="9">
+<p><strong>if</strong> <span class="math inline">\(|N_{\varepsilon_{\max}}(x_i)|\geqslant \operatorname{MinPts}\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="10">
 <p>Compute core distance</p>
 <p><span class="math display">\[
 d_{\text{core}}(x_i)
 =\text{distance to the $\operatorname{MinPts}$-th nearest neighbor of }x_i
 \]</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="11">
 <p>Initialize empty priority queue <span class="math inline">\(S\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-2" data-depth="2" data-line="12">
+<p><strong>for</strong> each unprocessed point <span class="math inline">\(x_j\in N_{\varepsilon_{\max}}(x_i)\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="13">
 <p><span class="math inline">\(d_{\text{new}}
-\gets \max\{d_{\text{core}}(x_i),\,\rho(x_i,x_j)\}\)</span> <span class="math inline">\(d_{\text{reach}}(x_j)
-\gets \min\{d_{\text{reach}}(x_j),\,d_{\text{new}}\}\)</span> Insert or update <span class="math inline">\(x_j\)</span> in <span class="math inline">\(S\)</span> with key <span class="math inline">\(d_{\text{reach}}(x_j)\)</span></p>
-<p>Extract <span class="math inline">\(x_p\)</span> with smallest <span class="math inline">\(d_{\text{reach}}(x_p)\)</span> from <span class="math inline">\(S\)</span> Compute neighborhood <span class="math inline">\(N_{\varepsilon_{\max}}(x_p)\)</span> Mark <span class="math inline">\(x_p\)</span> as processed Append <span class="math inline">\(x_p\)</span> to <span class="math inline">\(\mathcal{O}\)</span></p>
-<p>Compute <span class="math inline">\(d_{\text{core}}(x_p)\)</span> <span class="math inline">\(d_{\text{new}}
-\gets \max\{d_{\text{core}}(x_p),\,\rho(x_p,x_q)\}\)</span> <span class="math inline">\(d_{\text{reach}}(x_q)
-\gets \min\{d_{\text{reach}}(x_q),\,d_{\text{new}}\}\)</span> Insert or update <span class="math inline">\(x_q\)</span> in <span class="math inline">\(S\)</span> with key <span class="math inline">\(d_{\text{reach}}(x_q)\)</span></p>
+\gets \max\{d_{\text{core}}(x_i),\,\rho(x_i,x_j)\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="14">
+<p><span class="math inline">\(d_{\text{reach}}(x_j)
+\gets \min\{d_{\text{reach}}(x_j),\,d_{\text{new}}\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="15">
+<p>Insert or update <span class="math inline">\(x_j\)</span> in <span class="math inline">\(S\)</span> with key <span class="math inline">\(d_{\text{reach}}(x_j)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-2" data-depth="2" data-line="16">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-while algorithm-depth-2" data-depth="2" data-line="17">
+<p><strong>while</strong> <span class="math inline">\(S\ne \varnothing\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="18">
+<p>Extract <span class="math inline">\(x_p\)</span> with smallest <span class="math inline">\(d_{\text{reach}}(x_p)\)</span> from <span class="math inline">\(S\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="19">
+<p>Compute neighborhood <span class="math inline">\(N_{\varepsilon_{\max}}(x_p)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="20">
+<p>Mark <span class="math inline">\(x_p\)</span> as processed</p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="21">
+<p>Append <span class="math inline">\(x_p\)</span> to <span class="math inline">\(\mathcal{O}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-3" data-depth="3" data-line="22">
+<p><strong>if</strong> <span class="math inline">\(|N_{\varepsilon_{\max}}(x_p)|\geqslant \operatorname{MinPts}\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-4" data-depth="4" data-line="23">
+<p>Compute <span class="math inline">\(d_{\text{core}}(x_p)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-4" data-depth="4" data-line="24">
+<p><strong>for</strong> each unprocessed point <span class="math inline">\(x_q\in N_{\varepsilon_{\max}}(x_p)\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-5" data-depth="5" data-line="25">
+<p><span class="math inline">\(d_{\text{new}}
+\gets \max\{d_{\text{core}}(x_p),\,\rho(x_p,x_q)\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-5" data-depth="5" data-line="26">
+<p><span class="math inline">\(d_{\text{reach}}(x_q)
+\gets \min\{d_{\text{reach}}(x_q),\,d_{\text{new}}\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-5" data-depth="5" data-line="27">
+<p>Insert or update <span class="math inline">\(x_q\)</span> in <span class="math inline">\(S\)</span> with key <span class="math inline">\(d_{\text{reach}}(x_q)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-4" data-depth="4" data-line="28">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-3" data-depth="3" data-line="29">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-while-end algorithm-depth-2" data-depth="2" data-line="30">
+<p><strong>end while</strong></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="31">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="32">
+<p><strong>end for</strong></p>
 </div>
 </div>
-<p><span class="reference-missing" data-reference="alg:OPTICS">[缺失引用：alg:OPTICS]</span> 给出了OPTICS算法的完整流程。OPTICS属于基于密度的聚类方法，其基本密度可达性定义与 DBSCAN 保持一致，但其核心目标并非直接给出单一的聚类划分结果，而是通过对样本点进行有序遍历，显式刻画数据在不同密度尺度下的潜在聚类结构。</p>
+</div>
+<p><a href="#source-alg-OPTICS-e2ed3953" data-reference-type="ref+label" data-reference="alg:OPTICS">算法 23.8</a> 给出了OPTICS算法的完整流程。OPTICS属于基于密度的聚类方法，其基本密度可达性定义与 DBSCAN 保持一致，但其核心目标并非直接给出单一的聚类划分结果，而是通过对样本点进行有序遍历，显式刻画数据在不同密度尺度下的潜在聚类结构。</p>
 <p>在 OPTICS 中，引入<a href="../chapters/page-042.html#term-CoreDistance" class="term" title="core distance">核心距离<span class="term-english">（core distance）</span></a>以刻画样本点局部密度水平。对于样本点<span class="math inline">\(x_i\)</span>，其核心距离定义为：</p>
 <p>当点<span class="math inline">\(x_i\)</span>的<span class="math inline">\(\varepsilon_{\max}\)</span>-邻域中包含的样本数不少于<span class="math inline">\(\operatorname{MinPts}\)</span>时，<span class="math inline">\(x_i\)</span>被视为核心点，其核心距离反映了达到该局部密度所需的最小尺度；否则，该点被视为非核心点，其核心距离定义为无穷大。</p>
 <p>基于核心距离，OPTICS 进一步定义样本<span class="math inline">\(x_j\)</span>相对于核心点<span class="math inline">\(x_i\)</span>的<a href="../chapters/page-057.html#term-ReachabilityDistance" class="term" title="reachability distance">可达距离<span class="term-english">（reachability distance）</span></a> 。可达距离刻画了在保持局部密度约束的前提下，从核心点<span class="math inline">\(x_i\)</span>触及样<span class="math inline">\(x_j\)</span>所需的最小距离尺度，是 OPTICS 构建样本排序的关键量。</p>
@@ -1969,6 +2792,19 @@ d_{\text{core}}(x_i)
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
     const anchorJS = new window.AnchorJS();
     anchorJS.options = {

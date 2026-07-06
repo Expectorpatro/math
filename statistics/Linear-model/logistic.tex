@@ -129,13 +129,14 @@
 \begin{equation*}
 	X^{\top}WXz=X^{\top}(y-\mu)
 \end{equation*}
-这其实正是\cref{model:GeneralizedLinearModel}下的正则方程。\par
-能不能将这类推广的线性模型统一起来，用一个统一的公式去表达？如果可以的话，能不能尽量扩大这个统一形式的表达范围，使得囊括尽可能多的情况？我们需要来分析产生上述线性方程组的原因。设模型的参数为$\theta$。\par
-首先分析$\ln L(\beta)$关于$\beta$的梯度：
-\begin{equation*}
-	\frac{\dif\ln L(\beta)}{\dif\beta}=\frac{\dif\ln L(\beta)}{\dif\theta}\frac{\dif\theta}{\dif\beta}
-\end{equation*}
-均值和模型参数之间具有一个函数关系，同时均值和$\beta$之间也有函数关系，$X^{\top}(y-\mu)$中
+这其实正是\cref{model:GeneralizedLinearModel}下的正则方程。这类问题的一个重要优点在于，极大似然估计最终可以转化为带权残差意义下的最小化问题，从而在形式上延续了最小二乘法通过最小化残差确定参数的直观思想。\par
+能不能将这类推广的线性模型统一起来，用一个统一的公式去表达？如果可以的话，能不能尽量扩大这个统一形式的表达范围，使得囊括尽可能多的情况？我们需要来分析产生上述线性方程组的原因。\par
+首先分析$\ln L(\beta)$关于$\beta$的梯度。$\beta$是通过预测均值引入模型的，要求关于$\beta$的梯度必然需要引入均值进行链式法则计算，而模型与均值的关系一般为均值与模型参数有一个函数关系，于是我们设定模型的参数为$\theta$，这里的$\theta$未必是模型原始的参数，而可能是原始参数的一个函数。由\cref{prop:FrechetDifferential}(6)可得：
+\begin{align*}
+	&\frac{\dif\ln L(\beta)}{\dif\beta}=\left(\frac{\dif\eta}{\dif\beta}\right)^{\top}\frac{\dif\ln L(\beta)}{\dif\eta}=\left(\frac{\dif\eta}{\dif\beta}\right)^{\top}\left(\frac{\dif\mu}{\dif\eta}\right)^{\top}\frac{\dif\ln L(\beta)}{\dif\mu} \\
+	=&\left(\frac{\dif\eta}{\dif\beta}\right)^{\top}\left(\frac{\dif\mu}{\dif\eta}\right)^{\top}\left(\frac{\dif\theta}{\dif\mu}\right)^{\top}\frac{\dif\ln L(\beta)}{\dif\theta}=X^{\top}\frac{\dif\mu}{\dif\eta}\frac{\dif\theta}{\dif\mu}\frac{\dif\ln L(\beta)}{\dif\theta}
+\end{align*}
+因为上式中间两项导数仅分别和链接函数与模型均值相关，和$y$无关，所以最后一项必然要出现$y$，这使得$\ln L(\beta)$中必然出现$y\theta$这一项。
 
 \section{矩阵的分解}
 %\begin{algorithm}[!ht]

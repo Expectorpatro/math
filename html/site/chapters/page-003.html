@@ -41,10 +41,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-7380dde18c49706d018cafaca6afd2e2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -73,6 +77,140 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
+<script>
+(() => {
+  "use strict";
+
+  const storageKey = "textbook-color-scheme";
+  const quartoStorageKey = "quarto-color-scheme";
+
+  const readStoredTheme = () => {
+    try {
+      const value = window.localStorage.getItem(storageKey);
+      return value === "dark" || value === "light" ? value : null;
+    } catch (_error) {
+      return null;
+    }
+  };
+
+  const writeStorage = (key, value) => {
+    try {
+      window.localStorage.setItem(key, value);
+    } catch (_error) {
+      // Storage may be unavailable in a locked-down browser. The current page
+      // still switches normally; only cross-page persistence is affected.
+    }
+  };
+
+  const writeTheme = (theme) => {
+    writeStorage(storageKey, theme);
+    writeStorage(
+      quartoStorageKey,
+      theme === "dark" ? "alternate" : "default"
+    );
+  };
+
+  // Quarto reads its own sentinel at the beginning of <body>. Mirror our
+  // durable preference into it while still in <head>, preventing a white flash
+  // and making the correct theme active before the page is painted.
+  const storedTheme = readStoredTheme();
+  if (storedTheme) {
+    writeTheme(storedTheme);
+  }
+
+  const currentTheme = () =>
+    document.body.classList.contains("quarto-dark") ? "dark" : "light";
+
+  const updateButton = (button) => {
+    const isDark = currentTheme() === "dark";
+    const targetName = isDark ? "浅色" : "深色";
+    const icon = button.querySelector("i");
+    icon.className = isDark
+      ? "bi bi-sun-fill"
+      : "bi bi-moon-stars-fill";
+    button.setAttribute("aria-label", `切换到${targetName}模式`);
+    button.setAttribute("title", `切换到${targetName}模式`);
+    button.setAttribute("aria-pressed", String(isDark));
+  };
+
+  const applyTheme = (theme, button) => {
+    const wantsDark = theme === "dark";
+    const isDark = currentTheme() === "dark";
+
+    if (wantsDark !== isDark && typeof window.quartoToggleColorScheme === "function") {
+      // Force Quarto's next toggle toward the requested state even if its own
+      // sentinel and the body class have somehow drifted apart.
+      writeStorage(
+        quartoStorageKey,
+        wantsDark ? "default" : "alternate"
+      );
+      window.quartoToggleColorScheme();
+    }
+
+    writeTheme(theme);
+    updateButton(button);
+  };
+
+  const mountThemeToggle = () => {
+    if (document.getElementById("textbook-theme-toggle")) {
+      return;
+    }
+
+    const button = document.createElement("button");
+    button.id = "textbook-theme-toggle";
+    button.type = "button";
+    button.className = "btn textbook-theme-toggle";
+    button.innerHTML = '<i class="bi" aria-hidden="true"></i>';
+
+    const placeThemeToggle = () => {
+      const tocTitle = document.querySelector("#TOC #toc-title");
+      const useToc = Boolean(
+        tocTitle && window.matchMedia("(min-width: 992px)").matches
+      );
+
+      document
+        .querySelectorAll(".textbook-toc-title-with-toggle")
+        .forEach((element) => {
+          element.classList.remove("textbook-toc-title-with-toggle");
+        });
+
+      if (useToc) {
+        tocTitle.classList.add("textbook-toc-title-with-toggle");
+        tocTitle.appendChild(button);
+        button.classList.add("textbook-theme-toggle-in-toc");
+        button.classList.remove("textbook-theme-toggle-floating");
+      } else {
+        document.body.appendChild(button);
+        button.classList.add("textbook-theme-toggle-floating");
+        button.classList.remove("textbook-theme-toggle-in-toc");
+      }
+    };
+
+    placeThemeToggle();
+    window.addEventListener("resize", placeThemeToggle);
+
+    const initialTheme = readStoredTheme() || currentTheme();
+    applyTheme(initialTheme, button);
+
+    button.addEventListener("click", () => {
+      const nextTheme = currentTheme() === "dark" ? "light" : "dark";
+      applyTheme(nextTheme, button);
+    });
+
+    window.addEventListener("pageshow", () => {
+      applyTheme(readStoredTheme() || currentTheme(), button);
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mountThemeToggle, {
+      once: true,
+    });
+  } else {
+    mountThemeToggle();
+  }
+})();
+</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -108,7 +246,169 @@ window.Quarto = {
 <link rel="stylesheet" href="../sidebar.css">
 </head>
 
-<body class="nav-sidebar docked quarto-light">
+<body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -133,6 +433,9 @@ window.Quarto = {
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="../">你永远不知道一个强迫症能干出什么事情</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="切换深色模式"><i class="bi"></i></a>
+</div>
     </div>
       </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
@@ -675,6 +978,7 @@ window.Quarto = {
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
+
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-002.html">第 1 部分 代数</a></li><li class="breadcrumb-item"><a href="../chapters/page-003.html"><span class="chapter-title"><span class="header-section-number">第 2 章</span> 矩阵</span></a></li></ol></nav>
 <div class="quarto-title">
@@ -2140,20 +2444,204 @@ a_{m1} &amp; a_{m2} &amp; \dots &amp; a_{mn} &amp; b_m
 <p>(3)由(1)(2)可得。</p>
 <p>(4)由(3)立即可得。&nbsp;◻</p>
 </div>
-<div class="algorithm">
-<div class="algorithmic">
-<p>Augmented matrix <span class="math inline">\([A|\mathbf{b}] \in \mathbb{R}^{m \times (n+1)}\)</span> Solution status and expression <strong>Step 1: Forward Elimination</strong> Find <span class="math inline">\(p\)</span> such that <span class="math inline">\(|a_{pj}|\)</span> is maximum for <span class="math inline">\(j \leq p \leq m\)</span> <strong>continue</strong> Swap row <span class="math inline">\(p\)</span> and row <span class="math inline">\(j\)</span> <span class="math inline">\(a_{ik} \gets a_{ik} - a_{ij} / a_{jj} \cdot a_{jk}\)</span> <span class="math inline">\(a_{ij} \gets 0\)</span></p>
-<p><strong>Step 2: Inconsistency Check</strong> “No solution (inconsistent row)”</p>
-<p><strong>Step 3: Identify Pivot and Free Variables</strong> <span class="math inline">\(\mathcal{P} \gets\)</span> set of index of pivot columns in row echelon form, <span class="math inline">\(\mathcal{F} \gets \{1,\dots,n\}\setminus\mathcal{P}\)</span>, <span class="math inline">\(r \gets |\mathcal{P}|\)</span> <strong>Back substitution: unique solution</strong> Initialize <span class="math inline">\(\mathbf{x} \gets (0,\dots,0)^{\top}\)</span> <span class="math inline">\(x_i \gets \left(a_{i(n+1)} - \sum\limits_{k=i+1}^{n} a_{ik} x_k\right) / a_{ii}\)</span> <span class="math inline">\(\mathbf{x} = (x_1,\dots,x_n)^{\top}\)</span></p>
+<div id="source-alg-gauss-887d57c5" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 2.1</span> <span class="algorithm-title">Gaussian Elimination</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>输入：</strong> Augmented matrix <span class="math inline">\([A|\mathbf{b}] \in \mathbb{R}^{m \times (n+1)}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>输出：</strong> Solution status and expression</p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p><strong>Step 1: Forward Elimination</strong></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>for</strong> <span class="math inline">\(j = 1\)</span> to <span class="math inline">\(n\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="3">
+<p>Find <span class="math inline">\(p\)</span> such that <span class="math inline">\(|a_{pj}|\)</span> is maximum for <span class="math inline">\(j \leq p \leq m\)</span> <em>（Pivoting）</em></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="4">
+<p><strong>if</strong> <span class="math inline">\(|a_{pj}| &lt; \varepsilon\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="5">
+<p><strong>continue</strong> <em>（Skip zero column）</em></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="6">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="7">
+<p>Swap row <span class="math inline">\(p\)</span> and row <span class="math inline">\(j\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="8">
+<p><strong>for</strong> <span class="math inline">\(i = j+1\)</span> to <span class="math inline">\(m\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-2" data-depth="2" data-line="9">
+<p><strong>for</strong> <span class="math inline">\(k = j\)</span> to <span class="math inline">\(n+1\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="10">
+<p><span class="math inline">\(a_{ik} \gets a_{ik} - a_{ij} / a_{jj} \cdot a_{jk}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-2" data-depth="2" data-line="11">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="12">
+<p><span class="math inline">\(a_{ij} \gets 0\)</span> <em>（Explicitly zero to avoid error）</em></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="13">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="14">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="15">
+<p><strong>Step 2: Inconsistency Check</strong></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="16">
+<p><strong>for</strong> <span class="math inline">\(i = 1\)</span> to <span class="math inline">\(m\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="17">
+<p><strong>if</strong> All <span class="math inline">\(a_{ij} = 0\)</span> for <span class="math inline">\(j = 1\)</span> to <span class="math inline">\(n\)</span> <strong>and</strong> <span class="math inline">\(a_{i(n+1)} \neq 0\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="18">
+<p><strong>return</strong> “No solution (inconsistent row)”</p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="19">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="20">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="21">
+<p><strong>Step 3: Identify Pivot and Free Variables</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="22">
+<p><span class="math inline">\(\mathcal{P} \gets\)</span> set of index of pivot columns in row echelon form, <span class="math inline">\(\mathcal{F} \gets \{1,\dots,n\}\setminus\mathcal{P}\)</span>, <span class="math inline">\(r \gets |\mathcal{P}|\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-0" data-depth="0" data-line="23">
+<p><strong>if</strong> <span class="math inline">\(r = n\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="24">
+<p><strong>Back substitution: unique solution</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="25">
+<p>Initialize <span class="math inline">\(\mathbf{x} \gets (0,\dots,0)^{\top}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="26">
+<p><strong>for</strong> <span class="math inline">\(i = n\)</span> downto <span class="math inline">\(1\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="27">
+<p><span class="math inline">\(x_i \gets \left(a_{i(n+1)} - \sum\limits_{k=i+1}^{n} a_{ik} x_k\right) / a_{ii}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="28">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="29">
+<p><strong>return</strong> <span class="math inline">\(\mathbf{x} = (x_1,\dots,x_n)^{\top}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-0" data-depth="0" data-line="30">
+<p><strong>end if</strong></p>
 </div>
 </div>
-<div class="algorithm">
-<div class="algorithmic">
-<p>Row echelon form (REF) matrix <span class="math inline">\([A|\mathbf{b}]\)</span> with <span class="math inline">\(r &lt; n\)</span> General solution <span class="math inline">\(\mathbf{x} = \mathbf{x}_p + \sum t_j \mathbf{v}_j\)</span></p>
-<p><strong>Construct general solution: infinite solutions</strong> <strong>Step 4: Transform to Reduced Row Echelon Form (RREF)</strong> Let <span class="math inline">\(i\)</span> be the row where pivot in column <span class="math inline">\(\mathcal{P}[j]\)</span> appears Divide entire row <span class="math inline">\(i\)</span> by <span class="math inline">\(a_{i\mathcal{P}[j]}\)</span> to make pivot = 1 <span class="math inline">\(a_{kl} \gets a_{kl} - a_{k\mathcal{P}[j]} \cdot a_{il}\)</span></p>
-<p><strong>Step 5: Compute Particular Solution <span class="math inline">\(\mathbf{x}_p\)</span></strong> Initialize <span class="math inline">\(\mathbf{x}_p = (0, 0, \dots, 0)^{\top}\)</span> Let <span class="math inline">\(i\)</span> be the row where pivot in column <span class="math inline">\(\mathcal{P}[j]\)</span> appears <span class="math inline">\(\mathbf{x}_{p\mathcal{P}[j]}\gets a_{i(n+1)}\)</span></p>
-<p><strong>Step 6: Compute Basis Vectors <span class="math inline">\(\{\mathbf{v}_j\}\)</span></strong> Initialize <span class="math inline">\(\mathbf{v}_j = (0, 0, \dots, 0)^{\top}\)</span> <span class="math inline">\(\mathbf{v}_{j\mathcal{F}[j]}\gets1\)</span> Let <span class="math inline">\(i\)</span> be the first row such that the pivot column index is greater than <span class="math inline">\(\mathcal{F}[j]\)</span> <span class="math inline">\(\mathbf{v}_{jk}\gets-a_{k\mathcal{F}[j]}\)</span> Store <span class="math inline">\(\mathbf{v}_j\)</span></p>
-<p>General solution: <span class="math inline">\(\mathbf{x} = \mathbf{x}_p + \sum\limits_{j=1}^{n-r} c_j \mathbf{v}_j\)</span>, where <span class="math inline">\(c_j\in\mathbb{R}^{}\)</span></p>
+</div>
+<div id="algorithm-2-2" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 2.2</span> <span class="algorithm-title">Gaussian Elimination (Part 2): General Solution via RREF</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>输入：</strong> Row echelon form (REF) matrix <span class="math inline">\([A|\mathbf{b}]\)</span> with <span class="math inline">\(r &lt; n\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>输出：</strong> General solution <span class="math inline">\(\mathbf{x} = \mathbf{x}_p + \sum t_j \mathbf{v}_j\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p><strong>Construct general solution: infinite solutions</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>Step 4: Transform to Reduced Row Echelon Form (RREF)</strong></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="3">
+<p><strong>for</strong> <span class="math inline">\(j = r\)</span> downto <span class="math inline">\(1\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="4">
+<p>Let <span class="math inline">\(i\)</span> be the row where pivot in column <span class="math inline">\(\mathcal{P}[j]\)</span> appears</p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="5">
+<p>Divide entire row <span class="math inline">\(i\)</span> by <span class="math inline">\(a_{i\mathcal{P}[j]}\)</span> to make pivot = 1</p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="6">
+<p><strong>for</strong> <span class="math inline">\(k = 1\)</span> to <span class="math inline">\(i-1\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-2" data-depth="2" data-line="7">
+<p><strong>for</strong> <span class="math inline">\(l = \mathcal{P}[j]\)</span> to <span class="math inline">\(n+1\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="8">
+<p><span class="math inline">\(a_{kl} \gets a_{kl} - a_{k\mathcal{P}[j]} \cdot a_{il}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-2" data-depth="2" data-line="9">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="10">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="11">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="12">
+<p><strong>Step 5: Compute Particular Solution <span class="math inline">\(\mathbf{x}_p\)</span></strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="13">
+<p>Initialize <span class="math inline">\(\mathbf{x}_p = (0, 0, \dots, 0)^{\top}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="14">
+<p><strong>for</strong> <span class="math inline">\(j = 1\)</span> to <span class="math inline">\(r\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="15">
+<p>Let <span class="math inline">\(i\)</span> be the row where pivot in column <span class="math inline">\(\mathcal{P}[j]\)</span> appears</p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="16">
+<p><span class="math inline">\(\mathbf{x}_{p\mathcal{P}[j]}\gets a_{i(n+1)}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="17">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="18">
+<p><strong>Step 6: Compute Basis Vectors <span class="math inline">\(\{\mathbf{v}_j\}\)</span></strong></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="19">
+<p><strong>for</strong> <span class="math inline">\(j = 1\)</span> to <span class="math inline">\(n-r\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="20">
+<p>Initialize <span class="math inline">\(\mathbf{v}_j = (0, 0, \dots, 0)^{\top}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="21">
+<p><span class="math inline">\(\mathbf{v}_{j\mathcal{F}[j]}\gets1\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="22">
+<p>Let <span class="math inline">\(i\)</span> be the first row such that the pivot column index is greater than <span class="math inline">\(\mathcal{F}[j]\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="23">
+<p><strong>for</strong> <span class="math inline">\(k=1\)</span> to <span class="math inline">\(i-1\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="24">
+<p><span class="math inline">\(\mathbf{v}_{jk}\gets-a_{k\mathcal{F}[j]}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="25">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="26">
+<p>Store <span class="math inline">\(\mathbf{v}_j\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="27">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="28">
+<p><strong>return</strong> General solution: <span class="math inline">\(\mathbf{x} = \mathbf{x}_p + \sum\limits_{j=1}^{n-r} c_j \mathbf{v}_j\)</span>, where <span class="math inline">\(c_j\in\mathbb{R}^{}\)</span></p>
+</div>
 </div>
 </div>
 </section>
@@ -4423,6 +4911,12 @@ Hv=H(x+y)=x-y
 \end{equation*}\]</span></p>
 <p>而<span class="math inline">\(x-y\)</span>是<span class="math inline">\(v\)</span>关于平面<span class="math inline">\(S\)</span>的镜面反射。</p>
 </div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../_tikz/tikz-507cde6a51d928c3.png" class="tikz-image img-fluid figure-img" style="width:92.0%"></p>
+<figcaption>image</figcaption>
+</figure>
+</div>
 <div id="prop-Householder-9cc94735" class="property theorem-block env-property">
 <p><strong>Property 2.8.3</strong>. 设<span class="math inline">\(H\in M_{n}(\mathbb{R}^{})\)</span>是一个初等反射矩阵，则：</p>
 <ol type="1">
@@ -4627,7 +5121,7 @@ L^{-1}\tilde{L} = U \tilde{U}^{-1}
 <p>不对<span class="math inline">\(A\)</span>作行交换时的结论由上述分析和<a href="#lem-LU-d81b3faa" data-reference-type="ref+label" data-reference="lem:LU">引理 2.4</a>立即可得。&nbsp;◻</p>
 </div>
 <div id="method-2-1" class="method theorem-block env-method">
-<p><strong>Method 2.1</strong>. 设<span class="math inline">\(PA=(a_{ij})\)</span>，因为<span class="math inline">\(L^{-1}PA=U\)</span>，由<span class="reference-missing" data-reference="alg:gauss">[缺失引用：alg:gauss]</span>和<a href="#prop-ElementaryMatrix-4e529dad" data-reference-type="ref+label" data-reference="prop:ElementaryMatrix">性质 2.1.3</a>(2)可知：</p>
+<p><strong>Method 2.1</strong>. 设<span class="math inline">\(PA=(a_{ij})\)</span>，因为<span class="math inline">\(L^{-1}PA=U\)</span>，由<a href="#source-alg-gauss-887d57c5" data-reference-type="ref+label" data-reference="alg:gauss">算法 2.1</a>和<a href="#prop-ElementaryMatrix-4e529dad" data-reference-type="ref+label" data-reference="prop:ElementaryMatrix">性质 2.1.3</a>(2)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 L^{-1}=
 \begin{pmatrix}
@@ -4652,11 +5146,42 @@ l_{n1} &amp; l_{n2} &amp; \cdots &amp; l_{n(n-1)} &amp; 1 \\
 \end{pmatrix}
 
 \end{equation*}\]</span></p>
-<p>由<span class="reference-missing" data-reference="alg:gauss">[缺失引用：alg:gauss]</span>可知对第<span class="math inline">\(k\)</span>列进行消元后，第<span class="math inline">\(k\)</span>行的前<span class="math inline">\(k-1\)</span>个数都是<span class="math inline">\(0\)</span>，不会在后续过程中再使用到它们，于是<span class="math inline">\(L\)</span>矩阵中的元素可以直接存储在<span class="math inline">\(A\)</span>的下三角区域（除了主对角线），<span class="math inline">\(U\)</span>矩阵即为消元后所剩下的上三角矩阵。</p>
-<div class="algorithm">
-<div class="algorithmic">
-<p><span class="math inline">\(A=(a_{ij})\in M_{n}(K)\)</span> The lower triangular part of <span class="math inline">\(A\)</span> (excluding the diagonal) stores <span class="math inline">\(L\)</span>, and the upper triangular part (including the diagonal) stores <span class="math inline">\(U\)</span></p>
-<p><span class="math inline">\(a_{ik} \gets a_{ik} / a_{kk}\)</span> <span class="math inline">\(a_{ij} \gets a_{ij} - a_{ik} \cdot a_{kj}\)</span></p>
+<p>由<a href="#source-alg-gauss-887d57c5" data-reference-type="ref+label" data-reference="alg:gauss">算法 2.1</a>可知对第<span class="math inline">\(k\)</span>列进行消元后，第<span class="math inline">\(k\)</span>行的前<span class="math inline">\(k-1\)</span>个数都是<span class="math inline">\(0\)</span>，不会在后续过程中再使用到它们，于是<span class="math inline">\(L\)</span>矩阵中的元素可以直接存储在<span class="math inline">\(A\)</span>的下三角区域（除了主对角线），<span class="math inline">\(U\)</span>矩阵即为消元后所剩下的上三角矩阵。</p>
+<div id="algorithm-2-3" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 2.3</span> <span class="algorithm-title">In-place LU Factorization (without pivoting)</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>输入：</strong> <span class="math inline">\(A=(a_{ij})\in M_{n}(K)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>输出：</strong> The lower triangular part of <span class="math inline">\(A\)</span> (excluding the diagonal) stores <span class="math inline">\(L\)</span>, and the upper triangular part (including the diagonal) stores <span class="math inline">\(U\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="1">
+<p><strong>for</strong> <span class="math inline">\(k = 1\)</span> <strong>to</strong> <span class="math inline">\(n-1\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="2">
+<p><strong>for</strong> <span class="math inline">\(i = k+1\)</span> <strong>to</strong> <span class="math inline">\(n\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="3">
+<p><span class="math inline">\(a_{ik} \gets a_{ik} / a_{kk}\)</span> （<span class="math inline">\(l_{ik}\)</span>）</p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-2" data-depth="2" data-line="4">
+<p><strong>for</strong> <span class="math inline">\(j = k+1\)</span> <strong>to</strong> <span class="math inline">\(n\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="5">
+<p><span class="math inline">\(a_{ij} \gets a_{ij} - a_{ik} \cdot a_{kj}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-2" data-depth="2" data-line="6">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="7">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="8">
+<p><strong>end for</strong></p>
+</div>
 </div>
 </div>
 <p>该方法的计算复杂度为：</p>
@@ -4703,16 +5228,48 @@ u_{11} &amp; u_{12} &amp; u_{13} &amp; \cdots &amp; u_{1n} \\
 
 \end{equation*}\]</span></p>
 <p>的线性方程组<span class="math inline">\(Lx=b\)</span>或<span class="math inline">\(Ux=b\)</span>，有下述两种求解算法：</p>
-<div class="algorithm">
-<div class="algorithmic">
-<p>Lower triangular matrix <span class="math inline">\(L=(l_{ij})\in M_{n}(\mathbb{K})\)</span>, right-hand side vector <span class="math inline">\(b\in\mathbb{K}^n\)</span> Solution vector <span class="math inline">\(x\in\mathbb{K}^n\)</span> satisfying <span class="math inline">\(Lx=b\)</span></p>
+<div id="algorithm-2-4" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 2.4</span> <span class="algorithm-title">Forward Substitution for Lower Triangular Systems</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>输入：</strong> Lower triangular matrix <span class="math inline">\(L=(l_{ij})\in M_{n}(\mathbb{K})\)</span>, right-hand side vector <span class="math inline">\(b\in\mathbb{K}^n\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>输出：</strong> Solution vector <span class="math inline">\(x\in\mathbb{K}^n\)</span> satisfying <span class="math inline">\(Lx=b\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="1">
+<p><strong>for</strong> <span class="math inline">\(i=1\)</span> <strong>to</strong> <span class="math inline">\(n\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="2">
 <p><span class="math inline">\(x_i \gets \dfrac{b_i - \sum\limits_{j=1}^{i-1} l_{ij}x_j}{l_{ii}}\)</span></p>
 </div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="3">
+<p><strong>end for</strong></p>
 </div>
-<div class="algorithm">
-<div class="algorithmic">
-<p>Upper triangular matrix <span class="math inline">\(U=(u_{ij})\in M_{n}(K)\)</span>, right-hand side vector <span class="math inline">\(b\in\mathbb{K}^n\)</span> Solution vector <span class="math inline">\(x\in\mathbb{K}^n\)</span> satisfying <span class="math inline">\(Ux=b\)</span></p>
+</div>
+</div>
+<div id="algorithm-2-5" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 2.5</span> <span class="algorithm-title">Backward Substitution for Upper Triangular Systems</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>输入：</strong> Upper triangular matrix <span class="math inline">\(U=(u_{ij})\in M_{n}(K)\)</span>, right-hand side vector <span class="math inline">\(b\in\mathbb{K}^n\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>输出：</strong> Solution vector <span class="math inline">\(x\in\mathbb{K}^n\)</span> satisfying <span class="math inline">\(Ux=b\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="1">
+<p><strong>for</strong> <span class="math inline">\(i=n\)</span> <strong>downto</strong> <span class="math inline">\(1\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="2">
 <p><span class="math inline">\(x_i \gets \dfrac{b_i - \sum\limits_{j=i+1}^{n} u_{ij}x_j}{u_{ii}}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="3">
+<p><strong>end for</strong></p>
+</div>
 </div>
 </div>
 <p>上述两种算法的计算复杂度分别为：</p>
@@ -4779,9 +5336,35 @@ l_{ij}=\frac{1}{l_{jj}}\left(a_{ij}-\sum_{k=1}^{j-1}l_{ik}l_{jk}\right)
 
 \end{equation*}\]</span></p>
 <p>根据上面的公式我们可以逐列求解<span class="math inline">\(L\)</span>。</p>
-<div class="algorithm">
-<div class="algorithmic">
-<p><span class="math inline">\(A=(a_{ij})\in M_{n}(\mathbb{R})\)</span>, symmetric and positive definite The lower triangular part of <span class="math inline">\(A\)</span> stores <span class="math inline">\(L\)</span> <span class="math inline">\(l_{jj}\gets\sqrt{a_{jj}-\sum\limits_{k=1}^{j-1}l_{jk}^2}\)</span> <span class="math inline">\(l_{ij}\gets\dfrac{1}{l_{jj}}\left(a_{ij}-\sum\limits_{k=1}^{j-1}l_{ik}l_{jk}\right)\)</span></p>
+<div id="algorithm-2-6" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">算法 2.6</span> <span class="algorithm-title">Cholesky Factorization (Comparison Method)</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>输入：</strong> <span class="math inline">\(A=(a_{ij})\in M_{n}(\mathbb{R})\)</span>, symmetric and positive definite</p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>输出：</strong> The lower triangular part of <span class="math inline">\(A\)</span> stores <span class="math inline">\(L\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="1">
+<p><strong>for</strong> <span class="math inline">\(j = 1\)</span> <strong>to</strong> <span class="math inline">\(n\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="2">
+<p><span class="math inline">\(l_{jj}\gets\sqrt{a_{jj}-\sum\limits_{k=1}^{j-1}l_{jk}^2}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="3">
+<p><strong>for</strong> <span class="math inline">\(i = j+1\)</span> <strong>to</strong> <span class="math inline">\(n\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="4">
+<p><span class="math inline">\(l_{ij}\gets\dfrac{1}{l_{jj}}\left(a_{ij}-\sum\limits_{k=1}^{j-1}l_{ik}l_{jk}\right)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="5">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="6">
+<p><strong>end for</strong></p>
+</div>
 </div>
 </div>
 <p>在程序实现中，可直接在<span class="math inline">\(A\)</span>的下三角部分存储<span class="math inline">\(L\)</span>的元素，上三角部分不再使用。</p>
@@ -4937,6 +5520,19 @@ A=\sum_{i=1}^r\lambda_ip_iq_i^H
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
     const anchorJS = new window.AnchorJS();
     anchorJS.options = {

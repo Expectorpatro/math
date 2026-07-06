@@ -42,37 +42,55 @@
 
 \subsection{Jensen不等式}
 \begin{theorem}
-	设$(X,\mathscr{F},P)$是一个概率空间，$\mathscr{A}\subseteq\mathscr{F}$，$f$是$(X,\mathscr{F})$上可积的Borel函数，$\varphi$为$(\mathbb{R}^{},\mathcal{B})$上的Borel函数且是$\mathbb{R}^{}$上的凸函数，$\varphi\circ f$在$X$上可积，则有\info{补充凹函数版本}：
+	设$(X,\mathscr{F},P)$是一个概率空间，$\mathscr{A}\subseteq\mathscr{F}$且是$\sigma$代数，$f$是$(X,\mathscr{F})$上可积的Borel函数，$\varphi$为$(\mathbb{R}^{},\mathcal{B}(\mathbb{R}^{}))$上的Borel函数且是$\mathbb{R}^{}$上的凸函数，$\varphi\circ f$在$(X,\mathscr{F})$上可积，则有\info{补充凹函数版本}：
 	\begin{inequality*}\label{ineq:Jensen}
-		\varphi[\operatorname{E}(f|\mathscr{A})]\leqslant\operatorname{E}(\varphi\circ f|\mathscr{A})
+		\varphi[\operatorname{E}(f|\mathscr{A})]\leqslant\operatorname{E}(\varphi\circ f|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
 	\end{inequality*}
-	等号成立a.s.于$(X,\mathscr{A},P)$的一个充分条件为$f=\operatorname{E}(f|\mathscr{A})\;$a.s.于$X$。若$\varphi$是严格凸的，则等号成立a.s.于$(X,\mathscr{A},P)$的充要条件为$f=\operatorname{E}(f|\mathscr{A})\;$a.s.于$X$。
+	等号成立a.s.于$(X,\mathscr{A},P)$的一个充分条件为$f=\operatorname{E}(f|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$。若$\varphi$是严格凸的，则等号成立a.s.于$(X,\mathscr{A},P)$的充要条件为$f=\operatorname{E}(f|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$。
 \end{theorem}
 \begin{proof}
-	令：
+	设：
 	\begin{equation*}
-		x_0=\operatorname{E}(f|\mathscr{A})
+		\mathcal{L}=\{(a,b)\in\mathbb{R}^{2}:ax+b\leqslant\varphi(x),\;\forall\;x\in\mathbb{R}^{}\}
 	\end{equation*}
-	根据\cref{prop:ConvexFunction}(3)可知存在$a,b\in\mathbb{R}^{}$使得：
+	由\cref{prop:ConvexFunction}(4)可知$\mathcal{L}\ne\varnothing$，于是对任意的$(a,b)\in\mathcal{L}$有$af+b\leqslant\varphi\circ f$，根据\cref{prop:MeasurableIntegral}(6)和\cref{prop:NonnegativeMeasurableIntegral}(5)(1)可知可对$af+b$求关于$\mathscr{A}$的条件期望，由\cref{prop:NonnegativeMeasurableIntegral}(5)(1)可知可对$\varphi\circ f$求关于$\mathscr{A}$的条件期望，于是根据\cref{prop:ConditionalExpectation}(4)(5)(1)可知：
 	\begin{equation*}
-		\forall\;x\in\mathbb{R}^{},\;ax+b\leqslant\varphi(x)
+		\operatorname{E}(\varphi\circ f\mid\mathscr{A})\geqslant\operatorname{E}(af+b\mid\mathscr{A})=a\operatorname{E}(f\mid\mathscr{A})+b\operatorname{E}(1\mid\mathscr{A})=a\operatorname{E}(f\mid\mathscr{A})+b
 	\end{equation*}
-	并满足$ax_0+b=\varphi(x_0)$。根据\cref{prop:MeasurableIntegral}(7)，令$x=f(\omega)$对两侧求关于$\mathscr{A}$的条件期望，由\cref{prop:ConditionalExpectation}(5)(1)可得：
-	\begin{gather*}
-		\operatorname{E}(af+b|\mathscr{A})=a\operatorname{E}(f|\mathscr{A})+b\operatorname{E}(1|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P) \\ a\operatorname{E}(f|\mathscr{A})+b\operatorname{E}(1|\mathscr{A})=a\operatorname{E}(f|\mathscr{A})+b\;\text{a.s.于}(X,\mathscr{A},P)
-	\end{gather*}
-	根据\cref{prop:Measure}(3)（次有限可加性）和测度的非负性可知$\operatorname{E}(af+b|\mathscr{A})=a\operatorname{E}(f|\mathscr{A})+b\;$a.s.于$(X,\mathscr{A},P)$。显然$af(\omega)+b$在$X$上可积，由\cref{prop:ConditionalExpectation}(4)、\cref{prop:Measure}(3)（次有限可加性）和测度的非负性即可得：
+	a.s.于$(X,\mathscr{A},P)$。由\cref{prop:ConvexFunction}(4)和\info{上确界的不等式性}可知：
 	\begin{equation*}
-		a\operatorname{E}(f|\mathscr{A})+b=\varphi[\operatorname{E}(f|\mathscr{A})]\leqslant\operatorname{E}(\varphi\circ f|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
-	\end{equation*}
-	当$f=\operatorname{E}(f|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$时，$\varphi(f)=\varphi[\operatorname{E}(f|\mathscr{A})]\;$a.s.于$(X,\mathscr{A},P)$，因为$\varphi\circ f\in L_1(X)$，根据\cref{prop:MeasurableIntegral}(8)可知$\varphi[\operatorname{E}(f|\mathscr{A})]\in L_1(X)$。由\cref{prop:MeasurableMapping}(2)和\cref{prop:ConditionalExpectation}(1)可得$\operatorname{E}\{\varphi[\operatorname{E}(f|\mathscr{A})]|\mathscr{A}\}=\varphi[\operatorname{E}(f|\mathscr{A})]\;$a.s.于$(X,\mathscr{A},P)$。由\cref{prop:ConditionalExpectation}(4)、\cref{prop:Measure}(3)（次有限可加性）和测度的非负性可得：
-	\begin{equation*}
-		\operatorname{E}(\varphi\circ f|\mathscr{A})=\operatorname{E}\{\varphi[\operatorname{E}(f|\mathscr{A})]|\mathscr{A}\}=\varphi[\operatorname{E}(f|\mathscr{A})]\;\text{a.s.于}(X,\mathscr{A},P)
+		\sup_{a,b\in\mathcal{L}}a\operatorname{E}(f\mid\mathscr{A})+b=\varphi[\operatorname{E}(f\mid\mathscr{A})]\leqslant\operatorname{E}(\varphi\circ f\mid\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
 	\end{equation*}\par
-	当$\varphi$严格凸时，对任意的$x\in\mathbb{R}^{}\setminus\{x_0\}$有$ax+b<\varphi(x)$。若$\varphi[\operatorname{E}(f|\mathscr{A})]=\operatorname{E}(\varphi\circ f|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$，则：
+	当$f=\operatorname{E}(f|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$时，$\varphi\circ f=\varphi[\operatorname{E}(f|\mathscr{A})]\;$a.s.于$(X,\mathscr{A},P)$且$f$可视作$\mathscr{A}$可测的，根据\cref{prop:MeasurableMapping}(2)可知$\varphi\circ f$是$\mathscr{A}$可测的，由\cref{prop:ConditionalExpectation}(1)可知$\operatorname{E}(\varphi\circ f\mid\mathscr{A})=\varphi\circ f\;$a.s.于$(X,\mathscr{A},P)$，根据\cref{prop:Measure}(3)（次有限可加性）和测度的非负性可知：
 	\begin{equation*}
-		\operatorname{E}\{\varphi[\operatorname{E}(f|\mathscr{A})]\}=\operatorname{E}[\operatorname{E}(\varphi\circ f|\mathscr{A})]=\operatorname{E}(\varphi\circ f)
-	\end{equation*}\info{未完成}
+		\varphi[\operatorname{E}(f|\mathscr{A})]=\operatorname{E}(\varphi\circ f|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
+	\end{equation*}\par
+	当$\varphi$严格凸且等号成立a.s.于$(X,\mathscr{A},P)$时，由\cref{prop:ConvexFunction}(4)可知对任意$t\in\mathbb{R}$存在$c(t)\in\mathbb{R}$使得对任意$u\in\mathbb{R}$有：
+	\begin{equation*}
+		\varphi(u)\geqslant\varphi(t)+c(t)(u-t)
+	\end{equation*}
+	且上式在$u\neq t$时严格成立，于是：
+	\begin{equation*}
+		\varphi\circ f\geqslant\varphi[\operatorname{E}(f|\mathscr{A})]+c[\operatorname{E}(f|\mathscr{A})][f-\operatorname{E}(f|\mathscr{A})]
+	\end{equation*}
+	并且在；
+	\begin{equation*}
+		\{x\in X:f\ne\operatorname{E}(f|\mathscr{A})\}
+	\end{equation*}
+	上严格成立。记：
+	\begin{equation*}
+		H=\varphi\circ f-\varphi[\operatorname{E}(f|\mathscr{A})]-c[\operatorname{E}(f|\mathscr{A})][f-\operatorname{E}(f|\mathscr{A})]
+	\end{equation*}
+	则$H\geqslant 0$，且：
+	\begin{equation*}
+		H=0\quad\Longleftrightarrow\quad f=\operatorname{E}(f|\mathscr{A})
+	\end{equation*}
+	对$H$取关于$\mathscr{A}$的条件期望（和之前类似说明其存在性），由\cref{prop:MeasurableMapping}(2)、\cref{prop:ConditionalExpectation}(1)(5)、\cref{prop:Measure}(3)（次有限可加性）和测度的非负性可得：
+	\begin{align*}
+		\operatorname{E}(H|\mathscr{A})&=\operatorname{E}(\varphi\circ f|\mathscr{A})-\varphi[\operatorname{E}(f|\mathscr{A})]-c[\operatorname{E}(f|\mathscr{A})]\operatorname{E}[f-\operatorname{E}(f|\mathscr{A})\mid\mathscr{A}] \\
+		&=\operatorname{E}(\varphi\circ f|\mathscr{A})-\varphi[\operatorname{E}(f|\mathscr{A})]=0\;\text{a.s.于}(X,\mathscr{A},P)
+	\end{align*}
+	即$f=\operatorname{E}(f|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$。
 \end{proof}
 
 \subsection{Gibbs不等式}

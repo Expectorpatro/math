@@ -41,10 +41,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-7380dde18c49706d018cafaca6afd2e2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -73,6 +77,140 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
+<script>
+(() => {
+  "use strict";
+
+  const storageKey = "textbook-color-scheme";
+  const quartoStorageKey = "quarto-color-scheme";
+
+  const readStoredTheme = () => {
+    try {
+      const value = window.localStorage.getItem(storageKey);
+      return value === "dark" || value === "light" ? value : null;
+    } catch (_error) {
+      return null;
+    }
+  };
+
+  const writeStorage = (key, value) => {
+    try {
+      window.localStorage.setItem(key, value);
+    } catch (_error) {
+      // Storage may be unavailable in a locked-down browser. The current page
+      // still switches normally; only cross-page persistence is affected.
+    }
+  };
+
+  const writeTheme = (theme) => {
+    writeStorage(storageKey, theme);
+    writeStorage(
+      quartoStorageKey,
+      theme === "dark" ? "alternate" : "default"
+    );
+  };
+
+  // Quarto reads its own sentinel at the beginning of <body>. Mirror our
+  // durable preference into it while still in <head>, preventing a white flash
+  // and making the correct theme active before the page is painted.
+  const storedTheme = readStoredTheme();
+  if (storedTheme) {
+    writeTheme(storedTheme);
+  }
+
+  const currentTheme = () =>
+    document.body.classList.contains("quarto-dark") ? "dark" : "light";
+
+  const updateButton = (button) => {
+    const isDark = currentTheme() === "dark";
+    const targetName = isDark ? "浅色" : "深色";
+    const icon = button.querySelector("i");
+    icon.className = isDark
+      ? "bi bi-sun-fill"
+      : "bi bi-moon-stars-fill";
+    button.setAttribute("aria-label", `切换到${targetName}模式`);
+    button.setAttribute("title", `切换到${targetName}模式`);
+    button.setAttribute("aria-pressed", String(isDark));
+  };
+
+  const applyTheme = (theme, button) => {
+    const wantsDark = theme === "dark";
+    const isDark = currentTheme() === "dark";
+
+    if (wantsDark !== isDark && typeof window.quartoToggleColorScheme === "function") {
+      // Force Quarto's next toggle toward the requested state even if its own
+      // sentinel and the body class have somehow drifted apart.
+      writeStorage(
+        quartoStorageKey,
+        wantsDark ? "default" : "alternate"
+      );
+      window.quartoToggleColorScheme();
+    }
+
+    writeTheme(theme);
+    updateButton(button);
+  };
+
+  const mountThemeToggle = () => {
+    if (document.getElementById("textbook-theme-toggle")) {
+      return;
+    }
+
+    const button = document.createElement("button");
+    button.id = "textbook-theme-toggle";
+    button.type = "button";
+    button.className = "btn textbook-theme-toggle";
+    button.innerHTML = '<i class="bi" aria-hidden="true"></i>';
+
+    const placeThemeToggle = () => {
+      const tocTitle = document.querySelector("#TOC #toc-title");
+      const useToc = Boolean(
+        tocTitle && window.matchMedia("(min-width: 992px)").matches
+      );
+
+      document
+        .querySelectorAll(".textbook-toc-title-with-toggle")
+        .forEach((element) => {
+          element.classList.remove("textbook-toc-title-with-toggle");
+        });
+
+      if (useToc) {
+        tocTitle.classList.add("textbook-toc-title-with-toggle");
+        tocTitle.appendChild(button);
+        button.classList.add("textbook-theme-toggle-in-toc");
+        button.classList.remove("textbook-theme-toggle-floating");
+      } else {
+        document.body.appendChild(button);
+        button.classList.add("textbook-theme-toggle-floating");
+        button.classList.remove("textbook-theme-toggle-in-toc");
+      }
+    };
+
+    placeThemeToggle();
+    window.addEventListener("resize", placeThemeToggle);
+
+    const initialTheme = readStoredTheme() || currentTheme();
+    applyTheme(initialTheme, button);
+
+    button.addEventListener("click", () => {
+      const nextTheme = currentTheme() === "dark" ? "light" : "dark";
+      applyTheme(nextTheme, button);
+    });
+
+    window.addEventListener("pageshow", () => {
+      applyTheme(readStoredTheme() || currentTheme(), button);
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mountThemeToggle, {
+      once: true,
+    });
+  } else {
+    mountThemeToggle();
+  }
+})();
+</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -108,7 +246,169 @@ window.Quarto = {
 <link rel="stylesheet" href="../sidebar.css">
 </head>
 
-<body class="nav-sidebar docked quarto-light">
+<body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -133,6 +433,9 @@ window.Quarto = {
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="../">你永远不知道一个强迫症能干出什么事情</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="切换深色模式"><i class="bi"></i></a>
+</div>
     </div>
       </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
@@ -608,6 +911,7 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/page-018.html">第 6 部分 统计学</a></li><li class="breadcrumb-item"><a href="../chapters/page-019.html"><span class="chapter-title"><span class="header-section-number">第 18 章</span> 点估计理论</span></a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title"><span id="id--40c78803" class="quarto-section-identifier"><span class="chapter-title"><span class="header-section-number">第 18 章</span> 点估计理论</span></span></h1>
@@ -638,34 +942,33 @@ window.Quarto = {
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\delta(\mathbf{X})\)</span>为<span class="math inline">\(g(\theta)\)</span>的一个<a href="../chapters/page-060.html#term-UnbiasedEstimation" class="term" title="unbiased estimation">无偏估计<span class="term-english">（unbiased estimation）</span></a>。若<span class="math inline">\(g(\theta)\)</span>存在无偏估计量，则称<span class="math inline">\(g(\theta)\)</span><a href="../chapters/page-060.html#term-UEstimable" class="term" title="U-estimable">U可估<span class="term-english">（U-estimable）</span></a>。</p>
 </div>
-<div id="prop-0UnbiasedEstimator-697143bc" class="property theorem-block env-property">
-<p><strong>Property 18.0.1</strong>. 称满足<span class="math inline">\(\operatorname{E}_{\theta}[\delta(\mathbf{X})]=0\)</span>的估计量<span class="math inline">\(\delta(\mathbf{X})\)</span>为<strong>零无偏估计量</strong>，它具有如下性质：</p>
-<ol type="1">
-<li><p>设<span class="math inline">\(\delta\)</span>是待估量<span class="math inline">\(g(\theta)\in\mathbb{R}^{}\)</span>的无偏估计量，所有<span class="math inline">\(g(\theta)\)</span>的无偏估计量为<span class="math inline">\(\{\delta-f:\operatorname{E}_{\theta}[f(\mathbf{X})]=0\}\)</span>；</p></li>
-<li></li>
-</ol>
+<div id="definition-18-3" class="definition theorem-block env-definition">
+<p><strong>Definition 18.3</strong>. 称满足<span class="math inline">\(\operatorname{E}_{\theta}[\delta(\mathbf{X})]=0\)</span>的估计量<span class="math inline">\(\delta(\mathbf{X})\)</span>为<strong>零无偏估计量</strong>。</p>
+</div>
+<div id="prop-UnbiasedEstimator-a113d687" class="property theorem-block env-property">
+<p><strong>Property 18.0.1</strong>. 设<span class="math inline">\(\delta\)</span>是待估量<span class="math inline">\(g(\theta)\in\mathbb{R}^{}\)</span>的无偏估计量，所有<span class="math inline">\(g(\theta)\)</span>的无偏估计量为<span class="math inline">\(\{\delta-f:\operatorname{E}_{\theta}[f(\mathbf{X})]=0\}\)</span>。</p>
 </div>
 <div class="proof-block proof">
-<p><span class="proof-title"><em>证明</em>. </span>(1)估计量<span class="math inline">\(\delta_1\)</span>为<span class="math inline">\(g(\theta)\)</span>的无偏估计量当且仅当<span class="math inline">\(\operatorname{E}_{\theta}(\delta)=\operatorname{E}_{\theta}(\delta_1)-0\)</span>，由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得充分性。假设<span class="math inline">\(\delta_2\)</span>不可以表示为<span class="math inline">\(\delta\)</span>与一个零无偏估计<span class="math inline">\(f\)</span>的和，由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可知<span class="math inline">\(\operatorname{E}_{\theta}(\delta_2-\delta)=\operatorname{E}(\delta_2)-\operatorname{E}(\delta)\ne0\)</span>，<span class="math inline">\(\delta_2\)</span>不是<span class="math inline">\(g(\theta)\)</span>的无偏估计量，必要性得证。&nbsp;◻</p>
+<p><span class="proof-title"><em>证明</em>. </span>估计量<span class="math inline">\(\delta_1\)</span>为<span class="math inline">\(g(\theta)\)</span>的无偏估计量当且仅当<span class="math inline">\(\operatorname{E}_{\theta}(\delta)=\operatorname{E}_{\theta}(\delta_1)-0\)</span>，由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得充分性。假设无偏估计量<span class="math inline">\(\delta_2\)</span>不可以表示为<span class="math inline">\(\delta\)</span>与一个零无偏估计<span class="math inline">\(f\)</span>的和，由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可知<span class="math inline">\(\operatorname{E}_{\theta}(\delta_2-\delta)=\operatorname{E}(\delta_2)-\operatorname{E}(\delta)\ne0\)</span>，<span class="math inline">\(\delta_2\)</span>不是<span class="math inline">\(g(\theta)\)</span>的无偏估计量，必要性得证。&nbsp;◻</p>
 </div>
-<div id="definition-18-3" class="definition theorem-block env-definition">
-<p><strong>Definition 18.3</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}=(X_1, X_2, \dots, X_{n})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>是定义在<span class="math inline">\(\Theta\)</span>上的函数，<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的一个估计量。如果：</p>
+<div id="definition-18-4" class="definition theorem-block env-definition">
+<p><strong>Definition 18.4</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}=(X_1, X_2, \dots, X_{n})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>是定义在<span class="math inline">\(\Theta\)</span>上的函数，<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的一个估计量。如果：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\theta\in\Theta,\;\lim_{n\to+\infty}\operatorname{E}_{\theta}[\delta_n(\mathbf{X})]=g(\theta)
 
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\delta_n(\mathbf{X})\)</span>为<span class="math inline">\(g(\theta)\)</span>的一个<a href="../chapters/page-040.html#term-AsymptoticallyUnbiasedEstimation" class="term" title="asymptotically unbiased estimation">渐进无偏估计<span class="term-english">（asymptotically unbiased estimation）</span></a>。</p>
 </div>
-<div id="definition-18-4" class="definition theorem-block env-definition">
-<p><strong>Definition 18.4</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}=(X_1, X_2, \dots, X_{n})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>是定义在<span class="math inline">\(\Theta\)</span>上的函数，<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的一个估计量，<span class="math inline">\(\delta_1(\mathbf{X}),\delta_2(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的两个不同的无偏估计量。若：</p>
+<div id="definition-18-5" class="definition theorem-block env-definition">
+<p><strong>Definition 18.5</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}=(X_1, X_2, \dots, X_{n})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>是定义在<span class="math inline">\(\Theta\)</span>上的函数，<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的一个估计量，<span class="math inline">\(\delta_1(\mathbf{X}),\delta_2(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的两个不同的无偏估计量。若：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\theta\in\Theta,\;\operatorname{Var}_{\theta}[\delta_1(\mathbf{X})]\leqslant\operatorname{Var}_{\theta}[\delta_2(\mathbf{X})]
 
 \end{equation*}\]</span></p>
 <p>且至少存在一个<span class="math inline">\(\theta\in\Theta\)</span>使得小于号成立，则称估计量<span class="math inline">\(\delta_1(\mathbf{X})\)</span>比<span class="math inline">\(\delta_2(\mathbf{X})\)</span><strong>有效</strong>。</p>
 </div>
-<div id="definition-18-5" class="definition theorem-block env-definition">
-<p><strong>Definition 18.5</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X_n}=(X_1, X_2, \dots, X_{n})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>是定义在<span class="math inline">\(\Theta\)</span>上的函数，<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的一个估计量。若<span class="math inline">\(\delta(\mathbf{X_n})\overset{P}{\longrightarrow}g(\theta)\)</span>，则称<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的<a href="../chapters/page-062.html#term-WeaklyConsistentEstimation" class="term" title="weakly consistent estimation">弱相合估计<span class="term-english">（weakly consistent estimation）</span></a>。若<span class="math inline">\(\delta(\mathbf{X_n})\overset{\text{a.s.}}{\longrightarrow}g(\theta)\)</span>，则称<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的<a href="../chapters/page-058.html#term-StronglyConsistentEstimation" class="term" title="strongly consistent estimation">强相合估计<span class="term-english">（strongly consistent estimation）</span></a>。若：</p>
+<div id="definition-18-6" class="definition theorem-block env-definition">
+<p><strong>Definition 18.6</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X_n}=(X_1, X_2, \dots, X_{n})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>是定义在<span class="math inline">\(\Theta\)</span>上的函数，<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的一个估计量。若<span class="math inline">\(\delta(\mathbf{X_n})\overset{P}{\longrightarrow}g(\theta)\)</span>，则称<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的<a href="../chapters/page-062.html#term-WeaklyConsistentEstimation" class="term" title="weakly consistent estimation">弱相合估计<span class="term-english">（weakly consistent estimation）</span></a>。若<span class="math inline">\(\delta(\mathbf{X_n})\overset{\text{a.s.}}{\longrightarrow}g(\theta)\)</span>，则称<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的<a href="../chapters/page-058.html#term-StronglyConsistentEstimation" class="term" title="strongly consistent estimation">强相合估计<span class="term-english">（strongly consistent estimation）</span></a>。若：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}\operatorname{E}_{\theta}[|\delta(\mathbf{X_n})-g(\theta)|^r]=0
 
@@ -674,63 +977,62 @@ window.Quarto = {
 </div>
 <section id="id--9bfc2247" class="level2">
 <h2 class="anchored" data-anchor-id="id--9bfc2247"><span class="header-section-number">18.1</span> 一致最小风险无偏估计</h2>
-<div id="definition-18-6" class="definition theorem-block env-definition">
-<p><strong>Definition 18.6</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>为待估量，<span class="math inline">\(\operatorname{R}(\theta,d)\)</span>为风险函数。若估计量<span class="math inline">\(\delta(\mathbf{X})\)</span>对<span class="math inline">\(g(\theta)\)</span>的任一估计量<span class="math inline">\(\delta'(\mathbf{X})\)</span>有：</p>
+<div id="definition-18-7" class="definition theorem-block env-definition">
+<p><strong>Definition 18.7</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>为待估量，<span class="math inline">\(\operatorname{R}[g(\theta),d]\)</span>为风险函数。若估计量<span class="math inline">\(\delta(\mathbf{X})\)</span>对<span class="math inline">\(g(\theta)\)</span>的任一估计量<span class="math inline">\(\delta'(\mathbf{X})\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
-\forall\;\theta\in\Theta,\;\operatorname{R}[\theta,\delta(\mathbf{X})]\leqslant\operatorname{R}[\theta,\delta'(\mathbf{X})]
+\forall\;\theta\in\Theta,\;\operatorname{R}[g(\theta),\delta(\mathbf{X})]\leqslant\operatorname{R}[g(\theta),\delta'(\mathbf{X})]
 
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\delta(\mathbf{X})\)</span>为<span class="math inline">\(g(\theta)\)</span>的<a href="../chapters/page-060.html#term-UMRE" class="term" title="uniformly minimum-risk estimation">一致最小风险估计<span class="term-english">（uniformly minimum-risk estimation）</span></a>。</p>
 </div>
 <div id="note-18-1" class="note theorem-block env-note">
-<p><strong>note 18.1</strong>. 估计量的一致最小风险估计常不存在。</p>
-<p>设<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的一致风险估计。若风险函数<span class="math inline">\(\operatorname{R}(\theta,d)\)</span>存在关于<span class="math inline">\(d\)</span>的最小值，任取<span class="math inline">\(\theta_0\in\Theta\)</span>，我们总能可以取一个有偏好的<span class="math inline">\(\delta'(\mathbf{X})=\arg\min\operatorname{R}(\theta_0,d)\)</span>，那么<span class="math inline">\(\delta(\mathbf{X})\)</span>的风险函数在<span class="math inline">\(\theta_0\)</span>处的取值也应是最小值。由<span class="math inline">\(\theta_0\)</span>的任意性，<span class="math inline">\(\operatorname{R}[\theta,\delta(\mathbf{X})]\)</span>需要在整个参数空间<span class="math inline">\(\Theta\)</span>上都取到风险函数的最小值，这显然是不太可能存在的。若风险函数不存在关于<span class="math inline">\(d\)</span>的最小值，那么一致最小风险估计当然也有可能不存在。</p>
-<p>考虑到上述情况，我们转向研究在某一估计量族中寻找一致最小风险估计，而不是在所有估计量中去寻找。人们关注最多的便是在无偏估计量族中的情况。</p>
+<p><strong>note 18.1</strong>. 风险函数是用来衡量估计量与真实值差异的函数，估计量的一致最小风险估计常不存在。考虑到上述情况，我们转向研究在某一估计量族中寻找一致最小风险估计，而不是在所有估计量中去寻找。人们关注最多的便是在无偏估计量族中的情况。</p>
 </div>
-<div id="definition-18-7" class="definition theorem-block env-definition">
-<p><strong>Definition 18.7</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>为存在无偏估计量的待估量，<span class="math inline">\(\operatorname{R}(\theta,d)\)</span>为风险函数。若估计量<span class="math inline">\(\delta(\mathbf{X})\)</span>对<span class="math inline">\(g(\theta)\)</span>的任一无偏估计量<span class="math inline">\(\delta'(\mathbf{X})\)</span>有：</p>
+<div id="definition-18-8" class="definition theorem-block env-definition">
+<p><strong>Definition 18.8</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>为存在无偏估计量的待估量，<span class="math inline">\(\operatorname{R}[g(\theta),d]\)</span>为风险函数。若无偏估计量<span class="math inline">\(\delta(\mathbf{X})\)</span>对<span class="math inline">\(g(\theta)\)</span>的任一无偏估计量<span class="math inline">\(\delta'(\mathbf{X})\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
-\forall\;\theta\in\Theta,\;\operatorname{R}[\theta,\delta(\mathbf{X})]\leqslant\operatorname{R}[\theta,\delta'(\mathbf{X})]
+\forall\;\theta\in\Theta,\;\operatorname{R}[g(\theta),\delta(\mathbf{X})]\leqslant\operatorname{R}[g(\theta),\delta'(\mathbf{X})]
 
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\delta(\mathbf{X})\)</span>为<span class="math inline">\(g(\theta)\)</span>的<a href="../chapters/page-060.html#term-UMRUE" class="term" title="uniformly minimum-risk unbiased estimation">一致最小风险无偏估计<span class="term-english">（uniformly minimum-risk unbiased estimation）</span></a>。</p>
 </div>
 <div id="theo-Rao-Blackwell-a9425daf" class="theorem theorem-block env-theorem">
 <p><strong>Theorem 18.1</strong>. <strong>（Rao-Blackwell Theorem）</strong></p>
-<p>设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>为待估量，<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的估计量，<span class="math inline">\(T\)</span>是<span class="math inline">\(\mathscr{P}\)</span>的充分统计量，损失函数<span class="math inline">\(L(\theta,d)\)</span>是关于<span class="math inline">\(d\)</span>的凸函数。若<span class="math inline">\(\delta(\mathbf{X}),L[\theta,\delta(\mathbf{X})]\in L_1(X)\)</span>，则：</p>
+<p>设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>为待估量，<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的估计量，<span class="math inline">\(T\)</span>是<span class="math inline">\(\mathscr{P}\)</span>的充分统计量，损失函数<span class="math inline">\(L[g(\theta),d]\)</span>是关于<span class="math inline">\(d\)</span>的凸函数。若<span class="math inline">\(\delta(\mathbf{X}),L[g(\theta),\delta(\mathbf{X})]\in L_1(X)\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
 h(T)=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]
 
 \end{equation*}\]</span></p>
 <p>满足：</p>
 <p><span class="math display">\[\begin{equation*}
-\forall\;\theta\in\Theta,\;\operatorname{R}[\theta,h(T)]\leqslant\operatorname{R}[\theta,\delta(\mathbf{X})]
+\forall\;\theta\in\Theta,\;\operatorname{R}[g(\theta),h(T)]\leqslant\operatorname{R}[g(\theta),\delta(\mathbf{X})]
 
 \end{equation*}\]</span></p>
-<p>若<span class="math inline">\(L(\theta,d)\)</span>关于<span class="math inline">\(d\)</span>严格凸，则等号成立当且仅当<span class="math inline">\(\delta(\mathbf{X})=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]=h(T)\;\)</span>a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>。若<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的无偏估计量，则<span class="math inline">\(h(T)\)</span>也是<span class="math inline">\(g(\theta)\)</span>的无偏估计量。</p>
+<p>若<span class="math inline">\(L[g(\theta),d]\)</span>关于<span class="math inline">\(d\)</span>严格凸，则等号成立当且仅当<span class="math inline">\(\delta(\mathbf{X})=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]=h(T)\;\)</span>a.s.于<span class="math inline">\((X,\sigma(T),P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立。若<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的无偏估计量，则<span class="math inline">\(h(T)\)</span>也是<span class="math inline">\(g(\theta)\)</span>的无偏估计量。</p>
 </div>
 <div class="proof-block proof">
-<p><span class="proof-title"><em>证明</em>. </span>因为<span class="math inline">\(T\)</span>是充分统计量，所以<span class="math inline">\(P(\mathbf{X}|T)\)</span>与<span class="math inline">\(\theta\)</span>无关，<span class="math inline">\(h(T)=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]\)</span>也与<span class="math inline">\(\theta\)</span>无关，由条件期望的定义可得<span class="math inline">\(h(T)\)</span>可测，于是<span class="math inline">\(h(T)\)</span>是一个统计量。因为<span class="math inline">\(\delta(\mathbf{X})\in L_1(X)\)</span>，由<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(3)可知<span class="math inline">\(h(T)\in L_1(X)\)</span>。</p>
-<p>在<a href="../chapters/page-017.html#ineq-Jensen-4973d767" data-reference-type="ref+label" data-reference="ineq:Jensen">不等式 19</a>中取<span class="math inline">\(\varphi(d)=L(\theta,d)\)</span>可得：</p>
+<p><span class="proof-title"><em>证明</em>. </span>因为<span class="math inline">\(T\)</span>是充分统计量，所以对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>有<span class="math inline">\(P(\mathbf{X}|T)\)</span>与<span class="math inline">\(\theta\)</span>无关，于是<span class="math inline">\(h(T)=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]\)</span>也与<span class="math inline">\(\theta\)</span>无关，由条件期望的定义可得<span class="math inline">\(h(T)\)</span>可测，于是<span class="math inline">\(h(T)\)</span>是一个统计量。因为<span class="math inline">\(\delta(\mathbf{X})\in L_1(X)\)</span>，由<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(3)可知<span class="math inline">\(h(T)\in L_1(X)\)</span>。</p>
+<p>在<a href="../chapters/page-017.html#ineq-Jensen-4973d767" data-reference-type="ref+label" data-reference="ineq:Jensen">不等式 19</a>中取<span class="math inline">\(\varphi(d)=L[g(\theta),d]\)</span>可得：</p>
 <p><span class="math display">\[\begin{equation*}
-\forall\;P\in\mathscr{P},\;\varphi[h(T)]=\varphi\{\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]\}\leqslant\operatorname{E}_{\theta}\{\varphi[\delta(\mathbf{X})]|T\}\;\text{a.s.于}P
+\forall\;P\in\mathscr{P},\;\varphi[h(T)]=\varphi\{\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]\}\leqslant\operatorname{E}_{\theta}\{\varphi[\delta(\mathbf{X})]|T\}\;\text{a.s.于}(X,\sigma(T),P)
 
 \end{equation*}\]</span></p>
-<p>当<span class="math inline">\(L(\theta,d)\)</span>关于<span class="math inline">\(d\)</span>严格凸时等号成立a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>当且仅当<span class="math inline">\(\delta(\mathbf{X})=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]=h(T)\;\)</span>a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>。根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)，对上式两边同时求期望可得：</p>
+<p>当<span class="math inline">\(L[g(\theta),d]\)</span>关于<span class="math inline">\(d\)</span>严格凸时等号成立a.s.于<span class="math inline">\((X,\sigma(T),P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立当且仅当<span class="math inline">\(\delta(\mathbf{X})=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]=h(T)\;\)</span>a.s.于<span class="math inline">\((X,\sigma(T),P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立。根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(7)和<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(3)，对上式两边同时求期望可得：</p>
+<p><span class="math display">\[\begin{align*}
+&amp;R[g(\theta),h(T)]=\operatorname{E}_{\theta}\{L[g(\theta),h(T)]\}\leqslant\operatorname{E}_{\theta}\Big\{\operatorname{E}_{\theta}\{\varphi[\delta(\mathbf{X})]|T\}\Big\} \\
+=&amp;\operatorname{E}_{\theta}\{\varphi[\delta(\mathbf{X})]\}=\operatorname{E}_{\theta}\{L[g(\theta),\delta(\mathbf{X})]\}=\operatorname{R}[g(\theta),\delta(\mathbf{X})]
+
+\end{align*}\]</span></p>
+<p>若<span class="math inline">\(L[g(\theta),d]\)</span>关于<span class="math inline">\(d\)</span>严格凸，由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(8)可知当<span class="math inline">\(\delta(\mathbf{X})=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]=h(T)\;\)</span>a.s.于<span class="math inline">\((X,\sigma(T),P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立时上式等号成立。当上式等号成立时，因为<span class="math inline">\(L[g(\theta),\delta(\mathbf{X})]\in L_1\)</span>，由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
 <p><span class="math display">\[\begin{equation*}
-\operatorname{E}_{\theta}\{L[\theta,h(T)]\}\leqslant\operatorname{E}_{\theta}\Big\{\operatorname{E}_{\theta}\{\varphi[\delta(\mathbf{X})]|T\}\Big\}=\operatorname{E}_{\theta}\{\varphi[\delta(\mathbf{X})]\}=\operatorname{E}_{\theta}\{L[\theta,\delta(\mathbf{X})]\}=\operatorname{R}[\theta,\delta(\mathbf{X})]
+\operatorname{E}_{\theta}\{L[g(\theta),h(T)]\}-\operatorname{E}_{\theta}\Big\{\operatorname{E}_{\theta}\{\varphi[\delta(\mathbf{X})]|T\}\Big\}=\operatorname{E}_{\theta}\Big\{\varphi[h(T)]-\operatorname{E}_{\theta}\{\varphi[\delta(\mathbf{X})]|T\}\Big\}=0
 
 \end{equation*}\]</span></p>
-<p>若<span class="math inline">\(L(\theta,d)\)</span>关于<span class="math inline">\(d\)</span>严格凸，由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(8)可知当<span class="math inline">\(\delta(\mathbf{X})=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]=h(T)\;\)</span>a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>时上式等号成立。当上式等号成立时，因为<span class="math inline">\(L[\theta,\delta(\mathbf{X})]\in L_1\)</span>，由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
-<p><span class="math display">\[\begin{equation*}
-\operatorname{E}_{\theta}\{L[\theta,h(T)]\}-\operatorname{E}_{\theta}\Big\{\operatorname{E}_{\theta}\{\varphi[\delta(\mathbf{X})]|T\}\Big\}=\operatorname{E}_{\theta}\Big\{\varphi[h(T)]-\operatorname{E}_{\theta}\{\varphi[\delta(\mathbf{X})]|T\}\Big\}=0
-
-\end{equation*}\]</span></p>
-<p>而<span class="math inline">\(\varphi[h(T)]\leqslant\operatorname{E}_{\theta}\{\varphi[\delta(\mathbf{X})]|T\}\;\)</span>a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>，根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(9)可知<span class="math inline">\(\varphi[h(T)]=\operatorname{E}_{\theta}\{\varphi[\delta(\mathbf{X})]|T\}\;\)</span>a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>，即<span class="math inline">\(\delta(\mathbf{X})=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]=h(T)\;\)</span>a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>。于是对任意的<span class="math inline">\(\theta\in\Theta,\;\operatorname{R}[\theta,h(T)]=\operatorname{R}[\theta,\delta(\mathbf{X})]\)</span>当且仅当<span class="math inline">\(\delta(\mathbf{X})=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]=h(T)\;\)</span>a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>。</p>
+<p>而<span class="math inline">\(\varphi[h(T)]\leqslant\operatorname{E}_{\theta}\{\varphi[\delta(\mathbf{X})]|T\}\;\)</span>a.s.于<span class="math inline">\((X,\sigma(T),P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立，根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(9)可知<span class="math inline">\(\varphi[h(T)]=\operatorname{E}_{\theta}\{\varphi[\delta(\mathbf{X})]|T\}\;\)</span>a.s.于<span class="math inline">\((X,\sigma(T),P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立，由<a href="../chapters/page-017.html#ineq-Jensen-4973d767" data-reference-type="ref+label" data-reference="ineq:Jensen">不等式 19</a>可知<span class="math inline">\(\delta(\mathbf{X})=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]=h(T)\;\)</span>a.s.于任意的<span class="math inline">\((X,\sigma(T),P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立。于是对任意的<span class="math inline">\(\theta\in\Theta,\;\operatorname{R}[g(\theta),h(T)]=\operatorname{R}[g(\theta),\delta(\mathbf{X})]\)</span>当且仅当<span class="math inline">\(\delta(\mathbf{X})=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]=h(T)\;\)</span>a.s.于<span class="math inline">\((X,\sigma(T),P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立。</p>
 <p>当<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的无偏估计量时，由<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(3)可知<span class="math inline">\(h(T)\)</span>也是<span class="math inline">\(g(\theta)\)</span>的无偏估计量。&nbsp;◻</p>
 </div>
 <div id="cor-Rao-Blackwell-6e9b7667" class="corollary theorem-block env-corollary theorem">
-<p><span class="theorem-title"><strong>推论 19.1</strong></span> <strong>Corollary 18.1</strong>. 若损失函数<span class="math inline">\(L(\theta,d)\)</span>是关于<span class="math inline">\(d\)</span>的严格凸函数，则UMRE是充分统计量的函数a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>。</p>
+<p><span class="theorem-title"><strong>推论 19.1</strong></span> <strong>Corollary 18.1</strong>. 若损失函数<span class="math inline">\(L[g(\theta),d]\)</span>是关于<span class="math inline">\(d\)</span>的严格凸函数，则UMRUE是充分统计量<span class="math inline">\(T\)</span>的函数a.s.于<span class="math inline">\((X,\sigma(T),P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立。</p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>设<span class="math inline">\(\delta(\mathbf{X})\)</span>是一个UMRE，由<a href="#theo-Rao-Blackwell-a9425daf" data-reference-type="ref+label" data-reference="theo:Rao-Blackwell">定理 18.1</a>可知取充分统计量<span class="math inline">\(T\)</span>则有：</p>
@@ -738,10 +1040,10 @@ h(T)=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]
 \operatorname{R}\{\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]\}=\operatorname{R}[\delta(\mathbf{X})]
 
 \end{equation*}\]</span></p>
-<p>根据取等条件可知<span class="math inline">\(\delta(\mathbf{X})=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]=h(T)\;\)</span>a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>。&nbsp;◻</p>
+<p>根据取等条件可知<span class="math inline">\(\delta(\mathbf{X})=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]=h(T)\;\)</span>a.s.于<span class="math inline">\((X,\sigma(T),P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立，由Doob-Dynkin引理<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>即可得出结论。&nbsp;◻</p>
 </div>
-<div id="definition-18-8" class="definition theorem-block env-definition">
-<p><strong>Definition 18.8</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>为待估量，<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的估计量，<span class="math inline">\(T\)</span>是<span class="math inline">\(\mathscr{P}\)</span>的充分统计量，称：</p>
+<div id="definition-18-9" class="definition theorem-block env-definition">
+<p><strong>Definition 18.9</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>为待估量，<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的估计量，<span class="math inline">\(T\)</span>是<span class="math inline">\(\mathscr{P}\)</span>的充分统计量，称：</p>
 <p><span class="math display">\[\begin{equation*}
 h(T)=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]
 
@@ -750,7 +1052,7 @@ h(T)=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]
 </div>
 <div id="theo-Lehmann-Scheffe-549f34f6" class="theorem theorem-block env-theorem">
 <p><strong>Theorem 18.2</strong>. <strong>（Lehmann-Scheffe Theorem）</strong></p>
-<p>设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\in\mathbb{R}^{}\)</span>为U可估的待估量，损失函数<span class="math inline">\(L(\theta,d)\)</span>是关于<span class="math inline">\(d\)</span>的凸函数。若<span class="math inline">\(\mathscr{P}\)</span>存在完全充分统计量<span class="math inline">\(S(\mathbf{X})\)</span>，则<span class="math inline">\(g(\theta)\)</span>的UMRUE存在，任一<span class="math inline">\(g(\theta)\)</span>的无偏估计量关于<span class="math inline">\(S(\mathbf{X})\)</span>的Rao-Blackwell改进都是UMRUE。若<span class="math inline">\(L(\theta,d)\)</span>关于<span class="math inline">\(d\)</span>严格凸，则<span class="math inline">\(g(\theta)\)</span>的UMRUE在a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>的意义下唯一。</p>
+<p>设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\in\mathbb{R}^{}\)</span>为U可估的待估量，损失函数<span class="math inline">\(L[g(\theta),d]\)</span>是关于<span class="math inline">\(d\)</span>的凸函数。若<span class="math inline">\(\mathscr{P}\)</span>存在完全充分统计量<span class="math inline">\(S(\mathbf{X})\)</span>，则<span class="math inline">\(g(\theta)\)</span>的UMRUE存在，任一<span class="math inline">\(g(\theta)\)</span>的无偏估计量关于<span class="math inline">\(S(\mathbf{X})\)</span>的Rao-Blackwell改进都是UMRUE。若<span class="math inline">\(L[g(\theta),d]\)</span>关于<span class="math inline">\(d\)</span>严格凸，则<span class="math inline">\(g(\theta)\)</span>的UMRUE在a.s.于<span class="math inline">\((X,\mathscr{F},P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立的意义下唯一。</p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>任取<span class="math inline">\(g(\theta)\)</span>的一个无偏估计量<span class="math inline">\(\delta(\mathbf{X})\)</span>，由<a href="#theo-Rao-Blackwell-a9425daf" data-reference-type="ref+label" data-reference="theo:Rao-Blackwell">定理 18.1</a>可知<span class="math inline">\(T_1=\operatorname{E}_{\theta}[\delta(\mathbf{X})|S(\mathbf{X})]\)</span>仍是<span class="math inline">\(g(\theta)\)</span>的一个无偏估计量且风险函数值比<span class="math inline">\(\delta(\mathbf{X})\)</span>更小。任取<span class="math inline">\(g(\theta)\)</span>的另一无偏估计量<span class="math inline">\(\delta'(\mathbf{X})\)</span>，同理可知<span class="math inline">\(T_2=\operatorname{E}_{\theta}[\delta'(\mathbf{X})|S(\mathbf{X})]\)</span>仍是<span class="math inline">\(g(\theta)\)</span>的一个无偏估计量且风险函数值比<span class="math inline">\(\delta'(\mathbf{X})\)</span>更小。因为<span class="math inline">\(g(\theta)\in\mathbb{R}^{}\)</span>，所以<span class="math inline">\(\delta(\mathbf{X}),\delta'(\mathbf{X})\in L_1(X)\)</span>，于是对任意的<span class="math inline">\(\theta\in\Theta\)</span>，由<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(5)(3)、<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
@@ -759,16 +1061,16 @@ h(T)=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]
 =&amp;\operatorname{E}_{\theta}[\delta(\mathbf{X})-\delta'(\mathbf{X})]=\operatorname{E}_{\theta}[\delta(\mathbf{X})]-\operatorname{E}_{\theta}[\delta'(\mathbf{X})]=g(\theta)-g(\theta)=0
 
 \end{align*}\]</span></p>
-<p>根据条件期望的定义可知<span class="math inline">\(T_1-T_2\)</span>是关于<span class="math inline">\(S(\mathbf{X})\)</span>的可测函数，由完全统计量的定义即可得到<span class="math inline">\(T_1=T_2\;\)</span>a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>，<span class="math inline">\(L(\theta,T_1)=L(\theta,T_2)\;\)</span>a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>，于是根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(8)和<a href="#theo-Rao-Blackwell-a9425daf" data-reference-type="ref+label" data-reference="theo:Rao-Blackwell">定理 18.1</a>可得：</p>
+<p>根据Doob-Dynkin引理和<a href="../chapters/page-012.html#prop-MeasurableFunction-4dbcbd65" data-reference-type="ref+label" data-reference="prop:MeasurableFunction">性质 11.3.3</a>(5.a)可知<span class="math inline">\(T_1-T_2\)</span>是关于<span class="math inline">\(S(\mathbf{X})\)</span>的可测函数，由完全统计量的定义即可得到<span class="math inline">\(T_1=T_2\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{F},P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立，<span class="math inline">\(L(\theta,T_1)=L(\theta,T_2)\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{F},P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立，于是根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(8)和<a href="#theo-Rao-Blackwell-a9425daf" data-reference-type="ref+label" data-reference="theo:Rao-Blackwell">定理 18.1</a>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{R}(\delta,T_1)=\operatorname{R}(\delta,T_2)\leqslant\operatorname{R}[\delta,\delta'(\mathbf{X})]
 
 \end{equation*}\]</span></p>
 <p>由<span class="math inline">\(\delta'(\mathbf{X})\)</span>的任意性，<span class="math inline">\(T_1\)</span>是<span class="math inline">\(g(\theta)\)</span>的UMRUE，所以<span class="math inline">\(g(\theta)\)</span>的UMRUE存在。由<span class="math inline">\(\delta(\mathbf{X})\)</span>的任意性，任一<span class="math inline">\(g(\theta)\)</span>的无偏估计量关于<span class="math inline">\(S(\mathbf{X})\)</span>的Rao-Blackwell改进都是UMRUE。</p>
-<p>对于<span class="math inline">\(g(\theta)\)</span>的任意一个UMRUE<span class="math inline">\(\;\delta_1(\mathbf{X})\)</span>，它的Rao-Blackwell改进的风险函数值一定等于原本的风险函数值，若<span class="math inline">\(L(\theta,d)\)</span>关于<span class="math inline">\(d\)</span>严格凸，由<a href="#theo-Rao-Blackwell-a9425daf" data-reference-type="ref+label" data-reference="theo:Rao-Blackwell">定理 18.1</a>中的取等条件可知<span class="math inline">\(\delta_1(\mathbf{X})=h[S(\mathbf{X})]\;\)</span>a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>，修改其在一个零测集上的数值使得得到的<span class="math inline">\(\delta_1'(\mathbf{X})=h[S(\mathbf{X})]\)</span>，由完备性的定义，仿照存在性的证明可得所有经过修改后的UMRUE相等a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>，由<a href="../chapters/page-012.html#prop-Measure-9acfc4ac" data-reference-type="ref+label" data-reference="prop:Measure">性质 11.2.1</a>(3)（次有限可加性）可知原本的UMRUE相等a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>，即UMRUE在a.s.于任意的<span class="math inline">\(P\in\mathscr{P}\)</span>的意义下唯一。&nbsp;◻</p>
+<p>对于<span class="math inline">\(g(\theta)\)</span>的任意一个UMRUE<span class="math inline">\(\;\delta_1(\mathbf{X})\)</span>，它的Rao-Blackwell改进的风险函数值一定等于原本的风险函数值，若<span class="math inline">\(L[g(\theta),d]\)</span>关于<span class="math inline">\(d\)</span>严格凸，由<a href="#theo-Rao-Blackwell-a9425daf" data-reference-type="ref+label" data-reference="theo:Rao-Blackwell">定理 18.1</a>中的取等条件可知<span class="math inline">\(\delta_1(\mathbf{X})=h[S(\mathbf{X})]\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{F},P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立，修改其在一个零测集上的数值使得得到的<span class="math inline">\(\delta_1'(\mathbf{X})=h[S(\mathbf{X})]\)</span>，由完备性的定义，仿照存在性的证明可得所有经过修改后的UMRUE相等a.s.于<span class="math inline">\((X,\mathscr{F},P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立，由<a href="../chapters/page-012.html#prop-SigmaField-4168a9ce" data-reference-type="ref+label" data-reference="prop:SigmaField">性质 11.1.6</a>(2)和<a href="../chapters/page-012.html#prop-Measure-9acfc4ac" data-reference-type="ref+label" data-reference="prop:Measure">性质 11.2.1</a>(3)（次有限可加性）可知原本的UMRUE相等a.s.于<span class="math inline">\((X,\mathscr{F},P)\)</span>对任意的<span class="math inline">\(P\in\mathscr{P}\)</span>成立，唯一性成立。&nbsp;◻</p>
 </div>
 <div id="note-18-2" class="note theorem-block env-note">
-<p><strong>note 18.2</strong>. 上述定理给了寻找UMRUE的两个方法：如果损失函数<span class="math inline">\(L(\theta,d)\)</span>是关于<span class="math inline">\(d\)</span>的凸函数，<span class="math inline">\(\mathscr{P}\)</span>存在完全充分统计量<span class="math inline">\(S(\mathbf{X})\)</span>，则：</p>
+<p><strong>note 18.2</strong>. 上述定理给了寻找UMRUE的两个方法：如果损失函数<span class="math inline">\(L[g(\theta),d]\)</span>是关于<span class="math inline">\(d\)</span>的凸函数，<span class="math inline">\(\mathscr{P}\)</span>存在完全充分统计量<span class="math inline">\(S(\mathbf{X})\)</span>，则：</p>
 <ol type="1">
 <li><p>方程组：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -780,76 +1082,21 @@ h(T)=\operatorname{E}_{\theta}[\delta(\mathbf{X})|T]
 </ol>
 <p>证明也很简单：对于方法一而言，满足条件的<span class="math inline">\(\delta[S(\mathbf{X})]\)</span>是<span class="math inline">\(g(\theta)\)</span>的一个无偏估计，且其关于<span class="math inline">\(S(\mathbf{X})\)</span>的Rao-Blackwell改进就是自身；方法二是上述定理的直接结果。</p>
 </div>
-<div id="theorem-18-3" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 18.3</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\in\mathbb{R}^{}\)</span>为U可估的待估量，损失函数<span class="math inline">\(L(\theta,d)\)</span>是关于<span class="math inline">\(d\)</span>的有界函数，且对于任意的<span class="math inline">\(\theta\)</span>有：</p>
-<p><span class="math display">\[\begin{equation*}
-L[\theta,g(\theta)]=\underset{d}{\arg\min}L(\theta,d)=a
-
-\end{equation*}\]</span></p>
-<p>那么对任意的<span class="math inline">\(\theta_0\in\Theta\)</span>，存在一列无偏估计<span class="math inline">\(\{\delta_n\}\)</span>满足：</p>
-<p><span class="math display">\[\begin{equation*}
-\lim_{n\to+\infty}\operatorname{R}(\theta_0,\delta_n)=a
-
-\end{equation*}\]</span></p>
-</div>
-<div class="proof-block proof">
-<p><span class="proof-title"><em>证明</em>. </span>设<span class="math inline">\(|L(\theta,d)|\leqslant M\)</span>。因为<span class="math inline">\(g(\theta)\)</span>是U可估的，所以存在<span class="math inline">\(g(\theta)\)</span>的无偏估计量<span class="math inline">\(\delta(\mathbf{X})\)</span>，对于任意满足条件：</p>
-<p><span class="math display">\[\begin{equation*}
-\lim_{n\to+\infty}\alpha_n=0,\;\alpha_n\in(0,1),\;\forall\;n\in\mathbb{N}^+
-
-\end{equation*}\]</span></p>
-<p>的数列<span class="math inline">\(\{\alpha_n\}\)</span>，令：</p>
-<p><span class="math display">\[\begin{equation*}
-\delta_n'(\mathbf{X})=
-\begin{cases}
-g(\theta_0),\;&amp;\text{概率为}1-\alpha_n \\
-\dfrac{1}{\alpha_n}[\delta(\mathbf{X})-g(\theta_0)]+g(\theta_0),\;&amp;\text{概率为}\alpha_n
-\end{cases}
-
-\end{equation*}\]</span></p>
-<p>由<a href="../chapters/page-004.html#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(8.b)(8.c)可得：</p>
-<p><span class="math display">\[\begin{gather*}
-\operatorname{E}_{\theta}[\delta_n'(\mathbf{X})]=(1-\alpha_n)g(\theta_0)+\alpha_n\frac{1}{\alpha_n}[\delta(\mathbf{X})-g(\theta_0)]+\alpha_ng(\theta_0)=g(\theta_0) \\
-\operatorname{R}[\theta_0,\delta_n'(\mathbf{X})]=(1-\alpha_n)L[\theta_0,g(\theta_0)]+\alpha_nL[\theta_0,\delta_n'(\mathbf{X})]\leqslant(1-\alpha_n)a+\alpha_nM\to a
-
-\end{gather*}\]</span></p>
-<p>所以<span class="math inline">\(\{\delta_n'\}\)</span>是一列满足条件的无偏估计量。&nbsp;◻</p>
-</div>
-<div id="note-18-3" class="note theorem-block env-note">
-<p><strong>note 18.3</strong>. 这个定理告诉我们，当损失函数有界时（无论是否是凸函数），我们可以构造出任意高精度的无偏估计量，所以此时一般是不存在UMRUE的（除非它在每一个参数上都能取到损失函数的最小值），甚至局部的最小风险无偏估计也不存在。</p>
-<p>请注意，它也提醒了一个在构造估计量时可能存在的问题：当<span class="math inline">\(\alpha_n\to0\)</span>时，上述定理构造的<span class="math inline">\(\delta_n'(\mathbf{X})\)</span>在第二类情况中会使得估计的偏差趋向于正无穷。虽然估计量具有无偏性并且风险也很小，但仍可能给出一个离真实值非常非常远的结果，因为它可以以小概率在期望上来弥补估计量的偏差与风险，也就是说损失函数有界的情况下期望无偏性无法很好的约束自身行为，对大错的惩罚力度会因为小的概率而降低。这个时候讨论中位数无偏性会好一点。</p>
-</div>
 <section id="id--72b80979" class="level3">
 <h3 class="anchored" data-anchor-id="id--72b80979"><span class="header-section-number">18.1.1</span> 一致最小方差无偏估计</h3>
-<div id="note-18-4" class="note theorem-block env-note">
-<p><strong>note 18.4</strong>. 如果一个统计量不能达到渐近无偏那么它一般是不可接受的，也就是说估计量在真值<span class="math inline">\(g(\theta)\)</span>附近的行为尤其的重要，于是我们想到了Tylor展开。如果损失函数可以进行Taylor展开，可以得到：</p>
+<div id="definition-18-10" class="definition theorem-block env-definition">
+<p><strong>Definition 18.10</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>为存在无偏估计量的待估量。由<a href="../chapters/page-013.html#prop-MSE-f485b1be" data-reference-type="ref+label" data-reference="prop:MSE">性质 12.3.6</a>(1)，若估计量<span class="math inline">\(\delta(\mathbf{X})\)</span>对<span class="math inline">\(g(\theta)\)</span>的任一无偏估计量<span class="math inline">\(\delta'(\mathbf{X})\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
-L(\theta,d)=a_0(\theta)+a_1(\theta)[d-g(\theta)]+a_2(\theta)[d-g(\theta)]^2+R
-
-\end{equation*}\]</span></p>
-<p><span class="math inline">\(a_0(\theta)\)</span>无需考虑，它与估计量无关；当估计量足够接近真值时，余项<span class="math inline">\(R\)</span>也无需考虑；我们往往要求<span class="math inline">\(L(\theta,d)\)</span>恒正或恒负，否则求损失进行期望计算的时候正负可能被抵消，风险的大小就没什么意义了，在这种情况下，<span class="math inline">\(a_1(\theta)\)</span>可以认为是<span class="math inline">\(0\)</span>。综上，整个<span class="math inline">\(L(\theta,d)\)</span>最重要的部分便是<span class="math inline">\([d-g(\theta)]^2\)</span>了，也就是说对于风险而言最重要的是<span class="math inline">\(\operatorname{E}[d-g(\theta)]^2\)</span>，这就是我们讨论方差的原因。</p>
-</div>
-<div id="definition-18-9" class="definition theorem-block env-definition">
-<p><strong>Definition 18.9</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>为存在无偏估计量的待估量。由<a href="../chapters/page-013.html#prop-MSE-f485b1be" data-reference-type="ref+label" data-reference="prop:MSE">性质 12.3.6</a>，若估计量<span class="math inline">\(\delta(\mathbf{X})\)</span>对<span class="math inline">\(g(\theta)\)</span>的任一无偏估计量<span class="math inline">\(\delta'(\mathbf{X})\)</span>有：</p>
-<p><span class="math display">\[\begin{equation*}
-\operatorname{MSE}_{\theta}[\delta(\mathbf{X})]=\operatorname{Var}_{\theta}[\delta(\mathbf{X})]\leqslant\operatorname{MSE}_{\theta}[\delta'(\mathbf{X})]=\operatorname{Var}_{\theta}[\delta'(\mathbf{X})],\;\forall\;\theta\in\Theta
+\forall\;\theta\in\Theta,\;\operatorname{MSE}_{\theta}[\delta(\mathbf{X})]=\operatorname{Var}_{\theta}[\delta(\mathbf{X})]\leqslant\operatorname{MSE}_{\theta}[\delta'(\mathbf{X})]=\operatorname{Var}_{\theta}[\delta'(\mathbf{X})]
 
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\delta(\mathbf{X})\)</span>为<span class="math inline">\(g(\theta)\)</span>的<a href="../chapters/page-060.html#term-UMVUE" class="term" title="uniformly minimum-variance unbiased estimation">一致最小方差无偏估计<span class="term-english">（uniformly minimum-variance unbiased estimation）</span></a>。</p>
 </div>
-<div id="note-18-5" class="note theorem-block env-note">
-<p><strong>note 18.5</strong>. 由<a href="../chapters/page-015.html#prop-ConvexFunction-60c4bc79" data-reference-type="ref+label" data-reference="prop:ConvexFunction">性质 14.0.8</a>(1)可知二次函数是严格凸函数，所以前述Rao-Blackwell Theorem和Lehmann-Scheffe Theorem在风险函数为方差时都成立。</p>
-</div>
-<div id="note-18-6" class="note theorem-block env-note">
-<p><strong>note 18.6</strong>. 设<span class="math inline">\(\delta\in L_2(X)\)</span>是<span class="math inline">\(g(\theta)\)</span>的一个无偏估计量，<span class="math inline">\(f\)</span>是零无偏估计量，根据<a href="#prop-0UnbiasedEstimator-697143bc" data-reference-type="ref+label" data-reference="prop:0UnbiasedEstimator">性质 18.0.1</a>(1)和<a href="../chapters/page-013.html#prop-Variance-c0d6c124" data-reference-type="ref+label" data-reference="prop:Variance">性质 12.3.5</a>(1)可得：</p>
-<p><span class="math display">\[\begin{equation*}
-\operatorname{Var}_{\theta}(\delta)=\operatorname{Var}_{\theta}(\delta-f)=\operatorname{E}_{\theta}[(\delta-f)^2]-[g(\theta)]^2
-
-\end{equation*}\]</span></p>
-<p>为了得到UMVUE，我们就要对任意的<span class="math inline">\(f\)</span>最小化<span class="math inline">\(\operatorname{E}_{\theta}[(\delta-f)^2]\)</span>，这可以理解为寻找<span class="math inline">\(\delta\)</span>在所有零无偏估计张成的子空间上的投影<span class="math inline">\(f^{\star}\)</span>。</p>
+<div id="note-18-3" class="note theorem-block env-note">
+<p><strong>note 18.3</strong>. 由定义可知二次函数是严格凸函数，所以前述Rao-Blackwell Theorem和Lehmann-Scheffe Theorem在风险函数为方差时都成立。</p>
 </div>
 <div id="theo-UMVUE0UnbiasedEstimation-18be68d0" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 18.4</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>为U可估的待估量，<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的一个无偏估计量，对任意的<span class="math inline">\(\theta\in\Theta\)</span>有<span class="math inline">\(\operatorname{Var}_{\theta}[\delta(\mathbf{X})]&lt;+\infty\)</span>。令：</p>
+<p><strong>Theorem 18.3</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>为U可估的待估量，<span class="math inline">\(\delta(\mathbf{X})\)</span>是<span class="math inline">\(g(\theta)\)</span>的一个无偏估计量，对任意的<span class="math inline">\(\theta\in\Theta\)</span>有<span class="math inline">\(\operatorname{Var}_{\theta}[\delta(\mathbf{X})]&lt;+\infty\)</span>。令：</p>
 <p><span class="math display">\[\begin{equation*}
 A=\{f(\mathbf{X}):\forall\;\theta\in\Theta,\;\operatorname{E}_{\theta}[f(\mathbf{X})]=0\}
 
@@ -867,7 +1114,7 @@ A=\{f(\mathbf{X}):\forall\;\theta\in\Theta,\;\operatorname{E}_{\theta}[f(\mathbf
 =&amp;\operatorname{E}_{\theta}[\delta(\mathbf{X})\cdot f(\mathbf{X})]-g(\theta)\operatorname{E}_{\theta}[f(\mathbf{X})]=\operatorname{E}_{\theta}[\delta(\mathbf{X})\cdot f(\mathbf{X})]
 
 \end{align*}\]</span></p>
-<p><strong>(1)充分性：</strong>由<a href="#prop-0UnbiasedEstimator-697143bc" data-reference-type="ref+label" data-reference="prop:0UnbiasedEstimator">性质 18.0.1</a>(1)可知对任意<span class="math inline">\(g(\theta)\)</span>的无偏估计<span class="math inline">\(\delta'(\mathbf{X})\)</span>，都存在一个<span class="math inline">\(f(\mathbf{X})\in A\)</span>使得<span class="math inline">\(\delta'(\mathbf{X})=\delta(\mathbf{X})+f(\mathbf{X})\)</span>。由<a href="../chapters/page-013.html#prop-Variance-c0d6c124" data-reference-type="ref+label" data-reference="prop:Variance">性质 12.3.5</a>(3)和<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(2)可得：</p>
+<p><strong>(1)充分性：</strong>由<a href="#prop-UnbiasedEstimator-a113d687" data-reference-type="ref+label" data-reference="prop:UnbiasedEstimator">性质 18.0.1</a>可知对任意<span class="math inline">\(g(\theta)\)</span>的无偏估计<span class="math inline">\(\delta'(\mathbf{X})\)</span>，都存在一个<span class="math inline">\(f(\mathbf{X})\in A\)</span>使得<span class="math inline">\(\delta'(\mathbf{X})=\delta(\mathbf{X})+f(\mathbf{X})\)</span>。由<a href="../chapters/page-013.html#prop-Variance-c0d6c124" data-reference-type="ref+label" data-reference="prop:Variance">性质 12.3.5</a>(3)和<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(2)可得：</p>
 <p><span class="math display">\[\begin{align*}
 \operatorname{Var}_{\theta}[\delta'(\mathbf{X})]&amp;=\operatorname{Var}_{\theta}[\delta(\mathbf{X})+f(\mathbf{X})]=\operatorname{Var}_{\theta}[\delta(\mathbf{X})]+\operatorname{Var}_{\theta}[f(\mathbf{X})]+2\operatorname{Cov}_{\theta}[\delta(\mathbf{X}),f(\mathbf{X})] \\
 &amp;=\operatorname{Var}_{\theta}[\delta(\mathbf{X})]+\operatorname{Var}_{\theta}[f(\mathbf{X})]\geqslant\operatorname{Var}_{\theta}[\delta(\mathbf{X})]
@@ -904,8 +1151,8 @@ A=\{f(T):\forall\;\theta\in\Theta,\;\operatorname{E}_{\theta}[f(T)]=0\}
 
 \end{equation*}\]</span></p>
 </div>
-<div id="note-18-7" class="note theorem-block env-note">
-<p><strong>note 18.7</strong>. 其实这个定理也可以推广到凸函数的情况，但是要涉及到一些优化的知识，我对优化了解的太少了，看不懂。</p>
+<div id="note-18-4" class="note theorem-block env-note">
+<p><strong>note 18.4</strong>. 其实这个定理也可以推广到凸函数的情况，但是要涉及到一些优化的知识，我对优化了解的太少了，看不懂。</p>
 </div>
 <section id="id--3e948520" class="level4">
 <h4 class="anchored" data-anchor-id="id--3e948520"><span class="header-section-number">18.1.1.1</span> 信息不等式</h4>
@@ -925,11 +1172,11 @@ A=\{f(\mathbf{X}):\forall\;\theta\in\Theta,\;\operatorname{E}_{\theta}[f(\mathbf
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span><span class="math inline">\(\operatorname{Cov}(\delta,\varphi)\)</span>依赖于<span class="math inline">\(\delta\)</span>的方式是仅依赖于<span class="math inline">\(g(\theta)\)</span>当且仅当对<span class="math inline">\(g(\theta)\)</span>的任意两个无偏估计量<span class="math inline">\(\delta_1,\delta_2\)</span>有<span class="math inline">\(\operatorname{Cov}(\delta_1,\varphi)=\operatorname{Cov}(\delta_2,\varphi)\)</span>，由<a href="../chapters/page-013.html#prop-CovMat-3a62d09d" data-reference-type="ref+label" data-reference="prop:CovMat">性质 12.3.4</a>(3)(5)可知上式成立当且仅当<span class="math inline">\(\operatorname{Cov}(\delta_1-\delta_2,\varphi)=0\)</span>，由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可知<span class="math inline">\(\operatorname{E}(\delta_1-\delta_2)=\operatorname{E}(\delta_1)-\operatorname{E}(\delta_2)=0\)</span>，充分性成立。必要性使用反证法即可。&nbsp;◻</p>
 </div>
-<div id="note-18-8" class="note theorem-block env-note">
-<p><strong>note 18.8</strong>. 由上述引理，我们想到可以构造<span class="math inline">\(\varphi\)</span>来让<span class="math inline">\(\operatorname{Cov}_{\theta}(f,\varphi)=0\)</span>，一个很容易想到的情况是：<span class="math inline">\(\varphi\)</span>是一个分数，分母为<span class="math inline">\(p_{\theta}(x)\)</span>（用来抵消期望带来的<span class="math inline">\(p_{\theta}(x)\)</span>），分子也是概率函数（利用零无偏估计期望为<span class="math inline">\(0\)</span>来得到协方差为<span class="math inline">\(0\)</span>）。</p>
+<div id="note-18-5" class="note theorem-block env-note">
+<p><strong>note 18.5</strong>. 由上述引理，我们想到可以构造<span class="math inline">\(\varphi\)</span>来让<span class="math inline">\(\operatorname{Cov}_{\theta}(f,\varphi)=0\)</span>，一个很容易想到的情况是：<span class="math inline">\(\varphi\)</span>是一个分数，分母为<span class="math inline">\(p_{\theta}(x)\)</span>（用来抵消期望带来的<span class="math inline">\(p_{\theta}(x)\)</span>），分子也是概率函数（利用零无偏估计期望为<span class="math inline">\(0\)</span>来得到协方差为<span class="math inline">\(0\)</span>）。</p>
 </div>
 <div id="theo-Hammersley-Chapman-RobbinsInequality-d52d20fb" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 18.5</strong>. <strong>（Hammersley-Chapman-Robbins Inequality）</strong></p>
+<p><strong>Theorem 18.4</strong>. <strong>（Hammersley-Chapman-Robbins Inequality）</strong></p>
 <p>设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控参数结构，控制测度为<span class="math inline">\(\mu\)</span>，<span class="math inline">\(\Theta\)</span>是参数空间，概率函数族<span class="math inline">\(\left\{p_{\theta}:\theta\in\Theta,\;P_{\theta}\in\mathscr{P},\;p_{\theta}=\dfrac{\mathop{}\!\mathrm{d}P_{\theta}}{\mathop{}\!\mathrm{d}\mu}\right\}\)</span>有共同支撑，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(\delta(\mathbf{X})\in L_2(X)\)</span>是一个估计量，则：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Var}_{\theta}[\delta(\mathbf{X})]\geqslant\sup_{\theta'\ne\theta}\dfrac{[\operatorname{E}_{\theta'}(\delta)-\operatorname{E}_{\theta}(\delta)]^2}{\operatorname{E}_{\theta}\left\{\left[\frac{p_{\theta'}(x)}{p_{\theta}(x)}-1\right]^2\right\}}
@@ -971,8 +1218,8 @@ A=\{f(\mathbf{X}):\forall\;\theta\in\Theta,\;\operatorname{E}_{\theta}[f(\mathbf
 \end{align*}\]</span></p>
 <p>由上确界的不等式性即可得出结论。&nbsp;◻</p>
 </div>
-<div id="note-18-9" class="note theorem-block env-note">
-<p><strong>note 18.9</strong>. 第二种构造让我们想起了<span class="math inline">\(\dfrac{\mathop{}\!\mathrm{d}\ln p_{\theta}(x)}{\mathop{}\!\mathrm{d}\theta}\)</span>。在什么情况下<span class="math inline">\(\varphi_2(x,\theta)\)</span>可以被替换为它呢？首先需要保证<span class="math inline">\(\ln p_{\theta}(x)\)</span>有关于<span class="math inline">\(\theta\)</span>的导数，那么参数空间<span class="math inline">\(\Theta\)</span>最好是一个开集，这样对于每一个<span class="math inline">\(\theta\)</span>，它可以在各个方向都有导数。其次需要让：</p>
+<div id="note-18-6" class="note theorem-block env-note">
+<p><strong>note 18.6</strong>. 第二种构造让我们想起了<span class="math inline">\(\dfrac{\mathop{}\!\mathrm{d}\ln p_{\theta}(x)}{\mathop{}\!\mathrm{d}\theta}\)</span>。在什么情况下<span class="math inline">\(\varphi_2(x,\theta)\)</span>可以被替换为它呢？首先需要保证<span class="math inline">\(\ln p_{\theta}(x)\)</span>有关于<span class="math inline">\(\theta\)</span>的导数，那么参数空间<span class="math inline">\(\Theta\)</span>最好是一个开集，这样对于每一个<span class="math inline">\(\theta\)</span>，它可以在各个方向都有导数。其次需要让：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}_{\theta}\left[\frac{\mathop{}\!\mathrm{d}\ln p_{\theta}(x)}{\mathop{}\!\mathrm{d}\theta}\right]=0
 
@@ -989,8 +1236,8 @@ A=\{f(\mathbf{X}):\forall\;\theta\in\Theta,\;\operatorname{E}_{\theta}[f(\mathbf
 \end{equation*}\]</span></p>
 <p>这需要假设概率函数族<span class="math inline">\(\{p_{\theta}\}\)</span>的支撑与<span class="math inline">\(\theta\)</span>无关，也即概率函数族有共同支撑，否则由可知无法交换积分和微分的顺序。最后，为了让<span class="math inline">\(p_{\theta}’(x)\)</span>的后续操作更便捷，我们要求<span class="math inline">\(p_{\theta}‘(x)\)</span>有限。</p>
 </div>
-<div id="definition-18-10" class="definition theorem-block env-definition">
-<p><strong>Definition 18.10</strong>. 设<span class="math inline">\(\mathscr{P}=\{P_{\theta}:\theta\in\Theta\}\)</span>是一族概率测度，对任意的<span class="math inline">\(\theta\in\Theta\)</span>，<span class="math inline">\(P_{\theta}\)</span>有关于<span class="math inline">\(\sigma\)</span>有限测度<span class="math inline">\(\mu\)</span>的概率函数<span class="math inline">\(p_{\theta}(x)\)</span>。令：</p>
+<div id="definition-18-11" class="definition theorem-block env-definition">
+<p><strong>Definition 18.11</strong>. 设<span class="math inline">\(\mathscr{P}=\{P_{\theta}:\theta\in\Theta\}\)</span>是一族概率测度，对任意的<span class="math inline">\(\theta\in\Theta\)</span>，<span class="math inline">\(P_{\theta}\)</span>有关于<span class="math inline">\(\sigma\)</span>有限测度<span class="math inline">\(\mu\)</span>的概率函数<span class="math inline">\(p_{\theta}(x)\)</span>。令：</p>
 <p><span class="math display">\[\begin{equation*}
 S_{\theta}(x)=\left(\frac{\partial\ln p_{\theta}(x)}{\partial\theta_1},\frac{\partial\ln p_{\theta}(x)}{\partial\theta_2},\dots,\frac{\partial\ln p_{\theta}(x)}{\partial\theta_n}\right)^{\top}
 
@@ -1008,8 +1255,8 @@ I(\theta)=\operatorname{Cov}_{\theta}[S_{\theta}(x)]=\operatorname{E}_{\theta}[S
 \end{equation*}\]</span></p>
 <p>为<span class="math inline">\(\{p_{\theta}:\theta\in\Theta\}\)</span>的<a href="../chapters/page-045.html#term-FIM" class="term" title="Fisher information matrix">Fisher信息矩阵<span class="term-english">（Fisher information matrix）</span></a>，<span class="math inline">\(n=1\)</span>时称<span class="math inline">\(I(\theta)\)</span>为<span class="math inline">\(\{p_{\theta}:\theta\in\Theta\}\)</span>的<strong>Fisher信息量</strong>。类似定义随机变量概率函数族的Fisher信息量。</p>
 </div>
-<div id="definition-18-11" class="definition theorem-block env-definition">
-<p><strong>Definition 18.11</strong>. 概率函数族<span class="math inline">\(\{p_{\theta}(x):\theta\in\Theta\}\)</span>若满足：</p>
+<div id="definition-18-12" class="definition theorem-block env-definition">
+<p><strong>Definition 18.12</strong>. 概率函数族<span class="math inline">\(\{p_{\theta}(x):\theta\in\Theta\}\)</span>若满足：</p>
 <ol type="1">
 <li><p>参数空间<span class="math inline">\(\Theta\)</span>是欧氏空间上的开矩形；</p></li>
 <li><p><span class="math inline">\(\ln p_{\theta}(x)\)</span>关于<span class="math inline">\(\theta\)</span>的一阶偏导数对所有<span class="math inline">\(\theta\in\Theta\)</span>都存在且有限；</p></li>
@@ -1063,7 +1310,7 @@ I(\theta)=\operatorname{Cov}_{\theta}[S_{\theta}(x)]=\operatorname{E}_{\theta}[S
 
 \end{align*}\]</span></p>
 <p>于是结论成立。</p>
-<p>(4)设<span class="math inline">\(X_i\)</span>在参数<span class="math inline">\(\theta\in\Theta\)</span>下的概率函数为<span class="math inline">\(p_{\theta,i}(x_i)\)</span>，由和<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
+<p>(4)设<span class="math inline">\(X_i\)</span>在参数<span class="math inline">\(\theta\in\Theta\)</span>下的概率函数为<span class="math inline">\(p_{\theta,i}(x_i)\)</span>，由<a href="../chapters/page-013.html#prop-Independent-c50d54ba" data-reference-type="ref+label" data-reference="prop:Independent">性质 12.2.1</a>(5.c)和<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
 <p><span class="math display">\[\begin{align*}
 I(\theta)_{ij}&amp;=\operatorname{E}_{\theta}\left\{\frac{\partial}{\partial\theta_i}\ln\left[\prod_{k=1}^{n}p_{\theta,k}(x_k)\right]\cdot\frac{\partial}{\partial\theta_j}\ln\left[\prod_{l=1}^{n}p_{\theta,l}(x_l)\right]\right\} \\
 &amp;=\operatorname{E}_{\theta}\left\{\left[\sum_{k=1}^{n}\frac{\partial\ln p_{\theta,k}(x_k)}{\partial\theta_i}\right]\cdot\left[\sum_{l=1}^{n}\frac{\partial\ln p_{\theta,l}(x_l)}{\partial\theta_j}\right]\right\} \\
@@ -1121,7 +1368,7 @@ I(\eta)=J_{\theta}^{\top}(\eta)I(\theta)J_{\theta}^{\top}(\eta)=\operatorname{Co
 <p>因为指数族满秩，由<a href="../chapters/page-018.html#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(3)可知<span class="math inline">\(T(x)\)</span>的分量线性无关，所以<span class="math inline">\(\operatorname{Cov}_{\eta}(T)\)</span>可逆，根据<a href="../chapters/page-003.html#prop-InvertibleMatrix-8a0b4e00" data-reference-type="ref+label" data-reference="prop:InvertibleMatrix">性质 2.1.10</a>(12)即可得出结论。&nbsp;◻</p>
 </div>
 <div id="theo-InformationInequality1-3ffac8a2" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 18.6</strong>. <strong>（One-Dimensional Information Inequality）</strong></p>
+<p><strong>Theorem 18.5</strong>. <strong>（One-Dimensional Information Inequality）</strong></p>
 <p>设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathscr{P}\)</span>的概率函数族<span class="math inline">\(\{p_{\theta}(x):\theta\in\Theta\}\)</span>是Cramer-Rao正则族，其Fisher信息矩阵<span class="math inline">\(I(\theta)\)</span>可逆，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(\delta(\mathbf{X})\in L_2(X)\)</span>是一个估计量且：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{\mathop{}\!\mathrm{d}}{\mathop{}\!\mathrm{d}\theta}\int_{X}\delta p_{\theta}(x)\mathop{}\!\mathrm{d}\mu=\int_{X}\frac{\mathop{}\!\mathrm{d}}{\mathop{}\!\mathrm{d}\theta}[\delta p_{\theta}(x)]\mathop{}\!\mathrm{d}\mu
@@ -1139,15 +1386,15 @@ I(\eta)=J_{\theta}^{\top}(\eta)I(\theta)J_{\theta}^{\top}(\eta)=\operatorname{Co
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
-<p><span class="proof-title"><em>证明</em>. </span>在<a href="#theo-Hammersley-Chapman-RobbinsInequality-d52d20fb" data-reference-type="ref+label" data-reference="theo:Hammersley-Chapman-RobbinsInequality">定理 18.5</a>中取：</p>
+<p><span class="proof-title"><em>证明</em>. </span>在<a href="#theo-Hammersley-Chapman-RobbinsInequality-d52d20fb" data-reference-type="ref+label" data-reference="theo:Hammersley-Chapman-RobbinsInequality">定理 18.4</a>中取：</p>
 <p><span class="math display">\[\begin{equation*}
 \varphi=\frac{\mathop{}\!\mathrm{d}\ln p_{\theta}(x)}{\mathop{}\!\mathrm{d}\theta}
 
 \end{equation*}\]</span></p>
 <p>即可，取等条件由<a href="../chapters/page-017.html#ineq-cauchy-schiwarz-expectations-4f30d514" data-reference-type="ref+label" data-reference="ineq:cauchy-schiwarz-expectations">不等式 4</a>得到。&nbsp;◻</p>
 </div>
-<div id="theorem-18-7" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 18.7</strong>. 关于一维信息不等式的取等情况，有如下结论：</p>
+<div id="theorem-18-6" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 18.6</strong>. 关于一维信息不等式的取等情况，有如下结论：</p>
 <ol type="1">
 <li><p>设<span class="math inline">\(\mathscr{P}\)</span>是单参数Cramer-Rao正则指数族，其概率函数为：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1168,7 +1415,7 @@ I(\eta)=J_{\theta}^{\top}(\eta)I(\theta)J_{\theta}^{\top}(\eta)=\operatorname{Co
 </ol>
 </div>
 <div class="proof-block proof">
-<p><span class="proof-title"><em>证明</em>. </span>(1)由<a href="#theo-InformationInequality1-3ffac8a2" data-reference-type="ref+label" data-reference="theo:InformationInequality1">定理 18.6</a>和<a href="#prop-FIM-d3d0c848" data-reference-type="ref+label" data-reference="prop:FIM">性质 18.1.1</a>(5)的过程可知<span class="math inline">\(\delta\)</span>达到Cramer-Rao下界当且仅当：</p>
+<p><span class="proof-title"><em>证明</em>. </span>(1)由<a href="#theo-InformationInequality1-3ffac8a2" data-reference-type="ref+label" data-reference="theo:InformationInequality1">定理 18.5</a>和<a href="#prop-FIM-d3d0c848" data-reference-type="ref+label" data-reference="prop:FIM">性质 18.1.1</a>(5)的过程可知<span class="math inline">\(\delta\)</span>达到Cramer-Rao下界当且仅当：</p>
 <p><span class="math display">\[\begin{equation*}
 \delta=a\frac{\mathop{}\!\mathrm{d}\ln p_{\eta}(x)}{\mathop{}\!\mathrm{d}\eta}+b=a\left[T-\operatorname{E}_{\eta}(T)\right]+b
 
@@ -1176,7 +1423,7 @@ I(\eta)=J_{\theta}^{\top}(\eta)I(\theta)J_{\theta}^{\top}(\eta)=\operatorname{Co
 <p>为了使得<span class="math inline">\(\delta\)</span>是一个统计量，<span class="math inline">\(\delta\)</span>只能是<span class="math inline">\(T(x)\)</span>的线性变换。&nbsp;◻</p>
 </div>
 <div id="theo-InformationInequalityn-f2f09691" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 18.8</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是<span class="math inline">\(n\)</span>维参数空间，<span class="math inline">\(\mathscr{P}\)</span>的概率函数族<span class="math inline">\(\{p_{\theta}(x):\theta\in\Theta\}\)</span>是Cramer-Rao正则族，其Fisher信息矩阵<span class="math inline">\(I(\theta)\)</span>可逆，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(\delta(\mathbf{X})\in L_2(X)\)</span>是一个估计量且：</p>
+<p><strong>Theorem 18.7</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是<span class="math inline">\(n\)</span>维参数空间，<span class="math inline">\(\mathscr{P}\)</span>的概率函数族<span class="math inline">\(\{p_{\theta}(x):\theta\in\Theta\}\)</span>是Cramer-Rao正则族，其Fisher信息矩阵<span class="math inline">\(I(\theta)\)</span>可逆，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(\delta(\mathbf{X})\in L_2(X)\)</span>是一个估计量且：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{\partial\operatorname{E}_{\theta}(\delta)}{\partial\theta_i}=\int_{X}\frac{\partial}{\partial\theta_i}[\delta p_{\theta}(x)]\mathop{}\!\mathrm{d}\mu,\;i=1,2,\dots,n
 
@@ -1217,8 +1464,8 @@ I(\eta)=J_{\theta}^{\top}(\eta)I(\theta)J_{\theta}^{\top}(\eta)=\operatorname{Co
 </section>
 <section id="id--84b00f88" class="level2">
 <h2 class="anchored" data-anchor-id="id--84b00f88"><span class="header-section-number">18.2</span> 矩估计</h2>
-<div id="definition-18-12" class="definition theorem-block env-definition">
-<p><strong>Definition 18.12</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数统计结构，<span class="math inline">\(\mathbf{X_n}=(X_1, X_2, \dots, X_{n})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本。将：</p>
+<div id="definition-18-13" class="definition theorem-block env-definition">
+<p><strong>Definition 18.13</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数统计结构，<span class="math inline">\(\mathbf{X_n}=(X_1, X_2, \dots, X_{n})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本。将：</p>
 <p><span class="math display">\[\begin{equation*}
 \mu_{nk}=\frac{1}{n}\sum_{i=1}^{n}X_i^k,\quad
 \nu_{nk}=\frac{1}{n}\sum_{i=1}^{n}(X_i-\mu_{n1})^k
@@ -1227,7 +1474,7 @@ I(\eta)=J_{\theta}^{\top}(\eta)I(\theta)J_{\theta}^{\top}(\eta)=\operatorname{Co
 <p>分别称为样本<span class="math inline">\(k\)</span>阶原点矩和样本<span class="math inline">\(k\)</span>阶中心矩。</p>
 </div>
 <div id="theo-SampleMoment-8bac4fec" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 18.9</strong>. <span class="math inline">\(\nu_{nk}\)</span>与原点矩<span class="math inline">\(\mu_{nk}\)</span>之间存在如下关系：</p>
+<p><strong>Theorem 18.8</strong>. <span class="math inline">\(\nu_{nk}\)</span>与原点矩<span class="math inline">\(\mu_{nk}\)</span>之间存在如下关系：</p>
 <p><span class="math display">\[\begin{equation*}
 \nu_{nk}=\sum_{i=0}^{k}\binom{k}{i}\mu_{ni}(-\mu_{n1})^{k-i}
 
@@ -1245,8 +1492,8 @@ I(\eta)=J_{\theta}^{\top}(\eta)I(\theta)J_{\theta}^{\top}(\eta)=\operatorname{Co
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
-<div id="definition-18-13" class="definition theorem-block env-definition">
-<p><strong>Definition 18.13</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是一个参数统计结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}=(X_1, X_2, \dots, X_{n})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>是定义在<span class="math inline">\(\Theta\)</span>上的函数，它可以表示为总体分布的一些矩的函数，即：</p>
+<div id="definition-18-14" class="definition theorem-block env-definition">
+<p><strong>Definition 18.14</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是一个参数统计结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}=(X_1, X_2, \dots, X_{n})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g(\theta)\)</span>是定义在<span class="math inline">\(\Theta\)</span>上的函数，它可以表示为总体分布的一些矩的函数，即：</p>
 <p><span class="math display">\[\begin{equation*}
 g(\theta)=f(\mu_1, \mu_2, \dots, \mu_{s},\nu_1, \nu_2, \dots, \nu_{t})
 
@@ -1304,7 +1551,7 @@ g(\theta)=f(\mu_1, \mu_2, \dots, \mu_{s},\nu_1, \nu_2, \dots, \nu_{t})
 \nu_k=\sum_{i=0}^{k}\binom{k}{i}\mu_i(-\mu_1)^{k-i}=f(\mu_1, \mu_2, \dots, \mu_{k})
 
 \end{equation*}\]</span></p>
-<p>所以<span class="math inline">\(\nu_k\)</span>是<span class="math inline">\(\mu_1, \mu_2, \dots, \mu_{k}\)</span>的连续函数。由<a href="#theo-SampleMoment-8bac4fec" data-reference-type="ref+label" data-reference="theo:SampleMoment">定理 18.9</a>、(1)和<a href="../chapters/page-014.html#theo-ContinuousMappingTheorem-84040801" data-reference-type="ref+label" data-reference="theo:ContinuousMappingTheorem">定理 13.4</a>(1)可得：</p>
+<p>所以<span class="math inline">\(\nu_k\)</span>是<span class="math inline">\(\mu_1, \mu_2, \dots, \mu_{k}\)</span>的连续函数。由<a href="#theo-SampleMoment-8bac4fec" data-reference-type="ref+label" data-reference="theo:SampleMoment">定理 18.8</a>、(1)和<a href="../chapters/page-014.html#theo-ContinuousMappingTheorem-84040801" data-reference-type="ref+label" data-reference="theo:ContinuousMappingTheorem">定理 13.4</a>(1)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \nu_{nk}=f(\mu_{n1},\mu_{n2},\dots,\mu_{nk})\overset{\text{a.s.}}{\longrightarrow}f(\mu_1, \mu_2, \dots, \mu_{k})=\nu_{k}
 
@@ -1315,11 +1562,11 @@ g(\theta)=f(\mu_1, \mu_2, \dots, \mu_{s},\nu_1, \nu_2, \dots, \nu_{t})
 </section>
 <section id="id--216ff55e" class="level2">
 <h2 class="anchored" data-anchor-id="id--216ff55e"><span class="header-section-number">18.3</span> 极大似然估计</h2>
-<div id="definition-18-14" class="definition theorem-block env-definition">
-<p><strong>Definition 18.14</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控参数结构，<span class="math inline">\(\mu\)</span>为控制测度，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(f(\mathbf{X},\theta)\)</span>为样本<span class="math inline">\(\mathbf{X}\)</span>的概率函数。把<span class="math inline">\(f(\mathbf{X},\theta)\)</span>看作<span class="math inline">\(\theta\)</span>的函数，称该函数为<a href="../chapters/page-051.html#term-LikelihoodFunction" class="term" title="likelihood function">似然函数<span class="term-english">（likelihood function）</span></a>，记为<span class="math inline">\(L(\theta,\mathbf{X})\)</span>，称<span class="math inline">\(\ell(\theta,\mathbf{X})=\ln L(\theta,\mathbf{X})\)</span>为<a href="../chapters/page-051.html#term-Log-likelihoodFunction" class="term" title="log-likelihood function">对数似然函数<span class="term-english">（log-likelihood function）</span></a>。</p>
-</div>
 <div id="definition-18-15" class="definition theorem-block env-definition">
-<p><strong>Definition 18.15</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控参数结构，<span class="math inline">\(\mu\)</span>为控制测度，<span class="math inline">\(\Theta\)</span>是<span class="math inline">\(n\)</span>维参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(L(\theta,\mathbf{X})\)</span>是似然函数。若存在统计量<span class="math inline">\(\delta(\mathbf{X})\)</span>使得：</p>
+<p><strong>Definition 18.15</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控参数结构，<span class="math inline">\(\mu\)</span>为控制测度，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(f(\mathbf{X},\theta)\)</span>为样本<span class="math inline">\(\mathbf{X}\)</span>的概率函数。把<span class="math inline">\(f(\mathbf{X},\theta)\)</span>看作<span class="math inline">\(\theta\)</span>的函数，称该函数为<a href="../chapters/page-051.html#term-LikelihoodFunction" class="term" title="likelihood function">似然函数<span class="term-english">（likelihood function）</span></a>，记为<span class="math inline">\(L(\theta,\mathbf{X})\)</span>，称<span class="math inline">\(\ell(\theta,\mathbf{X})=\ln L(\theta,\mathbf{X})\)</span>为<a href="../chapters/page-051.html#term-Log-likelihoodFunction" class="term" title="log-likelihood function">对数似然函数<span class="term-english">（log-likelihood function）</span></a>。</p>
+</div>
+<div id="definition-18-16" class="definition theorem-block env-definition">
+<p><strong>Definition 18.16</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控参数结构，<span class="math inline">\(\mu\)</span>为控制测度，<span class="math inline">\(\Theta\)</span>是<span class="math inline">\(n\)</span>维参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(L(\theta,\mathbf{X})\)</span>是似然函数。若存在统计量<span class="math inline">\(\delta(\mathbf{X})\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 L[\delta(\mathbf{X}),\mathbf{X}]=\max_{\theta\in\Theta}L(\theta,\mathbf{X})
 
@@ -1350,28 +1597,89 @@ L[\delta(\mathbf{X}),\mathbf{X}]=\max_{\theta\in\Theta}L(\theta,\mathbf{X})
 </ol>
 </div>
 <div class="proof-block proof">
-<p><span class="proof-title"><em>证明</em>. </span>(3)由<a href="../chapters/page-018.html#theo-FactorizationTheorem-7db5092c" data-reference-type="ref+label" data-reference="theo:FactorizationTheorem">定理 17.2</a>可得：</p>
+<p><span class="proof-title"><em>证明</em>. </span>(1)若<span class="math inline">\(\theta^{\star}\)</span>是<span class="math inline">\(\theta\)</span>的最大似然估计，则：</p>
+<p><span class="math display">\[\begin{equation*}
+L(\theta^{\star},\mathbf{X})=\sup_{\theta\in\Theta}L(\theta,\mathbf{X})
+
+\end{equation*}\]</span></p>
+<p>记<span class="math inline">\(\Gamma=g(\Theta)\)</span>。由于<span class="math inline">\(g\)</span>未必是单射，所以同一个<span class="math inline">\(\gamma\in\Gamma\)</span>可能对应多个<span class="math inline">\(\theta\in\Theta\)</span>，因此定义：</p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;\gamma\in\Gamma,\quad L_g(\gamma,\mathbf{X})=\sup_{\theta\in\Theta:g(\theta)=\gamma}L(\theta,\mathbf{X})
+
+\end{equation*}\]</span></p>
+<p>对任意<span class="math inline">\(\gamma\in\Gamma\)</span>，有：</p>
+<p><span class="math display">\[\begin{equation*}
+\{\theta\in\Theta:g(\theta)=\gamma\}\subseteq \Theta
+
+\end{equation*}\]</span></p>
+<p>所以：</p>
+<p><span class="math display">\[\begin{equation*}
+L_g(\gamma,\mathbf{X})=\sup_{\theta\in\Theta:g(\theta)=\gamma}L(\theta,\mathbf{X})\leqslant\sup_{\theta\in\Theta}L(\theta,\mathbf{X})=L(\theta^{\star},\mathbf{X})
+
+\end{equation*}\]</span></p>
+<p>当<span class="math inline">\(\gamma=g(\theta^{\star})\)</span>时，由于：</p>
+<p><span class="math display">\[\begin{equation*}
+\theta^{\star}\in\{\theta\in\Theta:g(\theta)=g(\theta^{\star})\}
+
+\end{equation*}\]</span></p>
+<p>因此：</p>
+<p><span class="math display">\[\begin{equation*}
+L_g[g(\theta^{\star}),\mathbf{X}]=\sup_{\theta\in\Theta:g(\theta)=g(\theta^{\star})}L(\theta,\mathbf{X})\geqslant L(\theta^{\star},\mathbf{X})
+
+\end{equation*}\]</span></p>
+<p>于是：</p>
+<p><span class="math display">\[\begin{equation*}
+L_g[g(\theta^{\star}),\mathbf{X}]=L(\theta^{\star},\mathbf{X})=\sup_{\gamma\in\Gamma}L_g(\gamma,\mathbf{X})
+
+\end{equation*}\]</span></p>
+<p>即<span class="math inline">\(g(\theta^{\star})\)</span>是<span class="math inline">\(g(\theta)\)</span>的最大似然估计，极大似然估计具有不变性。</p>
+<p>(3)由<a href="../chapters/page-018.html#theo-FactorizationTheorem-7db5092c" data-reference-type="ref+label" data-reference="theo:FactorizationTheorem">定理 17.2</a>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\theta\in\Theta,\;\frac{\mathop{}\!\mathrm{d}P_{\theta}}{\mathop{}\!\mathrm{d}\mu}(x)=g_{\theta}[T(x)]h(x),\;\text{a.e.于}(X,\mathscr{A},\mu)
 
 \end{equation*}\]</span></p>
 <p>于是有：</p>
 <p><span class="math display">\[\begin{equation*}
-\ell[\theta,\mathbf{X}]=\ln g_{\theta}[T(\mathbf{X})]+\ln h(\mathbf{X})
+\ell[\theta,\mathbf{X}]=\ln g_{\theta}[T(\mathbf{X})]+\ln h(\mathbf{X}),\;\text{a.e.于}(X,\mathscr{A},\mu)
 
 \end{equation*}\]</span></p>
 <p>上式最大化等价于<span class="math inline">\(g_{\theta}[T(\mathbf{X})]\)</span>最大化，即：</p>
 <p><span class="math display">\[\begin{equation*}
-\delta(\mathbf{X})=\underset{\theta\in\Theta}{\arg\max\ln g_{\theta}[T(\mathbf{X})]}
+\delta(\mathbf{X})=\underset{\theta\in\Theta}{\arg\max}\ln g_{\theta}[T(\mathbf{X})]
 
 \end{equation*}\]</span></p>
-<p>由<span class="math inline">\(\delta(\mathbf{X})\)</span>的存在性与唯一性，<span class="math inline">\(\delta(\mathbf{X})\)</span>必为<span class="math inline">\(T(\mathbf{X})\)</span>的函数。&nbsp;◻</p>
+<p>下面证明<span class="math inline">\(\delta(\mathbf{X})\)</span>确为<span class="math inline">\(T(\mathbf{X})\)</span>的函数。任取两个样本点 <span class="math inline">\(\mathbf{x}_1,\mathbf{x}_2\)</span>，若</p>
+<p><span class="math display">\[\begin{equation*}
+T(\mathbf{X}_1)=T(\mathbf{X}_2)
+
+\end{equation*}\]</span></p>
+<p>则对任意<span class="math inline">\(\theta\in\Theta\)</span>，有</p>
+<p><span class="math display">\[\begin{equation*}
+\ln g_{\theta}[T(\mathbf{X}_1)]=\ln g_{\theta}[T(\mathbf{X}_2)]
+
+\end{equation*}\]</span></p>
+<p>因此二者关于<span class="math inline">\(\theta\)</span>的极大化问题完全相同，即：</p>
+<p><span class="math display">\[\begin{equation*}
+\underset{\theta\in\Theta}{\arg\max}\ln g_{\theta}[T(\mathbf{X}_1)]=\underset{\theta\in\Theta}{\arg\max}\ln g_{\theta}[T(\mathbf{X}_2)]
+
+\end{equation*}\]</span></p>
+<p>由于<span class="math inline">\(\delta(\mathbf{X})\)</span>存在且唯一，所以上述极大点均为单点集，从而极大似然估计：</p>
+<p><span class="math display">\[\begin{equation*}
+\delta(\mathbf{X}_1)=\delta(\mathbf{X}_2)
+
+\end{equation*}\]</span></p>
+<p>这说明只要两个样本点给出相同的充分统计量取值，则其对应的最大似然估计相同。于是可在<span class="math inline">\(T(\mathbf{X})\)</span>的值域上定义函数<span class="math inline">\(\varphi\)</span>：</p>
+<p><span class="math display">\[\begin{equation*}
+\varphi(t)=\delta(\mathbf{X}),\;T(\mathbf{X})=t,\quad\text{a.s.于}(X,\mathscr{A},\mu)
+
+\end{equation*}\]</span></p>
+<p>上式定义良好，故<span class="math inline">\(\delta(\mathbf{X})\)</span>必为<span class="math inline">\(T(\mathbf{X})\)</span>的函数。&nbsp;◻</p>
 </div>
 </section>
 <section id="id--391a6411" class="level2">
 <h2 class="anchored" data-anchor-id="id--391a6411"><span class="header-section-number">18.4</span> 常见点估计及其性质</h2>
 <div id="theo-xbar-f2e67db0" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 18.10</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是统计结构，<span class="math inline">\(\mathbf{X}=(X_1, X_2, \dots, X_{n})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(F\)</span>的期望为<span class="math inline">\(\mu\)</span>，<span class="math inline">\(\mathbf{Y}=(Y_1, Y_2, \dots, Y_{n})\)</span>为从总体<span class="math inline">\(G\)</span>中抽取的简单样本，<span class="math inline">\(\overline{X}=\dfrac{1}{n}\sum\limits_{i=1}^{n}X_i,\overline{Y}=\dfrac{1}{n}\sum\limits_{i=1}^{n}Y_i\)</span>，<span class="math inline">\(a,b\in\mathbb{R}^{}\)</span>。有如下等式：</p>
+<p><strong>Theorem 18.9</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是统计结构，<span class="math inline">\(\mathbf{X}=(X_1, X_2, \dots, X_{n})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(F\)</span>的期望为<span class="math inline">\(\mu\)</span>，<span class="math inline">\(\mathbf{Y}=(Y_1, Y_2, \dots, Y_{n})\)</span>为从总体<span class="math inline">\(G\)</span>中抽取的简单样本，<span class="math inline">\(\overline{X}=\dfrac{1}{n}\sum\limits_{i=1}^{n}X_i,\overline{Y}=\dfrac{1}{n}\sum\limits_{i=1}^{n}Y_i\)</span>，<span class="math inline">\(a,b\in\mathbb{R}^{}\)</span>。有如下等式：</p>
 <p><span class="math display">\[\begin{gather*}
 \sum_{i=1}^{n}(X_i-a)(Y_i-b)=\sum_{i=1}^{n}(X_i-\overline{X})(Y_i-\overline{Y})+n(\overline{X}-a)(\overline{Y}-b) \\
 \sum_{i=1}^{n}(X_i-\overline{X})^2=\sum_{i=1}^{n}X_i^2-n\overline{X}^2=\sum_{i=1}^{n}(X_i-\mu)^2-n(\overline{X}-\mu)^2
@@ -1432,7 +1740,7 @@ L[\delta(\mathbf{X}),\mathbf{X}]=\max_{\theta\in\Theta}L(\theta,\mathbf{X})
 \operatorname{Var}(\overline{X})=\frac{1}{n^2}\sum_{i=1}^{n}\operatorname{Var}(X_i)=\frac{n\sigma^2}{n^2}=\frac{\sigma^2}{n}
 
 \end{equation*}\]</span></p>
-<p>由<a href="#theo-xbar-f2e67db0" data-reference-type="ref+label" data-reference="theo:xbar">定理 18.10</a>可得：</p>
+<p>由<a href="#theo-xbar-f2e67db0" data-reference-type="ref+label" data-reference="theo:xbar">定理 18.9</a>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 S^2=\frac{1}{n-1}\sum_{i=1}^{n}(X_i-\overline{X})^2=\frac{1}{n-1}\left(\sum_{i=1}^{n}X_i^2-n\overline{X}^2\right)
 
@@ -1444,7 +1752,7 @@ S^2=\frac{1}{n-1}\sum_{i=1}^{n}(X_i-\overline{X})^2=\frac{1}{n-1}\left(\sum_{i=1
 =&amp;\frac{n}{n-1}(\sigma^2+\mu^2)-\frac{n}{n-1}\left(\frac{\sigma^2}{n}+\mu^2\right)=\frac{n}{n-1}\sigma^2-\frac{n}{n-1}\frac{\sigma^2}{n}=\sigma^2
 
 \end{align*}\]</span></p>
-<p>当<span class="math inline">\(\nu_4\)</span>存在时，由<a href="#theo-xbar-f2e67db0" data-reference-type="ref+label" data-reference="theo:xbar">定理 18.10</a>可得：</p>
+<p>当<span class="math inline">\(\nu_4\)</span>存在时，由<a href="#theo-xbar-f2e67db0" data-reference-type="ref+label" data-reference="theo:xbar">定理 18.9</a>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=1}^{n}(X_i-\overline{X})^2=\sum_{i=1}^{n}(X_i-\mu)^2-n(\overline{X}-\mu)^2
 
@@ -1461,7 +1769,7 @@ S^2=\frac{1}{n-1}\sum_{i=1}^{n}(X_i-\overline{X})^2=\frac{1}{n-1}\left(\sum_{i=1
 \operatorname{Var}[(X_i-\mu)^2]=\operatorname{E}[(X_i-\mu)^4]-\{\operatorname{E}[(X_i-\mu)^2]\}^2=\nu_4-\sigma^4
 
 \end{equation*}\]</span></p>
-<p>由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)、<a href="../chapters/page-013.html#prop-Variance-c0d6c124" data-reference-type="ref+label" data-reference="prop:Variance">性质 12.3.5</a>(3)、<a href="../chapters/page-013.html#prop-Independent-c50d54ba" data-reference-type="ref+label" data-reference="prop:Independent">性质 12.2.1</a>(4)、<a href="../chapters/page-013.html#prop-CovMat-3a62d09d" data-reference-type="ref+label" data-reference="prop:CovMat">性质 12.3.4</a>(7)(5)和可得：</p>
+<p>由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)、<a href="../chapters/page-013.html#prop-Variance-c0d6c124" data-reference-type="ref+label" data-reference="prop:Variance">性质 12.3.5</a>(3)、<a href="../chapters/page-013.html#prop-Independent-c50d54ba" data-reference-type="ref+label" data-reference="prop:Independent">性质 12.2.1</a>(4)、<a href="../chapters/page-013.html#prop-CovMat-3a62d09d" data-reference-type="ref+label" data-reference="prop:CovMat">性质 12.3.4</a>(7)(5)和<a href="../chapters/page-013.html#prop-Expectation-c89ff5d4" data-reference-type="ref+label" data-reference="prop:Expectation">性质 12.3.1</a>(2)可得：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;n^2\operatorname{Var}[(\overline{X}-\mu)^2]=n^2\operatorname{Var}\left\{\left[\frac{\sum\limits_{i=1}^{n}(X_i-\mu)}{n}\right]^2\right\}=\frac{1}{n^2}\operatorname{Var}\left\{\left[\sum_{i=1}^{n}(X_i-\mu)\right]^2\right\} \\
 =&amp;\frac{1}{n^2}\operatorname{Var}\left[\sum_{i=1}^{n}(X_i-\mu)^2+2\sum_{i=1}^{n}\sum_{j&gt;i}^{}(X_i-\mu)(X_j-\mu)\right] \\
@@ -1478,7 +1786,7 @@ S^2=\frac{1}{n-1}\sum_{i=1}^{n}(X_i-\overline{X})^2=\frac{1}{n-1}\left(\sum_{i=1
 =&amp;\frac{1}{n}[(\nu_4-\sigma^4)+2(n-1)\sigma^4]=\frac{1}{n}[\nu_4+(2n-3)\sigma^4]
 
 \end{align*}\]</span></p>
-<p>根据<a href="../chapters/page-013.html#prop-CovMat-3a62d09d" data-reference-type="ref+label" data-reference="prop:CovMat">性质 12.3.4</a>(3)(5)(6)和可得：</p>
+<p>根据<a href="../chapters/page-013.html#prop-CovMat-3a62d09d" data-reference-type="ref+label" data-reference="prop:CovMat">性质 12.3.4</a>(3)(5)(6)和<a href="../chapters/page-013.html#prop-Expectation-c89ff5d4" data-reference-type="ref+label" data-reference="prop:Expectation">性质 12.3.1</a>(2)可得：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;-2n\sum_{i=1}^{n}\operatorname{Cov}[(X_i-\mu)^2,(\overline{X}-\mu)^2] \\
 =&amp;-2n\frac{1}{n^2}\operatorname{Cov}\left[(X_i-\mu)^2,\sum_{j=1}^{n}(X_j-\mu)^2+2\sum_{j=1}^{n}\sum_{k&gt;1}^{}(X_j-\mu)(X_k-\mu)\right] \\
@@ -1494,7 +1802,7 @@ S^2=\frac{1}{n-1}\sum_{i=1}^{n}(X_i-\overline{X})^2=\frac{1}{n-1}\left(\sum_{i=1
 &amp;=\frac{n(\nu_4-\sigma^4)}{(n-1)^2}+\frac{\nu_4-3\sigma^4}{n(n-1)^2}-\frac{2(\nu_4-2\sigma^4)}{(n-1)^2}
 
 \end{align*}\]</span></p>
-<p>当<span class="math inline">\(\nu_3\)</span>存在时，由<a href="../chapters/page-013.html#prop-CovMat-3a62d09d" data-reference-type="ref+label" data-reference="prop:CovMat">性质 12.3.4</a>(3)(5)、<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)、<a href="../chapters/page-013.html#prop-Independent-c50d54ba" data-reference-type="ref+label" data-reference="prop:Independent">性质 12.2.1</a>(6)和可得：</p>
+<p>当<span class="math inline">\(\nu_3\)</span>存在时，由<a href="../chapters/page-013.html#prop-CovMat-3a62d09d" data-reference-type="ref+label" data-reference="prop:CovMat">性质 12.3.4</a>(3)(5)、<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)、<a href="../chapters/page-013.html#prop-Independent-c50d54ba" data-reference-type="ref+label" data-reference="prop:Independent">性质 12.2.1</a>(6)和<a href="../chapters/page-013.html#prop-Expectation-c89ff5d4" data-reference-type="ref+label" data-reference="prop:Expectation">性质 12.3.1</a>(2)可得：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;\operatorname{Cov}(\overline{X},S^2)=\operatorname{Cov}\left[\frac{1}{n}\sum_{i=1}^{n}X_i,\frac{1}{n-1}\sum_{i=1}^{n}(X_i-\overline{X})^2\right] \\
 =&amp;\operatorname{Cov}\left\{\frac{1}{n}\sum_{i=1}^{n}X_i,\frac{1}{n-1}\left[\sum_{i=1}^{n}(X_i-\mu)^2-n(\overline{X}-\mu)^2\right]\right\} \\
@@ -1525,7 +1833,7 @@ S^2=\dfrac{n}{n-1}\nu_{n2},\quad\frac{n}{n-1}\to1
 \overline{X}\overset{a}{\longrightarrow}\operatorname{N}\left(\mu,\frac{\sigma^2}{n}\right)
 
 \end{equation*}\]</span></p>
-<p>由<a href="#theo-xbar-f2e67db0" data-reference-type="ref+label" data-reference="theo:xbar">定理 18.10</a>可得：</p>
+<p>由<a href="#theo-xbar-f2e67db0" data-reference-type="ref+label" data-reference="theo:xbar">定理 18.9</a>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{1}{n-1}\sum_{i=1}^{n}(X_i-\overline{X})^2=\frac{1}{n-1}\sum_{i=1}^{n}(X_i-\mu)^2-\frac{n}{n-1}(\overline{X}-\mu)^2
 
@@ -1576,20 +1884,20 @@ S^2=\dfrac{n}{n-1}\nu_{n2},\quad\frac{n}{n-1}\to1
 =&amp;(n-1)\sum_{i=1}^{n}X_i^2-2\sum_{i=1}^{n-1}\sum_{j&gt;i}^{}X_iX_j=n\sum_{i=1}^{n}X_i^2-\left(\sum_{i=1}^{n}X_i\right)^2=n\sum_{i=1}^{n}X_i^2-n^2\overline{X}^2
 
 \end{align*}\]</span></p>
-<p>由<a href="#theo-xbar-f2e67db0" data-reference-type="ref+label" data-reference="theo:xbar">定理 18.10</a>可得：</p>
+<p>由<a href="#theo-xbar-f2e67db0" data-reference-type="ref+label" data-reference="theo:xbar">定理 18.9</a>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{1}{n(n-1)}\sum_{i&lt;j}^{}(X_i-X_j)^2=\frac{1}{n-1}\sum_{i=1}^{n}X_i^2-\frac{n}{n-1}\overline{X}^2=\frac{1}{n-1}\left(\sum_{i=1}^{n}X_i^2-n\overline{X}^2\right)=S^2
 
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
-<div id="definition-18-16" class="definition theorem-block env-definition">
-<p><strong>Definition 18.16</strong>. 称上述两个点估计为<a href="../chapters/page-058.html#term-SampleMean" class="term" title="sample mean">样本均值<span class="term-english">（sample mean）</span></a>和<a href="../chapters/page-058.html#term-SampleVariance" class="term" title="sample variance">样本方差<span class="term-english">（sample variance）</span></a>。</p>
+<div id="definition-18-17" class="definition theorem-block env-definition">
+<p><strong>Definition 18.17</strong>. 称上述两个点估计为<a href="../chapters/page-058.html#term-SampleMean" class="term" title="sample mean">样本均值<span class="term-english">（sample mean）</span></a>和<a href="../chapters/page-058.html#term-SampleVariance" class="term" title="sample variance">样本方差<span class="term-english">（sample variance）</span></a>。</p>
 </div>
 <section id="id--2660574a" class="level4">
 <h4 class="anchored" data-anchor-id="id--2660574a"><span class="header-section-number">18.4.0.1</span> 数值运算</h4>
-<div id="theorem-18-11" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 18.11</strong>. 对于样本方差和样本均值：</p>
+<div id="theorem-18-10" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 18.10</strong>. 对于样本方差和样本均值：</p>
 <ol type="1">
 <li><p>记：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1653,8 +1961,8 @@ s^2&amp;=\frac{(m-1)s_1^2+(n-1)s_2^2}{m+n-1}+\frac{m(\overline{x}_1-\overline{x}
 </section>
 <section id="id--5a080f9c" class="level2">
 <h2 class="anchored" data-anchor-id="id--5a080f9c"><span class="header-section-number">18.5</span> 区间估计</h2>
-<div id="definition-18-17" class="definition theorem-block env-definition">
-<p><strong>Definition 18.17</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g_1(\theta)\in\mathbb{R}^{n},g_2(\theta)\in\mathbb{R}^{}\)</span>是待估量，<span class="math inline">\(\delta(\mathbf{X}),\delta_1(\mathbf{X}),\delta_2(\mathbf{X})\)</span>是统计量且满足对任意的样本有<span class="math inline">\(\delta_1(\mathbf{X})\leqslant\delta_2(\mathbf{X})\)</span>，<span class="math inline">\(\alpha\in(0,1)\)</span>为给定值。若统计量<span class="math inline">\(\delta(\mathbf{X})\)</span>满足：</p>
+<div id="definition-18-18" class="definition theorem-block env-definition">
+<p><strong>Definition 18.18</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(\mathbf{X}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(g_1(\theta)\in\mathbb{R}^{n},g_2(\theta)\in\mathbb{R}^{}\)</span>是待估量，<span class="math inline">\(\delta(\mathbf{X}),\delta_1(\mathbf{X}),\delta_2(\mathbf{X})\)</span>是统计量且满足对任意的样本有<span class="math inline">\(\delta_1(\mathbf{X})\leqslant\delta_2(\mathbf{X})\)</span>，<span class="math inline">\(\alpha\in(0,1)\)</span>为给定值。若统计量<span class="math inline">\(\delta(\mathbf{X})\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\theta\in\Theta,\;P_{\theta}(\{g_1(\theta)\in \delta(\mathbf{X})\})\geqslant 1-\alpha
 
@@ -1686,11 +1994,11 @@ s^2&amp;=\frac{(m-1)s_1^2+(n-1)s_2^2}{m+n-1}+\frac{m(\overline{x}_1-\overline{x}
 \end{equation*}\]</span></p>
 <p>为其置信系数。</p>
 </div>
-<div id="note-18-10" class="note theorem-block env-note">
-<p><strong>note 18.10</strong>. 什么样的置信域是好的？我们当然希望置信域能够包含待估量的真实值（即提高置信水平或置信系数），并且包含的非真实值尽可能的少，但这两点往往是冲突的：置信域越大，更有可能包含真实值，但精度就会降低；置信域小则包含真实值的概率也小。Nyeman提出了一个区间估计的标准：在保持置信水平尽可能大的前提下，使得置信域尽可能的小，即可靠度优先。</p>
+<div id="note-18-7" class="note theorem-block env-note">
+<p><strong>note 18.7</strong>. 什么样的置信域是好的？我们当然希望置信域能够包含待估量的真实值（即提高置信水平或置信系数），并且包含的非真实值尽可能的少，但这两点往往是冲突的：置信域越大，更有可能包含真实值，但精度就会降低；置信域小则包含真实值的概率也小。Nyeman提出了一个区间估计的标准：在保持置信水平尽可能大的前提下，使得置信域尽可能的小，即可靠度优先。</p>
 </div>
-<div id="note-18-11" class="note theorem-block env-note">
-<p><strong>note 18.11</strong>. <strong>（枢轴量法）</strong></p>
+<div id="note-18-8" class="note theorem-block env-note">
+<p><strong>note 18.8</strong>. <strong>（枢轴量法）</strong></p>
 <p>枢轴量法是一个常见的构造区间估计的方法，下面给出其实现的具体步骤：</p>
 <ol type="1">
 <li><p>找到一个待估量<span class="math inline">\(g(\theta)\)</span>的良好的点估计<span class="math inline">\(\delta(\mathbf{X})\)</span>；</p></li>
@@ -1699,8 +2007,8 @@ s^2&amp;=\frac{(m-1)s_1^2+(n-1)s_2^2}{m+n-1}+\frac{m(\overline{x}_1-\overline{x}
 </ol>
 <p>考虑置信区间的情况，若<span class="math inline">\(f(g,\delta)\)</span>的分布是单峰对称分布（如一元正态分布），很容易找出给定置信水平的最小置信区间（<span class="math inline">\(g\)</span>在<span class="math inline">\(f\)</span>的分子位置时即取<span class="math inline">\(f(g,\delta)\)</span>分布的<span class="math inline">\(\frac{\alpha}{2}\)</span>与<span class="math inline">\(1-\frac{\alpha}{2}\)</span>分位点），但很多情况下我们需要数值方法来求解最小置信区间，为了避免这些麻烦，我们在多数情况下会构造<strong>等尾</strong>置信区间，即依旧取<span class="math inline">\(f(g,\delta)\)</span>分布的<span class="math inline">\(\frac{\alpha}{2}\)</span>与<span class="math inline">\(1-\frac{\alpha}{2}\)</span>分位点作为区间估计的两端。</p>
 </div>
-<div id="theorem-18-12" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 18.12</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\mathbf{X}=(X_1, X_2, \dots, X_{m})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(\mathbf{Y}=(Y_1, Y_2, \dots, Y_{n})\)</span>为从总体<span class="math inline">\(G\)</span>中抽取的简单样本，<span class="math inline">\(\overline{X},\overline{Y}\)</span>为样本均值，<span class="math inline">\(S_X^2,S_Y^2\)</span>为样本方差，<span class="math inline">\(g(\theta)\)</span>为待估量，其区间估计有如下结论：</p>
+<div id="theorem-18-11" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 18.11</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\mathbf{X}=(X_1, X_2, \dots, X_{m})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(\mathbf{Y}=(Y_1, Y_2, \dots, Y_{n})\)</span>为从总体<span class="math inline">\(G\)</span>中抽取的简单样本，<span class="math inline">\(\overline{X},\overline{Y}\)</span>为样本均值，<span class="math inline">\(S_X^2,S_Y^2\)</span>为样本方差，<span class="math inline">\(g(\theta)\)</span>为待估量，其区间估计有如下结论：</p>
 <ol type="1">
 <li><p>若置信水平为<span class="math inline">\(1-\alpha_1\)</span>的<span class="math inline">\(g(\theta)\)</span>的置信上限<span class="math inline">\(\delta_1(\mathbf{X})\)</span>和置信水平为<span class="math inline">\(1-\alpha_2\)</span>的<span class="math inline">\(g(\theta)\)</span>的置信上限<span class="math inline">\(\delta_2(\mathbf{X})\)</span>满足对任意的样本有<span class="math inline">\(\delta_1(\mathbf{X})\leqslant\delta_2(\mathbf{X})\)</span>，则<span class="math inline">\([\delta_1(\mathbf{X}),\delta_2(\mathbf{X})]\)</span>是<span class="math inline">\(g(\theta)\)</span>置信水平为<span class="math inline">\(1-\alpha_1-\alpha_2\)</span>的置信区间；</p></li>
 <li><p>若总体<span class="math inline">\(F\)</span>服从<span class="math inline">\(\operatorname{N}(\mu,\sigma^2)\)</span>，在<span class="math inline">\(\sigma^2\)</span>已知时<span class="math inline">\(g(\theta)=\mu\)</span>置信水平为<span class="math inline">\(1-\alpha\)</span>的区间估计为：</p>
@@ -1896,20 +2204,39 @@ f\left(\frac{\sigma_1^2}{\sigma_2^2},\frac{S_X^2(n-1)}{S_Y^2(m-1)}\right)=\frac{
 </div>
 <section id="id--a57e6976" class="level4">
 <h4 class="anchored" data-anchor-id="id--a57e6976"><span class="header-section-number">18.5.0.1</span> 样本量问题</h4>
-<div id="definition-18-18" class="definition theorem-block env-definition">
-<p><strong>Definition 18.18</strong>. 称置信区间的半径为<a href="../chapters/page-052.html#term-MOE" class="term" title="margin of error">误差幅度<span class="term-english">（margin of error）</span></a>。</p>
+<div id="definition-18-19" class="definition theorem-block env-definition">
+<p><strong>Definition 18.19</strong>. 称置信区间的半径为<a href="../chapters/page-052.html#term-MOE" class="term" title="margin of error">误差幅度<span class="term-english">（margin of error）</span></a>。</p>
 </div>
-<div id="note-18-12" class="note theorem-block env-note">
-<p><strong>note 18.12</strong>. 可以通过控制误差幅度来计算样本量，比如我们要控制误差幅度在<span class="math inline">\(a\)</span>以内，列出不等式可以去计算满足要求的样本量范围，一般来讲误差幅度越小所需的样本量就越大，由此可得到最小样本量。当方程难以求解时，可以采用Monte Carlo算法计算出大量样本量与其对应的MOE值，从而选择出合适的样本量。</p>
+<div id="note-18-9" class="note theorem-block env-note">
+<p><strong>note 18.9</strong>. 可以通过控制误差幅度来计算样本量，比如我们要控制误差幅度在<span class="math inline">\(a\)</span>以内，列出不等式可以去计算满足要求的样本量范围，一般来讲误差幅度越小所需的样本量就越大，由此可得到最小样本量。当方程难以求解时，可以采用Monte Carlo算法计算出大量样本量与其对应的MOE值，从而选择出合适的样本量。</p>
 </div>
 
 
 </section>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>自行搜索。<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
 </section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
     const anchorJS = new window.AnchorJS();
     anchorJS.options = {
