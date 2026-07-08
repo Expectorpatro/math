@@ -2398,6 +2398,55 @@ def split_quarto_pages(
     return pages
 
 
+def ast_header(
+    level: int,
+    identifier: str,
+    classes: list[str],
+    text: str,
+) -> dict[str, Any]:
+    return {
+        "t": "Header",
+        "c": [
+            level,
+            [identifier, classes, []],
+            [{"t": "Str", "c": text}],
+        ],
+    }
+
+
+def empty_div(identifier: str) -> dict[str, Any]:
+    return {
+        "t": "Div",
+        "c": [[identifier, [], []], []],
+    }
+
+
+def page_title(page: QuartoPage) -> str:
+    for block in page.blocks:
+        if block.get("t") == "Header":
+            return ast_plain_text(block["c"][2]).strip()
+    return ""
+
+
+def add_reference_page(pages: list[QuartoPage]) -> None:
+    references_page = QuartoPage(
+        source_path=Path("references.qmd"),
+        blocks=[
+            ast_header(1, "references", ["unnumbered"], "参考文献"),
+            empty_div("refs"),
+        ],
+        part=None,
+    )
+    insertion_index = len(pages)
+    for index, page in enumerate(pages):
+        title = page_title(page)
+        first_identifier = node_identifier(page.blocks[0]) if page.blocks else ""
+        if title == "后记" or first_identifier == "glossary":
+            insertion_index = index
+            break
+    pages.insert(insertion_index, references_page)
+
+
 def node_identifier(node: dict[str, Any]) -> str:
     node_type = node.get("t")
     content = node.get("c")
@@ -2721,6 +2770,8 @@ def write_qmd_page(
     markdown = "\n".join(lines) + ("\n" if markdown.endswith("\n") else "")
 
     markdown = re.sub(r"\n{3,}", "\n\n", markdown)
+    if page.source_path.name == "references.qmd":
+        markdown = "---\nnocite: '@*'\n---\n\n" + markdown.lstrip()
     destination.write_text(markdown, encoding="utf-8")
 
 
@@ -2945,6 +2996,7 @@ def write_quarto_site(
     sanitize_quarto_identifiers(document)
     copy_quarto_resources(document)
     pages = split_quarto_pages(document, transformer)
+    add_reference_page(pages)
     labels_to_pages: dict[str, Path] = {}
     for page in pages:
         identifiers: set[str] = set()
@@ -2988,6 +3040,7 @@ def write_quarto_site(
 
     clean_generated_directory(output_dir)
     shutil.copytree(QUARTO_PROJECT_DIR / "_site", output_dir)
+    postprocess_reference_pages(output_dir)
     (output_dir / ".nojekyll").write_text("", encoding="utf-8")
 
 
@@ -3029,6 +3082,58 @@ def write_site(
     run(command, cwd=HTML_DIR)
     shutil.copy2(HTML_DIR / "style.css", output_dir / "style.css")
     (output_dir / ".nojekyll").write_text("", encoding="utf-8")
+
+
+def remove_div_by_id(markup: str, identifier: str) -> str:
+    start_match = re.search(
+        rf'<div\b(?=[^>]*\bid=["\']{re.escape(identifier)}["\'])[^>]*>',
+        markup,
+        flags=re.IGNORECASE,
+    )
+    if not start_match:
+        return markup
+
+    depth = 0
+    div_tags = re.finditer(r"</?div\b[^>]*>", markup[start_match.start() :], re.I)
+    for tag_match in div_tags:
+        tag = tag_match.group(0)
+        if tag.lower().startswith("</div"):
+            depth -= 1
+            if depth == 0:
+                start = start_match.start()
+                end = start_match.start() + tag_match.end()
+                return markup[:start].rstrip() + "\n\n" + markup[end:].lstrip()
+        elif not tag.endswith("/>"):
+            depth += 1
+    return markup
+
+
+def postprocess_reference_pages(output_dir: Path) -> None:
+    references_page = output_dir / "references.html"
+    if not references_page.exists():
+        return
+
+    references_relative_to_site = references_page.relative_to(output_dir).as_posix()
+    for path in sorted(output_dir.rglob("*.html")):
+        text = path.read_text(encoding="utf-8")
+        if path.resolve() == references_page.resolve():
+            updated = text
+        else:
+            current_directory = path.parent.relative_to(output_dir).as_posix()
+            if current_directory == ".":
+                current_directory = ""
+            references_target = posixpath.relpath(
+                references_relative_to_site,
+                start=current_directory or ".",
+            )
+            updated = re.sub(
+                r'href="#(ref-[^"]+)"',
+                rf'href="{references_target}#\1"',
+                text,
+            )
+            updated = remove_div_by_id(updated, "refs")
+        if updated != text:
+            path.write_text(updated, encoding="utf-8")
 
 
 def localize_navigation(output_dir: Path) -> None:

@@ -14,10 +14,22 @@
 	称满足$\operatorname{E}_{\theta}[\delta(\mathbf{X})]=0$的估计量$\delta(\mathbf{X})$为\textbf{零无偏估计量}。
 \end{definition}
 \begin{property}\label{prop:UnbiasedEstimator}
-	设$\delta$是待估量$g(\theta)\in\mathbb{R}^{}$的无偏估计量，所有$g(\theta)$的无偏估计量为$\{\delta-f:\operatorname{E}_{\theta}[f(\mathbf{X})]=0\}$。
+	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，$\mathbf{X}=(\seq{X}{n})$为从总体$F$中抽取的简单样本，$p\in[1,+\infty]$，$\delta(\mathbf{X})\in\underset{P\in\mathscr{P}}{\cap}L_p(X,\mathscr{A},P)$，且$\delta(\mathbf{X})$是待估量$g(\theta)\in\mathbb{R}$的无偏估计量，则所有属于$\underset{P\in\mathscr{P}}{\cap}L_p(X,\mathscr{A},P)$的$g(\theta)$的所有无偏估计量为：
+	\begin{equation*}
+		\left\{\delta(\mathbf{X})-f(\mathbf{X}):f(\mathbf{X})\in\underset{P\in\mathscr{P}}{\cap}L_p(X,\mathscr{A},P),\;\operatorname{E}_\theta[f(\mathbf{X})]=0,\;\forall\theta\in\Theta\right\}
+	\end{equation*}
 \end{property}
 \begin{proof}
-	估计量$\delta_1$为$g(\theta)$的无偏估计量当且仅当$\operatorname{E}_{\theta}(\delta)=\operatorname{E}_{\theta}(\delta_1)-0$，由\cref{prop:MeasurableIntegral}(6)可得充分性。假设无偏估计量$\delta_2$不可以表示为$\delta$与一个零无偏估计$f$的和，由\cref{prop:MeasurableIntegral}(6)可知$\operatorname{E}_{\theta}(\delta_2-\delta)=\operatorname{E}(\delta_2)-\operatorname{E}(\delta)\ne0$，$\delta_2$不是$g(\theta)$的无偏估计量，必要性得证。
+	\textbf{充分性：}由\cref{theo:LtLs}、\cref{prop:MeasurableIntegral}(6)、\cref{prop:Lp}和\cref{prop:Linfty}立即可得。\par
+	\textbf{必要性：}任取$\delta_1(\mathbf{X})\in\underset{P\in\mathscr{P}}{\cap}L_p(X,\mathscr{A},P)$为$g(\theta)$的一个无偏估计量，由\cref{prop:Lp}和\cref{prop:Linfty}可知：
+	\begin{equation*}
+		f(\mathbf{X})=\delta(\mathbf{X})-\delta_1(\mathbf{X})\in\underset{P\in\mathscr{P}}{\cap}L_p(X,\mathscr{A},P)
+	\end{equation*}
+	根据\cref{theo:LtLs}和\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{equation*}
+		\operatorname{E}_\theta[f(\mathbf{X})]=\operatorname{E}_\theta[\delta(\mathbf{X})]-\operatorname{E}_\theta[\delta_1(\mathbf{X})]=g(\theta)-g(\theta)=0
+	\end{equation*}
+	由$\delta_1(\mathbf{X})$的任意性可知必要性成立。
 \end{proof}
 \begin{definition}
 	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，$\mathbf{X}=(\seq{X}{n})$为从总体$F$中抽取的简单样本，$g(\theta)$是定义在$\Theta$上的函数，$\delta(\mathbf{X})$是$g(\theta)$的一个估计量。如果：
@@ -25,6 +37,20 @@
 		\forall\;\theta\in\Theta,\;\lim_{n\to+\infty}\operatorname{E}_{\theta}[\delta_n(\mathbf{X})]=g(\theta)
 	\end{equation*}
 	则称$\delta_n(\mathbf{X})$为$g(\theta)$的一个\gls{AsymptoticallyUnbiasedEstimation}。
+\end{definition}
+\begin{definition}
+	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，$\mathbf{X}=(\seq{X}{n})$为从总体$F$中抽取的简单样本，$g(\theta)$是定义在$\Theta$上的函数，$\mathcal{D}$为估计量的取值空间。若函数：
+	\begin{equation*}
+		L:g(\Theta)\times\mathcal{D}\to[0,+\infty]
+	\end{equation*}
+	满足对任意$\theta\in\Theta$，$L[g(\theta),\delta(\mathbf{X})]$为$(X^n,\mathscr{A}^n)$上的可测函数，其中$\delta(\mathbf{X})$是$g(\theta)$的一个估计量，则称$L$为该估计问题下的\gls{LossFunction}，称$L[g(\theta),\delta(\mathbf{X})]$为当待估量真值为$g(\theta)$且采用估计量$\delta(\mathbf{X})$时产生的损失。
+\end{definition}
+\begin{definition}
+	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，$\mathbf{X}=(\seq{X}{n})$为从总体$F$中抽取的简单样本，$g(\theta)$是定义在$\Theta$上的函数，$\delta(\mathbf{X})$是$g(\theta)$的一个估计量，$L$是该估计问题下的损失函数。称：
+	\begin{equation*}
+		R[g(\theta),\delta(\mathbf{X})]=\operatorname{E}_{\theta}\{L[g(\theta),\delta(\mathbf{X})]\}
+	\end{equation*}
+	为估计量$\delta(\mathbf{X})$在待估量真值为$g(\theta)$处关于损失函数$L$的\gls{RiskFunction}。
 \end{definition}
 \begin{definition}
 	设$(X,\mathscr{A},\mathscr{P})$是参数结构，$\Theta$是参数空间，$\mathbf{X}=(\seq{X}{n})$为从总体$F$中抽取的简单样本，$g(\theta)$是定义在$\Theta$上的函数，$\delta(\mathbf{X})$是$g(\theta)$的一个估计量，$\delta_1(\mathbf{X}),\delta_2(\mathbf{X})$是$g(\theta)$的两个不同的无偏估计量。若：

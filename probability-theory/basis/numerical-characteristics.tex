@@ -295,14 +295,14 @@
 
 \subsection{协方差}
 \begin{definition}
-	对于随机向量$\mathbf{X}$与随机向量$\mathbf{Y}$，若它们的各分量都在$L_2(X)$中，由\cref{ineq:cauchy-schiwarz-expectations}和\cref{theo:LtLs}可知：
+	设$\mathbf{X}=(\seq{X}{m})$和$\mathbf{Y}=(\seq{Y}{n})$分别为概率空间$(X,\mathscr{F},P)$上的随机向量。根据\cref{theo:ProductMeasurable}，若$\mathbf{X}$和$\mathbf{Y}$的各分量都在$L_2(X)$中，由\cref{ineq:cauchy-schiwarz-expectations}和\cref{theo:LtLs}可知：
 	\begin{equation*}
-		\operatorname{Cov}(\mathbf{X},\mathbf{Y})=\operatorname{E}\Bigl[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Y}-\operatorname{E}(\mathbf{Y})\Bigr)^{\top}\Bigr]
+		\operatorname{Cov}(\mathbf{X},\mathbf{Y})=\operatorname{E}\{[\mathbf{X}-\operatorname{E}(\mathbf{X})]\mathbf{Y}-\operatorname{E}(\mathbf{Y})^{\top}\}
 	\end{equation*}
 	一定存在且每个元素都是有限值，称其为$\mathbf{X}$与$\mathbf{Y}$的\gls{Covariance}矩阵。若$\mathbf{X}=\mathbf{Y}$，则可将$\operatorname{Cov}(\mathbf{X},\mathbf{Y})$简写为$\operatorname{Cov}(\mathbf{X})$。
 \end{definition}
 \begin{definition}
-	设$X,Y$是两个随机变量，则：
+	设$X,Y$是概率空间$(X,\mathscr{F},P)$上的两个随机变量，则：
 	\begin{enumerate}
 		\item 若$\operatorname{Cov}(X,Y)>0$，称$X,Y$\gls{PositivelyCorrelated}；
 		\item 若$\operatorname{Cov}(X,Y)<0$，称$X,Y$\gls{NegativelyCorrelated}；
@@ -325,39 +325,36 @@
 			\operatorname{Cov}(\mathbf{X},\mathbf{Y}+\mathbf{Z})=\operatorname{Cov}(\mathbf{X},\mathbf{Y})+\operatorname{Cov}(\mathbf{X},\mathbf{Z})
 		\end{gather*}
 		\item $\operatorname{Cov}(\mathbf{X},\mathbf{Y})=\operatorname{E}(\mathbf{X}\mathbf{Y}^{\top})-[\operatorname{E}(\mathbf{X})][\operatorname{E}(\mathbf{Y})]^{\top}$；
-		\item 若随机变量$X$与随机变量$Y$独立，则$\operatorname{Cov}(X,Y)=0$，即$X$与$Y$不相关。
+		\item 若$\mathbf{X}$与$\mathbf{Y}$独立，则$\operatorname{Cov}(\mathbf{X},\mathbf{Y})=\mathbf{0}$；
+		\item 若不存在非零的$a\in\mathbb{R}^{n}$和任意的$b\in\mathbb{R}^{}$使得$a\mathbf{X}=b,\;$a.s.于$(X,\mathscr{F},P)$，则$\operatorname{Cov}(\mathbf{X})$可逆。
 	\end{enumerate}
 \end{property}
 \begin{proof}
 	(1)$\;\operatorname{Cov}(\mathbf{X})$在$(i,i)$位置上的元素为：
 	\begin{equation*}
-		\operatorname{E}\Bigl[\Bigl(\mathbf{X}_i-\operatorname{E}(\mathbf{X}_i)\Bigr)\Bigl(\mathbf{X}_i-\operatorname{E}(\mathbf{X}_i)\Bigr)^{\top}\Bigr]=\operatorname{E}\Bigl[\Bigl(\mathbf{X}_i-\operatorname{E}(\mathbf{X}_i)\Bigr)^2\Bigr]=\operatorname{Var}(\mathbf{X}_i)
+		\operatorname{E}\{[\mathbf{X}_i-\operatorname{E}(\mathbf{X}_i)][\mathbf{X}_i-\operatorname{E}(\mathbf{X}_i)]^{\top}\}=\operatorname{E}\{[\mathbf{X}_i-\operatorname{E}(\mathbf{X}_i)]^2\}=\operatorname{Var}(\mathbf{X}_i)
 	\end{equation*}
 	所以$\operatorname{tr}[\operatorname{Cov}(\mathbf{X})]=\sum\limits_{i=1}^{n}\operatorname{Var}(\mathbf{X}_i)$。\par
 	(2)因为：
 	\begin{align*}
 		\operatorname{Cov}(\mathbf{X})_{(i,j)}
-		&=\operatorname{E}\Bigl[\Bigl(\mathbf{X}_i-\operatorname{E}(\mathbf{X}_i)\Bigr)\Bigl(\mathbf{X}_j-\operatorname{E}(\mathbf{X}_j)\Bigr)^{\top}\Bigr] \\
-		&=\operatorname{E}\Bigl[\Bigl(\mathbf{X}_j-\operatorname{E}(\mathbf{X}_j)\Bigr)\Bigl(\mathbf{X}_i-\operatorname{E}(\mathbf{X}_i)\Bigr)^{\top}\Bigr] \\
+		&=\operatorname{E}\{[\mathbf{X}_i-\operatorname{E}(\mathbf{X}_i)][\mathbf{X}_j-\operatorname{E}(\mathbf{X}_j)]\} \\
+		&=\operatorname{E}\{[\mathbf{X}_j-\operatorname{E}(\mathbf{X}_j)][\mathbf{X}_i-\operatorname{E}(\mathbf{X}_i)]\} \\
 		&=\operatorname{Cov}(\mathbf{X})_{(j,i)}
 	\end{align*}
 	所以$\operatorname{Cov}(\mathbf{X})$是一个对称矩阵。\par
-	取$n$维非随机向量$c$，设$Y=c^{\top}\mathbf{X}$，由\cref{prop:Transpose}(4)和\cref{prop:MeasurableIntegral}(6)可得：
+	任取$c\in\mathbb{R}^{n}$，设$Y=c^{\top}\mathbf{X}$，由\cref{prop:NonnegativeMeasurableIntegral}(2)、\cref{prop:Transpose}(4)和\cref{prop:MeasurableIntegral}(6)可得：
 	\begin{align*}
-		\operatorname{Var}(Y)
-		&=\operatorname{Var}(c^{\top}\mathbf{X}) \\
-		&=\operatorname{E}\Bigl[\Bigl(c^{\top}\mathbf{X}-\operatorname{E}(c^{\top}\mathbf{X})\Bigr)\Bigl(c^{\top}\mathbf{X}-\operatorname{E}(c^{\top}\mathbf{X})\Bigr)\Bigr] \\
-		&=\operatorname{E}\Bigl[\Bigl(c^{\top}\mathbf{X}-c^{\top}\operatorname{E}(\mathbf{X})\Bigr)\Bigl(c^{\top}\mathbf{X}-c^{\top}\operatorname{E}(\mathbf{X})\Bigr)^{\top}\Bigr] \\
-		&=\operatorname{E}\Bigl\{c^{\top}\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl[c^{\top}\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigr]^{\top}\Bigr\} \\
-		&=c^{\top}\operatorname{E}\Bigl[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)^{\top}\Bigr]c \\
-		&=c^{\top}\operatorname{Cov}(\mathbf{X})c\geqslant0
+		&0\leqslant\operatorname{Cov}(Y)=\operatorname{Cov}(c^{\top}\mathbf{X})=\operatorname{E}\{[c^{\top}\mathbf{X}-\operatorname{E}(c^{\top}\mathbf{X})][c^{\top}\mathbf{X}-\operatorname{E}(c^{\top}\mathbf{X})]\} \\
+		=&\operatorname{E}\{[c^{\top}\mathbf{X}-c^{\top}\operatorname{E}(\mathbf{X})][c^{\top}\mathbf{X}-c^{\top}\operatorname{E}(\mathbf{X})]^{\top}\}=\operatorname{E}\Bigl\{c^{\top}[\mathbf{X}-\operatorname{E}(\mathbf{X})]\{c^{\top}[\mathbf{X}-\operatorname{E}(\mathbf{X})]\}^{\top}\Bigr\} \\
+		=&c^{\top}\operatorname{E}\{[\mathbf{X}-\operatorname{E}(\mathbf{X})][\mathbf{X}-\operatorname{E}(\mathbf{X})]^{\top}\}c=c^{\top}\operatorname{Cov}(\mathbf{X})c
 	\end{align*}
 	由$c$的任意性，$\operatorname{Cov}(\mathbf{X})$是半正定的。\par
-	(3)类似于(2)中的推导，有：
+	(3)由\cref{prop:Transpose}(4)和\cref{prop:MeasurableIntegral}(6)可得：
 	\begin{align*}
 		\operatorname{Cov}(A\mathbf{X},B\mathbf{Y})
-		&=\operatorname{E}\Bigl[\Bigl(A\mathbf{X}-\operatorname{E}(A\mathbf{X})\Bigr)\Bigl(B\mathbf{Y}-\operatorname{E}(B\mathbf{Y})\Bigr)^{\top}\Bigr] \\
-		&=A\operatorname{E}\Bigl[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Y}-\operatorname{E}(\mathbf{Y})\Bigr)^{\top}\Bigr]B^{\top} \\
+		&=\operatorname{E}\{[A\mathbf{X}-\operatorname{E}(A\mathbf{X})][B\mathbf{Y}-\operatorname{E}(B\mathbf{Y})]^{\top}\} \\
+		&=A\operatorname{E}\{[\mathbf{X}-\operatorname{E}(\mathbf{X})][\mathbf{Y}-\operatorname{E}(\mathbf{Y})]^{\top}\}B^{\top} \\
 		&=A\operatorname{Cov}(\mathbf{X},\mathbf{Y})B^{\top}
 	\end{align*}\par
 	(4)由\cref{prop:NonnegativeMeasurableIntegral}(9)直接可得；\par
@@ -365,29 +362,38 @@
 	\begin{gather*}
 		\begin{aligned}
 			\operatorname{Cov}(\mathbf{X}+\mathbf{Y},\mathbf{Z})
-			&=\operatorname{E}\left[\Bigl(\mathbf{X}+\mathbf{Y}-\operatorname{E}(\mathbf{X}+\mathbf{Y})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^{\top}\right] \\
-			&=\operatorname{E}\left[\Bigl(\mathbf{X}+\mathbf{Y}-\operatorname{E}(\mathbf{X})-\operatorname{E}(\mathbf{Y})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^{\top}\right] \\
-			&=\operatorname{E}\left[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^{\top}+\Bigl(\mathbf{Y}-\operatorname{E}(\mathbf{Y})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^{\top}\right] \\
-			&=\operatorname{E}\Bigl[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^{\top}\Bigr]+\operatorname{E}\Bigl[\Bigl(\mathbf{Y}-\operatorname{E}(\mathbf{Y})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^{\top}\Bigr] \\
+			&=\operatorname{E}\left\{\left[\mathbf{X}+\mathbf{Y}-\operatorname{E}(\mathbf{X}+\mathbf{Y})\right]\left[\mathbf{Z}-\operatorname{E}(\mathbf{Z})\right]^{\top}\right\} \\
+			&=\operatorname{E}\left\{\left[\mathbf{X}+\mathbf{Y}-\operatorname{E}(\mathbf{X})-\operatorname{E}(\mathbf{Y})\right]\left[\mathbf{Z}-\operatorname{E}(\mathbf{Z})\right]^{\top}\right\} \\
+			&=\operatorname{E}\left\{\left[\mathbf{X}-\operatorname{E}(\mathbf{X})\right]\left[\mathbf{Z}-\operatorname{E}(\mathbf{Z})\right]^{\top}
+			+\left[\mathbf{Y}-\operatorname{E}(\mathbf{Y})\right]\left[\mathbf{Z}-\operatorname{E}(\mathbf{Z})\right]^{\top}\right\} \\
+			&=\operatorname{E}\left\{\left[\mathbf{X}-\operatorname{E}(\mathbf{X})\right]\left[\mathbf{Z}-\operatorname{E}(\mathbf{Z})\right]^{\top}\right\}
+			+\operatorname{E}\left\{\left[\mathbf{Y}-\operatorname{E}(\mathbf{Y})\right]\left[\mathbf{Z}-\operatorname{E}(\mathbf{Z})\right]^{\top}\right\} \\
 			&=\operatorname{Cov}(\mathbf{X},\mathbf{Z})+\operatorname{Cov}(\mathbf{Y},\mathbf{Z})
 		\end{aligned} \\
 		\begin{aligned}
 			\operatorname{Cov}(\mathbf{X},\mathbf{Y}+\mathbf{Z})
-			&=\operatorname{E}\left[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Y}+\mathbf{Z}-\operatorname{E}(\mathbf{Y}+\mathbf{Z})\Bigr)^{\top}\right] \\
-			&=\operatorname{E}\left[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Y}+\mathbf{Z}-\operatorname{E}(\mathbf{Y})-\operatorname{E}(\mathbf{Z})\Bigr)^{\top}\right] \\
-			&=\operatorname{E}\left[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Y}-\operatorname{E}(\mathbf{Y})\Bigr)^{\top}+\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^{\top}\right] \\
-			&=\operatorname{E}\left[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Y}-\operatorname{E}(\mathbf{Y})\Bigr)^{\top}\right]+\operatorname{E}\left[\Bigl(\mathbf{X}-\operatorname{E}(\mathbf{X})\Bigr)\Bigl(\mathbf{Z}-\operatorname{E}(\mathbf{Z})\Bigr)^{\top}\right] \\
+			&=\operatorname{E}\left\{\left[\mathbf{X}-\operatorname{E}(\mathbf{X})\right]\left[\mathbf{Y}+\mathbf{Z}-\operatorname{E}(\mathbf{Y}+\mathbf{Z})\right]^{\top}\right\} \\
+			&=\operatorname{E}\left\{\left[\mathbf{X}-\operatorname{E}(\mathbf{X})\right]\left[\mathbf{Y}+\mathbf{Z}-\operatorname{E}(\mathbf{Y})-\operatorname{E}(\mathbf{Z})\right]^{\top}\right\} \\
+			&=\operatorname{E}\left\{\left[\mathbf{X}-\operatorname{E}(\mathbf{X})\right]\left[\mathbf{Y}-\operatorname{E}(\mathbf{Y})\right]^{\top}
+			+\left[\mathbf{X}-\operatorname{E}(\mathbf{X})\right]\left[\mathbf{Z}-\operatorname{E}(\mathbf{Z})\right]^{\top}\right\} \\
+			&=\operatorname{E}\left\{\left[\mathbf{X}-\operatorname{E}(\mathbf{X})\right]\left[\mathbf{Y}-\operatorname{E}(\mathbf{Y})\right]^{\top}\right\}
+			+\operatorname{E}\left\{\left[\mathbf{X}-\operatorname{E}(\mathbf{X})\right]\left[\mathbf{Z}-\operatorname{E}(\mathbf{Z})\right]^{\top}\right\} \\
 			&=\operatorname{Cov}(\mathbf{X},\mathbf{Y})+\operatorname{Cov}(\mathbf{X},\mathbf{Z})
 		\end{aligned}
 	\end{gather*}\par
-	(6)由\cref{prop:MeasurableIntegral}(6)可得：
+	(6)由\cref{theo:LtLs}和\cref{prop:MeasurableIntegral}(6)可得：
 	\begin{align*}
 		\operatorname{Cov}(\mathbf{X},\mathbf{Y})
 		&=\operatorname{E}\{[\mathbf{X}-\operatorname{E}(\mathbf{X})][\mathbf{Y}-\operatorname{E}(\mathbf{Y})]^{\top}\}
 		=\operatorname{E}\{[\mathbf{X}-\operatorname{E}(\mathbf{X})]\mathbf{Y}^{\top}-[\mathbf{X}-\operatorname{E}(\mathbf{X})]\operatorname{E}(\mathbf{Y})^{\top}\} \\
 		&=\operatorname{E}\{[\mathbf{X}-\operatorname{E}(\mathbf{X})]\mathbf{Y}^{\top}\}-\operatorname{E}[\mathbf{X}-\operatorname{E}(\mathbf{X})]\operatorname{E}(\mathbf{Y})^{\top} =\operatorname{E}(\mathbf{X}\mathbf{Y}^{\top})-[\operatorname{E}(\mathbf{X})][\operatorname{E}(\mathbf{Y})]^{\top}
 	\end{align*}\par
-	(7)由(6)和\info{独立性质}立即可得。
+	(7)由(6)和\cref{prop:Expectation}(2)立即可得。\par
+	(8)若$\operatorname{Cov}(\mathbf{X})$不可逆，则存在非零的$a\in\mathbb{R}^{n}$使得$a^{\top}\operatorname{Cov}(\mathbf{X})a=\mathbf{0}$，根据(2)的证明过程和\cref{prop:MeasurableIntegral}(6)可知即：
+	\begin{equation*}
+		\operatorname{Cov}(a^{\top}\mathbf{X})=\operatorname{E}\{[a^{\top}\mathbf{X}-a^{\top}\operatorname{E}(\mathbf{X})]^2\}=\mathbf{0}
+	\end{equation*}
+	由\cref{prop:NonnegativeMeasurableIntegral}(9)可知$a^{\top}\mathbf{X}=a^{\top}\operatorname{E}(\mathbf{X})\;$a.s.于$(X,\mathscr{F},P)$，矛盾，所以$\operatorname{Cov}(\mathbf{X})$可逆。
 \end{proof}
 
 \subsection{方差}
@@ -401,7 +407,7 @@
 \begin{property}\label{prop:Variance}
 	设$f,g$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量。方差具有如下性质：
 	\begin{enumerate}
-		\item 若$f\in L_2(X)$，则$\operatorname{Var}(f)=\operatorname{E}(f^2)-[\operatorname{E}(f)]^2$；
+		\item 若$f\in L_2(X)$，则$\operatorname{Var}(f)=\operatorname{E}(f^2)-[\operatorname{E}(f)]^2<+\infty$；
 		\item 若$f\in L_2(X)$，则$\operatorname{Var}(f)=\operatorname{E}[\operatorname{Var}(f|g)]+\operatorname{Var}[\operatorname{E}(f|g)]$；
 		\item 若$f,g\in L_2(X)$，则$\operatorname{Var}(f\pm g)=\operatorname{Var}(f)\pm2\operatorname{Cov}(f,g)+\operatorname{Var}(g)$；
 	\end{enumerate}
@@ -413,7 +419,7 @@
 		=\operatorname{E}[(f-\mu)^2]
 		=\operatorname{E}(f^2-2\mu f+\mu^2)
 		=\operatorname{E}(f^2)-2\mu^2+\mu^2
-		=\operatorname{E}(f^2)-\mu^2
+		=\operatorname{E}(f^2)-\mu^2<+\infty
 	\end{align*}\par
 	(2)由\cref{prop:Moment}(1)(3)可知$\operatorname{E}(f)=\mu\in\mathbb{R}^{}$。根据(1)和\cref{prop:ConditionalExpectation}(3)可得：
 	\begin{align*}

@@ -23,15 +23,17 @@
 	为\gls{Log-likelihoodEquation}。
 \end{definition}
 \begin{property}\label{prop:MLE}
-	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$\mu$为控制测度，$\Theta$是参数空间，$\mathbf{X}$为从总体$F$中抽取的简单样本。最大似然估计具有如下性质：
+	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$\mu$为控制测度，$\Theta$是参数空间，$\mathbf{X}$为从总体$F$中抽取的简单样本。极大似然估计具有如下性质：
 	\begin{enumerate}
-		\item 最大似然估计具有不变性，即：若$\theta$的MLE为$\theta^{\star}$，则$\theta$的任一可测函数$g(\theta)$的MLE为$g(\theta^{\star})$；
-		\item 若$\mathscr{P}$为满秩指数族，只要似然方程组的解是自然参数空间的内点，则解必唯一且是MLE；
+		\item 若极大似然估计是参数空间的内点且似然函数有关于$\theta$的所有一阶导数，则其满足似然方程；
+		\item 极大似然估计具有不变性，即：若$\theta$的MLE为$\theta^{\star}$，则$\theta$的任一可测函数$g(\theta)$的MLE为$g(\theta^{\star})$；
+		\item 若$\mathscr{P}$为可识别满秩指数族，只要似然方程组的解是自然参数空间的内点，则解必唯一且是MLE；
 		\item 若$T$是$\theta$的充分统计量且$\theta$的MLE$\;\delta$唯一存在，则$\delta$必为$T$的函数；
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)若$\theta^{\star}$是$\theta$的最大似然估计，则：
+	(1)由\cref{theo:FrechetExtremumOptimality}(1)立即可得。\par
+	(2)若$\theta^{\star}$是$\theta$的极大似然估计，则：
 	\begin{equation*}
 		L(\theta^{\star},\mathbf{X})=\sup_{\theta\in\Theta}L(\theta,\mathbf{X})
 	\end{equation*}
@@ -59,14 +61,38 @@
 	\begin{equation*}
 		L_g[g(\theta^{\star}),\mathbf{X}]=L(\theta^{\star},\mathbf{X})=\sup_{\gamma\in\Gamma}L_g(\gamma,\mathbf{X})
 	\end{equation*}
-	即$g(\theta^{\star})$是$g(\theta)$的最大似然估计，极大似然估计具有不变性。\par
-%	(2)设$\mathscr{P}$为$n$维指数族，$\mathbf{X}=(\seq{X}{m})$，则有：
-%	\begin{gather*}
-%		L(\eta,\mathbf{X})=\prod_{i=1}^{m}C(\eta)\exp\left[\eta^{\top}T(X_i)\right]h(X_i) \\
-%		\ell(\eta,\mathbf{X})=\sum_{i=1}^{m}\ln\{C(\eta)\exp[\eta^{\top}T(X_i)]h(X_i)\}=m\ln C(\eta)+\sum_{i=1}^{m}\eta^{\top}T(X_i)+\sum_{i=1}^{m}\ln h(X_i) \\
-%		\frac{\partial\ell(\eta,\mathbf{X})}{\partial\eta_j}=m\frac{1}{C(\eta)}\frac{\partial C(\eta)}{\partial\eta_j}+\sum_{i=1}^{m}T_j(X_i)
-%	\end{gather*}
-	(3)由\cref{theo:FactorizationTheorem}可得：
+	即$g(\theta^{\star})$是$g(\theta)$的极大似然估计，极大似然估计具有不变性。\par
+	(3)设$\mathbf{X}=(X_1,X_2,\dots,X_n)$为来自$P_\eta$的简单样本，$\eta\in\Xi$，由\cref{prop:Independent}(5.c)可知联合密度为：
+	\begin{equation*}
+		\frac{\dif P_\eta^n}{\dif\mu^n}=\prod_{i=1}^{n}\exp\{\eta^{\top}T(x_i)-\xi(\eta)\}h(x_i)
+	\end{equation*}
+	因此对数似然函数为：
+	\begin{equation*}
+		\ell[\eta,\mathbf{X}]=\eta^{\top}\sum_{i=1}^{n}T(X_i)-n\xi(\eta)+\sum_{i=1}^{n}\ln h(X_i) 
+	\end{equation*}
+	根据\cref{prop:ExponentialFamily}(6)和\cref{prop:FrechetDifferential}(6)对$\eta$求导，有：
+	\begin{equation*}
+		\frac{\partial\ell[\eta,\mathbf{X}]}{\partial\eta}=\sum_{i=1}^{n}T(X_i)-n\frac{\partial\xi(\eta)}{\partial\eta}
+	\end{equation*}
+	根据\cref{prop:ExponentialFamily}(6)和\cref{prop:FrechetDifferential}(6)对$\eta$再次求导可得：
+	\begin{equation*}
+		\frac{\partial^2\ell[\eta,\mathbf{X}]}{\partial\eta\partial\eta^{\top}}=-n\frac{\partial^2\xi(\eta)}{\partial\eta\partial\eta^{\top}}
+	\end{equation*}
+	由\cref{prop:ExponentialFamily}(9)可得：
+	\begin{equation*}
+		\frac{\partial^2\xi(\eta)}{\partial\eta\partial\eta^{\top}}=\operatorname{Cov}_{\eta}[T(\mathbf{X})]
+	\end{equation*}
+	根据\cref{prop:ExponentialFamily}(3)、\cref{prop:CovMat}(2)(8)和\cref{theo:PositiveSemidefinite}(6)可知$\dfrac{\partial^2\xi(\eta)}{\partial\eta\partial\eta^{\top}}$正定，从而$\dfrac{\partial^2\ell[\eta,\mathbf{X}]}{\partial\eta\partial\eta^{\top}}$负定，由\cref{prop:ConvexFunction}(3)可知$\ell[\eta,\mathbf{X}]$关于$\eta$严格凹。\par
+	因为$\hat{\eta}$是$\Xi$的内点，根据(1)可知：
+	\begin{equation*}
+		\frac{\partial\ell[\eta,\mathbf{X}]}{\partial\eta}\bigg|_{\eta=\hat{\eta}}=\mathbf{0}
+	\end{equation*}
+	由\cref{prop:ConvexFunction}(2)可知对任意$\eta\in\Xi$有：
+	\begin{equation*}
+		\ell[\eta,\mathbf{X}]\leqslant\ell[\hat{\eta},\mathbf{X}]+\left[\frac{\partial\ell[\eta,\mathbf{X}]}{\partial\eta}\bigg|_{\eta=\hat{\eta}}\right]^{\top}(\eta-\hat{\eta})=\ell[\hat{\eta},\mathbf{X}]
+	\end{equation*}
+	等号成立当且仅当$\eta=\hat{\eta}$。因此$\hat{\eta}$是$\ell[\eta,\mathbf{X}]$在$\Xi$上的唯一最大点，$\hat{\eta}$是唯一的MLE。\par
+	(4)由\cref{theo:FactorizationTheorem}可得：
 	\begin{equation*}
 		\forall\;\theta\in\Theta,\;\frac{\dif P_{\theta}}{\dif\mu}(x)=g_{\theta}[T(x)]h(x),\;\text{a.e.于}(X,\mathscr{A},\mu)
 	\end{equation*}
@@ -79,7 +105,7 @@
 		\delta(\mathbf{X})=\underset{\theta\in\Theta}{\arg\max}\ln g_{\theta}[T(\mathbf{X})]
 	\end{equation*}
 	下面证明$\delta(\mathbf{X})$确为$T(\mathbf{X})$的函数。任取两个样本点
-	$\mathbf{x}_1,\mathbf{x}_2$，若
+	$\mathbf{X}_1,\mathbf{X}_2$，若
 	\begin{equation*}
 		T(\mathbf{X}_1)=T(\mathbf{X}_2)
 	\end{equation*}
@@ -95,9 +121,185 @@
 	\begin{equation*}
 		\delta(\mathbf{X}_1)=\delta(\mathbf{X}_2)
 	\end{equation*}
-	这说明只要两个样本点给出相同的充分统计量取值，则其对应的最大似然估计相同。于是可在$T(\mathbf{X})$的值域上定义函数$\varphi$：
+	这说明只要两个样本点给出相同的充分统计量取值，则其对应的极大似然估计相同。于是可在$T(\mathbf{X})$的值域上定义函数$\varphi$：
 	\begin{equation*}
 		\varphi(t)=\delta(\mathbf{X}),\;T(\mathbf{X})=t,\quad\text{a.s.于}(X,\mathscr{A},\mu)
 	\end{equation*}
 	上式定义良好，故$\delta(\mathbf{X})$必为$T(\mathbf{X})$的函数。
+\end{proof}
+\begin{property}\label{prop:MLEConsistency}
+	设$(X,\mathscr{A},\mathscr{P})$是可控参数结构，$\mu$为控制测度，$\Theta\subset\mathbb{R}^p$为参数空间。设真实参数为$\theta_0\in\Theta$，并记：
+	\begin{equation*}
+		p_\theta(x)=\frac{\dif P_\theta}{\dif\mu}(x).
+	\end{equation*}
+	设$X_1,\ldots,X_n$为来自$P_{\theta_0}$的简单样本，对数似然函数为：
+	\begin{equation*}
+		\ell_n(\theta)
+		=
+		\sum_{i=1}^{n}\log p_\theta(X_i),
+	\end{equation*}
+	并记样本平均对数似然函数为：
+	\begin{equation*}
+		M_n(\theta)
+		=
+		\frac{1}{n}\ell_n(\theta)
+		=
+		\frac{1}{n}\sum_{i=1}^{n}\log p_\theta(X_i).
+	\end{equation*}
+	设总体目标函数为：
+	\begin{equation*}
+		M(\theta)
+		=
+		\operatorname{E}_{\theta_0}[\log p_\theta(X)].
+	\end{equation*}
+	若满足如下条件：
+	\begin{enumerate}
+		\item $\Theta$是紧集；
+		\item $M(\theta)$在$\Theta$上连续；
+		\item $M(\theta)$在$\theta_0$处唯一取最大值，即：
+		\begin{equation*}
+			M(\theta)<M(\theta_0),\qquad \theta\neq\theta_0;
+		\end{equation*}
+		\item 样本平均对数似然函数一致收敛于总体目标函数，即：
+		\begin{equation*}
+			\sup_{\theta\in\Theta}
+			\left|
+			M_n(\theta)-M(\theta)
+			\right|
+			\xrightarrow{P_{\theta_0}}0.
+		\end{equation*}
+	\end{enumerate}
+	若MLE存在，且$\hat{\theta}_n$为MLE，即：
+	\begin{equation*}
+		\hat{\theta}_n
+		\in
+		\underset{\theta\in\Theta}{\arg\max}\;M_n(\theta),
+	\end{equation*}
+	则$\hat{\theta}_n$是$\theta_0$的一致估计量，即：
+	\begin{equation*}
+		\hat{\theta}_n\xrightarrow{P_{\theta_0}}\theta_0.
+	\end{equation*}
+\end{property}
+
+\begin{proof}
+	任取$\varepsilon>0$。定义：
+	\begin{equation*}
+		C_\varepsilon
+		=
+		\{\theta\in\Theta:\|\theta-\theta_0\|\geqslant \varepsilon\}.
+	\end{equation*}
+	因为$\Theta$是紧集，所以$C_\varepsilon$也是紧集。又因为$M(\theta)$在$\Theta$上连续，所以$M(\theta)$在$C_\varepsilon$上可以取到最大值。
+	
+	由于$M(\theta)$在$\theta_0$处唯一取最大值，所以对任意$\theta\in C_\varepsilon$，都有：
+	\begin{equation*}
+		M(\theta)<M(\theta_0).
+	\end{equation*}
+	于是存在$\eta_\varepsilon>0$，使得：
+	\begin{equation*}
+		\sup_{\theta\in C_\varepsilon}M(\theta)
+		=
+		M(\theta_0)-\eta_\varepsilon.
+	\end{equation*}
+	也就是说，对任意$\theta\in C_\varepsilon$，有：
+	\begin{equation*}
+		M(\theta)
+		\leqslant
+		M(\theta_0)-\eta_\varepsilon.
+	\end{equation*}
+	
+	记：
+	\begin{equation*}
+		\Delta_n
+		=
+		\sup_{\theta\in\Theta}
+		\left|
+		M_n(\theta)-M(\theta)
+		\right|.
+	\end{equation*}
+	由一致收敛假设可知：
+	\begin{equation*}
+		\Delta_n\xrightarrow{P_{\theta_0}}0.
+	\end{equation*}
+	
+	下面证明：
+	\begin{equation*}
+		P_{\theta_0}(\|\hat{\theta}_n-\theta_0\|\geqslant\varepsilon)
+		\longrightarrow 0.
+	\end{equation*}
+	若事件
+	\begin{equation*}
+		\{\|\hat{\theta}_n-\theta_0\|\geqslant\varepsilon\}
+	\end{equation*}
+	发生，则$\hat{\theta}_n\in C_\varepsilon$。于是：
+	\begin{equation*}
+		M(\hat{\theta}_n)
+		\leqslant
+		M(\theta_0)-\eta_\varepsilon.
+	\end{equation*}
+	另一方面，因为$\hat{\theta}_n$是$M_n(\theta)$的最大点，所以：
+	\begin{equation*}
+		M_n(\hat{\theta}_n)
+		\geqslant
+		M_n(\theta_0).
+	\end{equation*}
+	由$\Delta_n$的定义，有：
+	\begin{equation*}
+		M_n(\hat{\theta}_n)
+		\leqslant
+		M(\hat{\theta}_n)+\Delta_n
+		\leqslant
+		M(\theta_0)-\eta_\varepsilon+\Delta_n,
+	\end{equation*}
+	并且：
+	\begin{equation*}
+		M_n(\theta_0)
+		\geqslant
+		M(\theta_0)-\Delta_n.
+	\end{equation*}
+	因此在事件$\{\|\hat{\theta}_n-\theta_0\|\geqslant\varepsilon\}$上，有：
+	\begin{equation*}
+		M(\theta_0)-\Delta_n
+		\leqslant
+		M_n(\theta_0)
+		\leqslant
+		M_n(\hat{\theta}_n)
+		\leqslant
+		M(\theta_0)-\eta_\varepsilon+\Delta_n.
+	\end{equation*}
+	从而：
+	\begin{equation*}
+		\Delta_n\geqslant\frac{\eta_\varepsilon}{2}.
+	\end{equation*}
+	所以有事件包含关系：
+	\begin{equation*}
+		\{\|\hat{\theta}_n-\theta_0\|\geqslant\varepsilon\}
+		\subset
+		\left\{
+		\Delta_n\geqslant\frac{\eta_\varepsilon}{2}
+		\right\}.
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		P_{\theta_0}(\|\hat{\theta}_n-\theta_0\|\geqslant\varepsilon)
+		\leqslant
+		P_{\theta_0}\left(
+		\Delta_n\geqslant\frac{\eta_\varepsilon}{2}
+		\right).
+	\end{equation*}
+	由于$\Delta_n\xrightarrow{P_{\theta_0}}0$，所以：
+	\begin{equation*}
+		P_{\theta_0}\left(
+		\Delta_n\geqslant\frac{\eta_\varepsilon}{2}
+		\right)
+		\longrightarrow 0.
+	\end{equation*}
+	因此：
+	\begin{equation*}
+		P_{\theta_0}(\|\hat{\theta}_n-\theta_0\|\geqslant\varepsilon)
+		\longrightarrow 0.
+	\end{equation*}
+	由$\varepsilon>0$的任意性可得：
+	\begin{equation*}
+		\hat{\theta}_n\xrightarrow{P_{\theta_0}}\theta_0.
+	\end{equation*}
 \end{proof}
