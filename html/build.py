@@ -38,6 +38,7 @@ TIKZ_CACHE_DIR = BUILD_DIR / "tikz-cache"
 TIKZ_WORK_DIR = BUILD_DIR / "tikz-work"
 DEFAULT_OUTPUT_DIR = HTML_DIR / "site"
 HOME_CONTENT = HTML_DIR / "home.md"
+BIBLIOGRAPHY_STYLE = HTML_DIR / "textbook.csl"
 MAIN_TEX = PROJECT_ROOT / "main.tex"
 SETTINGS_TEX = PROJECT_ROOT / "settings.tex"
 QUARTO = Path(
@@ -2875,6 +2876,7 @@ def write_quarto_config(
         "lang: zh",
         "date-format: long",
         f"bibliography: {yaml_quote('../../../ref.bib')}",
+        f"csl: {yaml_quote('textbook.csl')}",
         "",
         "book:",
         f"  title: {yaml_quote(title)}",
@@ -2978,6 +2980,7 @@ def copy_quarto_resources(document: dict[str, Any]) -> None:
         HTML_DIR / "theme-toggle.html",
         QUARTO_PROJECT_DIR / "theme-toggle.html",
     )
+    shutil.copy2(BIBLIOGRAPHY_STYLE, QUARTO_PROJECT_DIR / "textbook.csl")
 
 
 def write_quarto_site(
