@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,52 +1079,36 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#mathbbcn" id="toc-mathbbcn" class="nav-link active" data-scroll-target="#mathbbcn"><span class="header-section-number">9.1</span> <span class="math inline">\(\mathbb{C}^n\)</span></a>
-  <ul>
-  <li><a href="#mathbbcn-cdedfd16" id="toc-mathbbcn-cdedfd16" class="nav-link" data-scroll-target="#mathbbcn-cdedfd16"><span class="header-section-number">9.1.1</span> <span class="math inline">\(\mathbb{C}^n\)</span>上的距离</a>
   <ul class="collapse">
-  <li><a href="#id--1c1be04d" id="toc-id--1c1be04d" class="nav-link" data-scroll-target="#id--1c1be04d"><span class="header-section-number">9.1.1.1</span> 收敛的含义</a></li>
-  </ul></li>
-  <li><a href="#mathbbcn-ba54463c" id="toc-mathbbcn-ba54463c" class="nav-link" data-scroll-target="#mathbbcn-ba54463c"><span class="header-section-number">9.1.2</span> <span class="math inline">\(\mathbb{C}^n\)</span>上的范数</a>
-  <ul class="collapse">
-  <li><a href="#id--6d49aba5" id="toc-id--6d49aba5" class="nav-link" data-scroll-target="#id--6d49aba5"><span class="header-section-number">9.1.2.1</span> 依范数收敛的含义</a></li>
-  </ul></li>
+  <li><a href="#mathbbcn-cdedfd16" id="toc-mathbbcn-cdedfd16" class="nav-link" data-scroll-target="#mathbbcn-cdedfd16"><span class="header-section-number">9.1.1</span> <span class="math inline">\(\mathbb{C}^n\)</span>上的距离</a></li>
+  <li><a href="#mathbbcn-ba54463c" id="toc-mathbbcn-ba54463c" class="nav-link" data-scroll-target="#mathbbcn-ba54463c"><span class="header-section-number">9.1.2</span> <span class="math inline">\(\mathbb{C}^n\)</span>上的范数</a></li>
   </ul></li>
   <li><a href="#lp" id="toc-lp" class="nav-link" data-scroll-target="#lp"><span class="header-section-number">9.2</span> <span class="math inline">\(l^p\)</span></a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#lp-6bd19d7b" id="toc-lp-6bd19d7b" class="nav-link" data-scroll-target="#lp-6bd19d7b"><span class="header-section-number">9.2.1</span> <span class="math inline">\(l^p\)</span>上的距离</a></li>
   <li><a href="#lp-8c5be652" id="toc-lp-8c5be652" class="nav-link" data-scroll-target="#lp-8c5be652"><span class="header-section-number">9.2.2</span> <span class="math inline">\(l^p\)</span>上的范数</a></li>
   </ul></li>
   <li><a href="#linfty" id="toc-linfty" class="nav-link" data-scroll-target="#linfty"><span class="header-section-number">9.3</span> <span class="math inline">\(l^\infty\)</span></a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#linfty-c494dd0e" id="toc-linfty-c494dd0e" class="nav-link" data-scroll-target="#linfty-c494dd0e"><span class="header-section-number">9.3.1</span> <span class="math inline">\(l^\infty\)</span>上的距离</a></li>
   </ul></li>
   <li><a href="#s" id="toc-s" class="nav-link" data-scroll-target="#s"><span class="header-section-number">9.4</span> <span class="math inline">\(s\)</span></a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#s-0b796c9f" id="toc-s-0b796c9f" class="nav-link" data-scroll-target="#s-0b796c9f"><span class="header-section-number">9.4.1</span> <span class="math inline">\(s\)</span>上的距离</a></li>
   </ul></li>
   <li><a href="#s-1" id="toc-s-1" class="nav-link" data-scroll-target="#s-1"><span class="header-section-number">9.5</span> <span class="math inline">\(S\)</span></a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#s--1-5a02388f" id="toc-s--1-5a02388f" class="nav-link" data-scroll-target="#s--1-5a02388f"><span class="header-section-number">9.5.1</span> <span class="math inline">\(S\)</span>上的距离</a></li>
   </ul></li>
   <li><a href="#cab" id="toc-cab" class="nav-link" data-scroll-target="#cab"><span class="header-section-number">9.6</span> <span class="math inline">\(C[a,b]\)</span></a>
-  <ul>
-  <li><a href="#cab-e95571a2" id="toc-cab-e95571a2" class="nav-link" data-scroll-target="#cab-e95571a2"><span class="header-section-number">9.6.1</span> <span class="math inline">\(C[a,b]\)</span>上的距离</a>
   <ul class="collapse">
-  <li><a href="#id-1-d687f5cc" id="toc-id-1-d687f5cc" class="nav-link" data-scroll-target="#id-1-d687f5cc"><span class="header-section-number">9.6.1.1</span> 收敛的含义</a></li>
-  </ul></li>
-  <li><a href="#cab-3a493de6" id="toc-cab-3a493de6" class="nav-link" data-scroll-target="#cab-3a493de6"><span class="header-section-number">9.6.2</span> <span class="math inline">\(C[a,b]\)</span>上的范数</a>
-  <ul class="collapse">
-  <li><a href="#id-1-fc2a3e06" id="toc-id-1-fc2a3e06" class="nav-link" data-scroll-target="#id-1-fc2a3e06"><span class="header-section-number">9.6.2.1</span> 依范数收敛的含义</a></li>
-  </ul></li>
-  <li><a href="#id--750afd1f" id="toc-id--750afd1f" class="nav-link" data-scroll-target="#id--750afd1f"><span class="header-section-number">9.6.3</span> 性质</a>
-  <ul class="collapse">
-  <li><a href="#id-2-cb48b9b5" id="toc-id-2-cb48b9b5" class="nav-link" data-scroll-target="#id-2-cb48b9b5"><span class="header-section-number">9.6.3.1</span> 可分性</a></li>
-  <li><a href="#id-1-0a85a425" id="toc-id-1-0a85a425" class="nav-link" data-scroll-target="#id-1-0a85a425"><span class="header-section-number">9.6.3.2</span> 完备性</a></li>
-  </ul></li>
+  <li><a href="#cab-e95571a2" id="toc-cab-e95571a2" class="nav-link" data-scroll-target="#cab-e95571a2"><span class="header-section-number">9.6.1</span> <span class="math inline">\(C[a,b]\)</span>上的距离</a></li>
+  <li><a href="#cab-3a493de6" id="toc-cab-3a493de6" class="nav-link" data-scroll-target="#cab-3a493de6"><span class="header-section-number">9.6.2</span> <span class="math inline">\(C[a,b]\)</span>上的范数</a></li>
+  <li><a href="#id--750afd1f" id="toc-id--750afd1f" class="nav-link" data-scroll-target="#id--750afd1f"><span class="header-section-number">9.6.3</span> 性质</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -976,7 +1148,6 @@ window.Quarto = {
 <p><strong>Definition 9.2</strong>. 在<span class="math inline">\(\mathbb{C}^n\)</span>中定义向量<span class="math inline">\(x=(\xi_1,\xi_2,\dots,\xi_n)\)</span>和向量<span class="math inline">\(y=(\eta_1,\eta_2,\dots,\eta_n)\)</span>之间的距离为：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)=\left(\sum_{i=1}^n|\xi_i-\eta_i|^2\right)^{\frac{1}{2}}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\((\mathbb{C}^n,\rho)\)</span>是一个度量空间。</p>
 </div>
@@ -993,17 +1164,14 @@ window.Quarto = {
 &amp;\leqslant\sum_{i=1}^n|a_i|^2+2\sum_{i=1}^n|a_ib_i|+\sum_{i=1}^n|b_i|^2 \\
 &amp;\leqslant\sum_{i=1}^n|a_i|^2+2\left(\sum_{i=1}^n|a_i|^2\cdot\sum_{i=1}^n|b_i|^2\right)^{\frac{1}{2}}+\sum_{i=1}^n|b_i|^2 \\
 &amp;=\left[\left(\sum_{i=1}^k|a_i|^2\right)^{\frac{1}{2}}+\left(\sum_{i=1}^k|b_i|^2\right)^{\frac{1}{2}}\right]^2
-
 \end{align*}\]</span></p>
 <p>设<span class="math inline">\(x=(\xi_1,\xi_2,\dots,\xi_n),y=(\eta_1,\eta_2,\dots,\eta_n),z=(\zeta_1,\zeta_2,\dots,\zeta_n)\)</span>是<span class="math inline">\(\mathbb{R}^n\)</span>中的任意三点，在上式中令<span class="math inline">\(a_i=(\xi_i-\zeta_i),b_i=(\zeta_i-\eta_i)\)</span>，则</p>
 <p><span class="math display">\[\begin{equation*}
 \left[\sum_{i=1}^n|\xi_i-\eta_i|^2\right]^{\frac{1}{2}}\leqslant    \left[\sum_{i=1}^n|\xi_i-\zeta_i|^2\right]^{\frac{1}{2}}+\left[\sum_{i=1}^n|\zeta_i-\eta_i|^2\right]^{\frac{1}{2}}
-
 \end{equation*}\]</span></p>
 <p>即</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)\leqslant\rho(x,z)+\rho(z,y)
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1016,7 +1184,6 @@ window.Quarto = {
 <p><span class="proof-title"><em>证明</em>. </span>由下式可立即推出：</p>
 <p><span class="math display">\[\begin{equation*}
 \max_i|\xi_i-\eta_i|\leqslant   \left[\sum_{i=1}^n|\xi_i-\eta_i|^2\right]^{\frac{1}{2}}\leqslant\sum_{i=1}^{n}|\xi_i-\eta_i|
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1028,7 +1195,6 @@ window.Quarto = {
 <p><strong>Definition 9.3</strong>. 在<span class="math inline">\(\mathbb{C}^n\)</span>中定义元素<span class="math inline">\(x=(\xi_1,\xi_2,\dots,\xi_n)\)</span>的范数为：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x||=\left(\sum_{i=1}^n|\xi_i|^2\right)^{\frac{1}{2}}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\mathbb{C}^n\)</span>成为一个赋范线性空间。</p>
 </div>
@@ -1053,7 +1219,6 @@ window.Quarto = {
 <p><strong>Definition 9.4</strong>. 记<span class="math inline">\(l^p(1\leqslant p&lt;\infty)\)</span>为全体满足下列不等式的实或复数列<span class="math inline">\(\{\xi_n\}\)</span>构成的集合：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{\infty}|\xi_n|^p&lt;\infty
-
 \end{equation*}\]</span></p>
 </div>
 <section id="lp-6bd19d7b" class="level3">
@@ -1062,7 +1227,6 @@ window.Quarto = {
 <p><strong>Definition 9.5</strong>. 在<span class="math inline">\(l^p\)</span>中定义元素<span class="math inline">\(x=\{x_n\}\)</span>和元素<span class="math inline">\(y=\{y_n\}\)</span>之间的距离为：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)=\left(\sum_{n=1}^{\infty}|x_n-y_n|^p\right)^\frac{1}{p}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\((l^p,\rho)\)</span>是一个度量空间。</p>
 </div>
@@ -1071,17 +1235,14 @@ window.Quarto = {
 <p><span class="proof-title"><em>证明</em>. </span>(1)<span class="math inline">\(\rho\in R\)</span>：由<a href="../chapters/page-017.html#ineq-else-1-d62b2434" data-reference-type="ref+label" data-reference="ineq:else-1">不等式 18</a>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 |x_n-y_n|^p\leqslant\Bigl(|x_n|+|y_n|\Bigr)^p\leqslant2^{p-1}\Bigl(|x_n|^p+|y_n|^p\Bigr)
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)\leqslant\left[\sum_{n=1}^{+\infty}2^{p-1}\Bigl(|x_n|^p+|y_n|^p\Bigr)\right]^{\frac{1}{p}}\leqslant\left[2^{p-1}\sum_{n=1}^{+\infty}|x_n|^p+2^{p-1}\sum_{n=1}^{+\infty}|y_n|^p\right]^{\frac{1}{p}}
-
 \end{equation*}\]</span></p>
 <p>由<span class="math inline">\(l^p\)</span>空间定义，<span class="math inline">\(\rho\in\mathbb{R}\)</span>。 (2)非负性直接可得；(3)对称性直接可得； (4)三角不等式：设<span class="math inline">\(\{x_n\},\{y_n\},\{z_n\}\)</span>是任意的三个实或复有界数列。<span class="math inline">\(p=1\)</span>时可由绝对值的三角不等式或模长的三角不等式立即得到，<span class="math inline">\(p&gt;1\)</span>时在Minkowski不等式（即<a href="../chapters/page-017.html#ineq-minkowski-ineq-infty-series-851d07ba" data-reference-type="ref+label" data-reference="ineq:minkowski-ineq-infty-series">不等式 13</a>）</p>
 <p><span class="math display">\[\begin{equation*}
 \left(\sum_{i=1}^\infty|\xi_i+\eta_i|^p\right)^\frac{1}{p}\leqslant\left(\sum_{i=1}^\infty|\xi_i|^p\right)^\frac{1}{p}+\left(\sum_{i=1}^\infty|\eta_i|^p\right)^\frac{1}{p}
-
 \end{equation*}\]</span></p>
 <p>中取<span class="math inline">\(\xi_i=x_i-z_i,\eta_i=z_i-y_i\)</span>即可立即得到。&nbsp;◻</p>
 </div>
@@ -1092,7 +1253,6 @@ window.Quarto = {
 <p><strong>Definition 9.6</strong>. 在<span class="math inline">\(l^p\)</span>中定义元素<span class="math inline">\(x=\{x_n\}\)</span>的范数为：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x||=\left(\sum_{n=1}^{\infty}|x_n|^p\right)^\frac{1}{p}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(l^p\)</span>成为一个赋范线性空间。</p>
 </div>
@@ -1111,7 +1271,6 @@ window.Quarto = {
 <p><strong>Definition 9.7</strong>. 在<span class="math inline">\(l^\infty\)</span>中定义元素<span class="math inline">\(x=\{x_n\}\)</span>和元素<span class="math inline">\(y=\{y_n\}\)</span>之间的距离为：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)=\sup_{i\in\mathbb{N}}|x_n-y_n|
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\((l^\infty,\rho)\)</span>是一个度量空间。</p>
 </div>
@@ -1123,12 +1282,10 @@ window.Quarto = {
 |x_n-y_n|&amp;\leqslant|x_n-z_n|+|z_n-y_n| \\
 &amp;\leqslant\sup_{i\in\mathbb{N}}|x_n-z_n|+\sup_{i\in\mathbb{N}}|z_n-y_n| \\
 &amp;=\rho(x,z)+\rho(z,y)
-
 \end{align*}\]</span></p>
 <p>因此：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)=\sup_{i\in\mathbb{N}}|x_n-y_n|\leqslant\rho(x,z)+\rho(z,y)
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1143,7 +1300,6 @@ window.Quarto = {
 <p><strong>Definition 9.8</strong>. 在<span class="math inline">\(s\)</span>中定义定义元素<span class="math inline">\(x=\{x_n\}\)</span>和元素<span class="math inline">\(y=\{y_n\}\)</span>之间的距离为：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)=\sum_{i=1}^\infty\frac{1}{2^i}\frac{|x_i-y_i|}{1+|x_i-y_i|}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\((s,\rho)\)</span>是一个度量空间。</p>
 </div>
@@ -1154,12 +1310,10 @@ window.Quarto = {
 \frac{|x_i-y_i|}{1+|x_i-y_i|}&amp;\leqslant\frac{|x_i-z_i|+|z_i-y_i|}{1+|x_i-z_i|+|z_i-y_i|} \\
 &amp;=\frac{|x_i-z_i|}{1+|x_i-z_i|+|z_i-y_i|}+\frac{|z_i-y_i|}{1+|x_i-z_i|+|z_i-y_i|} \\
 &amp;\leqslant\frac{|x_i-z_i|}{1+|x_i-z_i|}+\frac{|z_i-y_i|}{|z_i-y_i|}
-
 \end{align*}\]</span></p>
 <p>将上式对<span class="math inline">\(i\)</span>求和即有：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)\leqslant\rho(x,z)+\rho(z,y)
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1174,7 +1328,6 @@ window.Quarto = {
 <p><strong>Definition 9.9</strong>. 在<span class="math inline">\(S\)</span>中定义定义元素<span class="math inline">\(x=x(t)\)</span>和元素<span class="math inline">\(y=y(t)\)</span>之间的距离为：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)=\int_F\frac{|x(t)-y(t)|}{1+|x(t)-y(t)|}\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\((S,\rho)\)</span>是一个度量空间。</p>
 </div>
@@ -1192,7 +1345,6 @@ window.Quarto = {
 <p><strong>Definition 9.11</strong>. 在<span class="math inline">\(C[a,b]\)</span>中定义元素<span class="math inline">\(x=x(t)\)</span>和元素<span class="math inline">\(y=y(t)\)</span>之间的距离为：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)=\max_{t\in[a,b]}|x(t)-y(t)|
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\((C[a,b],\rho)\)</span>是一个度量空间。</p>
 </div>
@@ -1204,12 +1356,10 @@ window.Quarto = {
 |x(t)-y(t)|&amp;\leqslant|x(t)-z(t)|+|z(t)-y(t)| \\
 &amp;\leqslant\max_{t\in[a,b]}|x(t)-z(t)|+\max_{t\in[a,b]}|z(t)-y(t)| \\
 &amp;=\rho(x,z)+\rho(z,y)
-
 \end{align*}\]</span></p>
 <p>因此：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)=\max_{t\in[a,b]}|x(t)-y(t)|\leqslant\rho(x,z)+\rho(z,y)
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1229,7 +1379,6 @@ window.Quarto = {
 <p><strong>Definition 9.12</strong>. 在<span class="math inline">\(C[a,b]\)</span>中定义元素<span class="math inline">\(x=x(t)\)</span>的范数为：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x||=\max_{a\leqslant t\leqslant b}|x(t)|
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(C[a,b]\)</span>成为一个赋范线性空间。</p>
 </div>

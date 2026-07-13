@@ -81,9 +81,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -186,6 +186,201 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -235,6 +430,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -773,152 +972,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -926,36 +1114,15 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#id--9161b181" id="toc-id--9161b181" class="nav-link active" data-scroll-target="#id--9161b181"><span class="header-section-number">34.1</span> 单调关联性的零假设与备择假设</a></li>
   <li><a href="#id-1-a927dcb5" id="toc-id-1-a927dcb5" class="nav-link" data-scroll-target="#id-1-a927dcb5"><span class="header-section-number">34.2</span> 本章各方法的简单总结</a></li>
-  <li><a href="#spearman-e28c1bc9" id="toc-spearman-e28c1bc9" class="nav-link" data-scroll-target="#spearman-e28c1bc9"><span class="header-section-number">34.3</span> Spearman秩关联检验</a>
-  <ul>
-  <li><a href="#id-15-738839b8" id="toc-id-15-738839b8" class="nav-link" data-scroll-target="#id-15-738839b8"><span class="header-section-number">34.3.0.1</span> 原理</a></li>
-  <li><a href="#id--3d74068c" id="toc-id--3d74068c" class="nav-link" data-scroll-target="#id--3d74068c"><span class="header-section-number">34.3.0.2</span> 大样本的情况</a></li>
-  <li><a href="#id-5-17cec8dc" id="toc-id-5-17cec8dc" class="nav-link" data-scroll-target="#id-5-17cec8dc"><span class="header-section-number">34.3.0.3</span> 打结</a></li>
-  <li><a href="#id-17-41e9e769" id="toc-id-17-41e9e769" class="nav-link" data-scroll-target="#id-17-41e9e769"><span class="header-section-number">34.3.0.4</span> 代码</a></li>
-  </ul></li>
-  <li><a href="#kendalltau-db0ead8b" id="toc-kendalltau-db0ead8b" class="nav-link" data-scroll-target="#kendalltau-db0ead8b"><span class="header-section-number">34.4</span> Kendall<span class="math inline">\(\;\tau\)</span>关联检验</a>
-  <ul>
-  <li><a href="#id--3c657306" id="toc-id--3c657306" class="nav-link" data-scroll-target="#id--3c657306"><span class="header-section-number">34.4.0.1</span> 协同</a></li>
-  <li><a href="#id-16-97439d91" id="toc-id-16-97439d91" class="nav-link" data-scroll-target="#id-16-97439d91"><span class="header-section-number">34.4.0.2</span> 原理</a></li>
-  <li><a href="#id-10-563323ce" id="toc-id-10-563323ce" class="nav-link" data-scroll-target="#id-10-563323ce"><span class="header-section-number">34.4.0.3</span> 大样本近似</a></li>
-  <li><a href="#id-6-df60bbbd" id="toc-id-6-df60bbbd" class="nav-link" data-scroll-target="#id-6-df60bbbd"><span class="header-section-number">34.4.0.4</span> 打结</a></li>
-  <li><a href="#tau_c-cc9d1477" id="toc-tau_c-cc9d1477" class="nav-link" data-scroll-target="#tau_c-cc9d1477"><span class="header-section-number">34.4.0.5</span> 有序分类变量情况下的<span class="math inline">\(\tau_c\)</span></a></li>
-  <li><a href="#id-18-9c876ef6" id="toc-id-18-9c876ef6" class="nav-link" data-scroll-target="#id-18-9c876ef6"><span class="header-section-number">34.4.0.6</span> 代码</a></li>
-  </ul></li>
-  <li><a href="#goodman-kruskalsgamma-c6e6a2e2" id="toc-goodman-kruskalsgamma-c6e6a2e2" class="nav-link" data-scroll-target="#goodman-kruskalsgamma-c6e6a2e2"><span class="header-section-number">34.5</span> Goodman-Kruskal’s<span class="math inline">\(\;\gamma\)</span>关联检验</a>
-  <ul>
-  <li><a href="#id-17-63b95675" id="toc-id-17-63b95675" class="nav-link" data-scroll-target="#id-17-63b95675"><span class="header-section-number">34.5.0.1</span> 原理</a></li>
-  <li><a href="#id-19-46345210" id="toc-id-19-46345210" class="nav-link" data-scroll-target="#id-19-46345210"><span class="header-section-number">34.5.0.2</span> 代码</a></li>
-  </ul></li>
-  <li><a href="#sumersd-5f49cf00" id="toc-sumersd-5f49cf00" class="nav-link" data-scroll-target="#sumersd-5f49cf00"><span class="header-section-number">34.6</span> Sumers’<span class="math inline">\(\;d\)</span>关联检验</a>
-  <ul>
-  <li><a href="#id-18-00ab984e" id="toc-id-18-00ab984e" class="nav-link" data-scroll-target="#id-18-00ab984e"><span class="header-section-number">34.6.0.1</span> 原理</a></li>
-  </ul></li>
+  <li><a href="#spearman-e28c1bc9" id="toc-spearman-e28c1bc9" class="nav-link" data-scroll-target="#spearman-e28c1bc9"><span class="header-section-number">34.3</span> Spearman秩关联检验</a></li>
+  <li><a href="#kendalltau-db0ead8b" id="toc-kendalltau-db0ead8b" class="nav-link" data-scroll-target="#kendalltau-db0ead8b"><span class="header-section-number">34.4</span> Kendall<span class="math inline">\(\;\tau\)</span>关联检验</a></li>
+  <li><a href="#goodman-kruskalsgamma-c6e6a2e2" id="toc-goodman-kruskalsgamma-c6e6a2e2" class="nav-link" data-scroll-target="#goodman-kruskalsgamma-c6e6a2e2"><span class="header-section-number">34.5</span> Goodman-Kruskal’s<span class="math inline">\(\;\gamma\)</span>关联检验</a></li>
+  <li><a href="#sumersd-5f49cf00" id="toc-sumersd-5f49cf00" class="nav-link" data-scroll-target="#sumersd-5f49cf00"><span class="header-section-number">34.6</span> Sumers’<span class="math inline">\(\;d\)</span>关联检验</a></li>
   </ul>
 </nav>
     </div>

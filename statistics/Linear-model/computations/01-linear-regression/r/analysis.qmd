@@ -1,0 +1,78 @@
+---
+title: "R：多元线性回归"
+format:
+  html:
+    embed-resources: true
+    toc: false
+    code-copy: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+使用 R 的 `lm` 对与 Python Notebook 完全相同的样本拟合模型
+
+$$
+\text{Employed}=\beta_0+\beta_1\text{GNP}+\beta_2\text{Unemployed}
++\beta_3\text{Armed.Forces}+\varepsilon.
+$$
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(broom)
+
+data <- as_tibble(datasets::longley)
+head(data, 8)
+```
+
+## 模型拟合
+
+```{r}
+model <- lm(
+  Employed ~ GNP + Unemployed + Armed.Forces,
+  data = data
+)
+
+tidy(model, conf.int = TRUE)
+glance(model)
+summary(model)
+```
+
+## 诊断图
+
+```{r}
+diagnostics <- tibble(
+  fitted = fitted(model),
+  observed = data$Employed,
+  residual = residuals(model)
+)
+
+ggplot(diagnostics, aes(fitted, observed)) +
+  geom_abline(slope = 1, intercept = 0, colour = "#397d78", linewidth = 0.8) +
+  geom_point(colour = "#52649a", alpha = 0.78, size = 2.2) +
+  labs(
+    title = "Observed versus fitted",
+    x = "Fitted Employed",
+    y = "Observed Employed"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+```{r}
+ggplot(diagnostics, aes(fitted, residual)) +
+  geom_hline(yintercept = 0, colour = "#397d78", linewidth = 0.7) +
+  geom_point(colour = "#52649a", alpha = 0.78, size = 2.2) +
+  labs(
+    title = "Residual diagnostics",
+    x = "Fitted Employed",
+    y = "Residual"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+## 结果解释
+
+两种语言使用相同的 `longley` 数据集、设计矩阵和最小二乘准则，因此估计结果
+仅存在浮点舍入级别的差异。

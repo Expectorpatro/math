@@ -101,9 +101,9 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -206,6 +206,201 @@ div.csl-indent {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -255,6 +450,10 @@ div.csl-indent {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -793,152 +992,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -946,136 +1134,74 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
-  <li><a href="#id--bb1c7c06" id="toc-id--bb1c7c06" class="nav-link active" data-scroll-target="#id--bb1c7c06"><span class="header-section-number">26.1</span> 基本概念</a>
-  <ul>
-  <li><a href="#id--b10c768c" id="toc-id--b10c768c" class="nav-link" data-scroll-target="#id--b10c768c"><span class="header-section-number">26.1.0.1</span> 抽样调查随机性的来源</a></li>
-  <li><a href="#id--3e42da66" id="toc-id--3e42da66" class="nav-link" data-scroll-target="#id--3e42da66"><span class="header-section-number">26.1.0.2</span> 误差</a></li>
-  </ul></li>
+  <li><a href="#id--bb1c7c06" id="toc-id--bb1c7c06" class="nav-link active" data-scroll-target="#id--bb1c7c06"><span class="header-section-number">26.1</span> 基本概念</a></li>
   <li><a href="#id--097d0c56" id="toc-id--097d0c56" class="nav-link" data-scroll-target="#id--097d0c56"><span class="header-section-number">26.2</span> 简单随机抽样</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#srs-2f8c70ed" id="toc-srs-2f8c70ed" class="nav-link" data-scroll-target="#srs-2f8c70ed"><span class="header-section-number">26.2.1</span> SRS的参数估计</a></li>
   <li><a href="#srswr-66754d5a" id="toc-srswr-66754d5a" class="nav-link" data-scroll-target="#srswr-66754d5a"><span class="header-section-number">26.2.2</span> SRSWR的参数估计</a></li>
   <li><a href="#id--8e4796c9" id="toc-id--8e4796c9" class="nav-link" data-scroll-target="#id--8e4796c9"><span class="header-section-number">26.2.3</span> 样本容量的选择</a></li>
-  <li><a href="#id--51d0f640" id="toc-id--51d0f640" class="nav-link" data-scroll-target="#id--51d0f640"><span class="header-section-number">26.2.4</span> 标记重捕法</a>
-  <ul class="collapse">
-  <li><a href="#id--7ef8f4ba" id="toc-id--7ef8f4ba" class="nav-link" data-scroll-target="#id--7ef8f4ba"><span class="header-section-number">26.2.4.1</span> 正态近似求置信区间</a></li>
-  <li><a href="#pearsonchi2-690a7f0c" id="toc-pearsonchi2-690a7f0c" class="nav-link" data-scroll-target="#pearsonchi2-690a7f0c"><span class="header-section-number">26.2.4.2</span> Pearson<span class="math inline">\(\chi^2\)</span>检验求置信区间</a></li>
-  <li><a href="#id--dd8d70aa" id="toc-id--dd8d70aa" class="nav-link" data-scroll-target="#id--dd8d70aa"><span class="header-section-number">26.2.4.3</span> 似然比检验</a></li>
-  <li><a href="#bootstrap-425d91a6" id="toc-bootstrap-425d91a6" class="nav-link" data-scroll-target="#bootstrap-425d91a6"><span class="header-section-number">26.2.4.4</span> bootstrap求置信区间</a></li>
-  <li><a href="#id--33246dda" id="toc-id--33246dda" class="nav-link" data-scroll-target="#id--33246dda"><span class="header-section-number">26.2.4.5</span> 代码</a></li>
-  </ul></li>
+  <li><a href="#id--51d0f640" id="toc-id--51d0f640" class="nav-link" data-scroll-target="#id--51d0f640"><span class="header-section-number">26.2.4</span> 标记重捕法</a></li>
   </ul></li>
   <li><a href="#id--cc13ba62" id="toc-id--cc13ba62" class="nav-link" data-scroll-target="#id--cc13ba62"><span class="header-section-number">26.3</span> 回归估计</a></li>
   <li><a href="#id--30de6b04" id="toc-id--30de6b04" class="nav-link" data-scroll-target="#id--30de6b04"><span class="header-section-number">26.4</span> 估计量</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id--27465a45" id="toc-id--27465a45" class="nav-link" data-scroll-target="#id--27465a45"><span class="header-section-number">26.4.1</span> 回归估计量</a></li>
   <li><a href="#id--77372d6e" id="toc-id--77372d6e" class="nav-link" data-scroll-target="#id--77372d6e"><span class="header-section-number">26.4.2</span> 比例估计量</a></li>
   </ul></li>
   <li><a href="#id--788c1f54" id="toc-id--788c1f54" class="nav-link" data-scroll-target="#id--788c1f54"><span class="header-section-number">26.5</span> 偏差</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id--682cd86f" id="toc-id--682cd86f" class="nav-link" data-scroll-target="#id--682cd86f"><span class="header-section-number">26.5.1</span> 回归估计的偏差</a></li>
   <li><a href="#id--a434f04f" id="toc-id--a434f04f" class="nav-link" data-scroll-target="#id--a434f04f"><span class="header-section-number">26.5.2</span> 比例估计的偏差</a></li>
   </ul></li>
   <li><a href="#id-1-ae213a1e" id="toc-id-1-ae213a1e" class="nav-link" data-scroll-target="#id-1-ae213a1e"><span class="header-section-number">26.6</span> 均方误差</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id--a76f641f" id="toc-id--a76f641f" class="nav-link" data-scroll-target="#id--a76f641f"><span class="header-section-number">26.6.1</span> 回归估计量的均方误差</a></li>
   <li><a href="#id--5fb613ce" id="toc-id--5fb613ce" class="nav-link" data-scroll-target="#id--5fb613ce"><span class="header-section-number">26.6.2</span> 比例估计量的均方误差</a></li>
   </ul></li>
   <li><a href="#id-1-e63d8a1a" id="toc-id-1-e63d8a1a" class="nav-link" data-scroll-target="#id-1-e63d8a1a"><span class="header-section-number">26.7</span> 方差</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id--f8fcda1f" id="toc-id--f8fcda1f" class="nav-link" data-scroll-target="#id--f8fcda1f"><span class="header-section-number">26.7.1</span> 回归估计的方差</a></li>
   <li><a href="#id--9b3ddc4e" id="toc-id--9b3ddc4e" class="nav-link" data-scroll-target="#id--9b3ddc4e"><span class="header-section-number">26.7.2</span> 比例估计的方差</a></li>
   </ul></li>
   <li><a href="#id-1-31bb737c" id="toc-id-1-31bb737c" class="nav-link" data-scroll-target="#id-1-31bb737c"><span class="header-section-number">26.8</span> 置信区间</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id--2f0677ba" id="toc-id--2f0677ba" class="nav-link" data-scroll-target="#id--2f0677ba"><span class="header-section-number">26.8.1</span> 回归估计的置信区间</a></li>
   <li><a href="#id--e6912ea2" id="toc-id--e6912ea2" class="nav-link" data-scroll-target="#id--e6912ea2"><span class="header-section-number">26.8.2</span> 比例估计的置信区间</a></li>
   </ul></li>
   <li><a href="#id--8df6123f" id="toc-id--8df6123f" class="nav-link" data-scroll-target="#id--8df6123f"><span class="header-section-number">26.9</span> 比例估计样本容量的选择</a></li>
   <li><a href="#ht-6022647f" id="toc-ht-6022647f" class="nav-link" data-scroll-target="#ht-6022647f"><span class="header-section-number">26.10</span> 回归估计、比例估计与HT估计的比较</a></li>
-  <li><a href="#id--0c4ca7c8" id="toc-id--0c4ca7c8" class="nav-link" data-scroll-target="#id--0c4ca7c8"><span class="header-section-number">26.11</span> 分层抽样</a>
-  <ul>
-  <li><a href="#id--11770624" id="toc-id--11770624" class="nav-link" data-scroll-target="#id--11770624"><span class="header-section-number">26.11.0.1</span> 为什么要使用分层抽样</a></li>
-  <li><a href="#id--eb38215f" id="toc-id--eb38215f" class="nav-link" data-scroll-target="#id--eb38215f"><span class="header-section-number">26.11.0.2</span> 分层随机抽样基本设置</a></li>
-  </ul></li>
+  <li><a href="#id--0c4ca7c8" id="toc-id--0c4ca7c8" class="nav-link" data-scroll-target="#id--0c4ca7c8"><span class="header-section-number">26.11</span> 分层抽样</a></li>
   <li><a href="#id-9-087379eb" id="toc-id-9-087379eb" class="nav-link" data-scroll-target="#id-9-087379eb"><span class="header-section-number">26.12</span> 参数估计</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id--8cf58071" id="toc-id--8cf58071" class="nav-link" data-scroll-target="#id--8cf58071"><span class="header-section-number">26.12.1</span> 亚群体特征的估计</a></li>
-  <li><a href="#hattau-a643c5af" id="toc-hattau-a643c5af" class="nav-link" data-scroll-target="#hattau-a643c5af"><span class="header-section-number">26.12.2</span> 总体总量<span class="math inline">\(\hat{\tau}\)</span>的估计</a>
-  <ul class="collapse">
-  <li><a href="#id--a2330638" id="toc-id--a2330638" class="nav-link" data-scroll-target="#id--a2330638"><span class="header-section-number">26.12.2.1</span> 计算公式</a></li>
-  <li><a href="#id--fcc8e676" id="toc-id--fcc8e676" class="nav-link" data-scroll-target="#id--fcc8e676"><span class="header-section-number">26.12.2.2</span> 抽样权重形式</a></li>
-  </ul></li>
-  <li><a href="#hatmu-57566659" id="toc-hatmu-57566659" class="nav-link" data-scroll-target="#hatmu-57566659"><span class="header-section-number">26.12.3</span> 总体均值<span class="math inline">\(\hat{\mu}\)</span>的估计</a>
-  <ul class="collapse">
-  <li><a href="#id-1-393312a9" id="toc-id-1-393312a9" class="nav-link" data-scroll-target="#id-1-393312a9"><span class="header-section-number">26.12.3.1</span> 计算公式</a></li>
-  <li><a href="#id-1-ccd42b6a" id="toc-id-1-ccd42b6a" class="nav-link" data-scroll-target="#id-1-ccd42b6a"><span class="header-section-number">26.12.3.2</span> 抽样权重形式</a></li>
-  </ul></li>
-  <li><a href="#id--37f2ae74" id="toc-id--37f2ae74" class="nav-link" data-scroll-target="#id--37f2ae74"><span class="header-section-number">26.12.4</span> 估计的性质</a>
-  <ul class="collapse">
-  <li><a href="#id--d65aec05" id="toc-id--d65aec05" class="nav-link" data-scroll-target="#id--d65aec05"><span class="header-section-number">26.12.4.1</span> 无偏性</a></li>
-  <li><a href="#id-2-cc355f2e" id="toc-id-2-cc355f2e" class="nav-link" data-scroll-target="#id-2-cc355f2e"><span class="header-section-number">26.12.4.2</span> 方差</a></li>
-  <li><a href="#id-2-de2fb8f7" id="toc-id-2-de2fb8f7" class="nav-link" data-scroll-target="#id-2-de2fb8f7"><span class="header-section-number">26.12.4.3</span> 置信区间</a></li>
-  <li><a href="#id--b6d94b3e" id="toc-id--b6d94b3e" class="nav-link" data-scroll-target="#id--b6d94b3e"><span class="header-section-number">26.12.4.4</span> 自由度问题</a></li>
-  </ul></li>
+  <li><a href="#hattau-a643c5af" id="toc-hattau-a643c5af" class="nav-link" data-scroll-target="#hattau-a643c5af"><span class="header-section-number">26.12.2</span> 总体总量<span class="math inline">\(\hat{\tau}\)</span>的估计</a></li>
+  <li><a href="#hatmu-57566659" id="toc-hatmu-57566659" class="nav-link" data-scroll-target="#hatmu-57566659"><span class="header-section-number">26.12.3</span> 总体均值<span class="math inline">\(\hat{\mu}\)</span>的估计</a></li>
+  <li><a href="#id--37f2ae74" id="toc-id--37f2ae74" class="nav-link" data-scroll-target="#id--37f2ae74"><span class="header-section-number">26.12.4</span> 估计的性质</a></li>
   <li><a href="#id--e598dc4d" id="toc-id--e598dc4d" class="nav-link" data-scroll-target="#id--e598dc4d"><span class="header-section-number">26.12.5</span> 群体比例问题</a></li>
   </ul></li>
-  <li><a href="#id--18b927ca" id="toc-id--18b927ca" class="nav-link" data-scroll-target="#id--18b927ca"><span class="header-section-number">26.13</span> 估计方法思考</a>
-  <ul>
-  <li><a href="#id--a4d0f57c" id="toc-id--a4d0f57c" class="nav-link" data-scroll-target="#id--a4d0f57c"><span class="header-section-number">26.13.0.1</span> 均值</a></li>
-  </ul></li>
+  <li><a href="#id--18b927ca" id="toc-id--18b927ca" class="nav-link" data-scroll-target="#id--18b927ca"><span class="header-section-number">26.13</span> 估计方法思考</a></li>
   <li><a href="#id--9ca316b6" id="toc-id--9ca316b6" class="nav-link" data-scroll-target="#id--9ca316b6"><span class="header-section-number">26.14</span> 分配原则</a>
-  <ul>
-  <li><a href="#id--b3352066" id="toc-id--b3352066" class="nav-link" data-scroll-target="#id--b3352066"><span class="header-section-number">26.14.1</span> 比例分配</a>
   <ul class="collapse">
-  <li><a href="#srs-0eb754a0" id="toc-srs-0eb754a0" class="nav-link" data-scroll-target="#srs-0eb754a0"><span class="header-section-number">26.14.1.1</span> 比例分配与SRS的比较</a></li>
-  </ul></li>
-  <li><a href="#id--030f7ec8" id="toc-id--030f7ec8" class="nav-link" data-scroll-target="#id--030f7ec8"><span class="header-section-number">26.14.2</span> 最优分配</a>
-  <ul class="collapse">
-  <li><a href="#id--47889536" id="toc-id--47889536" class="nav-link" data-scroll-target="#id--47889536"><span class="header-section-number">26.14.2.1</span> 成本一致最小化方差</a></li>
-  <li><a href="#id--111f2a13" id="toc-id--111f2a13" class="nav-link" data-scroll-target="#id--111f2a13"><span class="header-section-number">26.14.2.2</span> 成本不一致最小化方差</a></li>
-  <li><a href="#id--f348f924" id="toc-id--f348f924" class="nav-link" data-scroll-target="#id--f348f924"><span class="header-section-number">26.14.2.3</span> 固定方差最小化成本</a></li>
-  </ul></li>
+  <li><a href="#id--b3352066" id="toc-id--b3352066" class="nav-link" data-scroll-target="#id--b3352066"><span class="header-section-number">26.14.1</span> 比例分配</a></li>
+  <li><a href="#id--030f7ec8" id="toc-id--030f7ec8" class="nav-link" data-scroll-target="#id--030f7ec8"><span class="header-section-number">26.14.2</span> 最优分配</a></li>
   </ul></li>
   <li><a href="#id--b269abb3" id="toc-id--b269abb3" class="nav-link" data-scroll-target="#id--b269abb3"><span class="header-section-number">26.15</span> 后分层</a>
-  <ul>
-  <li><a href="#id-10-c1a2cd8c" id="toc-id-10-c1a2cd8c" class="nav-link" data-scroll-target="#id-10-c1a2cd8c"><span class="header-section-number">26.15.1</span> 参数估计</a>
   <ul class="collapse">
-  <li><a href="#mu-e3de8f0b" id="toc-mu-e3de8f0b" class="nav-link" data-scroll-target="#mu-e3de8f0b"><span class="header-section-number">26.15.1.1</span> 总体均值<span class="math inline">\(\mu\)</span>的估计</a></li>
+  <li><a href="#id-10-c1a2cd8c" id="toc-id-10-c1a2cd8c" class="nav-link" data-scroll-target="#id-10-c1a2cd8c"><span class="header-section-number">26.15.1</span> 参数估计</a></li>
   </ul></li>
-  </ul></li>
-  <li><a href="#id--8662c24a" id="toc-id--8662c24a" class="nav-link" data-scroll-target="#id--8662c24a"><span class="header-section-number">26.16</span> 样本容量</a>
-  <ul>
-  <li><a href="#fpc-33a9b8be" id="toc-fpc-33a9b8be" class="nav-link" data-scroll-target="#fpc-33a9b8be"><span class="header-section-number">26.16.0.1</span> 忽略FPC</a></li>
-  <li><a href="#fpc-a9b86abf" id="toc-fpc-a9b86abf" class="nav-link" data-scroll-target="#fpc-a9b86abf"><span class="header-section-number">26.16.0.2</span> 不忽略FPC</a></li>
-  </ul></li>
+  <li><a href="#id--8662c24a" id="toc-id--8662c24a" class="nav-link" data-scroll-target="#id--8662c24a"><span class="header-section-number">26.16</span> 样本容量</a></li>
   <li><a href="#id--54187618" id="toc-id--54187618" class="nav-link" data-scroll-target="#id--54187618"><span class="header-section-number">26.17</span> 整群抽样</a>
-  <ul>
-  <li><a href="#srs-514c4585" id="toc-srs-514c4585" class="nav-link" data-scroll-target="#srs-514c4585"><span class="header-section-number">26.17.0.1</span> 整群抽样与SRS、分层抽样的比较</a></li>
-  <li><a href="#id--be328f4a" id="toc-id--be328f4a" class="nav-link" data-scroll-target="#id--be328f4a"><span class="header-section-number">26.17.0.2</span> 整群抽样的分类</a></li>
-  <li><a href="#id--3df594dd" id="toc-id--3df594dd" class="nav-link" data-scroll-target="#id--3df594dd"><span class="header-section-number">26.17.0.3</span> 什么情况下使用整群抽样</a></li>
-  <li><a href="#id--5e2ac441" id="toc-id--5e2ac441" class="nav-link" data-scroll-target="#id--5e2ac441"><span class="header-section-number">26.17.1</span> 一阶整群抽样</a>
   <ul class="collapse">
-  <li><a href="#id-1-fb3f6dba" id="toc-id-1-fb3f6dba" class="nav-link" data-scroll-target="#id-1-fb3f6dba"><span class="header-section-number">26.17.1.1</span> 符号说明</a></li>
-  </ul></li>
-  <li><a href="#id--0dfea5a8" id="toc-id--0dfea5a8" class="nav-link" data-scroll-target="#id--0dfea5a8"><span class="header-section-number">26.17.2</span> 参数的无偏估计</a>
-  <ul class="collapse">
-  <li><a href="#id--32223ebc" id="toc-id--32223ebc" class="nav-link" data-scroll-target="#id--32223ebc"><span class="header-section-number">26.17.2.1</span> 总体总量的估计</a></li>
-  <li><a href="#id--0da193ec" id="toc-id--0da193ec" class="nav-link" data-scroll-target="#id--0da193ec"><span class="header-section-number">26.17.2.2</span> 总体均值的估计</a></li>
-  </ul></li>
+  <li><a href="#id--5e2ac441" id="toc-id--5e2ac441" class="nav-link" data-scroll-target="#id--5e2ac441"><span class="header-section-number">26.17.1</span> 一阶整群抽样</a></li>
+  <li><a href="#id--0dfea5a8" id="toc-id--0dfea5a8" class="nav-link" data-scroll-target="#id--0dfea5a8"><span class="header-section-number">26.17.2</span> 参数的无偏估计</a></li>
   <li><a href="#id--10e567f0" id="toc-id--10e567f0" class="nav-link" data-scroll-target="#id--10e567f0"><span class="header-section-number">26.17.3</span> 参数的比例估计</a></li>
   </ul></li>
   <li><a href="#id--2895cf7d" id="toc-id--2895cf7d" class="nav-link" data-scroll-target="#id--2895cf7d"><span class="header-section-number">26.18</span> 二阶抽样</a>
-  <ul>
-  <li><a href="#id-2-86ade5f2" id="toc-id-2-86ade5f2" class="nav-link" data-scroll-target="#id-2-86ade5f2"><span class="header-section-number">26.18.0.1</span> 符号说明</a></li>
-  <li><a href="#id--856cd1e6" id="toc-id--856cd1e6" class="nav-link" data-scroll-target="#id--856cd1e6"><span class="header-section-number">26.18.1</span> 总量的估计</a>
   <ul class="collapse">
-  <li><a href="#id--d97e49a2" id="toc-id--d97e49a2" class="nav-link" data-scroll-target="#id--d97e49a2"><span class="header-section-number">26.18.1.1</span> 无偏性的证明</a></li>
-  <li><a href="#id--91789bfd" id="toc-id--91789bfd" class="nav-link" data-scroll-target="#id--91789bfd"><span class="header-section-number">26.18.1.2</span> 方差公式的证明</a></li>
-  </ul></li>
+  <li><a href="#id--856cd1e6" id="toc-id--856cd1e6" class="nav-link" data-scroll-target="#id--856cd1e6"><span class="header-section-number">26.18.1</span> 总量的估计</a></li>
   <li><a href="#id--7b9e963b" id="toc-id--7b9e963b" class="nav-link" data-scroll-target="#id--7b9e963b"><span class="header-section-number">26.18.2</span> 流行率问题</a></li>
   </ul></li>
   <li><a href="#id--caf6283b" id="toc-id--caf6283b" class="nav-link" data-scroll-target="#id--caf6283b"><span class="header-section-number">26.19</span> 系统抽样</a></li>
@@ -1146,7 +1272,6 @@ window.Quarto = {
 \text{判断抽样} \\
 \end{cases}
 \end{cases}\notag
-
 \end{equation}\]</span></p>
 </div>
 <ul>
@@ -1181,7 +1306,6 @@ window.Quarto = {
 \text{混杂偏倚}
 \end{cases}
 \end{cases}
-
 \end{equation*}\]</span></p>
 </div>
 </section>
@@ -1210,45 +1334,37 @@ window.Quarto = {
                 \operatorname{E}(Z_i)=\frac{n}{N},\quad
                 \operatorname{Var}(Z_i)=\frac{n}{N}\left(1-\frac{n}{N}\right) \\
                 \operatorname{Cov}(Z_i,Z_j)=\frac{-n}{N(N-1)}\left(1-\frac{n}{N}\right),\quad\sum_{i=1}^{N}Z_i=n
-
     \end{gather*}\]</span></p></li>
 <li><p>总体方差<span class="math inline">\(\sigma^2\)</span>有如下点估计：</p>
 <p><span class="math display">\[\begin{equation*}
                 \hat{\sigma}^2=\frac{1}{n-1}\sum_{i=1}^N\left(Y_i-\frac{1}{n}\sum_{j=1}^{N}Y_jZ_j\right)^2Z_i
-
     \end{equation*}\]</span></p>
 <p>该点估计是一个无偏估计；</p></li>
 <li><p>总体均值<span class="math inline">\(\mu\)</span>有如下点估计：</p>
 <p><span class="math display">\[\begin{equation*}
                 \hat{\mu}=\frac{1}{n}\sum\limits_{i=1}^{N}Y_iZ_i
-
     \end{equation*}\]</span></p>
 <p>该点估计具有如下性质：</p>
 <p><span class="math display">\[\begin{gather*}
                 \operatorname{E}(\hat{\mu})=\mu,\;\operatorname{Var}(\hat{\mu})=\left(1-\frac{n}{N}\right)\frac{\sigma^2}{n} \\
                 \widehat{\operatorname{Var}}(\hat{\mu})=\left(1-\frac{n}{N}\right)\frac{\hat{\sigma}^2}{n}\text{是关于}\operatorname{Var}(\hat{\mu})\text{的无偏估计}
-
     \end{gather*}\]</span></p>
 <p>该点估计对应的置信水平为<span class="math inline">\(1-\alpha\)</span>的区间估计为：</p>
 <p><span class="math display">\[\begin{equation*}
                 \hat{\mu}\pm u_{1-\frac{\alpha}{2}}\times\sqrt{\widehat{\operatorname{Var}}(\hat{\mu})}
-
     \end{equation*}\]</span></p></li>
 <li><p>总体总量<span class="math inline">\(\tau\)</span>有如下点估计：</p>
 <p><span class="math display">\[\begin{equation*}
                 \hat{\tau}=N\hat{\mu}=\frac{N}{n}\sum\limits_{i=1}^{N}Y_iZ_i
-
     \end{equation*}\]</span></p>
 <p>该点估计具有如下性质：</p>
 <p><span class="math display">\[\begin{gather*}
                 \operatorname{E}(\hat{\tau})=\tau,\quad \operatorname{Var}(\hat{\tau})=N^2\left(1-\frac{n}{N}\right)\frac{\sigma^2}{n} \\
                 \widehat{\operatorname{Var}}(\hat{\tau})=N^2\left(1-\frac{n}{N}\right)\frac{\hat{\sigma}^2}{n}\text{是关于}\operatorname{Var}(\hat{\tau})\text{的无偏估计}
-
     \end{gather*}\]</span></p>
 <p>该点估计对应的置信水平为<span class="math inline">\(1-\alpha\)</span>的区间估计为：</p>
 <p><span class="math display">\[\begin{equation*}
                 \hat{\tau}\pm u_{1-\frac{\alpha}{2}}\times\sqrt{\widehat{\operatorname{Var}}(\hat{\tau})}
-
     \end{equation*}\]</span></p></li>
 </ol>
 </div>
@@ -1257,26 +1373,22 @@ window.Quarto = {
 <p><span class="math display">\[\begin{gather*}
 P(Z_i=1)=\pi_i=\frac{\binom{N-1}{n-1}}{\binom{N}{n}}=\frac{n}{N} \\
 P(Z_i=1,Z_j=1)=\frac{\binom{N-2}{n-2}}{\binom{N}{n}}=\frac{n(n-1)}{N(N-1)}
-
 \end{gather*}\]</span></p>
 <p>于是有</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}(Z_i)=1\times P(Z_i=1)=\frac{n}{N}
-
 \end{equation*}\]</span></p>
 <p>注意到<span class="math inline">\(\operatorname{E}(Z_i^2)=0\times P(Z_i^2=0)+1\times P(Z_i^2=1)=P(Z_i=1)=\operatorname{E}(Z_i)\)</span>，由<a href="../chapters/page-013.html#prop-Variance-c0d6c124" data-reference-type="ref+label" data-reference="prop:Variance">性质 12.3.5</a>(1)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Var}(Z_i)=\operatorname{E}(Z_i^2)-\operatorname{E}^2(Z_i)
 =\operatorname{E}(Z_i)[1-\operatorname{E}(Z_i)]
 =\frac{n}{N}\left(1-\frac{n}{N}\right)
-
 \end{equation*}\]</span></p>
 <p>注意到<span class="math inline">\(\operatorname{E}(Z_iZ_j)=P(Z_i=1,\;Z_j=1)\)</span>，由<a href="../chapters/page-013.html#prop-CovMat-3a62d09d" data-reference-type="ref+label" data-reference="prop:CovMat">性质 12.3.4</a>(6)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Cov}(Z_i,Z_j)=\operatorname{E}(Z_iZ_j)-\operatorname{E}(Z_i)\operatorname{E}(Z_j)
 =\frac{\binom{N-2}{n-2}}{\binom{N}{n}}-\operatorname{E}^2(Z_i)
 =\frac{-n}{N(N-1)}\left(1-\frac{n}{N}\right)
-
 \end{equation*}\]</span></p>
 <p>最后一式由SRS的定义即可得到。</p>
 <p>(2)由(1)、<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)、(3)（先看下面<span class="math inline">\(\mu\)</span>的估计）和<a href="../chapters/page-013.html#prop-Variance-c0d6c124" data-reference-type="ref+label" data-reference="prop:Variance">性质 12.3.5</a>(1)可得：</p>
@@ -1291,12 +1403,10 @@ P(Z_i=1,Z_j=1)=\frac{\binom{N-2}{n-2}}{\binom{N}{n}}=\frac{n(n-1)}{N(N-1)}
 =&amp;\frac{1}{n-1}\left[\frac{n}{N}\left(\sum_{i=1}^{N}Y_i^2-N\mu^2\right)-\left(1-\frac{n}{N}\right)\sigma^2\right] \\
 =&amp;\frac{1}{n-1}\left[\frac{n}{N}\sum_{i=1}^{N}(Y_i-\mu)^2-\left(1-\frac{n}{N}\right)\sigma^2\right] \\
 =&amp;\frac{1}{n-1}\left[\frac{n}{N}(N-1)\sigma^2-\left(1-\frac{n}{N}\right)\sigma^2\right]=\sigma^2
-
 \end{align*}\]</span></p>
 <p>(3)由(1)和<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}(\hat{\mu})=\frac{1}{n}\sum_{i=1}^{N}Y_i\operatorname{E}(Z_i)=\frac{1}{n}N\mu\frac{n}{N}=\mu
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-013.html#prop-Variance-c0d6c124" data-reference-type="ref+label" data-reference="prop:Variance">性质 12.3.5</a>(3)、<a href="../chapters/page-013.html#prop-CovMat-3a62d09d" data-reference-type="ref+label" data-reference="prop:CovMat">性质 12.3.4</a>(2)(3)和(1)可得：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1313,17 +1423,14 @@ P(Z_i=1,Z_j=1)=\frac{\binom{N-2}{n-2}}{\binom{N}{n}}=\frac{n(n-1)}{N(N-1)}
 =&amp;\frac{1}{n}\left(1-\frac{n}{N}\right)\frac{1}{N-1}\left(\sum\limits_{i=1}^{N}Y_i^2-2\mu\sum\limits_{i=1}^NY_i+N\mu^2\right) \\     
 =&amp;\frac{1}{n}\left(1-\frac{n}{N}\right)\frac{1}{N-1}\sum\limits_{i=1}^N(Y_i-\mu)^2 \\
 =&amp;\frac{1}{n}\left(1-\frac{n}{N}\right)\sigma^2
-
 \end{align*}\]</span></p>
 <p>由(2)和<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可知<span class="math inline">\(\widehat{\operatorname{Var}}(\hat{\mu})=\left(1-\dfrac{n}{N}\right)\dfrac{\hat{\sigma}^2}{n}\)</span>是<span class="math inline">\(\operatorname{Var}(\hat{\mu})\)</span>的无偏估计。由<a href="../chapters/page-014.html#theo-CLT-af1c1bb3" data-reference-type="ref+label" data-reference="theo:CLT">定理 13.8</a>可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{\hat{\mu}-\mu}{\sqrt{\operatorname{Var}(\hat{\mu})}}\overset{d}{\longrightarrow}\operatorname{N}(0,1)
-
 \end{equation*}\]</span></p>
 <p>由于<span class="math inline">\(\operatorname{Var}(\hat{\mu})\)</span>的计算中涉及未知参数<span class="math inline">\(\sigma^2\)</span>，以<span class="math inline">\(\widehat{\operatorname{Var}}(\hat{\mu})\)</span>代替，因此<span class="math inline">\(\hat{\mu}\)</span>置信水平为<span class="math inline">\(1-\alpha\)</span>的估计的置信区间为：</p>
 <p><span class="math display">\[\begin{equation*}
 \hat{\mu}\pm u_{1-\frac{\alpha}{2}}\times\sqrt{\widehat{\operatorname{Var}}(\hat{\mu})}
-
 \end{equation*}\]</span></p>
 <p>(4)由(3)和<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)立即可得。&nbsp;◻</p>
 </div>
@@ -1340,7 +1447,6 @@ P(Z_i=1,Z_j=1)=\frac{\binom{N-2}{n-2}}{\binom{N}{n}}=\frac{n(n-1)}{N(N-1)}
 <p><strong>Definition 26.7</strong>. 称：</p>
 <p><span class="math display">\[\begin{equation*}
 \hat{\tau}=\sum\limits_{i=1}^Nw_iY_iZ_i
-
 \end{equation*}\]</span></p>
 <p>为<span class="math inline">\(\tau\)</span>的<strong>Horvitz-Thompson估计量</strong>，简称为HT估计量。</p>
 </div>
@@ -1352,7 +1458,6 @@ P(Z_i=1,Z_j=1)=\frac{\binom{N-2}{n-2}}{\binom{N}{n}}=\frac{n(n-1)}{N(N-1)}
 <p><span class="math display">\[\begin{gather*}
 \sigma^2=\frac{1}{N-1}\sum_{i=1}^N(Y_i-p)^2=\frac{N}{N-1}p(1-p)\notag \\
 \hat{\sigma^2}=\frac{1}{n-1}\sum_{i=1}^{N}(Y_i-\hat{p})^2Z_i=\frac{n}{n-1}\hat{p}(1-\hat{p})
-
 \end{gather*}\]</span></p>
 </div>
 </section>
@@ -1366,27 +1471,22 @@ P(Z_i=1,Z_j=1)=\frac{\binom{N-2}{n-2}}{\binom{N}{n}}=\frac{n(n-1)}{N(N-1)}
                 \overrightarrow{Q}=(Q_1,Q_2,\dots,Q_N)\sim\operatorname{Multi}\left(n,\; \overbrace{\left(\frac{1}{N},\;\frac{1}{N},\dots,\frac{1}{N}\right)}^{\text{N个}\;\frac{1}{N}}\right)\\
                 Q_i\sim\operatorname{Binom}\left(n,\;\frac{1}{N}\right) \\
                 \operatorname{E}(Q_i)=\frac{n}{N},\;\operatorname{Var}(Q_i)=\frac{n}{N}\left(1-\frac{1}{N}\right) ,\;\operatorname{Cov}(Q_i,\;Q_j)=-\frac{n}{N^2}
-
     \end{gather*}\]</span></p></li>
 <li><p>总体均值<span class="math inline">\(\mu\)</span>有如下点估计：</p>
 <p><span class="math display">\[\begin{equation*}
                 \hat{\mu}=\frac{1}{n}\sum_{i=1}^{N}Y_iQ_i
-
     \end{equation*}\]</span></p>
 <p>该点估计具有如下性质：</p>
 <p><span class="math display">\[\begin{equation*}
                 \operatorname{E}(\hat{\mu})=\mu,\;\operatorname{Var}(\hat{\mu})=\frac{N-1}{N}\frac{\sigma^2}{n}
-
     \end{equation*}\]</span></p></li>
 <li><p>总体总量<span class="math inline">\(\tau\)</span>有如下点估计：</p>
 <p><span class="math display">\[\begin{equation*}
                 \hat{\tau}=\frac{N}{n}\sum_{i=1}^NY_iQ_i
-
     \end{equation*}\]</span></p>
 <p>该点估计具有如下性质：</p>
 <p><span class="math display">\[\begin{equation*}
                 \operatorname{E}(\hat{\tau})=\tau,\;\operatorname{Var}(\hat{\tau})=N(N-1)\frac{\sigma^2}{n}
-
     \end{equation*}\]</span></p></li>
 </ol>
 </div>
@@ -1396,20 +1496,17 @@ P(Z_i=1,Z_j=1)=\frac{\binom{N-2}{n-2}}{\binom{N}{n}}=\frac{n(n-1)}{N(N-1)}
 \operatorname{Cov}(Q_i,\;Q_j)&amp;=\operatorname{Cov}\left[\sum_{k=1}^nI_i(k),\;\sum_{l=1}^nI_j(l)\right] \\
 &amp;=\sum_{k=1}^n\sum_{l=1}^n\operatorname{Cov}[I_i(k),\;I_j(l)] \\
 &amp;=\sum_{k=l}\operatorname{Cov}[I_i(k),\;I_j(l)]+\sum_{k\ne l}\operatorname{Cov}[I_i(k),\;I_j(l)]
-
 \end{align*}\]</span></p>
 <p>由SRSWR的定义和<a href="../chapters/page-013.html#prop-CovMat-3a62d09d" data-reference-type="ref+label" data-reference="prop:CovMat">性质 12.3.4</a>(7)可知后一项为<span class="math inline">\(0\)</span>，根据<a href="../chapters/page-013.html#prop-CovMat-3a62d09d" data-reference-type="ref+label" data-reference="prop:CovMat">性质 12.3.4</a>(6)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Cov}(Q_i,\;Q_j)
 =\sum_{k=1}^n\operatorname{Cov}[I_i(k),\;I_j(k)] =\sum_{k=1}^n\left\{\operatorname{E}[I_i(k)I_j(k)]-\operatorname{E}[I_i(k)]\operatorname{E}[I_j(k)]\right\}
-
 \end{equation*}\]</span></p>
 <p>由于同一次抽样中不可能抽出两个个体，所以前一项为<span class="math inline">\(0\)</span>。根据<a href="../chapters/page-013.html#prop-Binom-e6beba11" data-reference-type="ref+label" data-reference="prop:Binom">性质 12.4.1</a>(2)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Cov}(Q_i,\;Q_j)
 =-\sum_{k=1}^n\operatorname{E}[I_i(k)]\operatorname{E}[I_j(k)]
 =-\frac{n}{N^2}
-
 \end{equation*}\]</span></p>
 <p>(2)类似<a href="#prop-SRS-fbd7b592" data-reference-type="ref+label" data-reference="prop:SRS">性质 26.2.1</a>(3)可得。</p>
 <p>(3)由(2)和<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)得到。&nbsp;◻</p>
@@ -1424,18 +1521,15 @@ P(Z_i=1,Z_j=1)=\frac{\binom{N-2}{n-2}}{\binom{N}{n}}=\frac{n(n-1)}{N(N-1)}
 <p><strong>Theorem 26.1</strong>. 待估参数为总体均值时有如下样本容量公式：</p>
 <p><span class="math display">\[\begin{equation*}
 n_{\text{SRS}}=\frac{1}{\frac{d^2}{u^2\sigma^2}+\frac{1}{N}},\quad n_{\text{SRSWR}}=\frac{u^2\sigma^2}{d^2}
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(u\)</span>为求解区间估计过程中选择的正态分布分位数，<span class="math inline">\(d\)</span>为误差幅度。</p>
 <p>上式中二者有关系（又称为两步法）：</p>
 <p><span class="math display">\[\begin{equation}
 \frac{1}{n_{\text{SRS}}}=\frac{1}{n_{\text{SRSWR}}}+\frac{1}{N}\notag
-
 \end{equation}\]</span></p>
 <p>待估参数为总体阳性率时有如下样本容量公式：</p>
 <p><span class="math display">\[\begin{equation*}
 n_{SRS}=\frac{Np(1-p)}{\frac{d^2}{u^2}(N-1)+p(1-p)},\quad n_{\text{SRSWR}}=\frac{u^2}{d^2}\frac{N}{N-1}p(1-p)\approx\frac{u^2p(1-p)}{d^2}
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1475,19 +1569,16 @@ n_{SRS}=\frac{Np(1-p)}{\frac{d^2}{u^2}(N-1)+p(1-p)},\quad n_{\text{SRSWR}}=\frac
 <p><strong>Theorem 26.2</strong>. 标记重捕法中总体总量<span class="math inline">\(\tau\)</span>的点估计如下：</p>
 <p><span class="math display">\[\begin{equation*}
 \hat{t}=\frac{y}{x}X
-
 \end{equation*}\]</span></p>
 <p>它有如下性质：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Var}(\hat{t})\approx\frac{(yX)^2}{\operatorname{E}^3(x)}\frac{(t-y)(t-X)}{t(t-1)},\quad
 \widehat{\operatorname{Var}}(\hat{t})=\frac{Xy(y-x)(X-x)}{x^3}
-
 \end{equation*}\]</span></p>
 <p>若<span class="math inline">\(x\)</span>很小，可对<span class="math inline">\(\hat{t}\)</span>和<span class="math inline">\(\hat{\operatorname{Var}}(\hat{t})\)</span>作如下修正：</p>
 <p><span class="math display">\[\begin{equation*}
 \hat{t}=\frac{(X+1)(y+1)}{x+1}-1,\quad
 \widehat{\operatorname{Var}}(\hat{t})=\frac{(X+1)(y+1)(y-x)(X-x)}{(x+1)^2(x+2)}
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1495,19 +1586,16 @@ n_{SRS}=\frac{Np(1-p)}{\frac{d^2}{u^2}(N-1)+p(1-p)},\quad n_{\text{SRSWR}}=\frac
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}(x)=\frac{yX}{t},\quad
 \operatorname{Var}(x)=\frac{yX(t-y)(t-X)}{t^2(t-1)}
-
 \end{equation*}\]</span></p>
 <p>所以由<a href="../chapters/page-014.html#sec-deltamethod-afa15d41" data-reference-type="ref+label" data-reference="sec:deltamethod">定理 13.9</a>：</p>
 <p><span class="math display">\[\begin{align*}
 \operatorname{Var}(\hat{t})&amp;=\operatorname{Var}\left(yX\frac{1}{x}\right)=(yX)^2\operatorname{Var}\left(\frac{1}{x}\right)\approx(yX)^2\left[\frac{-1}{\operatorname{E}^2(x)}\right]^2\operatorname{Var}(x) \\
 &amp;=\frac{(yX)^2}{\operatorname{E}^4(x)}\frac{yX}{t}\frac{(t-y)(t-X)}{t(t-1)}=\frac{(yX)^2}{\operatorname{E}^3(x)}\frac{(t-y)(t-X)}{t(t-1)}
-
 \end{align*}\]</span></p>
 <p>用<span class="math inline">\(x\)</span>替代<span class="math inline">\(E(x)\)</span>，然后考虑<span class="math inline">\(t\)</span>较大时的近似，最后还剩一个<span class="math inline">\(t\)</span>，用<span class="math inline">\(\hat{t}\)</span>带入进行计算，即可得到：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;\frac{(yX)^2}{x^3}\frac{(t-y)(t-X)}{t(t-1)} \approx\frac{(yX)^2}{x^3}\frac{(t-y)(t-X)}{t^2} \\
 =&amp;\frac{(yX)^2}{x^3}\left(1-\frac{y}{t}\right)\left(1-\frac{X}{t}\right) \approx\frac{Xy(y-x)(X-x)}{x^3}
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1645,7 +1733,6 @@ H_0:\theta=\hat{t}\quad H_1:\theta=\theta_A
 <p><strong>Definition 26.8</strong>. 在SRS下，利用<span class="math inline">\(\{Y_1, Y_2, \dots, Y_{N}\}\)</span>和个体特征<span class="math inline">\(\{X_1, X_2, \dots, X_{N}\}\)</span>的线性关系<span class="math inline">\(Y_i=\beta_1X_i+\beta_0\)</span>对总体相关信息进行估计的方法被称为<a href="../chapters/page-057.html#term-RegEstimate" class="term" title="regression estimate">回归估计<span class="term-english">（regression estimate）</span></a>，当<span class="math inline">\(\beta_0=0\)</span>时，也称之为<a href="../chapters/page-057.html#term-RatioEstimate" class="term" title="ratio estimate">比例估计<span class="term-english">（ratio estimate）</span></a>。称该个体特征为<a href="../chapters/page-040.html#term-AuxiliaryVariable" class="term" title="auxiliary variable">辅助变量<span class="term-english">（auxiliary variable）</span></a>。 <a href="../chapters/page-057.html#term-RatioEstimate" class="term" title="ratio estimate">比例估计<span class="term-english">（ratio estimate）</span></a>使用SRS来估计两个个体特征<span class="math inline">\(\{Y_1, Y_2, \dots, Y_{N}\}\)</span>与<span class="math inline">\(\{X_1, X_2, \dots, X_{N}\}\)</span>之间的比值：</p>
 <p><span class="math display">\[\begin{equation*}
 \beta=\frac{\mu_Y}{\mu_X}=\frac{\tau_Y}{\tau_X}
-
 \end{equation*}\]</span></p>
 <p>或者通过估计<span class="math inline">\(\mu_X(\tau_X)\)</span>和<span class="math inline">\(\beta\)</span>去估计<span class="math inline">\(\mu_Y=\beta\mu_X(\tau_Y=\beta\tau_X)\)</span>。</p>
 </div>
@@ -1666,13 +1753,11 @@ H_0:\theta=\hat{t}\quad H_1:\theta=\theta_A
 <li><p><span class="math inline">\(\beta\)</span>具有如下点估计：</p>
 <p><span class="math display">\[\begin{equation*}
                 \hat{\beta}=\frac{\hat{\mu}_Y}{\hat{\mu}_X}
-
     \end{equation*}\]</span></p>
 <p>该点估计具有如下性质<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>：</p>
 <p><span class="math display">\[\begin{gather*}
                 \operatorname{E}(\hat{\beta}-\beta)=-\dfrac{\operatorname{Cov}(\hat{\beta}),\hat{\mu}_X}{\mu_X}=\operatorname{O}_p\left(\frac{1}{n}\right) \\
                 \operatorname{MSE}(\hat{\beta})=\left(1-\frac{n}{N}\right)\frac{1}{n\mu_X^2}\frac{1}{N-1}\sum_{i=1}^{N}(Y_i-\beta X_i)^2+\operatorname{O}\left(\frac{1}{n^{\frac{3}{2}}}\right)=\operatorname{O}\left(\frac{1}{n}\right)
-
     \end{gather*}\]</span></p></li>
 </ol>
 </div>
@@ -1681,32 +1766,27 @@ H_0:\theta=\hat{t}\quad H_1:\theta=\theta_A
 <p><span class="math display">\[\begin{align*}
 \hat{\beta}-\beta&amp;=(\hat{\beta}-\beta)\frac{\mu_X-\hat{\mu}_X+\hat{\mu}_X}{\mu_X}=\frac{(\hat{\beta}-\beta)(\mu_X-\hat{\mu}_X)}{\mu_X}+\frac{(\hat{\beta}-\beta)\hat{\mu}_X}{\mu_X} \\
 &amp;=\frac{(\hat{\beta}-\beta)(\mu_X-\hat{\mu}_X)}{\mu_X}+\frac{\hat{\mu}_Y-\beta\hat{\mu}_X}{\mu_X}
-
 \end{align*}\]</span></p>
 <p>根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)和<a href="#prop-SRS-fbd7b592" data-reference-type="ref+label" data-reference="prop:SRS">性质 26.2.1</a>(3)可知：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;\operatorname{E}(\hat{\beta}-\beta)=\frac{\operatorname{E}[(\hat{\beta}-\beta)(\mu_X-\hat{\mu}_X)]}{\mu_X}+\frac{\operatorname{E}(\hat{\mu}_Y-\beta\hat{\mu}_X)}{\mu_X} \\
 =&amp;-\frac{\operatorname{E}\{[\hat{\beta}-\operatorname{E}(\hat{\beta})+\operatorname{E}(\hat{\beta})-\beta](\hat{\mu}_X-\mu_X)\}}{\mu_X} \\
 =&amp;-\frac{\operatorname{Cov}(\hat{\beta},\hat{\mu}_X)+[\operatorname{E}(\hat{\beta})-\beta]\operatorname{E}(\hat{\mu}_X-\mu_X)}{\mu_X}=-\frac{\operatorname{Cov}(\hat{\beta},\hat{\mu}_X)}{\mu_X}
-
 \end{align*}\]</span></p>
 <p>由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(2)(5)、<a href="../chapters/page-017.html#ineq-cauchy-schiwarz-expectations-4f30d514" data-reference-type="ref+label" data-reference="ineq:cauchy-schiwarz-expectations">不等式 4</a>和可得：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;|\operatorname{E}(\hat{\beta}-\beta)|\leqslant\operatorname{E}\left[\left|\frac{(\hat{\beta}-\beta)(\mu_X-\hat{\mu}_X)}{\mu_X}\right|\right]=\operatorname{E}\left[\left|\frac{(\hat{\mu}_Y-\beta\hat{\mu}_X)(\mu_X-\hat{\mu}_X)}{\hat{\mu}_X\mu_X}\right|\right] \\
 &lt;&amp;\frac{1}{\hat{\mu}_X\mu_X}\operatorname{E}[|(\hat{\mu}_Y-\beta\hat{\mu}_X)(\mu_X-\hat{\mu}_X)|]\leqslant\frac{1}{\hat{\mu}_X\mu_X}\sqrt{\operatorname{E}[(\hat{\mu}_Y-\beta\hat{\mu}_X)^2]\operatorname{E}[(\mu_X-\hat{\mu}_X)^2]} \\
 =&amp;\frac{1}{\hat{\mu}_X\mu_X}\sqrt{\operatorname{O}\left(\frac{1}{n}\right)\operatorname{O}\left(\frac{1}{n}\right)}=\operatorname{O}\left(\frac{1}{n}\right)
-
 \end{align*}\]</span></p>
 <p>不对最后一个等式作解释，涉及到了渐进理论的一些东西（连续映射定理、Slutsky定理和概率收敛阶数的性质），对这方面感兴趣的话先学测度论然后可以参考<span class="citation" data-cites="vander">(<a href="../references.html#ref-vander" role="doc-biblioref">A.W. van der Vaart 1998</a>)</span>。由即可得到<span class="math inline">\(\operatorname{E}(\hat{\beta}-\beta)=\operatorname{O}_p\left(\dfrac{1}{n}\right)\)</span>。</p>
 <p>(2)对<span class="math inline">\((\hat{\beta}-\beta)^2\)</span>进行变形：</p>
 <p><span class="math display">\[\begin{equation*}
 (\hat{\beta}-\beta)^2=\left(\frac{\hat{\mu}_Y-\beta\hat{\mu}_X}{\hat{\mu}_X}\right)=\frac{(\hat{\mu}_Y-\beta\hat{\mu}_X)^2}{\hat{\mu}_X^2}\frac{\mu_X^2-\hat{\mu}_X^2+\hat{\mu}_X^2}{\mu_X^2}=\frac{(\hat{\mu}_Y-\beta\hat{\mu}_X)^2}{\mu_X^2}-\frac{(\hat{\mu}_Y-\beta\hat{\mu}_X)^2(\hat{\mu}_X^2-\mu_X^2)}{\hat{\mu}_X^2\mu_X^2}
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)对上式两边求期望即可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}[(\hat{\beta}-\beta)^2]=\frac{1}{\mu_X^2}\operatorname{E}\left[(\hat{\mu}_Y-\beta\hat{\mu}_X)^2\right]-\operatorname{E}\left[\frac{(\hat{\mu}_Y-\beta\hat{\mu}_X)^2(\hat{\mu}_X^2-\mu_X^2)}{\hat{\mu}_X^2\mu_X^2}\right]
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1718,12 +1798,10 @@ H_0:\theta=\hat{t}\quad H_1:\theta=\theta_A
 <p><span class="math display">\[\begin{equation*}
                 \hat{\beta}_1=\frac{\sum\limits_{i=1}^{N}(X_i-\overline{x})(Y_i-\overline{y})Z_i}{\sum\limits_{i=1}^{N}(X_i-\overline{x})^2Z_i}=\frac{s_y\hat{R}}{s_x},\quad
                 \hat{\beta}_0=\overline{y}-\hat{\beta}_1\overline{x}
-
     \end{equation*}\]</span></p>
 <p>该点估计具有如下性质：</p>
 <p><span class="math display">\[\begin{gather*}
                 \beta_1-\hat{\beta}_1=\operatorname{MSE}(\hat{\beta}_1)=\operatorname{O}\left(\frac{1}{n}\right)
-
     \end{gather*}\]</span></p></li>
 </ol>
 </div>
@@ -1742,7 +1820,6 @@ H_0:\theta=\hat{t}\quad H_1:\theta=\theta_A
 =&amp;\left(1-\frac{n}{N}\right)\frac{1}{n}\frac{1}{N-1}\left(\sum_{i=1}^NX_iY_i-\sum_{i=1}^NX_i\mu_Y-\sum_{i=1}^NY_i\mu_X+N\mu_X\mu_Y\right) \\
 =&amp;\left(1-\frac{n}{N}\right)\frac{1}{n}\frac{1}{N-1}\sum_{i=1}^N(X_iY_i-X_i\mu_Y-Y_i\mu_X+\mu_X\mu_Y) \\
 =&amp;\left(1-\frac{n}{N}\right)\frac{1}{n}\frac{1}{N-1}\sum\limits_{i=1}^N(X_i-\mu_X)(Y_i-\mu_Y) =\left(1-\frac{n}{N}\right)\frac{1}{n}\operatorname{Cov}(X,Y)
-
 \end{align*}\]</span></p>
 <p>根据<a href="#prop-SRS-fbd7b592" data-reference-type="ref+label" data-reference="prop:SRS">性质 26.2.1</a>(3)可得：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1750,12 +1827,10 @@ H_0:\theta=\hat{t}\quad H_1:\theta=\theta_A
 &amp;=\frac{\left(1-\dfrac{n}{N}\right)\dfrac{1}{n}\operatorname{Cov}(X,Y)}{\sqrt{\left(1-\dfrac{n}{N}\right)^2\dfrac{1}{n^2}\operatorname{Var}(X)\operatorname{Var}(Y)}} \\
 &amp;=\frac{\operatorname{Cov}(X,Y)}{\sqrt{\operatorname{Var}(X)\operatorname{Var}(Y)}} \\
 &amp;=\operatorname{Corr}(X,Y)
-
 \end{align*}\]</span></p>
 <p>(2)令：</p>
 <p><span class="math display">\[\begin{gather*}
 \varepsilon_i=Y_i-\beta_1X_i-\beta_0,\;i=1,2,\dots,N \\ e_j=y_j-\beta_1x_j-\beta_0,\;j=1,2,\dots,n
-
 \end{gather*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1769,7 +1844,6 @@ H_0:\theta=\hat{t}\quad H_1:\theta=\theta_A
 <p><span class="math display">\[\begin{gather*}
 \hat{\mu}_{Y_{reg}}=\hat{B}_1\mu_X+\hat{B}_0=\hat{B}_1(\mu_X-\bar{x})+\bar{y},\quad
 \hat{\tau}_{Y_{reg}}=\hat{B}_1\tau_X+\hat{B}_0
-
 \end{gather*}\]</span></p>
 </div>
 </section>
@@ -1780,7 +1854,6 @@ H_0:\theta=\hat{t}\quad H_1:\theta=\theta_A
 <p><span class="math display">\[\begin{gather*}
 \hat{B}=\frac{\bar{y}}{\bar{x}}=\frac{\tau_y}{\tau_x} \\
 \hat{\mu}_{Yr}=\hat{B}\mu_X,\quad\hat{\tau}_{Yr}=\hat{B}\tau_X
-
 \end{gather*}\]</span></p>
 </div>
 <p>其中<span class="math inline">\(\hat{B}\)</span>是比例系数<span class="math inline">\(B\)</span>的估计<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>，对于<span class="math inline">\(B\)</span>的真实值，应有<span class="math inline">\(B=\frac{\mu_Y}{\mu_X}=\frac{\tau_Y}{\tau_X}\)</span>。<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
@@ -1799,13 +1872,11 @@ H_0:\theta=\hat{t}\quad H_1:\theta=\theta_A
 <p><span class="math display">\[\begin{gather*}
 bias(\hat{\mu}_{Yr})=E(\hat{\mu}_{Yr})-\mu_Y=Cov(-\hat{B},\bar{x}) \\
 bias(\hat{\tau}_{Yr})=E(\hat{\tau}_{Yr})-\tau_Y=Cov(-\hat{B},\bar{x})N
-
 \end{gather*}\]</span></p>
 <p>上式不便于计算，可以用下式进行估计：</p>
 <p><span class="math display">\[\begin{gather*}
 bias(\hat{\mu}_{Yr})\approx\frac{1}{\mu_X}\left[BVar(\bar{x})-Cov(\bar{x},\bar{y})\right]=\left(1-\frac{n}{N}\right)\frac{1}{n\mu_X}[B\sigma_X^2-Corr(X,Y)\sigma_X\sigma_Y] \\
 bias(\hat{\tau}_{Yr})\approx\frac{\tau_X}{\mu_X^2}\left[BVar(\bar{x})-Cov(\bar{x},\bar{y})\right]=\left(1-\frac{n}{N}\right)\frac{\tau_X}{n\mu_X^2}[B\sigma_X^2-Corr(X,Y)\sigma_X\sigma_Y]
-
 \end{gather*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1816,7 +1887,6 @@ Cov(-\hat{B},\bar{x})&amp;=-Cov(\hat{B},\bar{x}) \\
 &amp;=-\left[E\left(\frac{\bar{y}}{\bar{x}}\bar{x}\right)-E(\hat{B})\mu_X\right] \\
 &amp;=E(\hat{\mu}_{Yr})-E(\bar{y}) \\
 &amp;=E(\hat{\mu}_{Yr})-\mu_Y
-
 \end{align*}\]</span></p>
 <p>下证近似公式：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1835,13 +1905,11 @@ bias(\hat{\mu}_{Yr})
 &amp;=\frac{1}{\mu_X}\left\{E[\hat{B}(\bar{x}-\mu_X)^2]-E[\bar{y}(\bar{x}-\mu_X)]\right\} \\
 &amp;=\frac{1}{\mu_X}\left\{E[(\hat{B}-B+B)(\bar{x}-\mu_X)^2]-Cov(\bar{x},\bar{y})\right\} \\
 &amp;=\frac{1}{\mu_X}\left\{E[(\hat{B}-B)(\bar{x}-\mu_X)^2+B(\bar{x}-\mu_X)^2]-Cov(\bar{x},\bar{y})\right\}
-
 \end{align*}\]</span></p>
 <p>由于<span class="math inline">\(E\left[(\hat{B}-B)(\bar{x}-\mu_X)^2\right]\)</span>极小（严谨证明不提供），因此:</p>
 <p><span class="math display">\[\begin{align*}
 bias(\hat{\mu}_{Yr})&amp;\approx\frac{1}{\mu_X}\left\{E[B(\bar{x}-\mu_X)^2]-Cov(\bar{x},\bar{y})\right\} \\
 &amp;=\frac{1}{\mu_X}\left[BVar(\bar{x})-Cov(\bar{x},\bar{y})\right]
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1866,32 +1934,27 @@ MSE(\hat{\mu}_{Y_{reg}})&amp;=
 E\left\lbrace\big[\bar{y}+\hat{B}_1(\mu_X-\bar{x})-\mu_Y\big]^2\right\rbrace  \\
 &amp;\approx Var(\bar{d}) \\
 &amp;=\left(1-\frac{n}{N}\right)\frac{\sigma_d^2}{n}
-
 \end{align*}\]</span></p>
 <p>其中：</p>
 <p><span class="math display">\[\begin{gather*}
 d_i=y_i-\big[\mu_Y+B_1(x_i-\mu_X)\big] \\
 \sigma_d^2=\frac{1}{N-1}\sum_{i=1}^N[y_i-\mu_Y-B_1(x_i-\mu_X)]^2=(1-R^2)\sigma_Y^2
-
 \end{gather*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>下求<span class="math inline">\(E(d)\)</span>：</p>
 <p><span class="math display">\[\begin{equation*}
 E(d)=\frac{1}{N}\left[\sum_{i=1}^Ny_i-N\mu_Y-B_1\sum_{i=1}^Nx_i+B_1N\mu_X\right]=0
-
 \end{equation*}\]</span></p>
 <p>因此：</p>
 <p><span class="math display">\[\begin{align*}
 \sigma_d^2&amp;=\frac{1}{N-1}\sum_{i=1}^N\big[y_i-\mu_Y-B_1(x_i-\mu_X)\big]^2 \\
 &amp;=\frac{1}{N-1}\left[\sum_{i=1}^N(y_i-\mu_Y)^2+\sum_{i=1}^NB_1^2(x_i-\mu_X)^2-\sum_{i=1}^N2B_i(y_i-\mu_Y)(x_i-\mu_X)\right] \\
 &amp;=\sigma_Y^2+B_1^2\sigma_X^2-2B_1R\sigma_X\sigma_Y
-
 \end{align*}\]</span></p>
 <p>而：</p>
 <p><span class="math display">\[\begin{equation*}
 B_1=\frac{\sigma_YR}{\sigma_X}
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1900,7 +1963,6 @@ B_1=\frac{\sigma_YR}{\sigma_X}
 =\sigma_Y^2+\frac{\sigma_Y^2R^2}{\sigma_X^2}\sigma_X^2-2\frac{\sigma_YR}{\sigma_X}R\sigma_X\sigma_Y
 =\sigma_Y^2-R^2\sigma_Y^2
 =(1-R^2)\sigma_Y^2
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1920,7 +1982,6 @@ B_1=\frac{\sigma_YR}{\sigma_X}
 MSE(\hat{\mu}_{Yr})&amp;\approx E\left[(\bar{y}-B\bar{x})^2\right] \\
 &amp;=\left(1-\frac{n}{N}\right)\frac{\sigma_Y^2-2BR\sigma_X\sigma_Y+B^2\sigma_X^2}{n} \\
 &amp;\approx Var(\hat{\mu}_{Yr})
-
 \end{align*}\]</span></p>
 </div>
 <p>证明过程可见David and Sukhatme, 1974。</p>
@@ -1934,7 +1995,6 @@ MSE(\hat{\mu}_{Yr})&amp;\approx E\left[(\bar{y}-B\bar{x})^2\right] \\
 <p><strong>Theorem 26.6</strong>. 回归估计的方差为：</p>
 <p><span class="math display">\[\begin{equation*}
 Var(\hat{\mu}_{Y_{reg}})=Var(\bar{d})=\left(1-\frac{n}{N}\right)\frac{\sigma_d^2}{n}=\left(1-\frac{n}{N}\right)\frac{(1-R^2)\sigma_Y^2}{n}
-
 \end{equation*}\]</span></p>
 </div>
 <p>定义<span class="math inline">\(e_i=y_i-(\hat{B}_1x_i+\hat{B}_0)\)</span>可得：</p>
@@ -1995,7 +2055,6 @@ Var(\hat{\mu}_{Yr})
 &amp;=Var(\bar{\varepsilon}) \\
 &amp;=\left(1-\frac{n}{N}\right)\frac{\sigma_\varepsilon^2}{n}
 \end{aligned}
-
 \end{gather*}\]</span></p>
 <p>对于<span class="math inline">\(\sigma_\varepsilon^2\)</span>：</p>
 <p><span class="math display">\[\begin{align*}
@@ -2008,12 +2067,10 @@ Var(\hat{\mu}_{Yr})
 &amp;=\sigma_Y^2+B^2\sigma_X^2+\frac{1}{N-1}\left[N\mu_Y^2+B^2N\mu_X^2-2B\sum_{i=1}^N(x_i-\mu_X+\mu_X)(y_i-\mu_Y+\mu_Y)\right] \\
 &amp;=\sigma_Y^2+B^2\sigma_X^2+\frac{1}{N-1}\left[N\mu_Y^2+B^2N\mu_X^2-2B\sum_{i=1}^N(x_i-\mu_X)(y_i-\mu_Y)-2BN\mu_X\mu_Y\right] \\
 &amp;=\sigma_Y^2+B^2\sigma_X^2-2BCov(X,Y)+\frac{1}{N-1}\left[N\mu_Y^2+B^2N\mu_X^2-2BN\mu_X\mu_Y\right]
-
 \end{align*}\]</span></p>
 <p>因为：</p>
 <p><span class="math display">\[\begin{equation*}
 B=\frac{\mu_Y}{\mu_X}
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{align*}
@@ -2021,17 +2078,14 @@ N\mu_Y^2+B^2N\mu_X^2-2BN\mu_X\mu_Y
 &amp;=N\mu_Y^2+\frac{\mu_Y^2}{\mu_X^2}N\mu_X^2-2\frac{\mu_Y}{\mu_X}N\mu_X\mu_Y \\
 &amp;=2N\mu_Y^2-2N\mu_Y^2 \\
 &amp;=0
-
 \end{align*}\]</span></p>
 <p>也就有：</p>
 <p><span class="math display">\[\begin{equation*}
 \sigma_\varepsilon^2=\sigma_Y^2-2BR\sigma_X\sigma_Y+B^2\sigma_X^2
-
 \end{equation*}\]</span></p>
 <p>令<span class="math inline">\(e_i=y_i-\hat{B}x_i\)</span>，将它看作为<span class="math inline">\(\varepsilon_i\)</span>的估计，则有：</p>
 <p><span class="math display">\[\begin{equation*}
 s_e^2 =s_y^2-2\hat{B}\hat{R}s_xs_y+\hat{B}^2s_x^2
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -2263,17 +2317,14 @@ E(\tilde{\mu}_{str})
 <p><span class="math display">\[\begin{equation*}
 Var(\tilde{\tau}_{str})
 =\sum_{h=1}^HN_h^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h} =\sum_{h=1}^HN_h\left(1-\frac{n}{N}\right)\frac{N}{n}\sigma_h^2 =\left(1-\frac{n}{N}\right)\frac{N}{n}\sum_{h=1}^HN_h\sigma_h^2
-
 \end{equation*}\]</span></p>
 <p>从理论角度看待SSe，即计算总体而非样本的SSe，可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 SSe=\sum_{h=1}^H\sum_{j=1}^{N_h}(Y_{hj}-\mu_h)^2=\sum_{h=1}^H(N_h-1)\sigma_h^2
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 Var(\tilde{\tau}_{str})=\left(1-\frac{n}{N}\right)\frac{N}{n}\sum_{h=1}^HN_h\sigma_h^2=\left(1-\frac{n}{N}\right)\frac{N}{n}\left(SSe+\sum_{h=1}^H\sigma_h^2\right)
-
 \end{equation*}\]</span></p>
 <p>而：</p>
 <p><span class="math display">\[\begin{align*}
@@ -2287,12 +2338,10 @@ Var(\hat{\tau}_{srs})
 &amp;=\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)SSA+\left(1-\frac{n}{N}\right)\frac{N}{n}\left[SSe+\sum_{h=1}^H\left(\frac{N-1}{N-1}-\frac{N-N_h}{N-1}\right)\sigma_h^2\right] \\
 &amp;=\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)SSA+\left(1-\frac{n}{N}\right)\frac{N}{n}\left(SSe+\sum_{h=1}^H\sigma_h^2\right)+\left(1-\frac{n}{N}\right)\frac{N}{n}\left[\sum_{h=1}^H\left(-\frac{N-N_h}{N-1}\right)\sigma_h^2\right] \\
 &amp;=Var(\tilde{\tau}_{str})+\frac{N^2}{n(N-1)}\left(1-\frac{n}{N}\right)\left[SSA-\sum_{h=1}^H\left(1-\frac{N_h}{N}\right)\sigma_h^2\right]
-
 \end{align*}\]</span></p>
 <p>由上式可以看出，如果比例分配估计量的方差比SRS估计量的方差大，则需要：</p>
 <p><span class="math display">\[\begin{equation*}
 SSA&lt;\sum_{h=1}^H\left(1-\frac{N_h}{N}\right)\sigma_h^2
-
 \end{equation*}\]</span></p>
 <p>而这种情况在实践中几乎见不到。&nbsp;◻</p>
 </div>
@@ -2325,7 +2374,6 @@ n_k=\frac{nN_k\sigma_k}{\sum\limits_{h=1}^HN_h\sigma_h},\quad k=1,2,\dots,H
 f(\overrightarrow{n})=\sum_{h=1}^HN_h^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h} \\
 g(\overrightarrow{n})=\sum_{h=1}^Hn_h-n \\
 h(\overrightarrow{n})=f(\overrightarrow{n})+\lambda g(\overrightarrow{n})
-
 \end{gather*}\]</span></p>
 <p>对<span class="math inline">\(f\)</span>求偏导可得：</p>
 <p><span class="math display">\[\begin{align*}
@@ -2333,39 +2381,32 @@ h(\overrightarrow{n})=f(\overrightarrow{n})+\lambda g(\overrightarrow{n})
 =-\frac{N_h^2\sigma_h^2}{N_hn_h}-\left(1-\frac{n_h}{N_h}\right)\frac{N_k^2\sigma_h^2}{n_k^2} \\
 &amp;=-\frac{N_h\sigma_h^2}{n_h}-\frac{N_h^2\sigma_h^2}{n_h^2}+\frac{N_h\sigma_h^2}{n_h} \\
 &amp;=-\frac{N_h^2\sigma_h^2}{n_h^2}
-
 \end{align*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{gather*}
 \nabla f(\overrightarrow{n})=(-\frac{N_1^2\sigma_1^2}{n_1^2},-\frac{N_2^2\sigma_2^2}{n_2^2},\dots,-\frac{N_H^2\sigma_H^2}{n_H^2}) \\
 \nabla g(\overrightarrow{n})=(1,1,\dots,1)
-
 \end{gather*}\]</span></p>
 <p>当<span class="math inline">\(f\)</span>取最小值时有：</p>
 <p><span class="math display">\[\begin{gather*}
 \frac{\partial h(\overrightarrow{n})}{\partial \overrightarrow{n}}=(-\frac{N_1^2\sigma_1^2}{n_1^2}+\lambda,-\frac{N_2^2\sigma_2^2}{n_2^2}+\lambda,\dots,-\frac{N_H^2\sigma_H^2}{n_H^2}+\lambda)=(0,0,\dots,0) \\
 \sum_{h=1}^Hn_h=n
-
 \end{gather*}\]</span></p>
 <p>解得：</p>
 <p><span class="math display">\[\begin{equation*}
 n_h=\frac{N_h\sigma_h}{\sqrt{\lambda}},\quad h=1,2,\dots,H
-
 \end{equation*}\]</span></p>
 <p>此时：</p>
 <p><span class="math display">\[\begin{equation*}
 n=\sum_{h=1}^Hn_h=\frac{\sum\limits_{h=1}^HN_h\sigma_h}{\sqrt{\lambda}}
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \sqrt{\lambda}=\frac{\sum\limits_{h=1}^HN_h\sigma_h}{n}
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 n_k=\frac{nN_k\sigma_k}{\sum\limits_{h=1}^HN_h\sigma_h},\quad k=1,2,\dots,H
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -2417,7 +2458,6 @@ Var(\hat{\mu}_{poststr})=E[Var(\hat{\mu}_{str}\arrowvert\overrightarrow{n})]\app
 <p>(2)由方差分解公式：</p>
 <p><span class="math display">\[\begin{equation*}
 Var(\hat{\mu}_{poststr})=Var(E[\hat{\mu}_{str}\arrowvert\overrightarrow{n}])+E[Var(\hat{\mu}_{str}\arrowvert\overrightarrow{n})]
-
 \end{equation*}\]</span></p>
 <p>而：</p>
 <p><span class="math display">\[\begin{align*}
@@ -2427,12 +2467,10 @@ E[\hat{\mu}_{str}\arrowvert\overrightarrow{n}]
 &amp;=\sum_{h=1}^H\sum_{j=1}^{N_h}\frac{Y_{hj}n_h}{nN_h} \\
 &amp;=\sum_{h=1}^H\frac{n_h}{n}\sum_{j=1}^{N_h}\frac{Y_{hj}}{N_h} \\
 &amp;=\sum_{h=1}^H\frac{n_h}{n}\mu_h \\
-
 \end{align*}\]</span></p>
 <p>可以看出上式是一个定值，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 Var(E[\hat{\mu}_{str}\arrowvert\overrightarrow{n}])=0
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{align*}
@@ -2440,30 +2478,25 @@ Var(\hat{\mu}_{poststr})
 &amp;=E[Var(\hat{\mu}_{str}\arrowvert\overrightarrow{n})] \\
 &amp;=E\left[\sum_{h=1}^H\left(\frac{N_h}{N}\right)^2\left(1-\frac{n_h}{N_h}\right)\frac{\sigma_h^2}{n_h}\right] \\
 &amp;=\sum_{h=1}^H\left(\frac{N_h}{N}\right)^2\sigma_h^2\left[E\left(\frac{1}{n_h}\right)-\frac{1}{N_h}\right] \\
-
 \end{align*}\]</span></p>
 <p>由<a href="../chapters/page-014.html#sec-deltamethod-afa15d41" data-reference-type="ref+label" data-reference="sec:deltamethod">定理 13.9</a>，利用泰勒展开，令<span class="math inline">\(E(n_h)=\mu\)</span>，即有：</p>
 <p><span class="math display">\[\begin{align*}
 E\left(\frac{1}{n_h}\right)
 &amp;\approx E\left[\frac{1}{\mu}-\frac{1}{\mu^2}(n_h-\mu)+\frac{2}{\mu^3}\frac{(n_h-\mu)^2}{2!}\right] \\
 &amp;=\frac{1}{\mu}+\frac{1}{\mu^3}Var(n_h)
-
 \end{align*}\]</span></p>
 <p>由后分层原理，显然可以得到：</p>
 <p><span class="math display">\[\begin{gather*}
 n_h\sim \text{Hyper}(n,N_h,N) \\
 E(n_h)=\frac{nN_h}{N},\;Var(n_h)=\frac{nN_h(N-n)(N-N_h)}{N^2(N-1)}
-
 \end{gather*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 E\left(\frac{1}{n_h}\right)=\frac{N}{nN_h}+\left(\frac{N}{nN_h}\right)^2\left(1-\frac{N_h}{N}\right)\frac{N-n}{N-1}
-
 \end{equation*}\]</span></p>
 <p>将上式代入<span class="math inline">\(Var(\hat{\mu}_{poststr})\)</span>即可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 Var(\hat{\mu}_{poststr})\approx\left(1-\frac{n}{N}\right)\frac{1}{n}\sum_{h=1}^H\frac{N_h}{N}\sigma_h^2+\left(\frac{N-n}{N-1}\right)\frac{1}{n^2}\sum_{h=1}^H\left(1-\frac{N_h}{N}\right)\sigma_h^2
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>

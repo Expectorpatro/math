@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,45 +1079,30 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#id--e38f67cf" id="toc-id--e38f67cf" class="nav-link active" data-scroll-target="#id--e38f67cf"><span class="header-section-number">10.1</span> 有界线性算子空间</a>
-  <ul>
-  <li><a href="#id--7c543918" id="toc-id--7c543918" class="nav-link" data-scroll-target="#id--7c543918"><span class="header-section-number">10.1.1</span> 有界线性算子空间的范数</a></li>
-  <li><a href="#id--e6938bb0" id="toc-id--e6938bb0" class="nav-link" data-scroll-target="#id--e6938bb0"><span class="header-section-number">10.1.2</span> 有界线性算子空间中的依算子范数收敛</a>
   <ul class="collapse">
-  <li><a href="#id--60f2b092" id="toc-id--60f2b092" class="nav-link" data-scroll-target="#id--60f2b092"><span class="header-section-number">10.1.2.1</span> 依算子范数收敛与一致收敛的等价性</a></li>
-  </ul></li>
+  <li><a href="#id--7c543918" id="toc-id--7c543918" class="nav-link" data-scroll-target="#id--7c543918"><span class="header-section-number">10.1.1</span> 有界线性算子空间的范数</a></li>
+  <li><a href="#id--e6938bb0" id="toc-id--e6938bb0" class="nav-link" data-scroll-target="#id--e6938bb0"><span class="header-section-number">10.1.2</span> 有界线性算子空间中的依算子范数收敛</a></li>
   <li><a href="#id--8e3c2656" id="toc-id--8e3c2656" class="nav-link" data-scroll-target="#id--8e3c2656"><span class="header-section-number">10.1.3</span> 有界线性算子空间中的强收敛</a></li>
   <li><a href="#id--c795f3d8" id="toc-id--c795f3d8" class="nav-link" data-scroll-target="#id--c795f3d8"><span class="header-section-number">10.1.4</span> 有界线性算子空间的完备性</a></li>
-  <li><a href="#id--933362f3" id="toc-id--933362f3" class="nav-link" data-scroll-target="#id--933362f3"><span class="header-section-number">10.1.5</span> 有界线性算子的乘法</a>
-  <ul class="collapse">
-  <li><a href="#id--bfa72cc1" id="toc-id--bfa72cc1" class="nav-link" data-scroll-target="#id--bfa72cc1"><span class="header-section-number">10.1.5.1</span> 算子乘法的性质</a></li>
-  </ul></li>
+  <li><a href="#id--933362f3" id="toc-id--933362f3" class="nav-link" data-scroll-target="#id--933362f3"><span class="header-section-number">10.1.5</span> 有界线性算子的乘法</a></li>
   </ul></li>
   <li><a href="#banach-7bdff1e0" id="toc-banach-7bdff1e0" class="nav-link" data-scroll-target="#banach-7bdff1e0"><span class="header-section-number">10.2</span> Banach空间上有界线性算子的四大定理</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id--aed928a1" id="toc-id--aed928a1" class="nav-link" data-scroll-target="#id--aed928a1"><span class="header-section-number">10.2.1</span> 开映射定理</a></li>
-  <li><a href="#id--a1a3c395" id="toc-id--a1a3c395" class="nav-link" data-scroll-target="#id--a1a3c395"><span class="header-section-number">10.2.2</span> 逆算子定理</a>
-  <ul class="collapse">
-  <li><a href="#id--6b7dc602" id="toc-id--6b7dc602" class="nav-link" data-scroll-target="#id--6b7dc602"><span class="header-section-number">10.2.2.1</span> 等价范数与拓扑同构</a></li>
-  </ul></li>
-  <li><a href="#id--bd095668" id="toc-id--bd095668" class="nav-link" data-scroll-target="#id--bd095668"><span class="header-section-number">10.2.3</span> 闭图像定理</a>
-  <ul class="collapse">
-  <li><a href="#id--1860bba0" id="toc-id--1860bba0" class="nav-link" data-scroll-target="#id--1860bba0"><span class="header-section-number">10.2.3.1</span> 图像的定义</a></li>
-  <li><a href="#id--6743b60a" id="toc-id--6743b60a" class="nav-link" data-scroll-target="#id--6743b60a"><span class="header-section-number">10.2.3.2</span> 闭算子的定义</a></li>
-  <li><a href="#id--b1556aba" id="toc-id--b1556aba" class="nav-link" data-scroll-target="#id--b1556aba"><span class="header-section-number">10.2.3.3</span> 有界线性算子何时是闭算子</a></li>
-  <li><a href="#id--a7a3bb37" id="toc-id--a7a3bb37" class="nav-link" data-scroll-target="#id--a7a3bb37"><span class="header-section-number">10.2.3.4</span> 闭的线性算子何时有界</a></li>
-  </ul></li>
+  <li><a href="#id--a1a3c395" id="toc-id--a1a3c395" class="nav-link" data-scroll-target="#id--a1a3c395"><span class="header-section-number">10.2.2</span> 逆算子定理</a></li>
+  <li><a href="#id--bd095668" id="toc-id--bd095668" class="nav-link" data-scroll-target="#id--bd095668"><span class="header-section-number">10.2.3</span> 闭图像定理</a></li>
   <li><a href="#id--ce6e7b19" id="toc-id--ce6e7b19" class="nav-link" data-scroll-target="#id--ce6e7b19"><span class="header-section-number">10.2.4</span> 共鸣定理</a></li>
   </ul></li>
   <li><a href="#id--ac63ad3c" id="toc-id--ac63ad3c" class="nav-link" data-scroll-target="#id--ac63ad3c"><span class="header-section-number">10.3</span> 有界线性泛函</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id--9aaf8767" id="toc-id--9aaf8767" class="nav-link" data-scroll-target="#id--9aaf8767"><span class="header-section-number">10.3.1</span> 有界线性泛函的延拓</a></li>
   </ul></li>
   <li><a href="#id--59c59ee8" id="toc-id--59c59ee8" class="nav-link" data-scroll-target="#id--59c59ee8"><span class="header-section-number">10.4</span> 对偶空间与伴随算子</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id--2a2f24f2" id="toc-id--2a2f24f2" class="nav-link" data-scroll-target="#id--2a2f24f2"><span class="header-section-number">10.4.1</span> 对偶空间</a></li>
   </ul></li>
   </ul>
@@ -967,12 +1140,10 @@ window.Quarto = {
 <p><span class="math display">\[\begin{gather*}
 (T_1+T_2)x=T_1x+T_2x \\
 (\alpha T)x=\alpha Tx
-
 \end{gather*}\]</span></p>
 <p>其中<span class="math inline">\(T,T_1,T_2\in\mathscr{B}(X,Y)\)</span>，<span class="math inline">\(\alpha\)</span>是一个数。<span class="math inline">\(\mathscr{B}(X,Y)\)</span>在该线性运算下构成一个线性空间。定义<span class="math inline">\(\mathscr{B}(X,Y)\)</span>中的范数如下：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;T\in\mathscr{B}(X,Y),\;||T||=\sup_{\{x\in X:x\ne\mathbf{0}\}}\frac{||Tx||}{||x||}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\mathscr{B}(X,Y)\)</span>构成一个赋范线性空间。</p>
 </div>
@@ -985,8 +1156,7 @@ window.Quarto = {
 &amp;\leqslant\sup_{\{x\in X:x\ne\mathbf{0}\}}\frac{||T_1x||+||T_2x||}{||x||} \\
 &amp;\leqslant\sup_{\{x\in X:x\ne\mathbf{0}\}}\frac{||T_1x||}{||x||}+
 \sup_{\{x\in X:x\ne\mathbf{0}\}}\frac{||T_2x||}{||x||} \\
-&amp;=||T_1||+||T_2||  
-
+&amp;=||T_1||+||T_2||
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1002,7 +1172,6 @@ window.Quarto = {
 <p><strong>Definition 10.1</strong>. 设<span class="math inline">\(\{T_n\}\in\mathscr{B}\)</span>。若<span class="math inline">\(\{T_n\}\)</span>依<span class="math inline">\(\mathscr{B}\)</span>中的范数收敛于<span class="math inline">\(T\in\mathscr{B}\)</span>，即：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}||T_n-T||=0
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\{T_n\}\)</span>依算子范数收敛于<span class="math inline">\(T\)</span>或<span class="math inline">\(\{T_n\}\)</span>依一致算子拓扑收敛于<span class="math inline">\(T\)</span>。</p>
 </div>
@@ -1015,32 +1184,26 @@ window.Quarto = {
 <p><span class="proof-title"><em>证明</em>. </span>(1)必要性：任取<span class="math inline">\(A\subset X\)</span>为有界集。由<span class="math inline">\(A\)</span>的有界性：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;K&gt;0,\;\forall\;x\in A,\;||x||\leqslant K
-
 \end{equation*}\]</span></p>
 <p>因此：</p>
 <p><span class="math display">\[\begin{equation*}
 ||T_nx-Tx||=||(T_n-T)x||\leqslant||T_n-T||\;||x||\leqslant K||T_n-T||
-
 \end{equation*}\]</span></p>
 <p>由<span class="math inline">\(\lim\limits_{n\to+\infty}||T_n-T||=0\)</span>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;||T_n-T||&lt;\frac{\varepsilon}{K}
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;\forall\;x\in A,\;||T_nx-Tx||&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>(2)充分性：在<span class="math inline">\(X\)</span>中取单位球面<span class="math inline">\(S=\{x\in X:||x||=1\}\)</span>。显然<span class="math inline">\(S\)</span>是一个有界集，由一致收敛可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;\forall\;x\in X,\;||T_nx-Tx||&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;||T_n-T||=\sup_{x\in X,||x||=1}||T_nx-Tx||\leqslant\varepsilon
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(\{T_n\}\)</span>依算子范数收敛到<span class="math inline">\(T\)</span>。&nbsp;◻</p>
 </div>
@@ -1053,7 +1216,6 @@ window.Quarto = {
 <p><strong>Definition 10.2</strong>. 设<span class="math inline">\(\{T_n\}\in\mathscr{B}(X,Y)\)</span>。若：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;x\in X,\;\lim_{n\to+\infty}||T_nx-Tx||=0
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\{T_n\}\)</span><a href="../chapters/page-058.html#term-StrongConvergence" class="term" title="strong convergence">强收敛<span class="term-english">（strong convergence）</span></a>到<span class="math inline">\(T\)</span>或依强算子拓扑收敛于<span class="math inline">\(T\)</span>。</p>
 </div>
@@ -1067,22 +1229,18 @@ window.Quarto = {
 <p><span class="proof-title"><em>证明</em>. </span>设<span class="math inline">\(\{T_n\}\)</span>是<span class="math inline">\(\mathscr{B}(X,Y)\)</span>中的一个Cauchy点列，那么：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m&gt;N,\;m&gt;n,\;||T_m-T_n||&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>此时有：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;x\in X,\;||T_mx-T_nx||\leqslant||T_m-T_n||\;||x||&lt;\varepsilon||x||
-
 \end{equation*}\]</span></p>
 <p>因此<span class="math inline">\(\{T_nx\}\)</span>（<span class="math inline">\(x\)</span>为定值）是<span class="math inline">\(Y\)</span>中的Cauchy点列。因为<span class="math inline">\(Y\)</span>完备，所以<span class="math inline">\(\{T_nx\}\)</span>在<span class="math inline">\(Y\)</span>中收敛于一个元素，记为<span class="math inline">\(y\)</span>，即：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}T_nx=y
-
 \end{equation*}\]</span></p>
 <p>定义算子<span class="math inline">\(T:Tx=y\)</span>，即：</p>
 <p><span class="math display">\[\begin{equation*}
 Tx=\lim_{n\to+\infty}T_nx=y
-
 \end{equation*}\]</span></p>
 <p>下证明<span class="math inline">\(T\)</span>是定义在<span class="math inline">\(X\)</span>上而值域包含在<span class="math inline">\(Y\)</span>中的有界线性算子，且是<span class="math inline">\(\{T_n\}\)</span>依一致算子拓扑收敛的极限。其中<span class="math inline">\(T\)</span>定义域与值域是显然的。</p>
 <p>设<span class="math inline">\(x_1,x_2\in X\)</span>，可得（第一行到第二行利用了<span class="math inline">\(T_n\)</span>的可加性，第二行到第三行利用了范数极限的可加运算）：</p>
@@ -1091,44 +1249,36 @@ T(x_1+x_2)&amp;=\lim_{n\to+\infty}T_n(x_1+x_2) \\
 &amp;=\lim_{n\to+\infty}(T_nx_1+T_nx_2) \\
 &amp;=\lim_{n\to+\infty}T_nx_1+\lim_{n\to+\infty}T_nx_2 \\
 &amp;=Tx_1+Tx_2
-
 \end{align*}\]</span></p>
 <p>可加性得证。设<span class="math inline">\(x_3\in X\)</span>，<span class="math inline">\(\alpha\)</span>是一个数，可得（第二步到第三步利用了<span class="math inline">\(T_n\)</span>的齐次性，第三步到第四步利用了范数极限的数乘运算）：</p>
 <p><span class="math display">\[\begin{equation*}
 T(\alpha x_3)=\lim_{n\to+\infty}T_n(\alpha x_3)=\lim_{n\to+\infty}\alpha T_nx_3=\alpha\lim_{n\to+\infty}T_nx_3=\alpha Tx_3
-
 \end{equation*}\]</span></p>
 <p>齐次性得证。综上，<span class="math inline">\(T\)</span>是线性算子。</p>
 <p>注意到：</p>
 <p><span class="math display">\[\begin{equation*}
 |\;||T_n||-||T_m||\;|\leqslant||T_n-T_m||\to0
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\{||T_n||\}\)</span>是Cauchy序列。因此<span class="math inline">\(\{||T_n||\}\)</span>有界，即：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;M&gt;0,\;\forall\;n\in\mathbb{N}^+,\;||T_n||\leqslant M
-
 \end{equation*}\]</span></p>
 <p>由范数的连续性：</p>
 <p><span class="math display">\[\begin{equation*}
 ||Tx||=||\lim_{n\to+\infty}T_nx||\leqslant\lim_{n\to+\infty}||T_n||\;||x||\leqslant M||x||
-
 \end{equation*}\]</span></p>
 <p>有界性得证。</p>
 <p>因为：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m&gt;N,\;m&gt;n,\;\forall\;x\in X,\;||T_mx-T_nx||&lt;\varepsilon||x||
-
 \end{equation*}\]</span></p>
 <p>在上式中取<span class="math inline">\(m\to+\infty\)</span>，可得（第一步到第二步利用范数的连续性，第三步到第四步利用<span class="math inline">\(\mathscr{B}(X,Y)\)</span>中线性运算的定义，注意到此时已经证得<span class="math inline">\(T\in\mathscr{B}(X,Y)\)</span>）：</p>
 <p><span class="math display">\[\begin{align*}
 \lim_{m\to+\infty}||T_mx-T_nx||=||\lim_{m\to+\infty}T_mx-T_nx||=||Tx-T_nx||=||(T-T_n)x||\leqslant\varepsilon\;||x||
-
 \end{align*}\]</span></p>
 <p>此时即有：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;x\in X,\;\frac{||(T-T_n)x||}{||x||}\leqslant\varepsilon
-
 \end{equation*}\]</span></p>
 <p>也即<span class="math inline">\(||T-T_n||\to0\)</span>。依一致算子拓扑收敛得证。</p>
 <p>综上，<span class="math inline">\(\mathscr{B}(X,Y)\)</span>是Banach空间。&nbsp;◻</p>
@@ -1140,7 +1290,6 @@ T(\alpha x_3)=\lim_{n\to+\infty}T_n(\alpha x_3)=\lim_{n\to+\infty}\alpha T_nx_3=
 <p><strong>Definition 10.3</strong>. 设<span class="math inline">\(X,Y,Z\)</span>都是赋范线性空间。对<span class="math inline">\(T_1\in\mathscr{B}(X,Y)\)</span>，<span class="math inline">\(T_2\in\mathscr{B}(Y,Z)\)</span>，定义<span class="math inline">\(T_1\)</span>与<span class="math inline">\(T_2\)</span>的<a href="../chapters/page-055.html#term-ProductOfOperators" class="term" title="product of operators">算子乘积<span class="term-english">（product of operators）</span></a><span class="math inline">\(T_2T_1\)</span>如下：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;x\in X,\;(T_2T_1)x=T_2(T_1x)
-
 \end{equation*}\]</span></p>
 <p><span class="math inline">\(T^n\)</span>表示<span class="math inline">\(n\)</span>个<span class="math inline">\(T\)</span>相乘，<span class="math inline">\(T^0\)</span>表示单位算子<span class="math inline">\(I\)</span>。</p>
 </div>
@@ -1153,13 +1302,11 @@ T(\alpha x_3)=\lim_{n\to+\infty}T_n(\alpha x_3)=\lim_{n\to+\infty}\alpha T_nx_3=
 <p><span class="math display">\[\begin{equation*}
                 (T_3T_2)T_1=T_3(T_2T_1),\;(\alpha T_2)T_1=\alpha T_2T_1,\;
                 T_2(\alpha T_1)=\alpha(T_2T_1)
-
     \end{equation*}\]</span></p>
 <p>这里<span class="math inline">\(T_1\in\mathscr{B}(X,Y),\;T_2\in\mathscr{B}_(Y,Z),\;T_3\in\mathscr{B}(Z,K)\)</span>。</p></li>
 <li><p>分配律：</p>
 <p><span class="math display">\[\begin{equation*}
                 T_3(T_1+T_2)=T_3T_1+T_3T_2,\;(T_2+T_3)T_1=T_2T_1+T_3T_1
-
     \end{equation*}\]</span></p>
 <p>第一个式子中<span class="math inline">\(T_1,T_2\in\mathscr{B}(X,Y),\;T_3\in\mathscr{B}(Y,Z)\)</span>。<br>
 第二个式子中<span class="math inline">\(T_3,T_2\in\mathscr{B}(Y,Z),\;T_1\in\mathscr{B}(X,Y)\)</span>。</p></li>
@@ -1170,17 +1317,14 @@ T(\alpha x_3)=\lim_{n\to+\infty}T_n(\alpha x_3)=\lim_{n\to+\infty}\alpha T_nx_3=
 <p><span class="proof-title"><em>证明</em>. </span>只证(3)。(1)(2)证了没多大意思。对任意的<span class="math inline">\(x\in X\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 ||T_2T_1x||=||T_2(T_1)x||\leqslant||T_2||\;||T_1x||\leqslant||T_2||\;||T_1||\;||x||
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{||T_2T_1x||}{||x||}\leqslant||T_2||\;||T_1||
-
 \end{equation*}\]</span></p>
 <p>由上确界的不等式性可得：</p>
 <p><span class="math display">\[\begin{equation*}
 ||T_2T_1||\leqslant||T_2||\;||T_1||
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1212,7 +1356,6 @@ T(\alpha x_3)=\lim_{n\to+\infty}T_n(\alpha x_3)=\lim_{n\to+\infty}\alpha T_nx_3=
 <p><span class="proof-title"><em>证明</em>. </span>由开映射定理，<span class="math inline">\(T\)</span>是满射，所以<span class="math inline">\(T\)</span>是双射，因此<span class="math inline">\(T^{-1}\)</span>存在。任取<span class="math inline">\(Y\)</span>中一个有界集，记为<span class="math inline">\(E\)</span>，由开映射定理：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;K&gt;0,\;\forall\;y\in E,\;||T^{-1}y||\leqslant K||y||
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(E\)</span>有界，所以<span class="math inline">\(\exists\;M&gt;0,\;||y||\leqslant M\)</span>，于是<span class="math inline">\(\forall\;y\in E,\;||T^{-1}y||\leqslant KM\)</span>，即<span class="math inline">\(T^{-1}E\)</span>是有界集。由<span class="math inline">\(E\)</span>的任意性，<span class="math inline">\(T^{-1}\)</span>将任意有界集映成有界集，故<span class="math inline">\(T^{-1}\)</span>有界。&nbsp;◻</p>
 </div>
@@ -1230,7 +1373,6 @@ T(\alpha x_3)=\lim_{n\to+\infty}T_n(\alpha x_3)=\lim_{n\to+\infty}\alpha T_nx_3=
 <p><strong>Corollary 10.1</strong>. <span class="math inline">\((X,||\cdot||_1)\)</span>与<span class="math inline">\((X,||\cdot||_2)\)</span>都是Banach空间。若：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;K&gt;0,\;\forall\;x\in X,\;||x||_2\leqslant K||x||_1
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(||\cdot||_1,\;||\cdot||_2\)</span>等价，<span class="math inline">\((X,||\cdot||_1)\)</span>与<span class="math inline">\((X,||\cdot||_2)\)</span>拓扑同构。</p>
 </div>
@@ -1260,18 +1402,15 @@ T(\alpha x_3)=\lim_{n\to+\infty}T_n(\alpha x_3)=\lim_{n\to+\infty}\alpha T_nx_3=
 <p><span class="proof-title"><em>证明</em>. </span>充分性：任取<span class="math inline">\((x,y)\in\overline{G_T}\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;\{x_n\}\in E,\;\{(x_n,Tx_n)\}\to(x,y)
-
 \end{equation*}\]</span></p>
 <p>由<span class="math inline">\(X\oplus Y\)</span>中范数的定义可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 ||(x,y)-(x_n,Tx_n)||=||(x-x_n,y-Tx_n)||=||x-x_n||+||y-Tx_n||\to0
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\{x_n\}\to x,\;\{Tx_n\}\to y\)</span>，<span class="math inline">\((x,y)\in G_T\)</span>。由<span class="math inline">\((x,y)\)</span>的任意性，<span class="math inline">\(T\)</span>是闭算子。</p>
 <p>必要性：对任意的<span class="math inline">\(\{x_n\}\subset E\)</span>，若<span class="math inline">\(\{x_n\}\to x\in X,\;\{Tx_n\}\to y\in Y\)</span>，就有：</p>
 <p><span class="math display">\[\begin{equation*}
 ||(x,y)-(x_n,Tx_n)||=||(x-x_n,y-Tx_n)||=||x-x_n||+||y-Tx_n||\to0
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\{(x_n,Tx_n)\}\to(x,y)\)</span>。因为<span class="math inline">\(T\)</span>是闭算子，所以<span class="math inline">\((x,y)\in G_T\)</span>。&nbsp;◻</p>
 </div>
@@ -1296,25 +1435,21 @@ T(\alpha x_3)=\lim_{n\to+\infty}T_n(\alpha x_3)=\lim_{n\to+\infty}\alpha T_nx_3=
 <p><span class="proof-title"><em>证明</em>. </span>充分性：因为<span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>都是Banach空间，所以<span class="math inline">\(X\oplus Y\)</span>也是Banach空间。因为<span class="math inline">\(T\)</span>是闭算子，所以<span class="math inline">\(G_T\)</span>是<span class="math inline">\(X\oplus Y\)</span>的闭子空间，于是<span class="math inline">\(G_T\)</span>也是Banach空间。定义<span class="math inline">\(G_T\)</span>到<span class="math inline">\(X\)</span>的算子<span class="math inline">\(\tilde{T}\)</span>：</p>
 <p><span class="math display">\[\begin{equation*}
 \tilde{T}(x,Tx)=x
-
 \end{equation*}\]</span></p>
 <p>显然<span class="math inline">\(\tilde{T}\)</span>是满映射。若<span class="math inline">\(\tilde{T}\)</span>不是单射，则<span class="math inline">\(\exists\;x\in X\)</span>使得<span class="math inline">\(\exists\;y_1,y_2\in Y,\;y_1\ne y_2,\;Tx=y_1,Tx=y_2\)</span>，那么<span class="math inline">\(T\)</span>就不是映射，所以<span class="math inline">\(\tilde{T}\)</span>是单射。于是<span class="math inline">\(\tilde{T}\)</span>是双射。</p>
 <p>设<span class="math inline">\(a\)</span>是数，<span class="math inline">\((y,Ty)\in G_T\)</span>。由<span class="math inline">\(T\)</span>的线性性可推出：</p>
 <p><span class="math display">\[\begin{gather*}
 \tilde{T}[(x,Tx)+(y,Ty)]=\tilde{T}(x+y,Tx+Ty)=\tilde{T}[x+y,T(x+y)]=x+y=\tilde{T}(x,Tx)+\tilde{T}(y,Ty) \\
 \tilde{T}[a(x,Tx)]=\tilde{T}(ax,aTx)=\tilde{T}(ax,Tax)=ax=a\tilde{T}(x,Tx)
-
 \end{gather*}\]</span></p>
 <p>即<span class="math inline">\(\tilde{T}\)</span>是线性算子。</p>
 <p>由逆算子定理，<span class="math inline">\(\tilde{T}\)</span>存在有界的逆算子<span class="math inline">\(\tilde{T}^{-1}\)</span>。于是对任意的<span class="math inline">\(x\in X\)</span>，因为<span class="math inline">\((x,Tx)=\tilde{T}^{-1}x\)</span>，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 ||(x,Tx)||\leqslant||\tilde{T}^{-1}||\;||x||
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 ||Tx||\leqslant||\tilde{T}^{-1}||\;||x||
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(T\)</span>有界。</p>
 <p>必要性：任取<span class="math inline">\((x,y)\in\overline{G_T}\)</span>，则<span class="math inline">\(\exists\;\{(x_n,y_n)\}\in G_T\)</span>并且<span class="math inline">\(\{(x_n,y_n)\}\to (x,y)\)</span>。由<span class="math inline">\(X\oplus Y\)</span>中范数的定义可得到<span class="math inline">\(\{x_n\}\to x,\;\{Tx_n\}\to y\)</span>。因为<span class="math inline">\(T\)</span>有界，所以<span class="math inline">\(T\)</span>连续，于是<span class="math inline">\(\{Tx_n\}\to Tx=y\)</span>，所以<span class="math inline">\((x,y)\in G_T\)</span>。由<span class="math inline">\((x,y)\)</span>的任意性，<span class="math inline">\(G_T\)</span>是闭子空间，<span class="math inline">\(T\)</span>是闭算子。&nbsp;◻</p>
@@ -1327,12 +1462,10 @@ T(\alpha x_3)=\lim_{n\to+\infty}T_n(\alpha x_3)=\lim_{n\to+\infty}\alpha T_nx_3=
 <p><strong>Definition 10.7</strong>. 设<span class="math inline">\(X\)</span>是线性空间，<span class="math inline">\(T\)</span>是定义在<span class="math inline">\(E\)</span>上的泛函。若对任意的<span class="math inline">\(x,y\in X\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 T(x+y)\leqslant Tx+Ty
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(T\)</span>是次可加的。若对任意的<span class="math inline">\(\alpha\geqslant0\)</span>和<span class="math inline">\(\forall\;x\in X\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 T(\alpha x)=\alpha Tx
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(T\)</span>是正齐次的。</p>
 </div>
@@ -1341,7 +1474,6 @@ T(\alpha x)=\alpha Tx
 <p><span class="math inline">\(\{T_i:i\in I\}\)</span>是Banach空间<span class="math inline">\(X\)</span>到赋范线性空间<span class="math inline">\(Y\)</span>上的有界线性算子族。若：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;x\in X,\;\sup_{i\in I}||T_ix||&lt;+\infty
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\{||T_i||:i\in I\}\)</span>有界，即<span class="math inline">\(\{T_i:i\in I\}\)</span>一致有界。</p>
 </div>
@@ -1354,7 +1486,6 @@ T(\alpha x)=\alpha Tx
 <p>此时还有：</p>
 <p><span class="math display">\[\begin{equation*}
 ||T||\leqslant\varliminf||T_n||
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1381,7 +1512,6 @@ T(\alpha x)=\alpha Tx
 <p><strong>Theorem 10.14</strong>. 设<span class="math inline">\(E\)</span>是实线性空间<span class="math inline">\(X\)</span>的子空间，<span class="math inline">\(f\)</span>是定义在<span class="math inline">\(E\)</span>上的实线性泛函，<span class="math inline">\(g\)</span>是定义在<span class="math inline">\(X\)</span>上的次可加正齐次泛函，<span class="math inline">\(f\)</span>和<span class="math inline">\(g\)</span>之间满足：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;x\in E,\;f(x)\leqslant g(x)
-
 \end{equation*}\]</span></p>
 <p>则必定存在定义在<span class="math inline">\(X\)</span>上的实线性泛函<span class="math inline">\(F\)</span>，满足：</p>
 <ol type="1">
@@ -1393,13 +1523,11 @@ T(\alpha x)=\alpha Tx
 <p><strong>Corollary 10.2</strong>. 设<span class="math inline">\(f\)</span>是复赋范线性空间<span class="math inline">\(X\)</span>上的有界线性泛函，令：</p>
 <p><span class="math display">\[\begin{equation*}
 \varphi(x)=\operatorname{Re}f(x),\;\forall\;x\in X
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\varphi\)</span>是<span class="math inline">\(X\)</span>上的有界实线性泛函，且：</p>
 <p><span class="math display">\[\begin{gather*}
 f(x)=\varphi(x)-i\varphi(ix) \\
 ||\varphi||\leqslant||f||
-
 \end{gather*}\]</span></p>
 </div>
 <div id="theorem-10-15" class="theorem theorem-block env-theorem">
@@ -1410,12 +1538,10 @@ f(x)=\varphi(x)-i\varphi(ix) \\
 <p><strong>Corollary 10.3</strong>. 设<span class="math inline">\(E\)</span>是赋范线性空间<span class="math inline">\(X\)</span>的子空间，<span class="math inline">\(x_0\in X\setminus E\)</span>。若：</p>
 <p><span class="math display">\[\begin{equation*}
 d(x_0,E)=\inf_{x\in E}||x_0-x||=\delta&gt;0
-
 \end{equation*}\]</span></p>
 <p>则存在<span class="math inline">\(X\)</span>上的有界线性泛函<span class="math inline">\(f\)</span>，使得：</p>
 <p><span class="math display">\[\begin{equation*}
 ||f||=1,\;f(x_0)=\delta
-
 \end{equation*}\]</span></p>
 <p>而对任意的<span class="math inline">\(x\in E\)</span>，有<span class="math inline">\(f(x)=0\)</span>。</p>
 <p>于是有：</p>
@@ -1429,7 +1555,6 @@ d(x_0,E)=\inf_{x\in E}||x_0-x||=\delta&gt;0
 <p><strong>必要性：</strong>若<span class="math inline">\(x_0\in E\)</span>，在这种情况下则显然<span class="math inline">\(f(x_0)=0\)</span>；若<span class="math inline">\(x_0\in E'\)</span>，则存在<span class="math inline">\(\{x_n\}\subset E\)</span>，使得<span class="math inline">\(\{x_n\}\to x_0\)</span>。由有界线性算子的连续性可得：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x_0)=f\left(\lim_{n\to+\infty}x_n\right)=\lim_{n\to+\infty}f(x_n)=0
-
 \end{equation*}\]</span></p>
 <p>(3)设<span class="math inline">\(E_1\)</span>是由<span class="math inline">\(E\)</span>张成的子空间，<span class="math inline">\(x_0\)</span>可以用<span class="math inline">\(E\)</span>中元素的线性组合以任意精度逼近的充分必要条件是<span class="math inline">\(x_0\in\overline{E_1}\)</span>。由(2)可得，<span class="math inline">\(x_0\in\overline{E_1}\)</span>的充分必要条件为：对<span class="math inline">\(X\)</span>上任一满足对任意的<span class="math inline">\(x\in E_1\)</span>，都有<span class="math inline">\(f(x)=0\)</span>的有界线性泛函<span class="math inline">\(f\)</span>，有<span class="math inline">\(f(x_0)=0\)</span>。因为对<span class="math inline">\(E\)</span>生成的子空间<span class="math inline">\(E_1\)</span>满足该条件，则显然对<span class="math inline">\(E\)</span>也满足（只要把<span class="math inline">\(E\)</span>中某个元素的系数取为<span class="math inline">\(1\)</span>，其它元素系数取为<span class="math inline">\(0\)</span>即可）。&nbsp;◻</p>
 </div>
@@ -1437,14 +1562,12 @@ f(x_0)=f\left(\lim_{n\to+\infty}x_n\right)=\lim_{n\to+\infty}f(x_n)=0
 <p><strong>Corollary 10.4</strong>. 设<span class="math inline">\(X\)</span>是赋范线性空间，且<span class="math inline">\(X\ne\{\mathbf{0}\}\)</span>，则对任意的<span class="math inline">\(x\in X,\;x\ne\mathbf{0}\)</span>，存在<span class="math inline">\(X\)</span>上的有界线性泛函<span class="math inline">\(f\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 ||f||=1,\;f(x_0)=||x_0||
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span><span class="math inline">\(\{\mathbf{0}\}\)</span>是<span class="math inline">\(X\)</span>的一个子空间，由上一个推论可直接得到对任意的<span class="math inline">\(x\in X,\;x\ne\mathbf{0}\)</span>，存在<span class="math inline">\(X\)</span>上的有界线性泛函<span class="math inline">\(f\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 ||f||=1,\;f(x_0)=d(x_0,\{\mathbf{0}\})=||x_0-\mathbf{0}||=||x_0||
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>

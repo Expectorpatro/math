@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,34 +1079,26 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#basics" id="toc-basics" class="nav-link active" data-scroll-target="#basics"><span class="header-section-number">20.1</span> Basics</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#group-family" id="toc-group-family" class="nav-link" data-scroll-target="#group-family"><span class="header-section-number">20.1.1</span> Group Family</a></li>
   </ul></li>
   <li><a href="#bayesian" id="toc-bayesian" class="nav-link" data-scroll-target="#bayesian"><span class="header-section-number">20.2</span> Bayesian</a>
-  <ul>
-  <li><a href="#binomial-distribution" id="toc-binomial-distribution" class="nav-link" data-scroll-target="#binomial-distribution"><span class="header-section-number">20.2.1</span> Binomial Distribution</a></li>
-  <li><a href="#normal-distribution" id="toc-normal-distribution" class="nav-link" data-scroll-target="#normal-distribution"><span class="header-section-number">20.2.2</span> Normal Distribution</a>
   <ul class="collapse">
-  <li><a href="#known-variance" id="toc-known-variance" class="nav-link" data-scroll-target="#known-variance"><span class="header-section-number">20.2.2.1</span> Known Variance</a></li>
-  <li><a href="#known-mean" id="toc-known-mean" class="nav-link" data-scroll-target="#known-mean"><span class="header-section-number">20.2.2.2</span> Known Mean</a></li>
-  </ul></li>
+  <li><a href="#binomial-distribution" id="toc-binomial-distribution" class="nav-link" data-scroll-target="#binomial-distribution"><span class="header-section-number">20.2.1</span> Binomial Distribution</a></li>
+  <li><a href="#normal-distribution" id="toc-normal-distribution" class="nav-link" data-scroll-target="#normal-distribution"><span class="header-section-number">20.2.2</span> Normal Distribution</a></li>
   <li><a href="#possion-model" id="toc-possion-model" class="nav-link" data-scroll-target="#possion-model"><span class="header-section-number">20.2.3</span> Possion Model</a></li>
   </ul></li>
   <li><a href="#prior-distribution" id="toc-prior-distribution" class="nav-link" data-scroll-target="#prior-distribution"><span class="header-section-number">20.3</span> Prior Distribution</a>
-  <ul>
-  <li><a href="#conjugate-prior-distribution" id="toc-conjugate-prior-distribution" class="nav-link" data-scroll-target="#conjugate-prior-distribution"><span class="header-section-number">20.3.1</span> Conjugate Prior Distribution</a></li>
-  <li><a href="#noninformative-prior-distribution" id="toc-noninformative-prior-distribution" class="nav-link" data-scroll-target="#noninformative-prior-distribution"><span class="header-section-number">20.3.2</span> Noninformative Prior Distribution</a>
   <ul class="collapse">
-  <li><a href="#jeffreys-invariance-principle" id="toc-jeffreys-invariance-principle" class="nav-link" data-scroll-target="#jeffreys-invariance-principle"><span class="header-section-number">20.3.2.1</span> Jeffreys’ Invariance Principle</a></li>
-  <li><a href="#prior-distribution-for-the-location-scale-family" id="toc-prior-distribution-for-the-location-scale-family" class="nav-link" data-scroll-target="#prior-distribution-for-the-location-scale-family"><span class="header-section-number">20.3.2.2</span> Prior Distribution for the Location-Scale Family</a></li>
-  </ul></li>
+  <li><a href="#conjugate-prior-distribution" id="toc-conjugate-prior-distribution" class="nav-link" data-scroll-target="#conjugate-prior-distribution"><span class="header-section-number">20.3.1</span> Conjugate Prior Distribution</a></li>
+  <li><a href="#noninformative-prior-distribution" id="toc-noninformative-prior-distribution" class="nav-link" data-scroll-target="#noninformative-prior-distribution"><span class="header-section-number">20.3.2</span> Noninformative Prior Distribution</a></li>
   </ul></li>
   <li><a href="#id--365e8f93" id="toc-id--365e8f93" class="nav-link" data-scroll-target="#id--365e8f93"><span class="header-section-number">20.4</span> 贝叶斯统计推断</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id--e203a5f2" id="toc-id--e203a5f2" class="nav-link" data-scroll-target="#id--e203a5f2"><span class="header-section-number">20.4.1</span> 贝叶斯点估计</a></li>
   </ul></li>
   </ul>
@@ -1010,17 +1190,14 @@ P(\mathbf{Y}_1 \leqslant y_1, \mathbf{Y}_2 \leqslant y_2, \dots, \mathbf{Y}_n \l
 <p><span class="proof-title"><em>证明</em>. </span>(1)The likelihood corresponding to a sequence <span class="math inline">\(y = (y_1, y_2, \dots, y_{m})\)</span> of i.i.d observations is:</p>
 <p><span class="math display">\[\begin{equation*}
 p(y|\theta)\propto\prod_{i=1}^{m}\exp\left[\sum_{j=1}^{n}\theta_jT_j(y_i)-f(\theta)\right]=\exp\left[\sum_{i=1}^{n}\theta_i\sum_{j=1}^{m}T_i(y_j)-mf(\theta)\right]
-
 \end{equation*}\]</span></p>
 <p>If <span class="math inline">\(\theta\)</span>’s pdf is specified as:</p>
 <p><span class="math display">\[\begin{equation*}
 p(\theta)\propto\exp\left[\sum_{i=1}^{n}\theta_i\alpha_i-g(\theta)\right]
-
 \end{equation*}\]</span></p>
 <p>We have:</p>
 <p><span class="math display">\[\begin{equation*}
 p(\theta|y)\propto\exp\left\{\sum_{i=1}^{n}\theta_i\left[\sum_{j=1}^{m}T_i(y_j)+\alpha_i\right]-[mf(\theta)+g(\theta)]\right\}
-
 \end{equation*}\]</span></p>
 <p>which completes the proof.&nbsp;◻</p>
 </div>
@@ -1052,14 +1229,12 @@ p(y|\theta)=\operatorname{Binom}(y|n,\theta)=\binom{n}{y}\theta^y(1-\theta)^{n-y
 <p><strong>Theorem 20.3</strong>. When the prior distribution for the parameter <span class="math inline">\(\theta\)</span> is specified as uniform over the interval <span class="math inline">\([0,1]\)</span>, the resulting posterior distribution for the binomial model <span class="math inline">\(y\sim\operatorname{B}(n,\theta)\)</span> is characterized by a Beta distribution, specifically <span class="math inline">\(\operatorname{Beta}(y+1, n-y+1)\)</span>. Letting <span class="math inline">\(\tilde{y}\)</span> represent the result of a new trial which is exchangeable with the first <span class="math inline">\(n\)</span>, then:</p>
 <p><span class="math display">\[\begin{equation*}
 P(\tilde{y}=1| y)=\frac{y+1}{n+2}
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>As <a href="#eq-Bayesian-797b044c" data-reference-type="ref+label" data-reference="eq:Bayesian">定理 20.2</a> shows:</p>
 <p><span class="math display">\[\begin{equation*}
 p(\theta | y) = \frac{p(y | \theta) p(\theta)}{p(y)} \propto p(\theta) p(y | \theta) = p(y | \theta) = \binom{n}{y} \theta^y (1 - \theta)^{n - y} \propto \theta^y (1 - \theta)^{n - y}
-
 \end{equation*}\]</span></p>
 <p>Since the prior distribution <span class="math inline">\(p(\theta)\)</span> is uniform over <span class="math inline">\([0,1]\)</span>, we have <span class="math inline">\(p(\theta) = 1\)</span> for <span class="math inline">\(\theta \in [0,1]\)</span>. Therefore, the posterior distribution is proportional to the likelihood:</p>
 <p><span class="math display">\[
@@ -1078,7 +1253,6 @@ p(\theta ; \alpha, \beta) = \frac{1}{B(\alpha, \beta)} \theta^{\alpha - 1} (1 - 
 <p><span class="math display">\[\begin{align*}
 P(\tilde{y} = 1 | y) &amp;= \int_0^1 P(\tilde{y} = 1 | \theta, y)p(\theta | y)\mathop{}\!\mathrm{d}\theta \\
 &amp;= \int_0^1 \theta p(\theta | y)\mathop{}\!\mathrm{d}\theta = \operatorname{E}(\theta | y) = \frac{y + 1}{n + 2}
-
 \end{align*}\]</span></p>
 <p>which completes the proof.&nbsp;◻</p>
 </div>
@@ -1099,7 +1273,6 @@ p(y | \theta) \propto \theta^y (1 - \theta)^{n - y}
 p(\theta | y) &amp;\propto p(\theta)p(y | \theta) \\
 &amp;\propto \theta^{\alpha - 1} (1 - \theta)^{\beta - 1}\theta^y (1 - \theta)^{n - y}  \\
 &amp;\propto \theta^{\alpha + y - 1} (1 - \theta)^{\beta + n - y - 1}
-
 \end{align*}\]</span></p>
 <p>This expression matches the kernel of a Beta distribution with updated parameters. Therefore, the posterior distribution is:</p>
 <p><span class="math display">\[
@@ -1116,7 +1289,6 @@ p(\theta | y) &amp;\propto p(\theta)p(y | \theta) \\
 <p><strong>Theorem 20.5</strong>. When the variance is known, the normal distribution is the conjugate prior for the mean <span class="math inline">\(\mu\)</span> of a normal likelihood. Specifically, suppose there are <span class="math inline">\(n\)</span> i.i.d observations <span class="math inline">\(y=(y_1, y_2, \dots, y_{n})\)</span> and the likelihood is <span class="math inline">\(y_i|\mu\sim\operatorname{N}(\mu,\sigma^2)\)</span>, where <span class="math inline">\(\sigma^2\)</span> is known. If the prior for <span class="math inline">\(\mu\)</span> is <span class="math inline">\(\mu\sim\operatorname{N}(\nu,\tau^2)\)</span>, then the posterior distribution of <span class="math inline">\(\mu\)</span> is also normal:</p>
 <p><span class="math display">\[\begin{equation*}
 \mu|y\sim\operatorname{N}\left(\frac{n\tau^2\bar{y} + \sigma^2\nu}{n\tau^2 + \sigma^2}, \frac{\sigma^2\tau^2}{n\tau^2 + \sigma^2}\right)
-
 \end{equation*}\]</span></p>
 <p>where <span class="math inline">\(\bar{y} = \dfrac{1}{n}\sum\limits_{i=1}^n y_i\)</span> is the sample mean.</p>
 </div>
@@ -1130,28 +1302,24 @@ p(\mu|y)&amp;\propto p(\mu)p(y|\mu)\propto
 &amp;\propto\exp\left[-\frac{(n\tau^2+\sigma^2)\mu^2-2(n\tau^2\bar{y}+\sigma^2\nu)\mu}{2\sigma^2\tau^2}\right] \\
 &amp;=\exp\left[-\frac{\mu^2-2\dfrac{n\tau^2\bar{y}+\sigma^2\nu}{\sigma^2+\tau^2}\mu}{\dfrac{2\sigma^2\tau^2}{n\tau^2+\sigma^2}}\right] \\
 &amp;\propto\exp\left[-\frac{1}{2}\frac{\left(\mu-\dfrac{n\tau^2\bar{y}+\sigma^2\nu}{\sigma^2+\tau^2}\right)^2}{\dfrac{\sigma^2\tau^2}{n\tau^2+\sigma^2}}\right]
-
 \end{align*}\]</span>&nbsp;◻</p>
 </div>
 <div id="theorem-20-6" class="theorem theorem-block env-theorem">
 <p><strong>Theorem 20.6</strong>. The posterior distribution of a future observation <span class="math inline">\(\tilde{y}\)</span> is:</p>
 <p><span class="math display">\[\begin{equation*}
 \tilde{y}|y\sim\operatorname{N}\left(\frac{n\tau^2\bar{y}+\sigma^2\nu}{n\tau^2+\sigma^2},\frac{\sigma^2\tau^2}{n\tau^2+\sigma^2}+\sigma^2\right)
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>Let:</p>
 <p><span class="math display">\[\begin{equation*}
 \mu_1=\frac{n\tau^2\bar{y}+\sigma^2\nu}{n\tau^2+\sigma^2},\;\sigma^2_1=\frac{\sigma^2\tau^2}{n\tau^2+\sigma^2}
-
 \end{equation*}\]</span></p>
 <p>Given that the value of <span class="math inline">\(\tilde{y}\)</span> is independent of <span class="math inline">\(y\)</span> when conditioned on <span class="math inline">\(\mu\)</span>, we can express the conditional probability as follows:</p>
 <p><span class="math display">\[\begin{align*}
 p(\tilde{y}|y)
 &amp;=\int_{}p(\tilde{y}|\mu,y)p(\mu|y)\mathop{}\!\mathrm{d}\mu=\int_{}p(\tilde{y}|\mu)p(\mu|y)\mathop{}\!\mathrm{d}\mu \\
 &amp;\propto\int_{}\exp\left[-\frac{(\tilde{y}-\mu)^2}{2\sigma^2}\right]\exp\left[-\frac{(\mu-\mu_1)^2}{2\sigma_1^2}\right]\mathop{}\!\mathrm{d}\mu
-
 \end{align*}\]</span></p>
 <p>The above expression can be interpreted as the marginal density of the bivariate normal distribution <span class="math inline">\((\tilde{y}, \mu)\)</span> with respect to <span class="math inline">\(\tilde{y}\)</span>. According to <a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(3), it follows that <span class="math inline">\(\tilde{y}\)</span> is normally distributed. Utilizing <a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a> and <a href="../chapters/page-013.html#prop-Variance-c0d6c124" data-reference-type="ref+label" data-reference="prop:Variance">性质 12.3.5</a>, we derive the following results:</p>
 <p><span class="math display">\[\begin{gather*}
@@ -1160,7 +1328,6 @@ p(\tilde{y}|y)
 \operatorname{Var}(\tilde{y}|y)&amp;=\operatorname{E}[\operatorname{Var}(\tilde{y}|\theta,y)|y]+\operatorname{Var}[\operatorname{E}(\tilde{y}|\theta,y)|y]=\operatorname{E}[\operatorname{Var}(\tilde{y}|\theta)|y]+\operatorname{Var}[\operatorname{E}(\tilde{y}|\theta)|y] \\
 &amp;=\operatorname{E}(\sigma^2|y)+\operatorname{Var}(\mu|y)=\sigma_1^2+\sigma^2
 \end{aligned}
-
 \end{gather*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1171,7 +1338,6 @@ p(\tilde{y}|y)
 <p><strong>Theorem 20.7</strong>. When the mean is known, the inverse-gamma distribution is the conjugate prior for the variance <span class="math inline">\(\sigma^2\)</span> of a normal likelihood. Specifically, suppose there are <span class="math inline">\(n\)</span> i.i.d observations <span class="math inline">\(y=(y_1, y_2, \dots, y_{n})\)</span> and the likelihood is <span class="math inline">\(y_i|\mu\sim\operatorname{N}(\mu,\sigma^2)\)</span>, where <span class="math inline">\(\mu\)</span> is known. If the prior for <span class="math inline">\(\sigma^2\)</span> is <span class="math inline">\(\sigma^2\sim\operatorname{Inv-Gamma}(\alpha,\lambda)\)</span>, then the posterior distribution of <span class="math inline">\(\sigma^2\)</span> is:</p>
 <p><span class="math display">\[\begin{equation*}
 \sigma^2|y\sim\operatorname{Inv-Gamma}\left[\frac{n}{2}+\alpha,\lambda+\frac{1}{2}\sum_{i=1}^{n}(y_i-\mu)^2\right]
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1179,7 +1345,6 @@ p(\tilde{y}|y)
 p(\sigma^2|y)&amp;\propto p(\sigma^2)p(y|\sigma^2)
 \propto(\sigma^2)^{-\alpha-1}\exp\left(-\frac{\lambda}{\sigma^2}\right)\sigma^{-n}\exp\left[-\frac{1}{2\sigma^2}\sum_{i=1}^{n}(y_i-\mu)^2\right] \\
 &amp;=(\sigma^2)^{-\frac{n}{2}-\alpha-1}\exp\left[-\frac{2\lambda+\sum\limits_{i=1}^{n}(y_i-\mu)^2}{2\sigma^2}\right]
-
 \end{align*}\]</span>&nbsp;◻</p>
 </div>
 </section>
@@ -1190,7 +1355,6 @@ p(\sigma^2|y)&amp;\propto p(\sigma^2)p(y|\sigma^2)
 <p><strong>Theorem 20.8</strong>. The gamma distribution is the conjugate prior for the possion likelihood. Specifically, suppose there are <span class="math inline">\(n\)</span> i.i.d observations <span class="math inline">\(y=(y_1, y_2, \dots, y_{n})\)</span> and the likelihood is <span class="math inline">\(y_i|\lambda\sim\operatorname{Possion}(\lambda)\)</span>. If the prior for <span class="math inline">\(\lambda\)</span> is <span class="math inline">\(\lambda\sim\operatorname{Gamma}(\alpha,\beta)\)</span>, then the posterior distribution of <span class="math inline">\(\lambda\)</span> is:</p>
 <p><span class="math display">\[\begin{equation*}
 \lambda|y\sim\operatorname{Gamma}\left(\alpha+n\bar{y},\beta+n\right)
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1207,7 +1371,6 @@ p(\sigma^2|y)&amp;\propto p(\sigma^2)p(y|\sigma^2)
 <p><strong>Definition 20.8</strong>. If <span class="math inline">\(\mathcal{F}\)</span> is a class of sampling distributions <span class="math inline">\(p(y|\theta)\)</span>, and <span class="math inline">\(\mathcal{P}\)</span> is a class of prior distributions for <span class="math inline">\(\theta\)</span>, then the class <span class="math inline">\(\mathcal{P}\)</span> is conjugate for <span class="math inline">\(\mathcal{F}\)</span> if:</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;p(\cdot|\theta)\in\mathcal{F}\;and\;p(\cdot)\in\mathcal{P},\;p(\theta|y)\in\mathcal{P}
-
 \end{equation*}\]</span></p>
 <p>The set of all probability functions that share the same functional form as the likelihood is referred to as the natural conjugate prior families.</p>
 </div>
@@ -1227,35 +1390,29 @@ p(\sigma^2|y)&amp;\propto p(\sigma^2)p(y|\sigma^2)
 <p><strong>Theorem 20.9</strong>. The location parameter can be conceptualized as the particular instantiation of the same parameter across various origins. Consequently, it is posited that the prior distribution of the location parameter ought not to be influenced by the selection of origin. In accordance with this principle, the prior distribution for the location parameter should be formulated as follows:</p>
 <p><span class="math display">\[\begin{equation*}
 p(\theta)\propto1
-
 \end{equation*}\]</span></p>
 <p>Similarly, the scale parameter can be interpreted as the specific realization of the same parameter across different scales, so we believe that the prior distribution of the scale parameter should not depend on the choice of scale. In alignment with this principle, the prior distribution for the scale parameter should be articulated as follows:</p>
 <p><span class="math display">\[\begin{equation*}
 p(\theta)\propto\frac{1}{\theta}
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>Initially, we will assume that <span class="math inline">\(\theta\)</span> serves as a location parameter. In accordance with the aforementioned principle, we can express the following relationship:</p>
 <p><span class="math display">\[\begin{equation*}
 p(\theta) = p(\theta + \alpha), \;\forall\; \alpha \in \mathbb{R}^{}
-
 \end{equation*}\]</span></p>
 <p>This implies that <span class="math inline">\(p(\theta)\)</span> must be a constant across the real line.</p>
 <p>Next, we consider the case of a scale parameter, where we define <span class="math inline">\(\tau = \dfrac{\theta}{\alpha}\)</span>, with <span class="math inline">\(\alpha &gt; 0\)</span>. Referring to , we need to establish the following equation:</p>
 <p><span class="math display">\[\begin{equation*}
 p(\tau) = p(\alpha \tau) \left| \frac{\mathop{}\!\mathrm{d}\theta}{\mathop{}\!\mathrm{d}\tau} \right| = p(\alpha \tau) \alpha = p(\theta)
-
 \end{equation*}\]</span></p>
 <p>From this, we derive:</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{p(\alpha \tau)}{p(\theta)} = \frac{1}{\alpha}
-
 \end{equation*}\]</span></p>
 <p>This leads us to conclude that:</p>
 <p><span class="math display">\[\begin{equation*}
 p(\theta) \propto \frac{1}{\theta}
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>

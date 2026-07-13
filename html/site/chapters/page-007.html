@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,68 +1079,30 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#id-1-c9bff0eb" id="toc-id-1-c9bff0eb" class="nav-link active" data-scroll-target="#id-1-c9bff0eb"><span class="header-section-number">6.1</span> 数项级数</a>
-  <ul>
-  <li><a href="#cauchy-65d48130" id="toc-cauchy-65d48130" class="nav-link" data-scroll-target="#cauchy-65d48130"><span class="header-section-number">6.1.0.1</span> Cauchy积分判别法</a></li>
-  <li><a href="#id--281d5941" id="toc-id--281d5941" class="nav-link" data-scroll-target="#id--281d5941"><span class="header-section-number">6.1.1</span> 比较尺度问题</a></li>
-  <li><a href="#raabe-60d9e42a" id="toc-raabe-60d9e42a" class="nav-link" data-scroll-target="#raabe-60d9e42a"><span class="header-section-number">6.1.2</span> Raabe判别法</a>
   <ul class="collapse">
-  <li><a href="#id--e3b32086" id="toc-id--e3b32086" class="nav-link" data-scroll-target="#id--e3b32086"><span class="header-section-number">6.1.2.1</span> 一般形式</a></li>
-  <li><a href="#id--94e30ed0" id="toc-id--94e30ed0" class="nav-link" data-scroll-target="#id--94e30ed0"><span class="header-section-number">6.1.2.2</span> 上下极限形式</a></li>
-  <li><a href="#id--f7023d31" id="toc-id--f7023d31" class="nav-link" data-scroll-target="#id--f7023d31"><span class="header-section-number">6.1.2.3</span> 极限形式</a></li>
-  </ul></li>
+  <li><a href="#id--281d5941" id="toc-id--281d5941" class="nav-link" data-scroll-target="#id--281d5941"><span class="header-section-number">6.1.1</span> 比较尺度问题</a></li>
+  <li><a href="#raabe-60d9e42a" id="toc-raabe-60d9e42a" class="nav-link" data-scroll-target="#raabe-60d9e42a"><span class="header-section-number">6.1.2</span> Raabe判别法</a></li>
   <li><a href="#gauss-458fc166" id="toc-gauss-458fc166" class="nav-link" data-scroll-target="#gauss-458fc166"><span class="header-section-number">6.1.3</span> Gauss判别法</a></li>
   </ul></li>
   <li><a href="#id--ad648c27" id="toc-id--ad648c27" class="nav-link" data-scroll-target="#id--ad648c27"><span class="header-section-number">6.2</span> 函数序列与函数项级数</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id--0a986cf2" id="toc-id--0a986cf2" class="nav-link" data-scroll-target="#id--0a986cf2"><span class="header-section-number">6.2.1</span> 函数序列的收敛</a></li>
-  <li><a href="#id--4b86a80e" id="toc-id--4b86a80e" class="nav-link" data-scroll-target="#id--4b86a80e"><span class="header-section-number">6.2.2</span> 逐点收敛</a>
-  <ul class="collapse">
-  <li><a href="#id--44cb1626" id="toc-id--44cb1626" class="nav-link" data-scroll-target="#id--44cb1626"><span class="header-section-number">6.2.2.1</span> 极限函数的定义</a></li>
-  <li><a href="#id--8ac295cc" id="toc-id--8ac295cc" class="nav-link" data-scroll-target="#id--8ac295cc"><span class="header-section-number">6.2.2.2</span> 函数序列逐点收敛的定义</a></li>
-  </ul></li>
-  <li><a href="#id--b1eb34ea" id="toc-id--b1eb34ea" class="nav-link" data-scroll-target="#id--b1eb34ea"><span class="header-section-number">6.2.3</span> 一致收敛</a>
-  <ul class="collapse">
-  <li><a href="#id--a3a51ac7" id="toc-id--a3a51ac7" class="nav-link" data-scroll-target="#id--a3a51ac7"><span class="header-section-number">6.2.3.1</span> 函数序列一致收敛的定义</a></li>
-  <li><a href="#id--9b7180e9" id="toc-id--9b7180e9" class="nav-link" data-scroll-target="#id--9b7180e9"><span class="header-section-number">6.2.3.2</span> 函数序列一致收敛的等价叙述</a></li>
-  <li><a href="#id--3d062e3a" id="toc-id--3d062e3a" class="nav-link" data-scroll-target="#id--3d062e3a"><span class="header-section-number">6.2.3.3</span> 函数序列一致收敛的柯西原理</a></li>
-  </ul></li>
+  <li><a href="#id--4b86a80e" id="toc-id--4b86a80e" class="nav-link" data-scroll-target="#id--4b86a80e"><span class="header-section-number">6.2.2</span> 逐点收敛</a></li>
+  <li><a href="#id--b1eb34ea" id="toc-id--b1eb34ea" class="nav-link" data-scroll-target="#id--b1eb34ea"><span class="header-section-number">6.2.3</span> 一致收敛</a></li>
   <li><a href="#id--24a0433a" id="toc-id--24a0433a" class="nav-link" data-scroll-target="#id--24a0433a"><span class="header-section-number">6.2.4</span> 函数项级数的收敛</a></li>
-  <li><a href="#id-1-6778648e" id="toc-id-1-6778648e" class="nav-link" data-scroll-target="#id-1-6778648e"><span class="header-section-number">6.2.5</span> 逐点收敛</a>
-  <ul class="collapse">
-  <li><a href="#id--9eabc43f" id="toc-id--9eabc43f" class="nav-link" data-scroll-target="#id--9eabc43f"><span class="header-section-number">6.2.5.1</span> 函数项级数逐点收敛的定义</a></li>
-  </ul></li>
-  <li><a href="#id-1-0e486765" id="toc-id-1-0e486765" class="nav-link" data-scroll-target="#id-1-0e486765"><span class="header-section-number">6.2.6</span> 一致收敛</a>
-  <ul class="collapse">
-  <li><a href="#id--f91320d9" id="toc-id--f91320d9" class="nav-link" data-scroll-target="#id--f91320d9"><span class="header-section-number">6.2.6.1</span> 函数项级数一致收敛的定义</a></li>
-  <li><a href="#id--f353b847" id="toc-id--f353b847" class="nav-link" data-scroll-target="#id--f353b847"><span class="header-section-number">6.2.6.2</span> 函数项级数一致收敛的柯西原理</a></li>
-  <li><a href="#id--b021312d" id="toc-id--b021312d" class="nav-link" data-scroll-target="#id--b021312d"><span class="header-section-number">6.2.6.3</span> 函数项级数绝对一致收敛的判别法</a></li>
-  <li><a href="#id--8e500cca" id="toc-id--8e500cca" class="nav-link" data-scroll-target="#id--8e500cca"><span class="header-section-number">6.2.6.4</span> 函数项级数条件一致收敛的判别法</a></li>
-  </ul></li>
+  <li><a href="#id-1-6778648e" id="toc-id-1-6778648e" class="nav-link" data-scroll-target="#id-1-6778648e"><span class="header-section-number">6.2.5</span> 逐点收敛</a></li>
+  <li><a href="#id-1-0e486765" id="toc-id-1-0e486765" class="nav-link" data-scroll-target="#id-1-0e486765"><span class="header-section-number">6.2.6</span> 一致收敛</a></li>
   <li><a href="#id--0ea8c289" id="toc-id--0ea8c289" class="nav-link" data-scroll-target="#id--0ea8c289"><span class="header-section-number">6.2.7</span> 极限函数的分析性质</a></li>
-  <li><a href="#id--90a3360c" id="toc-id--90a3360c" class="nav-link" data-scroll-target="#id--90a3360c"><span class="header-section-number">6.2.8</span> 连续性</a>
-  <ul class="collapse">
-  <li><a href="#id--1d5e1c20" id="toc-id--1d5e1c20" class="nav-link" data-scroll-target="#id--1d5e1c20"><span class="header-section-number">6.2.8.1</span> 极限函数的连续性</a></li>
-  </ul></li>
-  <li><a href="#id-1-845fc158" id="toc-id-1-845fc158" class="nav-link" data-scroll-target="#id-1-845fc158"><span class="header-section-number">6.2.9</span> 定积分</a>
-  <ul class="collapse">
-  <li><a href="#id--c3e11eaa" id="toc-id--c3e11eaa" class="nav-link" data-scroll-target="#id--c3e11eaa"><span class="header-section-number">6.2.9.1</span> 逐项积分定理</a></li>
-  </ul></li>
-  <li><a href="#id-1-620b5f37" id="toc-id-1-620b5f37" class="nav-link" data-scroll-target="#id-1-620b5f37"><span class="header-section-number">6.2.10</span> 微分</a>
-  <ul class="collapse">
-  <li><a href="#id--d2025541" id="toc-id--d2025541" class="nav-link" data-scroll-target="#id--d2025541"><span class="header-section-number">6.2.10.1</span> 逐项微分定理</a></li>
-  </ul></li>
+  <li><a href="#id--90a3360c" id="toc-id--90a3360c" class="nav-link" data-scroll-target="#id--90a3360c"><span class="header-section-number">6.2.8</span> 连续性</a></li>
+  <li><a href="#id-1-845fc158" id="toc-id-1-845fc158" class="nav-link" data-scroll-target="#id-1-845fc158"><span class="header-section-number">6.2.9</span> 定积分</a></li>
+  <li><a href="#id-1-620b5f37" id="toc-id-1-620b5f37" class="nav-link" data-scroll-target="#id-1-620b5f37"><span class="header-section-number">6.2.10</span> 微分</a></li>
   <li><a href="#id--9b5f7df9" id="toc-id--9b5f7df9" class="nav-link" data-scroll-target="#id--9b5f7df9"><span class="header-section-number">6.2.11</span> 幂级数</a></li>
   <li><a href="#id--77ea4b12" id="toc-id--77ea4b12" class="nav-link" data-scroll-target="#id--77ea4b12"><span class="header-section-number">6.2.12</span> 幂级数的收敛半径</a></li>
-  <li><a href="#id--f29abfec" id="toc-id--f29abfec" class="nav-link" data-scroll-target="#id--f29abfec"><span class="header-section-number">6.2.13</span> 幂级数和函数的分析性质</a>
-  <ul class="collapse">
-  <li><a href="#id-1-583bcaed" id="toc-id-1-583bcaed" class="nav-link" data-scroll-target="#id-1-583bcaed"><span class="header-section-number">6.2.13.1</span> 连续性</a></li>
-  <li><a href="#id-2-4fb05e88" id="toc-id-2-4fb05e88" class="nav-link" data-scroll-target="#id-2-4fb05e88"><span class="header-section-number">6.2.13.2</span> 定积分</a></li>
-  <li><a href="#id-2-1144b25b" id="toc-id-2-1144b25b" class="nav-link" data-scroll-target="#id-2-1144b25b"><span class="header-section-number">6.2.13.3</span> 微分</a></li>
-  </ul></li>
+  <li><a href="#id--f29abfec" id="toc-id--f29abfec" class="nav-link" data-scroll-target="#id--f29abfec"><span class="header-section-number">6.2.13</span> 幂级数和函数的分析性质</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -989,7 +1139,6 @@ window.Quarto = {
 <p><strong>Lemma 6.1</strong>. 设<span class="math inline">\(f(x)\)</span>在<span class="math inline">\([1,+\infty)\)</span>上非负。记</p>
 <p><span class="math display">\[\begin{equation*}
 F(x)=\int_1^xf(t)\mathop{}\!\mathrm{d}t
-
 \end{equation*}\]</span></p>
 <p>则级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}[F(n+1)-F(n)]\)</span>与广义积分<span class="math inline">\(\int_1^{+\infty}f(x)\mathop{}\!\mathrm{d}x\)</span>同收敛。</p>
 </div>
@@ -999,7 +1148,6 @@ F(x)=\int_1^xf(t)\mathop{}\!\mathrm{d}t
 \lim_{n\to+\infty}\sum_{i=1}^n[F(i+1)-F(i)]&amp;=   \lim_{n\to+\infty}F(n+1) \\
 &amp;=\lim_{n\to+\infty}\int_1^{n+1}f(x)\mathop{}\!\mathrm{d}x \\
 &amp;=\int_1^{+\infty}f(x)\mathop{}\!\mathrm{d}x
-
 \end{align*}\]</span></p>
 <p>因此级数收敛。</p>
 <p>(2)如果级数收敛，对任意的<span class="math inline">\(H&gt;0\)</span>，令<span class="math inline">\(N=[H]\)</span>（取整函数），则：</p>
@@ -1010,7 +1158,6 @@ F(x)=\int_1^xf(t)\mathop{}\!\mathrm{d}t
 &amp;=\lim_{N\to+\infty}\int_1^{N+1}f(x)\mathop{}\!\mathrm{d}x \\
 &amp;=\lim_{N\to+\infty}\sum_{n=1}^{N}[F(n+1)-F(n)] \\
 &amp;=\sum_{n=1}^{+\infty}[F(n+1)-F(n)]
-
 \end{align*}\]</span></p>
 <p>因此广义积分收敛。&nbsp;◻</p>
 </div>
@@ -1018,12 +1165,10 @@ F(x)=\int_1^xf(t)\mathop{}\!\mathrm{d}t
 <p><strong>Theorem 6.1</strong>. 设<span class="math inline">\(f(x)\)</span>在<span class="math inline">\([1,+\infty)\)</span>单调下降且非负，则级数：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}f(n)
-
 \end{equation*}\]</span></p>
 <p>与广义积分：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{1}^{+\infty}f(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 <p>同敛态。</p>
 </div>
@@ -1031,23 +1176,19 @@ F(x)=\int_1^xf(t)\mathop{}\!\mathrm{d}t
 <p><span class="proof-title"><em>证明</em>. </span>(1)如果广义积分收敛，则级数：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=2}^{+\infty}[F(n)-F(n-1)]
-
 \end{equation*}\]</span></p>
 <p>收敛，由<span class="math inline">\(f(x)\)</span>单调下降且非负，有：</p>
 <p><span class="math display">\[\begin{equation*}
 f(n)\leqslant\int_{n-1}^{n}f(x)\mathop{}\!\mathrm{d}x=F(n)-F(n-1)
-
 \end{equation*}\]</span></p>
 <p>由比较判别法，级数收敛。</p>
 <p>(2)如果广义积分发散，则级数：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}[F(n+1)-F(n)]
-
 \end{equation*}\]</span></p>
 <p>发散，由<span class="math inline">\(f(x)\)</span>单调下降且非负，有：</p>
 <p><span class="math display">\[\begin{equation*}
 f(n)\geqslant\int_{n}^{n+1}f(x)\mathop{}\!\mathrm{d}x=F(n+1)-F(n)
-
 \end{equation*}\]</span></p>
 <p>由比较判别法，级数发散。&nbsp;◻</p>
 </div>
@@ -1075,13 +1216,11 @@ f(n)\geqslant\int_{n}^{n+1}f(x)\mathop{}\!\mathrm{d}x=F(n+1)-F(n)
 <li><p>如果<span class="math inline">\(\exists\;q&gt;1,\;\exists\;N\in\mathbb{N}^+\)</span>，使得对任意的<span class="math inline">\(n&gt;N\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
                 n\left(\frac{a_n}{a_{n+1}}-1\right)\geqslant q
-
     \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>收敛。</p></li>
 <li><p>如果<span class="math inline">\(\exists\;N\in\mathbb{N}^+\)</span>，使得对任意的<span class="math inline">\(n&gt;N\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
                 n\left(\frac{a_n}{a_{n+1}}-1\right)\leqslant1
-
     \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>发散。</p></li>
 </ol>
@@ -1090,7 +1229,6 @@ f(n)\geqslant\int_{n}^{n+1}f(x)\mathop{}\!\mathrm{d}x=F(n+1)-F(n)
 <p><span class="proof-title"><em>证明</em>. </span>(1)所给的条件等价于对任意的<span class="math inline">\(n&gt;N\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{a_n}{a_{n+1}}\geqslant1+\frac{q}{n}
-
 \end{equation*}\]</span></p>
 <p>取<span class="math inline">\(p\in\mathbb{R}\)</span>满足<span class="math inline">\(1&lt;p&lt;q\)</span>，取级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}\dfrac{1}{n^p}\)</span>，令<span class="math inline">\(b_n=\frac{1}{n^p}\)</span>。当<span class="math inline">\(n\)</span>足够大的时候，有：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1098,13 +1236,11 @@ f(n)\geqslant\int_{n}^{n+1}f(x)\mathop{}\!\mathrm{d}x=F(n+1)-F(n)
 &amp;=(1+\frac{1}{n})^p \\
 &amp;=1+\frac{p}{n}+O(\frac{1}{n^2}) \\
 &amp;&lt;1+\frac{q}{n}\leqslant\frac{a_n}{a_{n+1}}
-
 \end{align*}\]</span></p>
 <p>由比值判别法可得<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>收敛。</p>
 <p>(2)所给的条件等价于对任意的<span class="math inline">\(n&gt;N\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{a_n}{a_{n+1}}\leqslant1+\frac{1}{n}=\frac{\frac{1}{n}}{\frac{1}{n+1}}
-
 \end{equation*}\]</span></p>
 <p>由比值判别法可得<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>发散。&nbsp;◻</p>
 </div>
@@ -1117,13 +1253,11 @@ f(n)\geqslant\int_{n}^{n+1}f(x)\mathop{}\!\mathrm{d}x=F(n+1)-F(n)
 <li><p>如果：</p>
 <p><span class="math display">\[\begin{equation*}
                 \varliminf n\left(\frac{a_{n}}{a_{n+1}}-1\right)&gt;1
-
     \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>收敛。</p></li>
 <li><p>如果：</p>
 <p><span class="math display">\[\begin{equation*}
                 \varlimsup n\left(\frac{a_{n}}{a_{n+1}}-1\right)&lt;1
-
     \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>发散。</p></li>
 </ol>
@@ -1135,7 +1269,6 @@ f(n)\geqslant\int_{n}^{n+1}f(x)\mathop{}\!\mathrm{d}x=F(n+1)-F(n)
 <p><strong>Theorem 6.4</strong>. 设<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>是严格正项级数。且：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty} n\left(\frac{a_{n}}{a_{n+1}}-1\right)=q
-
 \end{equation*}\]</span></p>
 <ol type="1">
 <li><p>若<span class="math inline">\(q&gt;1\)</span>，则<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>收敛。</p></li>
@@ -1151,7 +1284,6 @@ f(n)\geqslant\int_{n}^{n+1}f(x)\mathop{}\!\mathrm{d}x=F(n+1)-F(n)
 <p><strong>Theorem 6.5</strong>. 设<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>是严格正项级数。若：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{a_n}{a_{n+1}}=\lambda+\frac{\mu}{n}+\frac{\nu}{n\ln n}+o(\frac{1}{n\ln n})
-
 \end{equation*}\]</span></p>
 <p>则：</p>
 <ol type="1">
@@ -1165,7 +1297,6 @@ f(n)\geqslant\int_{n}^{n+1}f(x)\mathop{}\!\mathrm{d}x=F(n+1)-F(n)
 <p>(3)我们以级数：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum\limits_{n=2}^{+\infty}b_n=\sum\limits_{n=2}^{+\infty}\frac{1}{n(\ln n)^p}
-
 \end{equation*}\]</span></p>
 <p>作为比较的尺度。计算可得：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1175,29 +1306,24 @@ f(n)\geqslant\int_{n}^{n+1}f(x)\mathop{}\!\mathrm{d}x=F(n+1)-F(n)
 &amp;=\left(1+\frac{1}{n}\right)\left(1+\frac{\ln(1+\frac{1}{n})}{\ln n}\right)^p \\
 &amp;=\left(1+\frac{1}{n}\right)\left(1+\frac{1}{n\ln n}+o(\frac{1}{n\ln n})\right)^p \\
 &amp;=1+\frac{1}{n}+\frac{p}{n\ln n}+o\left(\frac{1}{n\ln n}\right)
-
 \end{align*}\]</span></p>
 <p>其中第三行到第四行利用了泰勒展开。</p>
 <p>回归原级数，如果<span class="math inline">\(\lambda=\mu=1,\;\nu&gt;1\)</span>，则可以选取<span class="math inline">\(p\in\mathbb{R}\)</span>，使得：</p>
 <p><span class="math display">\[\begin{equation*}
 1&lt;p&lt;\nu
-
 \end{equation*}\]</span></p>
 <p>当<span class="math inline">\(n\)</span>足够大的时候，就有：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{a_n}{a_{n+1}}\geqslant\frac{b_n}{b_{n+1}}
-
 \end{equation*}\]</span></p>
 <p>此时<span class="math inline">\(\sum\limits_{n=1}^{+\infty}b_n\)</span>收敛，由比值判别法，级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>收敛。</p>
 <p>如果<span class="math inline">\(\lambda=\mu=1,\;\nu&lt;1\)</span>，则可以选取<span class="math inline">\(p\in\mathbb{R}\)</span>，使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \nu&lt;p&lt;1
-
 \end{equation*}\]</span></p>
 <p>当<span class="math inline">\(n\)</span>足够大的时候，就有：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{a_n}{a_{n+1}}\leqslant\frac{b_n}{b_{n+1}}
-
 \end{equation*}\]</span></p>
 <p>此时<span class="math inline">\(\sum\limits_{n=1}^{+\infty}b_n\)</span>发散，由比值判别法，级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>发散。&nbsp;◻</p>
 </div>
@@ -1227,12 +1353,10 @@ f_1(x),f_2(x),\cdots,f_n(x),\cdots
 <p><strong>Definition 6.2</strong>. 设<span class="math inline">\(D\subset\mathbb{R}\)</span>。如果函数序列<span class="math inline">\(\{f_n(x)\}\)</span>的收敛域包含了<span class="math inline">\(D\)</span>，那么：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;x\in D,\;\lim_{n\to+\infty}f_n(x)\in\mathbb{R}
-
 \end{equation*}\]</span></p>
 <p>可以定义一个函数：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=\lim_{n\to+\infty}f_n(x),\;f:D\rightarrow\mathbb{R}
-
 \end{equation*}\]</span></p>
 <p>我们把函数<span class="math inline">\(f\)</span>称之为函数序列<span class="math inline">\(\{f_n(x)\}\)</span>在集合<span class="math inline">\(D\)</span>上的<a href="../chapters/page-051.html#term-LimitF" class="term" title="limit function">极限函数<span class="term-english">（limit function）</span></a>。</p>
 </div>
@@ -1243,7 +1367,6 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;f:D\rightarrow\mathbb{R}
 <p><strong>Definition 6.3</strong>. 函数序列<span class="math inline">\(\{f_n(x)\}\)</span>在集合<span class="math inline">\(E\)</span>上<a href="../chapters/page-055.html#term-PointwiseConvergence" class="term" title="pointwise convergence">逐点收敛<span class="term-english">（pointwise convergence）</span></a>于函数<span class="math inline">\(f(x)\)</span>是指：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;x\in E,\;\forall\;\varepsilon&gt;0,\;\exists\; N(x,\varepsilon)\in\mathbb{N}^+,\;\forall\;n&gt;N,\;|f_n(x)-f(x)|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 </div>
 </section>
@@ -1256,12 +1379,10 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;f:D\rightarrow\mathbb{R}
 <p><strong>Definition 6.4</strong>. 设函数序列<span class="math inline">\(\{f_n(x)\}\)</span>在集合<span class="math inline">\(E\)</span>上逐点收敛于函数<span class="math inline">\(f(x)\)</span>。如果：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\; N(\varepsilon)\in\mathbb{N}^+,\;\forall\;n&gt;N,\;\forall\;x\in E,\;|f_n(x)-f(x)|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>则称函数序列<span class="math inline">\(\{f_n(x)\}\)</span>在集合<span class="math inline">\(E\)</span>上<a href="../chapters/page-060.html#term-UniformConvergence" class="term" title="uniform convergence">一致收敛<span class="term-english">（uniform convergence）</span></a>于函数<span class="math inline">\(f(x)\)</span>，记为：</p>
 <p><span class="math display">\[\begin{equation*}
 f_n(x)\underset{E}{\rightrightarrows}f(x)\quad(n\to+\infty)
-
 \end{equation*}\]</span></p>
 </div>
 </section>
@@ -1271,7 +1392,6 @@ f_n(x)\underset{E}{\rightrightarrows}f(x)\quad(n\to+\infty)
 <p><strong>Theorem 6.6</strong>. 设函数序列<span class="math inline">\(\{f_n(x)\}\)</span>在集合<span class="math inline">\(E\)</span>上逐点收敛于函数<span class="math inline">\(f(x)\)</span>。记：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(f_n(x),f(x))=\sup_{x\in E}|f_n(x)-f(x)|
-
 \end{equation*}\]</span></p>
 <p>则以下三条陈述等价：</p>
 <ol type="1">
@@ -1280,7 +1400,6 @@ f_n(x)\underset{E}{\rightrightarrows}f(x)\quad(n\to+\infty)
 <li><p>对任何序列<span class="math inline">\(\{x_n\}\subset E\)</span>，都有：</p>
 <p><span class="math display">\[\begin{equation*}
                 \lim_{n\to+\infty}[f_n(x_n)-f(x_n)]=0
-
     \end{equation*}\]</span></p></li>
 </ol>
 </div>
@@ -1289,12 +1408,10 @@ f_n(x)\underset{E}{\rightrightarrows}f(x)\quad(n\to+\infty)
 <p>假设(1)不成立，则</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;\varepsilon&gt;0,\;\forall\;N(\varepsilon)\in\mathbb{N}^+,\;\exists\;n&gt;N,\;\exists\;x\in E,\;|f_n(x)-f(x)|\geqslant\varepsilon
-
 \end{equation*}\]</span></p>
 <p>取一个固定地<span class="math inline">\(\varepsilon&gt;0\)</span>，令<span class="math inline">\(n_0=0\)</span>，则<span class="math inline">\(\exists\;n_k\in\mathbb{N}^+,\;n_k&gt;n_{k-1}+1\)</span>，且<span class="math inline">\(x_{n_k}\in E\)</span>，使得：</p>
 <p><span class="math display">\[\begin{equation*}
 |f_{n_k}(x_{n_k})-f(x_{n_k})|\geqslant\varepsilon
-
 \end{equation*}\]</span></p>
 <p>显然<span class="math inline">\(\{x_{n_k}\}\)</span>这个序列不满足(3)的条件，矛盾。&nbsp;◻</p>
 </div>
@@ -1306,7 +1423,6 @@ f_n(x)\underset{E}{\rightrightarrows}f(x)\quad(n\to+\infty)
 <p><strong>Theorem 6.7</strong>. 设函数序列<span class="math inline">\(\{f_n(x)\}\)</span>的各项在集合<span class="math inline">\(E\)</span>上都有定义，则这个函数序列在<span class="math inline">\(E\)</span>上一致收敛于某个极限函数的充要条件是：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m&gt;N,\;m&gt;n,\;\forall\;x\in E,\;|f_m(x)-f_n(x)|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1314,17 +1430,14 @@ f_n(x)\underset{E}{\rightrightarrows}f(x)\quad(n\to+\infty)
 <p>充分性：由条件，对任意的<span class="math inline">\(x\in E\)</span>，<span class="math inline">\(f_n(x)\)</span>构成一个<span class="math inline">\(\mathbb{R}\)</span>上的柯西序列，因此可定义一个极限函数：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
-
 \end{equation*}\]</span></p>
 <p>同时，由题目条件可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;\forall\;p\in\mathbb{N}^+,\;\forall\;x\in E,\;|f_{n+p}(x)-f_n(x)|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>在上式中取<span class="math inline">\(p\to+\infty\)</span>即可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;\forall\;x\in E,\;|f(x)-f_n(x)|\leqslant\varepsilon
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(\{f_n(x)\}\)</span>一致收敛于<span class="math inline">\(f(x)\)</span>。&nbsp;◻</p>
 </div>
@@ -1341,7 +1454,6 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
 <p><strong>Definition 6.5</strong>. 函数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}f_n(x)\)</span>在集合<span class="math inline">\(E\)</span>上逐点收敛于函数<span class="math inline">\(f(x)\)</span>是指：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;x\in E,\;\forall\;\varepsilon&gt;0,\;\exists\; N(x,\varepsilon)\in\mathbb{N}^+,\;\forall\;n&gt;N,\;\left|\sum_{i=1}^{n}f_i(x)-f(x)\right|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 </div>
 </section>
@@ -1354,7 +1466,6 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
 <p><strong>Definition 6.6</strong>. 设函数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}f_n(x)\)</span>在集合<span class="math inline">\(E\)</span>上逐点收敛于函数<span class="math inline">\(f(x)\)</span>。如果：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\; N(\varepsilon)\in\mathbb{N}^+,\;\forall\;n&gt;N,\;\forall\;x\in E,\;\left|\sum_{i=1}^{n}f_i(x)-f(x)\right|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>则称函数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}f_n(x)\)</span>在集合<span class="math inline">\(E\)</span>上一致收敛于函数<span class="math inline">\(f(x)\)</span>。</p>
 </div>
@@ -1365,7 +1476,6 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
 <p><strong>Theorem 6.8</strong>. 设函数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}f_n(x)\)</span>在集合<span class="math inline">\(E\)</span>上有定义，则这个函数序列在<span class="math inline">\(E\)</span>上一致收敛于某个极限函数的充要条件是：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m&gt;N,\;m&gt;n,\;\forall\;x\in E,\;\left|\sum_{i=n+1}^mf_i(x)\right|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1373,17 +1483,14 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
 <p>充分性：由条件，对任意的<span class="math inline">\(x\in E\)</span>，<span class="math inline">\(\sum\limits_{i=1}^nf_i(x)\)</span>构成一个<span class="math inline">\(\mathbb{R}\)</span>上的柯西序列，因此可定义一个极限函数<span class="math inline">\(f(x)\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;x\in E,\;f(x)=\lim_{n\to+\infty}\sum_{i=1}^nf_i(x)
-
 \end{equation*}\]</span></p>
 <p>同时，由题目条件可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;\forall\;p\in\mathbb{N}^+,\;\forall\;x\in E,\;\left|\sum_{i=1}^{n+p}f_i(x)-\sum_{i=1}^{n}f_i(x)\right|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>在上式中取<span class="math inline">\(p\to+\infty\)</span>即可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;\forall\;x\in E,\;|f(x)-\sum_{i=1}^nf_i(x)|\leqslant\varepsilon
-
 \end{equation*}\]</span></p>
 <p>即函数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}f_n(x)\)</span>一致收敛于<span class="math inline">\(f(x)\)</span>。&nbsp;◻</p>
 </div>
@@ -1402,7 +1509,6 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
 <p>设函数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}f_n(x)\)</span>在集合<span class="math inline">\(E\)</span>上有定义。如果存在收敛的正项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}x_n\)</span>，满足：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;n\in\mathbb{N}^+,\;\forall\;x\in E,\;|f_n(x)|\leqslant x_n
-
 \end{equation*}\]</span></p>
 <p>则函数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}f_n(x)\)</span>在集合<span class="math inline">\(E\)</span>上绝对一致收敛。称正项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}x_n\)</span>为优级数。</p>
 </div>
@@ -1410,12 +1516,10 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
 <p><span class="proof-title"><em>证明</em>. </span>因为数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}x_n\)</span>收敛，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m&gt;N,\;m&gt;n,\;\left|\sum_{i=n+1}^mx_i\right|=\sum_{i=n+1}^mx_i&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>也就有：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m&gt;N,\;m&gt;n,\;\forall\;x\in E,\;\sum_{i=n+1}^m|f_n(x)|\leqslant\sum_{i=n+1}^mx_i&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>由函数项级数收敛的柯西原理，<span class="math inline">\(\sum\limits_{n=1}^{+\infty}|f_n(x)|\)</span>一致收敛，即<span class="math inline">\(\sum\limits_{n=1}^{+\infty}f_n(x)\)</span>绝对一致收敛。&nbsp;◻</p>
 </div>
@@ -1427,7 +1531,6 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
 <p>对函数项级数：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}f_n(x)g_n(x),\quad x\in E
-
 \end{equation*}\]</span></p>
 <p>如果：</p>
 <ol type="1">
@@ -1435,7 +1538,6 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
 <li><p>函数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}g_n(x)\)</span>的部分和序列在<span class="math inline">\(E\)</span>上一致有界：</p>
 <p><span class="math display">\[\begin{equation*}
                 \forall\;n\in\mathbb{N}^+,\;\forall\;x\in E,\;\left|\sum_{i=1}^ng_i(x)\right|\leqslant L
-
     \end{equation*}\]</span></p></li>
 </ol>
 <p>则函数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}f_n(x)g_n(x)\)</span>在<span class="math inline">\(E\)</span>上条件一致收敛。</p>
@@ -1444,27 +1546,22 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
 <p><span class="proof-title"><em>证明</em>. </span>利用Abel引理来估计：</p>
 <p><span class="math display">\[\begin{equation*}
 \left|\sum_{i=n+1}^mf_i(x)g_i(x)\right|
-
 \end{equation*}\]</span></p>
 <p>因为函数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}g_n(x)\)</span>的部分和序列在<span class="math inline">\(E\)</span>上一致有界，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;n,m\in\mathbb{N}^+,\;m&gt;n,\;\forall\;x\in E,\;\left|\sum_{i=n+1}^mg_i(x)\right|\leqslant\left|\sum_{i=1}^ng_i(x)\right|+\left|\sum_{i=1}^mg_i(x)\right|\leqslant2L
-
 \end{equation*}\]</span></p>
 <p>又因函数序列<span class="math inline">\(\{f_n(x)\}\)</span>对每个取定的<span class="math inline">\(x\in E\)</span>都是单调的，由Abel引理：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;n,m\in\mathbb{N}^+,\;m&gt;n,\;\forall\;x\in E,\;\left|\sum_{i=n+1}^mf_i(x)g_i(x)\right|\leqslant2L(|f_{n+1}(x)|+2|f_m(x)|)
-
 \end{equation*}\]</span></p>
 <p>因为函数序列<span class="math inline">\(\{f_n(x)\}\)</span>在<span class="math inline">\(E\)</span>上一致地趋于<span class="math inline">\(0\)</span>，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;\forall\;x\in E,\;|f_n(x)|&lt;\frac{\varepsilon}{6L}
-
 \end{equation*}\]</span></p>
 <p>于是有：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m&gt;N,\;m&gt;n,\;\forall\;x\in E,\;\left|\sum_{i=n+1}^mf_i(x)g_i(x)\right|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>由函数项级数一致收敛的柯西原理，级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}f_n(x)g_n(x)\)</span>在<span class="math inline">\(E\)</span>上条件一致收敛。&nbsp;◻</p>
 </div>
@@ -1473,14 +1570,12 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
 <p>对函数项级数：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}f_n(x)g_n(x),\quad x\in E
-
 \end{equation*}\]</span></p>
 <p>如果：</p>
 <ol type="1">
 <li><p>函数序列<span class="math inline">\(\{f_n(x)\}\)</span>对每个取定的<span class="math inline">\(x\in E\)</span>都是单调的，并且该函数序列在<span class="math inline">\(E\)</span>上一致有界；</p>
 <p><span class="math display">\[\begin{equation*}
                 \forall\;n\in\mathbb{N}^+,\;\forall\;x\in E,\;\left|f_n(x)\right|\leqslant M
-
     \end{equation*}\]</span></p></li>
 <li><p>函数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}g_n(x)\)</span>在<span class="math inline">\(E\)</span>上一致收敛：</p></li>
 </ol>
@@ -1490,17 +1585,14 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
 <p><span class="proof-title"><em>证明</em>. </span>因为函数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}g_n(x)\)</span>在<span class="math inline">\(E\)</span>上一致收敛，则：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon'&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m&gt;N,\;m&gt;n,\;\left|\sum_{i=n+1}^mg_i(x)\right|&lt;\varepsilon'
-
 \end{equation*}\]</span></p>
 <p>又因函数序列<span class="math inline">\(\{f_n(x)\}\)</span>对每个取定的<span class="math inline">\(x\in E\)</span>都是单调的，由Abel引理：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;x\in E,\;\left|\sum_{i=n+1}^mf_i(x)g_i(x)\right|\leqslant\varepsilon'(|f_{n+1}(x)|+2|f_m(x)|)\leqslant3M\varepsilon'
-
 \end{equation*}\]</span></p>
 <p>对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，可以选取<span class="math inline">\(\varepsilon'&gt;0\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 3M\varepsilon'&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1522,27 +1614,22 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
 <p><span class="math display">\[\begin{equation*}
 |f(x)-f(x_0)|
 \leqslant|f(x)-f_n(x)|+|f_n(x)-f_n(x_0)|+|f_n(x_0)-f(x_0)|
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(\{f_n(x)\}\)</span>在<span class="math inline">\(I\)</span>上一致收敛于函数<span class="math inline">\(f(x)\)</span>，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;\forall\;x\in I,\;|f(x)-f_n(x)|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;|f(x)-f_n(x)|&lt;\varepsilon,\;|f_n(x_0)-f(x_0)|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>又因为<span class="math inline">\(\{f_n(x)\}\)</span>的每一项都在<span class="math inline">\(I\)</span>上连续，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;n\in\mathbb{N}^+,\;\forall\;\varepsilon&gt;0,\;\exists\;\delta&gt;0,\;\forall\;x\in\{x\in I:|x-x_0|&lt;\delta\},\;|f_n(x)-f_n(x_0)|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>取<span class="math inline">\(n\to+\infty\)</span>即可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;\delta&gt;0,\;\forall\;x\in\{x:|x-x_0|&lt;\delta\},\;|f(x)-f(x_0)|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(f(x)\)</span>在<span class="math inline">\(x_0\)</span>处连续。由<span class="math inline">\(x_0\)</span>的任意性，<span class="math inline">\(f(x)\)</span>在<span class="math inline">\(I\)</span>上连续。&nbsp;◻</p>
 </div>
@@ -1559,24 +1646,20 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
 <p><strong>Theorem 6.14</strong>. 设函数序列<span class="math inline">\(\{f_n(x)\}\)</span>在区间<span class="math inline">\([a,b]\)</span>上一致收敛于函数<span class="math inline">\(f(x)\)</span>。当函数序列<span class="math inline">\(\{f_n(x)\}\)</span>的每一项在<span class="math inline">\([a,b]\)</span>上都连续时，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}\left[\int_{a}^{b}f_n(x)\mathop{}\!\mathrm{d}x\right]=\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>因为<span class="math inline">\(\{f_n(x)\}\)</span>的每一项都在<span class="math inline">\([a,b]\)</span>上连续，所以<span class="math inline">\(f(x)\)</span>也连续，于是<span class="math inline">\(f(x)\)</span>可积。由积分中值定理：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;\xi\in[a,b],\;\left|\int_{a}^{b}f_n(x)\mathop{}\!\mathrm{d}x-\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x\right|=\left|\int_{a}^{b}[f_n(x)-f(x)]\mathop{}\!\mathrm{d}x\right|\leqslant(b-a)|f_n(\xi)-f(\xi)|
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(\{f_n(x)\}\)</span>一致收敛于<span class="math inline">\(f(x)\)</span>，所以对任意的<span class="math inline">\(\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;|f_n(\xi)-f(\xi)|&lt;\varepsilon\)</span>，此时即有：</p>
 <p><span class="math display">\[\begin{equation*}
 \left|\int_{a}^{b}f_n(x)\mathop{}\!\mathrm{d}x-\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x\right|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>也即：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}\left[\int_{a}^{b}f_n(x)\mathop{}\!\mathrm{d}x\right]=\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1584,7 +1667,6 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
 <p><strong>Theorem 6.15</strong>. 设函数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}f_n(x)\)</span>在区间<span class="math inline">\(I\)</span>上一致收敛于函数<span class="math inline">\(f(x)\)</span>。当函数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}f_n(x)\)</span>的每一项在<span class="math inline">\(I\)</span>上连续时，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}\left[\int_{a}^{b}f_n(x)\mathop{}\!\mathrm{d}x\right]=\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 </div>
 </section>
@@ -1601,13 +1683,11 @@ f(x)=\lim_{n\to+\infty}f_n(x),\;\forall\;x\in E
 <li><p><span class="math inline">\(\{f_n(x)\}\)</span>至少在某一点<span class="math inline">\(x_0\in[a,b]\)</span>收敛：</p>
 <p><span class="math display">\[\begin{equation*}
                 \lim_{n\to+\infty}f_n(x_0)=y_0\in\mathbb{R}
-
     \end{equation*}\]</span></p></li>
 </ol>
 <p>那么函数序列<span class="math inline">\(\{f_n(x)\}\)</span>在<span class="math inline">\([a,b]\)</span>上一致收敛于某个在<span class="math inline">\([a,b]\)</span>连续可微的函数<span class="math inline">\(f(x)\)</span>，并且有：</p>
 <p><span class="math display">\[\begin{equation*}
 f'(x)=\lim_{n\to+\infty}f_n'(x)=\varphi(x)
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1617,35 +1697,29 @@ f'(x)=\lim_{n\to+\infty}f_n'(x)=\varphi(x)
 <p><span class="math display">\[\begin{equation}
 \tag{6.1}
 \forall\;x\in[a,b],\;\forall\;n\in\mathbb{N}^+,\;f_n(x)=f_n(x_0)+\int_{x_0}^{x}f_n'(\xi)\mathop{}\!\mathrm{d}\xi
-
 \end{equation}\]</span></p>
 <p>由此可得：</p>
 <p><span class="math display">\[\begin{align*}
 |f_m(x)-f_n(x)|
 &amp;\leqslant|f_m(x_0)-f_n(x_0)|+\left|\int_{x_0}^{x}[f_m'(\xi)-f_n'(\xi)]\mathop{}\!\mathrm{d}\xi\right| \\
 &amp;\leqslant|f_m(x_0)-f_n(x_0)|+(b-a)\sup_{\xi\in[a,b]}|f_m'(\xi)-f_n'(\xi)|
-
 \end{align*}\]</span></p>
 <p>因为<span class="math inline">\(\{f_n(x)\}\)</span>在<span class="math inline">\(x_0\)</span>处收敛、导函数序列<span class="math inline">\(\{f_n'(x)\}\)</span>在<span class="math inline">\([a,b]\)</span>上一致收敛，所以：</p>
 <p><span class="math display">\[\begin{gather*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;m,n&gt;N,\;m&gt;n \\
 |f_m(x_0)-f_n(x_0)|&lt;\frac{\varepsilon}{2},\quad\sup_{\xi\in[a,b]}|f_m'(\xi)-f_n'(\xi)|&lt;\frac{\varepsilon}{2(b-a)}
-
 \end{gather*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;m,n&gt;N,\;m&gt;n,\;\forall\;x\in[a,b],\;|f_m(x)-f_n(x)|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>由柯西收敛准则，<span class="math inline">\(\{f_n(x)\}\)</span>一致收敛。设<span class="math inline">\(\{f_n(x)\}\)</span>一致收敛的对象为<span class="math inline">\(f(x)\)</span>，在<a href="#eq-6-3-1-cda7f036" data-reference-type="eqref" data-reference="eq:6.3.1">（6.1）</a>中取<span class="math inline">\(n\to+\infty\)</span>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=f(x_0)+\int_{x_0}^{x}\varphi(\xi)\mathop{}\!\mathrm{d}\xi
-
 \end{equation*}\]</span></p>
 <p>对其求导即可得：</p>
 <p><span class="math display">\[\begin{equation*}
 f'(x)=\varphi(x)
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1658,13 +1732,11 @@ f'(x)=\varphi(x)
 <li><p><span class="math inline">\(\sum\limits_{n=1}^{+\infty}f_n(x)\)</span>至少在某一点<span class="math inline">\(x_0\in[a,b]\)</span>收敛：</p>
 <p><span class="math display">\[\begin{equation*}
                 \lim_{n\to+\infty}\left[\sum_{i=1}^{n}f_i(x_0)\right]=y_0\in\mathbb{R}
-
     \end{equation*}\]</span></p></li>
 </ol>
 <p>那么函数项级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}f_n(x)\)</span>在<span class="math inline">\([a,b]\)</span>上一致收敛于某个在<span class="math inline">\([a,b]\)</span>连续可微的函数<span class="math inline">\(f(x)\)</span>，并且有：</p>
 <p><span class="math display">\[\begin{equation*}
 \left[\sum_{n=1}^{+\infty}f_n(x)\right]'=\sum_{n=1}^{+\infty}f_n'(x)=f'(x)=\varphi(x)
-
 \end{equation*}\]</span></p>
 </div>
 </section>
@@ -1683,7 +1755,6 @@ f'(x)=\varphi(x)
 <p>对于幂级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n(x-x_0)^n\)</span>，记：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho=\frac{1}{\varlimsup\sqrt[n]{|a_n|}}
-
 \end{equation*}\]</span></p>
 <p>则该幂级数对任意的<span class="math inline">\(x\in\{x:|x-x_0|&lt;\rho\}\)</span>绝对收敛，对任意的<span class="math inline">\(x\in\{x:|x-x_0|&gt;\rho\}\)</span>发散，称<span class="math inline">\(\rho\)</span>为<a href="../chapters/page-057.html#term-RadiusOfConvergence" class="term" title="radius of convergence">收敛半径<span class="term-english">（radius of convergence）</span></a>。</p>
 </div>
@@ -1691,22 +1762,18 @@ f'(x)=\varphi(x)
 <p><span class="proof-title"><em>证明</em>. </span>对于：</p>
 <p><span class="math display">\[\begin{equation*}
 \varlimsup\sqrt[n]{|a_n(x-x_0)^n|}=|x-x_0|\varlimsup\sqrt[n]{|a_n|}
-
 \end{equation*}\]</span></p>
 <p>由柯西根式判别法，当：</p>
 <p><span class="math display">\[\begin{equation*}
 |x-x_0|\varlimsup\sqrt[n]{|a_n|}&lt;1
-
 \end{equation*}\]</span></p>
 <p>时，该幂级数绝对收敛。当：</p>
 <p><span class="math display">\[\begin{equation*}
 \varlimsup\sqrt[n]{|a_n(x-x_0)^n|}&gt;1
-
 \end{equation*}\]</span></p>
 <p>时，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;|a_n(x-x_0)^n|&gt;1
-
 \end{equation*}\]</span></p>
 <p>即该幂级数的项不收敛于<span class="math inline">\(0\)</span>，不满足级数收敛的必要条件，所以该幂级数发散。&nbsp;◻</p>
 </div>
@@ -1714,29 +1781,24 @@ f'(x)=\varphi(x)
 <p><strong>Theorem 6.19</strong>. 幂级数的收敛半径也可由下式计算：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho=\lim_{n\to+\infty}\left|\frac{a_n}{a_{n+1}}\right|
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>由比值判别法，当：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}\left|\frac{a_{n+1}(x-x_0)^{n+1}}{a_n(x-x_0)^n}\right|=\lim_{n\to+\infty}\left|\frac{a_{n+1}(x-x_0)}{a_n}\right|&lt;1
-
 \end{equation*}\]</span></p>
 <p>时，即：</p>
 <p><span class="math display">\[\begin{equation*}
 |x-x_0|&lt;\lim_{n\to+\infty}\left|\frac{a_n}{a_{n+1}}\right|
-
 \end{equation*}\]</span></p>
 <p>时，该幂级数绝对收敛。当：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}\left|\frac{a_{n+1}(x-x_0)^{n+1}}{a_n(x-x_0)^n}\right|=\lim_{n\to+\infty}\left|\frac{a_{n+1}(x-x_0)}{a_n}\right|&gt;1
-
 \end{equation*}\]</span></p>
 <p>时，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;|a_{n+1}(x-x_0)^{n+1}|&gt;|a_n(x-x_0)^n|
-
 \end{equation*}\]</span></p>
 <p>即该幂级数的项不收敛于<span class="math inline">\(0\)</span>，不满足级数收敛的必要条件，所以该幂级数发散。&nbsp;◻</p>
 </div>
@@ -1747,12 +1809,10 @@ f'(x)=\varphi(x)
 <p><span class="proof-title"><em>证明</em>. </span>在闭区间<span class="math inline">\([x_0-r,x_0+r]\)</span>上，取级数：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}|a_n|r^n
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(r&lt;\rho\)</span>，所以上正项级数收敛。因为：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;n\in\mathbb{N}^+,\;\forall\;x\in[x_0-r,x_0+r],\;|a_n(x-x_0)^n|\leqslant|a_n|r^n
-
 \end{equation*}\]</span></p>
 <p>由Weierstrass判别法，该幂级数在<span class="math inline">\([x_0-r,x_0+r]\)</span>上绝对一致收敛。&nbsp;◻</p>
 </div>
@@ -1765,7 +1825,6 @@ f'(x)=\varphi(x)
 <p><strong>Theorem 6.21</strong>. 设幂级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n(x-x_0)^n\)</span>的收敛半径为<span class="math inline">\(\rho\)</span>，则和函数：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=\sum_{n=1}^{+\infty}a_n(x-x_0)^n
-
 \end{equation*}\]</span></p>
 <p>在开区间<span class="math inline">\((x_0-\rho,x_0+\rho)\)</span>内处处连续。若它还在<span class="math inline">\(x=x_0-\rho\)</span>处（或在<span class="math inline">\(x=x_0+\rho\)</span>处）收敛，则该幂级数在闭区间<span class="math inline">\([x_0-\rho,x_0]\)</span>上（或在闭区间<span class="math inline">\([x_0,x_0+\rho]\)</span>上）一致收敛，所以和函数<span class="math inline">\(f(x)\)</span>在<span class="math inline">\(x=x_0-\rho\)</span>处右连续（或在<span class="math inline">\(x=x_0+\rho\)</span>处左连续）。即：幂级数的和函数在幂级数收敛域的每一点都连续。</p>
 </div>
@@ -1774,14 +1833,12 @@ f(x)=\sum_{n=1}^{+\infty}a_n(x-x_0)^n
 <p>将幂级数写成如下形式：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}a_n\rho^n\left(\frac{x-x_0}{\rho}\right)^n
-
 \end{equation*}\]</span></p>
 <p>注意到：</p>
 <ol type="1">
 <li><p>对于<span class="math inline">\(x\in[x_0,x_0+\rho]\)</span>，函数序列<span class="math inline">\(\left\{\left(\dfrac{x-x_0}{\rho}\right)^n\right\}\)</span>单调下降并且一致有界：</p>
 <p><span class="math display">\[\begin{equation*}
                 1\geqslant\frac{x-x_0}{\rho}\geqslant\left(\frac{x-x_0}{\rho}\right)^2\geqslant\cdots\geqslant\left(\frac{x-x_0}{\rho}\right)^n\geqslant\cdots
-
     \end{equation*}\]</span></p></li>
 <li><p>级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\rho^n\)</span>收敛。</p></li>
 </ol>
@@ -1803,7 +1860,6 @@ f(x)=\sum_{n=1}^{+\infty}a_n(x-x_0)^n
 <p><strong>Theorem 6.23</strong>. 由幂级数逐项求导所得到的级数：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}na_n(x-x_0)^{n-1}
-
 \end{equation*}\]</span></p>
 <p>与原级数有相同的收敛半径。</p>
 </div>
@@ -1811,12 +1867,10 @@ f(x)=\sum_{n=1}^{+\infty}a_n(x-x_0)^n
 <p><span class="proof-title"><em>证明</em>. </span>由：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}na_n(x-x_0)^{n}=(x-x_0)\left[\sum_{n=1}^{+\infty}na_n(x-x_0)^{n-1}\right]
-
 \end{equation*}\]</span></p>
 <p>可以看出<span class="math inline">\(\sum\limits_{n=1}^{+\infty}na_n(x-x_0)^{n}\)</span>与<span class="math inline">\(\sum\limits_{n=1}^{+\infty}na_n(x-x_0)^{n-1}\)</span>的收敛域相同，所以它们的收敛半径相同。因为：</p>
 <p><span class="math display">\[\begin{equation*}
 \varlimsup\sqrt[n]{n|a_n|}=\varlimsup(\sqrt[n]{n}\cdot\sqrt[n]{|a_n|})=\lim\sqrt[n]{n}\cdot\varlimsup\sqrt[n]{|a_n|}=\varlimsup\sqrt[n]{|a_n|}
-
 \end{equation*}\]</span></p>
 <p>所以幂级数逐项求导所得到的级数与原级数有相同的收敛半径。&nbsp;◻</p>
 </div>
@@ -1827,12 +1881,10 @@ f(x)=\sum_{n=1}^{+\infty}a_n(x-x_0)^n
 <p><span class="proof-title"><em>证明</em>. </span>设幂级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n(x-x_0)^n\)</span>的收敛半径为<span class="math inline">\(\rho\)</span>，那么幂级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}na_n(x-x_0)^{n-1}\)</span>的收敛半径也是<span class="math inline">\(\rho\)</span>。对任意的<span class="math inline">\(c\in(x_0-\rho,x_0+\rho)\)</span>，可以选取<span class="math inline">\(0&lt;r&lt;\rho\)</span>，使得<span class="math inline">\(c\in(x_0-r,x_0+r)\)</span>。因为级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n(x-x_0)^n\)</span>和级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}na_n(x-x_0)^{n-1}\)</span>在<span class="math inline">\([x_0-r,x_0+r]\)</span>上一致收敛，并且级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n(x-x_0)^n\)</span>的每一项都连续可微，所以和函数<span class="math inline">\(f(x)=\sum\limits_{n=1}^{+\infty}a_n(x-x_0)^n\)</span>在<span class="math inline">\([x_0-r,x_0+r]\)</span>上连续可微，且有：</p>
 <p><span class="math display">\[\begin{equation*}
 f'(c)=\sum_{n=1}^{+\infty}na_nc^{n-1}
-
 \end{equation*}\]</span></p>
 <p>由<span class="math inline">\(c\)</span>的任意性可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;x\in(-\rho,\rho),\;f'(x)=\sum_{n=1}^{+\infty}na_n(x-x_0)^{n-1}
-
 \end{equation*}\]</span></p>
 <p>在上述结论下使用数学归纳法即可证明关于任意阶导数的论断。&nbsp;◻</p>
 </div>

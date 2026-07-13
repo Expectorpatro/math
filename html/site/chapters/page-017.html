@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,11 +1079,11 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#cauchy-6b6a740d" id="toc-cauchy-6b6a740d" class="nav-link active" data-scroll-target="#cauchy-6b6a740d"><span class="header-section-number">16.1</span> Cauchy不等式</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#cauchy-1cbf912d" id="toc-cauchy-1cbf912d" class="nav-link" data-scroll-target="#cauchy-1cbf912d"><span class="header-section-number">16.1.1</span> 实数域上的Cauchy不等式</a></li>
   <li><a href="#cauchy-0d1e08ba" id="toc-cauchy-0d1e08ba" class="nav-link" data-scroll-target="#cauchy-0d1e08ba"><span class="header-section-number">16.1.2</span> 复数域上的Cauchy不等式</a></li>
   <li><a href="#cauchy-schiwarz-a594012b" id="toc-cauchy-schiwarz-a594012b" class="nav-link" data-scroll-target="#cauchy-schiwarz-a594012b"><span class="header-section-number">16.1.3</span> 内积导出的Cauchy-Schiwarz不等式</a></li>
@@ -903,29 +1091,21 @@ window.Quarto = {
   <li><a href="#rayleigh-cauchyschwarz-7c6343fb" id="toc-rayleigh-cauchyschwarz-7c6343fb" class="nav-link" data-scroll-target="#rayleigh-cauchyschwarz-7c6343fb"><span class="header-section-number">16.1.5</span> Rayleigh商的Cauchy–Schwarz不等式</a></li>
   </ul></li>
   <li><a href="#youngs-aedd087f" id="toc-youngs-aedd087f" class="nav-link" data-scroll-target="#youngs-aedd087f"><span class="header-section-number">16.2</span> Young’s不等式</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id-1-6e4dae29" id="toc-id-1-6e4dae29" class="nav-link" data-scroll-target="#id-1-6e4dae29"><span class="header-section-number">16.2.1</span> 一般形式</a></li>
   </ul></li>
   <li><a href="#holder-0e326e86" id="toc-holder-0e326e86" class="nav-link" data-scroll-target="#holder-0e326e86"><span class="header-section-number">16.3</span> Holder不等式</a>
-  <ul>
-  <li><a href="#holder-d82484cc" id="toc-holder-d82484cc" class="nav-link" data-scroll-target="#holder-d82484cc"><span class="header-section-number">16.3.1</span> 离散形式的Holder不等式</a>
   <ul class="collapse">
-  <li><a href="#id--1c0065d6" id="toc-id--1c0065d6" class="nav-link" data-scroll-target="#id--1c0065d6"><span class="header-section-number">16.3.1.1</span> 有穷级数形式</a></li>
-  <li><a href="#id--bda28662" id="toc-id--bda28662" class="nav-link" data-scroll-target="#id--bda28662"><span class="header-section-number">16.3.1.2</span> 无穷级数形式</a></li>
-  </ul></li>
+  <li><a href="#holder-d82484cc" id="toc-holder-d82484cc" class="nav-link" data-scroll-target="#holder-d82484cc"><span class="header-section-number">16.3.1</span> 离散形式的Holder不等式</a></li>
   <li><a href="#holder-4152c172" id="toc-holder-4152c172" class="nav-link" data-scroll-target="#holder-4152c172"><span class="header-section-number">16.3.2</span> 积分形式的Holder不等式</a></li>
   </ul></li>
   <li><a href="#minkowski-9443be68" id="toc-minkowski-9443be68" class="nav-link" data-scroll-target="#minkowski-9443be68"><span class="header-section-number">16.4</span> Minkowski不等式</a>
-  <ul>
-  <li><a href="#minkowski-c2ff6226" id="toc-minkowski-c2ff6226" class="nav-link" data-scroll-target="#minkowski-c2ff6226"><span class="header-section-number">16.4.1</span> 离散形式的Minkowski不等式</a>
   <ul class="collapse">
-  <li><a href="#id-1-eadcb47a" id="toc-id-1-eadcb47a" class="nav-link" data-scroll-target="#id-1-eadcb47a"><span class="header-section-number">16.4.1.1</span> 有穷级数形式</a></li>
-  <li><a href="#id-1-e93f3fe0" id="toc-id-1-e93f3fe0" class="nav-link" data-scroll-target="#id-1-e93f3fe0"><span class="header-section-number">16.4.1.2</span> 无穷级数形式</a></li>
-  </ul></li>
+  <li><a href="#minkowski-c2ff6226" id="toc-minkowski-c2ff6226" class="nav-link" data-scroll-target="#minkowski-c2ff6226"><span class="header-section-number">16.4.1</span> 离散形式的Minkowski不等式</a></li>
   <li><a href="#minkowski-9a517dfc" id="toc-minkowski-9a517dfc" class="nav-link" data-scroll-target="#minkowski-9a517dfc"><span class="header-section-number">16.4.2</span> 积分形式的Minkowski不等式</a></li>
   </ul></li>
   <li><a href="#something-else" id="toc-something-else" class="nav-link" data-scroll-target="#something-else"><span class="header-section-number">16.5</span> Something else</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#jensen-e764f6f5" id="toc-jensen-e764f6f5" class="nav-link" data-scroll-target="#jensen-e764f6f5"><span class="header-section-number">16.5.1</span> Jensen不等式</a></li>
   <li><a href="#gibbs-88032ba7" id="toc-gibbs-88032ba7" class="nav-link" data-scroll-target="#gibbs-88032ba7"><span class="header-section-number">16.5.2</span> Gibbs不等式</a></li>
   <li><a href="#markov-97a66e90" id="toc-markov-97a66e90" class="nav-link" data-scroll-target="#markov-97a66e90"><span class="header-section-number">16.5.3</span> Markov不等式</a></li>
@@ -967,7 +1147,6 @@ window.Quarto = {
 <p><span class="math display">\[\begin{equation*}
 \tag{1}
 \left(\sum_{i=1}^na_ib_i\right)^2\leqslant\sum_{i=1}^na_i^2\cdot\sum_{i=1}^nb_i^2
-
 \end{equation*}\]</span></p>
 <p>上式取等当且仅当<span class="math inline">\(a=(a_1, a_2, \dots, a_{n})^\top\)</span>与<span class="math inline">\(b=(b_1, b_2, \dots, b_{n})^\top\)</span>线性相关。</p>
 </div>
@@ -976,12 +1155,10 @@ window.Quarto = {
 <p><span class="proof-title"><em>证明</em>. </span>对任意的<span class="math inline">\(c\in\mathbb{R}^{}\setminus\mathbb{R}^{-}\)</span>，关于<span class="math inline">\(\lambda\in\mathbb{R}^{}\)</span>的一元二次方程：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=1}^n\left(a_i+\lambda b_i\right)^2=\lambda^2\sum_{i=1}^nb_i^2+2\lambda\sum_{i=1}^na_ib_i+\sum_{i=1}^na_i^2=c
-
 \end{equation*}\]</span></p>
 <p>都有根。由判别式即可得：</p>
 <p><span class="math display">\[\begin{equation*}
 4\left(\sum_{i=1}^na_ib_i\right)^2\leqslant4\sum_{i=1}^na_i^2\cdot\sum_{i=1}^nb_i^2
-
 \end{equation*}\]</span></p>
 <p>上式取等当且仅当<span class="math inline">\(c=0\)</span>，即<span class="math inline">\(\sum\limits_{i=1}^n\left(a_i+\lambda b_i\right)^2=0\)</span>，<span class="math inline">\(a=(a_1, a_2, \dots, a_{n})^\top\)</span>与<span class="math inline">\(b=(b_1, b_2, \dots, b_{n})^\top\)</span>线性相关。&nbsp;◻</p>
 </div>
@@ -994,7 +1171,6 @@ window.Quarto = {
 <p><span class="math display">\[\begin{equation*}
 \tag{2}
 \left(\sum_{i=1}^n|a_ib_i|\right)^2\leqslant\sum_{i=1}^n|a_i|^2\cdot\sum_{i=1}^n|b_i|^2
-
 \end{equation*}\]</span></p>
 </div>
 </div>
@@ -1002,7 +1178,6 @@ window.Quarto = {
 <p><span class="proof-title"><em>证明</em>. </span>由复数模的性质可得到</p>
 <p><span class="math display">\[\begin{equation*}
 |a_ib_i|=|a_i||b_i|
-
 \end{equation*}\]</span></p>
 <p>然后使用实数域上的Cauchy不等式即可立即得到结果。&nbsp;◻</p>
 </div>
@@ -1015,7 +1190,6 @@ window.Quarto = {
 <p><span class="math display">\[\begin{equation*}
 \tag{3}
 |(x,y)|^2\leqslant(x,x)(y,y)
-
 \end{equation*}\]</span></p>
 </div>
 </div>
@@ -1024,18 +1198,15 @@ window.Quarto = {
 <p><span class="proof-title"><em>证明</em>. </span>设<span class="math inline">\(x,y\in X\)</span>。对任意的<span class="math inline">\(\lambda\in\mathbb{C}\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 (x+\lambda y,x+\lambda y)\geqslant 0
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 (x,x)+\overline{\lambda}(x,y)+\lambda(y,x)+|\lambda|^2(y,y)\geqslant 0
-
 \end{equation*}\]</span></p>
 <p>令<span class="math inline">\(\lambda=-\frac{(x,y)}{(y,y)}\)</span>，得到：</p>
 <p><span class="math display">\[\begin{gather*}
 (x,x)-2\frac{|(x,y)|^2}{(y,y)}+\frac{|(x,y)|^2}{(y,y)^2}(y,y)\geqslant0 \\
 |(x,y)|^2\leqslant(x,x)(y,y)
-
 \end{gather*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1048,7 +1219,6 @@ window.Quarto = {
 <p><span class="math display">\[\begin{equation*}
 \tag{4}
 |\operatorname{E}(XY)|\leqslant\sqrt{\operatorname{E}(X^2)\operatorname{E}(Y^2)}
-
 \end{equation*}\]</span></p>
 <p>等号成立的充要条件为存在不全为<span class="math inline">\(0\)</span>的常数<span class="math inline">\(a,b\)</span>使得<span class="math inline">\(aX+bY=0\;\)</span>a.s.成立。</p>
 </div>
@@ -1057,7 +1227,6 @@ window.Quarto = {
 <p><span class="proof-title"><em>证明</em>. </span>对任意的常数<span class="math inline">\(a,b\)</span>，由<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(2)(10)可知二次型：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}[(aX+bY)^2]=a^2\operatorname{E}(X^2)+2ab\operatorname{E}(XY)+b^2\operatorname{E}(Y^2)=(a,b)\Sigma(a,b)^{\top}\geqslant0
-
 \end{equation*}\]</span></p>
 <p>其中：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1066,7 +1235,6 @@ window.Quarto = {
 \operatorname{E}(X^2) &amp; \operatorname{E}(XY) \\
 \operatorname{E}(XY) &amp; \operatorname{E}(Y^2)
 \end{pmatrix}
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\Sigma\)</span>是一个半正定矩阵，由<a href="../chapters/page-003.html#theo-PositiveSemidefinite-cdf79ee9" data-reference-type="ref+label" data-reference="theo:PositiveSemidefinite">定理 2.18</a>第三条的(6)可知<span class="math inline">\(|\Sigma|\geqslant0\)</span>，即<span class="math inline">\(|\operatorname{E}(XY)|\leqslant\sqrt{\operatorname{E}(X^2)\operatorname{E}(Y^2)}\)</span>。等号成立当且仅当<span class="math inline">\(\Sigma\)</span>退化，当且仅当有不全为<span class="math inline">\(0\)</span>的常数<span class="math inline">\(a,b\)</span>使得<span class="math inline">\(\operatorname{E}[(aX+bY)^2]=0\)</span>（<span class="math inline">\(\Sigma\)</span>退化时列向量线性相关，存在不全为<span class="math inline">\(0\)</span>的<span class="math inline">\(a,b\)</span>使得<span class="math inline">\(\Sigma(a,b)^{\top}=\mathbf{0}\)</span>，即<span class="math inline">\((a,b)\Sigma(a,b)^{\top}=0\)</span>；当存在不全为<span class="math inline">\(0\)</span>的<span class="math inline">\(a,b\)</span>使得<span class="math inline">\(\operatorname{E}[(aX+bY)^2]=0\)</span>时，<span class="math inline">\((a,b)\Sigma(a,b)^{\top}=0\)</span>，），由<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(9)可知此时当且仅当有不全为<span class="math inline">\(0\)</span>的常数<span class="math inline">\(a,b\)</span>使得<span class="math inline">\(aX+bY=0\;\)</span>a.s.。&nbsp;◻</p>
 </div>
@@ -1079,7 +1247,6 @@ window.Quarto = {
 <p><span class="math display">\[\begin{equation*}
 \tag{5}
 \sup_{b\ne\mathbf{0}}\frac{(a^{\top}b)^2}{b^{\top}Ab}=a^{\top}A^{-1}a
-
 \end{equation*}\]</span></p>
 </div>
 </div>
@@ -1087,22 +1254,18 @@ window.Quarto = {
 <p><span class="proof-title"><em>证明</em>. </span>由于<span class="math inline">\(A\)</span>是正定矩阵，所以存在可逆的<span class="math inline">\(A^{1/2}\)</span>。令<span class="math inline">\(x = A^{1/2}b\)</span>，即<span class="math inline">\(b = A^{-1/2}x\)</span>，则：</p>
 <p><span class="math display">\[\begin{align*}
 \frac{(a^{\top}b)^2}{b^{\top}Ab} &amp;= \frac{(a^{\top} A^{-1/2} x)^2}{x^{\top} x}=\frac{[(A^{-1/2} a)^{\top} x]^2}{\|x\|^2}
-
 \end{align*}\]</span></p>
 <p>记<span class="math inline">\(u = A^{-1/2}a\)</span>，由<a href="#ineq-cauchy-schiwarz-inner-product-ccb1d695" data-reference-type="ref+label" data-reference="ineq:cauchy-schiwarz-inner-product">不等式 3</a>有：</p>
 <p><span class="math display">\[\begin{equation*}
 |(u,x)|^2 \leqslant \|u\|^2 \cdot \|x\|^2
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{[(A^{-1/2} a)^{\top} x]^2}{\|x\|^2} \leqslant \|A^{-1/2}a\|^2 = (A^{-1/2}a)^{\top} (A^{-1/2}a) = a^{\top} A^{-1} a
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 \sup_{b\ne\mathbf{0}}\frac{(a^{\top}b)^2}{b^{\top}Ab}=a^{\top}A^{-1}a
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1118,7 +1281,6 @@ window.Quarto = {
 <p><span class="math display">\[\begin{equation*}
 \tag{6}
 ab\leqslant\frac{a^p}{p}+\frac{b^q}{q}
-
 \end{equation*}\]</span></p>
 <p>等号成立当且仅当<span class="math inline">\(a^p=b^q\)</span>。</p>
 </div>
@@ -1127,12 +1289,10 @@ ab\leqslant\frac{a^p}{p}+\frac{b^q}{q}
 <p><span class="proof-title"><em>证明</em>. </span><span class="math inline">\(f(x)=e^x\)</span>是一个凸函数，因此对任意的<span class="math inline">\(t\in(0,1)\)</span>：</p>
 <p><span class="math display">\[\begin{equation*}
 e^{tx+(1-t)y}\leqslant te^x+(1-t)e^y
-
 \end{equation*}\]</span></p>
 <p>等号成立当且仅当<span class="math inline">\(x=y\)</span>。令<span class="math inline">\(\frac{1}{p}=t\)</span>，利用上式则有：</p>
 <p><span class="math display">\[\begin{equation*}
 ab=e^{\ln(a)+\ln(b)}=e^{\frac{\ln(a^p)}{p}+\frac{\ln(b^q)}{q}}\leqslant\frac{1}{p}e^{\ln(a^p)}+\frac{1}{q}e^{\ln(b^q)}=\frac{a^p}{p}+\frac{b^q}{q}
-
 \end{equation*}\]</span></p>
 <p>因为对数函数单调增，所以等号成立当且仅当<span class="math inline">\(a^p=b^q\)</span>。&nbsp;◻</p>
 </div>
@@ -1150,7 +1310,6 @@ ab=e^{\ln(a)+\ln(b)}=e^{\frac{\ln(a^p)}{p}+\frac{\ln(b^q)}{q}}\leqslant\frac{1}{
 <p><span class="math display">\[\begin{equation*}
 \tag{7}
 \sum_{i=1}^n|\xi_i\eta_i|\leqslant\left(\sum_{i=1}^n|\xi_i|^p\right)^\frac{1}{p}\cdot\left(\sum_{i=1}^n|\eta_i|^q\right)^\frac{1}{q}
-
 \end{equation*}\]</span></p>
 </div>
 </div>
@@ -1159,7 +1318,6 @@ ab=e^{\ln(a)+\ln(b)}=e^{\frac{\ln(a^p)}{p}+\frac{\ln(b^q)}{q}}\leqslant\frac{1}{
 <p><span class="math display">\[\begin{equation*}
 a=\frac{|\xi_i|}{\left(\sum\limits_{i=1}^n|\xi_i|^p\right)^\frac{1}{p}},\quad
 b=\frac{|\eta_i|}{\left(\sum\limits_{i=1}^n|\eta_i|^q\right)^\frac{1}{q}}
-
 \end{equation*}\]</span></p>
 <p>即有：</p>
 <p><span class="math display">\[\begin{gather*}
@@ -1167,7 +1325,6 @@ b=\frac{|\eta_i|}{\left(\sum\limits_{i=1}^n|\eta_i|^q\right)^\frac{1}{q}}
 \leqslant\frac{|\xi_i|^p}{p\left(\sum\limits_{i=1}^n|\xi_i|^p\right)}+\frac{|\eta_i|^q}{q\left(\sum\limits_{i=1}^n|\eta_i|^q\right)} \\
 \frac{\sum\limits_{i=1}^n|\xi_i\eta_i|}{\left(\sum\limits_{i=1}^n|\xi_i|^p\right)^\frac{1}{p}\cdot\left(\sum\limits_{i=1}^n|\eta_i|^q\right)^\frac{1}{q}}
 \leqslant\frac{\sum\limits_{i=1}^n|\xi_i|^p}{p\left(\sum\limits_{i=1}^n|\xi_i|^p\right)}+\frac{\sum\limits_{i=1}^n|\eta_i|^q}{q\left(\sum\limits_{i=1}^n|\eta_i|^q\right)}\leqslant\frac{1}{p}+\frac{1}{q}=1
-
 \end{gather*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1180,7 +1337,6 @@ b=\frac{|\eta_i|}{\left(\sum\limits_{i=1}^n|\eta_i|^q\right)^\frac{1}{q}}
 <p><span class="math display">\[\begin{equation*}
 \tag{8}
 \sum_{i=1}^{+\infty}|\xi_i\eta_i|\leqslant\left(\sum_{i=1}^{+\infty}|\xi_i|^p\right)^\frac{1}{p}\cdot\left(\sum_{i=1}^{+\infty}|\eta_i|^q\right)^\frac{1}{q}
-
 \end{equation*}\]</span></p>
 </div>
 </div>
@@ -1197,12 +1353,10 @@ b=\frac{|\eta_i|}{\left(\sum\limits_{i=1}^n|\eta_i|^q\right)^\frac{1}{q}}
 <p><span class="math display">\[\begin{equation*}
 \tag{9}
 \int_{E}^{}|f(x)g(x)|\mathop{}\!\mathrm{d}\mu\leqslant\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^{\frac{1}{p}}\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^{\frac{1}{q}}
-
 \end{equation*}\]</span></p>
 <p>等号成立当且仅当存在不全为<span class="math inline">\(0\)</span>的<span class="math inline">\(\alpha,\beta\geqslant0\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha|f|^p=\beta|g|^q\;\text{a.e.于$E$}
-
 \end{equation*}\]</span></p>
 </div>
 </div>
@@ -1211,59 +1365,49 @@ b=\frac{|\eta_i|}{\left(\sum\limits_{i=1}^n|\eta_i|^q\right)^\frac{1}{q}}
 <p><span class="math display">\[\begin{equation*}
 a=\frac{|f(x)|}{\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}},\quad
 b=\frac{|g(x)|}{\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{q}}
-
 \end{equation*}\]</span></p>
 <p>即有：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{|f(x)||g(x)|}{\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}\cdot\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{q}}
 \leqslant\frac{|f(x)|^p}{p\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]}+\frac{|g(x)|^q}{q\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]}
-
 \end{equation*}\]</span></p>
 <p>两边进行积分可得：</p>
 <p><span class="math display">\[\begin{gather*}
 \int_{E}\frac{|f(x)g(x)|}{\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}\cdot\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{q}}\mathop{}\!\mathrm{d}\mu\leqslant\frac{1}{p}+\frac{1}{q} \\
 \int_{E}|f(x)g(x)|\mathop{}\!\mathrm{d}\mu\leqslant\left(\frac{1}{p}+\frac{1}{q}\right)\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}\cdot\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{q} \\
 \int_{E}|f(x)g(x)|\mathop{}\!\mathrm{d}\mu\leqslant\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}\cdot\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{q}
-
 \end{gather*}\]</span></p>
 <p>由Young’s不等式可知等号成立当且仅当：</p>
 <p><span class="math display">\[\begin{gather*}
 \frac{|f(x)|^p}{\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu}=\frac{|g(x)|^q}{\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu} \\
 |f(x)|^p\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu=|g(x)|^q\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu
-
 \end{gather*}\]</span></p>
 <p>但使用Young’s不等式接下来的是积分的操作，我们只需要积分保持不等号即可，所以由<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(6)可知Young’s不等式得到的那个不等式只要a.e.成立即可，即上式只要a.e.成立即可。</p>
 <p><strong>(2)<span class="math inline">\(\;f(x)=0\)</span>或<span class="math inline">\(g(x)=0\;\)</span>a.e.于<span class="math inline">\(E\)</span>：</strong><span class="math inline">\(|f(x)g(x)|=0\;\)</span>a.e.于<span class="math inline">\(E\)</span>，由<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(9)可得<span class="math inline">\(\int_{E}|f(x)g(x)|\mathop{}\!\mathrm{d}\mu=0\)</span>，再根据<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(2)可得<span class="math inline">\(\int_{A}|f(x)|^p\mathop{}\!\mathrm{d}\mu,\int_{E}|g(x)|^q\mathop{}\!\mathrm{d}\mu\geqslant0\)</span>，于是不等式成立。</p>
 <p>以上两种情况都可以推导出存在不全为<span class="math inline">\(0\)</span>的<span class="math inline">\(\alpha,\beta\geqslant0\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha|f|^p=\beta|g|^q\;\text{a.e.于$E$}
-
 \end{equation*}\]</span></p>
 <p>即等号成立时上式也成立，下面证明反过来也对。当上不等式成立时，进行分类讨论。</p>
 <p><strong>(1)<span class="math inline">\(\;f(x)=0\)</span>或<span class="math inline">\(g(x)=0\;\)</span>a.e.于<span class="math inline">\(E\)</span>：</strong>仅对<span class="math inline">\(|f(x)|=0\;\)</span>a.e.于<span class="math inline">\(E\)</span>的情况进行证明，<span class="math inline">\(g(x)=0\;\)</span>a.e.于<span class="math inline">\(E\)</span>的情况可对称得到。此时<span class="math inline">\(|f(x)|^p=0\)</span>和<span class="math inline">\(|f(x)g(x)|\)</span>都a.e.于<span class="math inline">\(E\)</span>，于是由<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(9)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{E}|f(x)g(x)|\mathop{}\!\mathrm{d}\mu=0,\;\int_{E}|f(x)|^p\mathop{}\!\mathrm{d}\mu=0
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{E}^{}|f(x)g(x)|\mathop{}\!\mathrm{d}\mu=\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^{\frac{1}{p}}\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^{\frac{1}{q}}=0
-
 \end{equation*}\]</span></p>
 <p><strong>(2)<span class="math inline">\(\;f(x)=0\)</span>和<span class="math inline">\(g(x)=0\;\)</span>都不a.e.于<span class="math inline">\(E\)</span>：</strong>设<span class="math inline">\(\alpha\ne0\)</span>，对<span class="math inline">\(\beta\ne0\)</span>的情况可对称得到。此时有：</p>
 <p><span class="math display">\[\begin{equation*}
 |f|^p=\frac{\beta}{\alpha}|g|^q\;\text{a.e.于$E$}
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 |f(x)g(x)|=|f(x)||g(x)|=\left(\frac{\beta}{\alpha}\right)^{-p}|g(x)|^{\frac{q}{p}+1}
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(\dfrac{1}{p}+\dfrac{1}{q}=1\)</span>，所以<span class="math inline">\(\dfrac{q}{p}+1=q\)</span>，于是由<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(10)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{E}|f(x)g(x)|\mathop{}\!\mathrm{d}\mu=\int_{E}\left(\frac{\beta}{\alpha}\right)^{-p}|g(x)|^{q}\mathop{}\!\mathrm{d}\mu=\left(\frac{\beta}{\alpha}\right)^{-p}\int_{E}|g(x)|^q\mathop{}\!\mathrm{d}\mu
-
 \end{equation*}\]</span></p>
 <p>对<span class="math inline">\(\alpha|f|^p=\beta|g|^q\)</span>两边积分，由<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(7)(10)可得：</p>
 <p><span class="math display">\[\begin{gather*}
@@ -1271,14 +1415,12 @@ b=\frac{|g(x)|}{\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^\frac{1
 \alpha\int_{E}|f(x)|^p\mathop{}\!\mathrm{d}\mu=\beta\int_{E}|g(x)|^q\mathop{}\!\mathrm{d}\mu \\
 \frac{\int_{E}|f(x)|^p\mathop{}\!\mathrm{d}\mu}{\int_{E}|g(x)|^q\mathop{}\!\mathrm{d}\mu}=\frac{\beta}{\alpha} \\
 \left[\frac{\int_{E}|f(x)|^p\mathop{}\!\mathrm{d}\mu}{\int_{E}|g(x)|^q\mathop{}\!\mathrm{d}\mu}\right]^{-p}=\left(\frac{\beta}{\alpha}\right)^{-p}
-
 \end{gather*}\]</span></p>
 <p>将其代入到之前的式子可得：</p>
 <p><span class="math display">\[\begin{align*}
 \int_{E}|f(x)g(x)|\mathop{}\!\mathrm{d}\mu&amp;=\left(\frac{\beta}{\alpha}\right)^{-p}\int_{E}|g(x)|^q\mathop{}\!\mathrm{d}\mu \\
 &amp;=\left[\frac{\int_{E}|f(x)|^p\mathop{}\!\mathrm{d}\mu}{\int_{E}|g(x)|^q\mathop{}\!\mathrm{d}\mu}\right]^{-p}\int_{E}|g(x)|^q\mathop{}\!\mathrm{d}\mu \\
 &amp;=\left[\int_{E}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^{\frac{1}{p}}\left[\int_{E}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^{\frac{1}{q}}
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1287,13 +1429,11 @@ b=\frac{|g(x)|}{\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^\frac{1
 <p><strong>Theorem 16.10</strong>. 设 <span class="math inline">\((X,\mathscr{F},\mu)\)</span>是一个测度空间，<span class="math inline">\(E\in\mathscr{F}\)</span>，<span class="math inline">\(1&lt;p,q&lt;+\infty\)</span>，满足<span class="math inline">\(\frac{1}{p}+\frac{1}{q}=1\)</span>。对任意的<span class="math inline">\(f\in L_p(E),\;g\in L_q(E),\;h\in L_1(E)\)</span>，在<span class="math inline">\(L_1(E),L_p(E)\)</span>和<span class="math inline">\(L_q(E)\)</span>中引入范数：</p>
 <p><span class="math display">\[\begin{equation*}
 ||f||_p=\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p},\;||g||_q=\left[\int_{E}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^{\frac{1}{q}},\;||h||_1=\int_{E}|h(x)|\mathop{}\!\mathrm{d}\mu
-
 \end{equation*}\]</span></p>
 <p>则积分形式的Holder不等式可写为：</p>
 <p><span class="math display">\[\begin{equation*}
 \tag{10}
 ||fg||_1\leqslant||f||_p\;||g||_q
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(fg\in L_1(E)\)</span>由<span class="math inline">\(f\in L_p(E),g\in L_q(E)\)</span>以及积分形式的Holder不等式保证。</p>
 </div>
@@ -1306,13 +1446,11 @@ b=\frac{|g(x)|}{\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^\frac{1
 <p><strong>Theorem 16.11</strong>. 设 <span class="math inline">\((X,\mathscr{F},\mu)\)</span>是一个测度空间，<span class="math inline">\(E\in\mathscr{F}\)</span>。对任意的<span class="math inline">\(f\in L_1(E),\;g\in L_{\infty}(E)\)</span>，在<span class="math inline">\(L_{\infty}(E)\)</span>和<span class="math inline">\(L_1(E)\)</span>中分别定义范数为元素的无穷范数和：</p>
 <p><span class="math display">\[\begin{equation*}
 ||f||_1=\int_{E}|f(x)|\mathop{}\!\mathrm{d}\mu
-
 \end{equation*}\]</span></p>
 <p>则有：</p>
 <p><span class="math display">\[\begin{equation*}
 \tag{11}
 ||fg||_1\leqslant||f||_1\;||g||_{\infty}
-
 \end{equation*}\]</span></p>
 </div>
 </div>
@@ -1320,7 +1458,6 @@ b=\frac{|g(x)|}{\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^\frac{1
 <p><span class="proof-title"><em>证明</em>. </span>由<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(7)(10)和无穷范数的定义可得：</p>
 <p><span class="math display">\[\begin{equation*}
 ||fg||_1=\int_{E}|f(x)g(x)|\mathop{}\!\mathrm{d}\mu\leqslant\int_{E}|f(x)|\;||g||_{\infty}\mathop{}\!\mathrm{d}\mu=||g||_{\infty}\int_{E}|f(x)|\mathop{}\!\mathrm{d}\mu=||f||_1\;||g||_{\infty}
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(fg\in L_1(E)\)</span>由<span class="math inline">\(f\in L_1(E),g\in L_{\infty}(E)\)</span>以及上式保证。&nbsp;◻</p>
 </div>
@@ -1344,7 +1481,6 @@ b=\frac{|g(x)|}{\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^\frac{1
 <p><span class="math display">\[\begin{gather*}
 \sum_{i=1}^n|\xi_i||\xi_i+\eta_i|^\frac{p}{q}\leqslant\left(\sum_{i=1}^n|\xi_i|^p\right)^\frac{1}{p}\cdot\left(\sum_{i=1}^n|\xi_i+\eta_i|^p\right)^\frac{1}{q} \\
 \sum_{i=1}^n|\eta_i||\xi_i+\eta_i|^\frac{p}{q}\leqslant\left(\sum_{i=1}^n|\eta_i|^p\right)^\frac{1}{p}\cdot\left(\sum_{i=1}^n|\xi_i+\eta_i|^p\right)^\frac{1}{q}
-
 \end{gather*}\]</span></p>
 <p>因此：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1352,12 +1488,10 @@ b=\frac{|g(x)|}{\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^\frac{1
 &amp;\leqslant\sum_{i=1}^n\left[(|\xi_i|+|\eta_i|)|\xi_i+\eta_i|^\frac{p}{q}\right] \\
 &amp;=\sum_{i=1}^n|\xi_i||\xi_i+\eta_i|^\frac{p}{q}+\sum_{i=1}^n|\eta_i||\xi_i+\eta_i|^\frac{p}{q} \\
 &amp;\leqslant\left[\left(\sum_{i=1}^n|\xi_i|^p\right)^\frac{1}{p}+\left(\sum_{i=1}^n|\eta_i|^p\right)^\frac{1}{p}\right]\cdot\left(\sum_{i=1}^n|\xi_i+\eta_i|^p\right)^\frac{1}{q}
-
 \end{align*}\]</span></p>
 <p>上式第一行到第二行需要注意到<span class="math inline">\(p-1=\frac{p}{q}\)</span>。两边同除<span class="math inline">\(\left(\sum\limits_{i=1}^n|\xi_i+\eta_i|^p\right)^\frac{1}{q}\)</span>（若其为<span class="math inline">\(0\)</span>则结论显然也成立）即有：</p>
 <p><span class="math display">\[\begin{equation*}
 \left(\sum_{i=1}^n|\xi_i+\eta_i|^p\right)^\frac{1}{p}\leqslant\left(\sum_{i=1}^n|\xi_i|^p\right)^\frac{1}{p}+\left(\sum_{i=1}^n|\eta_i|^p\right)^\frac{1}{p}
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1384,7 +1518,6 @@ b=\frac{|g(x)|}{\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^\frac{1
 <p><span class="math display">\[\begin{equation*}
 \tag{14}
 \left[\int_{E}^{}|f(x)+g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}\leqslant\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}+\left[\int_{E}^{}|g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}
-
 \end{equation*}\]</span></p>
 <p>且：</p>
 </div>
@@ -1400,7 +1533,6 @@ b=\frac{|g(x)|}{\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^\frac{1
 <p><span class="math display">\[\begin{gather*}
 \int_{E}^{}|f(x)|\;|f(x)+g(x)|^\frac{p}{q}\mathop{}\!\mathrm{d}\mu\leqslant\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}\left[\int_{E}^{}|f(x)+g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{q} \\
 \int_{E}^{}|g(x)|\;|f(x)+g(x)|^\frac{p}{q}\mathop{}\!\mathrm{d}\mu\leqslant\left[\int_{E}^{}|g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}\left[\int_{E}^{}|f(x)+g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{q}
-
 \end{gather*}\]</span></p>
 <p>注意到<span class="math inline">\(p+q=pq\)</span>，所以<span class="math inline">\(q(p-1)=qp-q=p\)</span>，因此由绝对值的三角不等式以及<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(10)可得：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1409,34 +1541,28 @@ b=\frac{|g(x)|}{\left[\int_{E}^{}|g(x)|^q\mathop{}\!\mathrm{d}\mu\right]^\frac{1
 &amp;\leqslant\int_{E}^{}\Bigl[|f(x)|+|g(x)|\Bigr]\;|f(x)+g(x)|^{p-1}\mathop{}\!\mathrm{d}\mu \\
 &amp;=\int_{E}^{}|f(x)|\;|f(x)+g(x)|^{p-1}\mathop{}\!\mathrm{d}\mu+\int_{E}^{}|g(x)|\;|f(x)+g(x)|^{p-1}\mathop{}\!\mathrm{d}\mu \\
 &amp;\leqslant\left\{\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}+\left[\int_{E}^{}|g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}\right\}\left[\int_{E}^{}|f(x)+g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{q}
-
 \end{align*}\]</span></p>
 <p>两边同除<span class="math inline">\(\left[\int_{E}^{}|f(x)+g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{q}\)</span>即有：</p>
 <p><span class="math display">\[\begin{equation*}
 \left[\int_{E}^{}|f(x)+g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}\leqslant\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}+\left[\int_{E}^{}|g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}
-
 \end{equation*}\]</span></p>
 <p>由放缩的过程注意到等号成立当且仅当Holder不等式取等且<span class="math inline">\(f(x)g(x)\geqslant0\;\)</span>a.e.于<span class="math inline">\(E\)</span>，而Holder不等式取等当且仅当存在不全为<span class="math inline">\(0\)</span>的<span class="math inline">\(\alpha,\beta\geqslant0\)</span>和不全为<span class="math inline">\(0\)</span>的<span class="math inline">\(\gamma,\delta\geqslant0\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha|f|^p=\beta|f+g|^p,\;\gamma|g|^p=\delta|f+g|^p\;\text{a.e.于$E$}
-
 \end{equation*}\]</span></p>
 <p>因为此时<span class="math inline">\(f(x),g(x)\)</span>同号a.e.于<span class="math inline">\(E\)</span>，所以也即存在不全为<span class="math inline">\(0\)</span>的<span class="math inline">\(\alpha,\beta\geqslant0\)</span>和不全为<span class="math inline">\(0\)</span>的<span class="math inline">\(\gamma,\delta\geqslant0\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha f=\beta (f+g),\;\gamma g=\delta(f+g)\;\text{a.e.于$E$}
-
 \end{equation*}\]</span></p>
 <p>该条件可推出存在不全为<span class="math inline">\(0\)</span>的<span class="math inline">\(\alpha,\beta\geqslant0\)</span>使得<span class="math inline">\(\alpha f=\beta g\;\)</span>a.e.于<span class="math inline">\(E\)</span>。</p>
 <p>接下来证明存在不全为<span class="math inline">\(0\)</span>的<span class="math inline">\(\alpha,\beta\geqslant0\)</span>使得<span class="math inline">\(\alpha f=\beta g\;\)</span>a.e.于<span class="math inline">\(E\)</span>也可推出等式成立。仅对<span class="math inline">\(\alpha\ne0\)</span>的情况进行证明，<span class="math inline">\(\beta\ne0\)</span>的情况可对称得到。</p>
 <p><strong>(1)<span class="math inline">\(\;|f(x)+g(x)|=0\;\)</span>a.e.于<span class="math inline">\(E\)</span>：</strong>此时可得到<span class="math inline">\(g=0\;\)</span>a.e.于<span class="math inline">\(E\)</span>，进而得到<span class="math inline">\(f=0\;\)</span>a.e.成立。由<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(9)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \left[\int_{E}^{}|f(x)+g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}=\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}+\left[\int_{E}^{}|g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}=0
-
 \end{equation*}\]</span></p>
 <p><strong>(2)<span class="math inline">\(\;|f(x)+g(x)|=0\)</span>不a.e.于<span class="math inline">\(E\)</span>：</strong>此时可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 f=\frac{\beta}{\alpha}g\;\text{a.e.于$E$}
-
 \end{equation*}\]</span></p>
 <p>于是由<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(10)(7)可得：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1445,7 +1571,6 @@ f=\frac{\beta}{\alpha}g\;\text{a.e.于$E$}
 &amp;=\frac{\beta}{\alpha}\left[\int_{E}^{}|g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}+\left[\int_{E}^{}|g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p} \\
 &amp;=\left[\int_{E}\left|\frac{\beta}{\alpha}g(x)\right|^p\mathop{}\!\mathrm{d}\mu\right]^{\frac{1}{p}}+\left[\int_{E}^{}|g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p} \\
 &amp;=\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}+\left[\int_{E}^{}|g(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1454,13 +1579,11 @@ f=\frac{\beta}{\alpha}g\;\text{a.e.于$E$}
 <p><strong>Theorem 16.13</strong>. 设 <span class="math inline">\((X,\mathscr{F},\mu)\)</span>是一个测度空间，<span class="math inline">\(1\leqslant p&lt;+\infty\)</span>，<span class="math inline">\(E\in\mathscr{F}\)</span>。对任意的<span class="math inline">\(f,g\in L_p(E)\)</span>，在<span class="math inline">\(L_p(E)\)</span>空间中引入范数：</p>
 <p><span class="math display">\[\begin{equation*}
 ||f||_p=\left[\int_{E}^{}|f(x)|^p\mathop{}\!\mathrm{d}\mu\right]^\frac{1}{p}
-
 \end{equation*}\]</span></p>
 <p>则积分形式的Minkowski不等式可写为：</p>
 <p><span class="math display">\[\begin{equation*}
 \tag{15}
 ||f+g||_p\leqslant||f||_p+||g||_p
-
 \end{equation*}\]</span></p>
 </div>
 </div>
@@ -1470,7 +1593,6 @@ f=\frac{\beta}{\alpha}g\;\text{a.e.于$E$}
 <p><span class="math display">\[\begin{equation*}
 \tag{16}
 ||f+g||_{\infty}\leqslant||f||_{\infty}+||g||_{\infty}
-
 \end{equation*}\]</span></p>
 </div>
 </div>
@@ -1478,12 +1600,10 @@ f=\frac{\beta}{\alpha}g\;\text{a.e.于$E$}
 <p><span class="proof-title"><em>证明</em>. </span>由绝对值的三角不等式以及上确界的性质：</p>
 <p><span class="math display">\[\begin{equation*}
 \sup_{x\in E\setminus e}|f(x)+g(x)|\leqslant\sup_{x\in E\setminus e}[|f(x)|+|g(x)|]\leqslant\sup_{x\in E\setminus e}|f(x)|+\sup_{x\in E\setminus e}|g(x)|
-
 \end{equation*}\]</span></p>
 <p>由下确界的性质即可得：</p>
 <p><span class="math display">\[\begin{equation*}
 ||f+g||_{\infty}\leqslant||f||_{\infty}+||g||_{\infty}
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1494,7 +1614,6 @@ f=\frac{\beta}{\alpha}g\;\text{a.e.于$E$}
 \tag{17}
 ||f+g||_p\leqslant||f||_p+||g||_p,\quad
 \Big|||f||_p-||g||_p\Big|\leqslant||f-g||_p
-
 \end{equation*}\]</span></p>
 </div>
 </div>
@@ -1503,7 +1622,6 @@ f=\frac{\beta}{\alpha}g\;\text{a.e.于$E$}
 <p><span class="math display">\[\begin{gather*}
 ||f||_p=||f-g+g||_p\leqslant||f-g||_p+||g||_p \\
 ||g||_p=||g-f+f||_p\leqslant||g-f||_p+||f||_p=||f-g||_p+||f||_p
-
 \end{gather*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1517,7 +1635,6 @@ f=\frac{\beta}{\alpha}g\;\text{a.e.于$E$}
 <p><span class="math display">\[\begin{equation*}
 \tag{18}
 |a+b|^p\leqslant\Bigl(|a|+|b|\Bigr)^p \leqslant 2^{p-1}\Bigl(|a|^p+|b|^p\Bigr).
-
 \end{equation*}\]</span></p>
 </div>
 </div>
@@ -1525,22 +1642,18 @@ f=\frac{\beta}{\alpha}g\;\text{a.e.于$E$}
 <p><span class="proof-title"><em>证明</em>. </span>第一式显然成立。令 <span class="math inline">\(a,b\in\mathbb{R}\)</span>，并设 <span class="math inline">\(x=|a|\)</span> 和 <span class="math inline">\(y=|b|\)</span>（显然 <span class="math inline">\(x,y\geqslant0\)</span>）。考虑函数</p>
 <p><span class="math display">\[\begin{equation*}
 f(t)=t^p,\quad t\ge 0
-
 \end{equation*}\]</span></p>
 <p>由于 <span class="math inline">\(p\geqslant1\)</span>，函数 <span class="math inline">\(f(t)\)</span> 是凸函数。根据凸函数的定义，对于任意 <span class="math inline">\(x,y\ge 0\)</span> 和 <span class="math inline">\(\lambda\in[0,1]\)</span> 有</p>
 <p><span class="math display">\[\begin{equation*}
 f\bigl(\lambda x+(1-\lambda)y\bigr)\leqslant\lambda f(x)+(1-\lambda)f(y)
-
 \end{equation*}\]</span></p>
 <p>取 <span class="math inline">\(\lambda=\frac{1}{2}\)</span>，则上式变为：</p>
 <p><span class="math display">\[\begin{equation*}
 \left(\frac{x+y}{2}\right)^p\leqslant\frac{x^p+y^p}{2}
-
 \end{equation*}\]</span></p>
 <p>将上式两边同时乘以 <span class="math inline">\(2^p\)</span>，得到</p>
 <p><span class="math display">\[\begin{equation*}
 (x+y)^p\leqslant2^{p-1}\Bigl(x^p+y^p\Bigr)
-
 \end{equation*}\]</span></p>
 <p>将 <span class="math inline">\(x=|a|\)</span> 和 <span class="math inline">\(y=|b|\)</span> 代回，即得所需的不等式。&nbsp;◻</p>
 </div>
@@ -1551,12 +1664,10 @@ f\bigl(\lambda x+(1-\lambda)y\bigr)\leqslant\lambda f(x)+(1-\lambda)f(y)
 <p><span class="proof-title"><em>证明</em>. </span>注意到：</p>
 <p><span class="math display">\[\begin{equation*}
 |e^{ix}-1|^2=[\cos(x)-1]^2+\sin^2(x)=2-2\cos(x)=4\sin^2\left(\frac{x}{2}\right)
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 |e^{ix}-1|=2\left|\sin\left(\frac{x}{2}\right)\right|\leqslant x
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1568,7 +1679,6 @@ f\bigl(\lambda x+(1-\lambda)y\bigr)\leqslant\lambda f(x)+(1-\lambda)f(y)
 <p><span class="math display">\[\begin{equation*}
 \tag{19}
 \varphi[\operatorname{E}(f|\mathscr{A})]\leqslant\operatorname{E}(\varphi\circ f|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
-
 \end{equation*}\]</span></p>
 <p>等号成立a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>的一个充分条件为<span class="math inline">\(f=\operatorname{E}(f|\mathscr{A})\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>。若<span class="math inline">\(\varphi\)</span>是严格凸的，则等号成立a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>的充要条件为<span class="math inline">\(f=\operatorname{E}(f|\mathscr{A})\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>。</p>
 </div>
@@ -1577,53 +1687,43 @@ f\bigl(\lambda x+(1-\lambda)y\bigr)\leqslant\lambda f(x)+(1-\lambda)f(y)
 <p><span class="proof-title"><em>证明</em>. </span>设：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{L}=\{(a,b)\in\mathbb{R}^{2}:ax+b\leqslant\varphi(x),\;\forall\;x\in\mathbb{R}^{}\}
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-015.html#prop-ConvexFunction-60c4bc79" data-reference-type="ref+label" data-reference="prop:ConvexFunction">性质 14.0.8</a>(4)可知<span class="math inline">\(\mathcal{L}\ne\varnothing\)</span>，于是对任意的<span class="math inline">\((a,b)\in\mathcal{L}\)</span>有<span class="math inline">\(af+b\leqslant\varphi\circ f\)</span>，根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)和<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(5)(1)可知可对<span class="math inline">\(af+b\)</span>求关于<span class="math inline">\(\mathscr{A}\)</span>的条件期望，由<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(5)(1)可知可对<span class="math inline">\(\varphi\circ f\)</span>求关于<span class="math inline">\(\mathscr{A}\)</span>的条件期望，于是根据<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(4)(5)(1)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}(\varphi\circ f\mid\mathscr{A})\geqslant\operatorname{E}(af+b\mid\mathscr{A})=a\operatorname{E}(f\mid\mathscr{A})+b\operatorname{E}(1\mid\mathscr{A})=a\operatorname{E}(f\mid\mathscr{A})+b
-
 \end{equation*}\]</span></p>
 <p>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>。由<a href="../chapters/page-015.html#prop-ConvexFunction-60c4bc79" data-reference-type="ref+label" data-reference="prop:ConvexFunction">性质 14.0.8</a>(4)和可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \sup_{a,b\in\mathcal{L}}a\operatorname{E}(f\mid\mathscr{A})+b=\varphi[\operatorname{E}(f\mid\mathscr{A})]\leqslant\operatorname{E}(\varphi\circ f\mid\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
-
 \end{equation*}\]</span></p>
 <p>当<span class="math inline">\(f=\operatorname{E}(f|\mathscr{A})\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>时，<span class="math inline">\(\varphi\circ f=\varphi[\operatorname{E}(f|\mathscr{A})]\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>且<span class="math inline">\(f\)</span>可视作<span class="math inline">\(\mathscr{A}\)</span>可测的，根据<a href="../chapters/page-012.html#prop-MeasurableMapping-34bb2891" data-reference-type="ref+label" data-reference="prop:MeasurableMapping">性质 11.3.1</a>(2)可知<span class="math inline">\(\varphi\circ f\)</span>是<span class="math inline">\(\mathscr{A}\)</span>可测的，由<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(1)可知<span class="math inline">\(\operatorname{E}(\varphi\circ f\mid\mathscr{A})=\varphi\circ f\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>，根据<a href="../chapters/page-012.html#prop-Measure-9acfc4ac" data-reference-type="ref+label" data-reference="prop:Measure">性质 11.2.1</a>(3)（次有限可加性）和测度的非负性可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \varphi[\operatorname{E}(f|\mathscr{A})]=\operatorname{E}(\varphi\circ f|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
-
 \end{equation*}\]</span></p>
 <p>当<span class="math inline">\(\varphi\)</span>严格凸且等号成立a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>时，由<a href="../chapters/page-015.html#prop-ConvexFunction-60c4bc79" data-reference-type="ref+label" data-reference="prop:ConvexFunction">性质 14.0.8</a>(4)可知对任意<span class="math inline">\(t\in\mathbb{R}\)</span>存在<span class="math inline">\(c(t)\in\mathbb{R}\)</span>使得对任意<span class="math inline">\(u\in\mathbb{R}\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 \varphi(u)\geqslant\varphi(t)+c(t)(u-t)
-
 \end{equation*}\]</span></p>
 <p>且上式在<span class="math inline">\(u\neq t\)</span>时严格成立，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \varphi\circ f\geqslant\varphi[\operatorname{E}(f|\mathscr{A})]+c[\operatorname{E}(f|\mathscr{A})][f-\operatorname{E}(f|\mathscr{A})]
-
 \end{equation*}\]</span></p>
 <p>并且在；</p>
 <p><span class="math display">\[\begin{equation*}
 \{x\in X:f\ne\operatorname{E}(f|\mathscr{A})\}
-
 \end{equation*}\]</span></p>
 <p>上严格成立。记：</p>
 <p><span class="math display">\[\begin{equation*}
 H=\varphi\circ f-\varphi[\operatorname{E}(f|\mathscr{A})]-c[\operatorname{E}(f|\mathscr{A})][f-\operatorname{E}(f|\mathscr{A})]
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(H\geqslant 0\)</span>，且：</p>
 <p><span class="math display">\[\begin{equation*}
 H=0\quad\Longleftrightarrow\quad f=\operatorname{E}(f|\mathscr{A})
-
 \end{equation*}\]</span></p>
 <p>对<span class="math inline">\(H\)</span>取关于<span class="math inline">\(\mathscr{A}\)</span>的条件期望（和之前类似说明其存在性），由<a href="../chapters/page-012.html#prop-MeasurableMapping-34bb2891" data-reference-type="ref+label" data-reference="prop:MeasurableMapping">性质 11.3.1</a>(2)、<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(1)(5)、<a href="../chapters/page-012.html#prop-Measure-9acfc4ac" data-reference-type="ref+label" data-reference="prop:Measure">性质 11.2.1</a>(3)（次有限可加性）和测度的非负性可得：</p>
 <p><span class="math display">\[\begin{align*}
 \operatorname{E}(H|\mathscr{A})&amp;=\operatorname{E}(\varphi\circ f|\mathscr{A})-\varphi[\operatorname{E}(f|\mathscr{A})]-c[\operatorname{E}(f|\mathscr{A})]\operatorname{E}[f-\operatorname{E}(f|\mathscr{A})\mid\mathscr{A}] \\
 &amp;=\operatorname{E}(\varphi\circ f|\mathscr{A})-\varphi[\operatorname{E}(f|\mathscr{A})]=0\;\text{a.s.于}(X,\mathscr{A},P)
-
 \end{align*}\]</span></p>
 <p>即<span class="math inline">\(f=\operatorname{E}(f|\mathscr{A})\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{A},P)\)</span>。&nbsp;◻</p>
 </div>
@@ -1636,7 +1736,6 @@ H=0\quad\Longleftrightarrow\quad f=\operatorname{E}(f|\mathscr{A})
 <p><span class="math display">\[\begin{equation*}
 \tag{20}
 \int_{X}\ln\frac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}(x)\mathop{}\!\mathrm{d}\varphi\geqslant0
-
 \end{equation*}\]</span></p>
 <p>等号成立当且仅当<span class="math inline">\(\dfrac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}=1\;\)</span>a.e.于<span class="math inline">\((X,\mathscr{F},\mu)\)</span>。</p>
 </div>
@@ -1645,14 +1744,12 @@ H=0\quad\Longleftrightarrow\quad f=\operatorname{E}(f|\mathscr{A})
 <p><span class="proof-title"><em>证明</em>. </span>由高中的知识可知：</p>
 <p><span class="math display">\[\begin{equation*}
 x\ln x\geqslant x-1
-
 \end{equation*}\]</span></p>
 <p>等号成立当且仅当<span class="math inline">\(x=1\)</span>。取<span class="math inline">\(x=\dfrac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}\)</span>，由<a href="../chapters/page-012.html#theo-RadonNikodym-fd20b306" data-reference-type="ref+label" data-reference="theo:RadonNikodym">定理 11.35</a>和<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(10)可得<span class="math inline">\(\dfrac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}\geqslant0\;\)</span>a.e.于<span class="math inline">\((X,\mathscr{F},\mu)\)</span>。根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(7)(6)和<a href="../chapters/page-012.html#lem-IntChangeOfMeasure-673686c1" data-reference-type="ref+label" data-reference="lem:IntChangeOfMeasure">引理 11.10</a>可得：</p>
 <p><span class="math display">\[\begin{gather*}
 \frac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}\ln\frac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}\geqslant\frac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}-1\;\text{a.e.于}(A,\mathscr{F},\mu) \\
 \int_{X}\frac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}(x)\ln\frac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}(x)\mathop{}\!\mathrm{d}\mu\geqslant\int_{X}\left[\frac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}(x)-1\right]\mathop{}\!\mathrm{d}\mu \\
 \int_{X}\ln\frac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}(x)\mathop{}\!\mathrm{d}\varphi\geqslant0
-
 \end{gather*}\]</span></p>
 <p>根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(8)可知等号成立当且仅当<span class="math inline">\(\dfrac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}=1\;\)</span>a.e.于<span class="math inline">\((X,\mathscr{F},\mu)\)</span>。&nbsp;◻</p>
 </div>
@@ -1664,14 +1761,12 @@ x\ln x\geqslant x-1
 <p>设<span class="math inline">\(f\)</span>是概率空间<span class="math inline">\((X,\mathscr{F},P)\)</span>上的非负随机变量，<span class="math inline">\(\operatorname{E}(f)&lt;+\infty\)</span>，则对任意的<span class="math inline">\(t\in\mathbb{R}^{+}\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 P(f\geqslant t)\leqslant\frac{\operatorname{E}(f)}{t}
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>由<a href="../chapters/page-012.html#prop-SimpleFunction-f55e53f8" data-reference-type="ref+label" data-reference="prop:SimpleFunction">性质 11.3.2</a>(1)(2.a)、<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(6)(10)、<a href="../chapters/page-012.html#prop-MeasurableFunction-4dbcbd65" data-reference-type="ref+label" data-reference="prop:MeasurableFunction">性质 11.3.3</a>(1.d)和<a href="../chapters/page-012.html#prop-NonnegativeSimpleIntegral-0b16f243" data-reference-type="ref+label" data-reference="prop:NonnegativeSimpleIntegral">性质 11.4.1</a>(4)</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}(f)\geqslant\operatorname{E}[tI(x\in\{f\geqslant t\})]=t\operatorname{E}[I(x\in\{f\geqslant t\})]=tP(f\geqslant t)
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1682,14 +1777,12 @@ P(f\geqslant t)\leqslant\frac{\operatorname{E}(f)}{t}
 <p><span class="theorem-title"><strong>推论 17.1</strong></span> <strong>Corollary 16.1</strong>. 设<span class="math inline">\(f\)</span>是概率空间<span class="math inline">\((X,\mathscr{F},P)\)</span>上的随机变量，<span class="math inline">\(f\)</span>的<span class="math inline">\(n\in\mathbb{N}^+\)</span>阶矩存在，则对任意的<span class="math inline">\(t\in\mathbb{R}^{+}\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 P\Big(|f-\operatorname{E}(f)|\geqslant t\Big)\leqslant\frac{\operatorname{E}[|f-\operatorname{E}(f)|^n]}{t^n}
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>因为<span class="math inline">\(f\)</span>的<span class="math inline">\(n\)</span>阶矩存在，由<a href="../chapters/page-013.html#prop-Moment-a0c69eac" data-reference-type="ref+label" data-reference="prop:Moment">性质 12.3.3</a>(3)可知<span class="math inline">\(\operatorname{E}(f)\in\mathbb{R}^{}\)</span>，根据<a href="../chapters/page-012.html#prop-MeasurableFunction-4dbcbd65" data-reference-type="ref+label" data-reference="prop:MeasurableFunction">性质 11.3.3</a>(1.b)(1.d)和<a href="../chapters/page-012.html#prop-SigmaField-4168a9ce" data-reference-type="ref+label" data-reference="prop:SigmaField">性质 11.1.6</a>(2)可知<span class="math inline">\(|f-\operatorname{E}(f)|\)</span>是非负随机变量。由<a href="#theo-MarkovInequality-0b76cb0d" data-reference-type="ref+label" data-reference="theo:MarkovInequality">定理 16.20</a>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 P\Big(|f-\operatorname{E}(f)|\geqslant t\Big)=P\Big(|f-\operatorname{E}(f)|^n\geqslant t^n\Big)\leqslant\frac{\operatorname{E}[|f-\operatorname{E}(f)|^n]}{t^n}
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1697,14 +1790,12 @@ P\Big(|f-\operatorname{E}(f)|\geqslant t\Big)=P\Big(|f-\operatorname{E}(f)|^n\ge
 <p><span class="theorem-title"><strong>推论 17.2</strong></span> <strong>Corollary 16.2</strong>. 设<span class="math inline">\(f\)</span>是概率空间<span class="math inline">\((X,\mathscr{F},P)\)</span>上的随机变量，<span class="math inline">\(\operatorname{E}(f)&lt;+\infty\)</span>，<span class="math inline">\(\operatorname{E}(e^{\lambda f})\)</span>在<span class="math inline">\(\lambda\in[0,a]\)</span>上存在，则对任意的<span class="math inline">\(t\in\mathbb{R}^{}\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 \log P\Big((f-\operatorname{E}(f))\geqslant t\Big)\leqslant\inf_{\lambda\in[0,a]}\Big\{\log\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}-\lambda t\Big\}
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>由<a href="../chapters/page-012.html#prop-MeasurableFunction-4dbcbd65" data-reference-type="ref+label" data-reference="prop:MeasurableFunction">性质 11.3.3</a>(1.a)(10)、<a href="../chapters/page-012.html#prop-MeasurableMapping-34bb2891" data-reference-type="ref+label" data-reference="prop:MeasurableMapping">性质 11.3.1</a>(2)(4)和<a href="#theo-MarkovInequality-0b76cb0d" data-reference-type="ref+label" data-reference="theo:MarkovInequality">定理 16.20</a>可知：</p>
 <p><span class="math display">\[\begin{equation*}
 P\Big((f-\operatorname{E}(f))\geqslant t\Big)\geqslant=P\left(e^{\lambda[f-\operatorname{E}(f)]}\geqslant e^{\lambda t}\right)\leqslant\frac{\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}}{e^{\lambda t}}
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1712,7 +1803,6 @@ P\Big((f-\operatorname{E}(f))\geqslant t\Big)\geqslant=P\left(e^{\lambda[f-\oper
 <p><strong>Definition 16.1</strong>. 设<span class="math inline">\(f\)</span>是概率空间<span class="math inline">\((X,\mathscr{F},P)\)</span>上的随机变量，<span class="math inline">\(\operatorname{E}(f)&lt;+\infty\)</span>。如果存在<span class="math inline">\(\sigma&gt;0\)</span>使得对任意的<span class="math inline">\(\lambda\in\mathbb{R}^{}\)</span>都有：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}\leqslant\exp\left(\frac{\sigma^2\lambda^2}{2}\right)
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(f\)</span>是次高斯的，<span class="math inline">\(\sigma\)</span>被称为<span class="math inline">\(f\)</span>的次高斯参数。</p>
 </div>
@@ -1723,12 +1813,10 @@ P\Big((f-\operatorname{E}(f))\geqslant t\Big)\geqslant=P\left(e^{\lambda[f-\oper
 <li><p><span class="math inline">\(f\)</span>有如下的上下尾不等式：</p>
 <p><span class="math display">\[\begin{equation*}
                 \forall\;t\geqslant0,\;P\Big(f-\operatorname{E}(f)\geqslant t\Big)\leqslant\exp\left(-\frac{t^2}{2\sigma^2}\right),\;P\Big(f-\operatorname{E}(f)\leqslant -t\Big)\leqslant\exp\left(-\frac{t^2}{2\sigma^2}\right)
-
     \end{equation*}\]</span></p></li>
 <li><p><span class="math inline">\(f\)</span>有如下的集中不等式：</p>
 <p><span class="math display">\[\begin{equation*}
                 \forall\;t\geqslant0,\;P\Big(|f-\operatorname{E}(f)|\geqslant t\Big)\leqslant2\exp\left(-\frac{t^2}{2\sigma^2}\right)
-
     \end{equation*}\]</span></p></li>
 </ol>
 </div>
@@ -1736,18 +1824,15 @@ P\Big((f-\operatorname{E}(f))\geqslant t\Big)\geqslant=P\left(e^{\lambda[f-\oper
 <p><span class="proof-title"><em>证明</em>. </span>(1)由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)即可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}\{e^{\lambda[-f-\operatorname{E}(-f)]}\}=\operatorname{E}\{e^{-\lambda[f+\operatorname{E}(-f)]}\}=\operatorname{E}\{e^{-\lambda[f-\operatorname{E}(f)]}\}\leqslant\exp\left(\frac{\sigma^2\lambda^2}{2}\right)
-
 \end{equation*}\]</span></p>
 <p>(2)因为<span class="math inline">\(f\)</span>是次高斯的，所以对任意的<span class="math inline">\(\lambda\in\mathbb{R}^{}\)</span>，<span class="math inline">\(\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}\)</span>存在，所以由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可知<span class="math inline">\(\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}\)</span>存在。根据<a href="#cor-ChernoffBound-3e09f8ed" data-reference-type="ref+label" data-reference="cor:ChernoffBound">推论 16.2</a>可得：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;P\Big(f-\operatorname{E}(f)\geqslant t\Big)\leqslant\inf_{\lambda\in\mathbb{R}^{}}\frac{\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}}{e^{\lambda t}}\leqslant\inf_{\lambda\in\mathbb{R}^{}}\exp\left(\frac{\sigma^2\lambda^2}{2}-\lambda t\right) \\
 =&amp;\exp\left[\frac{\sigma^2}{2}\left(\frac{t}{\sigma^2}\right) ^2-\frac{t^2}{\sigma^2}\right]=\exp\left(\frac{t^2}{2\sigma^2}-\frac{t^2}{\sigma^2}\right)=\exp\left(-\frac{t^2}{2\sigma^2}\right)
-
 \end{align*}\]</span></p>
 <p>由(1)、<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)和上述上尾不等式可得：</p>
 <p><span class="math display">\[\begin{equation*}
 P\Big(-f-\operatorname{E}(-f)\geqslant t\Big)=P\Big(-f+\operatorname{E}(f)\geqslant t\Big)=P\Big(f-\operatorname{E}(f)\leqslant -t\Big)\leqslant\exp\left(-\frac{t^2}{2\sigma^2}\right)
-
 \end{equation*}\]</span></p>
 <p>(3)由(2)立即可得。&nbsp;◻</p>
 </div>
@@ -1756,12 +1841,10 @@ P\Big(-f-\operatorname{E}(-f)\geqslant t\Big)=P\Big(-f+\operatorname{E}(f)\geqsl
 <p>设<span class="math inline">\(f_1, f_2, \dots, f_{n}\)</span>是概率空间<span class="math inline">\((X,\mathscr{F},P)\)</span>上相互独立的随机变量，对任意的<span class="math inline">\(i=1,2,\dots,n\)</span>有<span class="math inline">\(a_i\leqslant f_i\leqslant b_i\;\)</span>a.s.于<span class="math inline">\((X,\mathscr{F},P)\)</span>，则对任意的<span class="math inline">\(t&gt;0\)</span>：</p>
 <p><span class="math display">\[\begin{gather*}
 P\left(\sum_{i=1}^{n}[f_i-\operatorname{E}(f_i)]\geqslant t\right)\leqslant\exp\left[-\frac{2t^2}{\sum\limits_{i=1}^{n}(b_i-a_i)^2}\right] \\ P\left(\left|\sum_{i=1}^{n}[f_i-\operatorname{E}(f_i)]\right|\geqslant t\right)\leqslant2\exp\left[-\frac{2t^2}{\sum\limits_{i=1}^{n}(b_i-a_i)^2}\right]
-
 \end{gather*}\]</span></p>
 <p>也即：</p>
 <p><span class="math display">\[\begin{gather*}
 P\left(\frac{1}{n}\sum_{i=1}^{n}[f_i-\operatorname{E}(f_i)]\geqslant t\right)\leqslant\exp\left[-\frac{2n^2t^2}{\sum\limits_{i=1}^{n}(b_i-a_i)^2}\right] \\ P\left(\left|\frac{1}{n}\sum_{i=1}^{n}[f_i-\operatorname{E}(f_i)]\right|\geqslant t\right)\leqslant2\exp\left[-\frac{2n^2t^2}{\sum\limits_{i=1}^{n}(b_i-a_i)^2}\right]
-
 \end{gather*}\]</span></p>
 </div>
 <div class="proof-block proof">

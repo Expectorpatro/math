@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,15 +1079,12 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#id--99efa8dd" id="toc-id--99efa8dd" class="nav-link active" data-scroll-target="#id--99efa8dd"><span class="header-section-number">15.1</span> 线性规划</a>
-  <ul>
-  <li><a href="#id--f727be91" id="toc-id--f727be91" class="nav-link" data-scroll-target="#id--f727be91"><span class="header-section-number">15.1.1</span> 线性规划的标准形</a>
   <ul class="collapse">
-  <li><a href="#id--530b2e88" id="toc-id--530b2e88" class="nav-link" data-scroll-target="#id--530b2e88"><span class="header-section-number">15.1.1.1</span> 标准形的基本解</a></li>
-  </ul></li>
+  <li><a href="#id--f727be91" id="toc-id--f727be91" class="nav-link" data-scroll-target="#id--f727be91"><span class="header-section-number">15.1.1</span> 线性规划的标准形</a></li>
   <li><a href="#id--5e79d893" id="toc-id--5e79d893" class="nav-link" data-scroll-target="#id--5e79d893"><span class="header-section-number">15.1.2</span> 线性规划解的性质</a></li>
   </ul></li>
   </ul>
@@ -954,7 +1139,6 @@ window.Quarto = {
 AX=\beta \\
 X\geqslant\mathbf{0}
 \end{cases}
-
 \end{gather*}\]</span></p>
 <p>称<span class="math inline">\(C=(c_1,c_2,\dots,c_n)\)</span>为<strong>价值向量</strong>，其中每个分量为<strong>价值系数</strong>，<span class="math inline">\(\beta\)</span>为<strong>资源向量</strong>。系数矩阵<span class="math inline">\(A\in M_{m\times n}(\mathbb{R})\)</span>行满秩，即<span class="math inline">\(\operatorname{rank}(A)=m\)</span>。称<span class="math inline">\(A\)</span>的秩<span class="math inline">\(m\)</span>为LP问题的<strong>阶数</strong>，<span class="math inline">\(A\)</span>的列数<span class="math inline">\(n\)</span>为LP问题的<strong>维数</strong>。</p>
 </div>
@@ -966,12 +1150,10 @@ X\geqslant\mathbf{0}
 <p><strong>最大化目标函数：</strong>若LP问题的目标函数为：</p>
 <p><span class="math display">\[\begin{equation*}
 \max z=C^{\top}X
-
 \end{equation*}\]</span></p>
 <p>则可将其转化为：</p>
 <p><span class="math display">\[\begin{equation*}
 \min z'=-C^{\top}X
-
 \end{equation*}\]</span></p>
 <p>显然转化前后的LP问题是等价的。</p>
 <p><strong>约束条件右端常数项为负数：</strong>若LP问题的约束条件为<span class="math inline">\(Ax=\beta\)</span>和<span class="math inline">\(\alpha^{\top}x=b&lt;0\)</span>，则可将其转化为：</p>
@@ -986,7 +1168,6 @@ x
 \beta \\
 -b
 \end{pmatrix}
-
 \end{equation*}\]</span></p>
 <p>显然转化前后的LP问题是等价的。</p>
 <p><strong>约束条件中含<span class="math inline">\(\leqslant\)</span>：</strong>若LP问题的约束条件为<span class="math inline">\(Ax=\beta\)</span>和<span class="math inline">\(\alpha^{\top}x\leqslant b\)</span>，则可将约束条件转化为：</p>
@@ -1005,7 +1186,6 @@ y
 b
 \end{pmatrix} \\
 X'=(X,y)^{\top}\geqslant\mathbf{0}
-
 \end{gather*}\]</span></p>
 <p>显然转化前后的LP问题是等价的。称新引入的变量<span class="math inline">\(y\)</span>为<a href="../chapters/page-058.html#term-SlackVariable" class="term" title="slack variable">松弛变量<span class="term-english">（slack variable）</span></a>。</p>
 <p><strong>约束条件中含<span class="math inline">\(\geqslant\)</span>：</strong>若LP问题的约束条件为<span class="math inline">\(Ax=\beta\)</span>和<span class="math inline">\(\alpha^{\top}x\geqslant b\)</span>，则可将约束条件转化为：</p>
@@ -1024,7 +1204,6 @@ y
 b
 \end{pmatrix} \\
 X'=(X,y)^{\top}\geqslant\mathbf{0}
-
 \end{gather*}\]</span></p>
 <p>显然转化前后的LP问题是等价的。称新引入的变量<span class="math inline">\(y\)</span>为<a href="../chapters/page-058.html#term-SurplusVariable" class="term" title="surplus variable">剩余变量<span class="term-english">（surplus variable）</span></a>。</p>
 <p><strong>决策变量中含负值变量：</strong>若LP问题为：</p>
@@ -1036,7 +1215,6 @@ s.t.
 X\geqslant\mathbf{0} \\
 x&lt;0
 \end{cases}
-
 \end{gather*}\]</span></p>
 <p>则作变换<span class="math inline">\(x'=-x\)</span>，将该LP问题转化为：</p>
 <p><span class="math display">\[\begin{gather*}
@@ -1046,7 +1224,6 @@ s.t.
 (A,-\alpha)(X,x')^{\top}=\beta \\
 X'=(X,x')^{\top}\geqslant\mathbf{0}
 \end{cases}
-
 \end{gather*}\]</span></p>
 <p>显然转化前后的LP问题是等价的。</p>
 <p><strong>决策变量中含自由变量<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>：</strong>若LP问题为：</p>
@@ -1057,7 +1234,6 @@ s.t.
 (A,\alpha)(X,x)^{\top}=\beta \\
 X\geqslant\mathbf{0}
 \end{cases}
-
 \end{gather*}\]</span></p>
 <p>可引入新变量<span class="math inline">\(x_1,x_2\)</span>，将该LP问题转化为：</p>
 <p><span class="math display">\[\begin{gather*}
@@ -1067,7 +1243,6 @@ s.t.
 (A,\alpha,-\alpha)(X,x_1,x_2)^{\top}=\beta \\
 X'=(X,x_1,x_2)^{\top}\geqslant\mathbf{0}
 \end{cases}
-
 \end{gather*}\]</span></p>
 <p>显然转化前后的LP问题是等价的。&nbsp;◻</p>
 </div>
@@ -1078,12 +1253,10 @@ X'=(X,x_1,x_2)^{\top}\geqslant\mathbf{0}
 <p><span class="math display">\[\begin{align*}
 &amp;\quad(\alpha_{i_1},\alpha_{i_2},\dots,\alpha_{i_m},\alpha_{j_1},\alpha_{j_2},\dots,\alpha_{j_{n-m}})(x_{i_1},x_{i_2},\dots,x_{i_m},x_{j_1},x_{j_2},\dots,x_{j_{n-m}})^{\top} \\
 &amp;=(b_{i_1},b_{i_2},\dots,b_{i_m},b_{j_1},b_{j_2},\dots,b_{j_{n-m}})^{\top}
-
 \end{align*}\]</span></p>
 <p>将该方程重新写作：</p>
 <p><span class="math display">\[\begin{equation*}
 (B,C)(X_1,X_2)^{\top}=\beta'
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(B\)</span>对应基矩阵，<span class="math inline">\(C\)</span>对应非基向量构成的矩阵，<span class="math inline">\(X_1\)</span>为基变矢，<span class="math inline">\(X_2\)</span>为非基变矢。令<span class="math inline">\(X_2=\mathbf{0}\)</span>，可得出方程的一个解：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1091,7 +1264,6 @@ X'=(X,x_1,x_2)^{\top}\geqslant\mathbf{0}
 X_1=B^{-1}\beta' \\
 X_2=\mathbf{0}
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>称该解为约束方程组的一个关于基矩阵<span class="math inline">\(B\)</span>的<strong>基本解</strong>，也称之为该标准形LP问题的一个基本解。若基本解中存在基变量值为<span class="math inline">\(0\)</span>，则称之为<strong>退化基本解</strong>。若某个基本解达到标准形LP问题的最优解，则称之为<strong>最优基本解</strong>。称满足非负性约束<span class="math inline">\(X\geqslant\mathbf{0}\)</span>的基本解为<a href="../chapters/page-041.html#term-BasicFeasibleSolution" class="term" title="basic feasible solution">基本可行解<span class="term-english">（basic feasible solution）</span></a>，若它是退化的，则称之为<strong>退化基本可行解</strong>。称基本可行解对应的基矩阵为<strong>可行基</strong>，称最优基本解对应的基矩阵为<strong>最优基</strong>。</p>
 </div>
@@ -1129,19 +1301,16 @@ s.t.
 AX=\beta \\
 X\geqslant\mathbf{0}
 \end{cases}
-
 \end{gather*}\]</span></p>
 <p>其可行域为<span class="math inline">\(E\)</span>，<span class="math inline">\(A=(a_1, a_2, \dots, a_{n})\in M_{m\times n}(\mathbb{R}),\;x=(x_1,x_2,\dots,x_n)^{\top}\)</span>。</p>
 <p>(1)显然：</p>
 <p><span class="math display">\[\begin{equation*}
 E=\{x\in\mathbb{R}^{n}:Ax=\beta,x\geqslant\mathbf{0}\}
-
 \end{equation*}\]</span></p>
 <p>任取<span class="math inline">\(x_1,x_2\in E\)</span>，则对任意的<span class="math inline">\(0\leqslant\alpha\leqslant1\)</span>有：</p>
 <p><span class="math display">\[\begin{gather*}
 A[\alpha x_1+(1-\alpha)x_2]=\alpha Ax_1+(1-\alpha)Ax_2=\alpha\beta+(1-\alpha)\beta=\beta \\
 \alpha x_1+(1-\alpha)x_2\geqslant0
-
 \end{gather*}\]</span></p>
 <p>所以<span class="math inline">\(\alpha x_1+(1-\alpha)x_2\in E\)</span>，<span class="math inline">\(E\)</span>是一个凸集。</p>
 <p>(2)<strong>基本可行解必是极点：</strong>要证基本可行解<span class="math inline">\(x\)</span>必是极点，即证<span class="math inline">\(x\)</span>不能表示为<span class="math inline">\(E\)</span>内不同的两点<span class="math inline">\(x_1,x_2\)</span>的严格凸组合。假设<span class="math inline">\(x\)</span>可以表示为<span class="math inline">\(x_1,x_2\)</span>的严格凸组合，即存在<span class="math inline">\(0&lt;\alpha&lt;1\)</span>，使得<span class="math inline">\(x=\alpha x_1+(1-\alpha)x_2\)</span>。因为<span class="math inline">\(x\)</span>是基本解，所以<span class="math inline">\(x\)</span>的非基变量都为<span class="math inline">\(0\)</span>，于是<span class="math inline">\(x_1,x_2\)</span>对应部分也都为<span class="math inline">\(0\)</span>。设<span class="math inline">\(x\)</span>对应的基矩阵是<span class="math inline">\(B\)</span>，则<span class="math inline">\(x=B^{-1}\beta\)</span>，此时也必有<span class="math inline">\(x_1=x_2=B^{-1}\beta\)</span>（考虑基本解的求解过程，<span class="math inline">\(B\)</span>对应的非基变量全为<span class="math inline">\(0\)</span>），于是<span class="math inline">\(x=x_1=x_2\)</span>，所以<span class="math inline">\(x\)</span>不可以表示为可行域内不同的两点的严格凸组合，矛盾，<span class="math inline">\(x\)</span>是极点。</p>

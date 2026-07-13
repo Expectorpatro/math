@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,28 +1079,21 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#id--2833a076" id="toc-id--2833a076" class="nav-link active" data-scroll-target="#id--2833a076"><span class="header-section-number">17.1</span> 基于测度论的统计简介</a>
-  <ul>
-  <li><a href="#id--22279fff" id="toc-id--22279fff" class="nav-link" data-scroll-target="#id--22279fff"><span class="header-section-number">17.1.1</span> 次序统计量</a></li>
-  <li><a href="#id--bcbc510d" id="toc-id--bcbc510d" class="nav-link" data-scroll-target="#id--bcbc510d"><span class="header-section-number">17.1.2</span> 充分统计量</a>
   <ul class="collapse">
-  <li><a href="#id--9ab7c1ef" id="toc-id--9ab7c1ef" class="nav-link" data-scroll-target="#id--9ab7c1ef"><span class="header-section-number">17.1.2.1</span> 极小充分统计量</a></li>
-  </ul></li>
+  <li><a href="#id--22279fff" id="toc-id--22279fff" class="nav-link" data-scroll-target="#id--22279fff"><span class="header-section-number">17.1.1</span> 次序统计量</a></li>
+  <li><a href="#id--bcbc510d" id="toc-id--bcbc510d" class="nav-link" data-scroll-target="#id--bcbc510d"><span class="header-section-number">17.1.2</span> 充分统计量</a></li>
   <li><a href="#id--c5497746" id="toc-id--c5497746" class="nav-link" data-scroll-target="#id--c5497746"><span class="header-section-number">17.1.3</span> 完全性</a></li>
   <li><a href="#id--0fbeb2d7" id="toc-id--0fbeb2d7" class="nav-link" data-scroll-target="#id--0fbeb2d7"><span class="header-section-number">17.1.4</span> 指数族</a></li>
   </ul></li>
   <li><a href="#id--9907757c" id="toc-id--9907757c" class="nav-link" data-scroll-target="#id--9907757c"><span class="header-section-number">17.2</span> 抽样分布</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id--799dc790" id="toc-id--799dc790" class="nav-link" data-scroll-target="#id--799dc790"><span class="header-section-number">17.2.1</span> 一维总体</a></li>
   <li><a href="#id--9f1cfbd4" id="toc-id--9f1cfbd4" class="nav-link" data-scroll-target="#id--9f1cfbd4"><span class="header-section-number">17.2.2</span> 多维总体</a></li>
-  <li><a href="#id--4be296ec" id="toc-id--4be296ec" class="nav-link" data-scroll-target="#id--4be296ec"><span class="header-section-number">17.2.3</span> 多维正态总体参数的检验</a>
-  <ul class="collapse">
-  <li><a href="#id--2c57a0be" id="toc-id--2c57a0be" class="nav-link" data-scroll-target="#id--2c57a0be"><span class="header-section-number">17.2.3.1</span> 均值的检验</a></li>
-  <li><a href="#id--30939897" id="toc-id--30939897" class="nav-link" data-scroll-target="#id--30939897"><span class="header-section-number">17.2.3.2</span> 两总体均值的比较</a></li>
-  </ul></li>
+  <li><a href="#id--4be296ec" id="toc-id--4be296ec" class="nav-link" data-scroll-target="#id--4be296ec"><span class="header-section-number">17.2.3</span> 多维正态总体参数的检验</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -958,7 +1139,6 @@ window.Quarto = {
 <p><strong>Definition 17.3</strong>. 设<span class="math inline">\(\mathscr{P}\)</span>为可测空间<span class="math inline">\((X,\mathscr{A})\)</span>上的一个概率测度族，则称<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>为<a href="../chapters/page-058.html#term-StatisticalStructure" class="term" title="statistical structure">统计结构<span class="term-english">（statistical structure）</span></a>或<a href="../chapters/page-058.html#term-StatisticalModel" class="term" title="statistical model">统计模型<span class="term-english">（statistical model）</span></a>。若<span class="math inline">\(\mathscr{P}\)</span>仅依赖于参数<span class="math inline">\(\theta\)</span>，即：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathscr{P}=\{P_{\theta}:\theta\in\Theta\}
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(\Theta\)</span>为参数空间，则称此结构为<a href="../chapters/page-055.html#term-ParametricStructure" class="term" title="parametric structure">参数结构<span class="term-english">（parametric structure）</span></a>，否则称为<a href="../chapters/page-053.html#term-Non-parametricStructure" class="term" title="non-parametric structure">非参数结构<span class="term-english">（non-parametric structure）</span></a>。</p>
 </div>
@@ -974,7 +1154,6 @@ window.Quarto = {
 <p><strong>Definition 17.5</strong>. 设<span class="math inline">\((X_1,\mathscr{A}_1,\mathscr{P}_1),(X_2,\mathscr{A}_2,\mathscr{P}_2),\dots,(X_n,\mathscr{A}_n,\mathscr{P}_n)\)</span>为<span class="math inline">\(n\)</span>个统计结构，称：</p>
 <p><span class="math display">\[\begin{equation*}
 \left(\prod_{i=1}^nX_i,\prod_{i=1}^n\mathscr{A}_i,\prod_{i=1}^n\mathscr{P}_i\right)
-
 \end{equation*}\]</span></p>
 <p>为它们的<a href="../chapters/page-055.html#term-ProductStructure" class="term" title="product structure">乘积结构<span class="term-english">（product structure）</span></a>。</p>
 </div>
@@ -996,7 +1175,6 @@ window.Quarto = {
 <p><span class="proof-title"><em>证明</em>. </span>注意到对任意的<span class="math inline">\(i=1,2,\dots,n\)</span>和任意的<span class="math inline">\(a\in\mathbb{R}^{}\)</span>，<span class="math inline">\(f_{(i)}\)</span>是从<span class="math inline">\(X\)</span>到<span class="math inline">\(\mathbb{R}\)</span>上的映射，并且有：</p>
 <p><span class="math display">\[\begin{equation*}
 \{f_{(i)}\leqslant a\}=\left\{\sum_{j=1}^{n}I_{\{f_j\leqslant a\}}\geqslant i\right\}
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-012.html#prop-MeasurableFunction-4dbcbd65" data-reference-type="ref+label" data-reference="prop:MeasurableFunction">性质 11.3.3</a>(1.b)、<a href="../chapters/page-012.html#prop-SimpleFunction-f55e53f8" data-reference-type="ref+label" data-reference="prop:SimpleFunction">性质 11.3.2</a>(3)(1)、<a href="../chapters/page-012.html#prop-MeasurableFunction-4dbcbd65" data-reference-type="ref+label" data-reference="prop:MeasurableFunction">性质 11.3.3</a>(5.a)(1.d)即可得到<span class="math inline">\(\{f_{(i)}\leqslant a\}\in\mathscr{A}\)</span>，于是<span class="math inline">\(f_{(i)}\)</span>是<span class="math inline">\((X,\mathscr{A})\)</span>上的随机变量。&nbsp;◻</p>
 </div>
@@ -1004,7 +1182,6 @@ window.Quarto = {
 <p><span class="theorem-title"><strong>引理 18.1</strong></span> <strong>Lemma 17.1</strong>. 设总体的分布函数为<span class="math inline">\(F(x)\)</span>，概率函数为<span class="math inline">\(f(x)\)</span>，<span class="math inline">\(X_1, X_2, \dots, X_{n}\)</span>为从总体中抽取的简单样本，则有：</p>
 <p><span class="math display">\[\begin{equation*}
 \underset{a&lt;x_1&lt;\cdots&lt;x_n&lt;b}{\int\cdots\int}f(x_1)\cdots f(x_n)\mathop{}\!\mathrm{d}x_1\cdots\mathop{}\!\mathrm{d}x_n=\frac{1}{n!}[F(b)-F(a)]^n
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(a,b\in\overline{\mathbb{R}}\)</span>。</p>
 </div>
@@ -1012,7 +1189,6 @@ window.Quarto = {
 <p><span class="proof-title"><em>证明</em>. </span>因为<span class="math inline">\(X_1, X_2, \dots, X_{n}\)</span>独立同分布，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{a}^{b}\cdots\int_{a}^{b}f(x_1)\cdots f(x_n)\mathop{}\!\mathrm{d}x_1\cdots\mathop{}\!\mathrm{d}x_n=\left[\int_{a}^{b}f(x_1)\mathop{}\!\mathrm{d}x_1\right]^n=[F(b)-F(a)]^n
-
 \end{equation*}\]</span></p>
 <p>在这个区域上对<span class="math inline">\(x_1, x_2, \dots, x_{n}\)</span>的排序结果一共有<span class="math inline">\(n!\)</span>种（不考虑等于的情况，测度为<span class="math inline">\(0\)</span>，不影响积分结果），每种排序都是等可能的，于是结论成立。&nbsp;◻</p>
 </div>
@@ -1026,7 +1202,6 @@ window.Quarto = {
                     n!f(y_1)f(y_2)\cdots f(y_n),&amp;y_1&lt;y_2&lt;\cdots&lt;y_n \\
                     0,&amp;\text{其它}
                 \end{cases}
-
     \end{equation*}\]</span></p></li>
 <li><p>次序统计量中任意<span class="math inline">\(m\geqslant2\)</span>个分量<span class="math inline">\(Y_{i_1},Y_{i_2},\dots,Y_{i_m},\;i_1&lt;i_2&lt;\cdots&lt;i_m\)</span>的联合概率函数为：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1036,17 +1211,14 @@ window.Quarto = {
                     \quad\frac{F^{i_1-1}(y_{i_1})}{(i_1-1)!}\frac{[1-F(y_{i_m})]^{n-i_m}}{(n-i_m)!},\quad y_{i_1}&lt;y_{i_2}&lt;\cdots&lt;y_{i_m} \\
                     0, \quad\text{其他}
                 \end{cases}
-
     \end{equation*}\]</span></p></li>
 <li><p>次序统计量中单个分量<span class="math inline">\(Y_{m},\;m=1,2,\dots,n\)</span>的概率函数为：</p>
 <p><span class="math display">\[\begin{equation*}
                 p(y_{m})=n!f(y_m)\frac{F^{m-1}(y_m)}{(m-1)!}\frac{[1-F(y_m)]^{n-m}}{(n-m)!}
-
     \end{equation*}\]</span></p></li>
 <li><p>对于任意的<span class="math inline">\(i,j=1,2,\dots,n\)</span>满足<span class="math inline">\(i&lt;j\)</span>，令<span class="math inline">\(V=Y_j-Y_i\)</span>，则有：</p>
 <p><span class="math display">\[\begin{equation*}
                 p(v)=\int_{-\infty}^{+\infty}p(u,v)\mathop{}\!\mathrm{d}u
-
     \end{equation*}\]</span></p>
 <p>其中：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1056,12 +1228,10 @@ window.Quarto = {
                     \quad\quad[1-F(u+v)]^{n-j},&amp;v&gt;0 \\
                     0,&amp;\text{其它}
                 \end{cases}
-
     \end{equation*}\]</span></p></li>
 <li><p>次序统计量<span class="math inline">\((Y_1, Y_2, \dots, Y_{n})\)</span>极差<span class="math inline">\(V\)</span>的概率函数为：</p>
 <p><span class="math display">\[\begin{equation*}
                 p(v)=\int_{-\infty}^{+\infty}p(u,v)\mathop{}\!\mathrm{d}u
-
     \end{equation*}\]</span></p>
 <p>其中：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1070,12 +1240,10 @@ window.Quarto = {
                     n(n-1)f(u)f(u+v)[F(u+v)-F(u)]^{n-2},&amp;v&gt;0 \\
                     0,&amp;\text{其它}
                 \end{cases}
-
     \end{equation*}\]</span></p>
 <p>分布函数为：</p>
 <p><span class="math display">\[\begin{equation*}
                 F(V\leqslant x)=\int_{-\infty}^{+\infty}nf(u)[F(u+x)-F(u)]^{n-1}\mathop{}\!\mathrm{d}u
-
     \end{equation*}\]</span></p></li>
 </ol>
 </div>
@@ -1084,7 +1252,6 @@ window.Quarto = {
 <p>任取一个上述区域<span class="math inline">\(A\)</span>作变换：</p>
 <p><span class="math display">\[\begin{equation*}
 y_j=x_{i_j},\;j=1,2,\dots,n,\;x_{i1}&lt;x_{i2}&lt;\cdots&lt;x_{in}
-
 \end{equation*}\]</span></p>
 <p>则该变换的Jacobi行列式为<span class="math inline">\(|\mathbf{J}|=|I_n|=1\)</span>，因为<span class="math inline">\(X_1, X_2, \dots, X_{n}\)</span>是简单样本，所以在该区域上的：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1093,7 +1260,6 @@ p(y_1, y_2, \dots, y_{n}|A)=
 \prod\limits_{i=1}^{n}f(x_i)=\prod\limits_{i=1}^{n}f(y_i),&amp;y_1&lt;y_2&lt;\cdots&lt;y_n \\
 0,&amp;\text{其它}
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>由区域的任意性可得在整个<span class="math inline">\(\mathbb{R}^{n}\)</span>上：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1102,7 +1268,6 @@ p(y_1, y_2, \dots, y_{n})=
 n!f(y_1)f(y_2)\cdots f(y_n),&amp;y_1&lt;y_2&lt;\cdots&lt;y_n \\
 0,&amp;\text{其它}
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>(2)注意到<span class="math inline">\(Y_{(i_1)},Y_{(i_2)},\dots,Y_{(i_m)}\)</span>的联合概率函数是次序统计量的边缘概率函数，所以由(1)和<a href="#lem-OrderStatistics-597ed04e" data-reference-type="ref+label" data-reference="lem:OrderStatistics">引理 17.1</a>可得：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1117,7 +1282,6 @@ p(y_{i_1},y_{i_2},\dots,y_{i_m})
 &amp;\quad\cdots\frac{1}{(n-i_m)!}[1-F(y_{i_m})]^{n-i_m} \\
 &amp;=n!\prod_{j=1}^{m}f(y_{i_j})\frac{1}{(i_1-1)!}F^{i_1-1}(y_{i_1})\frac{1}{(n-i_m)!}[1-F(y_{i_m})]^{n-i_m} \\
 &amp;\quad\left\{\prod_{k=2}^{m}\frac{1}{(i_k-i_{k-1}-1)!}[F(y_{i_k})-F(y_{i_{k-1}})]^{i_k-i_{k-1}-1}\right\}
-
 \end{align*}\]</span></p>
 <p>(3)类似(2)的过程即可得到，省略。</p>
 <p>(4)使用增补变量法，做变换：</p>
@@ -1131,7 +1295,6 @@ V=Y_j-Y_i
 Y_i=U \\
 Y_j=V+U
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>该变换的Jacobi行列式为：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1141,7 +1304,6 @@ Y_j=V+U
 1 &amp; 1
 \end{vmatrix}
 =1
-
 \end{equation*}\]</span></p>
 <p>由(2)可得<span class="math inline">\((Y_i,Y_j)\)</span>的联合概率函数：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1151,7 +1313,6 @@ p(y_i,y_j)=
 \quad\quad[1-F(y_j)]^{n-j},&amp;y_i&lt;y_j \\
 0,&amp;\text{其它}
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1161,12 +1322,10 @@ p(u,v)=
 \quad\quad[1-F(u+v)]^{n-j},&amp;v&gt;0 \\
 0,&amp;\text{其它}
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 p(v)=\int_{-\infty}^{+\infty}p(u,v)\mathop{}\!\mathrm{d}u
-
 \end{equation*}\]</span></p>
 <p>(5)由(4)立即可得概率函数。对于分布函数有：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1175,7 +1334,6 @@ F(V\leqslant x)&amp;=\int_{-\infty}^x\int_{-\infty}^{+\infty}g(u,v)\mathop{}\!\m
 &amp;=\int_{-\infty}^{+\infty}\mathop{}\!\mathrm{d}u\int_{0}^xn(n-1)f(u)f(u+v)[F(u+v)-F(u)]^{n-2}\mathop{}\!\mathrm{d}v \\
 &amp;=\int_{-\infty}^{+\infty}nf(u)[F(u+v)-F(u)]^{n-1}\Big|_0^x\mathop{}\!\mathrm{d}u \\
 &amp;=\int_{-\infty}^{+\infty}nf(u)[F(u+x)-F(u)]^{n-1}\mathop{}\!\mathrm{d}u
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1190,14 +1348,12 @@ F(V\leqslant x)&amp;=\int_{-\infty}^x\int_{-\infty}^{+\infty}g(u,v)\mathop{}\!\m
 <p>设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控参数结构，<span class="math inline">\(\mu\)</span>是控制测度，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(T\)</span>是可测空间<span class="math inline">\((X,\mathscr{A})\)</span>到可测空间<span class="math inline">\((Y,\mathscr{B})\)</span>上的统计量。<span class="math inline">\(T\)</span>为<span class="math inline">\(\mathscr{P}\)</span>的充分统计量当且仅当存在非负的<span class="math inline">\(\mathscr{B}\)</span>可测函数<span class="math inline">\(g_\theta\)</span>和非负<span class="math inline">\(\mathscr{A}\)</span>可测函数<span class="math inline">\(h\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\theta\in\Theta,\;\frac{\mathop{}\!\mathrm{d}P_\theta}{\mathop{}\!\mathrm{d}\mu}(x)=g_\theta[T(x)]h(x)\;\text{a.e.于}(X,\mathscr{A},\mu)
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span><strong>(1)必要性：</strong>对于任意的<span class="math inline">\(A\in\sigma(T)\)</span>，</p>
 <p><span class="math display">\[\begin{equation*}
 P_{\theta}(A\mid)
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1214,7 +1370,6 @@ P_{\theta}(A\mid)
 <p><strong>Definition 17.10</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是统计结构，<span class="math inline">\(T\)</span>是可测空间<span class="math inline">\((X,\mathscr{A})\)</span>到可测空间<span class="math inline">\((Y,\mathscr{B})\)</span>上对<span class="math inline">\(\mathscr{P}\)</span>充分的统计量。若对任意<span class="math inline">\(\mathscr{P}\)</span>的充分统计量<span class="math inline">\(S\)</span>存在<span class="math inline">\((Y,\mathscr{B})\)</span>到<span class="math inline">\((Y,\mathscr{B})\)</span>上的可测映射<span class="math inline">\(\varphi\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;P\in\mathscr{P},\;T=\varphi(S)\;a.s.\text{于}(X,\mathscr{A},P)
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(T\)</span>为<span class="math inline">\(\mathscr{P}\)</span>的<a href="../chapters/page-052.html#term-MinimalSufficientStatistic" class="term" title="minimal sufficient statistic">极小充分统计量<span class="term-english">（minimal sufficient statistic）</span></a>。</p>
 </div>
@@ -1228,13 +1383,11 @@ P_{\theta}(A\mid)
 <li><p>若<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控参数结构，<span class="math inline">\(X\)</span>是欧氏空间，<span class="math inline">\(\mu\)</span>是控制测度，<span class="math inline">\(\Theta\)</span>为参数空间，则如果满足：</p>
 <p><span class="math display">\[\begin{equation*}
                 \forall\;x,y\in X,\;\forall\;\theta\in\Theta,\;\frac{\mathop{}\!\mathrm{d}P_\theta}{\mathop{}\!\mathrm{d}\mu}(x)=\frac{\mathop{}\!\mathrm{d}P_\theta}{\mathop{}\!\mathrm{d}\mu}(y)f(x,y)\Rightarrow T(x)=T(y)
-
     \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(f\)</span>是一个可测函数，则<span class="math inline">\(T\)</span>是<span class="math inline">\(\mathscr{P}\)</span>的极小充分统计量；</p></li>
 <li><p>若<span class="math inline">\(\mathscr{P}=\{P_n\},\;n=0,1,2,\dots\)</span>，则统计量：</p>
 <p><span class="math display">\[\begin{equation*}
                 T(x)=\left(\frac{P_1(x)}{P_0(x)},\frac{P_2(x)}{P_0(x)},\dots\right)
-
     \end{equation*}\]</span></p>
 <p>是<span class="math inline">\(\mathscr{P}\)</span>的极小充分统计量；</p></li>
 </ol>
@@ -1246,12 +1399,10 @@ P_{\theta}(A\mid)
 <p>(4)设<span class="math inline">\(S\)</span>是<span class="math inline">\(\mathscr{P}\)</span>的充分统计量，所以<span class="math inline">\(S\)</span>也是<span class="math inline">\(\mathscr{P}_0\)</span>的充分统计量，于是存在可测映射<span class="math inline">\(\varphi\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;P\in\mathscr{P}_0,\;T=\varphi(S)\;a.s.\text{于}(X,\mathscr{A},P)
-
 \end{equation*}\]</span></p>
 <p>由条件即可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;P\in\mathscr{P},\;T=\varphi(S)\;a.s.\text{于}(X,\mathscr{A},P)
-
 \end{equation*}\]</span></p>
 <p>(5)&nbsp;◻</p>
 </div>
@@ -1263,7 +1414,6 @@ P_{\theta}(A\mid)
 <p><strong>Definition 17.11</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，<span class="math inline">\(T\)</span>是可测空间<span class="math inline">\((X,\mathscr{A})\)</span>到可测空间<span class="math inline">\((Y,\mathscr{B})\)</span>上的统计量。若对任意的Borel函数<span class="math inline">\(f\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\theta\in\Theta,\;\int_{X}f[T(x)]\mathop{}\!\mathrm{d}P_{\theta}=0\Rightarrow f[T(x)]=0\;a.s.\text{于}(X,\mathscr{A},P_{\theta})
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(T\)</span>为<a href="../chapters/page-042.html#term-CompleteStatistic" class="term" title="complete statistic">完全统计量<span class="term-english">（complete statistic）</span></a>，称<span class="math inline">\(\mathscr{P}T^{-1}\)</span>是<strong>完全的</strong>。若对任意的有界Borel函数有上述结论，则称<span class="math inline">\(T\)</span>为<a href="../chapters/page-041.html#term-BoundedlyCompleteStatistic" class="term" title="boundedly complete statistic">有界完全统计量<span class="term-english">（boundedly complete statistic）</span></a>。</p>
 </div>
@@ -1282,7 +1432,6 @@ P_{\theta}(A\mid)
 <p><strong>Definition 17.12</strong>. 设<span class="math inline">\((X,\mathscr{A},P)\)</span>为概率空间，<span class="math inline">\(\mu\)</span>为其上的<span class="math inline">\(\sigma\)</span>有限测度。若<span class="math inline">\(P\ll\mu\)</span>，根据<a href="../chapters/page-012.html#theo-RadonNikodym-fd20b306" data-reference-type="ref+label" data-reference="theo:RadonNikodym">定理 11.35</a>，称：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Supp}_{\mu}(P)=\left\{x\in X:\frac{\mathop{}\!\mathrm{d}P}{\mathop{}\!\mathrm{d}\mu}(x)&gt;0\right\}
-
 \end{equation*}\]</span></p>
 <p>为<span class="math inline">\(P\)</span>关于<span class="math inline">\(\mu\)</span>的<a href="../chapters/page-058.html#term-Support" class="term" title="support">支撑<span class="term-english">（support）</span></a>。</p>
 </div>
@@ -1290,7 +1439,6 @@ P_{\theta}(A\mid)
 <p><strong>Definition 17.13</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控参数结构，<span class="math inline">\(\mu\)</span>是控制测度，<span class="math inline">\(\Theta\)</span>是参数空间。若存在可测集合<span class="math inline">\(S\in\mathscr{A}\)</span>，使得对任意<span class="math inline">\(\theta\in\Theta\)</span>都有</p>
 <p><span class="math display">\[\begin{equation*}
 \mu\Big(\left\{x\in X:\frac{\mathop{}\!\mathrm{d}P_{\theta}}{\mathop{}\!\mathrm{d}\mu}(x)&gt;0\right\}\Delta S\Big)=0
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\mathscr{P}\)</span>关于<span class="math inline">\(\mu\)</span>具有<a href="../chapters/page-042.html#term-CommonSupport" class="term" title="common support">共同支撑<span class="term-english">（common support）</span></a><span class="math inline">\(S\)</span>，或称该结构的支撑不依赖于参数<span class="math inline">\(\theta\)</span>。</p>
 </div>
@@ -1298,17 +1446,14 @@ P_{\theta}(A\mid)
 <p><strong>Definition 17.14</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是可控参数结构，<span class="math inline">\(\mu\)</span>是控制测度，<span class="math inline">\(\Theta\)</span>是参数空间。若<span class="math inline">\(\mathscr{P}\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\theta\in\Theta,\;\frac{\mathop{}\!\mathrm{d}P_{\theta}}{\mathop{}\!\mathrm{d}\mu}(x)=\exp\left[\eta^{\top}(\theta)T(x)-\xi(\theta)\right]h(x)=C(\theta)\exp\left[\eta^{\top}(\theta)T(x)\right]h(x)
-
 \end{equation*}\]</span></p>
 <p>且该结构的支撑不依赖于未知参数<span class="math inline">\(\theta\)</span>，则称<span class="math inline">\(\mathscr{P}\)</span>是<a href="../chapters/page-044.html#term-ExponentialFamily" class="term" title="exponential family">指数族<span class="term-english">（exponential family）</span></a>。其中<span class="math inline">\(\eta(\theta),T(x)\in\mathbb{R}^{n}\)</span>，<span class="math inline">\(n\)</span>被称为该指数族的阶数，<span class="math inline">\(h\)</span>是非负Borel函数，<span class="math inline">\(\xi(\theta)\)</span>是实值函数。称：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{\mathop{}\!\mathrm{d}P_{\theta}}{\mathop{}\!\mathrm{d}\mu}(x)=\exp\left[\eta^{\top}T(x)-\xi(\eta)\right]h(x)=C(\eta)\exp\left[\eta^{\top}T(x)\right]h(x)
-
 \end{equation*}\]</span></p>
 <p>为指数族的<a href="../chapters/page-042.html#term-CanonicalForm" class="term" title="canonical form">标准形式<span class="term-english">（canonical form）</span></a>，此时的新参数<span class="math inline">\(\eta\)</span>被称为<a href="../chapters/page-053.html#term-NaturalParameter" class="term" title="natural parameter">自然参数<span class="term-english">（natural parameter）</span></a>，称：</p>
 <p><span class="math display">\[\begin{equation*}
 \Xi=\left\{\eta:\int_{X}\exp\left[\eta^{\top}T(x)\right]h(x)\mathop{}\!\mathrm{d}\mu&lt;+\infty\right\}
-
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/page-053.html#term-NaturalParameterSpace" class="term" title="natural parameter space">自然参数空间<span class="term-english">（natural parameter space）</span></a>。</p>
 </div>
@@ -1316,12 +1461,10 @@ P_{\theta}(A\mid)
 <p><strong>note 17.4</strong>. 在<span class="math inline">\(n\)</span>阶指数族的标准形式中，虽然自然参数<span class="math inline">\(\eta\)</span>被写为<span class="math inline">\(\mathbb{R}^{n}\)</span>中的向量，但这并不意味着该指数族真的具有<span class="math inline">\(n\)</span>个自由参数方向。例如设<span class="math inline">\(n=2\)</span>，若自然参数空间为：</p>
 <p><span class="math display">\[\begin{equation*}
 \Xi=\left\{(\eta_1,\eta_2)\in\mathbb{R}^{2}:\eta_1=2\eta_2\right\}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\Xi\)</span>只是<span class="math inline">\(\mathbb{R}^{2}\)</span>中的一条直线。尽管自然参数形式中出现了两个分量<span class="math inline">\(\eta_1,\eta_2\)</span>，但它们不能独立变化，模型实际上只有一个自由参数方向。令<span class="math inline">\(\eta_2=\gamma\)</span>，则<span class="math inline">\(\eta_1=2\gamma\)</span>，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \eta_1T_1(x)+\eta_2T_2(x)=\gamma\left[2T_1(x)+T_2(x)\right]
-
 \end{equation*}\]</span></p>
 <p>由此可见，该指数族虽然形式上写成二维自然参数形式，但本质上只是一维自然参数族。</p>
 <p>因此，在讨论指数族的阶数时，仅仅说明<span class="math inline">\(T(x)\in\mathbb{R}^{n}\)</span>和<span class="math inline">\(\eta\in\mathbb{R}^{n}\)</span>是不够的，还需要进一步要求自然参数空间<span class="math inline">\(\Xi\)</span>在<span class="math inline">\(\mathbb{R}^{n}\)</span>中确实具有<span class="math inline">\(n\)</span>维变化范围。换言之，在某个自然参数点附近，<span class="math inline">\(\eta\)</span>应当可以沿<span class="math inline">\(\mathbb{R}^{n}\)</span>中的任意方向作充分小的扰动。</p>
@@ -1337,7 +1480,6 @@ P_{\theta}(A\mid)
 <p><span class="math display">\[\begin{gather*}
                 \xi(\theta)=\ln\left\{\int_{X}\exp\left[\eta^{\top}(\theta)T(x)\right]h(x)\mathop{}\!\mathrm{d}\mu\right\} \\
                 \xi(\eta)=\ln\left\{\int_{X}\exp\left[\eta^{\top}T(x)\right]h(x)\mathop{}\!\mathrm{d}\mu\right\}
-
     \end{gather*}\]</span></p></li>
 <li><p>若<span class="math inline">\(\mathscr{P}\)</span>关于<span class="math inline">\(\mu\)</span>具有共同支撑<span class="math inline">\(S\)</span>，<span class="math inline">\(\Xi\)</span>是自然参数空间，<span class="math inline">\(\mathscr{P}\)</span>是满秩指数族，则自然参数<span class="math inline">\(\eta\)</span>不可识别当且仅当存在非零的<span class="math inline">\(\alpha\in\mathbb{R}^{n}\)</span>和<span class="math inline">\(\beta\in\mathbb{R}^{}\)</span>使得<span class="math inline">\(\alpha^{\top}T(x)=\beta\;\)</span>a.e.于<span class="math inline">\((S,S\cap\mathscr{A},\mu)\)</span>；</p></li>
 <li><p>有限个概率分布是指数族的相互独立的随机变量的联合概率分布仍为指数族，即指数族在简单抽样下是封闭的；</p></li>
@@ -1345,7 +1487,6 @@ P_{\theta}(A\mid)
 <li><p>设<span class="math inline">\(f\)</span>是<span class="math inline">\((X,\mathscr{A})\)</span>上的Borel函数，令：</p>
 <p><span class="math display">\[\begin{equation*}
                 G(\eta)=\int_{X}f(x)\exp[\eta^{\top}T(x)]h(x)\mathop{}\!\mathrm{d}\mu
-
     \end{equation*}\]</span></p>
 <p>记<span class="math inline">\(\Xi_0=\{\eta:G(\eta)\in\mathbb{R}^{}\}\)</span>。对<span class="math inline">\(\Xi_0\)</span>的任意内点<span class="math inline">\(a\)</span>，<span class="math inline">\(G\)</span>在<span class="math inline">\(a\)</span>点连续，且<span class="math inline">\(G\)</span>在<span class="math inline">\(a\)</span>点的任意阶偏导数都存在并可将求导与积分交换顺序。</p></li>
 <li><p><span class="math inline">\(T(x)\)</span>是<span class="math inline">\(\mathscr{P}\)</span>的充分统计量；</p></li>
@@ -1359,39 +1500,32 @@ P_{\theta}(A\mid)
 <p>(3)<strong>必要性：</strong>若参数<span class="math inline">\(\eta\)</span>不可识别，则存在不同的<span class="math inline">\(\eta_1,\eta_2\in\Xi\)</span>使得<span class="math inline">\(P_{\eta_1}=P_{\eta_2}\)</span>。由<a href="../chapters/page-012.html#theo-RadonNikodym-fd20b306" data-reference-type="ref+label" data-reference="theo:RadonNikodym">定理 11.35</a>可知此时有：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{\mathop{}\!\mathrm{d}P_{\eta_1}}{\mathop{}\!\mathrm{d}\mu}=\frac{\mathop{}\!\mathrm{d}P_{\eta_2}}{\mathop{}\!\mathrm{d}\mu},\;\text{a.e.于}(X,\mathscr{A},\mu)
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 \exp\left[\eta_1^{\top}T(x)-\xi(\eta_1)\right]h(x)=\exp\left[\eta_2^{\top}T(x)-\xi(\eta_2)\right]h(x),\;\text{a.e.于}(X,\mathscr{A},\mu)
-
 \end{equation*}\]</span></p>
 <p>于是存在<span class="math inline">\(N\in\mathscr{A}\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 \mu(N)=0,\quad\exp\left[\eta_1^{\top}T(x)-\xi(\eta_1)\right]h(x)=\exp\left[\eta_2^{\top}T(x)-\xi(\eta_2)\right]h(x),\;x\in N^c
-
 \end{equation*}\]</span></p>
 <p>对任意的<span class="math inline">\(x\in S\backslash N\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 \eta_1^{\top}T(x)-\xi(\eta_1)=\eta_2^{\top}T(x)-\xi(\eta_2)
-
 \end{equation*}\]</span></p>
 <p>根据<a href="../chapters/page-012.html#prop-SigmaField-4168a9ce" data-reference-type="ref+label" data-reference="prop:SigmaField">性质 11.1.6</a>(2)和<a href="../chapters/page-012.html#prop-Measure-9acfc4ac" data-reference-type="ref+label" data-reference="prop:Measure">性质 11.2.1</a>(3)（单调性）可知：</p>
 <p><span class="math display">\[\begin{equation*}
 0\leqslant\mu(S\cap N)\leqslant\mu(N)=0
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\mu(S\cap N)=0\)</span>，即：</p>
 <p><span class="math display">\[\begin{equation*}
 \eta_1^{\top}T(x)-\xi(\eta_1)=\eta_2^{\top}T(x)-\xi(\eta_2),\;\text{a.e.于}(S,S\cap\mathscr{A},\mu)
-
 \end{equation*}\]</span></p>
 <p>必要性成立。</p>
 <p><strong>充分性：</strong>若存在非零的<span class="math inline">\(\alpha\in\mathbb{R}^n\)</span>和<span class="math inline">\(\beta\in\mathbb{R}\)</span>使得<span class="math inline">\(\alpha^{\top}T(x)=\beta\;\)</span>a.e.于<span class="math inline">\((S,S\cap\mathscr{A},\mu)\)</span>，任取<span class="math inline">\(\Xi\)</span>中<span class="math inline">\(\mathbb{R}^{n}\)</span>上非空开集上的<span class="math inline">\(\eta_1\)</span>，于是存在充分小的<span class="math inline">\(t\ne 0\)</span>使得<span class="math inline">\(\eta_1+t\alpha\)</span>也在其中。由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)(8)可知：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;\int_{X}^{}\exp\left[(\eta_1+t\alpha)^\top T(x)\right]h(x)\mathop{}\!\mathrm{d}\mu=\int_{S}^{}\exp\left[\eta_1^\top T(x)+t\alpha^\top T(x)\right]h(x)\mathop{}\!\mathrm{d}\mu \\
 =&amp;\int_{S}^{}\exp\left[\eta_1^\top T(x)+t\beta\right]h(x)\mathop{}\!\mathrm{d}\mu=\exp(t\beta)\int_{S}^{}\exp\left[\eta_1^\top T(x)\right]h(x)\mathop{}\!\mathrm{d}\mu
-
 \end{align*}\]</span></p>
 <p>根据<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(2)可知<span class="math inline">\(\xi(\eta_1+t\alpha)=\xi(\eta_1)+t\beta\)</span>，于是：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1399,19 +1533,16 @@ P_{\theta}(A\mid)
 &amp;=\exp\left\{(\eta_1+t\alpha)^\top T(x)-\xi(\eta_1+t\alpha)\right\}h(x) \\
 &amp;=\exp\left\{\eta_1^\top T(x)+t\beta-\xi(\eta_1)-t\beta\right\}h(x) \\
 &amp;=\exp\left\{\eta_1^\top T(x)-\xi(\eta_1)\right\}h(x)=\frac{\mathop{}\!\mathrm{d}P_{\eta_1}}{\mathop{}\!\mathrm{d}\mu}(x)
-
 \end{align*}\]</span></p>
 <p>a.e.于<span class="math inline">\((S,S\cap\mathscr{A},\mu)\)</span>。注意到在<span class="math inline">\(S^c\)</span>上有<span class="math inline">\(h(x)=0\)</span>，上述二者也同时为<span class="math inline">\(0\)</span>，所以根据<a href="../chapters/page-012.html#prop-SigmaField-4168a9ce" data-reference-type="ref+label" data-reference="prop:SigmaField">性质 11.1.6</a>(6)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{\mathop{}\!\mathrm{d}P_{\eta_1+t\alpha}}{\mathop{}\!\mathrm{d}\mu}=\frac{\mathop{}\!\mathrm{d}P_{\eta_1}}{\mathop{}\!\mathrm{d}\mu},\;\text{a.e.于}(X,\mathscr{A},\mu)
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-012.html#theo-RadonNikodym-fd20b306" data-reference-type="ref+label" data-reference="theo:RadonNikodym">定理 11.35</a>和<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(8)可得<span class="math inline">\(P_{\eta_1+t\alpha}=P_{\eta_1}\)</span>。因为<span class="math inline">\(t\ne 0\)</span>且<span class="math inline">\(\alpha\ne\mathbf{0}\)</span>，所以<span class="math inline">\(\eta_1+t\alpha\ne\eta_1\)</span>， 自然参数<span class="math inline">\(\eta\)</span>不可识别。</p>
 <p>(4)由<a href="../chapters/page-013.html#prop-Independent-c50d54ba" data-reference-type="ref+label" data-reference="prop:Independent">性质 12.2.1</a>(5.c)即可得到。</p>
 <p>(5)设<span class="math inline">\(\theta,\vartheta\in\Xi\)</span>且<span class="math inline">\(\theta\ne\vartheta\)</span>。对任意的 <span class="math inline">\(\alpha\in(0,1)\)</span>，定义：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;A\in\mathscr{A},\;\nu(A)=\int_{A}h(x)\mathop{}\!\mathrm{d}\mu
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-012.html#prop-NonnegativeMeasurableIntegral-251535a7" data-reference-type="ref+label" data-reference="prop:NonnegativeMeasurableIntegral">性质 11.4.2</a>(2)(3)和<a href="../chapters/page-012.html#theo-MeasurableCountableIntegral-112b1a70" data-reference-type="ref+label" data-reference="theo:MeasurableCountableIntegral">定理 11.27</a>可知<span class="math inline">\(\nu\)</span>是<span class="math inline">\((X,\mathscr{A})\)</span>上的测度，并且<span class="math inline">\(\nu\ll\mu\)</span>。根据<a href="../chapters/page-012.html#theo-RadonNikodym-fd20b306" data-reference-type="ref+label" data-reference="theo:RadonNikodym">定理 11.35</a>可知<span class="math inline">\(h(x)\)</span>是<span class="math inline">\(\nu\)</span>关于<span class="math inline">\(\mu\)</span>的RN导数，由<a href="../chapters/page-012.html#lem-IntChangeOfMeasure-673686c1" data-reference-type="ref+label" data-reference="lem:IntChangeOfMeasure">引理 11.10</a>和<a href="../chapters/page-017.html#ineq-holder-ineq-Lebesgue-1c603ef4" data-reference-type="ref+label" data-reference="ineq:holder-ineq-Lebesgue">不等式 9</a>可得：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1419,14 +1550,12 @@ P_{\theta}(A\mid)
 =&amp;\int_{}\exp\left\{[\alpha\theta+(1-\alpha)\vartheta]^{\top}T(x)\right\}\mathop{}\!\mathrm{d}\nu \\
 =&amp;\int_{}\exp\left[\alpha\theta^{\top}T(x)\right]\exp\left[(1-\alpha)\vartheta^{\top}T(x)\right]\mathop{}\!\mathrm{d}\nu \\
 \leqslant&amp;\left\{\int_{}\exp\left[\theta^{\top}T(x)\right]\mathop{}\!\mathrm{d}\nu\right\}^{\alpha}\left\{\int_{}\exp\left[\vartheta^{\top}T(x)\right]\mathop{}\!\mathrm{d}\nu\right\}^{1-\alpha}&lt;+\infty
-
 \end{align*}\]</span></p>
 <p>即<span class="math inline">\(\alpha\theta+(1-\alpha)\vartheta\in\Xi\)</span>，结论成立。</p>
 <p>(7)由<a href="#theo-FactorizationTheorem-7db5092c" data-reference-type="ref+label" data-reference="theo:FactorizationTheorem">定理 17.2</a>立即可得。</p>
 <p>(9)因为：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{X}\exp\left[\sum_{i=1}^{n}\eta_iT_i(x)-\xi(\eta)\right]h(x)\mathop{}\!\mathrm{d}\mu=1
-
 \end{equation*}\]</span></p>
 <p>由(6)和<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
 <p><span class="math display">\[\begin{gather*}
@@ -1434,7 +1563,6 @@ P_{\theta}(A\mid)
 \int_{X}^{}\left[T_i(x)-\frac{\partial \xi(\eta)}{\partial\eta_i}\right]\exp\left[\sum_{i=1}^{n}\eta_iT_i(x)-\xi(\eta)\right]h(x)\mathop{}\!\mathrm{d}\mu=0 \\
 \int_{X}^{}T_i(x)\exp\left[\sum_{i=1}^{n}\eta_iT_i(x)-\xi(\eta)\right]h(x)\mathop{}\!\mathrm{d}\mu=\frac{\partial \xi(\eta)}{\partial\eta_i}\int_{X}^{}\exp\left[\sum_{i=1}^{n}\eta_iT_i(x)-\xi(\eta)\right]h(x)\mathop{}\!\mathrm{d}\mu \\
 \operatorname{E}_{\eta}(T_i)=\frac{\partial \xi(\eta)}{\partial\eta_i}
-
 \end{gather*}\]</span></p>
 <p>对上式求关于<span class="math inline">\(\eta_j\)</span>的导数，由<a href="../chapters/page-013.html#prop-CovMat-3a62d09d" data-reference-type="ref+label" data-reference="prop:CovMat">性质 12.3.4</a>(6)可得：</p>
 <p><span class="math display">\[\begin{gather*}
@@ -1443,7 +1571,6 @@ P_{\theta}(A\mid)
 \operatorname{E}_{\eta}(T_iT_j)-\frac{\partial \xi(\eta)}{\partial\eta_j}\operatorname{E}_{\eta}(T_i)=\frac{\partial^2 \xi(\eta)}{\partial\eta_j\partial\eta_i} \\
 \operatorname{E}_{\eta}(T_iT_j)-\operatorname{E}_{\eta}(T_i)\operatorname{E}_{\eta}(T_j)=\frac{\partial^2 \xi(\eta)}{\partial\eta_j\partial\eta_i} \\
 \operatorname{Cov}_{\eta}(T_i,T_j)=\frac{\partial^2 \xi(\eta)}{\partial\eta_j\partial\eta_i}
-
 \end{gather*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1454,7 +1581,6 @@ P_{\theta}(A\mid)
 <p><span class="math display">\[\begin{gather*}
                 p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(1+e^{\eta})^{-mn}\exp\left(\eta\sum_{i=1}^{m}x_i\right)\prod_{i=1}^{m}\left[\binom{n}{x_i}I_{\mathbb{N}_0}(x_i)\right] \\
                 \eta=\ln\left(\frac{p}{1-p}\right),\quad C(\eta)=(1+e^{\eta})^{-mn} \\ T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}\left[\binom{n}{x_i}I_{\mathbb{N}_0}(x_i)\right]
-
     \end{gather*}\]</span></p>
 <p>自然参数空间为<span class="math inline">\(\mathbb{R}^{}\)</span>；</p></li>
 <li><p><span class="math inline">\(\sum\limits_{i=1}^{m}X_i\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；</p></li>
@@ -1466,22 +1592,18 @@ P_{\theta}(A\mid)
 &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
 =&amp;\prod_{i=1}^{m}\left[\binom{n}{x_i}p^{x_i}(1-p)^{n-x_i}I_{\mathbb{N}_0}(x_i)\right]=\prod_{i=1}^{m}\left[\binom{n}{x_i}\left(\frac{p}{1-p}\right)^{x_i}(1-p)^nI_{\mathbb{N}_0}(x_i)\right] \\
 =&amp;(1-p)^{mn}\exp\left[\ln\left(\frac{p}{1-p}\right)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\left[\binom{n}{x_i}I_{\mathbb{N}_0}(x_i)\right]
-
 \end{align*}\]</span></p>
 <p>令：</p>
 <p><span class="math display">\[\begin{equation*}
 \eta=\ln\left(\frac{p}{1-p}\right)
-
 \end{equation*}\]</span></p>
 <p>可解得：</p>
 <p><span class="math display">\[\begin{equation*}
 p=\frac{e^{\eta}}{e^{\eta}+1}
-
 \end{equation*}\]</span></p>
 <p>于是有：</p>
 <p><span class="math display">\[\begin{equation*}
 C(\eta)=(1-p)^{mn}=\left(\frac{1}{e^{\eta}+1}\right)^{mn}=(1+e^{\eta})^{-mn}
-
 \end{equation*}\]</span></p>
 <p>根据<span class="math inline">\(\eta\)</span>与<span class="math inline">\(p\)</span>的关系可得<span class="math inline">\(\eta\in\mathbb{R}^{}\)</span>。</p>
 <p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
@@ -1497,7 +1619,6 @@ C(\eta)=(1-p)^{mn}=\left(\frac{1}{e^{\eta}+1}\right)^{mn}=(1+e^{\eta})^{-mn}
                 \end{aligned} \\
                 \eta=\ln(1-p),\quad C(\eta)=(1-e^{\eta})^{mr} \\
                 T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}\left[\binom{x_i+r-1}{r-1}I_{\mathbb{N}_0}(x_i)\right]
-
     \end{gather*}\]</span></p>
 <p>自然参数空间为<span class="math inline">\(\mathbb{R}^{-}\)</span>；</p></li>
 <li><p><span class="math inline">\(\sum\limits_{i=1}^{m}X_i\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；</p></li>
@@ -1509,7 +1630,6 @@ C(\eta)=(1-p)^{mn}=\left(\frac{1}{e^{\eta}+1}\right)^{mn}=(1+e^{\eta})^{-mn}
 &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
 =&amp;\prod_{i=1}^{m}\left[\binom{x_i+r-1}{r-1}p^r(1-p)^{x_i}I_{\mathbb{N}_0}(x_i)\right] \\
 =&amp;p^{mr}\exp\left[\ln(1-p)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\left[\binom{x_i+r-1}{r-1}I_{\mathbb{N}_0}(x_i)\right]
-
 \end{align*}\]</span></p>
 <p>令<span class="math inline">\(\eta=\ln(1-p)\)</span>，可解得<span class="math inline">\(p=1-e^{\eta}\)</span>，于是有<span class="math inline">\(C(\eta)=p^{mr}=(1-e^{\eta})^{mr}\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(p\)</span>的关系可得<span class="math inline">\(\eta\in\mathbb{R}^{-}\)</span>。</p>
 <p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
@@ -1521,7 +1641,6 @@ C(\eta)=(1-p)^{mn}=\left(\frac{1}{e^{\eta}+1}\right)^{mn}=(1+e^{\eta})^{-mn}
 <p><span class="math display">\[\begin{gather*}
                 p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\exp(-me^{\eta})\exp\left(\eta\sum_{i=1}^{m}x_i\right)\prod_{i=1}^{m}\frac{I_{\mathbb{N}_0}(x_i)}{x_i!} \\
                 \eta=\ln\lambda,\quad C(\eta)=\exp(-me^{\eta}),\quad T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}\frac{I_{\mathbb{N}_0}(x_i)}{x_i!}
-
     \end{gather*}\]</span></p>
 <p>自然参数空间为<span class="math inline">\(\mathbb{R}^{}\)</span>；</p></li>
 <li><p><span class="math inline">\(\sum\limits_{i=1}^{m}X_i\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；</p></li>
@@ -1532,7 +1651,6 @@ C(\eta)=(1-p)^{mn}=\left(\frac{1}{e^{\eta}+1}\right)^{mn}=(1+e^{\eta})^{-mn}
 <p><span class="math display">\[\begin{align*}
 &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
 =&amp;\prod_{i=1}^{m}\left(\frac{\lambda^{x_i}}{x_i!}e^{-\lambda}I_{\mathbb{N}_0}(x_i)\right) =e^{-m\lambda}\exp\left[\ln(\lambda)\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}\frac{I_{\mathbb{N}_0}(x_i)}{x_i!}
-
 \end{align*}\]</span></p>
 <p>令<span class="math inline">\(\eta=\ln\lambda\)</span>，可解得<span class="math inline">\(\lambda=e^{\eta}\)</span>，于是有<span class="math inline">\(C(\eta)=e^{-m\lambda}=\exp(-me^{\eta})\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(\lambda\)</span>的关系可得<span class="math inline">\(\eta\in\mathbb{R}^{}\)</span>。</p>
 <p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
@@ -1545,7 +1663,6 @@ C(\eta)=(1-p)^{mn}=\left(\frac{1}{e^{\eta}+1}\right)^{mn}=(1+e^{\eta})^{-mn}
                 p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(\eta+1)^m\exp\left(\eta\sum_{i=1}^{m}\ln x_i\right)\prod_{i=1}^{m}I_{(0,1)}(x_i) \\
                 \eta=\theta-1,\quad C(\eta)=(\eta+1)^m,\quad
                 T(x)=\sum_{i=1}^{m}\ln x_i,\quad h(x)=\prod_{i=1}^{m}I_{(0,1)}(x_i)
-
     \end{gather*}\]</span></p>
 <p>自然参数空间为<span class="math inline">\((-1,+\infty)\)</span>；</p></li>
 <li><p><span class="math inline">\(\sum\limits_{i=1}^{m}\ln X_i\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；</p></li>
@@ -1556,7 +1673,6 @@ C(\eta)=(1-p)^{mn}=\left(\frac{1}{e^{\eta}+1}\right)^{mn}=(1+e^{\eta})^{-mn}
 <p><span class="math display">\[\begin{align*}
 &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
 =&amp;\prod_{i=1}^{m}\left[\theta x_i^{\theta-1}I_{(0,1)}(x_i)\right]=\theta^m\exp\left[(\theta-1)\sum_{i=1}^{m}\ln x_i\right]\prod_{i=1}^{m}I_{(0,1)}(x_i)
-
 \end{align*}\]</span></p>
 <p>令<span class="math inline">\(\eta=\theta-1\)</span>，于是有<span class="math inline">\(C(\eta)=\theta^{m}=(\eta+1)^m\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(\theta\)</span>的关系可得<span class="math inline">\(\eta\in(-1,+\infty)\)</span>。</p>
 <p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
@@ -1569,7 +1685,6 @@ C(\eta)=(1-p)^{mn}=\left(\frac{1}{e^{\eta}+1}\right)^{mn}=(1+e^{\eta})^{-mn}
                 p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=(-\eta)^{m}\exp\left(\eta\sum_{i=1}^{m}x_i^n\right)\prod_{i=1}^{m}\left[nx_i^{n-1}I_{(0,+\infty)}(x_i)\right] \\
                 \eta=-\theta^{-n},\quad C(\eta)=(-\eta)^{m},\quad
                 T(x)=\sum_{i=1}^{m}x_i^n,\quad h(x)=\prod_{i=1}^{m}\left[nx_i^{n-1}I_{(0,+\infty)}(x_i)\right]
-
     \end{gather*}\]</span></p>
 <p>自然参数空间为<span class="math inline">\(\mathbb{R}^{-}\)</span>；</p></li>
 <li><p><span class="math inline">\(\sum\limits_{i=1}^{m}X_i^n\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；</p></li>
@@ -1581,7 +1696,6 @@ C(\eta)=(1-p)^{mn}=\left(\frac{1}{e^{\eta}+1}\right)^{mn}=(1+e^{\eta})^{-mn}
 &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
 =&amp;\prod_{i=1}^{m}\left\{nx_i^{n-1}\theta^{-n}\exp\left[-\left(\frac{x_i}{\theta}\right)^n\right]I_{(0,+\infty)}(x_i)\right\} \\
 =&amp;\theta^{-mn}\exp\left(-\frac{1}{\theta^n}\sum_{i=1}^{m}x_i^n\right)\prod_{i=1}^{m}\left[nx_i^{n-1}I_{(0,+\infty)}(x_i)\right]
-
 \end{align*}\]</span></p>
 <p>令<span class="math inline">\(\eta=-\theta^{-n}\)</span>，于是有<span class="math inline">\(C(\eta)=\theta^{-mn}=(-\eta)^{m}\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(\theta\)</span>的关系可得<span class="math inline">\(\eta\in\mathbb{R}^{-}\)</span>。</p>
 <p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
@@ -1597,7 +1711,6 @@ C(\eta)=(1-p)^{mn}=\left(\frac{1}{e^{\eta}+1}\right)^{mn}=(1+e^{\eta})^{-mn}
                 \end{aligned} \\
                 \eta=-(\beta+1),\quad C(\eta)=(-\eta-1)^m\alpha^{-m(\eta+1)} \\
                 T(x)=\sum_{i=1}^{m}\ln x_i,\quad h(x)=\prod_{i=1}^{m}I_{(\alpha,+\infty)}(x_i)
-
     \end{gather*}\]</span></p>
 <p>自然参数空间为<span class="math inline">\((-\infty,-1)\)</span>；</p></li>
 <li><p><span class="math inline">\(\sum\limits_{i=1}^{m}\ln X_i\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；</p></li>
@@ -1608,7 +1721,6 @@ C(\eta)=(1-p)^{mn}=\left(\frac{1}{e^{\eta}+1}\right)^{mn}=(1+e^{\eta})^{-mn}
 <p><span class="math display">\[\begin{align*}
 &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
 =&amp;\prod_{i=1}^{m}\left[\beta\alpha^{\beta}x_i^{-(\beta+1)}I_{(\alpha,+\infty)}(x_i)\right]=\beta^m\alpha^{m\beta}\exp\left[-(\beta+1)\sum_{i=1}^{m}\ln x_i\right]\prod_{i=1}^{m}I_{(\alpha,+\infty)}(x_i)
-
 \end{align*}\]</span></p>
 <p>令<span class="math inline">\(\eta=-(\beta+1)\)</span>，于是有<span class="math inline">\(C(\eta)=\beta^{m}\alpha^{m\beta}=(-\eta-1)^m\alpha^{-m(\eta+1)}\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(\beta\)</span>的关系可得<span class="math inline">\(\eta\in(-\infty,-1)\)</span>。</p>
 <p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
@@ -1624,7 +1736,6 @@ C(\eta)=(1-p)^{mn}=\left(\frac{1}{e^{\eta}+1}\right)^{mn}=(1+e^{\eta})^{-mn}
                 \end{aligned} \\
                 \eta=\left(-\frac{1}{2\sigma^2},\frac{\mu}{\sigma^2}\right),\quad C(\eta)=\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right) \\
                 T(x)=\left(\sum_{i=1}^{m}x_i^2,\sum_{i=1}^{m}x_i\right),\quad h(x)=1
-
     \end{gather*}\]</span></p>
 <p>自然参数空间为<span class="math inline">\(\mathbb{R}^-\times\mathbb{R}^{}\)</span>；</p></li>
 <li><p><span class="math inline">\(\left(\sum\limits_{i=1}^{m}X_i^2,\sum\limits_{i=1}^{m}X_i\right)\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；</p></li>
@@ -1637,22 +1748,18 @@ C(\eta)=(1-p)^{mn}=\left(\frac{1}{e^{\eta}+1}\right)^{mn}=(1+e^{\eta})^{-mn}
 =&amp;(2\pi\sigma^2)^{-\frac{m}{2}}\prod_{i=1}^{m}\left[\exp\left(-\frac{x_i^2-2x_i\mu+\mu^2}{2\sigma^2}\right)\right] \\
 =&amp;(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^{m}x_i^2+\frac{\mu}{\sigma^2}\sum_{i=1}^{m}x_i-\frac{m\mu^2}{2\sigma^2}\right) \\
 =&amp;(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^{m}x_i^2+\frac{\mu}{\sigma^2}\sum_{i=1}^{m}x_i\right)
-
 \end{align*}\]</span></p>
 <p>令：</p>
 <p><span class="math display">\[\begin{equation*}
 \eta=\left(-\frac{1}{2\sigma^2},\frac{\mu}{\sigma^2}\right)
-
 \end{equation*}\]</span></p>
 <p>可解得：</p>
 <p><span class="math display">\[\begin{equation*}
 \mu=-\frac{\eta_2}{2\eta_1},\quad\sigma^2=-\frac{1}{2\eta_1}
-
 \end{equation*}\]</span></p>
 <p>于是有：</p>
 <p><span class="math display">\[\begin{equation*}
 C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right)
-
 \end{equation*}\]</span></p>
 <p>由<span class="math inline">\(\eta\)</span>与<span class="math inline">\((\mu,\sigma^2)\)</span>的关系即可得到<span class="math inline">\(\eta\in\mathbb{R}^{-}\times\mathbb{R}^{}\)</span>。</p>
 <p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
@@ -1668,7 +1775,6 @@ C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=
                 \end{aligned} \\
                 \eta=\left(-\frac{1}{2\sigma^2},\frac{\mu}{\sigma^2}\right),\quad C(\eta)=\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right) \\
                 T(x)=\left(\sum_{i=1}^{m}\ln^2 x_i,\sum_{i=1}^{m}\ln x_i\right),\quad h(x)=\prod_{i=1}^{m}\frac{I_{(0,+\infty)}(x_i)}{x_i}
-
     \end{gather*}\]</span></p>
 <p>自然参数空间为<span class="math inline">\(\mathbb{R}^{-}\times\mathbb{R}^{}\)</span>；</p></li>
 <li><p><span class="math inline">\(\left(\sum\limits_{i=1}^{m}\ln^2 X_i,\sum\limits_{i=1}^{m}\ln X_i\right)\)</span>是该分布族的充分统计量、完备统计量和极小充分统计量；；</p></li>
@@ -1682,22 +1788,18 @@ C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=
 =&amp;(2\pi\sigma^2)^{-\frac{m}{2}}\prod_{i=1}^{m}\left[\exp\left(-\frac{\ln^2 x_i-2\mu\ln x_i+\mu^2}{2\sigma^2}\right)\frac{I_{(0,+\infty)}(x_i)}{x_i}\right] \\
 =&amp;(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^{m}\ln^2 x_i+\frac{\mu}{\sigma^2}\sum_{i=1}^{m}\ln x_i-\frac{m\mu^2}{2\sigma^2}\right)\prod_{i=1}^{m}\frac{I_{(0,+\infty)}(x_i)}{x_i} \\
 =&amp;(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^{m}\ln^2 x_i+\frac{\mu}{\sigma^2}\sum_{i=1}^{m}\ln x_i\right)\prod_{i=1}^{m}\frac{I_{(0,+\infty)}(x_i)}{x_i}
-
 \end{align*}\]</span></p>
 <p>令：</p>
 <p><span class="math display">\[\begin{equation*}
 \eta=\left(-\frac{1}{2\sigma^2},\frac{\mu}{\sigma^2}\right)
-
 \end{equation*}\]</span></p>
 <p>可解得：</p>
 <p><span class="math display">\[\begin{equation*}
 \mu=-\frac{\eta_2}{2\eta_1},\quad\sigma^2=-\frac{1}{2\eta_1}
-
 \end{equation*}\]</span></p>
 <p>于是有：</p>
 <p><span class="math display">\[\begin{equation*}
 C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=\left(-\frac{\pi}{\eta_1}\right)^{-\frac{m}{2}}\exp\left(\frac{m\eta_2^2}{4\eta_1}\right)
-
 \end{equation*}\]</span></p>
 <p>由<span class="math inline">\(\eta\)</span>与<span class="math inline">\((\mu,\sigma^2)\)</span>的关系即可得到<span class="math inline">\(\eta\in\mathbb{R}^{-}\times\mathbb{R}^{}\)</span>。</p>
 <p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
@@ -1710,7 +1812,6 @@ C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=
                 p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) =(-\eta)^m\lambda^m\exp\left(\eta\sum_{i=1}^{m}x_i\right)\prod_{i=1}^mI_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i) \\
                 \eta=-\lambda,\quad C(\eta)=(-\eta)^m,\quad
                 T(x)=\sum_{i=1}^{m}x_i,\quad h(x)=\prod_{i=1}^{m}I_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)
-
     \end{gather*}\]</span></p>
 <p>自然参数空间为<span class="math inline">\(\mathbb{R}^{-}\)</span>；</p></li>
 <li><p><span class="math inline">\(\sum\limits_{i=1}^{m}X_i\)</span>为该分布族的充分统计量、完备统计量、极小充分统计量；</p></li>
@@ -1721,7 +1822,6 @@ C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=
 <p><span class="math display">\[\begin{align*}
 &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
 =&amp;\prod_{i=1}^{m}\left[\lambda\exp(-\lambda x_i)I_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)\right]=\lambda^m\exp\left(-\lambda\sum_{i=1}^{m}x_i\right)\prod_{i=1}^mI_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)
-
 \end{align*}\]</span></p>
 <p>令<span class="math inline">\(\eta=-\lambda\)</span>，于是有<span class="math inline">\(C(\eta)=\lambda^m=(-\eta)^m\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(\lambda\)</span>的关系可得<span class="math inline">\(\eta\in\mathbb{R}^{-}\)</span>。</p>
 <p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
@@ -1734,7 +1834,6 @@ C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=
                 p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) =(-\eta)^m\exp\left(\eta\sum_{i=1}^{m}|x_i|\right) \\
                 \eta=-\theta^{-1},\quad C(\eta)=(-\eta)^m,\quad
                 T(x)=\sum_{i=1}^{m}|x_i|,\quad h(x)=1
-
     \end{gather*}\]</span></p>
 <p>自然参数空间为<span class="math inline">\(\mathbb{R}^{-}\)</span>；</p></li>
 <li><p><span class="math inline">\(\sum\limits_{i=1}^{m}|X_i|\)</span>为该分布族的充分统计量、完备统计量、极小充分统计量；</p></li>
@@ -1745,7 +1844,6 @@ C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=
 <p><span class="math display">\[\begin{align*}
 &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) \\
 =&amp;\prod_{i=1}^{m}\left[\frac{1}{\theta}\exp\left(-\frac{|x_i|}{\theta}\right)\right]=\frac{1}{\theta^m}\exp\left(-\frac{1}{\theta}\sum_{i=1}^{m}|x_i|\right)
-
 \end{align*}\]</span></p>
 <p>令<span class="math inline">\(\eta=-\theta^{-1}\)</span>，于是有<span class="math inline">\(C(\eta)=\theta^{-m}=(-\eta)^m\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(\theta\)</span>的关系可得<span class="math inline">\(\eta\in\mathbb{R}^{-}\)</span>。</p>
 <p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
@@ -1758,7 +1856,6 @@ C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=
                 p(X_1=x_1,X_2=x_2,\dots,X_m=x_m) =(-\eta)^m\exp\left(\eta\sum_{i=1}^{m}x_i^2\right)\prod_{i=1}^{m}\left[2x_iI_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)\right] \\
                 \eta=-\lambda,\quad C(\eta)=(-\eta)^m,\quad
                 T(x)=\sum_{i=1}^{m}x_i^2,\quad h(x)=\prod_{i=1}^{m}\left[2x_iI_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)\right]
-
     \end{gather*}\]</span></p>
 <p>自然参数空间为<span class="math inline">\(\mathbb{R}^{-}\)</span>；</p></li>
 <li><p><span class="math inline">\(\sum\limits_{i=1}^{m}X_i^2\)</span>为该分布族的充分统计量、完备统计量、极小充分统计量；</p></li>
@@ -1769,7 +1866,6 @@ C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=
 <p><span class="math display">\[\begin{align*}
 &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\prod_{i=1}^{m}\left[2\lambda x_i\exp(-\lambda x_i^2)I_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)\right] \\
 =&amp;\lambda^m\exp\left(-\lambda\sum_{i=1}^{m}x_i^2\right)\prod_{i=1}^{m}\left[2x_iI_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)\right]
-
 \end{align*}\]</span></p>
 <p>令<span class="math inline">\(\eta=-\lambda\)</span>，于是有<span class="math inline">\(C(\eta)=\lambda^{m}=(-\eta)^m\)</span>。由<span class="math inline">\(\eta\)</span>与<span class="math inline">\(\lambda\)</span>的关系可得<span class="math inline">\(\eta\in\mathbb{R}^{-}\)</span>。</p>
 <p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
@@ -1785,7 +1881,6 @@ C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=
                 \end{aligned} \\
                 \eta=(\alpha-1,-\lambda),\quad C(\eta)=\frac{(-\eta_2)^{m(\eta_1+1)}}{\Gamma^m(\eta_1+1)} \\
                 T(x)=\left(\sum_{i=1}^{m}\ln x_i,\sum_{i=1}^{m}x_i\right),\quad h(x)=\prod_{i=1}^{m}I_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)
-
     \end{gather*}\]</span></p>
 <p>自然参数空间为<span class="math inline">\((-1,+\infty)\times\mathbb{R}^{-}\)</span>；</p></li>
 <li><p><span class="math inline">\(\left(\sum\limits_{i=1}^{m}\ln X_i,\sum\limits_{i=1}^{m}X_i\right)\)</span>为该分布族的充分统计量、完备统计量、极小充分统计量；</p></li>
@@ -1796,12 +1891,10 @@ C(\eta)=(2\pi\sigma^2)^{-\frac{m}{2}}\exp\left(-\frac{m\mu^2}{2\sigma^2}\right)=
 <p><span class="math display">\[\begin{align*}
 &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\prod_{i=1}^{m}\left[\frac{\lambda^{\alpha}}{\Gamma(\alpha)}x_i^{\alpha-1}e^{-\lambda x_i}I_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)\right] \\
 =&amp;\frac{\lambda^{m\alpha}}{\Gamma^m(\alpha)}\exp\left[(\alpha-1)\sum_{i=1}^{m}\ln x_i-\lambda\sum_{i=1}^{m}x_i\right]\prod_{i=1}^{m}I_{\mathbb{R}^{}\setminus\mathbb{R}^{-}}(x_i)
-
 \end{align*}\]</span></p>
 <p>令<span class="math inline">\(\eta=(\alpha-1,-\lambda)\)</span>，于是有：</p>
 <p><span class="math display">\[\begin{equation*}
 C(\eta)=\frac{\lambda^{m\alpha}}{\Gamma^m(\alpha)}=\frac{(-\eta_2)^{m(\eta_1+1)}}{\Gamma^m(\eta_1+1)}
-
 \end{equation*}\]</span></p>
 <p>由<span class="math inline">\(\eta\)</span>与<span class="math inline">\((\alpha,\lambda)\)</span>的关系可得<span class="math inline">\(\eta\in(-1,+\infty)\times\mathbb{R}^{-}\)</span>。</p>
 <p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
@@ -1817,7 +1910,6 @@ C(\eta)=\frac{\lambda^{m\alpha}}{\Gamma^m(\alpha)}=\frac{(-\eta_2)^{m(\eta_1+1)}
                 \end{aligned} \\
                 \eta=(\alpha-1,\beta-1),\quad C(\eta)=\left[\frac{\Gamma(\eta_1+\eta_2+2)}{\Gamma(\eta_1+1)\Gamma(\eta_2+1)}\right]^m \\
                 T(x)=\left(\sum_{i=1}^{m}\ln x_i,\sum_{i=1}^{m}\ln(1-x_i)\right),\quad h(x)=\prod_{i=1}^{m}I_{(0,1)}(x_i)
-
     \end{gather*}\]</span></p>
 <p>自然参数空间为<span class="math inline">\((-1,+\infty)\times(-1,+\infty)\)</span>；</p></li>
 <li><p><span class="math inline">\(\left(\sum\limits_{i=1}^{m}\ln X_i,\sum\limits_{i=1}^{m}\ln(1-X_i)\right)\)</span>为该分布族的充分统计量、完备统计量、极小充分统计量；</p></li>
@@ -1828,12 +1920,10 @@ C(\eta)=\frac{\lambda^{m\alpha}}{\Gamma^m(\alpha)}=\frac{(-\eta_2)^{m(\eta_1+1)}
 <p><span class="math display">\[\begin{align*}
 &amp;p(X_1=x_1,X_2=x_2,\dots,X_m=x_m)=\prod_{i=1}^{m}\left[\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}x_i^{\alpha-1}(1-x_i)^{\beta-1}I_{(0,1)}(x_i)\right] \\
 =&amp;\left[\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}\right]^m\exp\left[(\alpha-1)\sum_{i=1}^{m}\ln x_i+(\beta-1)\sum_{i=1}^{m}\ln(1-x_i)\right]\prod_{i=1}^{m}I_{(0,1)}(x_i)
-
 \end{align*}\]</span></p>
 <p>令<span class="math inline">\(\eta=(\alpha-1,\beta-1)\)</span>，于是有：</p>
 <p><span class="math display">\[\begin{equation*}
 C(\eta)=\left[\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}\right]^m=\left[\frac{\Gamma(\eta_1+\eta_2+2)}{\Gamma(\eta_1+1)\Gamma(\eta_2+1)}\right]^m
-
 \end{equation*}\]</span></p>
 <p>由<span class="math inline">\(\eta\)</span>与<span class="math inline">\((\alpha,\beta)\)</span>的关系可得<span class="math inline">\(\eta\in(-1,+\infty)\times(-1,+\infty)\)</span>。</p>
 <p>(2)由(1)和<a href="#prop-ExponentialFamily-efe0ea47" data-reference-type="ref+label" data-reference="prop:ExponentialFamily">性质 17.1.5</a>(7)(8)立即可得。&nbsp;◻</p>
@@ -1854,12 +1944,10 @@ C(\eta)=\left[\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}\right]^m=
 <li><p><span class="math inline">\(\dfrac{\overline{X}-\overline{Y}-(\mu-\nu)}{S_w}\sqrt{\dfrac{m+n}{mn}}\sim \operatorname{t}_{m+n-2}\)</span>，其中：</p>
 <p><span class="math display">\[\begin{equation*}
                 (m+n-2)S_w^2=(m-1)S_X^2+(n-1)S_Y^2
-
     \end{equation*}\]</span></p></li>
 <li><p>若<span class="math inline">\(X_1, X_2, \dots, X_{m}\;\text{i.i.d.}\sim \operatorname{N}(\mu,\sigma_1^2)\)</span>，<span class="math inline">\(Y_1, Y_2, \dots, Y_{n}\;\text{i.i.d.}\sim \operatorname{N}(\nu,\sigma_2^2)\)</span>，其它条件不变，则：</p>
 <p><span class="math display">\[\begin{equation*}
                 \frac{S_X^2\sigma_2^2}{S_Y^2\sigma_1^2}\sim \operatorname{F}_{m-1,n-1}
-
     \end{equation*}\]</span></p></li>
 </ol>
 </div>
@@ -1867,17 +1955,14 @@ C(\eta)=\left[\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}\right]^m=
 <p><span class="proof-title"><em>证明</em>. </span>令<span class="math inline">\(\mathbf{X}=(X_1, X_2, \dots, X_{m})^{\top},\;\mathbf{Y}=(Y_1, Y_2, \dots, Y_{n})^{\top}\)</span>。因为<span class="math inline">\(X_1, X_2, \dots, X_{m}\;\text{i.i.d.}\sim \operatorname{N}(\mu,\sigma^2)\)</span>，<span class="math inline">\(Y_1, Y_2, \dots, Y_{n}\;\text{i.i.d.}\sim \operatorname{N}(\nu,\sigma^2)\)</span>，所以<span class="math inline">\(\mathbf{X}\sim N_m(\boldsymbol{\mu},\Sigma_m),\;\mathbf{Y}\sim N_n(\boldsymbol{\nu},\Sigma_n)\)</span>，其中：</p>
 <p><span class="math display">\[\begin{equation*}
 \boldsymbol{\mu}=\mu\mathbf{1}_m,\quad\Sigma_m=\sigma^2I_m,\quad\boldsymbol{\nu}=\nu\mathbf{1}_n,\quad\Sigma_n=\sigma^2I_n
-
 \end{equation*}\]</span></p>
 <p>(1)令<span class="math inline">\(m\)</span>维行向量<span class="math inline">\(c=\left(\dfrac{1}{m},\dfrac{1}{m},\dots,\dfrac{1}{m}\right)\)</span>， 由<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(2)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \overline{X}=c\mathbf{X}\sim \operatorname{N}(c\boldsymbol{\mu},c\Sigma c^{\top})
-
 \end{equation*}\]</span></p>
 <p>而：</p>
 <p><span class="math display">\[\begin{equation*}
 c\boldsymbol{\mu}=\sum_{i=1}^{m}\frac{\mu}{m}=\mu,\;c\Sigma c^{\top}=\sum_{i=1}^{m}\frac{\sigma^2}{m^2}=\frac{\sigma^2}{m}
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\overline{X}\sim N\left(\mu,\dfrac{\sigma^2}{m}\right)\)</span>。</p>
 <p>(2)由Schmidit正交化可知存在正交矩阵：</p>
@@ -1889,100 +1974,81 @@ a_{21} &amp; a_{22} &amp; \cdots &amp; a_{2m} \\
 \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
 a_{m1} &amp; a_{m2} &amp; \cdots &amp; a_{mm}
 \end{pmatrix}
-
 \end{equation*}\]</span></p>
 <p>令<span class="math inline">\(\mathbf{Z}=A\mathbf{X}\)</span>，由<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(2)可知<span class="math inline">\(\mathbf{Z}\sim N_m(A\boldsymbol{\mu},\sigma^2I_m)\)</span>。由<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(3)可知<span class="math inline">\(\mathbf{Z}_i\sim \operatorname{N}(\mu_i,\sigma^2)\)</span>，其中：</p>
 <p><span class="math display">\[\begin{equation*}
 \mu_i=\mu\sum_{j=1}^{m}a_{ij}
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(A\)</span>是一个正交矩阵，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \mu_i=\sqrt{m}\mu\sum_{j=1}^{m}\frac{1}{\sqrt{m}}a_{ij}=\sqrt{m}\mu\left(\dfrac{1}{\sqrt{m}},\dfrac{1}{\sqrt{m}},\dots,\dfrac{1}{\sqrt{m}}\right)(a_{i1},a_{i2},\dots,a_{im})^{\top}=0
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(2)即可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{\mathbf{Z}_i}{\sigma}\sim \operatorname{N}(0,1),\;\forall\;i=1,2,\dots,m
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(\mathbf{Z}=A\mathbf{X}\)</span>，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathbf{Z}_1=\frac{1}{\sqrt{m}}\sum_{i=1}^{m}X_i=\sqrt{m}\overline{X}
-
 \end{equation*}\]</span></p>
 <p>因为：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathbf{Z}^{\top}\mathbf{Z}=\sum_{i=1}^{m}\mathbf{Z}_i^2=\mathbf{X}^{\top}A^{\top}A\mathbf{X}=\mathbf{X}^{\top}\mathbf{X}=\sum_{i=1}^{m}X_i^2
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 (m-1)S_X^2=\sum_{i=1}^{m}(X_i-\overline{X})^2=\sum_{i=1}^{m}X_i^2-m\overline{X}^2=\sum_{i=1}^{m}\mathbf{Z}_i^2-\mathbf{Z}_1^2=\sum_{i=2}^{m}\mathbf{Z}_i^2
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{(m-1)S_X^2}{\sigma^2}=\sum_{i=2}^{m}\left(\frac{\mathbf{Z}_i}{\sigma}\right)^2\sim\chi_{m-1}^2
-
 \end{equation*}\]</span></p>
 <p>(3)由(2)的证明过程可得<span class="math inline">\(\mathbf{Z}\sim N_m(A\boldsymbol{\mu},\sigma^2I_m)\)</span>，根据<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(8)可知<span class="math inline">\(\mathbf{Z}_1, \mathbf{Z}_2, \dots, \mathbf{Z}_{m}\)</span>相互独立。而：</p>
 <p><span class="math display">\[\begin{equation*}
 S_X^2=\frac{\sum\limits_{i=2}^{m}\mathbf{Z}_i^2}{(m-1)},\;\overline{X}=\frac{\mathbf{Z}_1}{\sqrt{m}}
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(S_X^2\)</span>与<span class="math inline">\(\overline{X}\)</span>独立。</p>
 <p>(4)对<span class="math inline">\(\overline{X}\)</span>进行标准化可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{\overline{X}-\mu}{\sqrt{\frac{\sigma^2}{m}}}=\frac{\sqrt{m}(\overline{X}-\mu)}{\sigma}\sim\operatorname{N}(0,1)
-
 \end{equation*}\]</span></p>
 <p>由(2)和(3)进一步可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{\dfrac{\sqrt{m}(\overline{X}-\mu)}{\sigma}}{\sqrt{\dfrac{(m-1)S_X^2}{\sigma^2(m-1)}}}=\frac{\sqrt{m}(\overline{X}-\mu)}{S_X}\sim \operatorname{t}_{m-1}
-
 \end{equation*}\]</span></p>
 <p>(5)由(1)（得到<span class="math inline">\(\overline{X}\)</span>和<span class="math inline">\(\overline{Y}\)</span>的分布）、<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>与<span class="math inline">\(Y_1, Y_2, \dots, Y_{n}\)</span>相互独立（由<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(6)得到二维随机向量<span class="math inline">\((\overline{X},\overline{Y})^{\top}\)</span>的分布）和<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(2)（对<span class="math inline">\((\overline{X},\overline{Y})^{\top}\)</span>用二维行向量<span class="math inline">\((1,-1)\)</span>做线性变换）可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \overline{X}-\overline{Y}\sim N\left(\mu-\nu,\frac{\sigma^2}{m}+\frac{\sigma^2}{n}\right)
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{\overline{X}-\overline{Y}-(\mu-\nu)}{\sqrt{\dfrac{m+n}{mn}\sigma^2}}\sim \operatorname{N}(0,1)
-
 \end{equation*}\]</span></p>
 <p>由(2)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{(m-1)S_X^2}{\sigma^2}\sim\chi_{m-1}^2,\;
 \frac{(n-1)S_Y^2}{\sigma^2}\sim\chi_{n-1}^2
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-013.html#prop-Chi2Distribution-e2511e63" data-reference-type="ref+label" data-reference="prop:Chi2Distribution">性质 12.4.7</a>(1)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{(m-1)S_X^2+(n-1)S_Y^2}{\sigma^2}\sim\chi_{m+n-2}^2
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{(m+n-2)S_w^2}{\sigma^2}\sim\chi_{m+n-2}^2
-
 \end{equation*}\]</span></p>
 <p>由(3)可得<span class="math inline">\(\overline{X}\)</span>与<span class="math inline">\(S_X^2\)</span>独立、<span class="math inline">\(\overline{Y}\)</span>与<span class="math inline">\(S_Y^2\)</span>独立，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{\dfrac{\overline{X}-\overline{Y}-(\mu-\nu)}{\sqrt{\dfrac{m+n}{mn}\sigma^2}}}{\sqrt{\dfrac{(m+n-2)S_w^2}{\sigma^2(m+n-2)}}}=\frac{\overline{X}-\overline{Y}-(\mu-\nu)}{S_w}\sqrt{\dfrac{m+n}{mn}}\sim \operatorname{t}_{m+n-2}
-
 \end{equation*}\]</span></p>
 <p>(6)由(2)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{(m-1)S_X^2}{\sigma_1^2}\sim\chi_{m-1}^2,\;
 \frac{(n-1)S_Y^2}{\sigma_2^2}\sim\chi_{n-1}^2
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(X_1, X_2, \dots, X_{m}\)</span>和<span class="math inline">\(Y_1, Y_2, \dots, Y_{n}\)</span>相互独立，所以上两式也相互独立。由<span class="math inline">\(F\)</span>分布的定义即可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{\dfrac{(m-1)S_X^2}{\sigma_1^2(m-1)}}{\dfrac{(n-1)S_Y^2}{\sigma_2^2(n-1)}}=\frac{S_X^2\sigma_2^2}{S_Y^2\sigma_1^2}\sim \operatorname{F}_{m-1,n-1}
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1999,7 +2065,6 @@ S_X^2=\frac{\sum\limits_{i=2}^{m}\mathbf{Z}_i^2}{(m-1)},\;\overline{X}=\frac{\ma
 <li><p>若<span class="math inline">\(\boldsymbol{\mu}=\boldsymbol{\nu}\)</span>，则<span class="math inline">\(\dfrac{mn}{m+n}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})^{\top}S_{w}^{-1}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})\sim T^2(p,m+n-2)\)</span>，其中：</p>
 <p><span class="math display">\[\begin{equation*}
                 (m+n-2)S_w=(m-1)S_X+(n-1)S_Y
-
     \end{equation*}\]</span></p></li>
 </ol>
 </div>
@@ -2010,29 +2075,24 @@ S_X^2=\frac{\sum\limits_{i=2}^{m}\mathbf{Z}_i^2}{(m-1)},\;\overline{X}=\frac{\ma
 <p>(4)由(1)(2)(3)和<a href="../chapters/page-013.html#prop-T-2-0e93aa22" data-reference-type="ref+label" data-reference="prop:T^2">性质 12.5.2</a>(1)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 (m-1)m(\overline{\mathbf{X}}-\boldsymbol{\mu})^{\top}[(m-1)S_X]^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu})=m(\overline{\mathbf{X}}-\boldsymbol{\mu})^{\top}S_X^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu})\sim T^2(p,m-1)
-
 \end{equation*}\]</span></p>
 <p>(5)由(1)（得到<span class="math inline">\(\overline{\mathbf{X}}\)</span>和<span class="math inline">\(\overline{\mathbf{Y}}\)</span>的分布）、<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(2)（得到<span class="math inline">\(-\overline{\mathbf{Y}}\)</span>的分布）、<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(7)以及<span class="math inline">\(\overline{\mathbf{X}}\)</span>与<span class="math inline">\(\overline{\mathbf{Y}}\)</span>的独立性可得</p>
 <p><span class="math display">\[\begin{equation*}
 \overline{\mathbf{X}}-\overline{\mathbf{Y}}\sim \operatorname{N}_p\left(\boldsymbol{\mu}-\boldsymbol{\nu},\frac{\Sigma}{m}+\frac{\Sigma}{n}\right)
-
 \end{equation*}\]</span></p>
 <p>于是当<span class="math inline">\(\boldsymbol{\mu}=\boldsymbol{\nu}\)</span>时由<a href="../chapters/page-013.html#prop-MultiNormal-b0900be1" data-reference-type="ref+label" data-reference="prop:MultiNormal">性质 12.4.6</a>(2)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \overline{\mathbf{X}}-\overline{\mathbf{Y}}-(\mu-\nu)=\overline{\mathbf{X}}-\overline{\mathbf{Y}}\sim \operatorname{N}_p\left(\mathbf{0},\frac{\Sigma}{m}+\frac{\Sigma}{n}\right)
-
 \end{equation*}\]</span></p>
 <p>由(2)、<span class="math inline">\(\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_m}\)</span>和<span class="math inline">\(\mathbf{Y_1},\mathbf{Y_2},\dots,\mathbf{Y_m}\)</span>之间的独立性以及<a href="../chapters/page-013.html#prop-Wishart-cbd93bd1" data-reference-type="ref+label" data-reference="prop:Wishart">性质 12.5.1</a>(1)可得：</p>
 <p><span class="math display">\[\begin{gather*}
 (m-1)S_X\sim\operatorname{W}_p(m-1,\Sigma),\quad(n-1)S_Y\sim\operatorname{W}_p(n-1,\Sigma) \\
 (m+n-2)S_w=(m-1)S_X+(n-1)S_Y\sim\operatorname{W}_p(m+n-2,\Sigma)
-
 \end{gather*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;\frac{m+n-2}{\dfrac{m+n}{mn}}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})^{\top}[(m+n-2)S_{w}]^{-1}(\overline{\mathbf{X}}-\overline{\mathbf{Y}}) \\
 =&amp;\frac{mn}{m+n}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})^{\top}S_{w}^{-1}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})\sim T^2(p,m+n-2)
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -2045,7 +2105,6 @@ S_X^2=\frac{\sum\limits_{i=2}^{m}\mathbf{Z}_i^2}{(m-1)},\;\overline{X}=\frac{\ma
 <p><strong>Theorem 17.18</strong>. 设<span class="math inline">\(\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_n}\;\text{i.i.d.}\sim\operatorname{N}_p(\boldsymbol{\mu},\Sigma)\)</span>，<span class="math inline">\(\Sigma&gt;\mathbf{0}\)</span>，<span class="math inline">\(\overline{\mathbf{X}}\)</span>为样本均值向量，<span class="math inline">\(S\)</span>为样本协方差矩阵。假设检验问题：</p>
 <p><span class="math display">\[\begin{equation*}
 H_0:\boldsymbol{\mu}=\boldsymbol{\mu}_0,\quad H_1:\boldsymbol{\mu}\ne\boldsymbol{\mu}_0
-
 \end{equation*}\]</span></p>
 <p>的检验统计量与拒绝域为：</p>
 <p><span class="math display">\[\begin{gather*}
@@ -2057,14 +2116,12 @@ T^2=n(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)^{\top}S^{-1}(\overline{\mathbf{X
 \{\chi_0^2&gt;\chi_p^2(\alpha)\},&amp;\Sigma\text{已知} \\
 \{T^2&gt;T^2_{p,n-1}(\alpha)\},&amp;\Sigma\text{未知} \\
 \end{cases}
-
 \end{gather*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span><strong>(1)<span class="math inline">\(\;\Sigma\)</span>已知：</strong>因为<span class="math inline">\(\Sigma&gt;\mathbf{0}\)</span>，由<a href="../chapters/page-037.html#prop-ReverseSquareRootMat-b43b1d39" data-reference-type="ref+label" data-reference="prop:ReverseSquareRootMat">性质 34.9.4</a>(1)可知<span class="math inline">\(\Sigma^{-\frac{1}{2}},\Sigma^{-1}\)</span>存在。在原价设成立的情况下，由<a href="../chapters/page-013.html#theo-MatNormalLinearTransform-28e169ca" data-reference-type="ref+label" data-reference="theo:MatNormalLinearTransform">定理 12.13</a>和<a href="#theo-MultiVariateSamplingDist-558485ef" data-reference-type="ref+label" data-reference="theo:MultiVariateSamplingDist">定理 17.17</a>(1)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \sqrt{n}\Sigma^{-\frac{1}{2}}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)\sim\operatorname{N}_p(\mathbf{0},I_p)
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-037.html#prop-ReverseSquareRootMat-b43b1d39" data-reference-type="ref+label" data-reference="prop:ReverseSquareRootMat">性质 34.9.4</a>(3)可得：</p>
 <p><span class="math display">\[\begin{align*}
@@ -2072,7 +2129,6 @@ n(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)^{\top}\Sigma^{-1}(\overline{\mathbf{
 &amp;=(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)^{\top}\left(\frac{1}{n}\Sigma\right)^{-1}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0) \\
 &amp;=(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)^{\top}\left(\sqrt{n}\Sigma^{-\frac{1}{2}}\right)^{2}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0) \\
 &amp;=[\sqrt{n}\Sigma^{-\frac{1}{2}}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)]^{\top}[\sqrt{n}\Sigma^{-\frac{1}{2}}(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)]\sim\chi^2_p
-
 \end{align*}\]</span></p>
 <p>上式值越大，说明样本均值与<span class="math inline">\(\mu_0\)</span>的Mahalanobis距离越大，所以拒绝域取右侧单尾。</p>
 <p><strong>(2)<span class="math inline">\(\;\Sigma\)</span>未知：</strong>由<a href="#theo-MultiVariateSamplingDist-558485ef" data-reference-type="ref+label" data-reference="theo:MultiVariateSamplingDist">定理 17.17</a>(4)可得统计量的分布，而<span class="math inline">\(S\)</span>是<span class="math inline">\(\Sigma\)</span>的无偏估计，所以该统计量值越大说明样本均值与<span class="math inline">\(\mu_0\)</span>的Mahalanobis距离越大，拒绝域取右侧单尾。&nbsp;◻</p>
@@ -2084,12 +2140,10 @@ n(\overline{\mathbf{X}}-\boldsymbol{\mu}_0)^{\top}\Sigma^{-1}(\overline{\mathbf{
 <p><strong>Theorem 17.19</strong>. 设<span class="math inline">\(\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_m}\;\text{i.i.d.}\sim\operatorname{N}_p(\boldsymbol{\mu},\Sigma),\;\mathbf{Y_1},\mathbf{Y_2},\dots,\mathbf{Y_n}\;\text{i.i.d.}\sim\operatorname{N}_p(\boldsymbol{\nu},\Sigma)\)</span>，<span class="math inline">\(\Sigma&gt;\mathbf{0}\)</span>，<span class="math inline">\(\mathbf{X_1},\mathbf{X_2},\dots,\mathbf{X_m}\)</span>和<span class="math inline">\(\mathbf{Y_1},\mathbf{Y_2},\dots,\mathbf{Y_n}\)</span>相互独立，<span class="math inline">\(\overline{\mathbf{X}},\overline{\mathbf{Y}}\)</span>为样本均值向量，<span class="math inline">\(S_X,S_Y\)</span>为样本协方差矩阵。假设检验问题：</p>
 <p><span class="math display">\[\begin{equation*}
 H_0:\boldsymbol{\mu}=\boldsymbol{\nu},\quad H_1:\boldsymbol{\mu}\ne\boldsymbol{\nu}
-
 \end{equation*}\]</span></p>
 <p>的检验统计量与拒绝域为：</p>
 <p><span class="math display">\[\begin{equation*}
 T^2=\frac{mn}{m+n}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})^{\top}S_{w}^{-1}(\overline{\mathbf{X}}-\overline{\mathbf{Y}})\sim T^2(p,m+n-2),\quad\{T^2&gt;T^2_{p,m+n-2}(\alpha)\}
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\((m+n-2)S_w=(m-1)S_X+(n-1)S_Y\)</span>。</p>
 </div>

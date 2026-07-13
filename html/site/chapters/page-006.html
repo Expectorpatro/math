@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,49 +1079,22 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#id--0925f5ca" id="toc-id--0925f5ca" class="nav-link active" data-scroll-target="#id--0925f5ca"><span class="header-section-number">5.1</span> 无穷限积分</a>
-  <ul>
-  <li><a href="#id--58f8fcbc" id="toc-id--58f8fcbc" class="nav-link" data-scroll-target="#id--58f8fcbc"><span class="header-section-number">5.1.1</span> 无穷限积分的定义</a>
   <ul class="collapse">
-  <li><a href="#id--3d57d304" id="toc-id--3d57d304" class="nav-link" data-scroll-target="#id--3d57d304"><span class="header-section-number">5.1.1.1</span> 单侧无穷限</a></li>
-  <li><a href="#id--43015287" id="toc-id--43015287" class="nav-link" data-scroll-target="#id--43015287"><span class="header-section-number">5.1.1.2</span> 双侧无穷限</a></li>
-  <li><a href="#id--108229f3" id="toc-id--108229f3" class="nav-link" data-scroll-target="#id--108229f3"><span class="header-section-number">5.1.1.3</span> 双侧无穷限的柯西主值</a></li>
-  </ul></li>
-  <li><a href="#id--dc6d097c" id="toc-id--dc6d097c" class="nav-link" data-scroll-target="#id--dc6d097c"><span class="header-section-number">5.1.2</span> 无穷限积分的计算</a>
-  <ul class="collapse">
-  <li><a href="#id-1-2ce7b810" id="toc-id-1-2ce7b810" class="nav-link" data-scroll-target="#id-1-2ce7b810"><span class="header-section-number">5.1.2.1</span> 单侧无穷限</a></li>
-  <li><a href="#id-1-fce56788" id="toc-id-1-fce56788" class="nav-link" data-scroll-target="#id-1-fce56788"><span class="header-section-number">5.1.2.2</span> 双侧无穷限</a></li>
-  </ul></li>
-  <li><a href="#id--a8b84651" id="toc-id--a8b84651" class="nav-link" data-scroll-target="#id--a8b84651"><span class="header-section-number">5.1.3</span> 无穷限积分的收敛原理</a>
-  <ul class="collapse">
-  <li><a href="#id--48ae6aa2" id="toc-id--48ae6aa2" class="nav-link" data-scroll-target="#id--48ae6aa2"><span class="header-section-number">5.1.3.1</span> 绝对收敛与条件收敛</a></li>
-  </ul></li>
-  <li><a href="#id--719629e4" id="toc-id--719629e4" class="nav-link" data-scroll-target="#id--719629e4"><span class="header-section-number">5.1.4</span> 无穷限积分敛散性的判别法</a>
-  <ul class="collapse">
-  <li><a href="#id--cf2a5c2f" id="toc-id--cf2a5c2f" class="nav-link" data-scroll-target="#id--cf2a5c2f"><span class="header-section-number">5.1.4.1</span> 绝对收敛</a></li>
-  <li><a href="#id--86155802" id="toc-id--86155802" class="nav-link" data-scroll-target="#id--86155802"><span class="header-section-number">5.1.4.2</span> 条件收敛</a></li>
-  </ul></li>
+  <li><a href="#id--58f8fcbc" id="toc-id--58f8fcbc" class="nav-link" data-scroll-target="#id--58f8fcbc"><span class="header-section-number">5.1.1</span> 无穷限积分的定义</a></li>
+  <li><a href="#id--dc6d097c" id="toc-id--dc6d097c" class="nav-link" data-scroll-target="#id--dc6d097c"><span class="header-section-number">5.1.2</span> 无穷限积分的计算</a></li>
+  <li><a href="#id--a8b84651" id="toc-id--a8b84651" class="nav-link" data-scroll-target="#id--a8b84651"><span class="header-section-number">5.1.3</span> 无穷限积分的收敛原理</a></li>
+  <li><a href="#id--719629e4" id="toc-id--719629e4" class="nav-link" data-scroll-target="#id--719629e4"><span class="header-section-number">5.1.4</span> 无穷限积分敛散性的判别法</a></li>
   </ul></li>
   <li><a href="#id--e9bd11a3" id="toc-id--e9bd11a3" class="nav-link" data-scroll-target="#id--e9bd11a3"><span class="header-section-number">5.2</span> 瑕积分</a>
-  <ul>
-  <li><a href="#id--048792c2" id="toc-id--048792c2" class="nav-link" data-scroll-target="#id--048792c2"><span class="header-section-number">5.2.1</span> 瑕积分的定义</a>
   <ul class="collapse">
-  <li><a href="#id--4ebf9a6d" id="toc-id--4ebf9a6d" class="nav-link" data-scroll-target="#id--4ebf9a6d"><span class="header-section-number">5.2.1.1</span> 瑕点单侧</a></li>
-  <li><a href="#id--ade36701" id="toc-id--ade36701" class="nav-link" data-scroll-target="#id--ade36701"><span class="header-section-number">5.2.1.2</span> 瑕点双侧</a></li>
-  <li><a href="#id--b2d053f6" id="toc-id--b2d053f6" class="nav-link" data-scroll-target="#id--b2d053f6"><span class="header-section-number">5.2.1.3</span> 瑕点双侧的柯西主值</a></li>
-  </ul></li>
+  <li><a href="#id--048792c2" id="toc-id--048792c2" class="nav-link" data-scroll-target="#id--048792c2"><span class="header-section-number">5.2.1</span> 瑕积分的定义</a></li>
   <li><a href="#id--4062dc35" id="toc-id--4062dc35" class="nav-link" data-scroll-target="#id--4062dc35"><span class="header-section-number">5.2.2</span> 瑕积分的计算</a></li>
-  <li><a href="#id--95e1b612" id="toc-id--95e1b612" class="nav-link" data-scroll-target="#id--95e1b612"><span class="header-section-number">5.2.3</span> 瑕积分的收敛原理</a>
-  <ul class="collapse">
-  <li><a href="#id-1-337c07a6" id="toc-id-1-337c07a6" class="nav-link" data-scroll-target="#id-1-337c07a6"><span class="header-section-number">5.2.3.1</span> 绝对收敛与条件收敛</a></li>
-  </ul></li>
-  <li><a href="#id--199e74f4" id="toc-id--199e74f4" class="nav-link" data-scroll-target="#id--199e74f4"><span class="header-section-number">5.2.4</span> 瑕积分敛散性的判别法</a>
-  <ul class="collapse">
-  <li><a href="#id-1-022a7c39" id="toc-id-1-022a7c39" class="nav-link" data-scroll-target="#id-1-022a7c39"><span class="header-section-number">5.2.4.1</span> 绝对收敛</a></li>
-  </ul></li>
+  <li><a href="#id--95e1b612" id="toc-id--95e1b612" class="nav-link" data-scroll-target="#id--95e1b612"><span class="header-section-number">5.2.3</span> 瑕积分的收敛原理</a></li>
+  <li><a href="#id--199e74f4" id="toc-id--199e74f4" class="nav-link" data-scroll-target="#id--199e74f4"><span class="header-section-number">5.2.4</span> 瑕积分敛散性的判别法</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -978,13 +1139,11 @@ window.Quarto = {
 <p><span class="math display">\[\begin{equation*}
 \lim_{H\to+\infty}\int_{a}^{H}f(x)\mathop{}\!\mathrm{d}x\quad
 \left(\lim_{H'\to-\infty}\int_{H'}^{b}f(x)\mathop{}\!\mathrm{d}x\right)
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(f\)</span>在<span class="math inline">\([a,+\infty]\)</span>（或<span class="math inline">\([-\infty,b]\)</span>）上广义可积，或者说无穷限积分<span class="math inline">\(\int_{a}^{+\infty}f(x)\mathop{}\!\mathrm{d}x\)</span>（或<span class="math inline">\(\int_{-\infty}^{b}f(x)\mathop{}\!\mathrm{d}x\)</span>）收敛，并记：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{a}^{+\infty}f(x)\mathop{}\!\mathrm{d}x=\lim_{H\to+\infty}\int_{a}^{H}f(x)\mathop{}\!\mathrm{d}x\quad
 \left(\int_{-\infty}^{b}f(x)\mathop{}\!\mathrm{d}x=\lim_{H'\to-\infty}\int_{H'}^{b}f(x)\mathop{}\!\mathrm{d}x\right)
-
 \end{equation*}\]</span></p>
 <p>若不存在有穷极限，则称无穷限积分<span class="math inline">\(\int_{a}^{+\infty}f(x)\mathop{}\!\mathrm{d}x\)</span>（或<span class="math inline">\(\int_{-\infty}^{b}f(x)\mathop{}\!\mathrm{d}x\)</span>）发散。</p>
 </div>
@@ -996,13 +1155,11 @@ window.Quarto = {
 <p><span class="math display">\[\begin{equation*}
 \int_{-\infty}^{c}f(x)\mathop{}\!\mathrm{d}x\quad
 \int_{c}^{+\infty}f(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 <p>都收敛，则称积分<span class="math inline">\(\int_{-\infty}^{+\infty}f(x)\mathop{}\!\mathrm{d}x\)</span>收敛，并定义：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{-\infty}^{+\infty}f(x)\mathop{}\!\mathrm{d}x=\int_{-\infty}^{c}f(x)\mathop{}\!\mathrm{d}x+
 \int_{c}^{+\infty}f(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 </div>
 <p>实际上，所定义的积分值并不依赖于<span class="math inline">\(c\)</span>的选择。</p>
@@ -1010,19 +1167,16 @@ window.Quarto = {
 <p><span class="proof-title"><em>证明</em>. </span>若对于某个<span class="math inline">\(c\)</span>，<span class="math inline">\(\int_{c}^{+\infty}f(x)\mathop{}\!\mathrm{d}x\)</span>收敛，则对任意的<span class="math inline">\(c'\in\mathbb{R}\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{c'}^{+\infty}f(x)\mathop{}\!\mathrm{d}x=\int_{c'}^{c}f(x)\mathop{}\!\mathrm{d}x+\int_{c}^{+\infty}f(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 <p>收敛。同理<span class="math inline">\(\int_{-\infty}^{c'}f(x)\mathop{}\!\mathrm{d}x\)</span>收敛，并且有：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{-\infty}^{c'}f(x)\mathop{}\!\mathrm{d}x=\int_{-\infty}^{c}f(x)\mathop{}\!\mathrm{d}x+\int_{c}^{c'}f(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{align*}
 \int_{-\infty}^{c'}f(x)\mathop{}\!\mathrm{d}x+\int_{c'}^{+\infty}f(x)\mathop{}\!\mathrm{d}x
 &amp;=\int_{-\infty}^{c}f(x)\mathop{}\!\mathrm{d}x+\int_{c}^{c'}f(x)\mathop{}\!\mathrm{d}x+\int_{c'}^{c}f(x)\mathop{}\!\mathrm{d}x+\int_{c}^{+\infty}f(x)\mathop{}\!\mathrm{d}x \\
 &amp;=\int_{-\infty}^{c}f(x)\mathop{}\!\mathrm{d}x+\int_{c}^{+\infty}f(x)\mathop{}\!\mathrm{d}x
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1033,12 +1187,10 @@ window.Quarto = {
 <p><strong>Definition 5.3</strong>. 如果极限：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{H\to+\infty}\int_{-H}^{H}f(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 <p>存在，则称无穷限积分<span class="math inline">\(\int_{-\infty}^{+\infty}f(x)\mathop{}\!\mathrm{d}x\)</span>在柯西主值意义下收敛，称上述极限为无穷限积分<span class="math inline">\(\int_{-\infty}^{+\infty}f(x)\mathop{}\!\mathrm{d}x\)</span>的柯西主值，记为：</p>
 <p><span class="math display">\[\begin{equation*}
 VP\int_{-\infty}^{+\infty}f(x)\mathop{}\!\mathrm{d}x=\lim_{H\to+\infty}\int_{-H}^{H}f(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 </div>
 </section>
@@ -1052,13 +1204,11 @@ VP\int_{-\infty}^{+\infty}f(x)\mathop{}\!\mathrm{d}x=\lim_{H\to+\infty}\int_{-H}
 <p><span class="math display">\[\begin{equation*}
 F(+\infty)=\lim_{x\to+\infty}F(x)\quad
 \left(F(-\infty)=\lim_{x\to-\infty}F(x)\right)
-
 \end{equation*}\]</span></p>
 <p>那么就有：</p>
 <p><span class="math display">\[\begin{gather*}
 \int_{a}^{+\infty}f(x)\mathop{}\!\mathrm{d}x=F(+\infty)-F(a)=F(x)\Big|_a^{+\infty} \\
 \left[\int_{-\infty}^{b}f(x)\mathop{}\!\mathrm{d}x=F(b)-F(-\infty)=F(x)\Big|_{-\infty}^b\right]
-
 \end{gather*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1066,19 +1216,16 @@ F(+\infty)=\lim_{x\to+\infty}F(x)\quad
 <p><span class="math display">\[\begin{equation*}
 \int_{a}^{H}f(x)\mathop{}\!\mathrm{d}x=F(H)-F(a)\quad
 \left(\int_{H'}^{b}f(x)\mathop{}\!\mathrm{d}x=F(b)-F(H')\right)
-
 \end{equation*}\]</span></p>
 <p>取<span class="math inline">\(H\to+\infty\)</span>（或<span class="math inline">\(H'\to-\infty\)</span>）可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{H\to+\infty}\int_{a}^{H}f(x)\mathop{}\!\mathrm{d}x=\lim_{H\to+\infty}F(H)-F(a)\quad
 \left[\lim_{H'\to-\infty}\int_{H'}^{b}f(x)\mathop{}\!\mathrm{d}x=F(b)-\lim_{H'\to-\infty}F(H')\right]
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{gather*}
 \int_{a}^{+\infty}f(x)\mathop{}\!\mathrm{d}x=F(+\infty)-F(a)=F(x)\Big|_a^{+\infty} \\
 \left[\int_{-\infty}^{b}f(x)\mathop{}\!\mathrm{d}x=F(b)-F(-\infty)=F(x)\Big|_{-\infty}^b\right]
-
 \end{gather*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1090,12 +1237,10 @@ F(+\infty)=\lim_{x\to+\infty}F(x)\quad
 <p><span class="math display">\[\begin{equation*}
 F(+\infty)=\lim_{x\to+\infty}F(x)\quad
 F(-\infty)=\lim_{x\to-\infty}F(x)
-
 \end{equation*}\]</span></p>
 <p>且<span class="math inline">\(F(+\infty)-F(-\infty)\)</span>有意义，那么就有：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{-\infty}^{+\infty}f(x)\mathop{}\!\mathrm{d}x=F(+\infty)-F(-\infty)=F(x)\Big|_{-\infty}^{+\infty}
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1105,7 +1250,6 @@ F(-\infty)=\lim_{x\to-\infty}F(x)
 &amp;=\int_{-\infty}^{c}f(x)\mathop{}\!\mathrm{d}x+\int_{c}^{+\infty}f(x)\mathop{}\!\mathrm{d}x \\
 &amp;=F(c)-F(-\infty)+F(+\infty)-F(c) \\
 &amp;=F(x)\Big|_{-\infty}^{+\infty}
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1118,14 +1262,12 @@ F(-\infty)=\lim_{x\to-\infty}F(x)
 <p><strong>Theorem 5.3</strong>. 无穷限积分<span class="math inline">\(\int_{a}^{+\infty}f(x)\mathop{}\!\mathrm{d}x\)</span>收敛的充要条件为：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;\Delta&gt;0,\;\forall\;H'\geqslant H&gt;\Delta,\;\left|\int_{H}^{H'}f(x)\mathop{}\!\mathrm{d}x\right|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>按照无穷限积分<span class="math inline">\(\int_{a}^{+\infty}f(x)\mathop{}\!\mathrm{d}x\)</span>的定义，它是函数：</p>
 <p><span class="math display">\[\begin{equation*}
 \Phi(H)=\int_{a}^{H}f(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 <p>在<span class="math inline">\(H\to+\infty\)</span>时的极限，由函数极限的收敛原理即可得到无穷限积分的收敛原理。&nbsp;◻</p>
 </div>
@@ -1146,7 +1288,6 @@ F(-\infty)=\lim_{x\to-\infty}F(x)
 <p><strong>Theorem 5.4</strong>. 设函数<span class="math inline">\(f(x)\)</span>和<span class="math inline">\(g(x)\)</span>在区间<span class="math inline">\([a,+\infty)\)</span>上有定义，在其任何闭子区间<span class="math inline">\([a,H]\)</span>上可积，并且有：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;\Delta&gt;a,\;\forall\;x\in[\Delta,+\infty),\;|f(x)|\leqslant g(x)
-
 \end{equation*}\]</span></p>
 <p>若无穷限积分<span class="math inline">\(\int_{a}^{+\infty}g(x)\mathop{}\!\mathrm{d}x\)</span>收敛，那么无穷限积分<span class="math inline">\(\int_{a}^{+\infty}f(x)\mathop{}\!\mathrm{d}x\)</span>绝对收敛。</p>
 </div>
@@ -1154,12 +1295,10 @@ F(-\infty)=\lim_{x\to-\infty}F(x)
 <p><span class="proof-title"><em>证明</em>. </span>因为非负函数<span class="math inline">\(g(x)\)</span>的无穷限积分<span class="math inline">\(\int_{a}^{+\infty}g(x)\mathop{}\!\mathrm{d}x\)</span>收敛，由无穷限积分的收敛原理可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;\Delta&gt;0,\;\forall\;H'\geqslant H&gt;\Delta,\;\int_{H}^{H'}g(x)\mathop{}\!\mathrm{d}x&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;\Delta&gt;0,\;\forall\;H'\geqslant H&gt;\Delta,\;\int_{H}^{H'}|f(x)|\mathop{}\!\mathrm{d}x\int_{H}^{H'}g(x)\mathop{}\!\mathrm{d}x&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>由收敛原理，无穷限积分<span class="math inline">\(\int_{a}^{+\infty}|f(x)|\mathop{}\!\mathrm{d}x\)</span>收敛，即<span class="math inline">\(\int_{a}^{+\infty}f(x)\mathop{}\!\mathrm{d}x\)</span>绝对收敛。&nbsp;◻</p>
 </div>
@@ -1173,18 +1312,15 @@ F(-\infty)=\lim_{x\to-\infty}F(x)
 <li><p><span class="math inline">\(\exists\;\Delta&gt;a\)</span>使得<span class="math inline">\(f(x)\)</span>在<span class="math inline">\([\Delta,+\infty)\)</span>上单调，同时：</p>
 <p><span class="math display">\[\begin{equation*}
                 \lim_{x\to+\infty}f(x)=0
-
     \end{equation*}\]</span></p></li>
 <li><p><span class="math inline">\(\exists\;K\geqslant0\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
                 \forall\;x\in[a,+\infty),\;\Big|\int_{a}^{H}g(x)\mathop{}\!\mathrm{d}x\Big|\leqslant K
-
     \end{equation*}\]</span></p></li>
 </ol>
 <p>那么积分：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{a}^{+\infty}f(x)g(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 <p>收敛。</p>
 </div>
@@ -1192,22 +1328,18 @@ F(-\infty)=\lim_{x\to-\infty}F(x)
 <p><span class="proof-title"><em>证明</em>. </span>对充分大的<span class="math inline">\(H\)</span>和<span class="math inline">\(H'\)</span>，我们来估计：</p>
 <p><span class="math display">\[\begin{equation*}
 \left|\int_{H}^{H'}f(x)g(x)\mathop{}\!\mathrm{d}x\right|
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(f(x)\)</span>在<span class="math inline">\([\Delta,+\infty)\)</span>上单调，所以当<span class="math inline">\(H\)</span>和<span class="math inline">\(H'\)</span>充分大时，<span class="math inline">\(f(x)\)</span>在<span class="math inline">\([H,H']\)</span>上单调，又因为<span class="math inline">\(g(x)\)</span>在<span class="math inline">\([H,H']\)</span>上可积，由第二中值定理可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;\xi\in[H,H'],\;\int_{H}^{H'}f(x)g(x)\mathop{}\!\mathrm{d}x=f(H)\int_{H}^{\xi}g(x)\mathop{}\!\mathrm{d}x+f(H')\int_{\xi}^{H'}g(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 <p>由<span class="math inline">\(g(x)\)</span>积分的有界性可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \left|\int_{H}^{\xi}g(x)\mathop{}\!\mathrm{d}x\right|=\left|\int_{a}^{\xi}g(x)\mathop{}\!\mathrm{d}x-\int_{a}^{H}g(x)\mathop{}\!\mathrm{d}x\right|\leqslant\left|\int_{a}^{\xi}g(x)\mathop{}\!\mathrm{d}x\right|+\left|\int_{a}^{H}g(x)\mathop{}\!\mathrm{d}x\right|\leqslant2K
-
 \end{equation*}\]</span></p>
 <p>同理可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \left|\int_{\xi}^{H'}g(x)\mathop{}\!\mathrm{d}x\right|\leqslant2K
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1216,22 +1348,18 @@ F(-\infty)=\lim_{x\to-\infty}F(x)
 &amp;=\left|f(H)\int_{H}^{\xi}g(x)\mathop{}\!\mathrm{d}x\right|+\left|f(H')\int_{\xi}^{H'}g(x)\mathop{}\!\mathrm{d}x\right| \\
 &amp;=|f(H)|\left|\int_{H}^{\xi}g(x)\mathop{}\!\mathrm{d}x\right|+|f(H')|\left|\int_{\xi}^{H'}g(x)\mathop{}\!\mathrm{d}x\right| \\
 &amp;\leqslant2K[|f(H)|+|f(H')|]
-
 \end{align*}\]</span></p>
 <p>因为：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{x\to+\infty}f(x)=0
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;M&gt;0,\;\forall\;H,H'&gt;M,\;|f(H)|&lt;\frac{\varepsilon}{4K},\;|f(H')|&lt;\frac{\varepsilon}{4K}
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;M&gt;0,\;\forall\;H,H'&gt;M,\;\left|\int_{H}^{H'}f(x)g(x)\mathop{}\!\mathrm{d}x\right|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>由无穷限积分的收敛原理，<span class="math inline">\(\int_{a}^{+\infty}f(x)g(x)\mathop{}\!\mathrm{d}x\)</span>收敛。&nbsp;◻</p>
 </div>
@@ -1245,7 +1373,6 @@ F(-\infty)=\lim_{x\to-\infty}F(x)
 <p>那么积分：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{a}^{+\infty}f(x)g(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 <p>收敛。</p>
 </div>
@@ -1253,22 +1380,18 @@ F(-\infty)=\lim_{x\to-\infty}F(x)
 <p><span class="proof-title"><em>证明</em>. </span>因为<span class="math inline">\(f(x)\)</span>在<span class="math inline">\([\Delta,+\infty)\)</span>上单调有界，所以<span class="math inline">\(f(x)\)</span>有有穷的极限：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{x\to+\infty}f(x)=l
-
 \end{equation*}\]</span></p>
 <p>那么函数<span class="math inline">\(f(x)-l\)</span>在<span class="math inline">\([\Delta,+\infty)\)</span>上单调趋于<span class="math inline">\(0\)</span>。因为<span class="math inline">\(\int_{a}^{+\infty}g(x)\mathop{}\!\mathrm{d}x\)</span>收敛，所以<span class="math inline">\(\exists\;K\geqslant0\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;x\in[a,+\infty),\;\Big|\int_{a}^{H}g(x)\mathop{}\!\mathrm{d}x\Big|\leqslant K
-
 \end{equation*}\]</span></p>
 <p>由Dirichlet判别法，无穷限积分：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{a}^{+\infty}[f(x)-l]g(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 <p>收敛。因为<span class="math inline">\(\int_{a}^{+\infty}g(x)\mathop{}\!\mathrm{d}x\)</span>收敛，所以<span class="math inline">\(\int_{a}^{+\infty}lg(x)\mathop{}\!\mathrm{d}x\)</span>收敛，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{a}^{+\infty}f(x)g(x)\mathop{}\!\mathrm{d}x=\int_{a}^{+\infty}[f(x)-l]g(x)\mathop{}\!\mathrm{d}x+\int_{a}^{+\infty}lg(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 <p>收敛。&nbsp;◻</p>
 </div>
@@ -1289,13 +1412,11 @@ F(-\infty)=\lim_{x\to-\infty}F(x)
 <p><span class="math display">\[\begin{equation*}
 \lim_{\eta\to0+}\int_{a}^{b-\eta}f(x)\mathop{}\!\mathrm{d}x\quad
 \left(\lim_{\eta\to0+}\int_{a+\eta}^{b}f(x)\mathop{}\!\mathrm{d}x\right)
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(f\)</span>在<span class="math inline">\([a,b)\)</span>上（或在<span class="math inline">\((a,b]\)</span>上）广义可积，或者说积分<span class="math inline">\(\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x\)</span>收敛，并定义：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x=\lim_{\eta\to0+}\int_{a}^{b-\eta}f(x)\mathop{}\!\mathrm{d}x\quad
 \left(\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x=\lim_{\eta\to0+}\int_{a+\eta}^{b}f(x)\mathop{}\!\mathrm{d}x\right)
-
 \end{equation*}\]</span></p>
 </div>
 </section>
@@ -1305,12 +1426,10 @@ F(-\infty)=\lim_{x\to-\infty}F(x)
 <p><strong>Definition 5.7</strong>. 设<span class="math inline">\(a&lt;c&lt;b\)</span>，函数<span class="math inline">\(f\)</span>在<span class="math inline">\([a,c)\)</span>和<span class="math inline">\((c,b]\)</span>上有定义，并且对任何<span class="math inline">\(0&lt;\eta&lt;c-a,\;0&lt;\eta'&lt;b-c\)</span>，<span class="math inline">\(f\)</span>在<span class="math inline">\([a,c-\eta]\)</span>和<span class="math inline">\([c+\eta',b]\)</span>上都可积。如果下列两个积分：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{a}^{c}f(x)\mathop{}\!\mathrm{d}x\quad\int_{c}^{b}f(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 <p>都收敛，则称瑕积分<span class="math inline">\(\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x\)</span>收敛，并定义：</p>
 <p><span class="math display">\[\begin{equation*}
 \int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x=\int_{a}^{c}f(x)\mathop{}\!\mathrm{d}x+\int_{c}^{b}f(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 </div>
 </section>
@@ -1320,12 +1439,10 @@ F(-\infty)=\lim_{x\to-\infty}F(x)
 <p><strong>Definition 5.8</strong>. 如果极限：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{\eta\to0+}\left(\int_{a}^{c-\eta}f(x)\mathop{}\!\mathrm{d}x+\int_{c+\eta}^{b}f(x)\mathop{}\!\mathrm{d}x\right)
-
 \end{equation*}\]</span></p>
 <p>存在，则称瑕积分<span class="math inline">\(\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x\)</span>在柯西主值意义下收敛，称上述极限为瑕积分<span class="math inline">\(\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x\)</span>的柯西主值，记为：</p>
 <p><span class="math display">\[\begin{equation*}
 VP\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x=\lim_{\eta\to0+}\left(\int_{a}^{c-\eta}f(x)\mathop{}\!\mathrm{d}x+\int_{c+\eta}^{b}f(x)\mathop{}\!\mathrm{d}x\right)
-
 \end{equation*}\]</span></p>
 </div>
 </section>
@@ -1340,14 +1457,12 @@ VP\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x=\lim_{\eta\to0+}\left(\int_{a}^{c-\eta}
 <p><strong>Theorem 5.7</strong>. 瑕积分<span class="math inline">\(\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x\)</span>收敛的充要条件为：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;\delta&gt;0,\;\forall\;\eta,\eta',\;0&lt;\eta'&lt;\eta&lt;\delta,\;\left|\int_{b-\eta}^{b-\eta'}f(x)\mathop{}\!\mathrm{d}x\right|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>按照瑕积分<span class="math inline">\(\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x\)</span>的定义，它是函数：</p>
 <p><span class="math display">\[\begin{equation*}
 \Phi(\eta)=\int_{a}^{b-\eta}f(x)\mathop{}\!\mathrm{d}x
-
 \end{equation*}\]</span></p>
 <p>在<span class="math inline">\(\eta\to0+\)</span>时的极限，由函数极限的收敛原理即可得到无穷限积分的收敛原理。&nbsp;◻</p>
 </div>
@@ -1368,7 +1483,6 @@ VP\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x=\lim_{\eta\to0+}\left(\int_{a}^{c-\eta}
 <p><strong>Theorem 5.8</strong>. 设函数<span class="math inline">\(f(x)\)</span>和<span class="math inline">\(g(x)\)</span>在区间<span class="math inline">\([a,b)\)</span>上有定义，在其任何闭子区间<span class="math inline">\([a,b-\eta]\)</span>上可积，并且有：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;\delta&gt;a,\;\forall\;x\in[b-\delta,b),\;|f(x)|\leqslant g(x)
-
 \end{equation*}\]</span></p>
 <p>若瑕积分<span class="math inline">\(\int_{a}^{b}g(x)\mathop{}\!\mathrm{d}x\)</span>收敛，那么瑕积分<span class="math inline">\(\int_{a}^{b}f(x)\mathop{}\!\mathrm{d}x\)</span>绝对收敛。</p>
 </div>

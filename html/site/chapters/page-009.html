@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,23 +1079,17 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#id--ab6fd9cb" id="toc-id--ab6fd9cb" class="nav-link active" data-scroll-target="#id--ab6fd9cb"><span class="header-section-number">8.1</span> 赋范线性空间作为线性空间的性质</a>
-  <ul>
-  <li><a href="#id--a4fa8fad" id="toc-id--a4fa8fad" class="nav-link" data-scroll-target="#id--a4fa8fad"><span class="header-section-number">8.1.1</span> 直和</a></li>
-  <li><a href="#id-1-9232c673" id="toc-id-1-9232c673" class="nav-link" data-scroll-target="#id-1-9232c673"><span class="header-section-number">8.1.2</span> 商空间</a>
   <ul class="collapse">
-  <li><a href="#riesz-45d12e24" id="toc-riesz-45d12e24" class="nav-link" data-scroll-target="#riesz-45d12e24"><span class="header-section-number">8.1.2.1</span> Riesz引理</a></li>
-  </ul></li>
+  <li><a href="#id--a4fa8fad" id="toc-id--a4fa8fad" class="nav-link" data-scroll-target="#id--a4fa8fad"><span class="header-section-number">8.1.1</span> 直和</a></li>
+  <li><a href="#id-1-9232c673" id="toc-id-1-9232c673" class="nav-link" data-scroll-target="#id-1-9232c673"><span class="header-section-number">8.1.2</span> 商空间</a></li>
   </ul></li>
   <li><a href="#banach-3891ad46" id="toc-banach-3891ad46" class="nav-link" data-scroll-target="#banach-3891ad46"><span class="header-section-number">8.2</span> Banach空间</a>
-  <ul>
-  <li><a href="#banach-16220701" id="toc-banach-16220701" class="nav-link" data-scroll-target="#banach-16220701"><span class="header-section-number">8.2.1</span> 无限维Banach空间的基</a>
   <ul class="collapse">
-  <li><a href="#hilbert-b00d7bd3" id="toc-hilbert-b00d7bd3" class="nav-link" data-scroll-target="#hilbert-b00d7bd3"><span class="header-section-number">8.2.1.1</span> 可分Hilbert空间的同构性</a></li>
-  </ul></li>
+  <li><a href="#banach-16220701" id="toc-banach-16220701" class="nav-link" data-scroll-target="#banach-16220701"><span class="header-section-number">8.2.1</span> 无限维Banach空间的基</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -946,7 +1128,6 @@ window.Quarto = {
 <p><strong>Theorem 8.1</strong>. 设<span class="math inline">\(L_1,L_2,\dots,L_n\)</span>都是赋范线性空间，<span class="math inline">\(X\)</span>是<span class="math inline">\(L_1,L_2,\dots,L_n\)</span>的直和，即：</p>
 <p><span class="math display">\[\begin{equation*}
 X=L_1\oplus L_2\oplus\cdots\oplus L_n
-
 \end{equation*}\]</span></p>
 <p>可在<span class="math inline">\(X\)</span>中定义如下范数：</p>
 <p><span class="math display">\[\begin{gather*}
@@ -954,7 +1135,6 @@ X=L_1\oplus L_2\oplus\cdots\oplus L_n
 ||x||=||x_1||+||x_2||+\cdots+||x_n|| \\
 ||x||_1=\max_i||x_i|| \\
 ||x||_2=\left(\sum_{i=1}^n||x_i||^2\right)^\frac{1}{2}
-
 \end{gather*}\]</span></p>
 <p>这里<span class="math inline">\(x=\sum\limits_{i=1}^{n}x_i\in X,\;x_i\in L_i(i=1,2,\dots,n)\)</span>。<span class="math inline">\(X\)</span>按照这些范数都构成赋范线性空间。</p>
 </div>
@@ -969,26 +1149,22 @@ X=L_1\oplus L_2\oplus\cdots\oplus L_n
 <p><span class="proof-title"><em>证明</em>. </span>(1)对于范数<span class="math inline">\(||x||\)</span>，在<span class="math inline">\(X\)</span>中任取Cauchy点列<span class="math inline">\(\{x_m\}\)</span>，记：</p>
 <p><span class="math display">\[\begin{equation*}
 x_m=\sum_{i=1}^{n}y_m^{i},\quad y_m^{i}\in L_i,\;m\in\mathbb{N}^+,\;i=1,2,\dots,n
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(\{x_m\}\)</span>是Cauchy点列，所以对于<span class="math inline">\(\forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;j,k&gt;N\)</span>，有：</p>
 <p><span class="math display">\[\begin{align*}
 ||x_j-x_k||
 &amp;=\left\|\sum_{i=1}^{n}(y_j^i-y_k^i)\right\| \\
 &amp;=\sum_{i=1}^{n}||y_j^i-y_k^i||&lt;\varepsilon
-
 \end{align*}\]</span></p>
 <p>于是<span class="math inline">\(||y_j^i-y_k^i||&lt;\varepsilon\)</span>，即<span class="math inline">\(\{y_m^i\}\)</span>也构成Cauchy点列，其中<span class="math inline">\(i=1,2,\dots,n\)</span>。因为<span class="math inline">\(L_1,L_2,\dots,L_n\)</span>都是Banach空间，同时<span class="math inline">\(\{y_m^i\}\subset L_i\)</span>，所以存在<span class="math inline">\(y_i\in L_i\)</span>，使得<span class="math inline">\(\{y_m^i\}\to y_i\)</span>。令<span class="math inline">\(y=\sum\limits_{i=1}^{n}y_i\)</span>，显然<span class="math inline">\(y\in X\)</span>。则：</p>
 <p><span class="math display">\[\begin{equation*}
 x_m-y=\sum_{i=1}^{n}(y_m^i-y_i)\to 0\quad(m\to +\infty)
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(\{x_m\}\to y\in X\)</span>。由<span class="math inline">\(\{x_m\}\)</span>的任意性，<span class="math inline">\(X\)</span>是完备的，所以<span class="math inline">\(X\)</span>是Banach空间。</p>
 <p>(2)与(1)几乎完全一样，只是由<span class="math inline">\(\max\limits_i||y_j^i-y_k^i||&lt;\varepsilon\)</span>导出<span class="math inline">\(\{y_m^i\}\)</span>是Cauchy点列。</p>
 <p>(3)由：</p>
 <p><span class="math display">\[\begin{equation*}
 \sqrt{\sum_{i=1}^{n}||y_j^i-y_k^i||^2}\leqslant\sum_{i=1}^{n}||y_j^i-y_k^i||
-
 \end{equation*}\]</span></p>
 <p>可导出<span class="math inline">\(\{y_m^i\}\)</span>是Cauchy点列。&nbsp;◻</p>
 </div>
@@ -999,7 +1175,6 @@ x_m-y=\sum_{i=1}^{n}(y_m^i-y_i)\to 0\quad(m\to +\infty)
 <p><strong>Definition 8.1</strong>. 当<span class="math inline">\(L\)</span>是<span class="math inline">\(X\)</span>的闭子空间时，可在商空间<span class="math inline">\(X/L\)</span>中引进范数：对任意的<span class="math inline">\(\xi\in X/L\)</span>，令：</p>
 <p><span class="math display">\[\begin{equation*}
 ||\xi||=\inf_{x\in\xi}||x||
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1012,7 +1187,6 @@ x_m-y=\sum_{i=1}^{n}(y_m^i-y_i)\to 0\quad(m\to +\infty)
 <p><span class="proof-title"><em>证明</em>. </span>任取<span class="math inline">\(X/L\)</span>中的一个Cauchy点列<span class="math inline">\(\{\xi_n\}\)</span>。对于<span class="math inline">\(\xi_n\)</span>，存在<span class="math inline">\(x_n\in \xi_n\)</span>，使得<span class="math inline">\(\xi_n=x_n+L\)</span>。由Cauchy点列的性质，对于<span class="math inline">\(\forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m&gt;N\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 ||\xi_m-\xi_n||=||x_m-x_n+L||=\inf_{x\in x_m-x_n+L}||x||&lt;\frac{\varepsilon}{2}
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(x_m-x_n+L\subset X\)</span>，由下确界的定义，<span class="math inline">\(X\)</span>中必然存在元素<span class="math inline">\(y_m,y_n\)</span>使得&nbsp;◻</p>
 </div>
@@ -1022,7 +1196,6 @@ x_m-y=\sum_{i=1}^{n}(y_m^i-y_i)\to 0\quad(m\to +\infty)
 <p><strong>Lemma 8.1</strong>. 设<span class="math inline">\(X_0\)</span>是赋范线性空间<span class="math inline">\(X\)</span>的真闭子空间，那么对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，存在<span class="math inline">\(x_0\in X\)</span>，满足<span class="math inline">\(||x_0||=1\)</span>，且对任意的<span class="math inline">\(x\in X_0\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x_0-x||\geqslant 1-\varepsilon
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1030,12 +1203,10 @@ x_m-y=\sum_{i=1}^{n}(y_m^i-y_i)\to 0\quad(m\to +\infty)
 <p>因为<span class="math inline">\(X_0\)</span>是<span class="math inline">\(X\)</span>的真子空间，所以<span class="math inline">\(\exists\;x_1\in X\setminus X_0\)</span>。记：</p>
 <p><span class="math display">\[\begin{equation*}
 d=\inf_{x\in X_0}||x-x_1||
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(X_0\)</span>是闭的，所以<span class="math inline">\(d&gt;0\)</span>。因为<span class="math inline">\(\varepsilon&lt;1\)</span>，因此<span class="math inline">\(\frac{d}{1-\varepsilon}&gt;d\)</span>。由下确界的定义，存在<span class="math inline">\(x_2\in X_0\)</span>，使得：</p>
 <p><span class="math display">\[\begin{equation*}
 d\leqslant||x_2-x_1||&lt;\frac{d}{1-\varepsilon}
-
 \end{equation*}\]</span></p>
 <p>令<span class="math inline">\(x_0=\frac{x_1-x_2}{||x_1-x_2||}\)</span>，则<span class="math inline">\(||x_0||=1\)</span>。对任意的<span class="math inline">\(x\in X_0\)</span>，注意到<span class="math inline">\(x_2\in X_0\)</span>，因此有<span class="math inline">\(||x_1-x_2||x+x_2\in X_0\)</span>，于是有：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1043,7 +1214,6 @@ d\leqslant||x_2-x_1||&lt;\frac{d}{1-\varepsilon}
 &amp;=\frac{1}{||x_1-x_2||}\left\|\Bigl(||x_1-x_2||x+x_2\Bigr)-x_1\right\| \\
 &amp;\geqslant\frac{d}{||x_1-x_2||} \\
 &amp;&gt;1-\varepsilon
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1058,7 +1228,6 @@ d\leqslant||x_2-x_1||&lt;\frac{d}{1-\varepsilon}
 <p><strong>Definition 8.2</strong>. 设<span class="math inline">\(X\)</span>是无限维的Banach空间，<span class="math inline">\(X\)</span>中的点列<span class="math inline">\(\{e_n\}\)</span>如果满足：<span class="math inline">\(X\)</span>中的任一元素<span class="math inline">\(x\)</span>可唯一地表示成</p>
 <p><span class="math display">\[\begin{equation*}
 x=\sum_{n=1}^{+\infty}\xi_ne_n
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(\xi_n\)</span>为实数或复数，仅与<span class="math inline">\(x\)</span>有关，且右端的级数依<span class="math inline">\(X\)</span>中的范数收敛，则称<span class="math inline">\(\{e_n\}\)</span>为<span class="math inline">\(X\)</span>的Schauder基或简称基。</p>
 </div>
@@ -1069,20 +1238,17 @@ x=\sum_{n=1}^{+\infty}\xi_ne_n
 <p><span class="proof-title"><em>证明</em>. </span>设<span class="math inline">\(X\)</span>为具有Schauder基<span class="math inline">\(\{e_n\}\)</span>的Banach空间。取<span class="math inline">\(X\)</span>的一个子集<span class="math inline">\(E\)</span>，<span class="math inline">\(E\)</span>是以下点构成的集合：</p>
 <p><span class="math display">\[\begin{equation*}
 \left\{\sum_{i=1}^nr_ie_i:n\in\mathbb{N}^+,r_i\in\mathbb{Q}\right\}
-
 \end{equation*}\]</span></p>
 <p>任取<span class="math inline">\(x\in X\)</span>，则<span class="math inline">\(x\)</span>可表示为<span class="math inline">\(\sum\limits_{n=1}^{+\infty}\xi_ie_i\)</span>。在<span class="math inline">\(E\)</span>中取点列<span class="math inline">\(\{x_n\}\)</span>，其中:</p>
 <p><span class="math display">\[\begin{gather*}
 x_n=\sum_{i=1}^{n}\eta_{in}e_i \\
 \eta_{in}\in\mathbb{Q},\;\lim_{n\to+\infty}\eta_{in}=\xi_i
-
 \end{gather*}\]</span></p>
 <p>因为：</p>
 <p><span class="math display">\[\begin{align*}
 ||x_n-x||
 &amp;=\left\|\sum_{i=1}^{n}(\eta_{in}-\xi_i)e_i-\sum_{i=n+1}^{+\infty}\xi_ie_i\right\| \\
 &amp;\leqslant\left\|\sum_{i=1}^{n}(\eta_{in}-\xi_i)e_i\right\|+\left\|\sum_{i=n+1}^{+\infty}\xi_ie_i\right\|
-
 \end{align*}\]</span></p>
 <p>因为<span class="math inline">\(\sum\limits_{n=1}^{+\infty}\xi_ne_n\)</span>依<span class="math inline">\(X\)</span>中的范数收敛，所以后一项由Cauchy收敛准则趋于<span class="math inline">\(0\)</span>，而前一项显然趋于<span class="math inline">\(0\)</span>，所以<span class="math inline">\(\{x_n\}\rightarrow x\)</span>，且<span class="math inline">\(x_n\in E,\;\forall\;n\in\mathbb{N}^+\)</span>。因此<span class="math inline">\(x\)</span>是<span class="math inline">\(E\)</span>的一个聚点。由<span class="math inline">\(x\)</span>的任意性，<span class="math inline">\(X\subset\overline{E}\)</span>。而<span class="math inline">\(E\)</span>是可数集合，因此<span class="math inline">\(X\)</span>可分。&nbsp;◻</p>
 </div>
@@ -1093,7 +1259,6 @@ x_n=\sum_{i=1}^{n}\eta_{in}e_i \\
 <p><span class="proof-title"><em>证明</em>. </span>设<span class="math inline">\(\{e_n\}\)</span>是<span class="math inline">\(X\)</span>中完备的规范正交系，由<a href="../chapters/page-004.html#theo-OthonormalSystem-1108f5ef" data-reference-type="ref+label" data-reference="theo:OthonormalSystem">定理 3.31</a>(2)可知对任意的<span class="math inline">\(x\in X\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 x=\sum_{n=1}^{+\infty}(x,e_n)e_n
-
 \end{equation*}\]</span></p>
 <p>根据<a href="../chapters/page-004.html#theo-Density-062642be" data-reference-type="ref+label" data-reference="theo:Density">定理 3.2</a>(3)可知由<span class="math inline">\(\{e_n\}\)</span>张成的子空间在<span class="math inline">\(X\)</span>中稠密，由可知<span class="math inline">\(\{e_n\}\)</span>以有理数为系数的所有可能的线性组合构成的集在<span class="math inline">\(X\)</span>中也稠密且可列，于是<span class="math inline">\(X\)</span>可分。&nbsp;◻</p>
 </div>
@@ -1104,7 +1269,6 @@ x=\sum_{n=1}^{+\infty}(x,e_n)e_n
 <p><span class="proof-title"><em>证明</em>. </span>因为<span class="math inline">\(X\)</span>可分，所以<span class="math inline">\(X\)</span>中有可列的稠密子集<span class="math inline">\(\{x_n\}\)</span>。由Schmidt正交化定理，利用<span class="math inline">\(\{x_n\}\)</span>可以建立规范正交系<span class="math inline">\(\{e_n\}\)</span>，且<span class="math inline">\(\{x_n\}\)</span>与<span class="math inline">\(\{e_n\}\)</span>张成的子空间相同。因为<span class="math inline">\(\{x_n\}\)</span>在<span class="math inline">\(X\)</span>中稠密，所以任取<span class="math inline">\(y\in X\)</span>，存在<span class="math inline">\(\{x_n\}\)</span>中的点列<span class="math inline">\(\{y_n\}\)</span>使得<span class="math inline">\(\{y_n\}\to y\)</span>。因为<span class="math inline">\(x_n\)</span>可由<span class="math inline">\(\{e_n\}\)</span>线性表出，所以<span class="math inline">\(\{y_n\}\)</span>可由<span class="math inline">\(\{e_n\}\)</span>线性表出，于是<span class="math inline">\(\{y_n\}\subset\operatorname{span}\{e_n,\;n\in\mathbb{N}^+\}\)</span>。把<span class="math inline">\(y_n\)</span>用<span class="math inline">\(\{e_n\}\)</span>线性表出，就可以得到：</p>
 <p><span class="math display">\[\begin{equation*}
 y_k=\sum_{n=1}^{+\infty}(y_k,e_n)e_n,\;k\in\mathbb{N}^+
-
 \end{equation*}\]</span></p>
 <p>因为：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1112,7 +1276,6 @@ y_k=\sum_{n=1}^{+\infty}(y_k,e_n)e_n,\;k\in\mathbb{N}^+
 &amp;\leqslant||y-y_k||+\left\|y_k-\sum_{n=1}^{+\infty}(y,e_n)e_n\right\| \\
 &amp;=||y-y_k||+\left\|\sum_{n=1}^{+\infty}(y_k,e_n)e_n-\sum_{n=1}^{+\infty}(y,e_n)e_n\right\| \\
 &amp;=||y-y_k||+\left\|\sum_{n=1}^{+\infty}(y_k-y,e_n)e_n\right\|
-
 \end{align*}\]</span></p>
 <p>又：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1121,30 +1284,25 @@ y_k=\sum_{n=1}^{+\infty}(y_k,e_n)e_n,\;k\in\mathbb{N}^+
 &amp;=\sqrt{\sum_{n=1}^{+\infty}(y_k-y,e_n)\overline{(y_k-y,e_n)}}  
 \\
 &amp;=\sqrt{\sum_{n=1}^{+\infty}|(y_k-y,e_n)|^2}
-
 \end{align*}\]</span></p>
 <p>由Bessel inequality可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \left\|\sum_{n=1}^{+\infty}(y_k-y,e_n)e_n\right\|
 =\sqrt{\sum_{n=1}^{+\infty}|(y_k-y,e_n)|^2}
 \leqslant||y_k-y||
-
 \end{equation*}\]</span></p>
 <p>于是有：</p>
 <p><span class="math display">\[\begin{equation*}
 \left\|y-\sum_{n=1}^{+\infty}(y,e_n)e_n\right\|
 \leqslant2||y-y_k||\to0\quad(k\to+\infty)
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 \left\|y-\sum_{n=1}^{+\infty}(y,e_n)e_n\right\|=0w
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 y=\sum_{n=1}^{+\infty}(y,e_n)e_n
-
 \end{equation*}\]</span></p>
 <p>由<span class="math inline">\(y\)</span>的任意性，<span class="math inline">\(\{e_n\}\)</span>是完备的。&nbsp;◻</p>
 </div>
@@ -1157,13 +1315,11 @@ y=\sum_{n=1}^{+\infty}(y,e_n)e_n
 <p><span class="proof-title"><em>证明</em>. </span>设<span class="math inline">\(X\)</span>为实（或复）可分Hilbert空间，<span class="math inline">\(\{e_n\}\)</span>是<span class="math inline">\(X\)</span>中的一个完备规范正交系。任取<span class="math inline">\(x\in X\)</span>，<span class="math inline">\(\{c_n\}\)</span>是<span class="math inline">\(x\)</span>关于<span class="math inline">\(\{e_n\}\)</span>的Fourier系数集。作<span class="math inline">\(X\)</span>到<span class="math inline">\(l^2\)</span>中的映射：</p>
 <p><span class="math display">\[\begin{equation*}
 T:Tx=\{c_n\}
-
 \end{equation*}\]</span></p>
 <p>(1)由Parseval’s identity，<span class="math inline">\(T\)</span>是双射。</p>
 <p>(2)任取<span class="math inline">\(x,y\in X\)</span>，<span class="math inline">\(\alpha,\beta\)</span>为<span class="math inline">\(X\)</span>对应数域中的两个数，则：</p>
 <p><span class="math display">\[\begin{equation*}
 T(\alpha x+\beta y)=\{(\alpha x+\beta y,e_n)\}=\{\alpha(x,e_n)+\beta(y,e_n)\}=\alpha Tx+\beta Ty
-
 \end{equation*}\]</span></p>
 <p>综上两点，<span class="math inline">\(T\)</span>是<span class="math inline">\(X\)</span>到<span class="math inline">\(l^2\)</span>中的同构映射。</p>
 <p>任取<span class="math inline">\(x,y\in X\)</span>，由<span class="math inline">\(\{e_n\}\)</span>的完备性可得：</p>
@@ -1173,7 +1329,6 @@ T(\alpha x+\beta y)=\{(\alpha x+\beta y,e_n)\}=\{\alpha(x,e_n)+\beta(y,e_n)\}=\a
 &amp;=\sum_{n=1}^{+\infty}(x-y,e_n)\overline{(x-y,e_n)} \\
 &amp;=\sum_{n=1}^{+\infty}|(x-y,e_n)|^2 \\
 &amp;=||Tx-Ty||^2
-
 \end{align*}\]</span></p>
 <p>所以<span class="math inline">\(||x-y||=||Tx-Ty||\)</span>，即<span class="math inline">\(X\)</span>与<span class="math inline">\(l^2\)</span>空间等距。</p>
 <p>综上，<span class="math inline">\(X\)</span>与<span class="math inline">\(l^2\)</span>等距同构。由<span class="math inline">\(X\)</span>的任意性以及等距同构的传递性，所有实（或复）可分Hilbert空间彼此等距同构。&nbsp;◻</p>

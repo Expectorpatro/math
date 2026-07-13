@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,121 +1079,58 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
-  <li><a href="#id--75f0d886" id="toc-id--75f0d886" class="nav-link active" data-scroll-target="#id--75f0d886"><span class="header-section-number">24.0.0.1</span> 按因子数对方差分析进行分类</a></li>
-  <li><a href="#id--185b09eb" id="toc-id--185b09eb" class="nav-link" data-scroll-target="#id--185b09eb"><span class="header-section-number">24.0.0.2</span> 按因子水平的选取方式对方差分析进行分类</a></li>
-  <li><a href="#id-1-5c228f8c" id="toc-id-1-5c228f8c" class="nav-link" data-scroll-target="#id-1-5c228f8c"><span class="header-section-number">24.1</span> 多重假设检验</a>
-  <ul>
-  <li><a href="#id--01eb619d" id="toc-id--01eb619d" class="nav-link" data-scroll-target="#id--01eb619d"><span class="header-section-number">24.1.1</span> 正交对比</a>
+  <li><a href="#id-1-5c228f8c" id="toc-id-1-5c228f8c" class="nav-link active" data-scroll-target="#id-1-5c228f8c"><span class="header-section-number">24.1</span> 多重假设检验</a>
   <ul class="collapse">
-  <li><a href="#id--fbad0a46" id="toc-id--fbad0a46" class="nav-link" data-scroll-target="#id--fbad0a46"><span class="header-section-number">24.1.1.1</span> 正交对比的定义</a></li>
-  <li><a href="#id--881d5275" id="toc-id--881d5275" class="nav-link" data-scroll-target="#id--881d5275"><span class="header-section-number">24.1.1.2</span> 目的</a></li>
-  <li><a href="#id--3a997d55" id="toc-id--3a997d55" class="nav-link" data-scroll-target="#id--3a997d55"><span class="header-section-number">24.1.1.3</span> 假设的检验方法</a></li>
-  <li><a href="#ssa-eb36509d" id="toc-ssa-eb36509d" class="nav-link" data-scroll-target="#ssa-eb36509d"><span class="header-section-number">24.1.1.4</span> 正交对比与SSA的关系</a></li>
-  </ul></li>
+  <li><a href="#id--01eb619d" id="toc-id--01eb619d" class="nav-link" data-scroll-target="#id--01eb619d"><span class="header-section-number">24.1.1</span> 正交对比</a></li>
   </ul></li>
   <li><a href="#id--3f987ac7" id="toc-id--3f987ac7" class="nav-link" data-scroll-target="#id--3f987ac7"><span class="header-section-number">24.2</span> 随机效应下的单因子方差分析</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id--81f2993d" id="toc-id--81f2993d" class="nav-link" data-scroll-target="#id--81f2993d"><span class="header-section-number">24.2.1</span> 统计模型</a></li>
   <li><a href="#id--6b0424cb" id="toc-id--6b0424cb" class="nav-link" data-scroll-target="#id--6b0424cb"><span class="header-section-number">24.2.2</span> 统计假设</a></li>
-  <li><a href="#id-1-eed00999" id="toc-id-1-eed00999" class="nav-link" data-scroll-target="#id-1-eed00999"><span class="header-section-number">24.2.3</span> 方差分析</a>
-  <ul class="collapse">
-  <li><a href="#id--c8213f0c" id="toc-id--c8213f0c" class="nav-link" data-scroll-target="#id--c8213f0c"><span class="header-section-number">24.2.3.1</span> 偏差平方和的分解</a></li>
-  <li><a href="#id--996650b5" id="toc-id--996650b5" class="nav-link" data-scroll-target="#id--996650b5"><span class="header-section-number">24.2.3.2</span> 各平方和的期望</a></li>
-  <li><a href="#id--c03c1426" id="toc-id--c03c1426" class="nav-link" data-scroll-target="#id--c03c1426"><span class="header-section-number">24.2.3.3</span> 统计量及其分布</a></li>
-  <li><a href="#id--c8079616" id="toc-id--c8079616" class="nav-link" data-scroll-target="#id--c8079616"><span class="header-section-number">24.2.3.4</span> 拒绝域</a></li>
-  </ul></li>
+  <li><a href="#id-1-eed00999" id="toc-id-1-eed00999" class="nav-link" data-scroll-target="#id-1-eed00999"><span class="header-section-number">24.2.3</span> 方差分析</a></li>
   <li><a href="#id--a3ed23e8" id="toc-id--a3ed23e8" class="nav-link" data-scroll-target="#id--a3ed23e8"><span class="header-section-number">24.2.4</span> 方差分析表</a></li>
-  <li><a href="#id-3-f4f1a59f" id="toc-id-3-f4f1a59f" class="nav-link" data-scroll-target="#id-3-f4f1a59f"><span class="header-section-number">24.2.5</span> 参数估计</a>
-  <ul class="collapse">
-  <li><a href="#id--a38a7e82" id="toc-id--a38a7e82" class="nav-link" data-scroll-target="#id--a38a7e82"><span class="header-section-number">24.2.5.1</span> 点估计</a></li>
-  <li><a href="#id-1-25f5044d" id="toc-id-1-25f5044d" class="nav-link" data-scroll-target="#id-1-25f5044d"><span class="header-section-number">24.2.5.2</span> 区间估计</a></li>
-  </ul></li>
+  <li><a href="#id-3-f4f1a59f" id="toc-id-3-f4f1a59f" class="nav-link" data-scroll-target="#id-3-f4f1a59f"><span class="header-section-number">24.2.5</span> 参数估计</a></li>
   </ul></li>
   <li><a href="#id--833d454f" id="toc-id--833d454f" class="nav-link" data-scroll-target="#id--833d454f"><span class="header-section-number">24.3</span> 可加效应下的两因子方差分析</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id-1-5c987afc" id="toc-id-1-5c987afc" class="nav-link" data-scroll-target="#id-1-5c987afc"><span class="header-section-number">24.3.1</span> 统计假设</a></li>
-  <li><a href="#id-1-b4f4b882" id="toc-id-1-b4f4b882" class="nav-link" data-scroll-target="#id-1-b4f4b882"><span class="header-section-number">24.3.2</span> 偏差平方和的分解</a>
-  <ul class="collapse">
-  <li><a href="#sse" id="toc-sse" class="nav-link" data-scroll-target="#sse"><span class="header-section-number">24.3.2.1</span> SSe</a></li>
-  <li><a href="#ssa" id="toc-ssa" class="nav-link" data-scroll-target="#ssa"><span class="header-section-number">24.3.2.2</span> SSA</a></li>
-  <li><a href="#ssb" id="toc-ssb" class="nav-link" data-scroll-target="#ssb"><span class="header-section-number">24.3.2.3</span> SSB</a></li>
-  <li><a href="#id--5558d257" id="toc-id--5558d257" class="nav-link" data-scroll-target="#id--5558d257"><span class="header-section-number">24.3.2.4</span> 总偏差平方和分解公式</a></li>
-  </ul></li>
-  <li><a href="#id--7919df3c" id="toc-id--7919df3c" class="nav-link" data-scroll-target="#id--7919df3c"><span class="header-section-number">24.3.3</span> 检验统计量</a>
-  <ul class="collapse">
-  <li><a href="#varepsilon-d095d44d" id="toc-varepsilon-d095d44d" class="nav-link" data-scroll-target="#varepsilon-d095d44d"><span class="header-section-number">24.3.3.1</span> 关于<span class="math inline">\(\varepsilon\)</span>的一些结论</a></li>
-  <li><a href="#ssa-67c87093" id="toc-ssa-67c87093" class="nav-link" data-scroll-target="#ssa-67c87093"><span class="header-section-number">24.3.3.2</span> SSA的期望</a></li>
-  <li><a href="#ssb-051392a4" id="toc-ssb-051392a4" class="nav-link" data-scroll-target="#ssb-051392a4"><span class="header-section-number">24.3.3.3</span> SSB的期望</a></li>
-  <li><a href="#sse-42ecb8dc" id="toc-sse-42ecb8dc" class="nav-link" data-scroll-target="#sse-42ecb8dc"><span class="header-section-number">24.3.3.4</span> SSe的期望</a></li>
-  <li><a href="#id--c0ab39b9" id="toc-id--c0ab39b9" class="nav-link" data-scroll-target="#id--c0ab39b9"><span class="header-section-number">24.3.3.5</span> 构建统计量</a></li>
-  </ul></li>
+  <li><a href="#id-1-b4f4b882" id="toc-id-1-b4f4b882" class="nav-link" data-scroll-target="#id-1-b4f4b882"><span class="header-section-number">24.3.2</span> 偏差平方和的分解</a></li>
+  <li><a href="#id--7919df3c" id="toc-id--7919df3c" class="nav-link" data-scroll-target="#id--7919df3c"><span class="header-section-number">24.3.3</span> 检验统计量</a></li>
   <li><a href="#id--985921f3" id="toc-id--985921f3" class="nav-link" data-scroll-target="#id--985921f3"><span class="header-section-number">24.3.4</span> 统计量的分布</a></li>
   <li><a href="#id-1-d7294c51" id="toc-id-1-d7294c51" class="nav-link" data-scroll-target="#id-1-d7294c51"><span class="header-section-number">24.3.5</span> 方差分析表</a></li>
-  <li><a href="#id-4-b661de4e" id="toc-id-4-b661de4e" class="nav-link" data-scroll-target="#id-4-b661de4e"><span class="header-section-number">24.3.6</span> 参数估计</a>
-  <ul class="collapse">
-  <li><a href="#id-1-27796635" id="toc-id-1-27796635" class="nav-link" data-scroll-target="#id-1-27796635"><span class="header-section-number">24.3.6.1</span> 点估计</a></li>
-  </ul></li>
+  <li><a href="#id-4-b661de4e" id="toc-id-4-b661de4e" class="nav-link" data-scroll-target="#id-4-b661de4e"><span class="header-section-number">24.3.6</span> 参数估计</a></li>
   <li><a href="#id--fe2c308e" id="toc-id--fe2c308e" class="nav-link" data-scroll-target="#id--fe2c308e"><span class="header-section-number">24.3.7</span> 多重比较问题</a></li>
-  <li><a href="#id--eeccdecf" id="toc-id--eeccdecf" class="nav-link" data-scroll-target="#id--eeccdecf"><span class="header-section-number">24.3.8</span> 等重复试验情形</a>
-  <ul class="collapse">
-  <li><a href="#id--e00d6239" id="toc-id--e00d6239" class="nav-link" data-scroll-target="#id--e00d6239"><span class="header-section-number">24.3.8.1</span> 等重复试验下的方差分析表</a></li>
-  <li><a href="#id-5-4c7975c0" id="toc-id-5-4c7975c0" class="nav-link" data-scroll-target="#id-5-4c7975c0"><span class="header-section-number">24.3.8.2</span> 参数估计</a></li>
-  <li><a href="#id-1-d236670e" id="toc-id-1-d236670e" class="nav-link" data-scroll-target="#id-1-d236670e"><span class="header-section-number">24.3.8.3</span> 多重比较问题</a></li>
-  </ul></li>
+  <li><a href="#id--eeccdecf" id="toc-id--eeccdecf" class="nav-link" data-scroll-target="#id--eeccdecf"><span class="header-section-number">24.3.8</span> 等重复试验情形</a></li>
   </ul></li>
   <li><a href="#id--77d980ce" id="toc-id--77d980ce" class="nav-link" data-scroll-target="#id--77d980ce"><span class="header-section-number">24.4</span> 交互效应下的两因子方差分析</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id-1-166e33a7" id="toc-id-1-166e33a7" class="nav-link" data-scroll-target="#id-1-166e33a7"><span class="header-section-number">24.4.1</span> 统计模型</a></li>
   <li><a href="#id-2-07b78315" id="toc-id-2-07b78315" class="nav-link" data-scroll-target="#id-2-07b78315"><span class="header-section-number">24.4.2</span> 统计假设</a></li>
-  <li><a href="#id-2-9aabf1c5" id="toc-id-2-9aabf1c5" class="nav-link" data-scroll-target="#id-2-9aabf1c5"><span class="header-section-number">24.4.3</span> 偏差平方和的分解</a>
-  <ul class="collapse">
-  <li><a href="#id-1-bd64fcb6" id="toc-id-1-bd64fcb6" class="nav-link" data-scroll-target="#id-1-bd64fcb6"><span class="header-section-number">24.4.3.1</span> 总偏差平方和分解公式</a></li>
-  </ul></li>
+  <li><a href="#id-2-9aabf1c5" id="toc-id-2-9aabf1c5" class="nav-link" data-scroll-target="#id-2-9aabf1c5"><span class="header-section-number">24.4.3</span> 偏差平方和的分解</a></li>
   <li><a href="#id-1-4913c2c4" id="toc-id-1-4913c2c4" class="nav-link" data-scroll-target="#id-1-4913c2c4"><span class="header-section-number">24.4.4</span> 检验统计量</a></li>
   <li><a href="#id-1-e190af9b" id="toc-id-1-e190af9b" class="nav-link" data-scroll-target="#id-1-e190af9b"><span class="header-section-number">24.4.5</span> 统计量的分布</a></li>
   <li><a href="#id-2-9f6748fe" id="toc-id-2-9f6748fe" class="nav-link" data-scroll-target="#id-2-9f6748fe"><span class="header-section-number">24.4.6</span> 方差分析表</a></li>
-  <li><a href="#id-6-f4450fb2" id="toc-id-6-f4450fb2" class="nav-link" data-scroll-target="#id-6-f4450fb2"><span class="header-section-number">24.4.7</span> 参数估计</a>
-  <ul class="collapse">
-  <li><a href="#id-2-431337f9" id="toc-id-2-431337f9" class="nav-link" data-scroll-target="#id-2-431337f9"><span class="header-section-number">24.4.7.1</span> 点估计</a></li>
-  </ul></li>
+  <li><a href="#id-6-f4450fb2" id="toc-id-6-f4450fb2" class="nav-link" data-scroll-target="#id-6-f4450fb2"><span class="header-section-number">24.4.7</span> 参数估计</a></li>
   </ul></li>
   <li><a href="#id--937acc9a" id="toc-id--937acc9a" class="nav-link" data-scroll-target="#id--937acc9a"><span class="header-section-number">24.5</span> 随机效应下的两因子方差分析</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id-2-2bc4f9c6" id="toc-id-2-2bc4f9c6" class="nav-link" data-scroll-target="#id-2-2bc4f9c6"><span class="header-section-number">24.5.1</span> 统计模型</a></li>
   <li><a href="#id-3-b43e79e0" id="toc-id-3-b43e79e0" class="nav-link" data-scroll-target="#id-3-b43e79e0"><span class="header-section-number">24.5.2</span> 统计假设</a></li>
-  <li><a href="#id-2-d8c14992" id="toc-id-2-d8c14992" class="nav-link" data-scroll-target="#id-2-d8c14992"><span class="header-section-number">24.5.3</span> 方差分析</a>
-  <ul class="collapse">
-  <li><a href="#id-3-e89ed930" id="toc-id-3-e89ed930" class="nav-link" data-scroll-target="#id-3-e89ed930"><span class="header-section-number">24.5.3.1</span> 偏差平方和的分解</a></li>
-  <li><a href="#id-1-a174be2a" id="toc-id-1-a174be2a" class="nav-link" data-scroll-target="#id-1-a174be2a"><span class="header-section-number">24.5.3.2</span> 各平方和的期望</a></li>
-  <li><a href="#id-1-3e1b3106" id="toc-id-1-3e1b3106" class="nav-link" data-scroll-target="#id-1-3e1b3106"><span class="header-section-number">24.5.3.3</span> 统计量及其分布</a></li>
-  <li><a href="#id-1-f1acd460" id="toc-id-1-f1acd460" class="nav-link" data-scroll-target="#id-1-f1acd460"><span class="header-section-number">24.5.3.4</span> 拒绝域</a></li>
-  </ul></li>
+  <li><a href="#id-2-d8c14992" id="toc-id-2-d8c14992" class="nav-link" data-scroll-target="#id-2-d8c14992"><span class="header-section-number">24.5.3</span> 方差分析</a></li>
   <li><a href="#id-3-f45a896c" id="toc-id-3-f45a896c" class="nav-link" data-scroll-target="#id-3-f45a896c"><span class="header-section-number">24.5.4</span> 方差分析表</a></li>
-  <li><a href="#id-7-0a6f40a2" id="toc-id-7-0a6f40a2" class="nav-link" data-scroll-target="#id-7-0a6f40a2"><span class="header-section-number">24.5.5</span> 参数估计</a>
-  <ul class="collapse">
-  <li><a href="#id-3-a1ed193b" id="toc-id-3-a1ed193b" class="nav-link" data-scroll-target="#id-3-a1ed193b"><span class="header-section-number">24.5.5.1</span> 点估计</a></li>
-  </ul></li>
+  <li><a href="#id-7-0a6f40a2" id="toc-id-7-0a6f40a2" class="nav-link" data-scroll-target="#id-7-0a6f40a2"><span class="header-section-number">24.5.5</span> 参数估计</a></li>
   </ul></li>
   <li><a href="#id--483b8093" id="toc-id--483b8093" class="nav-link" data-scroll-target="#id--483b8093"><span class="header-section-number">24.6</span> 混合模型下的两因子方差分析</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id-3-4afe25ee" id="toc-id-3-4afe25ee" class="nav-link" data-scroll-target="#id-3-4afe25ee"><span class="header-section-number">24.6.1</span> 统计模型</a></li>
   <li><a href="#id-4-c2e3ee7d" id="toc-id-4-c2e3ee7d" class="nav-link" data-scroll-target="#id-4-c2e3ee7d"><span class="header-section-number">24.6.2</span> 统计假设</a></li>
-  <li><a href="#id-3-4a385960" id="toc-id-3-4a385960" class="nav-link" data-scroll-target="#id-3-4a385960"><span class="header-section-number">24.6.3</span> 方差分析</a>
-  <ul class="collapse">
-  <li><a href="#id-4-80b81f3e" id="toc-id-4-80b81f3e" class="nav-link" data-scroll-target="#id-4-80b81f3e"><span class="header-section-number">24.6.3.1</span> 偏差平方和的分解</a></li>
-  <li><a href="#id-2-91b7058d" id="toc-id-2-91b7058d" class="nav-link" data-scroll-target="#id-2-91b7058d"><span class="header-section-number">24.6.3.2</span> 各平方和的期望</a></li>
-  <li><a href="#id-2-7c5c1251" id="toc-id-2-7c5c1251" class="nav-link" data-scroll-target="#id-2-7c5c1251"><span class="header-section-number">24.6.3.3</span> 统计量及其分布</a></li>
-  <li><a href="#id-2-00e66dca" id="toc-id-2-00e66dca" class="nav-link" data-scroll-target="#id-2-00e66dca"><span class="header-section-number">24.6.3.4</span> 拒绝域</a></li>
-  </ul></li>
+  <li><a href="#id-3-4a385960" id="toc-id-3-4a385960" class="nav-link" data-scroll-target="#id-3-4a385960"><span class="header-section-number">24.6.3</span> 方差分析</a></li>
   <li><a href="#id-4-00c29c28" id="toc-id-4-00c29c28" class="nav-link" data-scroll-target="#id-4-00c29c28"><span class="header-section-number">24.6.4</span> 方差分析表</a></li>
   <li><a href="#id--b01da1b8" id="toc-id--b01da1b8" class="nav-link" data-scroll-target="#id--b01da1b8"><span class="header-section-number">24.6.5</span> 多重比较比较问题</a></li>
-  <li><a href="#id-8-314a0fba" id="toc-id-8-314a0fba" class="nav-link" data-scroll-target="#id-8-314a0fba"><span class="header-section-number">24.6.6</span> 参数估计</a>
-  <ul class="collapse">
-  <li><a href="#id-4-6e6b5b72" id="toc-id-4-6e6b5b72" class="nav-link" data-scroll-target="#id-4-6e6b5b72"><span class="header-section-number">24.6.6.1</span> 点估计</a></li>
-  </ul></li>
+  <li><a href="#id-8-314a0fba" id="toc-id-8-314a0fba" class="nav-link" data-scroll-target="#id-8-314a0fba"><span class="header-section-number">24.6.6</span> 参数估计</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -1067,7 +1192,6 @@ window.Quarto = {
 <p><strong>Definition 24.1</strong>. <span class="math inline">\(c=\sum\limits_{i=1}^ac_i\mu_i\)</span>和<span class="math inline">\(d=\sum\limits_{i=1}^ad_i\mu_i\)</span>是两个对比。若：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=1}^ac_id_i=0
-
 \end{equation*}\]</span></p>
 <p>则称这两个对比为正交对比。</p>
 </div>
@@ -1229,7 +1353,6 @@ E(SSe)=(n-a)\sigma^2,\;E(SSA)=\left(n-\frac{\sum\limits_{i=1}^an_i^2}{n}\right)\
 &amp;=\mu+\tau_i+\bar{\varepsilon}_{i.}-\frac{1}{n}\sum_{k=1}^a\sum_{j=1}^{n_k}(\mu+\tau_k+\varepsilon_{kj}) \\
 &amp;=\mu+\tau_i+\bar{\varepsilon}_{i.}-\frac{1}{n}\left(n\mu+\sum_{k=1}^an_k\tau_k+\varepsilon_{..}\right) \\
 &amp;=\tau_i-\frac{\sum\limits_{k=1}^an_k\tau_k}{n}+\bar{\varepsilon}_{i.}-\bar{\varepsilon}_{..}
-
 \end{align*}\]</span></p>
 <p><span class="math display">\[\begin{align*}
 E(SSA)
@@ -1238,7 +1361,6 @@ E(SSA)
 &amp;=\sum_{i=1}^an_iE(\tau_i^2)+\sum_{i=1}^an_iE(\bar{\varepsilon}_{i.}^2)+\sum_{i=1}^an_iE(\bar{\varepsilon}_{..}^2)-2\sum_{i=1}^an_iE(\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..})-\frac{\sum\limits_{i=1}^an_i^2E(\tau_i^2)}{n} \\
 &amp;=\sum_{i=1}^an_i\sigma_\tau^2+\sum_{i=1}^an_i\frac{\sigma^2}{n_i}+\sum_{i=1}^an_i\frac{\sigma^2}{n}-2\sum_{i=1}^an_i\frac{\sigma^2}{n}-\frac{\sum\limits_{i=1}^an_i^2\sigma_\tau^2}{n} \\
 &amp;=\left(n-\frac{\sum_{i=1}^an_i^2}{n}\right)\sigma_\tau^2+(a-1)\sigma^2
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1465,7 +1587,6 @@ E(\bar{\varepsilon}_{ij}^2)&amp;=Var(\bar{\varepsilon}_{ij})+[E(\bar{\varepsilon
 E(\bar{\varepsilon}_{i.}^2)&amp;=Var(\bar{\varepsilon}_{i.})+[E(\bar{\varepsilon}_{i.})]^2=\frac{\sigma^2}{b} \\
 E(\bar{\varepsilon}_{.j}^2)&amp;=Var(\bar{\varepsilon}_{.j})+[E(\bar{\varepsilon}_{.j})]^2=\frac{\sigma^2}{a} \\
 E(\bar{\varepsilon}_{..}^2)&amp;=Var(\bar{\varepsilon}_{..})+[E(\bar{\varepsilon}_{..})]^2=\frac{\sigma^2}{ab}
-
 \end{align*}\]</span></p>
 <p>下求<span class="math inline">\(E(\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..})\)</span>：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1474,7 +1595,6 @@ E(\bar{\varepsilon}_{i.}\bar{\varepsilon}_{..})
 &amp;=\frac{1}{ab^2}E\left(\sum_{j=1}^b\varepsilon_{ij}^2\right) \\
 &amp;=\frac{1}{ab^2}\sum_{j=1}^bE(\varepsilon_{ij}^2) \\
 &amp;=\frac{\sigma^2}{ab}
-
 \end{align*}\]</span></p>
 <p>下求<span class="math inline">\(E(\varepsilon_{.j}\bar{\varepsilon}_{..})\)</span>：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1483,7 +1603,6 @@ E(\varepsilon_{.j}\bar{\varepsilon}_{..})
 &amp;=\frac{1}{a^2b}E\left(\sum_{i=1}^a\varepsilon_{ij}^2\right) \\
 &amp;=\frac{1}{ab^2}\sum_{i=1}^aE(\varepsilon_{ij}^2) \\
 &amp;=\frac{\sigma^2}{ab}
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1530,7 +1649,7 @@ E(SSe)
 <p>由前述，MSe是<span class="math inline">\(\sigma^2\)</span>的无偏估计，而当零假设成立时，MSA和MSB也是<span class="math inline">\(\sigma^2\)</span>的一个无偏估计。如果MSA、MSB与MSe比值很大，即MSA、MSB比MSe大很多（<span class="math inline">\(b\sum\limits_{i=1}^a\tau_i^2,\;a\sum\limits_{j=1}^b\beta_j^2\)</span>很大），我们就有理由怀疑零假设。。由此构建统计量：</p>
 <p><span class="math display">\[\begin{gather*}
 F_A=\frac{MSA}{MSe}=\frac{\frac{SSA}{a-1}}{\frac{SSe}{(a-1)(b-1)}} \\
-F_B=\frac{MSB}{MSe}=\frac{\frac{SSB}{b-1}}{\frac{SSe}{(a-1)(b-1)}}  
+F_B=\frac{MSB}{MSe}=\frac{\frac{SSB}{b-1}}{\frac{SSe}{(a-1)(b-1)}}
 \end{gather*}\]</span></p>
 <p>在这些统计量的情况下，<span class="math inline">\(H_{01},\;H_{02}\)</span>的拒绝域是右向单尾的。下求统计量的分布。</p>
 </section>
@@ -1624,7 +1743,6 @@ SSe=SST-SSA-SSB
 <p><span class="proof-title"><em>证明</em>. </span>分别用<span class="math inline">\(\hat{\mu},\;\hat{\tau}_i,\;\hat{\beta}_j\)</span>表示<span class="math inline">\(\mu\)</span>，诸<span class="math inline">\(\tau_i\)</span>和诸<span class="math inline">\(\beta_j\)</span>的估计，用<span class="math inline">\(\hat{y}_{ij}=\hat{\mu}+\hat{\tau}_i+\hat{\beta}_j\)</span>表示<span class="math inline">\(y_{ij}\)</span>的估计，<span class="math inline">\(i=1,2,\dots,a,\;j=1,2,\dots,b\)</span>。损失函数为：</p>
 <p><span class="math display">\[\begin{equation*}
 L=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\hat{y}_{ij})^2=\sum_{i=1}^a\sum_{j=1}^b(y_{ij}-\hat{\mu}-\hat{\tau}_i-\hat{\beta}_j)^2
-
 \end{equation*}\]</span></p>
 <p>最小二乘解需要满足：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1642,7 +1760,6 @@ j=1,2,\dots,b \\
 \vspace{2ex}
 \sum\limits_{j=1}^b\hat{\beta}_j=0
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>上式即可解出结果。&nbsp;◻</p>
 </div>

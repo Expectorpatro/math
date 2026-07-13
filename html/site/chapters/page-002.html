@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,75 +1079,30 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#id-1-60a6ec0a" id="toc-id-1-60a6ec0a" class="nav-link active" data-scroll-target="#id-1-60a6ec0a"><span class="header-section-number">1.1</span> 线性空间</a>
-  <ul>
-  <li><a href="#id--22b7fe62" id="toc-id--22b7fe62" class="nav-link" data-scroll-target="#id--22b7fe62"><span class="header-section-number">1.1.1</span> 线性空间的概念与基本性质</a>
   <ul class="collapse">
-  <li><a href="#id--8cf565bf" id="toc-id--8cf565bf" class="nav-link" data-scroll-target="#id--8cf565bf"><span class="header-section-number">1.1.1.1</span> 线性空间的定义</a></li>
-  <li><a href="#id--fd4f60af" id="toc-id--fd4f60af" class="nav-link" data-scroll-target="#id--fd4f60af"><span class="header-section-number">1.1.1.2</span> 线性空间的基本性质</a></li>
-  </ul></li>
-  <li><a href="#id--07ec858c" id="toc-id--07ec858c" class="nav-link" data-scroll-target="#id--07ec858c"><span class="header-section-number">1.1.2</span> 线性相关与线性无关</a>
-  <ul class="collapse">
-  <li><a href="#id--e54b5689" id="toc-id--e54b5689" class="nav-link" data-scroll-target="#id--e54b5689"><span class="header-section-number">1.1.2.1</span> 基与维数</a></li>
-  <li><a href="#id--c2de509a" id="toc-id--c2de509a" class="nav-link" data-scroll-target="#id--c2de509a"><span class="header-section-number">1.1.2.2</span> 坐标与坐标变换</a></li>
-  </ul></li>
-  <li><a href="#id--eaee4c77" id="toc-id--eaee4c77" class="nav-link" data-scroll-target="#id--eaee4c77"><span class="header-section-number">1.1.3</span> 子空间</a>
-  <ul class="collapse">
-  <li><a href="#id--bcb255cf" id="toc-id--bcb255cf" class="nav-link" data-scroll-target="#id--bcb255cf"><span class="header-section-number">1.1.3.1</span> 子空间的定义及其判别</a></li>
-  <li><a href="#id--f959aa7d" id="toc-id--f959aa7d" class="nav-link" data-scroll-target="#id--f959aa7d"><span class="header-section-number">1.1.3.2</span> 张成的子空间</a></li>
-  <li><a href="#id--238ef635" id="toc-id--238ef635" class="nav-link" data-scroll-target="#id--238ef635"><span class="header-section-number">1.1.3.3</span> 子空间的性质</a></li>
-  <li><a href="#id--93b87f1b" id="toc-id--93b87f1b" class="nav-link" data-scroll-target="#id--93b87f1b"><span class="header-section-number">1.1.3.4</span> 子空间的直和</a></li>
-  </ul></li>
+  <li><a href="#id--22b7fe62" id="toc-id--22b7fe62" class="nav-link" data-scroll-target="#id--22b7fe62"><span class="header-section-number">1.1.1</span> 线性空间的概念与基本性质</a></li>
+  <li><a href="#id--07ec858c" id="toc-id--07ec858c" class="nav-link" data-scroll-target="#id--07ec858c"><span class="header-section-number">1.1.2</span> 线性相关与线性无关</a></li>
+  <li><a href="#id--eaee4c77" id="toc-id--eaee4c77" class="nav-link" data-scroll-target="#id--eaee4c77"><span class="header-section-number">1.1.3</span> 子空间</a></li>
   <li><a href="#id--b1f5692b" id="toc-id--b1f5692b" class="nav-link" data-scroll-target="#id--b1f5692b"><span class="header-section-number">1.1.4</span> 线性空间的同构</a></li>
-  <li><a href="#id--4c07bfa9" id="toc-id--4c07bfa9" class="nav-link" data-scroll-target="#id--4c07bfa9"><span class="header-section-number">1.1.5</span> 商空间</a>
-  <ul class="collapse">
-  <li><a href="#id--53d96eae" id="toc-id--53d96eae" class="nav-link" data-scroll-target="#id--53d96eae"><span class="header-section-number">1.1.5.1</span> 商空间的定义</a></li>
-  <li><a href="#id--1e67a76a" id="toc-id--1e67a76a" class="nav-link" data-scroll-target="#id--1e67a76a"><span class="header-section-number">1.1.5.2</span> 商空间的性质</a></li>
-  <li><a href="#id--3e590617" id="toc-id--3e590617" class="nav-link" data-scroll-target="#id--3e590617"><span class="header-section-number">1.1.5.3</span> 标准映射</a></li>
-  </ul></li>
+  <li><a href="#id--4c07bfa9" id="toc-id--4c07bfa9" class="nav-link" data-scroll-target="#id--4c07bfa9"><span class="header-section-number">1.1.5</span> 商空间</a></li>
   </ul></li>
   <li><a href="#id--26d1bc48" id="toc-id--26d1bc48" class="nav-link" data-scroll-target="#id--26d1bc48"><span class="header-section-number">1.2</span> 多项式</a>
-  <ul>
-  <li><a href="#id--a8c4450c" id="toc-id--a8c4450c" class="nav-link" data-scroll-target="#id--a8c4450c"><span class="header-section-number">1.2.1</span> 环</a>
   <ul class="collapse">
-  <li><a href="#id--99ab910d" id="toc-id--99ab910d" class="nav-link" data-scroll-target="#id--99ab910d"><span class="header-section-number">1.2.1.1</span> 子环</a></li>
+  <li><a href="#id--a8c4450c" id="toc-id--a8c4450c" class="nav-link" data-scroll-target="#id--a8c4450c"><span class="header-section-number">1.2.1</span> 环</a></li>
+  <li><a href="#id--e33126e7" id="toc-id--e33126e7" class="nav-link" data-scroll-target="#id--e33126e7"><span class="header-section-number">1.2.2</span> 一元多项式</a></li>
   </ul></li>
-  <li><a href="#id--e33126e7" id="toc-id--e33126e7" class="nav-link" data-scroll-target="#id--e33126e7"><span class="header-section-number">1.2.2</span> 一元多项式</a>
-  <ul class="collapse">
-  <li><a href="#id--d924213c" id="toc-id--d924213c" class="nav-link" data-scroll-target="#id--d924213c"><span class="header-section-number">1.2.2.1</span> 除法</a></li>
-  <li><a href="#id--98574f92" id="toc-id--98574f92" class="nav-link" data-scroll-target="#id--98574f92"><span class="header-section-number">1.2.2.2</span> 公因式</a></li>
-  <li><a href="#id--850838f6" id="toc-id--850838f6" class="nav-link" data-scroll-target="#id--850838f6"><span class="header-section-number">1.2.2.3</span> 因式</a></li>
-  </ul></li>
-  </ul></li>
-  <li><a href="#id--feaab940" id="toc-id--feaab940" class="nav-link" data-scroll-target="#id--feaab940"><span class="header-section-number">1.3</span> 线性映射</a>
-  <ul>
-  <li><a href="#id--8927ed8e" id="toc-id--8927ed8e" class="nav-link" data-scroll-target="#id--8927ed8e"><span class="header-section-number">1.3.0.1</span> 线性映射空间与线性映射的运算</a></li>
-  <li><a href="#id--8dd58cc3" id="toc-id--8dd58cc3" class="nav-link" data-scroll-target="#id--8dd58cc3"><span class="header-section-number">1.3.0.2</span> 线性空间上线性映射的性质</a></li>
-  <li><a href="#id--ed7011a6" id="toc-id--ed7011a6" class="nav-link" data-scroll-target="#id--ed7011a6"><span class="header-section-number">1.3.0.3</span> 线性映射的矩阵表示</a></li>
-  </ul></li>
+  <li><a href="#id--feaab940" id="toc-id--feaab940" class="nav-link" data-scroll-target="#id--feaab940"><span class="header-section-number">1.3</span> 线性映射</a></li>
   <li><a href="#id--220d5b00" id="toc-id--220d5b00" class="nav-link" data-scroll-target="#id--220d5b00"><span class="header-section-number">1.4</span> 线性变换</a>
-  <ul>
-  <li><a href="#id--3e74af83" id="toc-id--3e74af83" class="nav-link" data-scroll-target="#id--3e74af83"><span class="header-section-number">1.4.1</span> 线性变换的性质</a>
   <ul class="collapse">
-  <li><a href="#id--94bb2ff6" id="toc-id--94bb2ff6" class="nav-link" data-scroll-target="#id--94bb2ff6"><span class="header-section-number">1.4.1.1</span> 线性变换保持的矩阵关系</a></li>
-  <li><a href="#id--1335029f" id="toc-id--1335029f" class="nav-link" data-scroll-target="#id--1335029f"><span class="header-section-number">1.4.1.2</span> 线性变换的秩与矩阵的秩</a></li>
-  <li><a href="#id--864b7cfc" id="toc-id--864b7cfc" class="nav-link" data-scroll-target="#id--864b7cfc"><span class="header-section-number">1.4.1.3</span> 线性变换在不同基下的矩阵的关系</a></li>
-  </ul></li>
-  <li><a href="#id--d5a2a1d4" id="toc-id--d5a2a1d4" class="nav-link" data-scroll-target="#id--d5a2a1d4"><span class="header-section-number">1.4.2</span> 线性变换的分解与矩阵表示</a>
-  <ul class="collapse">
-  <li><a href="#id--6f0af4ca" id="toc-id--6f0af4ca" class="nav-link" data-scroll-target="#id--6f0af4ca"><span class="header-section-number">1.4.2.1</span> 对角化</a></li>
-  <li><a href="#id--6e852400" id="toc-id--6e852400" class="nav-link" data-scroll-target="#id--6e852400"><span class="header-section-number">1.4.2.2</span> 零化多项式</a></li>
-  <li><a href="#id--19df05e3" id="toc-id--19df05e3" class="nav-link" data-scroll-target="#id--19df05e3"><span class="header-section-number">1.4.2.3</span> 幂零变换的最简矩阵形式</a></li>
-  </ul></li>
+  <li><a href="#id--3e74af83" id="toc-id--3e74af83" class="nav-link" data-scroll-target="#id--3e74af83"><span class="header-section-number">1.4.1</span> 线性变换的性质</a></li>
+  <li><a href="#id--d5a2a1d4" id="toc-id--d5a2a1d4" class="nav-link" data-scroll-target="#id--d5a2a1d4"><span class="header-section-number">1.4.2</span> 线性变换的分解与矩阵表示</a></li>
   <li><a href="#id--b9447ad7" id="toc-id--b9447ad7" class="nav-link" data-scroll-target="#id--b9447ad7"><span class="header-section-number">1.4.3</span> 投影变换</a></li>
   </ul></li>
-  <li><a href="#id--aff6fe4f" id="toc-id--aff6fe4f" class="nav-link" data-scroll-target="#id--aff6fe4f"><span class="header-section-number">1.5</span> 内积空间</a>
-  <ul>
-  <li><a href="#id--889de2e6" id="toc-id--889de2e6" class="nav-link" data-scroll-target="#id--889de2e6"><span class="header-section-number">1.5.0.1</span> 内积空间的定义</a></li>
-  </ul></li>
+  <li><a href="#id--aff6fe4f" id="toc-id--aff6fe4f" class="nav-link" data-scroll-target="#id--aff6fe4f"><span class="header-section-number">1.5</span> 内积空间</a></li>
   </ul>
 </nav>
     </div>
@@ -1004,12 +1147,10 @@ window.Quarto = {
 <li><p><span class="math inline">\(X\)</span>中有一个元素，记作<span class="math inline">\(\mathbf{0}\)</span>，称为<span class="math inline">\(X\)</span>的<a href="../chapters/page-065.html#term-ZeroVector" class="term" title="zero vector">零元<span class="term-english">（zero vector）</span></a>，它使得：</p>
 <p><span class="math display">\[\begin{equation*}
                 \forall\;\alpha\in X,\;\alpha+\mathbf{0}=\alpha
-
     \end{equation*}\]</span></p></li>
 <li><p>对于任意的<span class="math inline">\(\alpha\in X\)</span>，存在与之对应的<span class="math inline">\(\beta\in X\)</span>，称为<span class="math inline">\(\alpha\)</span>的<a href="../chapters/page-040.html#term-AdditiveInverse" class="term" title="additive inverse">负元<span class="term-english">（additive inverse）</span></a>，记作<span class="math inline">\(-\alpha\)</span>，它使得：</p>
 <p><span class="math display">\[\begin{equation*}
                 \alpha+\beta=\mathbf{0}
-
     \end{equation*}\]</span></p></li>
 <li><p><span class="math inline">\(F\)</span>中的<a href="../chapters/page-052.html#term-MultiplicativeIdentity" class="term" title="multiplicative identity">单位元<span class="term-english">（multiplicative identity）</span></a><span class="math inline">\(1\)</span>满足<span class="math inline">\(\forall\;\alpha\in X,\;1\alpha=\alpha\)</span>；</p></li>
 <li><p><span class="math inline">\(\forall\;\alpha\in X,\;k,l\in F,\;(kl)\alpha=k(l\alpha)\)</span>；</p></li>
@@ -1036,51 +1177,42 @@ window.Quarto = {
 <p><span class="proof-title"><em>证明</em>. </span>(1)假设<span class="math inline">\(X\)</span>中有两个零元<span class="math inline">\(\mathbf{0}_1,\mathbf{0}_2\)</span>且<span class="math inline">\(\mathbf{0}_1\ne\mathbf{0}_2\)</span>，由线性空间运算法则(3)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathbf{0}_1+\mathbf{0}_2=\mathbf{0}_1,\quad\mathbf{0}_2+\mathbf{0}_1=\mathbf{0}_2
-
 \end{equation*}\]</span></p>
 <p>而由线性空间运算法则(1)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathbf{0}_1+\mathbf{0}_2=\mathbf{0}_2+\mathbf{0}_1
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\mathbf{0}_1=\mathbf{0}_2\)</span>，产生矛盾，所以<span class="math inline">\(X\)</span>中的零元是唯一的。</p>
 <p>(2)任取<span class="math inline">\(X\)</span>中的一个元素<span class="math inline">\(\alpha\)</span>，假设它有两个负元<span class="math inline">\(\beta_1,\beta_2\)</span>。由线性空间运算法则(4)(3)(2)可得：</p>
 <p><span class="math display">\[\begin{gather*}
 (\beta_1+\alpha)+\beta_2=\mathbf{0}+\beta_2=\beta_2 \\
 (\beta_1+\alpha)+\beta_2=\beta_1+(\alpha+\beta_2)=\beta_1+\mathbf{0}=\beta_1
-
 \end{gather*}\]</span></p>
 <p>所以<span class="math inline">\(\beta_1=\beta_2\)</span>，产生矛盾。由<span class="math inline">\(\alpha\)</span>的任意性，<span class="math inline">\(X\)</span>中每个元素的负元都是唯一的。</p>
 <p>(3)由线性空间运算法则(7)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 0\alpha+0\alpha=(0+0)\alpha=0\alpha
-
 \end{equation*}\]</span></p>
 <p>两边同时加上<span class="math inline">\(-0\alpha\)</span>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 0\alpha+0\alpha+(-0\alpha)=0\alpha+(-0\alpha)
-
 \end{equation*}\]</span></p>
 <p>由线性空间运算法则(2)(4)和(3)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 0\alpha=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>(4)由线性空间运算法则(8)和(3)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 k\mathbf{0}+k\mathbf{0}=k(\mathbf{0}+\mathbf{0})=k\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>两边加上<span class="math inline">\(-k\mathbf{0}\)</span>再由线性空间运算法则(2)(4)和(3)可得<span class="math inline">\(k\mathbf{0}=\mathbf{0}\)</span>。</p>
 <p>(5)如果<span class="math inline">\(k\ne0\)</span>，依次由线性空间运算法则(5)、(6)和(4)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha=1\alpha=(k^{-1}k)\alpha=k^{-1}(k\alpha)=k^{-1}\mathbf{0}=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>(6)由线性空间运算法则(5)与(7)以及(3)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha+(-1)\alpha=1\alpha+(-1)\alpha=(1-1)\alpha=0\alpha=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>再由负元的定义，<span class="math inline">\((-1)\alpha=-\alpha\)</span>。&nbsp;◻</p>
 </div>
@@ -1098,7 +1230,6 @@ k\mathbf{0}+k\mathbf{0}=k(\mathbf{0}+\mathbf{0})=k\mathbf{0}
 <p><strong>Definition 1.5</strong>. 设<span class="math inline">\(X\)</span>是域<span class="math inline">\(F\)</span>上的线性空间。对于<span class="math inline">\(X\)</span>中的一组向量<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>和<span class="math inline">\(F\)</span>中的一组元素<span class="math inline">\(k_1, k_2, \dots, k_{n}\)</span>，作纯量乘法和加法得到：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=1}^{n}k_i\alpha_i\in X
-
 \end{equation*}\]</span></p>
 <p>称该向量为<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>的一个<a href="../chapters/page-051.html#term-LinearCombination" class="term" title="linear combination">线性组合<span class="term-english">（linear combination）</span></a>。</p>
 </div>
@@ -1109,7 +1240,6 @@ k\mathbf{0}+k\mathbf{0}=k(\mathbf{0}+\mathbf{0})=k\mathbf{0}
 <p><strong>Definition 1.7</strong>. 如果向量组<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{s}\)</span>的每一个向量都可以由向量组<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{r}\)</span>线性表出，那么称向量组<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{s}\)</span>可以由向量组<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{r}\)</span>线性表出。如果向量组<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{s}\)</span>和向量组<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{r}\)</span>可以互相线性表出，则称两个向量组<a href="../chapters/page-044.html#term-EquivalentVectorSet" class="term" title="equivalent">等价<span class="term-english">（equivalent）</span></a>，记作：</p>
 <p><span class="math display">\[\begin{equation*}
 \{\alpha_1, \alpha_2, \dots, \alpha_{s}\}\cong\{\beta_1, \beta_2, \dots, \beta_{r}\}
-
 \end{equation*}\]</span></p>
 </div>
 <div id="definition-1-8" class="definition theorem-block env-definition">
@@ -1179,65 +1309,53 @@ k\mathbf{0}+k\mathbf{0}=k(\mathbf{0}+\mathbf{0})=k\mathbf{0}
 <p><span class="math display">\[\begin{gather*}
 \beta=k_1\alpha_1+\cdots+k_r\alpha_r+k_{r+1}u_1+\cdots+k_{r+s}u_s \\
 \beta=l_1\alpha_1+\cdots+l_r\alpha_r+l_{r+1}v_1+\cdots+l_{r+t}v_t
-
 \end{gather*}\]</span></p>
 <p>其中<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{r},u_1, u_2, \dots, u_{s},v_1, v_2, \dots, v_{t}\in W,\;k_1,k_2\dots,k_{r+s},l_1,l_2\dots,l_{r+t}\in F,\;r,s,t\geqslant0\)</span>。二式作差可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathbf{0}=(k_1-l_1)\alpha_1+\cdots+(k_r-l_r)\alpha_r+k_{r+1}u_1+\cdots+k_{r+s}u_s-l_{r+1}v_1-\cdots-l_{r+t}v_t
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(W\)</span>线性无关，所以向量组<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{r},u_1, u_2, \dots, u_{s},v_1, v_2, \dots, v_{t}\)</span>线性无关，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 k_1-l_1=0,\cdots,k_r-l_r=0,k_{r+1}=0,\cdots,k_{r+s}=0,l_{r+1}=0,\dots,l_{r+t}=0
-
 \end{equation*}\]</span></p>
 <p>所以两个表出方式完全相同，<span class="math inline">\(\beta\)</span>由<span class="math inline">\(W\)</span>线性表出的表示方法唯一。</p>
 <p><strong>必要性：</strong>如果<span class="math inline">\(W\)</span>线性相关，则<span class="math inline">\(W\)</span>有一个有限子集<span class="math inline">\(\{\alpha_1, \alpha_2, \dots, \alpha_{n}\}\)</span>线性相关，于是<span class="math inline">\(F\)</span>中有不全为<span class="math inline">\(0\)</span>的元素<span class="math inline">\(k_1, k_2, \dots, k_{n}\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 k_1\alpha_1+k_2\alpha_2+\cdots+k_n\alpha_n=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>由于<span class="math inline">\(\beta\)</span>可以由<span class="math inline">\(W\)</span>线性表出，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \beta=l_1\alpha_1+\cdots+l_n\alpha_n+l_{n+1}v_1+\cdots+l_{n+s}v_s
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(l_i\in F,\;i=1,2,\dots,n;\;v_j\in X,\;j=1,2,\dots,s\)</span>。将上两式相加可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \beta=(l_1+k_1)\alpha_1+\cdots+(l_n+k_n)\alpha_n+l_{n+1}v_1+\cdots+l_{n+s}v_s
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(k_1, k_2, \dots, k_{n}\)</span>不全为<span class="math inline">\(0\)</span>，所以有序元素组：</p>
 <p><span class="math display">\[\begin{equation*}
 (l_1,\dots,l_n,l_{n+1},\dots,l_{n+s})\ne(l_1+k_1,\dots,l_n+k_n,l_{n+1},\dots,l_{n+s})
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\beta\)</span>由<span class="math inline">\(W\)</span>线性表出的方式不唯一，矛盾，所以<span class="math inline">\(W\)</span>线性无关。</p>
 <p>(5)<strong>充分性：</strong>因为<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n},\beta\)</span>线性相关，所以域<span class="math inline">\(F\)</span>中存在不全为<span class="math inline">\(0\)</span>的元素<span class="math inline">\(k_1, k_2, \dots, k_{n},l\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 k_1\alpha_1+k_2\alpha_2+\cdots+k_n\alpha_n+l\beta=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>若<span class="math inline">\(l=0\)</span>，则域<span class="math inline">\(F\)</span>中存在不全为<span class="math inline">\(0\)</span>的元素<span class="math inline">\(k_1, k_2, \dots, k_{n}\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 k_1\alpha_1+k_2\alpha_2+\cdots+k_n\alpha_n=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>这与向量组<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>线性无关矛盾，所以<span class="math inline">\(l\ne0\)</span>。于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \beta=-\frac{k_1}{l}\alpha_1-\frac{k_2}{l}\alpha_2-\cdots-\frac{k_n}{l}\alpha_n
-
 \end{equation*}\]</span></p>
 <p>即向量<span class="math inline">\(\beta\)</span>可以由向量组<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>线性表出。</p>
 <p><strong>必要性：</strong>因为<span class="math inline">\(\beta\)</span>可以由向量组<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>线性表出，所以域<span class="math inline">\(F\)</span>中存在<span class="math inline">\(k_1, k_2, \dots, k_{n}\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \beta=k_1\alpha_1+k_2\alpha_2+\cdots+k_n\alpha_n
-
 \end{equation*}\]</span></p>
 <p>移项即可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 k_1\alpha_1+k_2\alpha_2+\cdots+k_n\alpha_n-\beta=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n},\beta\)</span>线性相关。</p>
 <p>(6)反身性与对称性显然成立。</p>
@@ -1245,18 +1363,15 @@ k_1\alpha_1+k_2\alpha_2+\cdots+k_n\alpha_n-\beta=\mathbf{0}
 <p><span class="math display">\[\begin{equation*}
 \alpha_i=\sum_{j=1}^{r}k_{j_i}\beta_j,\;i=1,2,\dots,s\quad
 \beta_j=\sum_{l=1}^{t}q_{l_j}\gamma_l,\;j=1,2,\dots,r
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha_i=\sum_{j=1}^{r}k_{j_i}\left(\sum_{l=1}^{t}q_{l_j}\gamma_l\right)=\sum_{j=1}^{r}\sum_{l=1}^{t}k_{j_i}q_{l_j}\gamma_l=\sum_{l=1}^{t}\left(\sum_{j=1}^{r}k_{j_i}q_{l_j}\right)\gamma_l,\;i=1,2,\dots,s
-
 \end{equation*}\]</span></p>
 <p>即向量组<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{s}\)</span>可以由向量组<span class="math inline">\(\gamma_1, \gamma_2, \dots, \gamma_{t}\)</span>线性表出。传递性得证。</p>
 <p>(7)考虑方程：</p>
 <p><span class="math display">\[\begin{equation*}
 k_1\beta_1+k_2\beta_2+\cdots+k_r\beta_r=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>因为向量组<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{r}\)</span>可以由向量组<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{s}\)</span>线性表出，所以：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1266,7 +1381,6 @@ k_1\beta_1+k_2\beta_2+\cdots+k_r\beta_r=\mathbf{0}
 \vdots \\
 \beta_r=a_{r1}\alpha_1+a_{r2}\alpha_2+\cdots+a_{rs}\alpha_s
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>则有：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1278,7 +1392,6 @@ k_1\beta_1+k_2\beta_2+\cdots+k_r\beta_r
 &amp;\quad+(k_1a_{12}+k_2a_{22}+\cdots+k_ra_{r2})\alpha_2+\cdots \\
 &amp;\quad+(k_1a_{1s}+k_2a_{2s}+\cdots+k_ra_{rs})\alpha_s \\
 &amp;=\mathbf{0}
-
 \end{align*}\]</span></p>
 <p>将上式看作<span class="math inline">\(k_1, k_2, \dots, k_{r}\)</span>的线性方程，考虑如下齐次线性方程组：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1301,12 +1414,10 @@ k_r
 \vdots \\
 0
 \end{pmatrix}
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(s&lt;r\)</span>，由<a href="../chapters/page-003.html#theo-SolutionOfSLE1-b82e55b5" data-reference-type="ref+label" data-reference="theo:SolutionOfSLE1">定理 2.3</a>可知上述齐次线性方程组必有非零解。取它的一个非零解<span class="math inline">\((k_1, k_2, \dots, k_{r})\)</span>，由<a href="#prop-LinearSpace-60f16f8a" data-reference-type="ref+label" data-reference="prop:LinearSpace">性质 1.1.1</a>(3)和线性空间运算法则(3)即可得：</p>
 <p><span class="math display">\[\begin{equation*}
 k_1\beta_1+k_2\beta_2+\cdots+k_r\beta_r=0\alpha_1+0\alpha_2+\cdots+0\alpha_s=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>于是向量组<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{r}\)</span>线性相关。</p>
 <p>(8)由(7)立即可得。</p>
@@ -1325,7 +1436,6 @@ k_1\beta_1+k_2\beta_2+\cdots+k_r\beta_r=0\alpha_1+0\alpha_2+\cdots+0\alpha_s=\ma
 <li><p>若向量组<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{s}\)</span>可以由向量组<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{r}\)</span>线性表出，那么：</p>
 <p><span class="math display">\[\begin{equation*}
                 \operatorname{rank}\{\alpha_1, \alpha_2, \dots, \alpha_{s}\}\leqslant\operatorname{rank}\{\beta_1, \beta_2, \dots, \beta_{r}\}
-
     \end{equation*}\]</span></p></li>
 <li><p>等价的向量组具有相等的秩；</p></li>
 <li><p>若向量组<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{s}\)</span>的秩为<span class="math inline">\(r\)</span>，则其中任意<span class="math inline">\(r+1\)</span>个向量线性相关；</p></li>
@@ -1391,7 +1501,6 @@ k_1\beta_1+k_2\beta_2+\cdots+k_r\beta_r=0\alpha_1+0\alpha_2+\cdots+0\alpha_s=\ma
 <p><strong>Definition 1.14</strong>. <span class="math inline">\(X\)</span>是域<span class="math inline">\(F\)</span>上的<span class="math inline">\(n\)</span>维线性空间，<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>是<span class="math inline">\(X\)</span>的一组基，由<a href="#prop-LinearlyDependent-0205c98a" data-reference-type="ref+label" data-reference="prop:LinearlyDependent">性质 1.1.2</a>(4)可知<span class="math inline">\(X\)</span>中任一向量<span class="math inline">\(\alpha\)</span>由<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>线性表出的方式唯一：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha=a_1\alpha_1+a_2\alpha_2+\cdots+a_n\alpha_n
-
 \end{equation*}\]</span></p>
 <p>把系数构成的<span class="math inline">\(n\)</span>元有序数组写成列向量的形式，得到<span class="math inline">\((a_1, a_2, \dots, a_{n})^{\top}\)</span>，该列向量被称为<span class="math inline">\(\alpha\)</span>在基<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>下的<a href="../chapters/page-042.html#term-Coordinate" class="term" title="coordinate">坐标<span class="term-english">（coordinate）</span></a>。</p>
 </div>
@@ -1399,7 +1508,6 @@ k_1\beta_1+k_2\beta_2+\cdots+k_r\beta_r=0\alpha_1+0\alpha_2+\cdots+0\alpha_s=\ma
 <p><strong>Definition 1.15</strong>. <span class="math inline">\(X\)</span>是域<span class="math inline">\(F\)</span>上的<span class="math inline">\(n\)</span>维线性空间。根据<a href="#prop-nDimensionalLinearSpace-2bfb8ddd" data-reference-type="ref+label" data-reference="prop:nDimensionalLinearSpace">性质 1.1.4</a>(3)和<a href="#theo-NOfBasisVector-89dbf137" data-reference-type="ref+label" data-reference="theo:NOfBasisVector">定理 1.2</a>，给定<span class="math inline">\(V\)</span>的两个基：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha_1, \alpha_2, \dots, \alpha_{n}\quad\beta_1, \beta_2, \dots, \beta_{n}
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>是<span class="math inline">\(V\)</span>的一组基，所以有：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1409,7 +1517,6 @@ k_1\beta_1+k_2\beta_2+\cdots+k_r\beta_r=0\alpha_1+0\alpha_2+\cdots+0\alpha_s=\ma
 \cdots\cdots\cdots \\
 \beta_n=a_{n1}\alpha_1+a_{n2}\alpha_2+\cdots+a_{nn}\alpha_n
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>模仿矩阵乘法的定义将上式写作：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1420,12 +1527,10 @@ a_{12} &amp; a_{22} &amp; \cdots &amp; a_{n2} \\
 \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
 a_{1n} &amp; a_{2n} &amp; \cdots &amp; a_{nn}
 \end{pmatrix}
-
 \end{equation*}\]</span></p>
 <p>将上式右端的矩阵记作<span class="math inline">\(A\)</span>，称它是基<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>到基<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>的<a href="../chapters/page-059.html#term-TransitionMatrix" class="term" title="transition matrix">过渡矩阵<span class="term-english">（transition matrix）</span></a>。于是上式可以写作：</p>
 <p><span class="math display">\[\begin{equation*}
 (\beta_1, \beta_2, \dots, \beta_{n})=(\alpha_1, \alpha_2, \dots, \alpha_{n})A
-
 \end{equation*}\]</span></p>
 <p>由于这种写法是模仿矩阵乘法的定义，所以矩阵乘法所满足的运算法则对于这种写法也成立。</p>
 </div>
@@ -1433,7 +1538,6 @@ a_{1n} &amp; a_{2n} &amp; \cdots &amp; a_{nn}
 <p><strong>Theorem 1.3</strong>. <span class="math inline">\(X\)</span>是域<span class="math inline">\(F\)</span>上的<span class="math inline">\(n\)</span>维线性空间，<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>是<span class="math inline">\(X\)</span>的一组基，且向量组<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 (\beta_1, \beta_2, \dots, \beta_{n})=(\alpha_1, \alpha_2, \dots, \alpha_{n})A
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>是<span class="math inline">\(X\)</span>的一组基当且仅当<span class="math inline">\(A\)</span>是可逆矩阵。</p>
 </div>
@@ -1461,7 +1565,6 @@ k_n
 \text{可推出}k_1=k_2=\cdots=k_n=0 \\
 &amp;\iff\text{齐次线性方程组}Ax=\mathbf{0}\text{只有零解} \\
 &amp;\iff A\text{可逆}
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1469,12 +1572,10 @@ k_n
 <p><strong>Theorem 1.4</strong>. <span class="math inline">\(X\)</span>是域<span class="math inline">\(F\)</span>上的<span class="math inline">\(n\)</span>维线性空间，<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>和<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>是<span class="math inline">\(X\)</span>上的两个基，<span class="math inline">\(A\)</span>是由基<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>到基<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>的过渡矩阵。若<span class="math inline">\(X\)</span>中向量<span class="math inline">\(\alpha\)</span>在这两个基下的坐标分别为：</p>
 <p><span class="math display">\[\begin{equation*}
 x=(x_1, x_2, \dots, x_{n})^{\top},\;y=(y_1, y_2, \dots, y_{n})^{\top}
-
 \end{equation*}\]</span></p>
 <p>则有：</p>
 <p><span class="math display">\[\begin{equation*}
 y=A^{-1}x
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1484,12 +1585,10 @@ y=A^{-1}x
 &amp;=(\alpha_1, \alpha_2, \dots, \alpha_{n})(x_1, x_2, \dots, x_{n})^{\top} \\
 &amp;=(\beta_1, \beta_2, \dots, \beta_{n})(y_1, y_2, \dots, y_{n})^{\top} \\
 &amp;=(\alpha_1, \alpha_2, \dots, \alpha_{n})A(y_1, y_2, \dots, y_{n})^{\top}
-
 \end{align*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 (x_1, x_2, \dots, x_{n})^{\top}=A(y_1, y_2, \dots, y_{n})^{\top}
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(x=Ay\)</span>。由<a href="#theo-BasisTransInvertibleMat-4697959b" data-reference-type="ref+label" data-reference="theo:BasisTransInvertibleMat">定理 1.3</a>可知<span class="math inline">\(A\)</span>可逆，于是<span class="math inline">\(y=A^{-1}x\)</span>。&nbsp;◻</p>
 </div>
@@ -1507,7 +1606,6 @@ y=A^{-1}x
 <p><span class="math display">\[\begin{gather*}
 \alpha,\beta\in E\Rightarrow\alpha+\beta\in E \\
 k\in F,\alpha\in E\Rightarrow k\alpha\in E
-
 \end{gather*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1520,7 +1618,6 @@ k\in F,\alpha\in E\Rightarrow k\alpha\in E
 <p><strong>Definition 1.17</strong>. 设<span class="math inline">\(X\)</span>是域<span class="math inline">\(F\)</span>上的一个线性空间，<span class="math inline">\(X_1, X_2, \dots, X_{n}\)</span>是<span class="math inline">\(X\)</span>的子空间。定义：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=1}^{n}X_i=\left\{\sum_{i=1}^{n}\alpha_i:\alpha_i\in X_i\right\}
-
 \end{equation*}\]</span></p>
 </div>
 </section>
@@ -1530,7 +1627,6 @@ k\in F,\alpha\in E\Rightarrow k\alpha\in E
 <p><strong>Definition 1.18</strong>. 设<span class="math inline">\(X\)</span>是域<span class="math inline">\(F\)</span>上的一个线性空间，<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\in X\)</span>，称：</p>
 <p><span class="math display">\[\begin{equation*}
 W=\left\{\sum_{i=1}^{n}k_i\alpha_i:k_i\in F\right\}
-
 \end{equation*}\]</span></p>
 <p>为向量组<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span><strong>张成的线性子空间</strong>，记作<span class="math inline">\(&lt;\alpha_1, \alpha_2, \dots, \alpha_{n}&gt;\)</span>。</p>
 </div>
@@ -1563,7 +1659,6 @@ W=\left\{\sum_{i=1}^{n}k_i\alpha_i:k_i\in F\right\}
 <li><p>若<span class="math inline">\(I\)</span>是一个指标集，对任意的<span class="math inline">\(i\in I\)</span>有<span class="math inline">\(X_i\)</span>是<span class="math inline">\(X\)</span>的子空间，则</p>
 <p><span class="math display">\[\begin{equation*}
                 \underset{i\in I}{\overset{}{\cap}}X_i=\{\alpha:\alpha\in X_i,\;\forall\;i\in I\}
-
     \end{equation*}\]</span></p>
 <p>也是<span class="math inline">\(X\)</span>的子空间；</p></li>
 <li><p>若<span class="math inline">\(X_1, X_2, \dots, X_{n}\)</span>是<span class="math inline">\(X\)</span>的子空间，<span class="math inline">\(n\in\mathbb{N}^+\)</span>，则<span class="math inline">\(X_1+X_2+\cdots+X_n\)</span>也是<span class="math inline">\(X\)</span>的子空间；</p></li>
@@ -1571,7 +1666,6 @@ W=\left\{\sum_{i=1}^{n}k_i\alpha_i:k_i\in F\right\}
 <li><p>若<span class="math inline">\(X_1,X_2\)</span>为<span class="math inline">\(X\)</span>的有限维子空间，则<span class="math inline">\(X_1\cap X_2,\;X_1+X_2\)</span>也是有限维的，并且有：</p>
 <p><span class="math display">\[\begin{equation*}
                 \dim(X_1)+\dim(X_2)=\dim(X_1+X_2)+\dim(X_1\cap X_2)
-
     \end{equation*}\]</span></p></li>
 </ol>
 </div>
@@ -1582,12 +1676,10 @@ W=\left\{\sum_{i=1}^{n}k_i\alpha_i:k_i\in F\right\}
 <p><span class="math display">\[\begin{equation*}
 \alpha=\gamma_1+\gamma_2+\cdots+\gamma_n,\quad
 \beta=\delta_1+\delta_2+\cdots+\delta_n
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(\gamma_i,\delta_i\in X_i,\;i=1,2,\dots,n\)</span>，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 k_1\alpha+k_2\beta=\sum_{i=1}^{n}(k_i\gamma_i+k_2\delta_i)
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(X_i\)</span>是<span class="math inline">\(X\)</span>的子空间，所以<span class="math inline">\(k_i\gamma_i+k_2\delta_i\in X_i,\;i=1,2,\dots,n\)</span>，于是<span class="math inline">\(k_1\alpha+k_2\beta\in X_1+X_2+\cdots+X_n\)</span>。由<a href="#theo-Subspace-e4ba2d14" data-reference-type="ref+label" data-reference="theo:Subspace">定理 1.5</a>可得<span class="math inline">\(X_1+X_2+\cdots+X_n\)</span>是<span class="math inline">\(X\)</span>的子空间。</p>
 <p>(4)由<a href="#theo-ExistenceOfBasis-368cfcc3" data-reference-type="ref+label" data-reference="theo:ExistenceOfBasis">定理 1.1</a>和<a href="#prop-nDimensionalLinearSpace-2bfb8ddd" data-reference-type="ref+label" data-reference="prop:nDimensionalLinearSpace">性质 1.1.4</a>(5)可得，<span class="math inline">\(E\)</span>的一组基可以扩充成<span class="math inline">\(X\)</span>的一组基，所以<span class="math inline">\(\dim(E)\leqslant\dim(X)\)</span>。当<span class="math inline">\(E=X\)</span>时，显然<span class="math inline">\(\dim(E)=\dim(X)\)</span>。当<span class="math inline">\(\dim(E)=\dim(X)\)</span>时，由<a href="#prop-nDimensionalLinearSpace-2bfb8ddd" data-reference-type="ref+label" data-reference="prop:nDimensionalLinearSpace">性质 1.1.4</a>(2)可知<span class="math inline">\(E\)</span>的一组基就是<span class="math inline">\(X\)</span>的一组基，所以<span class="math inline">\(X\)</span>中的任一向量可以由<span class="math inline">\(E\)</span>的基线性表出，于是<span class="math inline">\(X\subseteq E\)</span>，从而<span class="math inline">\(E=X\)</span>。</p>
@@ -1596,33 +1688,27 @@ k_1\alpha+k_2\beta=\sum_{i=1}^{n}(k_i\gamma_i+k_2\delta_i)
 X_1+X_2
 &amp;=&lt;\alpha_1, \alpha_2, \dots, \alpha_{m},\beta_1, \beta_2, \dots, \beta_{n_1-m}&gt;+&lt;\alpha_1, \alpha_2, \dots, \alpha_{m},\gamma_1, \gamma_2, \dots, \gamma_{n_2-m}&gt; \\
 &amp;=&lt;\alpha_1, \alpha_2, \dots, \alpha_{m},\beta_1, \beta_2, \dots, \beta_{n_1-m},\gamma_1, \gamma_2, \dots, \gamma_{n_2-m}&gt;
-
 \end{align*}\]</span></p>
 <p>根据<a href="#prop-SpanSubspace-5b082085" data-reference-type="ref+label" data-reference="prop:SpanSubspace">性质 1.1.5</a>(3)可得<span class="math inline">\(\operatorname{dim}(X_1+X_2)\leqslant n_1+n_2-m\)</span>，即<span class="math inline">\(X_1+X_2\)</span>是有限维的。</p>
 <p>设：</p>
 <p><span class="math display">\[\begin{equation*}
 k_1\alpha_1+\cdots+k_m\alpha_m+l_1\beta_1+\cdots+l_{n_1-m}\beta_{n_1-m}+q_1\gamma_1+\cdots+q_{n_2-m}\gamma_{n_2-m}=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 k_1\alpha_1+\cdots+k_m\alpha_m+l_1\beta_1+\cdots+l_{n_1-m}\beta_{n_1-m}=-(q_1\gamma_1+\cdots+q_{n_2-m}\gamma_{n_2-m})
-
 \end{equation*}\]</span></p>
 <p>左边属于<span class="math inline">\(X_1\)</span>，右边属于<span class="math inline">\(X_2\)</span>，所以它们属于<span class="math inline">\(X_1\cap X_2\)</span>。于是右边的向量也可以由<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{m}\)</span>线性表出，即：</p>
 <p><span class="math display">\[\begin{equation*}
 (q_1\gamma_1+\cdots+q_{n_2-m}\gamma_{n_2-m})=p_1\alpha_1+\cdots+p_m\alpha_m
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{m},\gamma_1, \gamma_2, \dots, \gamma_{n_2-m}\)</span>是<span class="math inline">\(X_2\)</span>的一组基，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 q_1=q_2=\cdots=q_{n_2-m}=p_1=p_2=\cdots=p_m=0
-
 \end{equation*}\]</span></p>
 <p>又因为<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{m},\beta_1, \beta_2, \dots, \beta_{n_1-m}\)</span>是<span class="math inline">\(X_1\)</span>的一组基，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 k_1=k_2=\cdots=k_m=l_1=l_2=\cdots=l_{n_1-m}=0
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{m},\beta_1, \beta_2, \dots, \beta_{n_1-m},\gamma_1, \gamma_2, \dots, \gamma_{n_2-m}\)</span>线性无关。由基的定义，它们是<span class="math inline">\(X_1+X_2\)</span>的一组基，于是有：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1630,12 +1716,10 @@ k_1=k_2=\cdots=k_m=l_1=l_2=\cdots=l_{n_1-m}=0
 =m+n_1-m+n_2-m \\
 =&amp;\dim(X_1\cap X_2)+\dim(X_1)-\dim(X_1\cap X_2)+\dim(X_2)-\dim(X_1\cap X_2) \\
 =&amp;\dim(X_1)+\dim(X_2)-\dim(X_1\cap X_2)
-
 \end{align*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 \dim(X_1)+\dim(X_2)=\dim(X_1+X_2)+\dim(X_1\cap X_2)
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1646,7 +1730,6 @@ k_1=k_2=\cdots=k_m=l_1=l_2=\cdots=l_{n_1-m}=0
 <p><strong>Definition 1.19</strong>. 设<span class="math inline">\(X\)</span>是域<span class="math inline">\(F\)</span>上的线性空间，<span class="math inline">\(X_1, X_2, \dots, X_{n}\)</span>是<span class="math inline">\(X\)</span>的子空间。如果<span class="math inline">\(X_1+X_2+\cdots+X_n\)</span>中的每个向量<span class="math inline">\(\alpha\)</span>都能唯一地表示为：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha=\sum_{i=1}^{n}\alpha_i,\;\alpha_i\in X_i
-
 \end{equation*}\]</span></p>
 <p>则称和<span class="math inline">\(X_1+X_2+\cdots+X_n\)</span>为<a href="../chapters/page-043.html#term-DirectSum" class="term" title="direct sum">直和<span class="term-english">（direct sum）</span></a>，记为<span class="math inline">\(X_1\oplus X_2\oplus\cdots\oplus X_n\)</span>，也可以写作<span class="math inline">\(\oplus_{i=1}^nX_i\)</span>。若<span class="math inline">\(X=X_1\oplus X_2\)</span>，则称<span class="math inline">\(X_2\)</span>为<span class="math inline">\(X_1\)</span>的<a href="../chapters/page-042.html#term-webscope-0a95227ff8-Complement" class="term" title="complement">补空间<span class="term-english">（complement）</span></a>。</p>
 </div>
@@ -1666,29 +1749,24 @@ k_1=k_2=\cdots=k_m=l_1=l_2=\cdots=l_{n_1-m}=0
 <p><span class="math inline">\(2\Rightarrow3\)</span>：任取<span class="math inline">\(\alpha\in X_i\cap\left(\sum\limits_{j\ne i}X_j\right)\)</span>。因为<span class="math inline">\(\alpha\in X_i\)</span>，<span class="math inline">\(X_i\)</span>是一个子空间，所以<span class="math inline">\(-\alpha\in X_i\)</span>。因为<span class="math inline">\(\alpha\in\left(\sum\limits_{j\ne i}X_j\right)\)</span>，所以<span class="math inline">\(\alpha\)</span>可表示为：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha=\sum_{j\ne i}\alpha_j,\;j=1,2,\dots,i-1,i+1,\dots n
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathbf{0}=\alpha+(-\alpha)=-\alpha+\sum_{j\ne i}\alpha_j
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(\mathbf{0}=\mathbf{0}+\mathbf{0}+\cdots+\mathbf{0}\)</span>，所以<span class="math inline">\(-\alpha=\mathbf{0}\)</span>，<span class="math inline">\(\alpha=\mathbf{0}\)</span>。由<span class="math inline">\(\alpha\)</span>的任意性，<span class="math inline">\(X_i\cap\left(\sum\limits_{j\ne i}X_j\right)=\mathbf{0},\;i,j=1,2,\dots,n\)</span>。</p>
 <p><span class="math inline">\(3\Rightarrow1\)</span>：假设和<span class="math inline">\(X_1+X_2+\cdots+X_n\)</span>不是直和，则存在<span class="math inline">\(\alpha\in X_1+X_2+\cdots+X_n\)</span>有两种表示方式，设：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha=\sum_{i=1}^{n}\alpha_i=\sum_{i=1}^{n}\beta_i,\quad
 \alpha_i,\beta_i\in X_i,\;\alpha_i\ne\beta_i
-
 \end{equation*}\]</span></p>
 <p>则：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha_i-\beta_i=\sum_{j\ne i}(\beta_j-\alpha_j),\quad i,j=1,2,\dots,n
-
 \end{equation*}\]</span></p>
 <p>注意到左边属于<span class="math inline">\(X_i\)</span>，右边属于<span class="math inline">\(\sum\limits_{j\ne i}X_j\)</span>，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha_i-\beta_i\in X_i\cap\left(\sum\limits_{j\ne i}X_j\right)=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\alpha_i=\beta_i\)</span>，矛盾，因此和<span class="math inline">\(X_1+X_2+\cdots+X_n\)</span>是直和。</p>
 <p><span class="math inline">\(1\Rightarrow4\)</span>：因为和<span class="math inline">\(X_1+X_2+\cdots+X_n\)</span>是直和，由(3)可得<span class="math inline">\(X_i\cap\left(\sum\limits_{j\ne i}X_j\right)=\mathbf{0},\;i,j=1,2,\dots,n\)</span>。由<a href="#prop-Subspace-fcfc4744" data-reference-type="ref+label" data-reference="prop:Subspace">性质 1.1.6</a>(5)可得：</p>
@@ -1697,46 +1775,38 @@ k_1=k_2=\cdots=k_m=l_1=l_2=\cdots=l_{n_1-m}=0
 &amp;=\dim\left(X_1+\sum_{i=2}^{n}X_i\right)
 =\dim(X_1)+\dim\left(\sum_{i=2}^{n}X_i\right)-\dim\left(X_1\cap\sum_{i=2}^{n}X_i\right) \\
 &amp;=\dim(X_1)+\dim\left(\sum_{i=2}^{n}X_i\right)
-
 \end{align*}\]</span></p>
 <p>注意到：</p>
 <p><span class="math display">\[\begin{equation*}
 X_2\cap\sum_{i=3}^{n}X_i\subseteq X_2\cap\left(X_1+\sum_{i=3}^{n}X_i\right)=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \dim\left(\sum_{i=2}^{n}X_i\right)
 =\dim(X_2)+\dim\left(\sum_{i=3}^{n}X_i\right)
-
 \end{equation*}\]</span></p>
 <p>递推可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \dim(X_1+X_2+\cdots+X_n)=\dim(X_1)+\dim(X_2)+\cdots+\dim(X_n)
-
 \end{equation*}\]</span></p>
 <p><span class="math inline">\(4\Rightarrow5\)</span>：根据<a href="#theo-ExistenceOfBasis-368cfcc3" data-reference-type="ref+label" data-reference="theo:ExistenceOfBasis">定理 1.1</a>，在<span class="math inline">\(X_i\)</span>中取一组基<span class="math inline">\(\alpha_{i1},\alpha_{i2},\dots,\alpha_{ir_i},\;i=1,2,\dots,n\)</span>，由<a href="#prop-SpanSubspace-5b082085" data-reference-type="ref+label" data-reference="prop:SpanSubspace">性质 1.1.5</a>(4)(6)可得：</p>
 <p><span class="math display">\[\begin{align*}
 \sum_{i=1}^{n}X_i
 &amp;=&lt;\alpha_{11},\alpha_{12},\dots,\alpha_{1r_1}&gt;+&lt;\alpha_{21},\alpha_{22},\dots,\alpha_{2r_2}&gt;+\cdots+&lt;\alpha_{n1},\alpha_{n2},\dots,\alpha_{nr_n}&gt; \\
 &amp;=&lt;\alpha_{11},\alpha_{12},\dots,\alpha_{1r_1},\alpha_{21},\alpha_{22},\dots,\alpha_{2r_2},\dots,\alpha_{n1},\alpha_{n2},\dots,\alpha_{nr_n}&gt;
-
 \end{align*}\]</span></p>
 <p>因为：</p>
 <p><span class="math display">\[\begin{equation*}
 \dim(X_1+X_2+\cdots+X_n)=\dim(X_1)+\dim(X_2)+\cdots+\dim(X_n)=\sum_{i=1}^{n}r_i
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-nDimensionalLinearSpace-2bfb8ddd" data-reference-type="ref+label" data-reference="prop:nDimensionalLinearSpace">性质 1.1.4</a>(4)可知<span class="math inline">\(\alpha_{ij},\;i=1,2,\dots,n,\;j=1,2,\dots,r_i\)</span>是<span class="math inline">\(X_1+X_2+\cdots+X_n\)</span>的一组基，即<span class="math inline">\(X_i,\;i=1,2,\dots,n\)</span>的基合起来是和<span class="math inline">\(X_1+X_2+\cdots+X_n\)</span>的一组基。</p>
 <p><span class="math inline">\(5\Rightarrow1\)</span>：根据<a href="#theo-ExistenceOfBasis-368cfcc3" data-reference-type="ref+label" data-reference="theo:ExistenceOfBasis">定理 1.1</a>，在<span class="math inline">\(X_i\)</span>中取一组基<span class="math inline">\(\alpha_{i1},\alpha_{i2},\dots,\alpha_{ir_i},\;i=1,2,\dots,n\)</span>，则<span class="math inline">\(\alpha_{ij},\;i=1,2,\dots,n,\;j=1,2,\dots,r_i\)</span>是<span class="math inline">\(X_1+X_2+\cdots+X_n\)</span>的一组基。设:</p>
 <p><span class="math display">\[\begin{equation*}
 \mathbf{0}=\alpha_1+\alpha_2+\cdots+\alpha_n,\;\alpha_i\in X_i
-
 \end{equation*}\]</span></p>
 <p>则有：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha_1+\alpha_2+\cdots+\alpha_n=\sum_{i=1}^{n}\sum_{j=1}^{r_i}k_{ij}\alpha_{ij}=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p><span class="math inline">\(k_{ij}\in F\)</span>。因为<span class="math inline">\(\alpha_{ij},\;i=1,2,\dots,n,\;j=1,2,\dots,r_i\)</span>是<span class="math inline">\(X_1+X_2+\cdots+X_n\)</span>的一组基，所以<span class="math inline">\(k_{ij}=0,\;i=1,2,\dots,n,\;j=1,2,\dots,r_i\)</span>，于是<span class="math inline">\(\alpha_i=\mathbf{0}\)</span>，即和<span class="math inline">\(X_1+X_2+\cdots+X_n\)</span>中零向量的表示方法唯一，由(2)可得和<span class="math inline">\(X_1+X_2+\cdots+X_n\)</span>是直和。&nbsp;◻</p>
 </div>
@@ -1749,35 +1819,29 @@ X_2\cap\sum_{i=3}^{n}X_i\subseteq X_2\cap\left(X_1+\sum_{i=3}^{n}X_i\right)=\mat
 X
 &amp;=&lt;\alpha_1, \alpha_2, \dots, \alpha_{m},\beta_1, \beta_2, \dots, \beta_{n-m}&gt; \\
 &amp;=&lt;\alpha_1, \alpha_2, \dots, \alpha_{m}&gt;+&lt;\beta_1, \beta_2, \dots, \beta_{n-m}&gt;=E+W
-
 \end{align*}\]</span></p>
 <p>其中<span class="math inline">\(W=&lt;\beta_1, \beta_2, \dots, \beta_{n-m}&gt;\)</span>。因为<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{m},\beta_1, \beta_2, \dots, \beta_{n-m}\)</span>线性无关，由<a href="#prop-LinearlyDependent-0205c98a" data-reference-type="ref+label" data-reference="prop:LinearlyDependent">性质 1.1.2</a>(1)可知<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n-m}\)</span>线性无关，所以<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n-m}\)</span>是<span class="math inline">\(W\)</span>的一组基。于是<span class="math inline">\(E\)</span>的一组基和<span class="math inline">\(W\)</span>的一组基合起来就是<span class="math inline">\(X\)</span>的一组基。由<a href="#theo-DirectSum-61fb3a25" data-reference-type="ref+label" data-reference="theo:DirectSum">定理 1.6</a>(5)可知<span class="math inline">\(X=E\oplus W\)</span>，于是<span class="math inline">\(W\)</span>是<span class="math inline">\(E\)</span>的补空间。</p>
 <p><strong>(2)<span class="math inline">\(\;\dim(X)=+\infty\)</span>：</strong> 考虑商空间<span class="math inline">\(X/E\)</span>，根据<a href="#theo-ExistenceOfBasis-368cfcc3" data-reference-type="ref+label" data-reference="theo:ExistenceOfBasis">定理 1.1</a>，设其一组基为<span class="math inline">\(\alpha_i+E,\;i\in I\)</span>，其中<span class="math inline">\(I\)</span>是一个指标集。由<a href="#prop-CanonicalMap-8de949dc" data-reference-type="ref+label" data-reference="prop:CanonicalMap">性质 1.1.8</a>(4)可知<span class="math inline">\(\alpha_i,\;i\in I\)</span>线性无关。令：</p>
 <p><span class="math display">\[\begin{equation*}
 W=\left\{\sum_{i=1}^{n}k_i\alpha_{i}:k_i\in F,\;n\in\mathbb{N}^+\right\}
-
 \end{equation*}\]</span></p>
 <p>显然<span class="math inline">\(\alpha_i,\;i\in I\)</span>是<span class="math inline">\(W\)</span>的一组基。下面证明<span class="math inline">\(W\)</span>是<span class="math inline">\(E\)</span>的一个补空间。</p>
 <p>任取<span class="math inline">\(\alpha\in X\)</span>，因为<span class="math inline">\(\alpha_i+E,\;i\in I\)</span>是<span class="math inline">\(X/E\)</span>的一组基，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha+E=\sum_{i=1}^{m}l_i\alpha_{i}+E,\;l_j\in F
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha-\sum_{i=1}^{m}l_i\alpha_{i}\in E
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\alpha\)</span>可以表示为<span class="math inline">\(E\)</span>和<span class="math inline">\(W\)</span>中两个元素的和。由<span class="math inline">\(\alpha\)</span>的任意性，<span class="math inline">\(X=E+W\)</span>。</p>
 <p>任取<span class="math inline">\(\beta\in W\cap E\)</span>，因为<span class="math inline">\(\beta\in W\)</span>，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \beta=\sum_{i=1}^{t}p_ia_{i},\;p_i\in F
-
 \end{equation*}\]</span></p>
 <p>又因为<span class="math inline">\(\beta\in E\)</span>，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 E=\beta+E=\sum_{i=1}^{t}p_ia_{r_i}+E=\sum_{i=1}^{t}p_i(a_{i}+E)
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(\alpha_i+E,\;i\in I\)</span>线性无关，所以<span class="math inline">\(p_i=0,\;i=1,2,\dots,t\)</span>（<span class="math inline">\(E\)</span>是<span class="math inline">\(X/E\)</span>的零元），于是<span class="math inline">\(\beta=\mathbf{0}\)</span>。由<a href="#theo-DirectSum-61fb3a25" data-reference-type="ref+label" data-reference="theo:DirectSum">定理 1.6</a>(3)可知<span class="math inline">\(X=E\oplus W\)</span>，<span class="math inline">\(W\)</span>是<span class="math inline">\(E\)</span>的补空间。</p>
 <p>综上，<span class="math inline">\(X\)</span>的任一子空间<span class="math inline">\(E\)</span>都有补空间。&nbsp;◻</p>
@@ -1790,7 +1854,6 @@ E=\beta+E=\sum_{i=1}^{t}p_ia_{r_i}+E=\sum_{i=1}^{t}p_i(a_{i}+E)
 <p><strong>Definition 1.20</strong>. 设<span class="math inline">\(X,Y\)</span>为域<span class="math inline">\(F\)</span>上的线性空间。如果存在<span class="math inline">\(X\)</span>到<span class="math inline">\(Y\)</span>的一个双射<span class="math inline">\(\sigma\)</span>，使得对于任意的<span class="math inline">\(\alpha,\beta\in X,\;k_1,k_2\in F\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \sigma(k_1\alpha+k_2\beta)=k_1\sigma(\alpha)+k_2\sigma(\beta)
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\sigma\)</span>是<span class="math inline">\(X\)</span>到<span class="math inline">\(Y\)</span>的一个<a href="../chapters/page-048.html#term-Isomorphism" class="term" title="isomorphism">同构映射<span class="term-english">（isomorphism）</span></a>，此时称<span class="math inline">\(X\)</span>与<span class="math inline">\(Y\)</span><a href="../chapters/page-048.html#term-Isomorphic" class="term" title="isomorphic">同构<span class="term-english">（isomorphic）</span></a>，记作<span class="math inline">\(X\cong Y\)</span>。</p>
 </div>
@@ -1812,23 +1875,19 @@ E=\beta+E=\sum_{i=1}^{t}p_ia_{r_i}+E=\sum_{i=1}^{t}p_i(a_{i}+E)
 <p>(3)设：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=1}^{n}k_i\alpha_i=\mathbf{0}_X,\;k_i\in F
-
 \end{equation*}\]</span></p>
 <p>由(1)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=1}^{n}k_i\sigma(\alpha_i)=\sigma(\mathbf{0}_X)=\mathbf{0}_Y
-
 \end{equation*}\]</span></p>
 <p>若<span class="math inline">\(k_i\)</span>不全为<span class="math inline">\(0\)</span>，即<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>或<span class="math inline">\(\sigma(\alpha_1),\sigma(\alpha_2),\dots,\sigma(\alpha_n)\)</span>线性相关，此时另一个也线性相关。</p>
 <p>(4)由(3)可得<span class="math inline">\(\sigma(\alpha_1),\sigma(\alpha_2),\dots,\sigma(\alpha_n)\)</span>线性无关。任取<span class="math inline">\(\beta\in Y\)</span>，因为<span class="math inline">\(\sigma\)</span>是一个满射，则存在<span class="math inline">\(\alpha\in X\)</span>使得<span class="math inline">\(\sigma(\alpha)=\beta\)</span>。因为<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>是<span class="math inline">\(X\)</span>的一组基，所以存在<span class="math inline">\(k_1, k_2, \dots, k_{n}\in F\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha=\sum_{i=1}^{n}k_i\alpha_i
-
 \end{equation*}\]</span></p>
 <p>由(3)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \beta=\sigma(\alpha)=\sigma\left(\sum_{i=1}^{n}k_i\alpha_i\right)=\sum_{i=1}^{n}k_i\sigma(\alpha_i)
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\beta\)</span>可由<span class="math inline">\(\sigma(\alpha_i),\;i=1,2,\dots,n\)</span>线性表出。由<span class="math inline">\(\beta\)</span>的任意性，<span class="math inline">\(\sigma(\alpha_i),\;i=1,2,\dots,n\)</span>是<span class="math inline">\(Y\)</span>的一组基。</p>
 <p>(5)由定义和(4)直接得到。</p>
@@ -1843,7 +1902,6 @@ E=\beta+E=\sum_{i=1}^{t}p_ia_{r_i}+E=\sum_{i=1}^{t}p_i(a_{i}+E)
 <p><strong>(2)充分性：</strong>设二者维数都是<span class="math inline">\(n\)</span>，取<span class="math inline">\(X\)</span>的一组基<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>和<span class="math inline">\(Y\)</span>的一组基<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>。令：</p>
 <p><span class="math display">\[\begin{equation*}
 \sigma:\sum_{i=1}^{n}k_i\alpha_i\longrightarrow\sum_{i=1}^{n}k_i\beta_i
-
 \end{equation*}\]</span></p>
 <p>显然它是一个线性映射，由<a href="#prop-LinearlyDependent-0205c98a" data-reference-type="ref+label" data-reference="prop:LinearlyDependent">性质 1.1.2</a>(4)和基的定义可知它是一个双射，于是<span class="math inline">\(X\)</span>与<span class="math inline">\(Y\)</span>同构。&nbsp;◻</p>
 </div>
@@ -1871,7 +1929,6 @@ E=\beta+E=\sum_{i=1}^{t}p_ia_{r_i}+E=\sum_{i=1}^{t}p_i(a_{i}+E)
 <p><span class="math display">\[\begin{gather*}
 \alpha+\beta=x+y+L,\;x\in\alpha,\;y\in\beta \\
 k\alpha=kx+L,\;x\in\alpha
-
 \end{gather*}\]</span></p>
 <p>则<span class="math inline">\(\hat{X}\)</span>成为一个线性空间，称其为<span class="math inline">\(X\)</span>关于<span class="math inline">\(L\)</span>的<a href="../chapters/page-056.html#term-QuotientSpace" class="term" title="quotient space">商空间<span class="term-english">（quotient space）</span></a>，记作<span class="math inline">\(X/L\)</span>。</p>
 </div>
@@ -1880,13 +1937,11 @@ k\alpha=kx+L,\;x\in\alpha
 <p>(1)任取<span class="math inline">\(x'\in\alpha,\;y'\in\beta\)</span>，满足<span class="math inline">\(x\ne x',\;y\ne y'\)</span>。于是有：</p>
 <p><span class="math display">\[\begin{equation*}
 x'+y'+L=x+y+(x'-x)+(y'-y)+L
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(x,x'\in\alpha,\;y,y'\in\beta\)</span>，所以<span class="math inline">\(x'-x,y'-y\in L\)</span>，于是<span class="math inline">\(x'+y'+L=x+y+L\)</span>。</p>
 <p>(2)任取<span class="math inline">\(x'\in\alpha\)</span>，满足<span class="math inline">\(x\ne x'\)</span>。于是有：</p>
 <p><span class="math display">\[\begin{equation*}
 kx'+L=kx+k(x'-x)+L
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(x,x'\in\alpha\)</span>，所以<span class="math inline">\(x'-x\in L\)</span>。因为<span class="math inline">\(L\)</span>是线性空间，所以<span class="math inline">\(k(x'-x)\in L\)</span>，于是<span class="math inline">\(kx'+L=kx+L\)</span>。</p>
 <p>下证明<span class="math inline">\(\hat{X}\)</span>是一个线性空间。</p>
@@ -1909,25 +1964,21 @@ kx'+L=kx+k(x'-x)+L
 <p><strong>Theorem 1.10</strong>. 设<span class="math inline">\(X\)</span>是域<span class="math inline">\(F\)</span>上的<span class="math inline">\(n\)</span>维线性空间，<span class="math inline">\(E\)</span>是<span class="math inline">\(X\)</span>的<span class="math inline">\(m\)</span>维子空间，<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{m}\)</span>是<span class="math inline">\(E\)</span>的一组基，<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>是<span class="math inline">\(X\)</span>的一组基，则<span class="math inline">\(\alpha_{m+1}+E,\alpha_{m+2}+E,\dots,\alpha_{n}+E\)</span>是<span class="math inline">\(X/E\)</span>的一组基且：</p>
 <p><span class="math display">\[\begin{equation*}
 \dim(X/E)=\dim(X)-\dim(E)=n-m
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>设<span class="math inline">\(\dim(X)=n,\;\dim(E)=m\)</span>，根据<a href="#theo-ExistenceOfBasis-368cfcc3" data-reference-type="ref+label" data-reference="theo:ExistenceOfBasis">定理 1.1</a>和<a href="#prop-Subspace-fcfc4744" data-reference-type="ref+label" data-reference="prop:Subspace">性质 1.1.6</a>(4)，取<span class="math inline">\(E\)</span>的一组基<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{m}\)</span>，把它扩充为<span class="math inline">\(X\)</span>的一组基<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>。任取<span class="math inline">\(\beta+E\in X/E\)</span>，因为<span class="math inline">\(\beta\in X\)</span>，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \beta+E=\sum_{i=1}^{n}k_i\alpha_i+E=\sum_{i=1}^{m}k_i\alpha_i+\sum_{i=m+1}^{n}k_i\alpha_i+E=\sum_{i=m+1}^{n}k_i\alpha_i+E
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(k_i\in F,\;i=1,2,\dots,n\)</span>。上式表明，对任意的<span class="math inline">\(\beta+E\in X/E\)</span>，都可以用<span class="math inline">\(\alpha_i+E,\;i=m+1,m+2,\dots,n\)</span>的线性组合表示。下证明它们线性无关。</p>
 <p>设：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=m+1}^{n}k_i\alpha_i+E=E
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\sum\limits_{i=m+1}^{n}k_i\alpha_i\in E\)</span>，于是存在<span class="math inline">\(l_j\in F,\;j=1,2,\dots,m\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{j=1}^{m}l_j\alpha_j=\sum_{i=m+1}^{n}k_i\alpha_i
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>线性无关，所以<span class="math inline">\(k_i=l_j=0,\;i=m+1,m+2,\dots,n,\;j=1,2,\dots,m\)</span>，因此<span class="math inline">\(\alpha_i+E,\;i=m+1,m+2,\dots,n\)</span>线性无关，即它们是<span class="math inline">\(X/E\)</span>的一组基，<span class="math inline">\(\dim(X/E)=n-m=\dim(X)-\dim(E)\)</span>。&nbsp;◻</p>
 </div>
@@ -1941,7 +1992,6 @@ kx'+L=kx+k(x'-x)+L
 <p><strong>Definition 1.23</strong>. 设<span class="math inline">\(X\)</span>是域<span class="math inline">\(F\)</span>上的一个线性空间，<span class="math inline">\(E\)</span>是<span class="math inline">\(X\)</span>的一个子空间，定义映射：</p>
 <p><span class="math display">\[\begin{equation*}
 \pi:\alpha\longrightarrow\alpha+E,\;\forall\;\alpha\in X
-
 \end{equation*}\]</span></p>
 <p>称之为<a href="../chapters/page-042.html#term-CanonicalMapping" class="term" title="canonical mapping">标准映射<span class="term-english">（canonical mapping）</span></a>。</p>
 </div>
@@ -1951,7 +2001,6 @@ kx'+L=kx+k(x'-x)+L
 <li><p><span class="math inline">\(X/E\)</span>中的一个元素<span class="math inline">\(\alpha+E\)</span>在<span class="math inline">\(\pi\)</span>下的原像是：</p>
 <p><span class="math display">\[\begin{equation*}
                 \{\alpha+\beta:\beta\in E\}
-
     \end{equation*}\]</span></p></li>
 <li><p><span class="math inline">\(\pi\)</span>是一个满射。当且仅当<span class="math inline">\(E\)</span>是零空间时，<span class="math inline">\(\pi\)</span>是一个双射；</p></li>
 <li><p><span class="math inline">\(\pi\)</span>是一个线性映射；</p></li>
@@ -1970,24 +2019,20 @@ kx'+L=kx+k(x'-x)+L
 \exists\;\beta\in E,\;\gamma=\alpha+\beta
 \iff
 \gamma\in\{\alpha+\beta:\beta\in E\}
-
 \end{align*}\]</span></p>
 <p>(2)满射是显然的结论。当<span class="math inline">\(E\)</span>是零空间时，<span class="math inline">\(\pi\)</span>是<span class="math inline">\(X\)</span>上的恒等变换，恒等变换显然是双射。当<span class="math inline">\(\pi\)</span>是双射时，<span class="math inline">\(\pi\)</span>是一个单射，即对任何的<span class="math inline">\(\alpha+E\in X/E\)</span>，有且仅有<span class="math inline">\(\alpha\in X\)</span>使得<span class="math inline">\(\pi(\alpha)=\alpha+E\)</span>，也即不存在<span class="math inline">\(\beta\in X,\;\beta\ne\alpha\)</span>，使得<span class="math inline">\(\beta-\alpha\in E\)</span>，此时<span class="math inline">\(E\)</span>只能为零空间。</p>
 <p>(3)<span class="math inline">\(\;\forall\;\alpha,\beta\in X,\;k_1,k_2\in F\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \pi(k_1\alpha+k_2\beta)=k_1\alpha+k_2\beta+E=k_1\alpha+E+k_2\alpha+E=k_1\pi(\alpha)+k_2\pi(\beta)
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\pi\)</span>是一个线性映射。</p>
 <p>(4)因为<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>线性相关，所以存在不全为零的<span class="math inline">\(k_1, k_2, \dots, k_{n}\in F\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=1}^{n}k_i\alpha_i=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>由(3)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \pi\left(\sum_{i=1}^{n}k_i\alpha_i\right)=\sum_{i=1}^{n}k_i\pi(\alpha_i)=\sum_{i=1}^{n}k_i\alpha_i+E=E
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\pi(\alpha_i),\;i=1,2,\dots,n\)</span>线性相关。&nbsp;◻</p>
 </div>
@@ -2006,12 +2051,10 @@ kx'+L=kx+k(x'-x)+L
 <li><p><span class="math inline">\(X\)</span>中有一个元素，记作<span class="math inline">\(\mathbf{0}\)</span>，称为<span class="math inline">\(X\)</span>的<strong>零元</strong>，它使得：</p>
 <p><span class="math display">\[\begin{equation*}
                 \forall\;\alpha\in X,\;\alpha+\mathbf{0}=\alpha
-
     \end{equation*}\]</span></p></li>
 <li><p>对于任意的<span class="math inline">\(\alpha\in X\)</span>，存在与之对应的<span class="math inline">\(\beta\in X\)</span>，称为<span class="math inline">\(\alpha\)</span>的<strong>逆元</strong>，记作<span class="math inline">\(-\alpha\)</span>，它使得：</p>
 <p><span class="math display">\[\begin{equation*}
                 \alpha+\beta=\mathbf{0}
-
     \end{equation*}\]</span></p></li>
 <li><p><span class="math inline">\(\forall\;\alpha,\beta,\gamma\in X,\;(\alpha\beta)\gamma=\alpha(\beta\gamma)\)</span>；</p></li>
 <li><p><span class="math inline">\(\forall\;\alpha,\beta,\gamma\in X,\;(\alpha+\beta)\gamma=\alpha\gamma+\beta\gamma,\;\alpha(\beta+\gamma)=\alpha\gamma+\alpha\gamma\)</span>。</p></li>
@@ -2028,7 +2071,6 @@ kx'+L=kx+k(x'-x)+L
 <li><p>若<span class="math inline">\(X\)</span>中有一个元素<span class="math inline">\(e\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
                 \forall\;\alpha\in X,\;\alpha e=e\alpha=\alpha
-
     \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(e\)</span>是<span class="math inline">\(X\)</span>的<strong>单位元</strong>，单位元是唯一的。</p></li>
 </ol>
@@ -2037,42 +2079,35 @@ kx'+L=kx+k(x'-x)+L
 <p><span class="proof-title"><em>证明</em>. </span>(1)假设<span class="math inline">\(X\)</span>中有两个零元<span class="math inline">\(\mathbf{0}_1,\mathbf{0}_2\)</span>且<span class="math inline">\(\mathbf{0}_1\ne\mathbf{0}_2\)</span>，由环运算法则(3)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathbf{0}_1+\mathbf{0}_2=\mathbf{0}_1,\quad\mathbf{0}_2+\mathbf{0}_1=\mathbf{0}_2
-
 \end{equation*}\]</span></p>
 <p>而由环运算法则(1)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathbf{0}_1+\mathbf{0}_2=\mathbf{0}_2+\mathbf{0}_1
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\mathbf{0}_1=\mathbf{0}_2\)</span>，产生矛盾，所以<span class="math inline">\(X\)</span>中的零元是唯一的。</p>
 <p>(2)任取<span class="math inline">\(X\)</span>中的一个元素<span class="math inline">\(\alpha\)</span>，假设它有两个负元<span class="math inline">\(\beta_1,\beta_2\)</span>。由环运算法则(4)(1)(3)(2)可得：</p>
 <p><span class="math display">\[\begin{gather*}
 (\beta_1+\alpha)+\beta_2=\mathbf{0}+\beta_2=\beta_2 \\
 (\beta_1+\alpha)+\beta_2=\beta_1+(\alpha+\beta_2)=\beta_1+\mathbf{0}=\beta_1
-
 \end{gather*}\]</span></p>
 <p>所以<span class="math inline">\(\beta_1=\beta_2\)</span>，产生矛盾。由<span class="math inline">\(\alpha\)</span>的任意性，<span class="math inline">\(X\)</span>中每个元素的负元都是唯一的。</p>
 <p>(3)由环运算法则(6)(3)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathbf{0}\alpha+\mathbf{0}\alpha=(\mathbf{0}+\mathbf{0})\alpha=\mathbf{0}\alpha
-
 \end{equation*}\]</span></p>
 <p>两边同时加上<span class="math inline">\(-(\mathbf{0}\alpha)\)</span>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathbf{0}\alpha+\mathbf{0}\alpha+[-(\mathbf{0}\alpha)]=\mathbf{0}\alpha+[-(\mathbf{0}\alpha)]
-
 \end{equation*}\]</span></p>
 <p>由环运算法则(2)(4)(3)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathbf{0}\alpha=\mathbf{\mathbf{0}}
-
 \end{equation*}\]</span></p>
 <p>由环运算法则(6)中的左分配律同理可得<span class="math inline">\(\alpha\mathbf{0}=\mathbf{0}\)</span>。</p>
 <p>(4)由环运算法则(4)可得<span class="math inline">\(-\alpha+[-(-\alpha)]=\mathbf{0}\)</span>，在两边同时加上<span class="math inline">\(\alpha\)</span>由(4)(1)(3)即可得出结论。</p>
 <p>(5)假设<span class="math inline">\(X\)</span>中有两个单位元<span class="math inline">\(e_1,e_2\)</span>，由单位元的定义可得：</p>
 <p><span class="math display">\[\begin{equation*}
 e_1e_2=e_1,\quad e_1e_2=e_2
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(e_1=e_2\)</span>，产生矛盾，所以<span class="math inline">\(X\)</span>中的单位元是唯一的。&nbsp;◻</p>
 </div>
@@ -2097,7 +2132,6 @@ e_1e_2=e_1,\quad e_1e_2=e_2
 <p><strong>Theorem 1.11</strong>. 环<span class="math inline">\(X\)</span>的一个非空子集<span class="math inline">\(E\)</span>是<span class="math inline">\(X\)</span>的子环的充分必要条件是<span class="math inline">\(E\)</span>对于<span class="math inline">\(X\)</span>的减法和乘法都封闭，即：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\alpha,\beta\in E,\;\alpha-\beta,\alpha\beta\in E
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -2105,7 +2139,6 @@ e_1e_2=e_1,\quad e_1e_2=e_2
 <p><span class="math display">\[\begin{gather*}
 \mathbf{0}_E+\mathbf{0}_E+(-\mathbf{0}_E)=\mathbf{0}_E+(-\mathbf{0}_E) \\
 \mathbf{0}_E+\mathbf{0}_X=\mathbf{0}_X
-
 \end{gather*}\]</span></p>
 <p>即<span class="math inline">\(\mathbf{0}_E=\mathbf{0}_X\)</span>。</p>
 <p>任取<span class="math inline">\(a,b\in E\)</span>，对于<span class="math inline">\(X\)</span>的减法，由减法的定义可知<span class="math inline">\(a-b=a+(-b)_X\)</span>。因为<span class="math inline">\(\mathbf{0}_E=\mathbf{0}_X\)</span>，所以<span class="math inline">\(b+(-b)_E=\mathbf{0}_E=\mathbf{0}_X\)</span>，由<a href="#prop-RingAlgebra-a5a46024" data-reference-type="ref+label" data-reference="prop:RingAlgebra">性质 1.2.1</a>(2)可知<span class="math inline">\((-b)_E=(-b)_X\)</span>，所以<span class="math inline">\(a+(-b)_X=a+(-b)_E\)</span>。因为<span class="math inline">\(E\)</span>对<span class="math inline">\(X\)</span>上的加法封闭，所以<span class="math inline">\(a-b\in E\)</span>，即<span class="math inline">\(E\)</span>对<span class="math inline">\(X\)</span>的减法封闭。</p>
@@ -2122,7 +2155,6 @@ e_1e_2=e_1,\quad e_1e_2=e_2
 <p><strong>Definition 1.30</strong>. 数域<span class="math inline">\(K\)</span>上的<a href="../chapters/page-060.html#term-UnivariatePolynomial" class="term" title="univariate polynomial">一元多项式<span class="term-english">（univariate polynomial）</span></a>指的是如下形式的表达式：</p>
 <p><span class="math display">\[\begin{equation*}
 a_nx^n+a_{n-1}x^{n-1}+\cdots+a_1x+a_0
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(x\)</span>是一个符号，<span class="math inline">\(n\in\mathbb{N}^+\)</span>，<span class="math inline">\(a_i\in K,\;i=0,1,\dots,n\)</span>。规定<span class="math inline">\(x^0=1\)</span>，称<span class="math inline">\(x\)</span>为<a href="../chapters/page-048.html#term-Indeterminate" class="term" title="indeterminate">不定元<span class="term-english">（indeterminate）</span></a>，<span class="math inline">\(a_i\)</span>为<a href="../chapters/page-042.html#term-Coefficient" class="term" title="coefficient">系数<span class="term-english">（coefficient）</span></a>，<span class="math inline">\(a_ix^i\)</span>为<a href="../chapters/page-059.html#term-TermOfDegreeI" class="term" title="term of degree i"><span class="math inline">\(i\)</span>次项<span class="term-english">（term of degree i）</span></a>，<span class="math inline">\(a_0\)</span>也称为<a href="../chapters/page-042.html#term-ConstantTerm" class="term" title="constant term">常数项<span class="term-english">（constant term）</span></a>或<strong>零次项</strong>。两个这种形式的表达式相等当且仅当它们在除去系数为<span class="math inline">\(0\)</span>的项后含有完全相同的项。系数全为<span class="math inline">\(0\)</span>的一元多项式称为<a href="../chapters/page-065.html#term-ZeroPolynomial" class="term" title="zero polynomial">零多项式<span class="term-english">（zero polynomial）</span></a>，记作<span class="math inline">\(0\)</span>。</p>
 </div>
@@ -2154,7 +2186,6 @@ a_nx^n+a_{n-1}x^{n-1}+\cdots+a_1x+a_0
 <li><p>若<span class="math inline">\(f(x),g(x)\in K[x]\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
                 \deg[(f(x)\pm g(x))]\leqslant\max\{\deg f(x)+\deg g(x)\},\quad\deg[f(x)g(x)]=\deg f(x)+\deg g(x)
-
     \end{equation*}\]</span></p></li>
 <li><p>若<span class="math inline">\(f(x),g(x)\in K[x]\)</span>且<span class="math inline">\(f(x)g(x)=0\)</span>，则<span class="math inline">\(f(x)=0\)</span>或<span class="math inline">\(g(x)=0\)</span>；</p></li>
 <li><p><span class="math inline">\(K[x]\)</span>中的乘法适合消去率，即若<span class="math inline">\(f(x)g(x)=f(x)h(x)\)</span>且<span class="math inline">\(f(x)\ne0\)</span>，则有<span class="math inline">\(g(x)=h(x)\)</span>；</p></li>
@@ -2210,49 +2241,41 @@ a_nx^n+a_{n-1}x^{n-1}+\cdots+a_1x+a_0
 <p>(6)由整除的定义可知存在<span class="math inline">\(p(x),q(x)\in K[x]\)</span>使得<span class="math inline">\(g(x)=p(x)f(x),h(x)=q(x)f(x)\)</span>，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 u(x)g(x)+v(x)h(x)=u(x)p(x)f(x)+v(x)q(x)f(x)=[u(x)p(x)+v(x)q(x)]f(x)
-
 \end{equation*}\]</span></p>
 <p>(7)<strong>充分性：</strong>代入验证即可。</p>
 <p><strong>必要性：</strong>设<span class="math inline">\(f(x)\sim g(x)\)</span>，则<span class="math inline">\(f(x)\mid g(x)\)</span>且<span class="math inline">\(g(x)\mid f(x)\)</span>，于是存在<span class="math inline">\(h_1(x),h_2(x)\)</span>使得<span class="math inline">\(g(x)=h_1(x)f(x),f(x)=h_2(x)g(x)\)</span>，所以有：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=h_2(x)h_1(x)f(x)
-
 \end{equation*}\]</span></p>
 <p>当<span class="math inline">\(f(x)=0\)</span>时，由(2)可知<span class="math inline">\(g(x)=0\)</span>，满足条件。当<span class="math inline">\(f(x)\ne0\)</span>时，由<a href="#prop-UnivariatePolynomialRing-354ab600" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialRing">性质 1.2.2</a>(4)和<a href="#prop-RingAlgebra-a5a46024" data-reference-type="ref+label" data-reference="prop:RingAlgebra">性质 1.2.1</a>(5)可得<span class="math inline">\(h_2(x)h_1(x)=1\)</span>，根据<a href="#prop-UnivariatePolynomialRing-354ab600" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialRing">性质 1.2.2</a>(1)可知<span class="math inline">\(\deg h_1(x)=\deg h_2(x)=0\)</span>，于是<span class="math inline">\(h_1(x),h_2(x)\in K\setminus\{0\}\)</span>，令<span class="math inline">\(a=h_2(x)\)</span>即可。</p>
 <p>(8)<strong>存在性：</strong>若<span class="math inline">\(\deg f(x)&lt;\deg g(x)\)</span>，取<span class="math inline">\(h(x)=0,r(x)=f(x)\)</span>即可。当<span class="math inline">\(\deg f(x)\geqslant\deg g(x)\)</span>时，对<span class="math inline">\(f(x)\)</span>的次数作数学归纳法。若<span class="math inline">\(\deg f(x)=0\)</span>，则<span class="math inline">\(\deg g(x)=0\)</span>，注意到：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=\frac{f(x)}{g(x)}g(x)+0
-
 \end{equation*}\]</span></p>
 <p>即可。假设当<span class="math inline">\(\deg f(x)=m-1\)</span>时结论成立，接下来证明<span class="math inline">\(\deg f(x)=m\)</span>时结论也成立。</p>
 <p>设：</p>
 <p><span class="math display">\[\begin{gather*}
 f(x)=a_mx^m+a_{m-1}x^{m-1}+\cdots+a_1x+a_0,\quad a_m\ne0 \\
 g(x)=b_nx^n+b_{n-1}x^{n-1}+\cdots+b_1x+b_0,\quad b_n\ne0
-
 \end{gather*}\]</span></p>
 <p>因为<span class="math inline">\(m\geqslant n\)</span>，所以可以令：</p>
 <p><span class="math display">\[\begin{equation*}
 p(x)=f(x)-a_mb_n^{-1}x^{m-n}g(x)
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\deg p(x)&lt;m\)</span>。由归纳假设，存在唯一的一对<span class="math inline">\(h_1(x),r_1(x)\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 p(x)=h_1(x)g(x)+r_1(x)
-
 \end{equation*}\]</span></p>
 <p>且<span class="math inline">\(\deg r_1(x)&lt;\deg g(x)\)</span>。变形可得：</p>
 <p><span class="math display">\[\begin{gather*}
 h_1(x)g(x)+r_1(x)=f(x)-a_mb_n^{-1}x^{m-n}g(x) \\
 f(x)=[h_1(x)+a_mb_n^{-1}x^{m-n}]g(x)+r_1(x)
-
 \end{gather*}\]</span></p>
 <p>存在性得证。</p>
 <p><strong>唯一性：</strong>假设还有一对不同于<span class="math inline">\(h(x),r(x)\)</span>的<span class="math inline">\(u(x),v(x)\)</span>使得<span class="math inline">\(f(x)=u(x)g(x)+v(x)\)</span>，且有<span class="math inline">\(\deg v(x)&lt;\deg g(x)\)</span>，则：</p>
 <p><span class="math display">\[\begin{gather*}
 u(x)g(x)+v(x)=h(x)g(x)+r(x) \\
 [h(x)-u(x)]g(x)=v(x)-r(x)
-
 \end{gather*}\]</span></p>
 <p>由<a href="#prop-UnivariatePolynomialRing-354ab600" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialRing">性质 1.2.2</a>(1)可知<span class="math inline">\(v(x)=r(x)\)</span>，否则无法满足<span class="math inline">\(\deg v(x)&lt;\deg g(x)\)</span>。因为<span class="math inline">\(g(x)\ne0\)</span>，根据<a href="#prop-UnivariatePolynomialRing-354ab600" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialRing">性质 1.2.2</a>(2)可知<span class="math inline">\(h(x)=u(x)\)</span>，唯一性得证。</p>
 <p>(9)<strong>必要性：</strong>因为在<span class="math inline">\(K[x]\)</span>中有<span class="math inline">\(g(x)\mid f(x)\)</span>，所以存在<span class="math inline">\(h(x)\in K[x]\)</span>使得<span class="math inline">\(f(x)=h(x)g(x)\)</span>。因为<span class="math inline">\(K\subseteq F\)</span>，所以<span class="math inline">\(f(x),g(x),h(x)\in F[x]\)</span>，于是在<span class="math inline">\(F[x]\)</span>中有<span class="math inline">\(g(x)\mid f(x)\)</span>。</p>
@@ -2283,7 +2306,6 @@ u(x)g(x)+v(x)=h(x)g(x)+r(x) \\
 <li><p><span class="math inline">\(f(x)\)</span>和<span class="math inline">\(g(x)\)</span>在<span class="math inline">\(K[x]\)</span>中存在最大公因式<span class="math inline">\(c(x)\)</span>，且存在<span class="math inline">\(u(x),v(x)\in K[x]\)</span>使得<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>：</p>
 <p><span class="math display">\[\begin{equation*}
                 c(x)=u(x)f(x)+v(x)g(x)
-
     \end{equation*}\]</span></p></li>
 <li><p><span class="math inline">\(c(x)\)</span>是<span class="math inline">\(f(x)\)</span>和<span class="math inline">\(g(x)\)</span>的最大公因式的充要条件为<span class="math inline">\(c(x)\)</span>是<span class="math inline">\(af(x)\)</span>和<span class="math inline">\(bg(x)\)</span>的最大公因式；</p></li>
 <li><p><span class="math inline">\(c(x)\)</span>是<span class="math inline">\(f(x)\)</span>和<span class="math inline">\(g(x)\)</span>的最大公因式的充要条件为<span class="math inline">\(ac(x)\)</span>是<span class="math inline">\(f(x)\)</span>和<span class="math inline">\(g(x)\)</span>的最大公因式；</p></li>
@@ -2291,7 +2313,6 @@ u(x)g(x)+v(x)=h(x)g(x)+r(x) \\
 <li><p><span class="math inline">\(f(x)\)</span>和<span class="math inline">\(g(x)\)</span>互素的充要条件为存在<span class="math inline">\(u(x),v(x)\in K[x]\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
                 1=u(x)f(x)+v(x)g(x)
-
     \end{equation*}\]</span></p></li>
 <li><p>若<span class="math inline">\(f(x)\mid g(x)h(x)\)</span>且<span class="math inline">\((f(x),g(x))=1\)</span>，则<span class="math inline">\(f(x)\mid h(x)\)</span>；</p></li>
 <li><p>若<span class="math inline">\(f(x)\mid h(x)\)</span>、<span class="math inline">\(g(x)\mid h(x)\)</span>且<span class="math inline">\((f(x),g(x))=1\)</span>，则<span class="math inline">\(f(x)g(x)\mid h(x)\)</span>；</p></li>
@@ -2306,19 +2327,16 @@ u(x)g(x)+v(x)=h(x)g(x)+r(x) \\
 <p>若<span class="math inline">\(g(x)\ne0\)</span>，由<a href="#prop-UnivariatePolynomialDivision-42d5d755" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialDivision">性质 1.2.3</a>(8)可知在<span class="math inline">\(K[x]\)</span>中存在唯一的一对<span class="math inline">\(h_1(x),r_1(x)\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=h_1(x)g(x)+r_1(x),\quad\deg r_1(x)&lt;\deg g(x)
-
 \end{equation*}\]</span></p>
 <p>根据(1)可知<span class="math inline">\(f(x)\)</span>和<span class="math inline">\(g(x)\)</span>的最大公因式即为<span class="math inline">\(g(x)\)</span>和<span class="math inline">\(r_1(x)\)</span>的最大公因式。若<span class="math inline">\(r_1(x)=0\)</span>，由<a href="#prop-UnivariatePolynomialDivision-42d5d755" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialDivision">性质 1.2.3</a>(4)可知<span class="math inline">\(g(x)\)</span>就是<span class="math inline">\(f(x)\)</span>和<span class="math inline">\(g(x)\)</span>的最大公因式，根据<a href="#prop-RingAlgebra-a5a46024" data-reference-type="ref+label" data-reference="prop:RingAlgebra">性质 1.2.1</a>(2)可取<span class="math inline">\(u(x)=0\)</span>和<span class="math inline">\(v(x)=1\)</span>。若<span class="math inline">\(r_1(x)\ne0\)</span>，则由<a href="#prop-UnivariatePolynomialDivision-42d5d755" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialDivision">性质 1.2.3</a>(8)可知在<span class="math inline">\(K[x]\)</span>中存在唯一的一对<span class="math inline">\(h_2(x),r_2(x)\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 g(x)=h_2(x)r_1(x)+r_2(x),\quad\deg r_2(x)&lt;\deg r_1(x)
-
 \end{equation*}\]</span></p>
 <p>根据(1)可知<span class="math inline">\(g(x)\)</span>和<span class="math inline">\(r_1(x)\)</span>的最大公因式即为<span class="math inline">\(r_1(x)\)</span>和<span class="math inline">\(r_2(x)\)</span>的最大公因式。若<span class="math inline">\(r_2(x)=0\)</span>，由<a href="#prop-UnivariatePolynomialDivision-42d5d755" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialDivision">性质 1.2.3</a>(4)可知<span class="math inline">\(r_1(x)\)</span>就是<span class="math inline">\(g(x)\)</span>和<span class="math inline">\(r_1(x)\)</span>的最大公因式，也即<span class="math inline">\(r_1(x)\)</span>就是<span class="math inline">\(f(x)\)</span>和<span class="math inline">\(g(x)\)</span>的最大公因式，此时可取<span class="math inline">\(u(x)=1\)</span>和<span class="math inline">\(v(x)=-h_1(x)\)</span>。若<span class="math inline">\(r_2(x)\ne0\)</span>，则可以继续重复上述步骤。</p>
 <p>由于余式的次数总是小于上一次除法余式的次数，所以一定存在<span class="math inline">\(n\in\mathbb{N}^+\)</span>满足<span class="math inline">\(r_{n+1}(x)=0\)</span>（否则可以进行无穷次除法，此时所得余式不为<span class="math inline">\(0\)</span>但次数为<span class="math inline">\(-\infty\)</span>），此时<span class="math inline">\(r_n(x)\)</span>就是<span class="math inline">\(f(x)\)</span>和<span class="math inline">\(g(x)\)</span>的最大公因式。</p>
 <p>由前面重复的过程可以看出所有的余式都可以由<span class="math inline">\(f(x)\)</span>和<span class="math inline">\(g(x)\)</span>表示，所以：</p>
 <p><span class="math display">\[\begin{align*}
 r_n(x)=r_{n-2}(x)-h_n(x)r_{n-1}(x)=u(x)f(x)+v(x)g(x)
-
 \end{align*}\]</span></p>
 <p>(4)<strong>必要性：</strong>因为<span class="math inline">\(c(x)\)</span>是<span class="math inline">\(f(x)\)</span>和<span class="math inline">\(g(x)\)</span>的最大公因式，所以<span class="math inline">\(c(x)\)</span>是<span class="math inline">\(f(x)\)</span>和<span class="math inline">\(g(x)\)</span>的公因式，由<a href="#prop-UnivariatePolynomialDivision-42d5d755" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialDivision">性质 1.2.3</a>(6)和<a href="#prop-RingAlgebra-a5a46024" data-reference-type="ref+label" data-reference="prop:RingAlgebra">性质 1.2.1</a>(3)可知<span class="math inline">\(c(x)\)</span>是<span class="math inline">\(af(x)\)</span>和<span class="math inline">\(bg(x)\)</span>的公因式。任取<span class="math inline">\(af(x)\)</span>和<span class="math inline">\(bg(x)\)</span>的公因式<span class="math inline">\(d(x)\)</span>，由<a href="#prop-UnivariatePolynomialDivision-42d5d755" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialDivision">性质 1.2.3</a>(6)和<a href="#prop-RingAlgebra-a5a46024" data-reference-type="ref+label" data-reference="prop:RingAlgebra">性质 1.2.1</a>(3)可知<span class="math inline">\(d(x)\)</span>是<span class="math inline">\(f(x)\)</span>和<span class="math inline">\(g(x)\)</span>的公因式，所以<span class="math inline">\(d(x)\mid c(x)\)</span>。由<span class="math inline">\(d(x)\)</span>的任意性可知<span class="math inline">\(c(x)\)</span>是<span class="math inline">\(af(x)\)</span>和<span class="math inline">\(bg(x)\)</span>的最大公因式。</p>
 <p><strong>充分性：</strong>完全类似必要性。</p>
@@ -2331,24 +2349,20 @@ r_n(x)=r_{n-2}(x)-h_n(x)r_{n-1}(x)=u(x)f(x)+v(x)g(x)
 <p>(8)由(7)可知存在<span class="math inline">\(u(x),v(x)\in K[x]\)</span>使得<span class="math inline">\(1=u(x)f(x)+v(x)g(x)\)</span>，即：</p>
 <p><span class="math display">\[\begin{equation*}
 h(x)=u(x)f(x)h(x)+v(x)g(x)h(x)
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(f(x)\mid g(x)h(x)\)</span>，所以<span class="math inline">\(f(x)\mid h(x)\)</span>。</p>
 <p>(9)由(7)可知存在<span class="math inline">\(u(x),v(x)\in K[x]\)</span>使得<span class="math inline">\(1=u(x)f(x)+v(x)g(x)\)</span>，即：</p>
 <p><span class="math display">\[\begin{equation*}
 h(x)=u(x)f(x)h(x)+v(x)g(x)h(x)
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(f(x)\mid h(x)\)</span>且<span class="math inline">\(g(x)\mid h(x)\)</span>，所以<span class="math inline">\(f(x)g(x)\mid h(x)\)</span>。</p>
 <p>(10)由(7)可知存在<span class="math inline">\(u_1(x),u_2(x),v_1(x),v_2(x)\in K[x]\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 1=u_1(x)f(x)+v_1(x)h(x),\quad1=u_2(x)g(x)+v_2(x)h(x)
-
 \end{equation*}\]</span></p>
 <p>将两式相乘得到：</p>
 <p><span class="math display">\[\begin{equation*}
 1=u_1(x)u_2(x)f(x)g(x)+u_1(x)v_2(x)f(x)h(x)+v_1(x)u_2(x)h(x)g(x)+v_1(x)v_2(x)h(x)h(x)
-
 \end{equation*}\]</span></p>
 <p>取<span class="math inline">\(u(x)=u_1(x)u_2(x)\)</span>和<span class="math inline">\(v(x)=u_1(x)v_2(x)f(x)+v_1(x)u_2(x)g(x)+v_1(x)v_2(x)h(x)\)</span>，根据(7)即可得出结论。&nbsp;◻</p>
 </div>
@@ -2380,7 +2394,6 @@ h(x)=u(x)f(x)h(x)+v(x)g(x)h(x)
 <p><strong>Theorem 1.12</strong>. <span class="math inline">\(K[x]\)</span>中任意次数大于<span class="math inline">\(0\)</span>的多项式<span class="math inline">\(f(x)\)</span>都能唯一地分解为数域<span class="math inline">\(K\)</span>上有限多个不可约多项式的乘积，唯一性指的是若<span class="math inline">\(f(x)\)</span>有两个满足条件的分解式：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=\prod_{i=1}^{s}p_i(x)=\prod_{i=1}^{t}q_i(x),\quad p_i(x),q_i(x)\in K[x]
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(s=t\)</span>且排列因式顺序后有<span class="math inline">\(p_i(x)\sim q_i(x),\;i=1,2,\dots,s\)</span>。</p>
 </div>
@@ -2389,19 +2402,16 @@ f(x)=\prod_{i=1}^{s}p_i(x)=\prod_{i=1}^{t}q_i(x),\quad p_i(x),q_i(x)\in K[x]
 <p>若<span class="math inline">\(f(x)\)</span>不可约，由<a href="#prop-UnivariatePolynomialRing-354ab600" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialRing">性质 1.2.2</a>(1)可知结论成立。若<span class="math inline">\(f(x)\)</span>可约，根据定义和<a href="#prop-UnivariatePolynomialRing-354ab600" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialRing">性质 1.2.2</a>(1)可知存在<span class="math inline">\(f_1,f_2(x)\in K[x]\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=f_1(x)f_2(x),\quad\deg f_i(x)&lt;\deg f(x),\;i=1,2
-
 \end{equation*}\]</span></p>
 <p>根据归纳假设，<span class="math inline">\(f_1(x)\)</span>和<span class="math inline">\(f_2(x)\)</span>都可以被分解为有限个不可约多项式的乘积，于是<span class="math inline">\(f(x)\)</span>可被分解为有限个不可约多项式的乘积。</p>
 <p><strong>唯一性：</strong>若<span class="math inline">\(f(x)\)</span>有两个不同的分解式：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=\prod_{i=1}^{s}p_i(x)=\prod_{i=1}^{t}q_i(x),\quad p_i(x),q_i(x)\in K[x]
-
 \end{equation*}\]</span></p>
 <p>当<span class="math inline">\(s=1\)</span>时有<span class="math inline">\(f(x)=p_1(x)\)</span>，因为<span class="math inline">\(p_1(x),q_1(x)\)</span>不可约，<span class="math inline">\(q_1(x)\mid f(x)=p_1(x)\)</span>，所以<span class="math inline">\(p_1(x)\sim q_1(x)\)</span>。由<a href="#prop-UnivariatePolynomialDivision-42d5d755" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialDivision">性质 1.2.3</a>(7)可知此时只能有<span class="math inline">\(s=t=1\)</span>、<span class="math inline">\(p_1(x)=q_1(x)\)</span>，唯一性成立。若结论对<span class="math inline">\(s-1\)</span>成立，下证明对<span class="math inline">\(s\)</span>也成立。</p>
 <p>因为<span class="math inline">\(p_1(x)\)</span>是不可约多项式且<span class="math inline">\(p_1(x)\mid f(x)=\prod\limits_{i=1}^{t}q_i(x)\)</span>，由<a href="#prop-IrreduciblePolynomial-9724b36b" data-reference-type="ref+label" data-reference="prop:IrreduciblePolynomial">性质 1.2.5</a>(3)可知存在<span class="math inline">\(q_i(x)\)</span>满足<span class="math inline">\(p_1(x)\mid q_i(x)\)</span>。因为<span class="math inline">\(p_1(x),q_i(x)\)</span>不可约，所以<span class="math inline">\(p_1(x)\sim q_i(x)\)</span>。交换顺序使得<span class="math inline">\(i=1\)</span>，由<a href="#prop-UnivariatePolynomialDivision-42d5d755" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialDivision">性质 1.2.3</a>(7)和<a href="#prop-UnivariatePolynomialRing-354ab600" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialRing">性质 1.2.2</a>(3)可知存在<span class="math inline">\(a\in K\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \prod_{i=2}^{s}p_i(x)=a\prod_{i=2}^{t}q_i(x)
-
 \end{equation*}\]</span></p>
 <p>根据归纳假设可知<span class="math inline">\(s-1=t-1\)</span>且排列因式顺序后有<span class="math inline">\(p_i(x)\sim q_i(x),\;i=2,3,\dots,s\)</span>，结论成立。&nbsp;◻</p>
 </div>
@@ -2412,12 +2422,10 @@ f(x)=\prod_{i=1}^{s}p_i(x)=\prod_{i=1}^{t}q_i(x),\quad p_i(x),q_i(x)\in K[x]
 <p><strong>Definition 1.41</strong>. 设：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=a_nx^n+a_{n-1}x^{n-1}+\cdots+a_1x+a_0\in K[x]
-
 \end{equation*}\]</span></p>
 <p>称：</p>
 <p><span class="math display">\[\begin{equation*}
 na_nx^{n-1}+(n-1)a_{n-1}x^{n-2}+\cdots+2a_2x+a_1
-
 \end{equation*}\]</span></p>
 <p>为<span class="math inline">\(f(x)\)</span>的<strong>一阶导数</strong>，记作<span class="math inline">\(f'(x)\)</span>。称<span class="math inline">\(f'(x)\)</span>的导数为<span class="math inline">\(f(x)\)</span>的二阶导数，更高阶的情况可类似定义。</p>
 </div>
@@ -2438,7 +2446,6 @@ na_nx^{n-1}+(n-1)a_{n-1}x^{n-2}+\cdots+2a_2x+a_1
 <p><span class="proof-title"><em>证明</em>. </span>(1)由条件可知存在<span class="math inline">\(g(x)\in K[x]\)</span>满足<span class="math inline">\(f(x)=p^k(x)g(x)\)</span>，其中<span class="math inline">\(p(x)\nmid g(x)\)</span>，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 f'(x)=kp^{k-1}(x)p'(x)g(x)+p^k(x)g'(x)=p^{k-1}[kp'(x)g(x)+p(x)g'(x)]
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(p^{k-1}\mid f'(x)\)</span>，下只需证明<span class="math inline">\(p^k(x)\nmid f'(x)\)</span>，即<span class="math inline">\(p(x)\nmid kp'(x)g(x)\)</span>。由<a href="#prop-IrreduciblePolynomial-9724b36b" data-reference-type="ref+label" data-reference="prop:IrreduciblePolynomial">性质 1.2.5</a>(3)可知只需证明<span class="math inline">\(p(x)\nmid kp'(x)\)</span>。</p>
 <p>若<span class="math inline">\(p(x)\mid kp'(x)\)</span>，则存在<span class="math inline">\(h(x)\in K[x]\)</span>满足<span class="math inline">\(kp'(x)=h(x)p(x)\)</span>，由<a href="#prop-UnivariatePolynomialRing-354ab600" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialRing">性质 1.2.2</a>(1)可知此时只能有<span class="math inline">\(p'(x)=0\)</span>，于是<span class="math inline">\(\deg p(x)=0\)</span>，矛盾，所以<span class="math inline">\(p(x)\nmid kp'(x)\)</span>。</p>
@@ -2446,19 +2453,16 @@ f'(x)=kp^{k-1}(x)p'(x)g(x)+p^k(x)g'(x)=p^{k-1}[kp'(x)g(x)+p(x)g'(x)]
 <p><strong>充分性：</strong>由条件可知存在<span class="math inline">\(g(x)\in K[x]\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=g(x)p(x),\quad f'(x)=g'(x)p(x)+g(x)p'(x)
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(p(x)\mid f'(x)\)</span>，所以<span class="math inline">\(p(x)\mid g(x)p'(x)\)</span>。仿照(1)中的证明可以得到<span class="math inline">\(p(x)\nmid p'(x)\)</span>，由<a href="#prop-IrreduciblePolynomial-9724b36b" data-reference-type="ref+label" data-reference="prop:IrreduciblePolynomial">性质 1.2.5</a>(3)可知<span class="math inline">\(p(x)\mid g(x)\)</span>，所以<span class="math inline">\(p(x)\)</span>是<span class="math inline">\(f(x)\)</span>的重因式。</p>
 <p>(3)<strong>必要性：</strong>若<span class="math inline">\(f(x)\)</span>有重因式，则存在不可约多项式<span class="math inline">\(p(x)\in K[x]\)</span>和整数<span class="math inline">\(k\geqslant2\)</span>，使得<span class="math inline">\(p(x)\)</span>是<span class="math inline">\(f(x)\)</span>的<span class="math inline">\(k\)</span>重因式。由(2)可知，<span class="math inline">\(p(x)\)</span>是<span class="math inline">\(f(x)\)</span>和<span class="math inline">\(f'(x)\)</span>的公因式。又因为<span class="math inline">\(p(x)\)</span>不可约，所以<span class="math inline">\(\deg p(x)&gt;0\)</span>，即<span class="math inline">\(f(x)\)</span>与<span class="math inline">\(f'(x)\)</span>有次数大于<span class="math inline">\(0\)</span>的公因式。</p>
 <p><strong>充分性：</strong>若<span class="math inline">\(f(x)\)</span>与<span class="math inline">\(f'(x)\)</span>有次数大于<span class="math inline">\(0\)</span>的公因式，则存在<span class="math inline">\(g(x)\in K[x]\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 \deg g(x)&gt;0,\quad g(x)\mid f(x),\quad g(x)\mid f'(x)
-
 \end{equation*}\]</span></p>
 <p>根据<a href="#theo-UnivariatePolynomialDecomposition-772f27ca" data-reference-type="ref+label" data-reference="theo:UnivariatePolynomialDecomposition">定理 1.12</a>可知<span class="math inline">\(g(x)\)</span>至少有一个不可约因式。取不可约多项式<span class="math inline">\(p(x)\)</span>满足<span class="math inline">\(p(x)\mid g(x)\)</span>，由<a href="#prop-UnivariatePolynomialDivision-42d5d755" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialDivision">性质 1.2.3</a>(5)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 p(x)\mid f(x),\quad p(x)\mid f'(x)
-
 \end{equation*}\]</span></p>
 <p>因此<span class="math inline">\(p(x)\)</span>是<span class="math inline">\(f(x)\)</span>和<span class="math inline">\(f'(x)\)</span>的公因式。由(2)可知<span class="math inline">\(p(x)\)</span>是<span class="math inline">\(f(x)\)</span>的重因式，即<span class="math inline">\(f(x)\)</span>有重因式。 (4)由(3)立即可得。</p>
 <p>(5)由<a href="../chapters/page-037.html#theo-MinimumNumberField-f34ccba3" data-reference-type="ref+label" data-reference="theo:MinimumNumberField">定理 34.1</a>可知多项式的导数不会随数域的扩大而发生变化，根据<a href="#prop-UnivariatePolynomialDivision-42d5d755" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialDivision">性质 1.2.3</a>(9)或<a href="#prop-CommonDivision-0589cf5b" data-reference-type="ref+label" data-reference="prop:CommonDivision">性质 1.2.4</a>(6)立即可得出结论。&nbsp;◻</p>
@@ -2472,7 +2476,6 @@ p(x)\mid f(x),\quad p(x)\mid f'(x)
 <p><strong>Definition 1.42</strong>. 设<span class="math inline">\(X,Y\)</span>是域<span class="math inline">\(F\)</span>上的线性空间，<span class="math inline">\(X\)</span>到<span class="math inline">\(Y\)</span>上的一个映射<span class="math inline">\(\mathcal{T}\)</span>如果对任意的<span class="math inline">\(\alpha,\beta\in X\)</span>和任意的<span class="math inline">\(k_1,k_2\in F\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}(k_1\alpha+k_2\beta)=k_1\mathcal{T}\alpha+k_2\mathcal{T}\beta
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\mathcal{T}\)</span>是<span class="math inline">\(X\)</span>到<span class="math inline">\(Y\)</span>的一个<a href="../chapters/page-051.html#term-LinearMapping" class="term" title="linear mapping">线性映射<span class="term-english">（linear mapping）</span></a>。若<span class="math inline">\(Y=X\)</span>，则称<span class="math inline">\(\mathcal{T}\)</span>为<span class="math inline">\(X\)</span>上的<a href="../chapters/page-051.html#term-LinearTransformation" class="term" title="linear transformation">线性变换<span class="term-english">（linear transformation）</span></a>；若<span class="math inline">\(Y=F\)</span>，则称<span class="math inline">\(\mathcal{T}\)</span>为<span class="math inline">\(X\)</span>上的<a href="../chapters/page-051.html#term-LinearFunction" class="term" title="linear function">线性函数<span class="term-english">（linear function）</span></a>。</p>
 </div>
@@ -2483,7 +2486,6 @@ p(x)\mid f(x),\quad p(x)\mid f'(x)
 <p><span class="math display">\[\begin{gather*}
 (\mathcal{T}_1+\mathcal{T}_2)\alpha=\mathcal{T}_1\alpha+\mathcal{T}_2\alpha,\;\forall\;\alpha\in X \\
 (k\mathcal{T}_1)\alpha=k\mathcal{T}_1\alpha,\;\forall\;\alpha\in X
-
 \end{gather*}\]</span></p>
 <p>容易验证<span class="math inline">\(\operatorname{Hom}(X,Y)\)</span>成为域<span class="math inline">\(F\)</span>上的一个线性空间。<span class="math inline">\(X=Y\)</span>时将<span class="math inline">\(\operatorname{Hom}(X,Y)\)</span>简记为<span class="math inline">\(\operatorname{Hom}(X)\)</span>。</p>
 </div>
@@ -2491,7 +2493,6 @@ p(x)\mid f(x),\quad p(x)\mid f'(x)
 <p><strong>Definition 1.44</strong>. 设<span class="math inline">\(X,Y\)</span>是域<span class="math inline">\(F\)</span>上的线性空间，<span class="math inline">\(\mathcal{T}_1,\mathcal{T}_2\in\operatorname{Hom}(X,Y)\)</span>，定义线性映射的减法如下：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}_1-\mathcal{T}_2=\mathcal{T}_1+(-\mathcal{T}_2)
-
 \end{equation*}\]</span></p>
 </div>
 <div id="definition-1-45" class="definition theorem-block env-definition">
@@ -2504,7 +2505,6 @@ p(x)\mid f(x),\quad p(x)\mid f'(x)
 <p><strong>Definition 1.47</strong>. 设<span class="math inline">\(X,Y,Z\)</span>是域<span class="math inline">\(F\)</span>上的线性空间，<span class="math inline">\(\mathcal{T}_1\in\operatorname{Hom}(X,Y),\mathcal{T}_2\in\operatorname{Hom}(Z,Y)\)</span>，定义线性映射乘法如下：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\alpha\in X,\;(\mathcal{T}_2\mathcal{T}_1)\alpha=\mathcal{T}_2(\mathcal{T}_1\alpha)
-
 \end{equation*}\]</span></p>
 </div>
 <div id="definition-1-48" class="definition theorem-block env-definition">
@@ -2524,7 +2524,6 @@ p(x)\mid f(x),\quad p(x)\mid f'(x)
 =\mathcal{T}_2(k_1\mathcal{T}_1\alpha+k_2\mathcal{T}_1\beta) \\
 &amp;=k_1\mathcal{T}_2(\mathcal{T}_1\alpha)+k_2\mathcal{T}_2(\mathcal{T}_1\beta)
 =k_1(\mathcal{T}_2\mathcal{T}_1)\alpha+k_2(\mathcal{T}_2\mathcal{T}_1)\beta
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -2533,7 +2532,6 @@ p(x)\mid f(x),\quad p(x)\mid f'(x)
 <p><span class="math display">\[\begin{equation*}
 \{\alpha\in X:\mathcal{T}\alpha=\mathbf{0}_Y\},\quad
 \{\mathcal{T}\alpha:\alpha\in X\}
-
 \end{equation*}\]</span></p>
 <p>为<span class="math inline">\(\mathcal{T}\)</span>的<a href="../chapters/page-050.html#term-Kernel" class="term" title="kernel">核<span class="term-english">（kernel）</span></a>与<a href="../chapters/page-048.html#term-Image" class="term" title="image">象<span class="term-english">（image）</span></a>，将它们分别记作<span class="math inline">\(\operatorname{Ker}\mathcal{T}\)</span>和<span class="math inline">\(\operatorname{Im}\mathcal{T}\)</span>。</p>
 </div>
@@ -2549,7 +2547,6 @@ p(x)\mid f(x),\quad p(x)\mid f'(x)
 <li><p>对于任意的<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\in X,\;k_1, k_2, \dots, k_{n}\in F\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
                 \mathcal{T}\left(\sum_{i=1}^{n}k_i\alpha_i\right)=\sum_{i=1}^{n}k_i\mathcal{T}\alpha_i
-
     \end{equation*}\]</span></p>
 <p>这表明，如果<span class="math inline">\(X\)</span>是有限维的，那么只要知道<span class="math inline">\(X\)</span>的一组基在<span class="math inline">\(\mathcal{T}\)</span>下的象，那么<span class="math inline">\(X\)</span>中所有向量在<span class="math inline">\(\mathcal{T}\)</span>下的象就都确定了；</p></li>
 <li><p>若<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\in X\)</span>线性相关，则<span class="math inline">\(\mathcal{T}\alpha_1, \mathcal{T}\alpha_2, \dots, \mathcal{T}\alpha_{n}\)</span>线性相关；</p></li>
@@ -2559,13 +2556,11 @@ p(x)\mid f(x),\quad p(x)\mid f'(x)
 <li><p><span class="math inline">\(X/\operatorname{Ker}\mathcal{T}\)</span>与<span class="math inline">\(\operatorname{Im}\mathcal{T}\)</span>在映射：</p>
 <p><span class="math display">\[\begin{equation*}
                 \sigma:\alpha+\operatorname{Ker}\mathcal{T}\longrightarrow\mathcal{T}\alpha
-
     \end{equation*}\]</span></p>
 <p>下同构；</p></li>
 <li><p>若<span class="math inline">\(X\)</span>是有限维的，则<span class="math inline">\(\operatorname{Ker}\mathcal{T}\)</span>和<span class="math inline">\(\operatorname{Im}\mathcal{T}\)</span>都是有限维的，且有：</p>
 <p><span class="math display">\[\begin{equation*}
                 \dim(X)=\dim(\operatorname{Ker}\mathcal{T})+\dim(\operatorname{Im}\mathcal{T})
-
     \end{equation*}\]</span></p></li>
 <li><p>若<span class="math inline">\(\dim(X)=\dim(Y)=n&lt;+\infty\)</span>，则<span class="math inline">\(\mathcal{T}\)</span>是单射当且仅当<span class="math inline">\(\mathcal{T}\)</span>是满射；</p></li>
 <li><p>设<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\in X\)</span>，则有<span class="math inline">\(\mathcal{T}&lt;\alpha_1, \alpha_2, \dots, \alpha_{n}&gt;=&lt;\mathcal{T}\alpha_1, \mathcal{T}\alpha_2, \dots, \mathcal{T}\alpha_{n}&gt;\)</span>；</p></li>
@@ -2576,13 +2571,11 @@ p(x)\mid f(x),\quad p(x)\mid f'(x)
 <p>(6)任取<span class="math inline">\(\alpha,\beta\in\operatorname{Ker}\mathcal{T}\)</span>和<span class="math inline">\(k_1,k_2\in F\)</span>，则有：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}(k_1\alpha+k_2\beta)=k_1\mathcal{T}\alpha+k_2\mathcal{T}\beta=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(k_1\alpha+k_2\beta\in\operatorname{Ker}\mathcal{T}\)</span>，所以<span class="math inline">\(\operatorname{Ker}\mathcal{T}\)</span>是<span class="math inline">\(X\)</span>的子空间。</p>
 <p>任取<span class="math inline">\(\mathcal{T}\alpha,\mathcal{T}\beta\in\operatorname{Im}\mathcal{T}\)</span>和<span class="math inline">\(k_1,k_2\in F\)</span>，则有：</p>
 <p><span class="math display">\[\begin{equation*}
 k_1\mathcal{T}\alpha+k_2\mathcal{T}\beta=\mathcal{T}(k_1\alpha+k_2\beta)
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(X\)</span>是一个线性空间，所以<span class="math inline">\(k_1\alpha+k_2\beta\in X\)</span>，于是<span class="math inline">\(\mathcal{T}(k_1\alpha+k_2\beta)\in\operatorname{Im}\mathcal{T}\)</span>，因此<span class="math inline">\(\operatorname{Im}\mathcal{T}\)</span>是<span class="math inline">\(Y\)</span>的子空间。</p>
 <p>(7)<strong>充分性：</strong>假设此时<span class="math inline">\(\mathcal{T}\)</span>不是单射，则存在<span class="math inline">\(\mathcal{T}\alpha,\mathcal{T}\beta\in\mathcal{T}\)</span>使得<span class="math inline">\(\mathcal{T}\alpha=\mathcal{T}\beta\)</span>且<span class="math inline">\(\alpha\ne\beta\)</span>，而此时<span class="math inline">\(\mathcal{T}\alpha-\mathcal{T}\beta=\mathcal{T}(\alpha-\beta)=\mathbf{0}_Y\)</span>，由已知条件可得<span class="math inline">\(\alpha-\beta=\mathbf{0}_X\)</span>，即<span class="math inline">\(\alpha=\beta\)</span>，矛盾。</p>
@@ -2595,7 +2588,6 @@ k_1\mathcal{T}\alpha+k_2\mathcal{T}\beta=\mathcal{T}(k_1\alpha+k_2\beta)
 =\mathcal{T}(k_1\alpha+k_2\beta) \\
 &amp;=k_1\mathcal{T}\alpha+k_2\mathcal{T}\beta
 =k_1\sigma(\alpha+\operatorname{Ker}\mathcal{T})+k_2(\beta+\operatorname{Ker}\mathcal{T})
-
 \end{align*}\]</span></p>
 <p>所以<span class="math inline">\(\sigma\)</span>是一个线性映射。</p>
 <p>显然<span class="math inline">\(\sigma\)</span>是一个满射。</p>
@@ -2604,7 +2596,6 @@ k_1\mathcal{T}\alpha+k_2\mathcal{T}\beta=\mathcal{T}(k_1\alpha+k_2\beta)
 <p>(10)因为<span class="math inline">\(X\)</span>是有限维的，由<a href="#theo-QuotientDim-bc8c951b" data-reference-type="ref+label" data-reference="theo:QuotientDim">定理 1.10</a>可知<span class="math inline">\(X/\operatorname{Ker}\mathcal{T}\)</span>和<span class="math inline">\(\operatorname{Ker}\mathcal{T}\)</span>都是有限维的。由<a href="#theo-IsomorphicDim-0dccb800" data-reference-type="ref+label" data-reference="theo:IsomorphicDim">定理 1.8</a>和(9)可知<span class="math inline">\(\dim(X/\operatorname{Ker}\mathcal{T})=\dim(\operatorname{Im}\mathcal{T})\)</span>，于是<span class="math inline">\(\operatorname{Im}\mathcal{T}\)</span>也是有限维的。由<a href="#theo-QuotientDim-bc8c951b" data-reference-type="ref+label" data-reference="theo:QuotientDim">定理 1.10</a>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \dim(\operatorname{Im}\mathcal{T})=\dim(X/\operatorname{Ker}\mathcal{T})=\dim(X)-\dim(\operatorname{Ker}\mathcal{T})
-
 \end{equation*}\]</span></p>
 <p>(11)由(7)(10)(6)、<a href="#prop-Subspace-fcfc4744" data-reference-type="ref+label" data-reference="prop:Subspace">性质 1.1.6</a>(4)和(8)可得：</p>
 <p><span class="math display">\[\begin{align*}
@@ -2612,13 +2603,11 @@ k_1\mathcal{T}\alpha+k_2\mathcal{T}\beta=\mathcal{T}(k_1\alpha+k_2\beta)
 &amp;\iff\operatorname{Ker}\mathcal{T}=\mathbf{0}_X \iff\dim(\operatorname{Ker}\mathcal{T})=0 \\
 &amp;\iff\dim(Y)=\dim(X)=\dim(\operatorname{Im}\mathcal{T})
 \iff\mathcal{T}\text{是满射}
-
 \end{align*}\]</span></p>
 <p>(12)由(4)可得；</p>
 <p><span class="math display">\[\begin{align*}
 &lt;\mathcal{T}\alpha_1, \mathcal{T}\alpha_2, \dots, \mathcal{T}\alpha_{n}&gt;&amp;=\left\{\sum_{i=1}^{n}c_i\mathcal{T}\alpha_i:c_i\in F\right\}=\left\{\mathcal{T}\left(\sum_{i=1}^{n}c_i\alpha_i\right):c_i\in F\right\} \\
 &amp;=\mathcal{T}&lt;\alpha_1, \alpha_2, \dots, \alpha_{n}&gt;
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -2638,7 +2627,6 @@ a_{21} &amp; a_{22} &amp; \cdots &amp; a_{2m} \\
 \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
 a_{n1} &amp; a_{n2} &amp; \cdots &amp; a_{nm} \\
 \end{pmatrix}
-
 \end{equation*}\]</span></p>
 <p>将<span class="math inline">\((\mathcal{T}\alpha_1, \mathcal{T}\alpha_2, \dots, \mathcal{T}\alpha_{m})\)</span>记作<span class="math inline">\(\mathcal{T}(\alpha_1, \alpha_2, \dots, \alpha_{m})\)</span>，将上式右端矩阵记为<span class="math inline">\(A\)</span>，称<span class="math inline">\(A\)</span>为<span class="math inline">\(\mathcal{T}\)</span>在<span class="math inline">\(X\)</span>的基<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{m}\)</span>和<span class="math inline">\(Y\)</span>的基<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>下的矩阵。若<span class="math inline">\(X=Y\)</span>，取<span class="math inline">\((\beta_1, \beta_2, \dots, \beta_{n})\)</span>为<span class="math inline">\((\alpha_1, \alpha_2, \dots, \alpha_{m})\)</span>，称<span class="math inline">\(A\)</span>为<span class="math inline">\(\mathcal{T}\)</span>在基<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{m}\)</span>下的矩阵。</p>
 </div>
@@ -2646,26 +2634,22 @@ a_{n1} &amp; a_{n2} &amp; \cdots &amp; a_{nm} \\
 <p><strong>Theorem 1.14</strong>. 设<span class="math inline">\(X,Y\)</span>分别为域<span class="math inline">\(F\)</span>上的<span class="math inline">\(m\)</span>维、<span class="math inline">\(n\)</span>维线性空间，<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{m}\)</span>和<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>分别是<span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>的一组基，则映射<span class="math inline">\(\sigma:\mathcal{T}\in\operatorname{Hom}(X,Y)\longrightarrow\mathcal{T}\)</span>在<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{m}\)</span>和<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>下的矩阵<span class="math inline">\(A\)</span>是<span class="math inline">\(\operatorname{Hom}(X,Y)\)</span>到<span class="math inline">\(M_{n\times m}(F)\)</span>的一个同构映射，于是有：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Hom}(X,Y)\cong M_{n\times m}(F),\quad\dim[\operatorname{Hom}(X,Y)]=\dim(X)\dim(Y)=mn
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>任意的<span class="math inline">\(\mathcal{T}\in\operatorname{Hom}(X,Y)\)</span>都存在对应的<span class="math inline">\(A\in M_{n\times m}(F)\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 (\mathcal{T}\alpha_1, \mathcal{T}\alpha_2, \dots, \mathcal{T}\alpha_{m})=(\beta_1, \beta_2, \dots, \beta_{n})A
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>是<span class="math inline">\(Y\)</span>的一组基，由<a href="#prop-LinearlyDependent-0205c98a" data-reference-type="ref+label" data-reference="prop:LinearlyDependent">性质 1.1.2</a>(4)可知<span class="math inline">\(T\alpha_i\)</span>由<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>表出的方式唯一，所以<span class="math inline">\(A\)</span>是唯一的，<span class="math inline">\(\sigma\)</span>是一个映射。</p>
 <p>若<span class="math inline">\(\sigma\)</span>不是一个单射，则存在不同的<span class="math inline">\(\mathcal{T}_1,\mathcal{T}_2\)</span>使得<span class="math inline">\(\sigma(\mathcal{T}_1)=\sigma(\mathcal{T}_2)=A\)</span>，此时有：</p>
 <p><span class="math display">\[\begin{equation*}
 (\mathcal{T}_1\alpha_1, \mathcal{T}_1\alpha_2, \dots, \mathcal{T}_1\alpha_{m})=(\mathcal{T}_2\alpha_1, \mathcal{T}_2\alpha_2, \dots, \mathcal{T}_2\alpha_{m})=(\beta_1, \beta_2, \dots, \beta_{n})A
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\mathcal{T}_1=\mathcal{T}_2\)</span>，矛盾。</p>
 <p>若<span class="math inline">\(\sigma\)</span>不是一个满射，则存在<span class="math inline">\(A=(a_{ij})\in M_{m\times n}(F)\)</span>不是<span class="math inline">\(\operatorname{Hom}(X,Y)\)</span>中任意一个线性映射在<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{m}\)</span>和<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>下的矩阵。定义映射：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}:\alpha=\sum_{i=1}^{m}k_i\alpha_i\to\beta=\sum_{i=1}^{m}k_i\sum_{j=1}^{n}a_{ji}\beta_j,\quad k_1, k_2, \dots, k_{m}\in F
-
 \end{equation*}\]</span></p>
 <p>由定义可以验证<span class="math inline">\(\mathcal{T}\)</span>是一个线性映射，<span class="math inline">\(A\)</span>就是其在<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{m}\)</span>和<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>下的矩阵，矛盾。</p>
 <p>综上，<span class="math inline">\(\sigma\)</span>是一个双射。</p>
@@ -2676,12 +2660,10 @@ a_{n1} &amp; a_{n2} &amp; \cdots &amp; a_{nm} \\
 =&amp;(k_1\mathcal{T}_1\alpha_1,k_1\mathcal{T}_1\alpha_2,\dots,k_1\mathcal{T}_1\alpha_m)+(k_2\mathcal{T}_2\alpha_1,k_2\mathcal{T}_2\alpha_2,\dots,k_2\mathcal{T}_2\alpha_m) \\
 =&amp;k_1(\mathcal{T}_1\alpha_1,\mathcal{T}_1\alpha_2,\dots,\mathcal{T}_1\alpha_m)+k_2(\mathcal{T}_2\alpha_1,\mathcal{T}_2\alpha_2,\dots,\mathcal{T}_2\alpha_m) \\
 =&amp;k_1(\beta_1, \beta_2, \dots, \beta_{n})A+k_2(\beta_1, \beta_2, \dots, \beta_{n})B=(\beta_1, \beta_2, \dots, \beta_{n})(k_1A+k_2B)
-
 \end{align*}\]</span></p>
 <p>即:</p>
 <p><span class="math display">\[\begin{equation*}
 \sigma(k_1\mathcal{T}_1+k_2\mathcal{T}_2)=k_1A+k_2B=k_1\sigma(\mathcal{T}_1)+k_2\sigma(\mathcal{T}_2)
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\sigma\)</span>是一个线性映射。</p>
 <p>综上，映射<span class="math inline">\(\sigma\)</span>是<span class="math inline">\(\operatorname{Hom}(X,Y)\)</span>到<span class="math inline">\(M_{n\times m}(F)\)</span>的一个同构映射，<span class="math inline">\(\operatorname{Hom}(X,Y)\cong M_{n\times m}(F)\)</span>，由<a href="#theo-IsomorphicDim-0dccb800" data-reference-type="ref+label" data-reference="theo:IsomorphicDim">定理 1.8</a>可得<span class="math inline">\(\dim[\operatorname{Hom}(X,Y)]=mn=\dim(X)\dim(Y)\)</span>。&nbsp;◻</p>
@@ -2701,12 +2683,10 @@ a_{n1} &amp; a_{n2} &amp; \cdots &amp; a_{nm} \\
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}^n=\underbrace{\mathcal{T} \cdot \mathcal{T} \cdots \mathcal{T}}_{n\text{个}\mathcal{T}}
 ,\;n\in\mathbb{N}^+
-
 \end{equation*}\]</span></p>
 <p>若<span class="math inline">\(\mathcal{T}\)</span>可逆，还可以定义<span class="math inline">\(\mathcal{T}\)</span>的负整数指数幂如下：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}^{-n}=(\mathcal{T}^{-1})^n,\;n\in\mathbb{N}^+
-
 \end{equation*}\]</span></p>
 </div>
 <div id="definition-1-54" class="definition theorem-block env-definition">
@@ -2716,7 +2696,6 @@ a_{n1} &amp; a_{n2} &amp; \cdots &amp; a_{nm} \\
 <li><p>若<span class="math inline">\(E\)</span>和<span class="math inline">\(W\)</span>是<span class="math inline">\(X\)</span>的子空间，且有<span class="math inline">\(X=E\oplus W\)</span>，若对任意的<span class="math inline">\(\alpha=\alpha_1+\alpha_2\in X,\;\alpha_1\in E,\;\alpha_2\in W\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
                 \mathcal{T}\alpha=\alpha_1
-
     \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\mathcal{T}\)</span>为平行于<span class="math inline">\(W\)</span>在<span class="math inline">\(E\)</span>上的<a href="../chapters/page-055.html#term-ProjectionTransformation" class="term" title="projection transformation">投影变换<span class="term-english">（projection transformation）</span></a>，记为<span class="math inline">\(\mathcal{P}_E\)</span>。</p></li>
 <li><p>若<span class="math inline">\(\mathcal{T}^2=\mathcal{I}\)</span>，则称<span class="math inline">\(\mathcal{T}\)</span>为<a href="../chapters/page-048.html#term-Involution" class="term" title="involution">对合变换<span class="term-english">（involution）</span></a>；</p></li>
@@ -2738,7 +2717,6 @@ a_{n1} &amp; a_{n2} &amp; \cdots &amp; a_{nm} \\
 =[\mathcal{T}_1(\mathcal{T}_2\alpha_1),\mathcal{T}_1(\mathcal{T}_2\alpha_2),\dots,\mathcal{T}_1(\mathcal{T}_2\alpha_n)] \\
 =&amp;\mathcal{T}_1(\mathcal{T}_2\alpha_1, \mathcal{T}_2\alpha_2, \dots, \mathcal{T}_2\alpha_{n}) =\mathcal{T}_1[(\alpha_1, \alpha_2, \dots, \alpha_{n})B] =(\mathcal{T}_1\alpha_1, \mathcal{T}_1\alpha_2, \dots, \mathcal{T}_1\alpha_{n})B \\
 =&amp;(\alpha_1, \alpha_2, \dots, \alpha_{n})AB
-
 \end{align*}\]</span></p>
 <p>于是<span class="math inline">\(\sigma(\mathcal{T}_1\mathcal{T}_2)=AB\)</span>，即线性变换对其对应的矩阵保持乘法运算。&nbsp;◻</p>
 </div>
@@ -2753,23 +2731,19 @@ a_{n1} &amp; a_{n2} &amp; \cdots &amp; a_{nm} \\
 <p><span class="math display">\[\begin{align*}
 \operatorname{rank}(\mathcal{T})&amp;=\dim(\operatorname{Im}\mathcal{T})=\dim(\mathcal{T}X)=\dim(\mathcal{T}&lt;\alpha_1, \alpha_2, \dots, \alpha_{n}&gt;) \\
 &amp;=\dim&lt;\mathcal{T}\alpha_1, \mathcal{T}\alpha_2, \dots, \mathcal{T}\alpha_{n}&gt;
-
 \end{align*}\]</span></p>
 <p>因为<span class="math inline">\(\dim(X)=n\)</span>，由<a href="#theo-IsomorphicDim-0dccb800" data-reference-type="ref+label" data-reference="theo:IsomorphicDim">定理 1.8</a>可知<span class="math inline">\(X\cong F^n\)</span>，映射：</p>
 <p><span class="math display">\[\begin{equation*}
 \sigma:\sum_{i=1}^{n}b_i\beta_i\longrightarrow(b_1, b_2, \dots, b_{n})^{\top}
-
 \end{equation*}\]</span></p>
 <p>是<span class="math inline">\(X\)</span>到<span class="math inline">\(F^n\)</span>的一个同构映射。注意到：</p>
 <p><span class="math display">\[\begin{equation*}
 (\mathcal{T}\alpha_1, \mathcal{T}\alpha_2, \dots, \mathcal{T}\alpha_{n})=(\alpha_1, \alpha_2, \dots, \alpha_{n})A
-
 \end{equation*}\]</span></p>
 <p><span class="math inline">\(T\alpha_i\)</span>在基<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>下的坐标就是<span class="math inline">\(A\)</span>的第<span class="math inline">\(i\)</span>列，所以<span class="math inline">\(\sigma(\mathcal{T}\alpha_i)=A_i\)</span>，其中<span class="math inline">\(A_i\)</span>表示<span class="math inline">\(A\)</span>的第<span class="math inline">\(i\)</span>列，于是由<a href="#prop-LinearMapping-e3beabe4" data-reference-type="ref+label" data-reference="prop:LinearMapping">性质 1.3.1</a>(12)可得<span class="math inline">\(\sigma&lt;\mathcal{T}\alpha_1, \mathcal{T}\alpha_2, \dots, \mathcal{T}\alpha_{n}&gt;=&lt;A_1, A_2, \dots, A_{n}&gt;\)</span>，所以由<a href="#prop-IsomorphicOfLinearSpace-86b98faf" data-reference-type="ref+label" data-reference="prop:IsomorphicOfLinearSpace">性质 1.1.7</a>(6)可得：</p>
 <p><span class="math display">\[\begin{align*}
 \operatorname{rank}(\mathcal{T})&amp;=\dim&lt;\mathcal{T}\alpha_1, \mathcal{T}\alpha_2, \dots, \mathcal{T}\alpha_{n}&gt;=\dim(\sigma&lt;\mathcal{T}\alpha_1, \mathcal{T}\alpha_2, \dots, \mathcal{T}\alpha_{n}&gt;) \\
 &amp;=\dim&lt;A_1, A_2, \dots, A_{n}&gt;=\operatorname{rank}(A)
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -2780,7 +2754,6 @@ a_{n1} &amp; a_{n2} &amp; \cdots &amp; a_{nm} \\
 <p><strong>Theorem 1.18</strong>. 设<span class="math inline">\(X\)</span>是域<span class="math inline">\(F\)</span>上的<span class="math inline">\(n\)</span>维线性空间，<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>和<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>是<span class="math inline">\(X\)</span>的两组基，<span class="math inline">\(P\)</span>为<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>到<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>的过渡矩阵，<span class="math inline">\(\mathcal{T}\in\operatorname{Hom}(X)\)</span>，则<span class="math inline">\(\mathcal{T}\)</span>在<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{n}\)</span>下的矩阵<span class="math inline">\(A\)</span>与在<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>下的矩阵<span class="math inline">\(B\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 B=P^{-1}AP
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -2789,7 +2762,6 @@ B=P^{-1}AP
 (\mathcal{T}\alpha_1, \mathcal{T}\alpha_2, \dots, \mathcal{T}\alpha_{n})=(\alpha_1, \alpha_2, \dots, \alpha_{n})A \\
 (\mathcal{T}\beta_1, \mathcal{T}\beta_2, \dots, \mathcal{T}\beta_{n})=(\beta_1, \beta_2, \dots, \beta_{n})B \\
 (\beta_1, \beta_2, \dots, \beta_{n})=(\alpha_1, \alpha_2, \dots, \alpha_{n})P
-
 \end{gather*}\]</span></p>
 <p>根据<a href="#theo-BasisTransInvertibleMat-4697959b" data-reference-type="ref+label" data-reference="theo:BasisTransInvertibleMat">定理 1.3</a>可知<span class="math inline">\(P\)</span>可逆。设<span class="math inline">\(P\)</span>的列向量为<span class="math inline">\(P_1, P_2, \dots, P_{n}\)</span>，所以：</p>
 <p><span class="math display">\[\begin{align*}
@@ -2799,7 +2771,6 @@ B=P^{-1}AP
 =&amp;(\mathcal{T}\alpha_1, \mathcal{T}\alpha_2, \dots, \mathcal{T}\alpha_{n})P
 =(\alpha_1, \alpha_2, \dots, \alpha_{n})AP
 =(\beta_1, \beta_2, \dots, \beta_{n})P^{-1}AP
-
 \end{align*}\]</span></p>
 <p>由<a href="#theo-LinearTransformationMatrix-15bb156b" data-reference-type="ref+label" data-reference="theo:LinearTransformationMatrix">定理 1.14</a>可知<span class="math inline">\(\mathcal{T}\)</span>在<span class="math inline">\(\beta_1, \beta_2, \dots, \beta_{n}\)</span>下的矩阵是唯一的，所以<span class="math inline">\(B=P^{-1}AP\)</span>。&nbsp;◻</p>
 </div>
@@ -2807,7 +2778,6 @@ B=P^{-1}AP
 <p><strong>Definition 1.55</strong>. 设<span class="math inline">\(A,B\in M_{n}(F)\)</span>。如果存在可逆矩阵<span class="math inline">\(P\in M_{n}(F)\)</span>，使得：</p>
 <p><span class="math display">\[\begin{equation*}
 P^{-1}AP=B
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(A\)</span>与<span class="math inline">\(B\)</span><a href="../chapters/page-058.html#term-Similar" class="term" title="similar">相似<span class="term-english">（similar）</span></a>。</p>
 </div>
@@ -2832,7 +2802,6 @@ X=E_1\oplus E_2\oplus\cdots\oplus E_n
 <p><strong>Definition 1.58</strong>. 设<span class="math inline">\(X\)</span>是域<span class="math inline">\(F\)</span>上的线性空间，<span class="math inline">\(\mathcal{T}\in\operatorname{Hom}(X)\)</span>，<span class="math inline">\(E\)</span>是<span class="math inline">\(\mathcal{T}\)</span>-子空间。定义：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}/E:\alpha+E\to\mathcal{T}\alpha+E,\quad\alpha+E\in X/E
-
 \end{equation*}\]</span></p>
 </div>
 <div id="prop-InvariantSubspace-a3d49828" class="property theorem-block env-property">
@@ -2849,7 +2818,6 @@ X=E_1\oplus E_2\oplus\cdots\oplus E_n
                     A_1 &amp; A_3 \\
                     \mathbf{0} &amp; A_2
                 \end{pmatrix},\quad A_1\in M_{r\times r}(F)
-
     \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(A_1\)</span>是<span class="math inline">\(\mathcal{T}\mid E\)</span>在<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{r}\)</span>下的矩阵，<span class="math inline">\(A_2\)</span>是<span class="math inline">\(\mathcal{T}/E\)</span>在<span class="math inline">\(X/E\)</span>的基<span class="math inline">\(\alpha_{r+1}+E,\alpha_{r+2}+E,\dots,\alpha_n+E\)</span>下的矩阵；</p></li>
 <li><p>若<span class="math inline">\(\dim(X)=n\)</span>，<span class="math inline">\(\mathcal{T}\)</span>在<span class="math inline">\(X\)</span>的一组基<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{r},\alpha_{r+1},\alpha_{r+2},\dots,\alpha_n\)</span>下的矩阵<span class="math inline">\(A\)</span>是一个分块上三角矩阵：</p>
@@ -2858,7 +2826,6 @@ X=E_1\oplus E_2\oplus\cdots\oplus E_n
                     A_1 &amp; A_3 \\
                     \mathbf{0} &amp; A_2
                 \end{pmatrix}
-
     \end{equation*}\]</span></p>
 <p>令<span class="math inline">\(E=&lt;\alpha_1, \alpha_2, \dots, \alpha_{r}&gt;\)</span>，则<span class="math inline">\(E\)</span>是<span class="math inline">\(\mathcal{T}\)</span>的一个非平凡不变子空间，且<span class="math inline">\(\mathcal{T}\mid E\)</span>在<span class="math inline">\(E\)</span>的基<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{r}\)</span>下的矩阵为<span class="math inline">\(A_1\)</span>；</p></li>
 </ol>
@@ -2869,20 +2836,17 @@ X=E_1\oplus E_2\oplus\cdots\oplus E_n
 <p>(3)根据<a href="#prop-LinearMapping-e3beabe4" data-reference-type="ref+label" data-reference="prop:LinearMapping">性质 1.3.1</a>(6)，任取<span class="math inline">\(\alpha\in\operatorname{Ker}(\mathcal{T}_2)\)</span>，由<a href="#prop-LinearMapping-e3beabe4" data-reference-type="ref+label" data-reference="prop:LinearMapping">性质 1.3.1</a>(2)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}_2(\mathcal{T}_1\alpha)=\mathcal{T}_1(\mathcal{T}_2\alpha)=\mathcal{T}_1\mathbf{0}=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\mathcal{T}_1\alpha\in\operatorname{Ker}(\mathcal{T}_2)\)</span>，<span class="math inline">\(\operatorname{Ker}(\mathcal{T}_2)\)</span>是<span class="math inline">\(\mathcal{T}_1\)</span>-子空间。</p>
 <p>根据<a href="#prop-LinearMapping-e3beabe4" data-reference-type="ref+label" data-reference="prop:LinearMapping">性质 1.3.1</a>(6)，任取<span class="math inline">\(\alpha\in\operatorname{Im}(\mathcal{T}_2)\)</span>，则存在<span class="math inline">\(\beta\in X\)</span>使得<span class="math inline">\(\mathcal{T}_2\beta=\alpha\)</span>，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}_1\alpha=\mathcal{T}_1(\mathcal{T}_2\beta)=\mathcal{T}_2(\mathcal{T}_1\beta)\in\operatorname{Im}(\mathcal{T}_2)
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\operatorname{Im}(\mathcal{T}_2)\)</span>是<span class="math inline">\(\mathcal{T}_1\)</span>-子空间。</p>
 <p>(4)任取<span class="math inline">\(\mathcal{T}\)</span>-子空间<span class="math inline">\(X_1,X_2\)</span>。</p>
 <p>任取<span class="math inline">\(\alpha_1\in X_1,\alpha_2\in X_2\)</span>，有<span class="math inline">\(\mathcal{T}\alpha_1\in X_1,\mathcal{T}\alpha_2\in X_2\)</span>。因为：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}(\alpha_1+\alpha_2)=\mathcal{T}\alpha_1+\mathcal{T}\alpha_2\in X_1+X_2
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(X_1+X_2\)</span>是<span class="math inline">\(\mathcal{T}\)</span>-子空间。</p>
 <p>任取<span class="math inline">\(\alpha\in X_1\cap X_2\)</span>，有<span class="math inline">\(\mathcal{T}\alpha\in X_1\cap X_2\)</span>，所以<span class="math inline">\(X_1\cap X_2\)</span>是<span class="math inline">\(\mathcal{T}\)</span>-子空间。</p>
@@ -2903,7 +2867,6 @@ a_{r1} &amp; a_{r2} &amp; \cdots &amp; a_{rr} &amp; a_{r(r+1)} &amp; a_{r(r+2)} 
 \vdots &amp; \vdots  &amp; \ddots &amp; \vdots  &amp; \vdots  &amp; \vdots  &amp; \ddots &amp; \vdots  \\
 0 &amp; 0 &amp; \cdots &amp; 0 &amp; a_{n(r+1)} &amp; a_{n(r+2)} &amp; \cdots &amp; a_{nn} \\
 \end{pmatrix}
-
 \end{gather*}\]</span></p>
 <p>将上式矩阵记作：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -2911,12 +2874,10 @@ A=\begin{pmatrix}
 A_1 &amp; A_3 \\
 \mathbf{0} &amp; A_2
 \end{pmatrix}
-
 \end{equation*}\]</span></p>
 <p>A为<span class="math inline">\(\mathcal{T}\)</span>在<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{r},\alpha_{r+1},\alpha_{r+2},\dots,\alpha_n\)</span>下的矩阵，并且：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}\mid E(\alpha_1, \alpha_2, \dots, \alpha_{r})=(\alpha_1, \alpha_2, \dots, \alpha_{r})A_1
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(A_1\)</span>是<span class="math inline">\(\mathcal{T}\mid E\)</span>在<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{r}\)</span>下的矩阵。</p>
 <p>由<a href="#theo-QuotientDim-bc8c951b" data-reference-type="ref+label" data-reference="theo:QuotientDim">定理 1.10</a>可知<span class="math inline">\(\alpha_{r+1}+E,\alpha_{r+2}+E,\dots,\alpha_{n}+E\)</span>是<span class="math inline">\(X/E\)</span>的一组基。因为<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{r}\)</span>的线性组合都在<span class="math inline">\(E\)</span>中，由(5)可得：</p>
@@ -2924,7 +2885,6 @@ A_1 &amp; A_3 \\
 &amp;\mathcal{T}/E(\alpha_{r+1}+E,\alpha_{r+2}+E,\dots,\alpha_{n}+E) \\
 =&amp;(\mathcal{T}\alpha_{r+1}+E,\mathcal{T}\alpha_{r+2}+E,\dots,\mathcal{T}\alpha_{n}+E) \\
 =&amp;(\alpha_{r+1}+E,\alpha_{r+2}+E,\dots,\alpha_{n}+E)A_2
-
 \end{align*}\]</span></p>
 <p>即<span class="math inline">\(A_2\)</span>是<span class="math inline">\(\mathcal{T}/E\)</span>在<span class="math inline">\(X/E\)</span>的基<span class="math inline">\(\alpha_{r+1}+E,\alpha_{r+2}+E,\dots,\alpha_n+E\)</span>下的矩阵。</p>
 <p>(7)由条件可知<span class="math inline">\(\mathcal{T}\alpha_i\in E,\;i=1,2,\dots,r\)</span>，根据<a href="#prop-LinearMapping-e3beabe4" data-reference-type="ref+label" data-reference="prop:LinearMapping">性质 1.3.1</a>(4)可知<span class="math inline">\(E\)</span>是<span class="math inline">\(\mathcal{T}\)</span>-子空间。由<a href="#prop-SpanSubspace-5b082085" data-reference-type="ref+label" data-reference="prop:SpanSubspace">性质 1.1.5</a>(2)可知<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{r}\)</span>是<span class="math inline">\(E\)</span>的基，根据定义即可得到<span class="math inline">\(\mathcal{T}\mid E\)</span>在<span class="math inline">\(E\)</span>的基<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{r}\)</span>下的矩阵为<span class="math inline">\(A_1\)</span>。&nbsp;◻</p>
@@ -2939,12 +2899,10 @@ A_1 &amp;\mathbf{0} &amp; \cdots &amp; \mathbf{0} \\
 \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
 \mathbf{0} &amp; \mathbf{0} &amp; \cdots &amp; A_s
 \end{pmatrix}
-
 \end{equation*}\]</span></p>
 <p>当且仅当<span class="math inline">\(X\)</span>能分解为<span class="math inline">\(\mathcal{T}\)</span>的非平凡不变子空间的直和：</p>
 <p><span class="math display">\[\begin{equation*}
 X=E_1\oplus E_2\oplus\cdots\oplus E_s
-
 \end{equation*}\]</span></p>
 <p>此时<span class="math inline">\(A_i\)</span>是<span class="math inline">\(\mathcal{T}\mid E_i\)</span>在<span class="math inline">\(E_i\)</span>的一组基下的矩阵。</p>
 </div>
@@ -2958,12 +2916,10 @@ A_1 &amp;\mathbf{0} &amp; \cdots &amp; \mathbf{0} \\
 \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
 \mathbf{0} &amp; \mathbf{0} &amp; \cdots &amp; A_s
 \end{pmatrix}
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(\sum\limits_{i=1}^{s}r_i=n\)</span>。令<span class="math inline">\(E_i=&lt;a_{i1},a_{i2},\dots,a_{ir_i}&gt;,\;i=1,2,\dots,s\)</span>，由<a href="#prop-SpanSubspace-5b082085" data-reference-type="ref+label" data-reference="prop:SpanSubspace">性质 1.1.5</a>(6)(2)和<a href="#theo-DirectSum-61fb3a25" data-reference-type="ref+label" data-reference="theo:DirectSum">定理 1.6</a>(5)可知<span class="math inline">\(X=E_1\oplus E_2\oplus\cdots\oplus E_s\)</span>。注意到：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}(a_{i1},a_{i2},\dots,a_{ir_i})=(a_{i1},a_{i2},\dots,a_{ir_i})A_i,\;i=1,2,\dots,s
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(A_i\)</span>是<span class="math inline">\(\mathcal{T}\mid E_i\)</span>在<span class="math inline">\(E_i\)</span>的一组基下的矩阵。由上式、<a href="#prop-SpanSubspace-5b082085" data-reference-type="ref+label" data-reference="prop:SpanSubspace">性质 1.1.5</a>(2)和定义可验证得到<span class="math inline">\(E_i,\;i=1,2,\dots,s\)</span>为<span class="math inline">\(\mathcal{T}\)</span>的非平凡不变子空间。</p>
 <p><strong>(2)充分性：</strong>取<span class="math inline">\(E_i\)</span>的一组基<span class="math inline">\(a_{i1},a_{i2},\dots,a_{ir_i},\;i=1,2,\dots,s\)</span>，由<a href="#theo-DirectSum-61fb3a25" data-reference-type="ref+label" data-reference="theo:DirectSum">定理 1.6</a>(5)可知它们拼起来是<span class="math inline">\(X\)</span>的一组基。由不变子空间的定义可知对任意的<span class="math inline">\(i\)</span>和<span class="math inline">\(j\)</span>有<span class="math inline">\(\mathcal{T}a_{ij}\in E_i\)</span>，于是<span class="math inline">\(\mathcal{T}\)</span>在这组基下对应其余方向的元素必须全为<span class="math inline">\(0\)</span>，即<span class="math inline">\(\mathcal{T}\)</span>在这组基下的矩阵为条件中所述的分块对角矩阵。&nbsp;◻</p>
@@ -2983,7 +2939,6 @@ A_1 &amp;\mathbf{0} &amp; \cdots &amp; \mathbf{0} \\
 <p><strong>Definition 1.61</strong>. 设<span class="math inline">\(A\in M_{n}(F)\)</span>。如果<span class="math inline">\(F^n\)</span>中存在非零向量<span class="math inline">\(\alpha\)</span>，使得：</p>
 <p><span class="math display">\[\begin{equation*}
 A\alpha=\lambda\alpha,\;\lambda\in F
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\lambda\)</span>是<span class="math inline">\(A\)</span>的一个<a href="../chapters/page-044.html#term-Eigenvalue" class="term" title="eigenvalue">特征值<span class="term-english">（eigenvalue）</span></a>，<span class="math inline">\(\alpha\)</span>是<span class="math inline">\(A\)</span>属于特征值<span class="math inline">\(\lambda\)</span>的一个<a href="../chapters/page-044.html#term-Eigenvector" class="term" title="eigenvector">特征向量<span class="term-english">（eigenvector）</span></a>。</p>
 </div>
@@ -3005,7 +2960,6 @@ A\alpha=\lambda\alpha,\;\lambda\in F
 \iff&amp;\alpha\text{是齐次线性方程组}(\lambda I-A)x=\mathbf{0}\text{的一个非零解，}\lambda\in F \\        \iff&amp;|\lambda I-A|=0,\;\alpha\text{是齐次线性方程组}(\lambda I-A)x=\mathbf{0}\text{的一个非零解，}\lambda\in F \\
 \iff&amp;\lambda\text{是多项式}|\lambda I-A|\text{在}F\text{中的一个根，} \\
 &amp;\alpha\text{是齐次线性方程组}(\lambda I-A)x=\mathbf{0}\text{的一个非零解，}\lambda\in F
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -3013,7 +2967,6 @@ A\alpha=\lambda\alpha,\;\lambda\in F
 <p><strong>Definition 1.63</strong>. 设<span class="math inline">\(X\)</span>是域<span class="math inline">\(F\)</span>上的一个线性空间，<span class="math inline">\(\mathcal{T}\in\operatorname{Hom}(X)\)</span>。若<span class="math inline">\(X\)</span>中存在非零向量<span class="math inline">\(\xi\)</span>，<span class="math inline">\(F\)</span>中存在元素<span class="math inline">\(\lambda\)</span>，使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}\xi=\lambda\xi
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\lambda\)</span>是<span class="math inline">\(\mathcal{T}\)</span>的一个特征值，<span class="math inline">\(\xi\)</span>是<span class="math inline">\(\mathcal{T}\)</span>属于特征值<span class="math inline">\(\lambda\)</span>的一个特征向量，<span class="math inline">\(\mathcal{T}\)</span>在一组基下的矩阵的特征多项式被称为<span class="math inline">\(\mathcal{T}\)</span>的特征多项式。</p>
 </div>
@@ -3032,7 +2985,6 @@ A\alpha=\lambda\alpha,\;\lambda\in F
 &amp;|\lambda I-B|=|\lambda I-P^{-1}AP|=|P^{-1}\lambda IP-P^{-1}AP| \\
 =&amp;|P^{-1}(\lambda I-A)P|=|P^{-1}|\;|\lambda I-A|\;|P|=|\lambda I-A|\;|P^{-1}|\;|P| \\
 =&amp;|\lambda I-A|\;|P^{-1}P|=|\lambda I-A|\;|I|=|\lambda I-A|
-
 \end{align*}\]</span></p>
 <p>根据<a href="#theo-LinearTransformationMatrixSimilarity-fec754f2" data-reference-type="ref+label" data-reference="theo:LinearTransformationMatrixSimilarity">定理 1.18</a>即可得出结论。&nbsp;◻</p>
 </div>
@@ -3051,33 +3003,28 @@ A\alpha=\lambda\alpha,\;\lambda\in F
 <p><span class="proof-title"><em>证明</em>. </span>(1)任取<span class="math inline">\(\mathcal{T}\)</span>属于<span class="math inline">\(\lambda\)</span>的两个特征向量<span class="math inline">\(\xi_1,\xi_2\)</span>以及域<span class="math inline">\(F\)</span>上的任意两个元素<span class="math inline">\(k_1,k_2\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}(k_1\xi_1+k_2\xi_2)=k_1\mathcal{T}\xi_1+k_2\mathcal{T}\xi_2=k_1\lambda\xi_1+k_2\lambda\xi_2=\lambda(k_1\xi_1+k_1\xi_2)
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(k_1\xi_1+k_2\xi_2\)</span>也是<span class="math inline">\(\mathcal{T}\)</span>属于<span class="math inline">\(\lambda\)</span>的特征向量，由<a href="#theo-Subspace-e4ba2d14" data-reference-type="ref+label" data-reference="theo:Subspace">定理 1.5</a>可知<span class="math inline">\(\mathcal{T}\)</span>属于<span class="math inline">\(\lambda\)</span>的特征向量构成<span class="math inline">\(X\)</span>的一个子空间。</p>
 <p>(2)<span class="math inline">\(\;\xi\in X_{\lambda}\iff\mathcal{T}\xi=\lambda\xi\iff(\mathcal{T}-\lambda\mathcal{I})\xi=\mathbf{0}\iff\xi\in\operatorname{Ker}(\lambda\mathcal{I}-\mathcal{T})\)</span>。</p>
 <p>(3)由(2)和<a href="#prop-LinearMapping-e3beabe4" data-reference-type="ref+label" data-reference="prop:LinearMapping">性质 1.3.1</a>(10)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \dim(X_{\lambda})=\dim[\operatorname{Ker}(\lambda\mathcal{I}-\mathcal{T})]=n-\dim[\operatorname{Im}(\lambda\mathcal{I}-\mathcal{T})]=\operatorname{rank}(\lambda\mathcal{I}-\mathcal{T})
-
 \end{equation*}\]</span></p>
 <p>(4)由定义即可验证得到。</p>
 <p>(5)根据<a href="#prop-LinearTransformationEigenspace-0d70b2ec" data-reference-type="ref+label" data-reference="prop:LinearTransformationEigenspace">性质 1.4.2</a>(1)，任取<span class="math inline">\(\mathcal{T}_2\)</span>的特征子空间<span class="math inline">\(X_\lambda\)</span>及其中的向量<span class="math inline">\(\alpha\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}_2(\mathcal{T}_1\alpha)=\mathcal{T}_1(\mathcal{T}_2\alpha)=\mathcal{T}_1(\lambda\alpha)=\alpha(\mathcal{T}_1\alpha)
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(\mathcal{T}_1\alpha\in X_\lambda\)</span>，于是<span class="math inline">\(X_\lambda\)</span>是<span class="math inline">\(\mathcal{T}_1\)</span>-子空间。</p>
 <p>(6)任取<span class="math inline">\(\mathcal{T}\)</span>属于不同特征值<span class="math inline">\(\lambda_1, \lambda_2, \dots, \lambda_{n}\)</span>的特征向量<span class="math inline">\(\xi_1, \xi_2, \dots, \xi_{n}\)</span>，<span class="math inline">\(n\in\mathbb{N}^+\)</span>且<span class="math inline">\(n\)</span>小于等于<span class="math inline">\(\mathcal{T}\)</span>的特征值的个数。若<span class="math inline">\(\xi_1, \xi_2, \dots, \xi_{n}\)</span>线性相关，则存在不全为<span class="math inline">\(0\)</span>的<span class="math inline">\(k_1, k_2, \dots, k_{n}\in F\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 k_1\xi_1+k_2\xi_2+\cdots+k_n\xi_n=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-LinearMapping-e3beabe4" data-reference-type="ref+label" data-reference="prop:LinearMapping">性质 1.3.1</a>(2)可得：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;\prod_{i\ne 1}^{}(\lambda_i\mathcal{I}-\mathcal{T})\left(k_1\xi_1+k_2\xi_2+\cdots+k_n\xi_n\right)=k_1\prod_{i\ne 1}^{}(\lambda_i\mathcal{I}-\mathcal{T})\xi_1 \\
 =&amp;k_1\prod_{i\notin{1,2}}^{}(\lambda_i\mathcal{I}-\mathcal{T})(\lambda_2\mathcal{I}-\mathcal{T})\xi_1=k_1\prod_{i\notin{1,2}}^{}(\lambda_i\mathcal{I}-\mathcal{T})(\lambda_2-\lambda_1)\xi_1 \\
 =&amp;\prod_{i=2}^{n}(\lambda_i-\lambda_1)\xi_1=\prod_{i\ne j}^{}(\lambda\mathcal{I}-\mathcal{T})\mathbf{0}=\mathbf{0}
-
 \end{align*}\]</span></p>
 <p>由于<span class="math inline">\(\lambda_1, \lambda_2, \dots, \lambda_{n}\)</span>之间互不相同，根据<a href="#prop-LinearSpace-60f16f8a" data-reference-type="ref+label" data-reference="prop:LinearSpace">性质 1.1.1</a>(5)可知<span class="math inline">\(k_1=0\)</span>。依此类推可得<span class="math inline">\(k_1=k_2=\cdots=k_n=0\)</span>，矛盾，即<span class="math inline">\(\xi_1, \xi_2, \dots, \xi_{n}\)</span>线性无关。根据<span class="math inline">\(\lambda_1, \lambda_2, \dots, \lambda_{n}\)</span>的任意性可知结论成立。&nbsp;◻</p>
 </div>
@@ -3095,7 +3042,6 @@ k_1\xi_1+k_2\xi_2+\cdots+k_n\xi_n=\mathbf{0}
 <li><p><span class="math inline">\(\mathcal{T}\)</span>的特征多项式在<span class="math inline">\(F[x]\)</span>中可分解为：</p>
 <p><span class="math display">\[\begin{equation*}
                 (x-\lambda_1)^{r_1}(x-\lambda_2)^{r_2}\cdots(x-\lambda_m)^{r_m}
-
     \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(\lambda_1, \lambda_2, \dots, \lambda_{m}\)</span>两两不等且<span class="math inline">\(\mathcal{T}\)</span>的每个特征值<span class="math inline">\(\lambda_i\)</span>的几何重数等于它的代数重数，<span class="math inline">\(i=1,2,\dots,m\)</span>。</p></li>
 </ol>
@@ -3116,7 +3062,6 @@ k_1\xi_1+k_2\xi_2+\cdots+k_n\xi_n=\mathbf{0}
 &amp;\{\mathcal{T}[(\alpha_1, \alpha_2, \dots, \alpha_{n})P_1],\mathcal{T}[(\alpha_1, \alpha_2, \dots, \alpha_{n})P_2],\dots,\mathcal{T}[(\alpha_1, \alpha_2, \dots, \alpha_{n})P_n]\} \\
 =&amp;[(\alpha_1, \alpha_2, \dots, \alpha_{n})P_1, (\alpha_1, \alpha_2, \dots, \alpha_{n})P_2, \dots, (\alpha_1, \alpha_2, \dots, \alpha_{n})P_{n}]\varLambda
 \end{aligned}
-
 \end{gather*}\]</span></p>
 <p>由<a href="#theo-BasisTransInvertibleMat-4697959b" data-reference-type="ref+label" data-reference="theo:BasisTransInvertibleMat">定理 1.3</a>可知<span class="math inline">\((\alpha_1, \alpha_2, \dots, \alpha_{n})P_1, (\alpha_1, \alpha_2, \dots, \alpha_{n})P_2, \dots, (\alpha_1, \alpha_2, \dots, \alpha_{n})P_{n}\)</span>还是<span class="math inline">\(X\)</span>的一组基，于是<span class="math inline">\(\mathcal{T}\)</span>在这组基下的矩阵是对角矩阵<span class="math inline">\(\varLambda\)</span>，<span class="math inline">\(\mathcal{T}\)</span>可对角化，充分性得证。</p>
 <p>(2)由<span class="math inline">\(\mathcal{T}\)</span>可对角化的定义可得：</p>
@@ -3126,7 +3071,6 @@ k_1\xi_1+k_2\xi_2+\cdots+k_n\xi_n=\mathbf{0}
 &amp;\xi_1, \xi_2, \dots, \xi_{n}\text{线性无关} \\
 \iff&amp;\mathcal{T}\xi_i=\lambda_i\xi_i\text{且}\xi_1, \xi_2, \dots, \xi_{n}\text{线性无关} \\
 \iff&amp;\mathcal{T}\text{有$n$个线性无关的特征向量}\xi_1, \xi_2, \dots, \xi_{n}
-
 \end{align*}\]</span></p>
 <p>(3)由(2)和<a href="#prop-nDimensionalLinearSpace-2bfb8ddd" data-reference-type="ref+label" data-reference="prop:nDimensionalLinearSpace">性质 1.1.4</a>(2)立即可得。</p>
 <p>(4)<strong>必要性：</strong>由(3)可知<span class="math inline">\(X\)</span>可表为<span class="math inline">\(\mathcal{T}\)</span>属于不同特征值的特征子空间的和，根据特征值的定义、<a href="#theo-DirectSum-61fb3a25" data-reference-type="ref+label" data-reference="theo:DirectSum">定理 1.6</a>(3)和<a href="#prop-LinearSpace-60f16f8a" data-reference-type="ref+label" data-reference="prop:LinearSpace">性质 1.1.1</a>(5)可知结论成立。</p>
@@ -3142,12 +3086,10 @@ k_1\xi_1+k_2\xi_2+\cdots+k_n\xi_n=\mathbf{0}
 <p><strong>Theorem 1.23</strong>. 设<span class="math inline">\(X\)</span>是域<span class="math inline">\(F\)</span>上的线性空间，<span class="math inline">\(\mathcal{T}\in\operatorname{Hom}(X)\)</span>，在<span class="math inline">\(F[x]\)</span>中有：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=f_1(x)f_2(x)\cdots f_n(x)
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(f_i(x),\;i=1,2,\dots,n\)</span>两两互素，则：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Ker}[f(\mathcal{T})]=\operatorname{Ker}[f_1(\mathcal{T})]\oplus\operatorname{Ker}[f_2(\mathcal{T})]\oplus\cdots\oplus\operatorname{Ker}[f_n(\mathcal{T})]
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -3156,33 +3098,27 @@ f(x)=f_1(x)f_2(x)\cdots f_n(x)
 <p>任取<span class="math inline">\(\alpha\in\operatorname{Ker}[f(\mathcal{T})]\)</span>。因为<span class="math inline">\((f_1(x),f_2(x))=1\)</span>，由<a href="#prop-CommonDivision-0589cf5b" data-reference-type="ref+label" data-reference="prop:CommonDivision">性质 1.2.4</a>(7)可知存在<span class="math inline">\(u(x),v(x)\in F[x]\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 u(x)f_1(x)+v(x)f_2(x)=1
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 u(\mathcal{T})f_1(\mathcal{T})+v(\mathcal{T})f_2(\mathcal{T})=\mathcal{I}
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha=\mathcal{I}\alpha=u(\mathcal{T})f_1(\mathcal{T})\alpha+v(\mathcal{T})f_2(\mathcal{T})\alpha
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-LinearMapping-e3beabe4" data-reference-type="ref+label" data-reference="prop:LinearMapping">性质 1.3.1</a>(1)可得：</p>
 <p><span class="math display">\[\begin{gather*}
 f_2(\mathcal{T})[u(\mathcal{T})f_1(\mathcal{T})]\alpha=u(\mathcal{T})[f_1(\mathcal{T})f_2(\mathcal{T})]\alpha=\mathbf{0} \\ f_1(\mathcal{T})[v(\mathcal{T})f_2(\mathcal{T})]\alpha=v(\mathcal{T})[f_2(\mathcal{T})f_1(\mathcal{T})]\alpha=\mathbf{0}
-
 \end{gather*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 u(\mathcal{T})f_1(\mathcal{T})\alpha\in\operatorname{Ker}[f_2(\mathcal{T})],\quad v(\mathcal{T})f_2(\mathcal{T})\alpha\in\operatorname{Ker}[f_1(\mathcal{T})]
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\alpha\)</span>可以分解为<span class="math inline">\(\operatorname{Ker}[f_1(\mathcal{T})]\)</span>和<span class="math inline">\(\operatorname{Ker}[f_2(\mathcal{T})]\)</span>中元素的和。根据<span class="math inline">\(\alpha\)</span>的任意性，<span class="math inline">\(\operatorname{Ker}[f(\mathcal{T})]=\operatorname{Ker}[f_1(\mathcal{T})]+\operatorname{Ker}[f_2(\mathcal{T})]\)</span>。</p>
 <p>任取<span class="math inline">\(\alpha\in\operatorname{Ker}[f_1(\mathcal{T})]\cap\operatorname{Ker}[f_2(\mathcal{T})]\)</span>，由<a href="#prop-LinearMapping-e3beabe4" data-reference-type="ref+label" data-reference="prop:LinearMapping">性质 1.3.1</a>(1)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \beta=\mathcal{I}\beta=u(\mathcal{T})f_1(\mathcal{T})\beta+v(\mathcal{T})f_2(\mathcal{T})\beta=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>根据<a href="#theo-DirectSum-61fb3a25" data-reference-type="ref+label" data-reference="theo:DirectSum">定理 1.6</a>(3)可知<span class="math inline">\(\operatorname{Ker}[f(\mathcal{T})]=\operatorname{Ker}[f_1(\mathcal{T})]\oplus\operatorname{Ker}[f_2(\mathcal{T})]\)</span>。&nbsp;◻</p>
 </div>
@@ -3210,42 +3146,34 @@ u(\mathcal{T})f_1(\mathcal{T})\alpha\in\operatorname{Ker}[f_2(\mathcal{T})],\qua
 <p>设<span class="math inline">\(B\)</span>是<span class="math inline">\(\lambda I_n-A\)</span>的伴随矩阵，根据<a href="../chapters/page-003.html#prop-InvertibleMatrix-8a0b4e00" data-reference-type="ref+label" data-reference="prop:InvertibleMatrix">性质 2.1.10</a>(3)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 B(\lambda I_n-A)=|\lambda I_n-A|I_n=f(\lambda)I_n
-
 \end{equation*}\]</span></p>
 <p>由伴随矩阵的定义可知<span class="math inline">\(B\)</span>的元素都是<span class="math inline">\(\lambda I_n-A\)</span>的代数余子式，所以<span class="math inline">\(B\)</span>的元素都是次数不超过<span class="math inline">\(n-1\)</span>次的关于<span class="math inline">\(\lambda\)</span>的一元多项式，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 B=\lambda^{n-1}B_{n-1}+\lambda^{n-2}B_{n-2}+\cdots+\lambda B_1+B_0
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(B_0,B_1, B_2, \dots, B_{n-1}\)</span>为域<span class="math inline">\(F\)</span>上的<span class="math inline">\(n\)</span>阶矩阵。注意到：</p>
 <p><span class="math display">\[\begin{equation*}
 B(\lambda I_n-A)=\lambda^nB_{n-1}+\lambda^{n-1}(B_{n-2}-B_{n-1}A)+\cdots+\lambda(B_0-B_1A)-B_0A
-
 \end{equation*}\]</span></p>
 <p>设：</p>
 <p><span class="math display">\[\begin{equation*}
 f(\lambda)=\lambda^n+a_{n-1}\lambda^{n-1}+\cdots+a_1\lambda+a_0
-
 \end{equation*}\]</span></p>
 <p>则：</p>
 <p><span class="math display">\[\begin{equation*}
 f(\lambda)I_n=\lambda^nI_n+a_{n-1}\lambda^{n-1}I_n+\cdots+a_1\lambda I_n+a_0I_n
-
 \end{equation*}\]</span></p>
 <p>将上式与<span class="math inline">\(B(\lambda I_n-A)\)</span>进行对应可得：</p>
 <p><span class="math display">\[\begin{equation*}
 B_{n-1}=I_n,\;B_{n-2}-B_{n-1}A=a_{n-1}I_n,\;\dots,\;B_0-B_1A=a_1I_n,\;-B_0A=a_0I_n
-
 \end{equation*}\]</span></p>
 <p>用<span class="math inline">\(A^n,A^{n-1},\dots,I_n\)</span>依次乘上式的两端即可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 B_{n-1}A^n=A^n,\;B_{n-2}A^{n-1}-B_{n-1}A^n=a_{n-1}A^{n-1},\;\dots,\;B_0A-B_1A^2=a_1A,\;-B_0A=a_0I_n
-
 \end{equation*}\]</span></p>
 <p>将上式相加可得：</p>
 <p><span class="math display">\[\begin{equation*}
 f(A)=A^n+a_{n-1}A^{n-1}+\cdots+a_1A+a_0I_n=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -3264,7 +3192,6 @@ f(A)=A^n+a_{n-1}A^{n-1}+\cdots+a_1A+a_0I_n=\mathbf{0}
 <li><p>若<span class="math inline">\(X\)</span>可以分解为<span class="math inline">\(\mathcal{T}\)</span>的非平凡不变子空间的直和：</p>
 <p><span class="math display">\[\begin{equation*}
                 X=E_1\oplus E_2\oplus\cdots\oplus E_m
-
     \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\mathcal{T}\)</span>的最小多项式为<span class="math inline">\(\mathcal{T}\mid E_i,\;i=1,2,\dots,m\)</span>最小多项式的首项系数为<span class="math inline">\(1\)</span>的最小公倍式；</p></li>
 <li><p>若<span class="math inline">\(A\)</span>是域<span class="math inline">\(F\)</span>上的一个分块对角矩阵：</p>
@@ -3276,7 +3203,6 @@ f(A)=A^n+a_{n-1}A^{n-1}+\cdots+a_1A+a_0I_n=\mathbf{0}
                     \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
                     \mathbf{0} &amp; \mathbf{0} &amp; \cdots &amp; A_m
                 \end{pmatrix}
-
     \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(A\)</span>的最小多项式为<span class="math inline">\(A_i,\;i=1,2,\dots,m\)</span>最小多项式的首项系数为<span class="math inline">\(1\)</span>的最小公倍式；</p></li>
 </ol>
@@ -3288,12 +3214,10 @@ f(A)=A^n+a_{n-1}A^{n-1}+\cdots+a_1A+a_0I_n=\mathbf{0}
 <p>(4)<strong>必要性：</strong>若<span class="math inline">\(g(x)\)</span>不是<span class="math inline">\(f(x)\)</span>的倍式，由<a href="#prop-UnivariatePolynomialDivision-42d5d755" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialDivision">性质 1.2.3</a>(8)可知存在唯一的一对<span class="math inline">\(h(x),r(x)\in F[x]\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 g(x)=h(x)f(x)+r(x),\quad r(x)\ne0,\;\deg r(x)&lt;\deg g(x)
-
 \end{equation*}\]</span></p>
 <p>于是根据<a href="#prop-LinearMapping-e3beabe4" data-reference-type="ref+label" data-reference="prop:LinearMapping">性质 1.3.1</a>(2)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{O}=g(\mathcal{T})=h(\mathcal{T})f(\mathcal{T})+r(\mathcal{T})=r(\mathcal{T})
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(r(x)=0\)</span>，矛盾，<span class="math inline">\(g(x)\)</span>是<span class="math inline">\(f(x)\)</span>的倍式。</p>
 <p><strong>充分性：</strong>由<a href="#prop-LinearMapping-e3beabe4" data-reference-type="ref+label" data-reference="prop:LinearMapping">性质 1.3.1</a>(2)立即可得。</p>
@@ -3301,24 +3225,20 @@ g(x)=h(x)f(x)+r(x),\quad r(x)\ne0,\;\deg r(x)&lt;\deg g(x)
 <p>设<span class="math inline">\(\mathcal{T}\)</span>在<span class="math inline">\(X\)</span>的一组基下的矩阵为<span class="math inline">\(A\)</span>，将<span class="math inline">\(A\)</span>视作<span class="math inline">\(E\)</span>上的矩阵。任取<span class="math inline">\(g(x)\)</span>在<span class="math inline">\(E\)</span>中的根<span class="math inline">\(\lambda\)</span>，于是<span class="math inline">\(\lambda\)</span>是<span class="math inline">\(A\)</span>的特征值，即存在非零的<span class="math inline">\(\xi\in E^n\)</span>使得<span class="math inline">\(A\xi=\lambda\xi\)</span>。设<span class="math inline">\(f(x)=a_nx^n+a_{n-1}x^{n-1}+\cdots+a_0\)</span>，因为<span class="math inline">\(f(x)\)</span>是<span class="math inline">\(\mathcal{T}\)</span>的最小多项式，由(1)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathbf{0}=f(A)\xi=(a_nA^n+a_{n-1}A^{n-1}+\cdots+a_0I_n)\xi=(a_n\lambda^n+a_{n-1}\lambda^{n-1}+\cdots+a_0)\xi=f(\lambda)\xi
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(\xi\ne\mathbf{0}\)</span>，根据<a href="#prop-LinearSpace-60f16f8a" data-reference-type="ref+label" data-reference="prop:LinearSpace">性质 1.1.1</a>(5)可知<span class="math inline">\(f(\lambda)=0\)</span><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>。由<span class="math inline">\(\lambda\)</span>的任意性可知<span class="math inline">\(g(x)\)</span>在<span class="math inline">\(E\)</span>上的根都是<span class="math inline">\(f(x)\)</span>在<span class="math inline">\(E\)</span>上的根。</p>
 <p>(6)设<span class="math inline">\(f_i(x)\)</span>是<span class="math inline">\(\mathcal{T}\mid E_i\)</span>的最小多项式，<span class="math inline">\(i=1,2,\dots,m\)</span>，<span class="math inline">\(f(x)\)</span>为<span class="math inline">\(\mathcal{T}\)</span>的最小多项式。对于任意的<span class="math inline">\(\alpha\in E_i\)</span>，根据<a href="#prop-LinearMapping-e3beabe4" data-reference-type="ref+label" data-reference="prop:LinearMapping">性质 1.3.1</a>(2)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathbf{0}=f(\mathcal{T})\alpha=f(\mathcal{T}\mid E_i)\alpha
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(f(x)\)</span>是<span class="math inline">\(\mathcal{T}\mid E_i\)</span>的零化多项式。由(4)可知<span class="math inline">\(f(x)\)</span>是<span class="math inline">\(f_i(x)\)</span>的倍式，<span class="math inline">\(i=1,2,\dots,m\)</span>，根据<a href="#prop-UnivariatePolynomialDivision-42d5d755" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialDivision">性质 1.2.3</a><span class="math inline">\(f_1(x),f_2(x),\dots,f_m(x)\)</span>首项系数为<span class="math inline">\(1\)</span>的最小公倍式<span class="math inline">\(g(x)\)</span>满足<span class="math inline">\(g(x)\mid f(x)\)</span>。</p>
 <p>任取<span class="math inline">\(\alpha\in X\)</span>，则<span class="math inline">\(\alpha\)</span>有分解式：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha=\alpha_1+\alpha_2+\cdots+\alpha_s,\quad\alpha_i\in E_i,\;i=1,2,\dots,m
-
 \end{equation*}\]</span></p>
 <p>于是由<a href="#prop-LinearMapping-e3beabe4" data-reference-type="ref+label" data-reference="prop:LinearMapping">性质 1.3.1</a>(2)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 g(\mathcal{T})\alpha=g(\mathcal{T})\sum_{i=1}^{m}\alpha_i=\sum_{i=1}^{m}g(\mathcal{T})\alpha_i=\sum_{i=1}^{m}g(\mathcal{T}\mid E_i)\alpha_i=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>由<span class="math inline">\(\alpha\)</span>的任意性可知<span class="math inline">\(g(x)\)</span>是<span class="math inline">\(\mathcal{T}\)</span>的零化多项式，根据(4)可知<span class="math inline">\(g(x)\)</span>是<span class="math inline">\(f(x)\)</span>的倍式，即<span class="math inline">\(f(x)\mid g(x)\)</span>。由<a href="#prop-UnivariatePolynomialDivision-42d5d755" data-reference-type="ref+label" data-reference="prop:UnivariatePolynomialDivision">性质 1.2.3</a>(7)可知<span class="math inline">\(f(x)=g(x)\)</span>。</p>
 <p>(7)由<a href="#theo-LinearTransformationMatrix-15bb156b" data-reference-type="ref+label" data-reference="theo:LinearTransformationMatrix">定理 1.14</a>、<a href="#theo-BlockDiagonalizationInvariantSubspace-ecdaf51d" data-reference-type="ref+label" data-reference="theo:BlockDiagonalizationInvariantSubspace">定理 1.19</a>和(6)(1)立即可得。&nbsp;◻</p>
@@ -3369,28 +3289,23 @@ B_i=A_i-\alpha_iI_{n_i}
 <p><span class="proof-title"><em>证明</em>. </span><strong>必要性：</strong>由<a href="#theo-LinearTransformationDiagonal-960831db" data-reference-type="ref+label" data-reference="theo:LinearTransformationDiagonal">定理 1.22</a>(4)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 X=X_{\lambda_1}\oplus X_{\lambda_2}\oplus\cdots\oplus X_{\lambda_m}
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(\lambda_1, \lambda_2, \dots, \lambda_{m}\)</span>是<span class="math inline">\(\mathcal{T}\)</span>的全部特征值。对任意的<span class="math inline">\(\alpha\in X_{\lambda_i},\;i=1,2,\dots,m\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 (\mathcal{T}\mid X_{\lambda_i})\alpha=\mathcal{T}\alpha=\lambda_i\alpha
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\mathcal{T}\mid X_{\lambda_i}=\lambda_i\mathcal{I}\)</span>，其最小多项式为<span class="math inline">\(f_i(x)=x-\lambda_i\)</span>。由<a href="#prop-MinimalPolynomial-f212fe91" data-reference-type="ref+label" data-reference="prop:MinimalPolynomial">性质 1.4.4</a>(7)可知<span class="math inline">\(\mathcal{T}\)</span>的最小多项式<span class="math inline">\(f(x)\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=\prod_{i=1}^{m}f_i(x)=\prod_{i=1}^{m}(x-\lambda_i)
-
 \end{equation*}\]</span></p>
 <p><strong>充分性：</strong>设<span class="math inline">\(\mathcal{T}\)</span>的最小多项式<span class="math inline">\(f(x)\)</span>为：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=\prod_{i=1}^{m}f_i(x)=\prod_{i=1}^{m}(x-\alpha_i)
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(\alpha_i\)</span>是<span class="math inline">\(F\)</span>中两两不等的元素，则<span class="math inline">\(x-\alpha_i\)</span>两两互素。根据<a href="#theo-KernelDecompositionCoprimePolynomialFactors-4dbd0cdb" data-reference-type="ref+label" data-reference="theo:KernelDecompositionCoprimePolynomialFactors">定理 1.23</a>可知：</p>
 <p><span class="math display">\[\begin{align*}
 X&amp;=\operatorname{Ker}[f(\mathcal{T})]=\operatorname{Ker}[f_1(\mathcal{T})]\oplus\operatorname{Ker}[f_2(\mathcal{T})]\oplus\cdots\oplus\operatorname{Ker}[f_m(\mathcal{T})] \\
 &amp;=\operatorname{Ker}(\mathcal{T}-\alpha_1\mathcal{I})\oplus\operatorname{Ker}(\mathcal{T}-\alpha_2\mathcal{I})\oplus\cdots\oplus\operatorname{Ker}(\mathcal{T}-\alpha_m\mathcal{I})
-
 \end{align*}\]</span></p>
 <p>注意到<span class="math inline">\(\operatorname{Ker}(\mathcal{T}-\alpha_i\mathcal{I})\)</span>是<span class="math inline">\(\mathcal{T}\)</span>属于特征值<span class="math inline">\(\alpha_i\)</span>的特征子空间，根据<a href="#theo-LinearTransformationDiagonal-960831db" data-reference-type="ref+label" data-reference="theo:LinearTransformationDiagonal">定理 1.22</a>(4)可知<span class="math inline">\(\mathcal{T}\)</span>可对角化。&nbsp;◻</p>
 </div>
@@ -3406,7 +3321,6 @@ X&amp;=\operatorname{Ker}[f(\mathcal{T})]=\operatorname{Ker}[f_1(\mathcal{T})]\o
 <p>(2)设<span class="math inline">\(\mathcal{T}\)</span>的最小多项式为<span class="math inline">\(f(x)\)</span>，<span class="math inline">\(\mathcal{T}\mid E\)</span>的最小多项式为<span class="math inline">\(g(x)\)</span>。对任意的<span class="math inline">\(\alpha\in E\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 f(\mathcal{T})\alpha=f(\mathcal{T}\mid E)\alpha=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(f(x)\)</span>是<span class="math inline">\(\mathcal{T}\mid E\)</span>的零化多项式。由<a href="#prop-MinimalPolynomial-f212fe91" data-reference-type="ref+label" data-reference="prop:MinimalPolynomial">性质 1.4.4</a>(4)可知<span class="math inline">\(g(x)\mid f(x)\)</span>，根据<a href="#theo-LinearTransformationDiagonal2-d27199e2" data-reference-type="ref+label" data-reference="theo:LinearTransformationDiagonal2">定理 1.25</a>可知<span class="math inline">\(f(x)\)</span>可在<span class="math inline">\(F[x]\)</span>中分解为不同的一次因式的乘积，于是<span class="math inline">\(g(x)\)</span>可在<span class="math inline">\(F[x]\)</span>中分解为不同的一次因式的乘积，由<a href="#prop-Subspace-fcfc4744" data-reference-type="ref+label" data-reference="prop:Subspace">性质 1.1.6</a>(4)和<a href="#theo-LinearTransformationDiagonal2-d27199e2" data-reference-type="ref+label" data-reference="theo:LinearTransformationDiagonal2">定理 1.25</a>即可得出结论。&nbsp;◻</p>
 </div>
@@ -3423,7 +3337,6 @@ k &amp; 1 &amp; 0 &amp; 0 &amp; \cdots &amp; 0 &amp; 0 &amp; 0 \\
 0 &amp; 0 &amp; 0 &amp; 0 &amp; \cdots &amp; 0 &amp; k &amp; 1 \\
 0 &amp; 0 &amp; 0 &amp; 0 &amp; \cdots &amp; 0 &amp; 0 &amp; k \\
 \end{pmatrix}
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(A\)</span>为<span class="math inline">\(n\)</span>阶<a href="../chapters/page-049.html#term-JordanBlock" class="term" title="Jordan block">Jordan块<span class="term-english">（Jordan block）</span></a>，记作<span class="math inline">\(J_n(k)\)</span>。称Jordan块组成的分块对角矩阵为<a href="../chapters/page-052.html#term-MatrixInJordanForm" class="term" title="matrix in Jordan form">Jordan形矩阵<span class="term-english">（matrix in Jordan form）</span></a>。</p>
 </div>
@@ -3445,7 +3358,6 @@ k &amp; 1 &amp; 0 &amp; 0 &amp; \cdots &amp; 0 &amp; 0 &amp; 0 \\
 <li><p>若<span class="math inline">\(X=E\oplus W\)</span>，<span class="math inline">\(\mathcal{P}_E\)</span>为平行于<span class="math inline">\(W\)</span>在<span class="math inline">\(E\)</span>上的投影变换，则：</p>
 <p><span class="math display">\[\begin{equation*}
                 E=\operatorname{Im}\mathcal{P}_E,\;W=\operatorname{Ker}\mathcal{P}_E
-
     \end{equation*}\]</span></p></li>
 <li><p><span class="math inline">\(X\)</span>的任一子空间<span class="math inline">\(E\)</span>是平行于<span class="math inline">\(E\)</span>的一个补空间在<span class="math inline">\(E\)</span>上的投影变换的象；</p></li>
 <li><p><span class="math inline">\(X\)</span>的任一子空间<span class="math inline">\(E\)</span>是平行于<span class="math inline">\(E\)</span>在<span class="math inline">\(E\)</span>的一个补空间上的投影变换的核。</p></li>
@@ -3460,26 +3372,22 @@ k &amp; 1 &amp; 0 &amp; 0 &amp; \cdots &amp; 0 &amp; 0 &amp; 0 \\
 =\mathcal{P}_E[(k_1\alpha_1+k_2\beta_1)+(k_1\alpha_2+k_2\beta_2)]
 =k_1\alpha_1+k_2\beta_1
 =k_1\mathcal{P}_E\alpha+k_2\mathcal{P}_E\beta
-
 \end{align*}\]</span></p>
 <p>所以<span class="math inline">\(\mathcal{P}_E\)</span>是线性变换。</p>
 <p>(2)任取<span class="math inline">\(\alpha=\alpha_1+\alpha_2\in X,\;\alpha_1\in E,\;\alpha_2\in W\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{P}_E(\mathcal{P}_E\alpha)=\mathcal{P}_E(\alpha_1)=\alpha_1=\mathcal{P}_E\alpha
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\mathcal{P}_E\)</span>是幂等变换。</p>
 <p>(3)任取<span class="math inline">\(\alpha=\alpha_1+\alpha_2\in X,\;\alpha_1\in E,\;\alpha_2\in W\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{P}_E(\mathcal{P}_W\alpha)=\mathcal{P}_E\alpha_2=\mathbf{0},\;
 \mathcal{P}_W(\mathcal{P}_E\alpha)=\mathcal{P}_W\alpha_2=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\mathcal{P}_E\mathcal{P}_W=\mathcal{P}_W\mathcal{P}_E=\mathcal{O}\)</span>，即<span class="math inline">\(\mathcal{P}_E\)</span>与<span class="math inline">\(\mathcal{P}_W\)</span>正交。</p>
 <p>(4)任取<span class="math inline">\(\alpha=\alpha_1+\alpha_2\in X,\;\alpha_1\in E,\;\alpha_2\in W\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
 (\mathcal{P}_E+\mathcal{P}_W)\alpha=\mathcal{P}_E\alpha+\mathcal{P}_W\alpha=\alpha_1+\alpha_2=\alpha
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\mathcal{P}_E+\mathcal{P}_W=\mathcal{I}\)</span>。</p>
 <p>(5)若存在另一平行于<span class="math inline">\(W\)</span>在<span class="math inline">\(E\)</span>上的投影变换，则它与<span class="math inline">\(\mathcal{P}_E\)</span>的作用完全相同，于是二者相等，唯一性得证。</p>
@@ -3489,13 +3397,11 @@ k &amp; 1 &amp; 0 &amp; 0 &amp; \cdots &amp; 0 &amp; 0 &amp; 0 \\
 <p>(8)与(2)类似可得。 (9)任取<span class="math inline">\(\alpha\in X\)</span>，则<span class="math inline">\(\mathcal{T}\alpha\in\operatorname{Im}\mathcal{T}\)</span>。因为：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}(\alpha-\mathcal{T}\alpha)=\mathcal{T}\alpha-\mathcal{T}^2\alpha=\mathcal{T}\alpha-\mathcal{T}\alpha=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\alpha-\mathcal{T}\alpha\in\operatorname{Ker}\mathcal{T}\)</span>。因为<span class="math inline">\(\alpha=\mathcal{T}\alpha+\alpha-\mathcal{T}\alpha\)</span>，所以<span class="math inline">\(X=\operatorname{Im}\mathcal{T}+\operatorname{Ker}\mathcal{T}\)</span>。</p>
 <p>任取<span class="math inline">\(\beta\in\operatorname{Im}\mathcal{T}\cap\operatorname{Ker}\mathcal{T}\)</span>，则存在<span class="math inline">\(\gamma\in X\)</span>使得<span class="math inline">\(\mathcal{T}\gamma=\beta\)</span>，且有<span class="math inline">\(\mathcal{T}\beta=\mathbf{0}\)</span>，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathbf{0}=\mathcal{T}\beta=\mathcal{T}(\mathcal{T}\gamma)=\mathcal{T}^2\gamma=\mathcal{T}\gamma=\beta
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\operatorname{Im}\mathcal{T}\cap\operatorname{Ker}\mathcal{T}=\mathbf{0}\)</span>，由<a href="#theo-DirectSum-61fb3a25" data-reference-type="ref+label" data-reference="theo:DirectSum">定理 1.6</a>(3)可知<span class="math inline">\(X=\operatorname{Im}\mathcal{T}\oplus\operatorname{Ker}\mathcal{T}\)</span>。</p>
 <p>记<span class="math inline">\(\operatorname{Im}\mathcal{T}=E,\;\operatorname{Ker}\mathcal{T}=W\)</span>，对上述<span class="math inline">\(\alpha=\mathcal{T}\alpha+\alpha-\mathcal{T}\alpha\)</span>，有<span class="math inline">\(\mathcal{P}_E\alpha=\mathcal{T}\alpha\)</span>。由<span class="math inline">\(\alpha\)</span>的任意性，<span class="math inline">\(\mathcal{T}=\mathcal{P}_E\)</span>。</p>
@@ -3503,13 +3409,11 @@ k &amp; 1 &amp; 0 &amp; 0 &amp; \cdots &amp; 0 &amp; 0 &amp; 0 \\
 <p>任取<span class="math inline">\(\beta\in\operatorname{Im}\mathcal{T}_1\cap\operatorname{Im}\mathcal{T}_2\)</span>，则存在<span class="math inline">\(\gamma,\delta\in X\)</span>使得<span class="math inline">\(\mathcal{T}_1\gamma=\beta,\;\mathcal{T}_2\delta=\beta\)</span>，于是有<span class="math inline">\(\beta=\mathcal{T}_1\gamma=\mathcal{T}_1^2\gamma=\mathcal{T}_1(\mathcal{T}_1\gamma)=\mathcal{T}_1\beta\)</span>。因为<span class="math inline">\(\mathcal{T}_1\)</span>与<span class="math inline">\(\mathcal{T}_2\)</span>正交，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}_1\beta=\mathcal{T}_1(\mathcal{T}_2\delta)=(\mathcal{T}_1\mathcal{T}_2)\delta=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\beta=\mathbf{0}\)</span>，即<span class="math inline">\(\operatorname{Im}\mathcal{T}_1\cap\operatorname{Im}\mathcal{T}_2=\mathbf{0}\)</span>。由<a href="#theo-DirectSum-61fb3a25" data-reference-type="ref+label" data-reference="theo:DirectSum">定理 1.6</a>可得<span class="math inline">\(X=\operatorname{Im}\mathcal{T}_1\oplus\operatorname{Im}\mathcal{T}_2\)</span>。</p>
 <p>任取<span class="math inline">\(\varepsilon=\mathcal{T}_1\varepsilon_1+\mathcal{T}_2\varepsilon_2\in X\)</span>，其中<span class="math inline">\(\varepsilon_1,\varepsilon_2\in X\)</span>。因为<span class="math inline">\(\mathcal{T}_1\)</span>与<span class="math inline">\(\mathcal{T}_2\)</span>正交、<span class="math inline">\(\mathcal{T}_1\)</span>是幂等变换，所以显然有：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{T}_1\varepsilon=\mathcal{T}_1(\mathcal{T}_1\varepsilon_1+\mathcal{T}_2\varepsilon_2)=\mathcal{T}_1^2\varepsilon_1+(\mathcal{T}_1\mathcal{T}_2)\varepsilon_2=\mathcal{T}_1\varepsilon_1
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\mathcal{T}_1\)</span>是平行于<span class="math inline">\(\operatorname{Im}\mathcal{T}_2\)</span>在<span class="math inline">\(\operatorname{Im}\mathcal{T}_1\)</span>上的投影。<span class="math inline">\(\mathcal{T}_2\)</span>同理。&nbsp;◻</p>
 </div>

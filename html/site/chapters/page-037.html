@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,23 +1079,16 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#id--4e8a6fd3" id="toc-id--4e8a6fd3" class="nav-link active" data-scroll-target="#id--4e8a6fd3"><span class="header-section-number">34.7</span> 数域</a></li>
   <li><a href="#id--e61524f0" id="toc-id--e61524f0" class="nav-link" data-scroll-target="#id--e61524f0"><span class="header-section-number">34.8</span> 等价关系</a></li>
   <li><a href="#id-1-d7e8ee5e" id="toc-id-1-d7e8ee5e" class="nav-link" data-scroll-target="#id-1-d7e8ee5e"><span class="header-section-number">34.9</span> 矩阵</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#kronecker-b0863dbc" id="toc-kronecker-b0863dbc" class="nav-link" data-scroll-target="#kronecker-b0863dbc"><span class="header-section-number">34.9.1</span> Kronecker乘积</a></li>
-  <li><a href="#id--f42788e0" id="toc-id--f42788e0" class="nav-link" data-scroll-target="#id--f42788e0"><span class="header-section-number">34.9.2</span> 向量化算子</a>
-  <ul class="collapse">
-  <li><a href="#id--6eb30e50" id="toc-id--6eb30e50" class="nav-link" data-scroll-target="#id--6eb30e50"><span class="header-section-number">34.9.2.1</span> 交换矩阵的定义及其性质</a></li>
-  <li><a href="#id--4e1fbe01" id="toc-id--4e1fbe01" class="nav-link" data-scroll-target="#id--4e1fbe01"><span class="header-section-number">34.9.2.2</span> 向量化算子的性质</a></li>
-  </ul></li>
-  <li><a href="#id--469909a4" id="toc-id--469909a4" class="nav-link" data-scroll-target="#id--469909a4"><span class="header-section-number">34.9.3</span> 平方根阵</a>
-  <ul class="collapse">
-  <li><a href="#id--1945b16f" id="toc-id--1945b16f" class="nav-link" data-scroll-target="#id--1945b16f"><span class="header-section-number">34.9.3.1</span> 平方根阵的逆矩阵</a></li>
-  </ul></li>
+  <li><a href="#id--f42788e0" id="toc-id--f42788e0" class="nav-link" data-scroll-target="#id--f42788e0"><span class="header-section-number">34.9.2</span> 向量化算子</a></li>
+  <li><a href="#id--469909a4" id="toc-id--469909a4" class="nav-link" data-scroll-target="#id--469909a4"><span class="header-section-number">34.9.3</span> 平方根阵</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -958,7 +1139,6 @@ window.Quarto = {
 <p><strong>Definition 34.2</strong>. 对于任意两个非空集合<span class="math inline">\(S,M\)</span>，称：</p>
 <p><span class="math display">\[\begin{equation*}
 \{(a,b):a\in S,\;b\in M\}
-
 \end{equation*}\]</span></p>
 <p>为集合<span class="math inline">\(S\)</span>与集合<span class="math inline">\(M\)</span>的<a href="../chapters/page-042.html#term-CartesianProduct" class="term" title="Cartesian product">笛卡尔积<span class="term-english">（Cartesian product）</span></a>，记为<span class="math inline">\(S\times M\)</span>。其中两个元素<span class="math inline">\((a_1,b_1)\)</span>与<span class="math inline">\((a_2,b_2)\)</span>如果满足<span class="math inline">\(a_1=a_2,\;b_1=b_2\)</span>，则称二者相等，记作<span class="math inline">\((a_1,b_1)=(a_2,b_2)\)</span>。</p>
 </div>
@@ -978,7 +1158,6 @@ window.Quarto = {
 <p><strong>Definition 34.5</strong>. 设<span class="math inline">\(\sim\)</span>是集合<span class="math inline">\(S\)</span>上的一个等价关系，<span class="math inline">\(a\in S\)</span>，令：</p>
 <p><span class="math display">\[\begin{equation*}
 \overline{a}\coloneq\{x\in S:x\sim a\}
-
 \end{equation*}\]</span></p>
 <p>称<span class="math inline">\(\overline{a}\)</span>是由<span class="math inline">\(a\)</span>确定的<a href="../chapters/page-044.html#term-EquivalenceClass" class="term" title="equivalence class">等价类<span class="term-english">（equivalence class）</span></a>，称<span class="math inline">\(a\)</span>是等价类<span class="math inline">\(\overline{a}\)</span>的一个代表。</p>
 </div>
@@ -1011,7 +1190,6 @@ window.Quarto = {
 <p><strong>Definition 34.6</strong>. 如果集合<span class="math inline">\(S\)</span>可以表示为一些非空子集的并集，且这些子集不相交，即：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;S_i\subseteq S,\;\underset{i\in I}{\overset{}{\cup}}S_i=S,\;S_i\cap S_j=\varnothing,\;i\ne j,\;i,j\in I
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(I\)</span>是指标集。称集合<span class="math inline">\(\{S_i:i\in I\}\)</span>是<span class="math inline">\(S\)</span>的一个<a href="../chapters/page-055.html#term-Partition" class="term" title="partition">分割<span class="term-english">（partition）</span></a>，记作<span class="math inline">\(\pi(S)\)</span>。</p>
 </div>
@@ -1052,7 +1230,6 @@ a_{m1} B &amp; a_{m2} B &amp; \cdots &amp; a_{mn} B
 <li><p>设<span class="math inline">\(A\in M_{m}(K),\;B\in M_{n}(K)\)</span>，则<span class="math inline">\(A\otimes B\)</span>可逆的充分必要条件为<span class="math inline">\(A,B\)</span>都可逆，此时有：</p>
 <p><span class="math display">\[\begin{equation*}
                 (A\otimes B)^{-1}=A^{-1}\otimes B^{-1}
-
     \end{equation*}\]</span></p></li>
 <li><p>设<span class="math inline">\(A=(a_{ij})\in M_{m\times n}(K),\;B=(b_{kl})\in M_{p\times q}(K)\)</span>，则<span class="math inline">\((A\otimes B)^{\top}=A^{\top}\otimes B^{\top}\)</span>；</p></li>
 </ol>
@@ -1068,7 +1245,6 @@ I_n &amp; 0 &amp; \cdots &amp; 0 \\
 \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
 0 &amp; 0 &amp; \cdots &amp; I_n
 \end{pmatrix}=I_{mn}
-
 \end{equation*}\]</span></p>
 <p>(2)由Kronecker乘积的定义：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1094,19 +1270,16 @@ c_{n1} D &amp; c_{n2} D &amp; \cdots &amp; c_{nk} D
 \sum\limits_{i=1}^{n}a_{mi}c_{i1}BD &amp; \sum\limits_{i=1}^{n}a_{mi}c_{i2}BD &amp; \cdots &amp;\sum\limits_{i=1}^{n}a_{mi}c_{ik}BD \\
 \end{pmatrix} \\
 &amp;=(AC)\otimes (BD)
-
 \end{align*}\]</span></p>
 <p>(3)<strong>必要性：</strong>假设此时<span class="math inline">\(A\)</span>不可逆，则存在非零向量<span class="math inline">\(x\)</span>使得<span class="math inline">\(Ax=\mathbf{0}\)</span>。取非零向量<span class="math inline">\(y\)</span>，则<span class="math inline">\((x\otimes y)\)</span>不是一个零向量。由(2)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 (A\otimes B)(x\otimes y)=(Ax)\otimes(By)=\mathbf{0}\otimes(By)=\mathbf{0}
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(A\otimes B\)</span>可逆，所以不存在非零向量<span class="math inline">\(z\)</span>使得<span class="math inline">\((A\otimes B)z=\mathbf{0}\)</span>，但此时有<span class="math inline">\((A\otimes B)(x\otimes y)=\mathbf{0}\)</span>，矛盾，所以<span class="math inline">\(A\)</span>可逆。同理可得<span class="math inline">\(B\)</span>可逆。</p>
 <p><strong>充分性：</strong>由(1)(2)可得：</p>
 <p><span class="math display">\[\begin{gather*}
 (A\otimes B)(A^{-1}\otimes B^{-1})=(AA^{-1})\otimes(BB^{-1})=I_m\otimes I_n=I_{mn} \\
 (A^{-1}\otimes B^{-1})(A\otimes B)=(A^{-1}A)\otimes(B^{-1}B)=I_m\otimes I_n=I_{mn}
-
 \end{gather*}\]</span></p>
 <p>所以<span class="math inline">\(A\otimes B\)</span>可逆，逆矩阵就是<span class="math inline">\((A^{-1}\otimes B^{-1})\)</span>。</p>
 <p>(4)对任意的<span class="math inline">\(1\leqslant i\leqslant m,\;1\leqslant j\leqslant n,\;1\leqslant k\leqslant p,\;1\leqslant l\leqslant q\)</span>，元素<span class="math inline">\(a_{ij}b_{kl}\)</span>在<span class="math inline">\(A\otimes B\)</span>中的行标为<span class="math inline">\((i-1)p+k\)</span>，列标为<span class="math inline">\((j-1)q+l\)</span>。于是<span class="math inline">\(a_{ij}b_{kl}\)</span>在<span class="math inline">\((A\otimes B)^{\top}\)</span>中的列标为<span class="math inline">\((i-1)p+k\)</span>，行标为<span class="math inline">\((j-1)q+l\)</span>。而<span class="math inline">\(A^{\top}\otimes B^{\top}\)</span>列标为<span class="math inline">\((i-1)p+k\)</span>、行标为<span class="math inline">\((j-1)q+l\)</span>的元素为<span class="math inline">\(a_{ij}b_{kl}\)</span>，于是<span class="math inline">\((A\otimes B)^{\top}=A^{\top}\otimes B^{\top}\)</span>。&nbsp;◻</p>
@@ -1119,7 +1292,6 @@ c_{n1} D &amp; c_{n2} D &amp; \cdots &amp; c_{nk} D
 <p><span class="math display">\[\begin{gather*}
 \operatorname{vec}(A)=(a_{11},a_{21},\dots,a_{s1},a_{12},a_{22},\dots,a_{s2},\dots,a_{1m},a_{2m},\dots,a_{sm})^{\top} \\
 \operatorname{rvec}(A)=(a_{11},a_{12},\dots,a_{1m},a_{21},a_{22},\dots,a_{2m},\dots,a_{s1},a_{s2},\dots,a_{sm})
-
 \end{gather*}\]</span></p>
 <p>称<span class="math inline">\(\operatorname{vec}\)</span>与<span class="math inline">\(\operatorname{rvec}\)</span>为向量化算子。</p>
 </div>
@@ -1129,7 +1301,6 @@ c_{n1} D &amp; c_{n2} D &amp; \cdots &amp; c_{nk} D
 <p><strong>Definition 34.11</strong>. 对<span class="math inline">\(A\in M_{s\times m}(K)\)</span>，存在唯一的<span class="math inline">\(K_{sm}\in M_{sm\times sm}(K)\)</span>，使得：</p>
 <p><span class="math display">\[\begin{equation*}
 K_{sm}\operatorname{vec}(A)=\operatorname{vec}(A^{\top})
-
 \end{equation*}\]</span></p>
 <p>称<span class="math inline">\(K_{sm}\)</span>为<a href="../chapters/page-042.html#term-CommutationMatrix" class="term" title="commutation matrix">交换矩阵<span class="term-english">（commutation matrix）</span></a>。</p>
 </div>
@@ -1149,7 +1320,6 @@ K_{sm}\operatorname{vec}(A)=\operatorname{vec}(A^{\top})
 <p>(2)因为：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{tr}(A^{\top}B)=\sum_{i=1}^{m}\sum_{j=1}^{s}a_{ji}b_{ji}
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1158,7 +1328,6 @@ K_{sm}\operatorname{vec}(A)=\operatorname{vec}(A^{\top})
 &amp;\quad\cdot(b_{11},b_{21},\dots,b_{s1},b_{12},b_{22},\dots,b_{s2},\dots,b_{1m},b_{2m},\dots,b_{sm})^{\top} \\
 &amp;=\sum_{i=1}^{m}\sum_{j=1}^{s}a_{ji}b_{ji} \\
 &amp;=\operatorname{tr}(A^{\top}B)
-
 \end{align*}\]</span></p>
 <p>(3)设<span class="math inline">\(B=(B_1,B_2,\dots,B_n),\;C=(C_1,C_2,\dots,C_p)\)</span>，则<span class="math inline">\(ABC\)</span>的第<span class="math inline">\(k\)</span>列：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1173,7 +1342,6 @@ B_2 \\
 B_n
 \end{pmatrix}
 =(C_k^{\top}\otimes A)\operatorname{vec}(B)
-
 \end{align*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1201,7 +1369,6 @@ C_p^{\top}\otimes A
 \end{pmatrix}
 \operatorname{vec}(B)
 =(C^{\top}\otimes A)\operatorname{vec}(B)
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1213,12 +1380,10 @@ C_p^{\top}\otimes A
 <p><strong>Definition 34.12</strong>. 设对称阵<span class="math inline">\(A\in M_n(\mathbb{R})\)</span>，其特征值记为<span class="math inline">\(\lambda_i,\;i=1,2,\dots,n\)</span>。因为<span class="math inline">\(A\)</span>是一个实对称阵，由<span class="reference-missing" data-reference="prop:RMatEigen">[缺失引用：prop:RMatEigen]</span>(3)可知存在正交矩阵<span class="math inline">\(Q\)</span>使得<span class="math inline">\(A=Q^{\top}\operatorname{diag}\{\lambda_1, \lambda_2, \dots, \lambda_{n}\}Q\)</span>。若<span class="math inline">\(A\geqslant0\)</span>，由<a href="../chapters/page-003.html#theo-PositiveSemidefinite-cdf79ee9" data-reference-type="ref+label" data-reference="theo:PositiveSemidefinite">定理 2.18</a>(3.5)可知<span class="math inline">\(\lambda_i\geqslant0,\;i=1,2,\dots,n\)</span>，记：</p>
 <p><span class="math display">\[\begin{equation*}
 \varLambda^{\frac{1}{2}}=\operatorname{diag}\{\lambda_1^{\frac{1}{2}},\lambda_2^{\frac{1}{2}},\dots,\lambda_n^{\frac{1}{2}}\}
-
 \end{equation*}\]</span></p>
 <p>称：</p>
 <p><span class="math display">\[\begin{equation*}
 A^{\frac{1}{2}}=Q^{\top}\varLambda^{\frac{1}{2}} Q
-
 \end{equation*}\]</span></p>
 <p>为<span class="math inline">\(A\)</span>的<strong>平方根阵</strong>。</p>
 </div>
@@ -1235,18 +1400,15 @@ A^{\frac{1}{2}}=Q^{\top}\varLambda^{\frac{1}{2}} Q
 <p>(1)显然：</p>
 <p><span class="math display">\[\begin{equation*}
 (A^{\frac{1}{2}})^2=Q^{\top}\varLambda^{\frac{1}{2}}QQ^{\top}\varLambda^{\frac{1}{2}}Q=Q^{\top}(\varLambda^{\frac{1}{2}})^2Q=Q^{\top}\operatorname{diag}\{\lambda_1, \lambda_2, \dots, \lambda_{n}\}Q=A
-
 \end{equation*}\]</span></p>
 <p>(2)因为<span class="math inline">\(Q\)</span>是正交矩阵，所以<span class="math inline">\(Q^{\top}=Q^{-1}\)</span>。于是：</p>
 <p><span class="math display">\[\begin{equation*}
 QA^{\frac{1}{2}}Q^{-1}=\varLambda^{\frac{1}{2}}
-
 \end{equation*}\]</span></p>
 <p>由<span class="reference-missing" data-reference="theo:DiagCondition1">[缺失引用：theo:DiagCondition1]</span>的必要性可知，<span class="math inline">\(\lambda_i^{\frac{1}{2}}\)</span>为<span class="math inline">\(A^{\frac{1}{2}}\)</span>的特征值，而<span class="math inline">\(\lambda_i\geqslant0\)</span>，由<a href="../chapters/page-003.html#theo-PositiveSemidefinite-cdf79ee9" data-reference-type="ref+label" data-reference="theo:PositiveSemidefinite">定理 2.18</a>(3.5)可知<span class="math inline">\(A^{\frac{1}{2}}\geqslant0\)</span>。</p>
 <p>(3)显然：</p>
 <p><span class="math display">\[\begin{equation*}
 (A^{\frac{1}{2}})^{\top}=(Q^{\top}\varLambda^{\frac{1}{2}} Q)^{\top}=Q^{\top}(\varLambda^{\frac{1}{2}})^{\top}Q=Q^{\top}\varLambda^{\frac{1}{2}}Q=A^{\frac{1}{2}}
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1256,12 +1418,10 @@ QA^{\frac{1}{2}}Q^{-1}=\varLambda^{\frac{1}{2}}
 <p><strong>Theorem 34.4</strong>. 设对称阵<span class="math inline">\(A\in M_n(\mathbb{R})\)</span>，其特征值记为<span class="math inline">\(\lambda_i,\;i=1,2,\dots,n\)</span>。因为<span class="math inline">\(A\)</span>是一个实对称阵，由<span class="reference-missing" data-reference="prop:RMatEigen">[缺失引用：prop:RMatEigen]</span>(3)可知存在正交矩阵<span class="math inline">\(Q\)</span>使得<span class="math inline">\(A=Q^{\top}\operatorname{diag}\{\lambda_1, \lambda_2, \dots, \lambda_{n}\}Q\)</span>。若<span class="math inline">\(A&gt;0\)</span>，由<a href="../chapters/page-003.html#theo-PositiveDefinite-bcd1811a" data-reference-type="ref+label" data-reference="theo:PositiveDefinite">定理 2.17</a>(3.5)可知<span class="math inline">\(\lambda_i&gt;0,\;i=1,2,\dots,n\)</span>，记：</p>
 <p><span class="math display">\[\begin{equation*}
 \varLambda^{-\frac{1}{2}}=\operatorname{diag}\{\lambda_1^{-\frac{1}{2}},\lambda_2^{-\frac{1}{2}},\dots,\lambda_n^{-\frac{1}{2}}\}
-
 \end{equation*}\]</span></p>
 <p>则：</p>
 <p><span class="math display">\[\begin{equation*}
 A^{-\frac{1}{2}}=Q^{\top}\varLambda^{-\frac{1}{2}} Q
-
 \end{equation*}\]</span></p>
 <p>是<span class="math inline">\(A^{\frac{1}{2}}\)</span>的逆矩阵。</p>
 </div>
@@ -1269,7 +1429,6 @@ A^{-\frac{1}{2}}=Q^{\top}\varLambda^{-\frac{1}{2}} Q
 <p><span class="proof-title"><em>证明</em>. </span>显然：</p>
 <p><span class="math display">\[\begin{equation*}
 A^{\frac{1}{2}}A^{-\frac{1}{2}}=Q^{\top}\operatorname{diag}\{\lambda_1^{\frac{1}{2}},\lambda_2^{\frac{1}{2}},\dots,\lambda_n^{\frac{1}{2}}\}QQ^{\top}\operatorname{diag}\{\lambda_1^{-\frac{1}{2}},\lambda_2^{-\frac{1}{2}},\dots,\lambda_n^{-\frac{1}{2}}\}Q=I
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1286,25 +1445,21 @@ A^{\frac{1}{2}}A^{-\frac{1}{2}}=Q^{\top}\operatorname{diag}\{\lambda_1^{\frac{1}
 <p>(1)显然：</p>
 <p><span class="math display">\[\begin{equation*}
 (A^{-\frac{1}{2}})^2=Q^{\top}\varLambda^{-\frac{1}{2}}QQ^{\top}\varLambda^{-\frac{1}{2}}Q=Q^{\top}\operatorname{diag}\{\lambda_1^{-1},\lambda_2^{-1},\dots,\lambda_n^{-1}\}Q
-
 \end{equation*}\]</span></p>
 <p>而：</p>
 <p><span class="math display">\[\begin{align*}
 A^{-1}&amp;=(Q^{\top}\operatorname{diag}\{\lambda_1, \lambda_2, \dots, \lambda_{n}\}Q)^{-1}=Q^{-1}\operatorname{diag}\{\lambda_1^{-1},\lambda_2^{-1},\dots,\lambda_n^{-1}\}(Q^{\top})^{-1} \\
 &amp;=Q^{\top}\operatorname{diag}\{\lambda_1^{-1},\lambda_2^{-1},\dots,\lambda_n^{-1}\}Q
-
 \end{align*}\]</span></p>
 <p>所以<span class="math inline">\((A^{-\frac{1}{2}})^2=A^{-1}\)</span>。</p>
 <p>(2)因为<span class="math inline">\(Q\)</span>是正交矩阵，所以<span class="math inline">\(Q^{\top}=Q^{-1}\)</span>。于是：</p>
 <p><span class="math display">\[\begin{equation*}
 QA^{-\frac{1}{2}}Q^{-1}=\varLambda^{-\frac{1}{2}}
-
 \end{equation*}\]</span></p>
 <p>由<span class="reference-missing" data-reference="theo:DiagCondition1">[缺失引用：theo:DiagCondition1]</span>的必要性可知，<span class="math inline">\(\lambda_i^{-\frac{1}{2}}\)</span>为<span class="math inline">\(A^{-\frac{1}{2}}\)</span>的特征值，而<span class="math inline">\(\lambda_i&gt;0\)</span>，由<a href="../chapters/page-003.html#theo-PositiveDefinite-bcd1811a" data-reference-type="ref+label" data-reference="theo:PositiveDefinite">定理 2.17</a>(3.5)可知<span class="math inline">\(A^{\frac{1}{2}}&gt;0\)</span>。</p>
 <p>(3)显然：</p>
 <p><span class="math display">\[\begin{equation*}
 (A^{-\frac{1}{2}})^{\top}=(Q^{\top}\varLambda^{-\frac{1}{2}} Q)^{\top}=Q^{\top}(\varLambda^{-\frac{1}{2}})^{\top}Q=Q^{\top}\varLambda^{-\frac{1}{2}}Q=A^{-\frac{1}{2}}
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1312,7 +1467,6 @@ QA^{-\frac{1}{2}}Q^{-1}=\varLambda^{-\frac{1}{2}}
 <p><strong>Theorem 34.5</strong>. 设<span class="math inline">\(\{A_n\}\)</span>是一列集合，且对每个<span class="math inline">\(n\in\mathbb{N}\)</span>，<span class="math inline">\(A_n\)</span>都是至多可列集，则：</p>
 <p><span class="math display">\[\begin{equation*}
 A=\underset{n=1}{\overset{+\infty}{\cup}}A_n
-
 \end{equation*}\]</span></p>
 <p>也是至多可列集。</p>
 </div>
@@ -1323,7 +1477,6 @@ A=\underset{n=1}{\overset{+\infty}{\cup}}A_n
 &amp;(0,1),(1,0), \\
 &amp;(0,2),(1,1),(2,0), \\
 &amp;\dots
-
 \end{align*}\]</span></p>
 <p>即可枚举完<span class="math inline">\(A\)</span>。&nbsp;◻</p>
 </div>

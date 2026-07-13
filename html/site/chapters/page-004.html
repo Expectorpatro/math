@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,82 +1079,33 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#id--38df959e" id="toc-id--38df959e" class="nav-link active" data-scroll-target="#id--38df959e"><span class="header-section-number">3.1</span> 度量空间上的收敛点列</a></li>
   <li><a href="#id--36c0249d" id="toc-id--36c0249d" class="nav-link" data-scroll-target="#id--36c0249d"><span class="header-section-number">3.2</span> 度量空间上的点集</a>
-  <ul>
-  <li><a href="#id--16cb4552" id="toc-id--16cb4552" class="nav-link" data-scroll-target="#id--16cb4552"><span class="header-section-number">3.2.1</span> 基础知识</a>
   <ul class="collapse">
-  <li><a href="#id--fce00165" id="toc-id--fce00165" class="nav-link" data-scroll-target="#id--fce00165"><span class="header-section-number">3.2.1.1</span> 点的定义</a></li>
-  <li><a href="#id--fc6f9e36" id="toc-id--fc6f9e36" class="nav-link" data-scroll-target="#id--fc6f9e36"><span class="header-section-number">3.2.1.2</span> 点集的定义</a></li>
-  </ul></li>
-  <li><a href="#id--2a5afcd3" id="toc-id--2a5afcd3" class="nav-link" data-scroll-target="#id--2a5afcd3"><span class="header-section-number">3.2.2</span> 稠密、稀疏、可分、全有界、准紧性</a>
-  <ul class="collapse">
-  <li><a href="#id--a7a0a15c" id="toc-id--a7a0a15c" class="nav-link" data-scroll-target="#id--a7a0a15c"><span class="header-section-number">3.2.2.1</span> 稠密性</a></li>
-  <li><a href="#id--fc44cced" id="toc-id--fc44cced" class="nav-link" data-scroll-target="#id--fc44cced"><span class="header-section-number">3.2.2.2</span> 稀疏性</a></li>
-  <li><a href="#id--0085af1f" id="toc-id--0085af1f" class="nav-link" data-scroll-target="#id--0085af1f"><span class="header-section-number">3.2.2.3</span> 可分性</a></li>
-  <li><a href="#id--ed275620" id="toc-id--ed275620" class="nav-link" data-scroll-target="#id--ed275620"><span class="header-section-number">3.2.2.4</span> 全有界性</a></li>
-  <li><a href="#id--b5f46c28" id="toc-id--b5f46c28" class="nav-link" data-scroll-target="#id--b5f46c28"><span class="header-section-number">3.2.2.5</span> 准紧集</a></li>
-  </ul></li>
-  <li><a href="#id--b2daf3e3" id="toc-id--b2daf3e3" class="nav-link" data-scroll-target="#id--b2daf3e3"><span class="header-section-number">3.2.3</span> 完备的度量空间</a>
-  <ul class="collapse">
-  <li><a href="#cauchy-3fe94779" id="toc-cauchy-3fe94779" class="nav-link" data-scroll-target="#cauchy-3fe94779"><span class="header-section-number">3.2.3.1</span> Cauchy点列</a></li>
-  <li><a href="#id--aa281ddb" id="toc-id--aa281ddb" class="nav-link" data-scroll-target="#id--aa281ddb"><span class="header-section-number">3.2.3.2</span> 完备度量空间</a></li>
-  </ul></li>
-  <li><a href="#id--1af388ab" id="toc-id--1af388ab" class="nav-link" data-scroll-target="#id--1af388ab"><span class="header-section-number">3.2.4</span> 紧度量空间</a>
-  <ul class="collapse">
-  <li><a href="#id--6c2f8869" id="toc-id--6c2f8869" class="nav-link" data-scroll-target="#id--6c2f8869"><span class="header-section-number">3.2.4.1</span> 有限覆盖</a></li>
-  <li><a href="#id--29156f53" id="toc-id--29156f53" class="nav-link" data-scroll-target="#id--29156f53"><span class="header-section-number">3.2.4.2</span> 有限交</a></li>
-  </ul></li>
-  <li><a href="#mathbbroverlinemathbbr-mathbbrn-b19d4ec2" id="toc-mathbbroverlinemathbbr-mathbbrn-b19d4ec2" class="nav-link" data-scroll-target="#mathbbroverlinemathbbr-mathbbrn-b19d4ec2"><span class="header-section-number">3.2.5</span> <span class="math inline">\(\mathbb{R}^{},\overline{\mathbb{R}^{}}\)</span>与<span class="math inline">\(\mathbb{R}^{n}\)</span></a>
-  <ul class="collapse">
-  <li><a href="#id--b3480678" id="toc-id--b3480678" class="nav-link" data-scroll-target="#id--b3480678"><span class="header-section-number">3.2.5.1</span> 距离</a></li>
-  <li><a href="#id--b89f8c2a" id="toc-id--b89f8c2a" class="nav-link" data-scroll-target="#id--b89f8c2a"><span class="header-section-number">3.2.5.2</span> 一般性质</a></li>
-  <li><a href="#id--03744a56" id="toc-id--03744a56" class="nav-link" data-scroll-target="#id--03744a56"><span class="header-section-number">3.2.5.3</span> 完备性</a></li>
-  <li><a href="#id--2678ef1f" id="toc-id--2678ef1f" class="nav-link" data-scroll-target="#id--2678ef1f"><span class="header-section-number">3.2.5.4</span> 紧性</a></li>
-  <li><a href="#id-1-6bd147ff" id="toc-id-1-6bd147ff" class="nav-link" data-scroll-target="#id-1-6bd147ff"><span class="header-section-number">3.2.5.5</span> 可分性</a></li>
-  <li><a href="#id--2d572a06" id="toc-id--2d572a06" class="nav-link" data-scroll-target="#id--2d572a06"><span class="header-section-number">3.2.5.6</span> 极限点</a></li>
-  </ul></li>
-  <li><a href="#id--e0b283a9" id="toc-id--e0b283a9" class="nav-link" data-scroll-target="#id--e0b283a9"><span class="header-section-number">3.2.6</span> 数项级数</a>
-  <ul class="collapse">
-  <li><a href="#id--d047c1c0" id="toc-id--d047c1c0" class="nav-link" data-scroll-target="#id--d047c1c0"><span class="header-section-number">3.2.6.1</span> 正项级数</a></li>
-  <li><a href="#id--76fef249" id="toc-id--76fef249" class="nav-link" data-scroll-target="#id--76fef249"><span class="header-section-number">3.2.6.2</span> 任意项级数</a></li>
-  <li><a href="#id--a2627edd" id="toc-id--a2627edd" class="nav-link" data-scroll-target="#id--a2627edd"><span class="header-section-number">3.2.6.3</span> 收敛级数的性质</a></li>
-  </ul></li>
+  <li><a href="#id--16cb4552" id="toc-id--16cb4552" class="nav-link" data-scroll-target="#id--16cb4552"><span class="header-section-number">3.2.1</span> 基础知识</a></li>
+  <li><a href="#id--2a5afcd3" id="toc-id--2a5afcd3" class="nav-link" data-scroll-target="#id--2a5afcd3"><span class="header-section-number">3.2.2</span> 稠密、稀疏、可分、全有界、准紧性</a></li>
+  <li><a href="#id--b2daf3e3" id="toc-id--b2daf3e3" class="nav-link" data-scroll-target="#id--b2daf3e3"><span class="header-section-number">3.2.3</span> 完备的度量空间</a></li>
+  <li><a href="#id--1af388ab" id="toc-id--1af388ab" class="nav-link" data-scroll-target="#id--1af388ab"><span class="header-section-number">3.2.4</span> 紧度量空间</a></li>
+  <li><a href="#mathbbroverlinemathbbr-mathbbrn-b19d4ec2" id="toc-mathbbroverlinemathbbr-mathbbrn-b19d4ec2" class="nav-link" data-scroll-target="#mathbbroverlinemathbbr-mathbbrn-b19d4ec2"><span class="header-section-number">3.2.5</span> <span class="math inline">\(\mathbb{R}^{},\overline{\mathbb{R}^{}}\)</span>与<span class="math inline">\(\mathbb{R}^{n}\)</span></a></li>
+  <li><a href="#id--e0b283a9" id="toc-id--e0b283a9" class="nav-link" data-scroll-target="#id--e0b283a9"><span class="header-section-number">3.2.6</span> 数项级数</a></li>
   </ul></li>
   <li><a href="#id--ebd295c8" id="toc-id--ebd295c8" class="nav-link" data-scroll-target="#id--ebd295c8"><span class="header-section-number">3.3</span> 度量空间上的映射</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id--c033b895" id="toc-id--c033b895" class="nav-link" data-scroll-target="#id--c033b895"><span class="header-section-number">3.3.1</span> 映射的定义与性质</a></li>
   <li><a href="#id--d0723b67" id="toc-id--d0723b67" class="nav-link" data-scroll-target="#id--d0723b67"><span class="header-section-number">3.3.2</span> 映射的极限</a></li>
   <li><a href="#id--73a6330c" id="toc-id--73a6330c" class="nav-link" data-scroll-target="#id--73a6330c"><span class="header-section-number">3.3.3</span> 映射的连续性</a></li>
   <li><a href="#id--b4507a09" id="toc-id--b4507a09" class="nav-link" data-scroll-target="#id--b4507a09"><span class="header-section-number">3.3.4</span> 压缩映射原理</a></li>
   <li><a href="#id--001b696d" id="toc-id--001b696d" class="nav-link" data-scroll-target="#id--001b696d"><span class="header-section-number">3.3.5</span> 紧集上的连续映射</a></li>
-  <li><a href="#mathbbrmathbbrn-a9f7f5ea" id="toc-mathbbrmathbbrn-a9f7f5ea" class="nav-link" data-scroll-target="#mathbbrmathbbrn-a9f7f5ea"><span class="header-section-number">3.3.6</span> 值域为<span class="math inline">\(\mathbb{R}^{},\mathbb{R}^{n}\)</span>的映射</a>
-  <ul class="collapse">
-  <li><a href="#id--3e82b9f4" id="toc-id--3e82b9f4" class="nav-link" data-scroll-target="#id--3e82b9f4"><span class="header-section-number">3.3.6.1</span> 连通性与介值性</a></li>
-  <li><a href="#id--6f9fd181" id="toc-id--6f9fd181" class="nav-link" data-scroll-target="#id--6f9fd181"><span class="header-section-number">3.3.6.2</span> 无穷小与有界记号</a></li>
-  </ul></li>
+  <li><a href="#mathbbrmathbbrn-a9f7f5ea" id="toc-mathbbrmathbbrn-a9f7f5ea" class="nav-link" data-scroll-target="#mathbbrmathbbrn-a9f7f5ea"><span class="header-section-number">3.3.6</span> 值域为<span class="math inline">\(\mathbb{R}^{},\mathbb{R}^{n}\)</span>的映射</a></li>
   </ul></li>
   <li><a href="#id--9f72ebd1" id="toc-id--9f72ebd1" class="nav-link" data-scroll-target="#id--9f72ebd1"><span class="header-section-number">3.4</span> 范数</a>
-  <ul>
-  <li><a href="#id--426de5fd" id="toc-id--426de5fd" class="nav-link" data-scroll-target="#id--426de5fd"><span class="header-section-number">3.4.1</span> 线性算子</a>
   <ul class="collapse">
-  <li><a href="#id--83f6640f" id="toc-id--83f6640f" class="nav-link" data-scroll-target="#id--83f6640f"><span class="header-section-number">3.4.1.1</span> 线性算子的连续性</a></li>
-  <li><a href="#id--2120db08" id="toc-id--2120db08" class="nav-link" data-scroll-target="#id--2120db08"><span class="header-section-number">3.4.1.2</span> 线性算子的有界性</a></li>
-  <li><a href="#id--c77213ff" id="toc-id--c77213ff" class="nav-link" data-scroll-target="#id--c77213ff"><span class="header-section-number">3.4.1.3</span> 线性算子有界与连续的关系</a></li>
-  </ul></li>
-  <li><a href="#id--5de2d188" id="toc-id--5de2d188" class="nav-link" data-scroll-target="#id--5de2d188"><span class="header-section-number">3.4.2</span> 有限维赋范线性空间</a>
-  <ul class="collapse">
-  <li><a href="#id--f2a16aca" id="toc-id--f2a16aca" class="nav-link" data-scroll-target="#id--f2a16aca"><span class="header-section-number">3.4.2.1</span> 拓扑同构</a></li>
-  </ul></li>
-  <li><a href="#hilbert-102390cd" id="toc-hilbert-102390cd" class="nav-link" data-scroll-target="#hilbert-102390cd"><span class="header-section-number">3.4.3</span> Hilbert空间</a>
-  <ul class="collapse">
-  <li><a href="#hilbert-dcbcb3d6" id="toc-hilbert-dcbcb3d6" class="nav-link" data-scroll-target="#hilbert-dcbcb3d6"><span class="header-section-number">3.4.3.1</span> Hilbert空间中的正交系</a></li>
-  <li><a href="#schmidt-0f04bc92" id="toc-schmidt-0f04bc92" class="nav-link" data-scroll-target="#schmidt-0f04bc92"><span class="header-section-number">3.4.3.2</span> Schmidt正交化</a></li>
-  <li><a href="#riesz-f531b27e" id="toc-riesz-f531b27e" class="nav-link" data-scroll-target="#riesz-f531b27e"><span class="header-section-number">3.4.3.3</span> Riesz表示定理</a></li>
-  </ul></li>
+  <li><a href="#id--426de5fd" id="toc-id--426de5fd" class="nav-link" data-scroll-target="#id--426de5fd"><span class="header-section-number">3.4.1</span> 线性算子</a></li>
+  <li><a href="#id--5de2d188" id="toc-id--5de2d188" class="nav-link" data-scroll-target="#id--5de2d188"><span class="header-section-number">3.4.2</span> 有限维赋范线性空间</a></li>
+  <li><a href="#hilbert-102390cd" id="toc-hilbert-102390cd" class="nav-link" data-scroll-target="#hilbert-102390cd"><span class="header-section-number">3.4.3</span> Hilbert空间</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -1007,7 +1146,6 @@ window.Quarto = {
 <p><strong>Definition 3.2</strong>. 度量空间<span class="math inline">\((X,\rho)\)</span>中的点集：</p>
 <p><span class="math display">\[\begin{equation*}
 \{P\in X:\rho(P,P_0)&lt;\delta\}\qquad (\delta&gt;0)
-
 \end{equation*}\]</span></p>
 <p>被称之为点<span class="math inline">\(P_0\)</span>的<span class="math inline">\(\delta\;\)</span><a href="../chapters/page-053.html#term-neighbourhood" class="term" title="neighbourhood">邻域<span class="term-english">（neighbourhood）</span></a>或开邻域，记为<span class="math inline">\(U(P_0,\delta)\)</span>。若在上式中取小于等于号，则称之为闭邻域，用<span class="math inline">\(\bar{U}(P,\delta)\)</span>表示<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>。</p>
 </div>
@@ -1026,7 +1164,6 @@ window.Quarto = {
 <p><strong>Definition 3.3</strong>. 设<span class="math inline">\((X,\rho)\)</span>是度量空间，<span class="math inline">\(E\subseteq X\)</span>。称：</p>
 <p><span class="math display">\[\begin{equation*}
 \delta_E=\sup_{x,y\in E}\rho(x,y)
-
 \end{equation*}\]</span></p>
 <p>为点集<span class="math inline">\(E\)</span>的<a href="../chapters/page-043.html#term-diameter" class="term" title="diameter">直径<span class="term-english">（diameter）</span></a>。</p>
 </div>
@@ -1049,12 +1186,10 @@ window.Quarto = {
 <p><strong>Definition 3.6</strong>. 设<span class="math inline">\(\{x_n\}\)</span>是度量空间<span class="math inline">\((X,\rho)\)</span>中的一个点列，而</p>
 <p><span class="math display">\[\begin{equation*}
 n_1&lt;n_2&lt;\cdots&lt;n_k&lt;n_{k+1}&lt;\cdots
-
 \end{equation*}\]</span></p>
 <p>是一串严格递增的自然数，则</p>
 <p><span class="math display">\[\begin{equation*}
 x_{n_1}&lt;x_{n_2}&lt;\cdots&lt;x_{n_k}&lt;x_{n_{k+1}}&lt;\cdots
-
 \end{equation*}\]</span></p>
 <p>也形成一个<span class="math inline">\((X,\rho)\)</span>中的点列，我们把<span class="math inline">\(\{x_{n_k}\}\)</span>称之为点列<span class="math inline">\(\{x_n\}\)</span>的一个<a href="../chapters/page-058.html#term-subsequence" class="term" title="subsequence">子列<span class="term-english">（subsequence）</span></a>。</p>
 </div>
@@ -1062,7 +1197,6 @@ x_{n_1}&lt;x_{n_2}&lt;\cdots&lt;x_{n_k}&lt;x_{n_{k+1}}&lt;\cdots
 <p><strong>Definition 3.7</strong>. 设<span class="math inline">\(\{x_n\}\)</span>是度量空间<span class="math inline">\((X,\rho)\)</span>中的点列，<span class="math inline">\(x\in X\)</span>。如果对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，<span class="math inline">\(\exists\; N\in\mathbb{N}^+\)</span>，当<span class="math inline">\(n&gt;N\)</span>时有：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_n,x)&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\{x_n\}\)</span>是度量空间<span class="math inline">\((X,\rho)\)</span>中的<a href="../chapters/page-042.html#term-ConvergentSeqOfPoints" class="term" title="convergent sequence of points">收敛点列<span class="term-english">（convergent sequence of points）</span></a>，<span class="math inline">\(x\)</span>是点列<span class="math inline">\(\{x_n\}\)</span>的<a href="../chapters/page-051.html#term-limit" class="term" title="limit">极限<span class="term-english">（limit）</span></a>，记作<span class="math inline">\(\{x_n\}\to x\)</span>或<span class="math inline">\(\lim\limits_{n\to+\infty}x_n=x\)</span>。</p>
 </div>
@@ -1080,23 +1214,19 @@ x_{n_1}&lt;x_{n_2}&lt;\cdots&lt;x_{n_k}&lt;x_{n_{k+1}}&lt;\cdots
 <p><span class="proof-title"><em>证明</em>. </span>(1)假设极限不唯一，<span class="math inline">\(\{x_n\}\)</span>既收敛到<span class="math inline">\(a\)</span>又收敛到<span class="math inline">\(b\)</span>，则对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，<span class="math inline">\(\exists\; N_1\in\mathbb{N}^+\)</span>，当<span class="math inline">\(n&gt;N_1\)</span>时有<span class="math inline">\(\rho(x_n,a)&lt;\frac{\varepsilon}{2}\)</span>；<span class="math inline">\(\exists\; N_2\in\mathbb{N}^+\)</span>，当<span class="math inline">\(n&gt;N_2\)</span>时有<span class="math inline">\(\rho(x_n,b)&lt;\frac{\varepsilon}{2}\)</span>。取<span class="math inline">\(N=\max\{N1,N2\}\)</span>，则当<span class="math inline">\(n&gt;N\)</span>时，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(a,b)\leqslant\rho(a,x_n)+\rho(x_n,b)&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(a=b\)</span>。</p>
 <p>(2)设<span class="math inline">\(\{x_n\}\to x\)</span>，由距离的定义：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_n,y)\leqslant\rho(x_n,x)+\rho(x,y)
-
 \end{equation*}\]</span></p>
 <p>由于<span class="math inline">\(\{x_n\}\)</span>收敛，所以对<span class="math inline">\(\varepsilon=1\)</span>：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;\rho(x_n,x)&lt;\varepsilon=1
-
 \end{equation*}\]</span></p>
 <p>取<span class="math inline">\(K=\max\{\rho(x_1,x),\rho(x_2,x),\dots,\rho(x_N,x),1\}\)</span>，则有：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;n\in\mathbb{N}^+,\;\rho(x_n,y)\leqslant K+\rho(x,y)
-
 \end{equation*}\]</span></p>
 <p>即数列<span class="math inline">\(\{\rho(x_n,y)\}\)</span>有界。</p>
 <p>(3)任取<span class="math inline">\(y\in X\)</span>，由(2)数列<span class="math inline">\(\{\rho(x_n,y)\}\)</span>有界，即<span class="math inline">\(\exists\;\delta&gt;0,\;\forall\;n\in\mathbb{N}^+,\;\rho(x_n,y)&lt;\delta\)</span>，则<span class="math inline">\(\{x_n\}\subseteq U(y,\delta)\)</span>，即<span class="math inline">\(\{x_n\}\)</span>有界。</p>
@@ -1184,7 +1314,6 @@ x_{n_1}&lt;x_{n_2}&lt;\cdots&lt;x_{n_k}&lt;x_{n_{k+1}}&lt;\cdots
 \overline{A}\cup \overline{B}=A\cup A'\cup B\cup B'
 =(A\cup B)\cup(A'\cup B')=(A\cup B)\cup(A\cup B)'
 =\overline{A\cup B}
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1290,23 +1419,19 @@ x_{n_1}&lt;x_{n_2}&lt;\cdots&lt;x_{n_k}&lt;x_{n_{k+1}}&lt;\cdots
 <p>(3)因为<span class="math inline">\(A\)</span>是全有界集，所以对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，存在一个<span class="math inline">\(A\)</span>的<span class="math inline">\(\frac{\varepsilon}{2}\)</span>-网<span class="math inline">\(\{x_1,x_2,\dots,x_n\}\)</span>。依次取<span class="math inline">\(a_i\in A\)</span>使得<span class="math inline">\(a_i\in U(x_i,\frac{\varepsilon}{2}),\;i=1,2,\dots,n\)</span>，则<span class="math inline">\(\{a_1, a_2, \dots, a_{n}\}\)</span>即构成<span class="math inline">\(A\)</span>的一个<span class="math inline">\(\varepsilon\)</span>-网：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;a\in U\left(x_i,\frac{\varepsilon}{2}\right),\;\rho(a,a_i)\leqslant\rho(a,x_i)+\rho(x_i,a_i)&lt;\frac{\varepsilon}{2}+\frac{\varepsilon}{2}=\varepsilon,\;i=1,2,\dots,n
-
 \end{equation*}\]</span></p>
 <p>(4)设<span class="math inline">\(A\subseteq X\)</span>是全有界集，则<span class="math inline">\(A\)</span>应有一个<span class="math inline">\(1\)</span>-网<span class="math inline">\(\{x_1,x_2,\dots,x_n\}\)</span>，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;a\in A,\;\exists\;x_{k}\in\{x_1,x_2,\dots,x_n\},\;\rho(a,x_k)&lt;1
-
 \end{equation*}\]</span></p>
 <p>所以（下式中<span class="math inline">\(x_k\)</span>是与点<span class="math inline">\(a\)</span>对应的<span class="math inline">\(1\)</span>-网中的点）：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;a\in A,\;\rho(a,x_1)\leqslant\rho(a,x_k)+\rho(x_k,x_1)&lt;1+\max_{k}\rho(x_k,x_1)
-
 \end{equation*}\]</span></p>
 <p>记<span class="math inline">\(\max\limits_{k}\rho(x_k,x_1)=K\)</span>，则对任意的<span class="math inline">\(a\in A,\;a\in U(x_1,1+K)\)</span>，所以<span class="math inline">\(A\)</span>是有界的。</p>
 <p>因为<span class="math inline">\(A\)</span>是全有界集，所以对任意的<span class="math inline">\(\varepsilon=\frac{1}{n},\;n\in\mathbb{N}^+\)</span>，<span class="math inline">\(X\)</span>中都存在<span class="math inline">\(A\)</span>的一个只含有限个点的<span class="math inline">\(\varepsilon\)</span>-网<span class="math inline">\(B_n\)</span>。记：</p>
 <p><span class="math display">\[\begin{equation*}
 B=\underset{n=1}{\overset{+\infty}{\cup}}B_n
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-037.html#theo-CountableUnionCountable-118a0230" data-reference-type="ref+label" data-reference="theo:CountableUnionCountable">定理 34.5</a>可知<span class="math inline">\(B\)</span>是可列的。对任意的<span class="math inline">\(x\in A\)</span>，存在<span class="math inline">\(x_n\in B_n\subset B\)</span>满足对任意的<span class="math inline">\(n\in\mathbb{N}^+\)</span>有<span class="math inline">\(\rho(x,x_n)&lt;\frac{1}{n}\)</span>，因此<span class="math inline">\(\{x_n\}\to x\)</span>。由<span class="math inline">\(x\)</span>的任意性和<a href="#theo-Density-062642be" data-reference-type="ref+label" data-reference="theo:Density">定理 3.2</a>(3)，<span class="math inline">\(B\)</span>在<span class="math inline">\(A\)</span>中稠密。综上，<span class="math inline">\(A\)</span>是可分的。&nbsp;◻</p>
 </div>
@@ -1337,7 +1462,6 @@ B=\underset{n=1}{\overset{+\infty}{\cup}}B_n
 <p><strong>Definition 3.26</strong>. <span class="math inline">\((X,\rho)\)</span>是度量空间，<span class="math inline">\(\{x_n\}\)</span>是<span class="math inline">\(X\)</span>中的点列。若对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，<span class="math inline">\(\exists\;N\in\mathbb{N}^+\)</span>，当<span class="math inline">\(n,m&gt;N\)</span>时，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_n,x_m)&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>则称点列<span class="math inline">\(\{x_n\}\)</span>是<a href="../chapters/page-042.html#term-CauchySeq" class="term" title="Cauchy sequence">柯西点列<span class="term-english">（Cauchy sequence）</span></a>或<a href="../chapters/page-045.html#term-FoundamentalSeq" class="term" title="foundamental sequence">基本点列<span class="term-english">（foundamental sequence）</span></a>。</p>
 </div>
@@ -1353,23 +1477,19 @@ B=\underset{n=1}{\overset{+\infty}{\cup}}B_n
 <p><span class="proof-title"><em>证明</em>. </span>(1)令<span class="math inline">\(n&lt;m\)</span>。因为<span class="math inline">\(\{x_n\}\)</span>是<span class="math inline">\(X\)</span>中的收敛点列，假设其极限为<span class="math inline">\(x\)</span>，则对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，<span class="math inline">\(\exists\; N_1\in\mathbb{N}^+\)</span>，当<span class="math inline">\(n&gt;N_1\)</span>时有<span class="math inline">\(\rho(x_n,x)&lt;\frac{\varepsilon}{2}\)</span>；<span class="math inline">\(\exists\; N_2\in\mathbb{N}^+\)</span>，当<span class="math inline">\(m&gt;N_2\)</span>时有<span class="math inline">\(\rho(x_m,x)&lt;\frac{\varepsilon}{2}\)</span>。取<span class="math inline">\(N=\max\{N_1,N_2\}\)</span>，则当<span class="math inline">\(n&gt;N\)</span>时，有</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_n,x_m)\leqslant\rho(x_n,x)+\rho(x_m,x)&lt;\frac{\varepsilon}{2}+\frac{\varepsilon}{2}=\varepsilon
-
 \end{equation*}\]</span></p>
 <p>即点列<span class="math inline">\(\{x_n\}\)</span>是Cauchy点列。</p>
 <p>(2)设<span class="math inline">\(\{x_{n_k}\}\)</span>极限为<span class="math inline">\(x\)</span>，则</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_n,x)\leqslant\rho(x_n,x_{n_k})+\rho(x_{n_k},x)
-
 \end{equation*}\]</span></p>
 <p>对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，因为<span class="math inline">\(x_{n_k}\)</span>收敛于<span class="math inline">\(x\)</span>，所以<span class="math inline">\(\exists\;N_1\in\mathbb{N}^+\)</span>，使得当<span class="math inline">\(k&gt;N_1\)</span>时，有<span class="math inline">\(\rho(x_{n_k},x)&lt;\frac{\varepsilon}{2}\)</span>。又因<span class="math inline">\(\{x_n\}\)</span>是<span class="math inline">\(X\)</span>中的Cauchy点列，因此<span class="math inline">\(\exists\;N_2\in\mathbb{N}^+\)</span>，使得当<span class="math inline">\(n,k&gt;N_2\)</span>时，有<span class="math inline">\(\rho(x_n,x_{n_k})&lt;\frac{\varepsilon}{2}\)</span>。取<span class="math inline">\(N=\max\{N_1,N_2\}\)</span>，当<span class="math inline">\(n,k&gt;N\)</span>时，即有</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_n,x)\leqslant\rho(x_n,x_{n_k})+\rho(x_{n_k},x)&lt;\frac{\varepsilon}{2}+\frac{\varepsilon}{2}=\varepsilon
-
 \end{equation*}\]</span></p>
 <p>(3)设<span class="math inline">\((X,\rho)\)</span>是度量空间，<span class="math inline">\(\{x_n\}\)</span>是<span class="math inline">\(X\)</span>中的Cauchy点列，则对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，<span class="math inline">\(\exists\;N\in\mathbb{N}^+\)</span>，当<span class="math inline">\(n,m&gt;N\)</span>时，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_n,x_m)&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>取<span class="math inline">\(m=N+1\)</span>，令<span class="math inline">\(\alpha=\max\limits_{i=1,2,\dots,N}\rho(x_m,x_i)\)</span>，<span class="math inline">\(\delta=\max\{\varepsilon,\alpha\}\)</span>，则<span class="math inline">\(\{x_n\}\)</span>中的所有点都在闭邻域<span class="math inline">\(\overline{U}(x_m,\delta)\)</span>中，所以<span class="math inline">\(\{x_n\}\)</span>有界。&nbsp;◻</p>
 </div>
@@ -1392,34 +1512,28 @@ B=\underset{n=1}{\overset{+\infty}{\cup}}B_n
 <p><span class="proof-title"><em>证明</em>. </span><strong>充分性：</strong>任取<span class="math inline">\(X\)</span>中的一个Cauchy点列<span class="math inline">\(\{x_n\}\)</span>。因为<span class="math inline">\(\{x_n\}\)</span>是Cauchy点列，所以对任意的<span class="math inline">\(\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m&gt;N,\;\rho(x_m,x_n)&lt;\varepsilon\)</span>。取<span class="math inline">\(\{N_k\}\)</span>使得<span class="math inline">\(N_k\)</span>是使得<span class="math inline">\(\rho(x_m,x_n)&lt;\dfrac{1}{2^k}\)</span>的临界条件，取<span class="math inline">\(x_{n_k}&gt;N_k,\;x_{n_k+1}&gt;N_{k+1}\)</span>，即可产生一个子列 <span class="math inline">\(\{x_{n_k}\}\)</span>，满足：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_{n_k},x_{n_{k+1}})&lt;\frac{1}{2^k}
-
 \end{equation*}\]</span></p>
 <p>取闭邻域列：</p>
 <p><span class="math display">\[\begin{equation*}
 \left\{E_k=\bar{U}\left(x_{n_k},\frac{1}{2^{k-1}}\right)\right\}
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;y\in E_{k+1},\;\rho(y,x_{n_k})\leqslant\rho(y,x_{n_{k+1}})+\rho(x_{n_{k+1}},x_{n_k})&lt;\frac{1}{2^k}+\frac{1}{2^k}=\frac{1}{2^{k-1}}
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(E_k\supseteq E_{k+1}\)</span>。由条件，此时存在唯一的<span class="math inline">\(x\in X\)</span>满足<span class="math inline">\(x\in E_k,\;\forall\;k\in\mathbb{N}^+\)</span>。下证<span class="math inline">\(\{x_n\}\to x\)</span>：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_n,x)\leqslant\rho(x_n,x_{n_k})+\rho(x_{n_k},x)\leqslant\rho(x_n,x_{n_k})+\frac{1}{2^{k-1}}
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(\{x_n\}\)</span>是Cauchy点列，因此当<span class="math inline">\(n\)</span>和<span class="math inline">\(k\)</span>足够大时，上式右端两项均趋于<span class="math inline">\(0\)</span>。因此<span class="math inline">\(\{x_n\}\to x\)</span>。由<span class="math inline">\(\{x_n\}\)</span>的任意性，<span class="math inline">\(X\)</span>是完备的度量空间。</p>
 <p><strong>必要性中的存在性：</strong>在每个<span class="math inline">\(E_n\)</span>中取一点<span class="math inline">\(y_n\)</span>构成点列<span class="math inline">\(\{y_n\}\)</span>。设<span class="math inline">\(m&gt;n\)</span>，因为<span class="math inline">\(E_m\subseteq E_n\)</span>，所以<span class="math inline">\(y_m\in E_n\)</span>，于是有：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(y_n,y_m)\leqslant2\delta_n\to0
-
 \end{equation*}\]</span></p>
 <p>因此<span class="math inline">\(\{y_n\}\)</span>是Cauchy点列。因为<span class="math inline">\(X\)</span>完备，所以<span class="math inline">\(\{y_n\}\to x\in X\)</span>。对任意的<span class="math inline">\(n_0\in\mathbb{N}^+\)</span>，当<span class="math inline">\(n&gt;n_0\)</span>时，<span class="math inline">\(y_n\in E_n\subseteq E_{n_0}\)</span>。由<a href="#prop-OpenClosedSet-f9867d00" data-reference-type="ref+label" data-reference="prop:OpenClosedSet">性质 3.2.2</a>(2)可得闭邻域<span class="math inline">\(E_{n_0}\)</span>是闭集，因此<span class="math inline">\(x\in E_{n_0}\)</span>。由<span class="math inline">\(n_0\)</span>的任意性，<span class="math inline">\(x\in E_n,\;\forall\;n\in\mathbb{N}^+\)</span>。</p>
 <p><strong>必要性中的唯一性：</strong>若还有一点<span class="math inline">\(y\)</span>满足上述条件，则：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)\leqslant\rho(x,y_n)+\rho(y_n,y)\to0
-
 \end{equation*}\]</span></p>
 <p>唯一性得证。&nbsp;◻</p>
 </div>
@@ -1448,7 +1562,6 @@ B=\underset{n=1}{\overset{+\infty}{\cup}}B_n
 <p>(2)假设不成立，即存在完备的度量空间<span class="math inline">\(X\)</span>使得<span class="math inline">\(X\)</span>是第一型集。也就是说<span class="math inline">\(X=\underset{i=1}{\overset{+\infty}{\cup}}F_i\)</span>，其中<span class="math inline">\(F_i,\;\forall\;i\in\mathbb{N}^+\)</span>是稀疏集。因为<span class="math inline">\(F_1\)</span>是稀疏集，由<a href="#theo-Density-062642be" data-reference-type="ref+label" data-reference="theo:Density">定理 3.2</a>(2)，存在<span class="math inline">\(x_1\in X\)</span>，使得闭邻域<span class="math inline">\(U(x_1,r_1)\)</span>中不含<span class="math inline">\(F_1\)</span>中的点。对于闭邻域<span class="math inline">\(U(x_1,r_1)\)</span>，由于<span class="math inline">\(F_2\)</span>是稀疏集，因此存在<span class="math inline">\(x_2\in U(x_1,r_1)\)</span>，使得闭邻域<span class="math inline">\(U(x_2,r_2)\)</span>中不含<span class="math inline">\(F_2\)</span>中的点。如此重复下去，实际上可以取<span class="math inline">\(r_n=\dfrac{1}{n}\)</span>，便可以得到一个闭球套：</p>
 <p><span class="math display">\[\begin{equation*}
 U(x_1,r_1)\supseteq U(x_2,r_2)\supseteq\cdots\supseteq U(x_n,r_n)\supseteq\cdots
-
 \end{equation*}\]</span></p>
 <p>且<span class="math inline">\(\{r_n\}\to0\)</span>。由完备度量空间的闭球套定理，存在一个<span class="math inline">\(X\)</span>中的点<span class="math inline">\(x\in U(x_n,r_n),\;\forall\;n\in\mathbb{N}^+\)</span>。而由闭球套的取法，<span class="math inline">\(x\notin X\)</span>，矛盾。</p>
 <p>(3)根据<a href="#prop-PrecompactSet-d24bcd04" data-reference-type="ref+label" data-reference="prop:PrecompactSet">性质 3.2.4</a>(2)可知只需证明必要性。任取<span class="math inline">\(A\)</span>中的点列<span class="math inline">\(\{x_n\}\)</span>。如果<span class="math inline">\(\{x_n\}\)</span>中只有有限个互不相同的元素，则<span class="math inline">\(\{x_n\}\)</span>显然有收敛的子列。如果<span class="math inline">\(\{x_n\}\)</span>中有无限个互不相同的元素，记这些元素构成的集合为<span class="math inline">\(B_0\)</span>。由<a href="#prop-TotallyBoundedSet-02fcc408" data-reference-type="ref+label" data-reference="prop:TotallyBoundedSet">性质 3.2.3</a>(2)，<span class="math inline">\(B_0\)</span>也是全有界集。由<a href="#prop-TotallyBoundedSet-02fcc408" data-reference-type="ref+label" data-reference="prop:TotallyBoundedSet">性质 3.2.3</a>(3)，<span class="math inline">\(B_0\)</span>中存在有限个元素使得以它们为球心、<span class="math inline">\(\dfrac{1}{2}\)</span>为半径的开邻域的并包含<span class="math inline">\(B_0\)</span>，显然<span class="math inline">\(B_0\)</span>中至少存在一个点<span class="math inline">\(y_1\)</span>使得以它为半径、<span class="math inline">\(\dfrac{1}{2}\)</span>为半径的开邻域包含了无穷多个<span class="math inline">\(A\)</span>中的点。记被<span class="math inline">\(y_1\)</span>包含的这无穷多个点构成的集合为<span class="math inline">\(B_1\)</span>，显然<span class="math inline">\(B_1\)</span>的直径小于等于<span class="math inline">\(1\)</span>。因为<span class="math inline">\(B_1\)</span>是<span class="math inline">\(B_0\)</span>的子集，所以<span class="math inline">\(B_1\)</span>也是全有界的，重复上述论证，则存在<span class="math inline">\(B_2\subseteq B_1\)</span>，使得<span class="math inline">\(B_2\)</span>中含有<span class="math inline">\(B_1\)</span>无穷多个元素且<span class="math inline">\(B_2\)</span>的直径小于等于<span class="math inline">\(\frac{1}{2}\)</span>。依次类推，可以得到一系列集合满足如下条件：</p>
@@ -1460,14 +1573,12 @@ U(x_1,r_1)\supseteq U(x_2,r_2)\supseteq\cdots\supseteq U(x_n,r_n)\supseteq\cdots
 <p>取<span class="math inline">\(x_{n_k}\in B_k\)</span>，便得到<span class="math inline">\(\{x_n\}\)</span>的一个子列<span class="math inline">\(\{x_{n_k}\}\)</span>。显然<span class="math inline">\(\{x_{n_k}\}\)</span>是Cauchy点列：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;p&gt;q,\;x_{n_p}\in B_p\subseteq B_q,\;\rho(x_{n_p},x_{n_q})&lt;\frac{1}{2^{q-1}}\to0
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(X\)</span>完备，所以<span class="math inline">\(\{x_{n_k}\}\)</span>在<span class="math inline">\(X\)</span>中收敛。由<span class="math inline">\(\{x_n\}\)</span>的任意性，<span class="math inline">\(A\)</span>准紧。</p>
 <p>(4)<strong>必要性：</strong><span class="math inline">\(A\)</span>就是它自身的准紧的<span class="math inline">\(\varepsilon\)</span>-网。</p>
 <p><strong>充分性：</strong>若对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，<span class="math inline">\(A\)</span>都有准紧的<span class="math inline">\(\varepsilon\)</span>-网<span class="math inline">\(B\)</span>。因为<span class="math inline">\(B\)</span>准紧，同时<span class="math inline">\(X\)</span>完备，由<a href="#prop-PrecompactSet-d24bcd04" data-reference-type="ref+label" data-reference="prop:PrecompactSet">性质 3.2.4</a>(2)可知<span class="math inline">\(B\)</span>全有界，即<span class="math inline">\(B\)</span>有只有有限个元素的<span class="math inline">\(\varepsilon\)</span>-网<span class="math inline">\(C=\{c_1,c_2,\dots,c_n\}\)</span>。则：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;a\in A,\;\rho(a,c_i)\leqslant\rho(a,b)+\rho(b,c_i),\;\forall\;i=1,2,\dots,n
-
 \end{equation*}\]</span></p>
 <p>可以选取<span class="math inline">\(c_i\)</span>和<span class="math inline">\(b\in B\)</span>使得<span class="math inline">\(\rho(a,b)&lt;\varepsilon,\;\rho(b,c_i)&lt;\varepsilon\)</span>（先选择<span class="math inline">\(b\)</span>，再根据<span class="math inline">\(b\)</span>即可选得<span class="math inline">\(c_i\)</span>），即对于任意的<span class="math inline">\(a\in A\)</span>，存在<span class="math inline">\(c_i\in\{c_1,c_2,\dots,c_n\}\)</span>使得<span class="math inline">\(\rho(a,c_i)&lt;2\varepsilon\)</span>，于是<span class="math inline">\(\{c_1,c_2,\dots,c_n\}\)</span>中的点为中心、<span class="math inline">\(2\varepsilon\)</span>为半径构成的<span class="math inline">\(2\varepsilon\)</span>-网必然是<span class="math inline">\(A\)</span>的一个<span class="math inline">\(2\varepsilon\)</span>-网。由<span class="math inline">\(\varepsilon\)</span>的任意性，<span class="math inline">\(A\)</span>全有界。又因为<span class="math inline">\(X\)</span>是完备的，由(3)可知<span class="math inline">\(A\)</span>准紧。&nbsp;◻</p>
 </div>
@@ -1499,7 +1610,6 @@ U(x_1,r_1)\supseteq U(x_2,r_2)\supseteq\cdots\supseteq U(x_n,r_n)\supseteq\cdots
 <p><strong>Definition 3.31</strong>. <span class="math inline">\((X,\rho)\)</span>是度量空间，<span class="math inline">\(A\subseteq X\)</span>，<span class="math inline">\(\{G_i:i\in I\}\)</span>（其中<span class="math inline">\(I\)</span>是指标集）是<span class="math inline">\(X\)</span>中某些开集组成的集族。如果：</p>
 <p><span class="math display">\[\begin{equation*}
 A\subseteq\underset{i\in I}{\cup}G_i
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\{G_i:i\in I\}\)</span>为<span class="math inline">\(A\)</span>的<a href="../chapters/page-054.html#term-OpenCover" class="term" title="open cover">开覆盖<span class="term-english">（open cover）</span></a>。如果<span class="math inline">\(I\)</span>是有限集，则称<span class="math inline">\(\{G_i:i\in I\}\)</span>为<span class="math inline">\(A\)</span>的<a href="../chapters/page-045.html#term-FiniteOpenCover" class="term" title="finite open cover">有限开覆盖<span class="term-english">（finite open cover）</span></a>。</p>
 </div>
@@ -1511,14 +1621,12 @@ A\subseteq\underset{i\in I}{\cup}G_i
 <p><span class="proof-title"><em>证明</em>. </span>(1)必要性：先来证明<span class="math inline">\(\exists\;\varepsilon&gt;0,\;\forall\;x\in A,\;\exists\;i\in I,\;U(x,\varepsilon)\in G_i\)</span>。若不成立，则：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;\varepsilon&gt;0,\;\exists\;x\in A,\;\forall\;i\in I,\;U(x,\varepsilon)\notin G_i
-
 \end{equation*}\]</span></p>
 <p>依次选择<span class="math inline">\(\varepsilon_n=\dfrac{1}{2^n},\;n\in\mathbb{N}^+\)</span>，即可构造出序列<span class="math inline">\(\{x_n\}\)</span>满足其中的每个元素都不在任何<span class="math inline">\(G_i\)</span>中。因为<span class="math inline">\(A\)</span>是紧集，所以<span class="math inline">\(\{x_n\}\)</span>存在收敛于<span class="math inline">\(A\)</span>中某点<span class="math inline">\(x_0\)</span>的子列<span class="math inline">\(\{x_{n_k}\}\)</span>。又因为<span class="math inline">\(A\subseteq\underset{i\in I}{\cup}G_i\)</span>，所以<span class="math inline">\(\exists\;i\in I,\;x_0\in G_i\)</span>。因为<span class="math inline">\(G_i\)</span>是开集，所以<span class="math inline">\(x_0\)</span>是<span class="math inline">\(G_i\)</span>的内点，由<a href="#prop-OpenClosedSet-f9867d00" data-reference-type="ref+label" data-reference="prop:OpenClosedSet">性质 3.2.2</a>(1)可知可取充分大的<span class="math inline">\(k\)</span>使得<span class="math inline">\(U\left(x_{n_k},\dfrac{1}{2^{n_k}}\right)\subseteq U(x_0)\subseteq G_i\)</span>，这与<span class="math inline">\(x_{n_k}\)</span>的取法矛盾。</p>
 <p>记使上述命题成立的<span class="math inline">\(\varepsilon=\varepsilon_0\)</span>。因为<span class="math inline">\(A\)</span>是紧集，则<span class="math inline">\(A\)</span>也是全有界集，故能选择<span class="math inline">\(A\)</span>中有限个点，使得对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，这有限个点的开<span class="math inline">\(\varepsilon\)</span>邻域能够包含整个<span class="math inline">\(A\)</span>。取<span class="math inline">\(\varepsilon=\varepsilon_0\)</span>，此时只要对这有限个点的开邻域选择对应的<span class="math inline">\(G_i\)</span>，即可选出有限子覆盖。</p>
 <p>(2)充分性：设<span class="math inline">\(\{x_n\}\)</span>是<span class="math inline">\(A\)</span>中的一个点列。如果<span class="math inline">\(\{x_n\}\)</span>没有子列在<span class="math inline">\(A\)</span>中收敛，则：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;y\in A,\;\exists\;\varepsilon_y&gt;0,\;\exists\;n_y\in\mathbb{N}^+,\;\forall\;n&gt;n_y,\;x_n\notin U(y,\varepsilon_y)
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(\{U(y,\varepsilon_y):y\in A\}\supseteq A\)</span>，所以可以选择<span class="math inline">\(A\)</span>中有限个点，分别记为<span class="math inline">\(y_1,y_2,\dots,y_{n_0}\)</span>，使得<span class="math inline">\(\{U(y_i,\varepsilon_y):i=1,2,\dots,n_0\}\supseteq A\)</span>。当<span class="math inline">\(n\geqslant
 \max\{n_{y_1},\;n_{y_2},\dots,n_{y_{n_0}}\}\)</span>时，<span class="math inline">\(x_n\notin A\)</span>，与<span class="math inline">\(\{x_n\}\subseteq A\)</span>矛盾。&nbsp;◻</p>
@@ -1537,38 +1645,31 @@ A\subseteq\underset{i\in I}{\cup}G_i
 <p>(1)必要性：假设该闭子集族的交集为空集。令<span class="math inline">\(G_i=X\setminus F_i\)</span>，由<a href="#prop-OpenClosedSet-f9867d00" data-reference-type="ref+label" data-reference="prop:OpenClosedSet">性质 3.2.2</a>(5)可知<span class="math inline">\(\{G_i\}_{i\in I}\)</span>为开集族。由<a href="../chapters/page-012.html#prop-SetOperation-8abfa3aa" data-reference-type="ref+label" data-reference="prop:SetOperation">性质 11.1.1</a>(6)(4)(7)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \underset{i\in I}{\overset{}{\cup}}G_i=\underset{i\in I}{\overset{}{\cup}}(X\setminus F_i)=X\setminus \underset{i\in I}{\overset{}{\cap}}F_i=X
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\{G_i\}_{i\in I}\supseteq A\)</span>。因为<span class="math inline">\(A\)</span>是紧集，所以可从<span class="math inline">\(\{G_i\}_{i\in I}\)</span>中选择出<span class="math inline">\(A\)</span>的有限子覆盖<span class="math inline">\(\{G_{i_j}\}_{j=1}^n\)</span>。由<a href="../chapters/page-012.html#prop-SetOperation-8abfa3aa" data-reference-type="ref+label" data-reference="prop:SetOperation">性质 11.1.1</a>(6)(2)(7)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \underset{j=1}{\overset{n}{\cap}}F_{i_j}=\underset{j=1}{\overset{n}{\cap}}(X\setminus G_{i_j})=X\setminus\underset{j=1}{\overset{n}{\cup}}G_{i_j}\subseteq X\setminus A
-
 \end{equation*}\]</span></p>
 <p>又因为<span class="math inline">\(F_{i_j}\subseteq A\)</span>，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \underset{j=1}{\overset{n}{\cap}}F_{i_j}\subseteq A
-
 \end{equation*}\]</span></p>
 <p>综合上两式可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \underset{j=1}{\overset{n}{\cap}}F_{i_j}\subseteq(X\setminus A)\cap A=\varnothing
-
 \end{equation*}\]</span></p>
 <p>这与<span class="math inline">\(\mathscr{F}\)</span>具有有限交性质矛盾。</p>
 <p>(2)充分性：设闭集<span class="math inline">\(A\)</span>中任一具有有限交性质的闭子集族具有非空的交。设<span class="math inline">\(\{G_i\}_{i\in I}\)</span>为<span class="math inline">\(A\)</span>的任一开覆盖，令<span class="math inline">\(F_i=A\setminus G_i\)</span>，因为<span class="math inline">\(A\)</span>是闭集，由<a href="../chapters/page-012.html#prop-SetOperation-8abfa3aa" data-reference-type="ref+label" data-reference="prop:SetOperation">性质 11.1.1</a>(6)和<a href="#prop-OpenClosedSet-f9867d00" data-reference-type="ref+label" data-reference="prop:OpenClosedSet">性质 3.2.2</a>(5)(6)可知<span class="math inline">\(F_i\)</span>也是闭集。由<a href="../chapters/page-012.html#prop-SetOperation-8abfa3aa" data-reference-type="ref+label" data-reference="prop:SetOperation">性质 11.1.1</a>(6)(2)(7)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \underset{i\in I}{\overset{}{\cap}}F_i=\underset{i\in I}{\overset{}{\cap}}(A\setminus G_i)=A\setminus\underset{i\in I}{\overset{}{\cup}}G_i=\varnothing
-
 \end{equation*}\]</span></p>
 <p>所以，<span class="math inline">\(A\)</span>的闭子集族<span class="math inline">\(\{F_i\}_{i\in I}\)</span>不具有有限交性质，否则的话根据假设应有<span class="math inline">\(\underset{i\in I}{\overset{}{\cap}}F_i\ne\varnothing\)</span>。于是存在有限子集族<span class="math inline">\(\{F_{i_j}\}_{j=1}^n\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \underset{j=1}{\overset{n}{\cap}}F_{i_j}=\varnothing
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-012.html#prop-SetOperation-8abfa3aa" data-reference-type="ref+label" data-reference="prop:SetOperation">性质 11.1.1</a>(6)(4)(7)可得它对应的开集族<span class="math inline">\(\{F_{i_j}\}_{j=1}^n\)</span>则满足：</p>
 <p><span class="math display">\[\begin{equation*}
 \underset{j=1}{\overset{n}{\cup}}G_{i_j}=\underset{j=1}{\overset{n}{\cup}}(A\setminus F_{i_j})=A\setminus\underset{j=1}{\overset{n}{\cap}}F_{i_j}=A
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(\{G_{i_j}\}\)</span>是<span class="math inline">\(A\)</span>的一个有限开覆盖，由<span class="math inline">\(\{G_i\}_{i\in I}\)</span>的任意性和<a href="#theo-FiniteOpenCover-390f23d3" data-reference-type="ref+label" data-reference="theo:FiniteOpenCover">定理 3.5</a>可知<span class="math inline">\(A\)</span>是紧集。&nbsp;◻</p>
 </div>
@@ -1583,7 +1684,6 @@ A\subseteq\underset{i\in I}{\cup}G_i
 <p><strong>Definition 3.33</strong>. 在<span class="math inline">\(\mathbb{R}^{n}\)</span>中定义向量<span class="math inline">\(x=(\xi_1,\xi_2,\dots,\xi_n)\)</span>和向量<span class="math inline">\(y=(\eta_1,\eta_2,\dots,\eta_n)\)</span>之间的距离为：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)=\left[\sum_{i=1}^n(\xi_i-\eta_i)^2\right]^{\frac{1}{2}}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\((\mathbb{R}^{n},\rho)\)</span>是度量空间，称该距离为<strong>欧几里得距离</strong>，简称为<strong>欧氏距离</strong>。</p>
 </div>
@@ -1594,17 +1694,14 @@ A\subseteq\underset{i\in I}{\cup}G_i
 \sum_{i=1}^n(a_i+b_i)^2&amp;=\sum_{i=1}^na_i^2+2\sum_{i=1}^na_ib_i+\sum_{i=1}^nb_i^2 \\
 &amp;\leqslant\sum_{i=1}^na_i^2+2\left(\sum_{i=1}^na_i^2\cdot\sum_{i=1}^nb_i^2\right)^{\frac{1}{2}}+\sum_{i=1}^nb_i^2 \\
 &amp;=\left[\left(\sum_{i=1}^na_i^2\right)^{\frac{1}{2}}+\left(\sum_{i=1}^nb_i^2\right)^{\frac{1}{2}}\right]^2
-
 \end{align*}\]</span></p>
 <p>设<span class="math inline">\(x=(\xi_1,\xi_2,\dots,\xi_n),y=(\eta_1,\eta_2,\dots,\eta_n),z=(\zeta_1,\zeta_2,\dots,\zeta_n)\)</span>是<span class="math inline">\(\mathbb{R}^{n}\)</span>中的任意三点，在上式中令<span class="math inline">\(a_i=\xi_i-\zeta_i,b_i=\zeta_i-\eta_i\)</span>，则</p>
 <p><span class="math display">\[\begin{equation*}
 \left[\sum_{i=1}^n(\xi_i-\eta_i)^2\right]^{\frac{1}{2}}\leqslant    \left[\sum_{i=1}^n(\xi_i-\zeta_i)^2\right]^{\frac{1}{2}}+\left[\sum_{i=1}^n(\zeta_i-\eta_i)^2\right]^{\frac{1}{2}}
-
 \end{equation*}\]</span></p>
 <p>即</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)\leqslant\rho(x,z)+\rho(z,y)
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1633,22 +1730,18 @@ A\subseteq\underset{i\in I}{\cup}G_i
 <li><p>若<span class="math inline">\(x\in\mathbb{R}^{}\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
                 x+(+\infty)=+\infty,\quad x-(+\infty)=-\infty,\quad x+(-\infty)=-\infty,\quad x-(-\infty)=+\infty
-
     \end{equation*}\]</span></p></li>
 <li><p>若<span class="math inline">\(x\in\mathbb{R}^{+}\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
                 x\cdot(+\infty)=(+\infty)\cdot x=+\infty,\quad x\cdot(-\infty)=(-\infty)\cdot x=-\infty
-
     \end{equation*}\]</span></p>
 <p>若<span class="math inline">\(x\in\mathbb{R}^{-}\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
                 x\cdot(+\infty)=(+\infty)\cdot x=-\infty,\quad x\cdot(-\infty)=(-\infty)\cdot x=+\infty
-
     \end{equation*}\]</span></p></li>
 <li><p>若<span class="math inline">\(x\in\mathbb{R}^{}\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
                 \frac{x}{+\infty}=\frac{x}{-\infty}=0
-
     \end{equation*}\]</span></p></li>
 <li><p>对于无穷的运算：</p>
 <p><span class="math display">\[\begin{gather*}
@@ -1656,7 +1749,6 @@ A\subseteq\underset{i\in I}{\cup}G_i
                 (-\infty)+(-\infty)=-\infty,\quad(-\infty)-(+\infty)=-\infty \\
                 (+\infty)\cdot(+\infty)=(-\infty)\cdot(-\infty)=+\infty,\quad(+\infty)\cdot(-\infty)=(-\infty)\cdot(+\infty)=-\infty \\
                 -\infty\leqslant-\infty,\quad-\infty\leqslant+\infty,\quad+\infty\leqslant+\infty
-
     \end{gather*}\]</span></p></li>
 </ol>
 <p>其余涉及无穷的运算皆无意义。</p>
@@ -1717,32 +1809,27 @@ A\subseteq\underset{i\in I}{\cup}G_i
 <p>(2)<strong>和：</strong>对任意的<span class="math inline">\(n\in\mathbb{N}^+\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_n+y_n,0)=|x_n+y_n|\leqslant|x_n|+|y_n|=\rho(x_n,0)+\rho(y_n,0)&lt;+\infty
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\{x_n+y_n\}\)</span>有界。</p>
 <p><strong>乘积：</strong>因为<span class="math inline">\(\{x_n\}\)</span>有界，所以<span class="math inline">\(\rho(x_n,0)=|x_n|&lt;+\infty\)</span>，即存在<span class="math inline">\(K\in\mathbb{R}^{+}\)</span>使得<span class="math inline">\(|x_n|&lt;K\)</span>，同理可得存在<span class="math inline">\(L\in\mathbb{R}^{+}\)</span>使得<span class="math inline">\(|y_n|&lt;L\)</span>，于是对任意的<span class="math inline">\(n\in\mathbb{N}^+\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_ny_n,0)=|x_ny_n|&lt;KL&lt;+\infty
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\{x_ny_n\}\)</span>有界。</p>
 <p>(3)因为<span class="math inline">\(\{x_n\}\)</span>有界，所以<span class="math inline">\(\rho(x_n,0)=|x_n|&lt;+\infty\)</span>，即存在<span class="math inline">\(K\in\mathbb{R}^{+}\)</span>使得<span class="math inline">\(|x_n|&lt;K\)</span>。因为<span class="math inline">\(\{y_n\}\)</span>是无穷小序列，于是对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，有<span class="math inline">\(\dfrac{\varepsilon}{K}&gt;0\)</span>，所以存在<span class="math inline">\(N\in\mathbb{N}^+\)</span>，当<span class="math inline">\(n&gt;N\)</span>时有<span class="math inline">\(\rho(y_n,0)=|y_n|&lt;\dfrac{\varepsilon}{K}\)</span>，即<span class="math inline">\(\rho(x_ny_n,0)=|x_ny_n|&lt;\varepsilon\)</span>，<span class="math inline">\(\{x_ny_n\}\to0\)</span>。</p>
 <p>(4)因为<span class="math inline">\(\{x_n\}\to a,\;\{z_n\}\to a\)</span>，所以对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，存在<span class="math inline">\(N_1,N_2\in\mathbb{N}^+\)</span>，当<span class="math inline">\(n&gt;N_1\)</span>时有<span class="math inline">\(a-\varepsilon&lt;x_n&lt;a+\varepsilon\)</span>，当<span class="math inline">\(n&gt;N_2\)</span>时有<span class="math inline">\(a-\varepsilon&lt;z_n&lt;a+\varepsilon\)</span>，于是当<span class="math inline">\(n&gt;\max\{N_1,N_2,N\}\)</span>时有：</p>
 <p><span class="math display">\[\begin{equation*}
 a-\varepsilon&lt;x_n\leqslant y_n\leqslant z_n&lt;a+\varepsilon
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(\rho(y_n,a)=|y_n-a|&lt;\varepsilon\)</span>，于是有<span class="math inline">\(\{y_n\}\to a\)</span>。另外两种情况同理可得。</p>
 <p>(5)先考虑存在极限都有限时的情况。设<span class="math inline">\(\{x_n\}\to a,\{y_n\}\to b\)</span>，取<span class="math inline">\(\varepsilon=\dfrac{b-a}{2}\)</span>。由极限的定义可知：</p>
 <p><span class="math display">\[\begin{gather*}
 \exists\;N_1\in\mathbb{N}^+,\;\forall\;n&gt;N,\;|x_n-a|&lt;\varepsilon \\
 \exists\;N_2\in\mathbb{N}^+,\;\forall\;n&gt;N,\;|y_n-b|&lt;\varepsilon
-
 \end{gather*}\]</span></p>
 <p>于是当<span class="math inline">\(n&gt;\max\{N_1,N_2\}\)</span>时有：</p>
 <p><span class="math display">\[\begin{equation*}
 x_n&lt;\frac{a+b}{2}&lt;y_n
-
 \end{equation*}\]</span></p>
 <p>结论成立。</p>
 <p>对于存在极限为无穷的情况，此时仅有三种可能：</p>
@@ -1750,7 +1837,6 @@ x_n&lt;\frac{a+b}{2}&lt;y_n
 \lim_{n\to+\infty}x_n=-\infty,\;\lim_{n\to+\infty}y_n=a\in\mathbb{R}^{} \\
 \lim_{n\to+\infty}x_n=a\in\mathbb{R}^{},\;\lim_{n\to+\infty}y_n=+\infty \\
 \lim_{n\to+\infty}x_n=-\infty,\;\lim_{n\to+\infty}y_n=+\infty
-
 \end{gather*}\]</span></p>
 <p>结论可类似前述讨论得出。</p>
 <p>(6)反证法，与(5)矛盾。</p>
@@ -1762,35 +1848,29 @@ x_n&lt;\frac{a+b}{2}&lt;y_n
 <p><strong>a：</strong>根据：</p>
 <p><span class="math display">\[\begin{equation*}
 \Big||x_n|-|a|\Big|\leqslant|x_n-a|
-
 \end{equation*}\]</span></p>
 <p>即可得出结论。</p>
 <p><strong>b：</strong>根据：</p>
 <p><span class="math display">\[\begin{equation*}
 |x_n\pm y_n-(a\pm b)|\leqslant|x_n-a|+|y_n-b|
-
 \end{equation*}\]</span></p>
 <p>即可得出结论。</p>
 <p><strong>c：</strong>根据：</p>
 <p><span class="math display">\[\begin{equation*}
 |x_ny_n-ab|=|x_ny_n-ay_n+ay_n-ab|=|(x_n-a)y_n+a(y_n-b)|\leqslant|x_n-a||y_n|+|a||y_n-b|
-
 \end{equation*}\]</span></p>
 <p>和<a href="#prop-ConvergentSeqOfPoints-9fdcf3e3" data-reference-type="ref+label" data-reference="prop:ConvergentSeqOfPoints">性质 3.1.1</a>(2)即可得出结论。</p>
 <p><strong>d：</strong>先证明<span class="math inline">\(y_n=1\)</span>时的情况。因为<span class="math inline">\(\{x_n\}\to a\)</span>，所以对于<span class="math inline">\(\dfrac{|a|}{2}\)</span>存在<span class="math inline">\(N\in\mathbb{N}^+\)</span>使得当<span class="math inline">\(n&gt;N\)</span>时有：</p>
 <p><span class="math display">\[\begin{equation*}
 |x_n-a|&lt;\frac{|a|}{2}
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 |x_n|=|a-(a-x_n)|\geqslant|a|-|a-x_n|&gt;\frac{|a|}{2}
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \Big|\frac{1}{x_n}-\frac{1}{a}\Big|=\Big|\frac{a-x_n}{ax_n}\Big|&lt;\frac{2}{|a|^2}|a-x_n|\to0
-
 \end{equation*}\]</span></p>
 <p><span class="math inline">\(\{y_n\}\)</span>为一般收敛点列时，由c和上述证明即可得出结论。&nbsp;◻</p>
 </div>
@@ -1807,7 +1887,6 @@ x_n&lt;\frac{a+b}{2}&lt;y_n
 <p>(2)由下式即可推出极限有限时的结论：</p>
 <p><span class="math display">\[\begin{equation*}
 \max_i|\xi_i-\eta_i|\leqslant   \left[\sum_{i=1}^m(\xi_i-\eta_i)^2\right]^{\frac{1}{2}}\leqslant\left\{\left[\sum_{i=1}^{m}|\xi_i-\eta_i|\right]^2\right\}^{\frac{1}{2}}=\sum_{i=1}^{m}|\xi_i-\eta_i|
-
 \end{equation*}\]</span></p>
 <p>极限无限时用反证法即可得出。</p>
 <p>(3)由<a href="#prop-Norm-bc271cd1" data-reference-type="ref+label" data-reference="prop:Norm">性质 3.4.1</a>(3)立即可得。&nbsp;◻</p>
@@ -1819,12 +1898,10 @@ x_n&lt;\frac{a+b}{2}&lt;y_n
 <p><strong>Definition 3.41</strong>. 设<span class="math inline">\(I_i=[a_i,b_i]\subseteq\mathbb{R}^{},\;i=1,2,\dots,n\)</span>，称：</p>
 <p><span class="math display">\[\begin{equation*}
 I=I_1\times I_2\times\cdots\times I_n\subseteq\mathbb{R}^{n}
-
 \end{equation*}\]</span></p>
 <p>为<span class="math inline">\(\mathbb{R}^{n}\)</span>中的<a href="../chapters/page-042.html#term-ClosedCube" class="term" title="closed cube">闭方块<span class="term-english">（closed cube）</span></a>，称实数：</p>
 <p><span class="math display">\[\begin{equation*}
 l(I)=\max\{b_1-a_1,b_2-a_2,\dots,b_n-a_n\}
-
 \end{equation*}\]</span></p>
 <p>为闭方块<span class="math inline">\(I\)</span>的<strong>线度</strong>。</p>
 </div>
@@ -1840,12 +1917,10 @@ l(I)=\max\{b_1-a_1,b_2-a_2,\dots,b_n-a_n\}
 <li><p><span class="math inline">\(\{x_n\}\)</span>和<span class="math inline">\(\{y_n\}\)</span>收敛于同一极限：</p>
 <p><span class="math display">\[\begin{equation*}
                 \lim_{n\to+\infty}x_n=\lim_{n\to+\infty}y_n=a
-
     \end{equation*}\]</span></p></li>
 <li><p><span class="math inline">\(a\)</span>是满足以下条件的唯一实数：</p>
 <p><span class="math display">\[\begin{equation*}
                 \forall\;n\in\mathbb{N}^+,\;x_n\leqslant a\leqslant y_n
-
     \end{equation*}\]</span></p></li>
 </ol>
 <p>上述结论可推广为：设<span class="math inline">\(\{I_n\}\)</span>是<span class="math inline">\(\mathbb{R}^{m}\)</span>中的一列闭方块，满足：</p>
@@ -1859,18 +1934,15 @@ l(I)=\max\{b_1-a_1,b_2-a_2,\dots,b_n-a_n\}
 <p><span class="proof-title"><em>证明</em>. </span>(1)由条件1可知：</p>
 <p><span class="math display">\[\begin{equation*}
 x_1\leqslant x_2\leqslant\cdots\leqslant x_n\leqslant\cdots\leqslant y_n\leqslant\cdots\leqslant y_2\leqslant y_1
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\{x_n\}\)</span>单调递增且有上界<span class="math inline">\(y_1\)</span>，<span class="math inline">\(\{y_n\}\)</span>单调递减且有下界<span class="math inline">\(x_1\)</span>，根据<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(7)可知<span class="math inline">\(\{x_n\}\)</span>和<span class="math inline">\(\{y_n\}\)</span>收敛于有限值。由条件2和<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(8.b)(8.c)即可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}x_n=\lim_{n\to+\infty}y_n=a=\sup_nx_n=\inf_ny_n\in\mathbb{R}^{}
-
 \end{equation*}\]</span></p>
 <p>根据确界的唯一性即可得到<span class="math inline">\(a\)</span>的唯一性。</p>
 <p>(2)记<span class="math inline">\(I_i^j\)</span>是第<span class="math inline">\(i\)</span>个闭方块中第<span class="math inline">\(j\)</span>维闭区间。因为<span class="math inline">\(\lim\limits_{n\to+\infty}l(I_n)=0\)</span>，所以<span class="math inline">\(\{I_n\}\)</span>的每一个维度都满足(1)的条件，于是存在<span class="math inline">\(c_i\in\mathbb{R}^{}\)</span>满足<span class="math inline">\(c_i\in\underset{n\in\mathbb{N}^+}{\cap}I_n^i\)</span>。令<span class="math inline">\(c=(c_1, c_2, \dots, c_{m})\)</span>，则有：</p>
 <p><span class="math display">\[\begin{equation*}
 c\in\left(\underset{n\in\mathbb{N}^+}{\cap}I_n^1\right)\times\left(\underset{n\in\mathbb{N}^+}{\cap}I_n^2\right)\times\cdots\times\left(\underset{n\in\mathbb{N}^+}{\cap}I_n^m\right)
-
 \end{equation*}\]</span></p>
 <p><span class="math inline">\(c\)</span>即为满足条件的点。&nbsp;◻</p>
 </div>
@@ -1894,13 +1966,11 @@ c\in\left(\underset{n\in\mathbb{N}^+}{\cap}I_n^1\right)\times\left(\underset{n\i
 <p>任取<span class="math inline">\(\mathbb{R}^{m}\)</span>中的Cauchy点列<span class="math inline">\(\{x_n\}\)</span>，则对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，存在<span class="math inline">\(N\in\mathbb{N}^+\)</span>，当<span class="math inline">\(n_1,n_2&gt;N\)</span>时有<span class="math inline">\(\rho(x_{n_1},x_{n_2})&lt;\varepsilon\)</span>，于是<span class="math inline">\(|x_{n_1}^i-x_{n_2}^i|\leqslant\rho(x_{n_1},x_{n_2})&lt;\varepsilon\)</span>，<span class="math inline">\(\{x_{n}^i\}\)</span>构成<span class="math inline">\(\mathbb{R}^{}\)</span>上的Cauchy点列。由<span class="math inline">\(\mathbb{R}^{}\)</span>的完备性可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}x_n^i=a_i\in\mathbb{R}^{},\quad i=1,2,\dots,m
-
 \end{equation*}\]</span></p>
 <p>记<span class="math inline">\(a=(a_1, a_2, \dots, a_{m})\)</span>，由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(6)(8.b)可得：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;0\leqslant\lim_{n\to+\infty}\rho(x_n,a)=\lim_{n\to+\infty}\left[\sum_{i=1}^m(x_n^i-a_i)^2\right]^{\frac{1}{2}}\leqslant\lim_{n\to+\infty}\left\{\left[\sum_{i=1}^{m}|x_n^i-a_i|\right]^2\right\}^{\frac{1}{2}} \\
 =&amp;\lim_{n\to+\infty}\left(\sum_{i=1}^{m}|x_n^i-a_i|\right)=\sum_{i=1}^{m}\lim_{n\to+\infty}|x_n^i-a_i|=0
-
 \end{align*}\]</span></p>
 <p>即<span class="math inline">\(\{x_n\}\to  a\)</span>。由<span class="math inline">\(\{x_n\}\)</span>的任意性即可得出结论。&nbsp;◻</p>
 </div>
@@ -1914,7 +1984,6 @@ c\in\left(\underset{n\in\mathbb{N}^+}{\cap}I_n^1\right)\times\left(\underset{n\i
 <p><span class="proof-title"><em>证明</em>. </span><strong>必要性：</strong>因为<span class="math inline">\(E\)</span>有界，所以<span class="math inline">\(E\)</span>可以包含在<span class="math inline">\(\mathbb{R}^{m}\)</span>中一个闭方块<span class="math inline">\(I_0\)</span>中。任取<span class="math inline">\(\{x_n\}\subseteq E\)</span>。将<span class="math inline">\(I_0\)</span>划分为<span class="math inline">\(2^n\)</span>个闭子方块，则其中至少有一个闭子方块<span class="math inline">\(I_1\)</span>包含<span class="math inline">\(\{x_n\}\)</span>中无穷个点且其线度为<span class="math inline">\(l(I_1)=\dfrac{1}{2}l(I_0)\)</span>，取<span class="math inline">\(x_{n_1}\in I_1\)</span>；再将<span class="math inline">\(I_1\)</span>分成<span class="math inline">\(2^n\)</span>个闭子方块，其中至少有一个闭子方块<span class="math inline">\(I_2\)</span>包含<span class="math inline">\(\{x_n\}\)</span>中无穷个点，取<span class="math inline">\(x_{n_2}\in I_1\)</span>满足<span class="math inline">\(n_2&gt;n_1\)</span>（可以验证这样的<span class="math inline">\(n_2\)</span>一定是存在的，如果不存在那么<span class="math inline">\(I_2\)</span>中只有<span class="math inline">\(\{x_n\}\)</span>中有限个点）。以此类推可得一个闭方块套<span class="math inline">\(\{I_n\}\)</span>和<span class="math inline">\(\{x_n\}\)</span>的子列<span class="math inline">\(\{x_{n_k}\}\)</span>，由<a href="#theo-ClosedCubeTheorem-171ac679" data-reference-type="ref+label" data-reference="theo:ClosedCubeTheorem">定理 3.7</a>可知存在唯一的<span class="math inline">\(c\in\mathbb{R}^{}\)</span>满足<span class="math inline">\(c\in\underset{n\in\mathbb{N}^+}{\cap}I_n\)</span>。注意到：</p>
 <p><span class="math display">\[\begin{equation*}
 0\leqslant\rho(x_{n_k},c)\leqslant\sqrt{m[l(I_k)]^2}=\sqrt{m}l(I_k)=\frac{\sqrt{m}}{2^k}l(I_0)\to0
-
 \end{equation*}\]</span></p>
 <p>于是有<span class="math inline">\(\lim\limits_{k\to+\infty}x_{n_k}=c\)</span>。因为<span class="math inline">\(E\)</span>是闭集，所以<span class="math inline">\(c\in E\)</span>，即<span class="math inline">\(\{x_n\}\)</span>存在收敛的子列<span class="math inline">\(\{x_{n_k}\}\)</span>，由<span class="math inline">\(\{x_n\}\)</span>的任意性可得<span class="math inline">\(E\)</span>是紧集。</p>
 <p><strong>充分性：</strong>由<a href="#prop-CompactSet-6ade9af0" data-reference-type="ref+label" data-reference="prop:CompactSet">性质 3.2.7</a>(2)可知<span class="math inline">\(E\)</span>是有界的，根据<a href="#prop-CompactSet-6ade9af0" data-reference-type="ref+label" data-reference="prop:CompactSet">性质 3.2.7</a>(3)和<a href="#prop-CompleteMetricSpace-b7028330" data-reference-type="ref+label" data-reference="prop:CompleteMetricSpace">性质 3.2.6</a>(1)可知<span class="math inline">\(E\)</span>是闭的，所以<span class="math inline">\(E\)</span>是有界闭集。&nbsp;◻</p>
@@ -1939,7 +2008,6 @@ c\in\left(\underset{n\in\mathbb{N}^+}{\cap}I_n^1\right)\times\left(\underset{n\i
 <p><span class="math display">\[\begin{gather*}
 \varliminf x_n=\lim_{n\to+\infty}\inf_{k\geqslant n}x_k=\sup_n\inf_{k\geqslant n}x_k \\
 \varlimsup x_n=\lim_{n\to+\infty}\sup_{k\geqslant n}x_k=\inf_n\sup_{k\geqslant n}x_k
-
 \end{gather*}\]</span></p>
 <p>分别称之为<span class="math inline">\(\{x_n\}\)</span>的<a href="../chapters/page-051.html#term-LLimit" class="term" title="lower limit">下极限<span class="term-english">（lower limit）</span></a>和<a href="../chapters/page-060.html#term-ULimit" class="term" title="upper limit">上极限<span class="term-english">（upper limit）</span></a>。</p>
 </div>
@@ -1973,13 +2041,11 @@ c\in\left(\underset{n\in\mathbb{N}^+}{\cap}I_n^1\right)\times\left(\underset{n\i
                         \end{cases} \\
                         &amp;\leqslant\varlimsup(x_n+y_n) \\
                         &amp;\leqslant\varlimsup x_n+\varlimsup y_n
-
         \end{align*}\]</span></p></li>
 <li><p>上下极限的减法运算：</p>
 <p><span class="math display">\[\begin{gather*}
                         -\varliminf x_n=\varlimsup(-x_n) \\
                         -\varlimsup x_n=\varliminf(-x_n)
-
         \end{gather*}\]</span></p></li>
 <li><p>上下极限的乘法运算：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1991,31 +2057,26 @@ c\in\left(\underset{n\in\mathbb{N}^+}{\cap}I_n^1\right)\times\left(\underset{n\i
                         \end{cases} \\
                         &amp;\leqslant\varlimsup(x_n\cdot y_n) \\
                         &amp;\leqslant\varlimsup x_n\cdot\varlimsup y_n
-
         \end{align*}\]</span></p></li>
 <li><p>上下极限的分式运算（<span class="math inline">\(\varliminf x_n&gt;0\)</span>）：</p>
 <p><span class="math display">\[\begin{gather*}
                         \frac{1}{\varliminf x_n}=\varlimsup\frac{1}{x_n} \\
                         \frac{1}{\varlimsup x_n}=\varliminf\frac{1}{x_n}
-
         \end{gather*}\]</span></p></li>
 <li><p>上下极限与极限混合的加法运算（<span class="math inline">\(\lim\limits_{n\to+\infty}x_n=u\)</span>）：</p>
 <p><span class="math display">\[\begin{gather*}
                         \varliminf(x_n+y_n)=u+\varliminf y_n \\
                         \varlimsup(x_n+y_n)=u+\varlimsup y_n
-
         \end{gather*}\]</span></p></li>
 <li><p>上下极限与极限混合的乘法运算（<span class="math inline">\(\lim\limits_{n\to+\infty}x_n=u&gt;0,\;y_n\geqslant0,\;\forall\;n\in\mathbb{N}^+\)</span>）：</p>
 <p><span class="math display">\[\begin{gather*}
                         \varliminf(x_n\cdot y_n)=u\cdot\varliminf y_n \\
                         \varlimsup(x_n\cdot y_n)=u\cdot\varlimsup y_n
-
         \end{gather*}\]</span></p></li>
 <li><p>上下极限的不等式性（<span class="math inline">\(x_n\leqslant y_n\)</span>）：</p>
 <p><span class="math display">\[\begin{gather*}
                         \varliminf x_n\leqslant\varliminf y_n \\
                         \varlimsup x_n\leqslant\varlimsup y_n
-
         \end{gather*}\]</span></p></li>
 </ol></li>
 </ol>
@@ -2024,53 +2085,44 @@ c\in\left(\underset{n\in\mathbb{N}^+}{\cap}I_n^1\right)\times\left(\underset{n\i
 <p><span class="proof-title"><em>证明</em>. </span>(1)任取<span class="math inline">\(\{x_n\}\)</span>的一个极限点<span class="math inline">\(\xi\)</span>，由极限点定义可知，<span class="math inline">\(\{x_n\}\)</span>中存在一个子列<span class="math inline">\(\{x_{n_k}\}\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{k\to+\infty}x_{n_k}=\xi
-
 \end{equation*}\]</span></p>
 <p>令：</p>
 <p><span class="math display">\[\begin{equation*}
 y_k=\inf_{n\geqslant k}x_n,\quad
 z_k=\sup_{n\geqslant k}x_n
-
 \end{equation*}\]</span></p>
 <p>于是有<span class="math inline">\(y_k\leqslant x_{n_k}\leqslant z_k\)</span>，由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(4)即可得到<span class="math inline">\(\eta\leqslant\xi\leqslant\zeta\)</span>。</p>
 <p>(2)下给出下极限的证明，上极限可类似得出。</p>
 <p>若<span class="math inline">\(\{x_n\}\)</span>下方无界，则对于<span class="math inline">\(M=1\)</span>，存在<span class="math inline">\(n_1\geqslant1\)</span>使得<span class="math inline">\(x_{n_1}&lt;-1\)</span>，否则<span class="math inline">\(\{x_n\}\)</span>下方有界；对于<span class="math inline">\(M=2\)</span>，存在<span class="math inline">\(n_2\geqslant n_1\)</span>使得<span class="math inline">\(x_{n_2}&lt;-2\)</span>，否则<span class="math inline">\(\{x_n\}\)</span>下方有界，依次可构造出子列<span class="math inline">\(\{x_{n_k}\}\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{k\to+\infty}x_{n_k}=-\infty
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(-\infty\)</span>是<span class="math inline">\(\{x_n\}\)</span>的一个极限点。如果<span class="math inline">\(\varliminf x_n\ne-\infty\)</span>，则存在<span class="math inline">\(M\in\mathbb{R}^{+}\)</span>对任意的<span class="math inline">\(N\in\mathbb{N}^+\)</span>存在<span class="math inline">\(n&gt;N\)</span>使得<span class="math inline">\(\inf_{k\geqslant n}x_k\geqslant-M\)</span>，此时<span class="math inline">\(\{x_n\}\)</span>下方有界，矛盾，所以<span class="math inline">\(\varliminf  x_n=-\infty\)</span>，即<span class="math inline">\(\{x_n\}\)</span>的下极限是自身的极限点。</p>
 <p>当<span class="math inline">\(\{x_n\}\)</span>下方有界时，记：</p>
 <p><span class="math display">\[\begin{equation*}
 y_m=\inf_{n\geqslant m}x_n
-
 \end{equation*}\]</span></p>
 <p>设<span class="math inline">\(n_0=0\)</span>，对<span class="math inline">\(n_{k-1}\)</span>选取<span class="math inline">\(m_k\in\mathbb{N}^+\)</span>满足<span class="math inline">\(m_k&gt;n_{k-1}\)</span>，再由下确界的定义选取<span class="math inline">\(n_k\geqslant m_k\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 y_{m_k}\leqslant x_{n_k}\leqslant y_{m_k}+\frac{1}{k}
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(4)和<a href="#prop-ConvergentSeqOfPoints-9fdcf3e3" data-reference-type="ref+label" data-reference="prop:ConvergentSeqOfPoints">性质 3.1.1</a>(4)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{k\to+\infty}x_{n_k}=\lim_{k\to+\infty}y_{m_k}=\eta
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\eta\)</span>是<span class="math inline">\(\{x_n\}\)</span>的极限点。</p>
 <p>(3)<strong><span class="math inline">\(\;(a)\rightarrow(b)\)</span>：</strong>令：</p>
 <p><span class="math display">\[\begin{equation*}
 y_n=\inf_{k\geqslant n}x_k,\quad
 z_n=\sup_{k\geqslant n}x_k
-
 \end{equation*}\]</span></p>
 <p>则有<span class="math inline">\(y_n\leqslant x_n\leqslant z_n\)</span>。又因为：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}y_n=\lim_{n\to+\infty}z_n=\xi
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(4)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}x_n=\xi
-
 \end{equation*}\]</span></p>
 <p><strong><span class="math inline">\(\;(b)\rightarrow(c)\)</span>：</strong>由<a href="#prop-ConvergentSeqOfPoints-9fdcf3e3" data-reference-type="ref+label" data-reference="prop:ConvergentSeqOfPoints">性质 3.1.1</a>(4)立即可得。</p>
 <p><strong><span class="math inline">\(\;(c)\rightarrow(a)\)</span>：</strong>反证法，由(2)立即可得。</p>
@@ -2084,12 +2136,10 @@ z_n=\sup_{k\geqslant n}x_k
 <p><strong>Definition 3.45</strong>. 设<span class="math inline">\(a_n\in\mathbb{R},\;\forall\;n\in\mathbb{N}^+\)</span>。称：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}a_n=a_1+a_2+\cdots+a_n+\cdots
-
 \end{equation*}\]</span></p>
 <p>为以<span class="math inline">\(a_1, a_2, \dots, a_{n},\dots\)</span>为项的<a href="../chapters/page-058.html#term-series" class="term" title="series">级数<span class="term-english">（series）</span></a>。称：</p>
 <p><span class="math display">\[\begin{equation*}
 \left\{S_n=\sum_{i=1}^na_i\right\}
-
 \end{equation*}\]</span></p>
 <p>为级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>的<a href="../chapters/page-058.html#term-SeqOfPartialSum" class="term" title="sequence of partial sums">部分和序列<span class="term-english">（sequence of partial sums）</span></a>。如果<span class="math inline">\(\{S_n\}\)</span>收敛，则称级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>收敛，同时将级数的值记为<span class="math inline">\(\{S_n\}\)</span>的极限。</p>
 </div>
@@ -2109,17 +2159,14 @@ z_n=\sup_{k\geqslant n}x_k
 <li><p>级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>收敛的必要条件为：</p>
 <p><span class="math display">\[\begin{equation*}
                 \lim_{n\to+\infty}a_n=0
-
     \end{equation*}\]</span></p></li>
 <li><p>级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>收敛的充分必要条件为：</p>
 <p><span class="math display">\[\begin{equation*}
                 \forall\;\varepsilon&gt;0,\;\exists\;N\in\mathbb{N}^+,\;\forall\;n,m&gt;N,\;m&gt;n,\;\left|\sum_{i=n}^ma_i\right|&lt;\varepsilon
-
     \end{equation*}\]</span></p></li>
 <li><p>级数的运算满足线性性，即：若<span class="math inline">\(\alpha,\beta\in\mathbb{R}^{}\)</span>，<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n,\sum\limits_{n=1}^{+\infty}b_n\in\overline{\mathbb{R}^{}}\)</span>，如果下式右侧有定义，则公式成立：</p>
 <p><span class="math display">\[\begin{equation*}
                 \sum_{n=1}^{+\infty}(\alpha a_n+\beta b_n)=\alpha\sum_{n=1}^{+\infty}a_n+\beta\sum_{n=1}^{+\infty}b_n
-
     \end{equation*}\]</span></p></li>
 </ol>
 </div>
@@ -2128,7 +2175,6 @@ z_n=\sup_{k\geqslant n}x_k
 <p>(2)因为级数收敛，所以部分和序列<span class="math inline">\(\{S_n\}\)</span>收敛。由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(8.b)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}a_n=\lim_{n\to+\infty}(S_n-S_{n-1})=\lim_{n\to+\infty}S_n-\lim_{n\to+\infty}S_{n-1}=0
-
 \end{equation*}\]</span></p>
 <p>(3)由<a href="#theo-RnComplete-67c1ecd6" data-reference-type="ref+label" data-reference="theo:RnComplete">定理 3.8</a>立即可得。</p>
 <p>(4)利用部分和序列以及无穷的运算性质进行分类讨论即可得到。&nbsp;◻</p>
@@ -2170,13 +2216,11 @@ z_n=\sup_{k\geqslant n}x_k
 <p><span class="math display">\[\begin{align*}
 \sum_{n=1}^{+\infty}a_n&amp;=\sum_{n=1}^Na_n+\sum_{n=N+1}^{+\infty}a_n\leqslant\sum_{n=1}^Na_n+\sum_{n=N+1}^{+\infty}cb_n \\
 &amp;\leqslant\sum_{n=1}^Na_n+\sum_{n=1}^{+\infty}cb_n =\sum_{n=1}^Na_n+c\sum_{n=1}^{+\infty}b_n
-
 \end{align*}\]</span></p>
 <p>于是<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>有上界，由<a href="#prop-PositiveSeries-433ab53e" data-reference-type="ref+label" data-reference="prop:PositiveSeries">性质 3.2.13</a>可知其收敛。</p>
 <p>(1.b)若此时<span class="math inline">\(a_n\)</span>收敛，则：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;N\in\mathbb{N}^+,\;\forall\;n&gt;N,\;b_n\leqslant\frac{1}{c}a_n,\;\frac{1}{c}\in[0,+\infty)
-
 \end{equation*}\]</span></p>
 <p>由(1.a)可知<span class="math inline">\(\sum\limits_{n=1}^{+\infty}b_n\)</span>收敛，矛盾。</p>
 <p>(2)由<a href="#prop-LowerUpperLimit-f800774b" data-reference-type="ref+label" data-reference="prop:LowerUpperLimit">性质 3.2.11</a>(4)即可得到。</p>
@@ -2189,7 +2233,6 @@ z_n=\sup_{k\geqslant n}x_k
 <p><span class="proof-title"><em>证明</em>. </span>由等比数列求和公式和<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(8.c)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}S_n=\lim_{n\to+\infty}\sum_{i=1}^{n}r^n=\lim_{n\to+\infty}\frac{r(1-r^n)}{1-r}=\frac{r}{1-r}
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -2208,13 +2251,11 @@ z_n=\sup_{k\geqslant n}x_k
 <li><p>若<span class="math inline">\(\sum\limits_{n=1}^{+\infty}b_n\)</span>收敛，且<span class="math inline">\(\exists\;N\in\mathbb{N}^+\)</span>，当<span class="math inline">\(n&gt;N\)</span>时满足：</p>
 <p><span class="math display">\[\begin{equation*}
                 \frac{a_{n+1}}{a_n}\leqslant\frac{b_{n+1}}{b_n}
-
     \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>也收敛。</p></li>
 <li><p>若<span class="math inline">\(\sum\limits_{n=1}^{+\infty}b_n\)</span>发散，且<span class="math inline">\(\exists\;N\in\mathbb{N}^+\)</span>，当<span class="math inline">\(n&gt;N\)</span>时满足：</p>
 <p><span class="math display">\[\begin{equation*}
                 \frac{a_{n+1}}{a_n}\geqslant\frac{b_{n+1}}{b_n}
-
     \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>也发散。</p></li>
 </ol>
@@ -2224,17 +2265,14 @@ z_n=\sup_{k\geqslant n}x_k
 \frac{a_{N+3}}{a_{N+2}}\leqslant\frac{b_{N+3}}{b_{N+2}},\;
 \cdots,\;
 \frac{a_{n+1}}{a_n}\leqslant\frac{b_{n+1}}{b_n}
-
 \end{equation*}\]</span></p>
 <p>作乘法即可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{a_{n+1}}{a_{N+1}}\leqslant\frac{b_{n+1}}{b_{N+1}}
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 a_{n+1}\leqslant\frac{a_{N+1}}{b_{N+1}}b_{n+1},\;\forall\;n&gt;N
-
 \end{equation*}\]</span></p>
 <p>由<a href="#theo-ComparisonTest-dd1febad" data-reference-type="ref+label" data-reference="theo:ComparisonTest">定理 3.11</a>(1.a)即可得出<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>收敛。</p>
 <p>(2)类似(1)。</p>
@@ -2249,7 +2287,6 @@ a_{n+1}\leqslant\frac{a_{N+1}}{b_{N+1}}b_{n+1},\;\forall\;n&gt;N
 <p><span class="theorem-title"><strong>引理 4.2</strong></span> <strong>Lemma 3.2</strong>. 设<span class="math inline">\(\alpha_i,\beta_i,\;i=1,2,\dots,p\)</span>是实数，且：</p>
 <p><span class="math display">\[\begin{equation*}
 B_k=\sum_{i=1}^k\beta_i,\;k=1,2,\dots,p
-
 \end{equation*}\]</span></p>
 <p>则有：</p>
 <ol type="1">
@@ -2257,12 +2294,10 @@ B_k=\sum_{i=1}^k\beta_i,\;k=1,2,\dots,p
 <li><p>如果<span class="math inline">\(\{\alpha_i\}\)</span>单调，并且有：</p>
 <p><span class="math display">\[\begin{equation*}
                 |B_k|\leqslant L,\;k=1,2,\dots,p
-
     \end{equation*}\]</span></p>
 <p>那么就有：</p>
 <p><span class="math display">\[\begin{equation*}
                 \left|\sum_{i=1}^p\alpha_i\beta_i\right|\leqslant L\left(|\alpha_1|+2|\alpha_p|\right)
-
     \end{equation*}\]</span></p></li>
 </ol>
 </div>
@@ -2274,14 +2309,12 @@ B_k=\sum_{i=1}^k\beta_i,\;k=1,2,\dots,p
 &amp;=\sum_{i=1}^p\alpha_i(B_i-B_{i-1})=\sum_{i=1}^p\alpha_iB_i-\sum_{i=1}^p\alpha_iB_{i-1} \\
 &amp;=\sum_{i=1}^p\alpha_iB_i-\sum_{i=0}^{p-1}\alpha_{i+1}B_{i}=\sum_{i=1}^p\alpha_iB_i-\sum_{i=1}^{p-1}\alpha_{i+1}B_{i} \\
 &amp;=\sum_{i=1}^{p-1}(\alpha_i-\alpha_{i+1})B_i+\alpha_pB_p
-
 \end{align*}\]</span></p>
 <p>(2)下第三行到第四行利用了<span class="math inline">\(\{\alpha_i\}\)</span>的单调性。</p>
 <p><span class="math display">\[\begin{align*}
 \left|\sum_{i=1}^p\alpha_i\beta_i\right|
 &amp;=\left|\sum_{i=1}^{p-1}(\alpha_i-\alpha_{i+1})B_i+\alpha_pB_p\right|\leqslant\sum_{i=1}^{p-1}|\alpha_i-\alpha_{i+1}|\;|B_i|+|\alpha_p|\;|B_p| \\
 &amp;\leqslant L\left(\sum_{i=1}^{p-1}|\alpha_i-\alpha_{i+1}|+|\alpha_p|\right)=L\left(|\alpha_1-\alpha_p|+|\alpha_p|\right)\leqslant L\left(|\alpha_1|+2|\alpha_p|\right)
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -2289,14 +2322,12 @@ B_k=\sum_{i=1}^k\beta_i,\;k=1,2,\dots,p
 <p><strong>note 3.4</strong>. (1)这个公式又称为<a href="../chapters/page-040.html#term-AbelTrans" class="term" title="Abel transformation">阿贝尔变换<span class="term-english">（Abel transformation）</span></a>、<a href="../chapters/page-058.html#term-SumByParts" class="term" title="summation by parts">分部求和公式<span class="term-english">（summation by parts）</span></a>。之所以被称之为分部求和公式，是因为它可以写为如下形式：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=1}^p\alpha_i\Delta B_i = \alpha_jB_j\Big|_{j=0}^p-\sum_{i=1}^{p-1}B_i\Delta\alpha_i
-
 \end{equation*}\]</span></p>
 <p>其中：</p>
 <p><span class="math display">\[\begin{gather*}
 a_0=0,\quad B_0=0 \\
 \Delta B_k=B_k-B_{k-1}=\beta_k,\quad k=1,2,\dots,p, \\
 \Delta\alpha_i=\alpha_{i+1}-\alpha_i,\quad i=1,2,\dots,p-1
-
 \end{gather*}\]</span></p>
 </div>
 <div id="theo-DirichletTest-7d2a003e" class="theorem theorem-block env-theorem">
@@ -2312,32 +2343,26 @@ a_0=0,\quad B_0=0 \\
 <p><span class="proof-title"><em>证明</em>. </span>我们来估计：</p>
 <p><span class="math display">\[\begin{equation*}
 \left|\sum_{i=n+1}^{n+p}a_ib_i\right|
-
 \end{equation*}\]</span></p>
 <p>令：</p>
 <p><span class="math display">\[\begin{equation*}
 B_k=\sum_{i=1}^{n+p}b_i
-
 \end{equation*}\]</span></p>
 <p>因为序列<span class="math inline">\(\left\{\sum\limits_{i=1}^nb_i\right\}\)</span>有界，因此有：</p>
 <p><span class="math display">\[\begin{equation*}
 \left|\sum\limits_{i=1}^nb_i\right|\leqslant L,\;n\in\mathbb{N}^+
-
 \end{equation*}\]</span></p>
 <p>也就有：</p>
 <p><span class="math display">\[\begin{equation*}
 |B_k|=\left|\sum_{i=1}^{n+p}b_i-\sum_{i=1}^nb_i\right|\leqslant 2L
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(\{\alpha_i\}\)</span>单调，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \left|\sum_{i=n+1}^{n+p}a_ib_i\right|\leqslant 2L(|\alpha_{n+1}|+2|\alpha_{n+p}|)
-
 \end{equation*}\]</span></p>
 <p>又因为<span class="math inline">\(\{\alpha_i\}\rightarrow0\)</span>，所以对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，当<span class="math inline">\(n\)</span>足够大时可以有：</p>
 <p><span class="math display">\[\begin{equation*}
 \left|\sum_{i=n+1}^{n+p}a_ib_i\right|&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-Series-457db7a2" data-reference-type="ref+label" data-reference="prop:Series">性质 3.2.12</a>(3)可知级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_nb_n\)</span>收敛。&nbsp;◻</p>
 </div>
@@ -2354,12 +2379,10 @@ B_k=\sum_{i=1}^{n+p}b_i
 <p><span class="proof-title"><em>证明</em>. </span>因为<span class="math inline">\(\{a_n\}\)</span>单调有界，由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(7)可知可以设：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}a_n=a\in\mathbb{R}^{}
-
 \end{equation*}\]</span></p>
 <p>则序列<span class="math inline">\(\{a_n-a\}\)</span>单调趋于<span class="math inline">\(0\)</span>。又因级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}b_n\)</span>收敛，所以序列<span class="math inline">\(\left\{\sum\limits_{i=1}^nb_i\right\}\)</span>有界。由<a href="#theo-DirichletTest-7d2a003e" data-reference-type="ref+label" data-reference="theo:DirichletTest">定理 3.12</a>可知<span class="math inline">\(\sum\limits_{n=1}^{+\infty}(a_n-a)b_n\)</span>收敛。根据<a href="#prop-Series-457db7a2" data-reference-type="ref+label" data-reference="prop:Series">性质 3.2.12</a>(4)可知<span class="math inline">\(\sum\limits_{n=1}^{+\infty}ab_n\)</span>收敛且：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}a_nb_n=\sum_{n=1}^{+\infty}\left[(a_n-a)b_n+ab_n\right]=\sum_{n=1}^{+\infty}\left[(a_n-a)b_n\right]+\sum_{n=1}^{+\infty}ab_n
-
 \end{equation*}\]</span></p>
 <p>因此级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_nb_n\)</span>收敛。&nbsp;◻</p>
 </div>
@@ -2395,7 +2418,6 @@ a_1b_1,a_1b_2,a_2b_2,a_2b_1,a_1b_3,a_2b_3,a_3b_3\dots
 <li><p>若把<span class="math inline">\(\sum\limits_{n=1}^{+\infty}\)</span>的若干个相继的项归并为一项，即将该级数变为如下形式：</p>
 <p><span class="math display">\[\begin{equation*}
                 (a_1+a_2+\cdots+a_{n_1})+(a_{n_1+1}+a_{n_1+2}+\cdots+a_{n_2})+\cdots+(a_{n_k+1}+a_{n_k+2}+\cdots+a_{n_{k+1}})+\cdots
-
     \end{equation*}\]</span></p>
 <p>则结合后的级数仍然收敛，且与原级数有相等的和。如果原级数为定号级数（即正项级数或负项级数），逆命题也成立；</p></li>
 <li><p>若<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>绝对收敛，则重排后的级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n'\)</span>也绝对收敛，并且二者值相等。重排的含义是把该序列中的所有项无重复、无遗漏地改变一个顺序重新排出来，用符号表示即为<span class="math inline">\(\alpha_n'=\alpha_{\varphi(n)}\)</span>，其中<span class="math inline">\(\varphi\)</span>是从<span class="math inline">\(\mathbb{N}^+\)</span>到<span class="math inline">\(\mathbb{N}^+\)</span>的双射；</p></li>
@@ -2403,7 +2425,6 @@ a_1b_1,a_1b_2,a_2b_2,a_2b_1,a_1b_3,a_2b_3,a_3b_3\dots
 <li><p>如果级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>和级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}b_n\)</span>绝对收敛，并且：</p>
 <p><span class="math display">\[\begin{equation*}
                 \sum_{n=1}^{+\infty}a_n=A,\quad\sum_{n=1}^{+\infty}b_n=B
-
     \end{equation*}\]</span></p>
 <p>则这两个级数的无穷乘积中的元素<span class="math inline">\(a_ib_j\)</span>按任意方式排列成的级数都是绝对收敛的，并且其和为<span class="math inline">\(AB\)</span>。</p></li>
 </ol>
@@ -2413,61 +2434,50 @@ a_1b_1,a_1b_2,a_2b_2,a_2b_1,a_1b_3,a_2b_3,a_3b_3\dots
 <p>对于定号级数的逆命题，根据<a href="#prop-Series-457db7a2" data-reference-type="ref+label" data-reference="prop:Series">性质 3.2.12</a>(4)可知只需证明正号级数的情况即可。将归并后的级数记作<span class="math inline">\(\sum\limits_{n=1}^{+\infty}b_n\)</span>，部分和序列记为<span class="math inline">\(\{T_n\}\)</span>，原级数部分和序列记为<span class="math inline">\(\{S_n\}\)</span>，则有：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;m\in\mathbb{N}^+,\;\exists\;n\in\mathbb{N}^+,\;T_n\leqslant S_m\leqslant T_{n+1}
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(4.a)即可得出结论。</p>
 <p>(2)我们先来讨论正项级数，再来讨论任意项级数：</p>
 <p><strong>正项级数：</strong>设级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>为绝对收敛的正项级数，则级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n'\)</span>也是正项级数。因为：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^Na_n'\leqslant\sum_{n=1}^{+\infty}a_n,\;\forall\;N\in\mathbb{N}^+
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(6)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}a_n'\leqslant\sum_{n=1}^{+\infty}a_n
-
 \end{equation*}\]</span></p>
 <p>于是级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n'\)</span>收敛。反之，也可认为级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>是由级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n'\)</span>重排后的结果，因此也可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}a_n\leqslant\sum_{n=1}^{+\infty}a_n'
-
 \end{equation*}\]</span></p>
 <p>于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}a_n=\sum_{n=1}^{+\infty}a_n'
-
 \end{equation*}\]</span></p>
 <p><strong>任意项级数：</strong>设级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>为绝对收敛的任意项级数。令：</p>
 <p><span class="math display">\[\begin{equation*}
 p_n=\frac{|a_n|+a_n}{2},\;q_n=\frac{|a_n|-a_n}{2},\;n\in\mathbb{N}^+
-
 \end{equation*}\]</span></p>
 <p>于是有：</p>
 <p><span class="math display">\[\begin{equation*}
 0\leqslant p_n\leqslant|a_n|,\;0\leqslant q_n\leqslant|a_n|,\;n\in\mathbb{N}^+
-
 \end{equation*}\]</span></p>
 <p>取比较级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}|a_n|\)</span>，由<a href="#theo-ComparisonTest-dd1febad" data-reference-type="ref+label" data-reference="theo:ComparisonTest">定理 3.11</a>(1.a)可知<span class="math inline">\(\sum\limits_{n=1}^{+\infty}p_n\)</span>与<span class="math inline">\(\sum\limits_{n=1}^{+\infty}q_n\)</span>都是正项收敛级数。由(1)，任意重排后的级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}p_n'\)</span>和<span class="math inline">\(\sum\limits_{n=1}^{+\infty}q_n'\)</span>也都收敛，并且有：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}p_n'=\sum_{n=1}^{+\infty}p_n,\quad
 \sum_{n=1}^{+\infty}q_n'=\sum_{n=1}^{+\infty}q_n
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-Series-457db7a2" data-reference-type="ref+label" data-reference="prop:Series">性质 3.2.12</a>(4)可知级数：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}|a_n'|=\sum_{n=1}^{+\infty}(p_n'+q_n')
-
 \end{equation*}\]</span></p>
 <p>收敛，即级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n'\)</span>绝对收敛，并且有：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;\sum_{n=1}^{+\infty}a_n'=\sum_{n=1}^{+\infty}(p_n'-q_n')=\sum_{n=1}^{+\infty}p_n'-\sum_{n=1}^{+\infty}q_n' \\
 =&amp;\sum_{n=1}^{+\infty}p_n-\sum_{n=1}^{+\infty}q_n=\sum_{n=1}^{+\infty}(p_n-q_n)=\sum_{n=1}^{+\infty}a_n
-
 \end{align*}\]</span></p>
 <p>(3)<strong><span class="math inline">\(\;\xi\in\mathbb{R}\)</span>：</strong>令：</p>
 <p><span class="math display">\[\begin{equation*}
 p_n=\frac{|a_n|+a_n}{2},\;q_n=\frac{|a_n|-a_n}{2},\;n\in\mathbb{N}^+
-
 \end{equation*}\]</span></p>
 <p>由(2)和<a href="#prop-Series-457db7a2" data-reference-type="ref+label" data-reference="prop:Series">性质 3.2.12</a>(2)(4)可知<span class="math inline">\(\sum\limits_{n=1}^{+\infty}p_n\)</span>与<span class="math inline">\(\sum\limits_{n=1}^{+\infty}q_n\)</span>都是正项级数，并且有：</p>
 <p><span class="math display">\[\begin{gather*}
@@ -2475,106 +2485,87 @@ p_n=\frac{|a_n|+a_n}{2},\;q_n=\frac{|a_n|-a_n}{2},\;n\in\mathbb{N}^+
 \lim_{n\to+\infty}q_n=\lim_{n\to+\infty}\frac{|a_n|-a_n}{2}=0 \\
 \sum_{n=1}^{+\infty}p_n=\sum_{n=1}^{+\infty}\frac{|a_n|+a_n}{2}=\frac{1}{2}\sum_{n=1}^{+\infty}|a_n|+\frac{1}{2}\sum_{n=1}^{+\infty}a_n=+\infty \\
 \sum_{n=1}^{+\infty}q_n=\sum_{n=1}^{+\infty}\frac{|a_n|-a_n}{2}=\frac{1}{2}\sum_{n=1}^{+\infty}|a_n|-\frac{1}{2}\sum_{n=1}^{+\infty}a_n=+\infty
-
 \end{gather*}\]</span></p>
 <p>接下来来考察序列：</p>
 <p><span class="math display">\[\begin{equation*}
 a_1,a_2,\cdots,a_n,\cdots
-
 \end{equation*}\]</span></p>
 <p>令<span class="math inline">\(P_n\)</span>表示这个序列中第<span class="math inline">\(n\)</span>个非负项，以<span class="math inline">\(Q_n\)</span>表示其中第<span class="math inline">\(n\)</span>个负项的绝对值，则<span class="math inline">\(\{P_n\}\)</span>是<span class="math inline">\(\{p_n\}\)</span>去除一部分值为<span class="math inline">\(0\)</span>的项后剩下的子序列，<span class="math inline">\(\{Q_n\}\)</span>是<span class="math inline">\(\{q_n\}\)</span>去除所有值为<span class="math inline">\(0\)</span>的项后剩下的子序列，且有：</p>
 <p><span class="math display">\[\begin{gather*}
 \lim_{n\to+\infty}P_n=\lim_{n\to+\infty}Q_n=0 \\
 \sum_{n=1}^{+\infty}P_n=\sum_{n=1}^{+\infty}Q_n=+\infty
-
 \end{gather*}\]</span></p>
 <p>同时注意到，<span class="math inline">\(\{P_n\}\)</span>与<span class="math inline">\(\{-Q_n\}\)</span>的各项其实都是原本<span class="math inline">\(\{a_n\}\)</span>中的某项。我们依次考察<span class="math inline">\(P_1,P_2,\dots\)</span>中的各项，设<span class="math inline">\(P_{m_1}\)</span>是第一个满足以下条件的项（存在性由<span class="math inline">\(\sum\limits_{n=1}^{+\infty}P_n=+\infty\)</span>保证）：</p>
 <p><span class="math display">\[\begin{equation*}
 P_1+P_2+\cdots+P_{m_1}&gt;\xi
-
 \end{equation*}\]</span></p>
 <p>再依次考察<span class="math inline">\(Q_1,Q_2,\dots\)</span>中的各项，设<span class="math inline">\(Q_{n_1}\)</span>是第一个满足以下条件的项（存在性由<span class="math inline">\(\sum\limits_{n=1}^{+\infty}Q_n=+\infty\)</span>保证）：</p>
 <p><span class="math display">\[\begin{equation*}
 P_1+P_2+\cdots+P_{m_1}-Q_1-Q_2-\cdots-Q_{n_1}&lt;\xi
-
 \end{equation*}\]</span></p>
 <p>再考虑考察<span class="math inline">\(P_{m_1+1},P_{m_1+2},\dots\)</span>中的各项，设<span class="math inline">\(P_{m_2}\)</span>是第一个满足以下条件的项（存在性由<span class="math inline">\(\sum\limits_{n=m_1+1}^{+\infty}P_n=\sum\limits_{n=1}^{+\infty}P_n-\sum\limits_{n=1}^{m_1}P_n=+\infty\)</span>保证）：</p>
 <p><span class="math display">\[\begin{gather*}
 P_1+P_2+\cdots+P_{m_1}-Q_1-Q_2-\cdots-Q_{n_1} \\
 +P_{m_1+1}+P_{m_1+2}+\cdots+P_{m_2}&gt;\xi
-
 \end{gather*}\]</span></p>
 <p>不断重复下去，我们可以得到<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>的一个重排级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n'\)</span>：</p>
 <p><span class="math display">\[\begin{gather*}
 P_1+P_2+\cdots+P_{m_1}-Q_1-Q_2-\cdots-Q_{n_1} \\
 +P_{m_1+1}+P_{m_1+2}+\cdots+P_{m_2}-Q_{n_1+1}-Q_{n_1+2}-\cdots-Q_{n_2} \\
 \vdots
-
 \end{gather*}\]</span></p>
 <p>令<span class="math inline">\(R_k\)</span>和<span class="math inline">\(L_k\)</span>分别表示级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n'\)</span>末项为<span class="math inline">\(P_{m_k}\)</span>的部分和与末项为<span class="math inline">\(Q_{n_k}\)</span>的部分和，则有：</p>
 <p><span class="math display">\[\begin{gather*}
 |R_k-\xi|\leqslant P_{m_k},\;k=2,3,\dots,\quad|L_k-\xi|\leqslant Q_{n_k},\;k=1,2,3,\dots,
-
 \end{gather*}\]</span></p>
 <p>而：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{k\to+\infty}P_{m_k}=\lim_{k\to+\infty}Q_{n_k}=0
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{k\to+\infty}R_k=\lim_{k\to+\infty}L_k=\xi
-
 \end{equation*}\]</span></p>
 <p>由重排级数的排列情况（连续正连续负），任取<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n'\)</span>的一个部分和<span class="math inline">\(S_n'\)</span>，当<span class="math inline">\(S_n'\)</span>处于连续正片段时，必定存在<span class="math inline">\(k\in\mathbb{N}^+\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 L_{k-1}\leqslant S_n'\leqslant R_k,
-
 \end{equation*}\]</span></p>
 <p>当<span class="math inline">\(S_n'\)</span>处于连续负片段时，必定存在<span class="math inline">\(k\in\mathbb{N}^+\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 L_{k}\leqslant S_n'\leqslant R_{k-1},
-
 \end{equation*}\]</span></p>
 <p>因此由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(4.a)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}a_n'=\xi
-
 \end{equation*}\]</span></p>
 <p><strong><span class="math inline">\(\xi=\infty\)</span>：</strong>仅对正无穷情况进行讨论，负无穷类似。</p>
 <p>任取一个单调上升且趋于无穷的实数数列<span class="math inline">\(\{\xi_n\}\)</span>。沿用<span class="math inline">\(\xi\in\mathbb{R}^{}\)</span>中的记号。设<span class="math inline">\(P_{m_1}\)</span>是第一个满足以下条件的项：</p>
 <p><span class="math display">\[\begin{equation*}
 P_1+P_2+\cdots+P_{m_1}&gt;\xi_1
-
 \end{equation*}\]</span></p>
 <p>再依次考察<span class="math inline">\(Q_1,Q_2,\dots\)</span>中的各项，设<span class="math inline">\(Q_{n_1}\)</span>是第一个满足以下条件的项（：</p>
 <p><span class="math display">\[\begin{equation*}
 P_1+P_2+\cdots+P_{m_1}-Q_1-Q_2-\cdots-Q_{n_1}&lt;\xi_1
-
 \end{equation*}\]</span></p>
 <p>再考虑考察<span class="math inline">\(P_{m_1+1},P_{m_1+2},\dots\)</span>中的各项，设<span class="math inline">\(P_{m_2}\)</span>是第一个满足以下条件的项：</p>
 <p><span class="math display">\[\begin{gather*}
 P_1+P_2+\cdots+P_{m_1}-Q_1-Q_2-\cdots-Q_{n_1} \\
 +P_{m_1+1}+P_{m_1+2}+\cdots+P_{m_2}&gt;\xi_2
-
 \end{gather*}\]</span></p>
 <p>不断重复下去，我们可以得到<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n\)</span>的一个重排级数<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n'\)</span>：</p>
 <p><span class="math display">\[\begin{gather*}
 P_1+P_2+\cdots+P_{m_1}-Q_1-Q_2-\cdots-Q_{n_1} \\
 +P_{m_1+1}+P_{m_1+2}+\cdots+P_{m_2}-Q_{n_1+1}-Q_{n_1+2}-\cdots-Q_{n_2} \\
 \vdots
-
 \end{gather*}\]</span></p>
 <p>而这个重排级数即满足<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_n'=+\infty\)</span>。</p>
 <p>(4)设<span class="math inline">\(a_{i_k}b_{j_k},\;k\in\mathbb{N}^+\)</span>是<span class="math inline">\(a_ib_j,\;i,j\in\mathbb{N}^+\)</span>的任意一种排列。把<span class="math inline">\(i_1,i_2,\dots,i_n,\;j_1,j_2,\dots,j_n\)</span>中最大的记为<span class="math inline">\(N\)</span>，由<a href="../chapters/page-017.html#ineq-cauchy-ineq-R-143b29da" data-reference-type="ref+label" data-reference="ineq:cauchy-ineq-R">不等式 1</a>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{k=1}^n|a_{i_k}b_{j_k}|\leqslant\sum_{i=1}^N|a_i|\sum_{j=1}^N|b_j|\leqslant\sum_{i=1}^{+\infty}|a_i|\sum_{j=1}^{+\infty}|b_j|
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(6)可知<span class="math inline">\(\sum\limits_{n=1}^{+\infty}a_{i_k}b_{j_k}\)</span>绝对收敛。根据<a href="#prop-ConvergentSeries-3c900fce" data-reference-type="ref+label" data-reference="prop:ConvergentSeries">性质 3.2.14</a>(2)和<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(8.c)，按正方形形式重排该级数可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}a_{i_k}b_{j_k}=\lim_{n\to+\infty}\left(\sum_{i=1}^na_i\right)\left(\sum_{i=1}^nb_i\right)=\left(\sum_{i=1}^{+\infty}a_i\right)\left(\sum_{i=1}^{+\infty}b_i\right)=AB
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -2582,12 +2573,10 @@ P_1+P_2+\cdots+P_{m_1}-Q_1-Q_2-\cdots-Q_{n_1} \\
 <p><strong>note 3.5</strong>. 对于<a href="#prop-ConvergentSeries-3c900fce" data-reference-type="ref+label" data-reference="prop:ConvergentSeries">性质 3.2.14</a>(1)的逆否命题，若收敛级数不定号，考虑级数：</p>
 <p><span class="math display">\[\begin{equation*}
 (1-1)+(1-1)+\cdots+(1-1)+\cdots
-
 \end{equation*}\]</span></p>
 <p>这个级数当然是收敛的，但级数：</p>
 <p><span class="math display">\[\begin{equation*}
 1-1+1-1+\cdots+(-1)^{n-1}+\cdots
-
 \end{equation*}\]</span></p>
 <p>显然还是发散的。</p>
 </div>
@@ -2602,7 +2591,6 @@ P_1+P_2+\cdots+P_{m_1}-Q_1-Q_2-\cdots-Q_{n_1} \\
 <p><strong>Definition 3.49</strong>. 设<span class="math inline">\(X,Y\)</span>是任意给定的集合。如果对于任意的<span class="math inline">\(x\in X\)</span>，都存在唯一的<span class="math inline">\(f(x)\in Y\)</span>与之对应，则称对应关系<span class="math inline">\(f\)</span>是从<span class="math inline">\(X\)</span>到<span class="math inline">\(Y\)</span>的<a href="../chapters/page-052.html#term-mapping" class="term" title="mapping">映射<span class="term-english">（mapping）</span></a>。对任何<span class="math inline">\(E\subseteq Y\)</span>，称：</p>
 <p><span class="math display">\[\begin{equation*}
 f^{-1}(E)=\{x:f(x)\in E\}
-
 \end{equation*}\]</span></p>
 <p>为集合<span class="math inline">\(B\)</span>在映射<span class="math inline">\(f\)</span>下的<a href="../chapters/page-055.html#term-preimage" class="term" title="preimage">原像<span class="term-english">（preimage）</span></a><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>。</p>
 </div>
@@ -2616,7 +2604,6 @@ f^{-1}(E)=\{x:f(x)\in E\}
 <p><span class="math display">\[\begin{equation*}
                 f^{-1}\left(\underset{t\in T}{\bigcup}A_t\right)=\underset{t\in T}{\bigcup}f^{-1}(A_t), \quad
                 f^{-1}\left(\underset{t\in T}{\bigcap}A_t\right)=\underset{t\in T}{\bigcap}f^{-1}(A_t)
-
     \end{equation*}\]</span></p></li>
 </ol>
 </div>
@@ -2650,12 +2637,10 @@ f^{-1}(E)=\{x:f(x)\in E\}
 <p><strong>Definition 3.55</strong>. 设<span class="math inline">\((X,\rho_X)\)</span>和<span class="math inline">\((Y,\rho_Y)\)</span>都是度量空间，<span class="math inline">\(T\)</span>是<span class="math inline">\(E\subseteq X\)</span>到<span class="math inline">\(Y\)</span>的映射，<span class="math inline">\(x_0\in X\)</span>是<span class="math inline">\(E\)</span>的一个聚点，<span class="math inline">\(y\in Y\)</span>。若对任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，存在<span class="math inline">\(\delta&gt;0\)</span>，使得对<span class="math inline">\(E\setminus\{x_0\}\)</span>中一切满足条件<span class="math inline">\(\rho(x,x_0)&lt;\delta\)</span>的<span class="math inline">\(x\)</span>，都有<span class="math inline">\(\rho_Y(Tx,y)&lt;\varepsilon\)</span>，则称<span class="math inline">\(T\)</span>沿<span class="math inline">\(E\)</span>趋于<span class="math inline">\(x_0\)</span>时，<span class="math inline">\(T\)</span>的极限为<span class="math inline">\(y\)</span>，记为：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{\substack{x\to x_0 \\ E}}Tx=y
-
 \end{equation*}\]</span></p>
 <p>当<span class="math inline">\(E\)</span>自明时，可简记为：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{x\to x_0}Tx=y
-
 \end{equation*}\]</span></p>
 </div>
 <div id="theo-SequentialCharacterizationOfFunctionLimits-6c56b085" class="theorem theorem-block env-theorem">
@@ -2674,12 +2659,10 @@ f^{-1}(E)=\{x:f(x)\in E\}
 <p><span class="proof-title"><em>证明</em>. </span><strong>必要性：</strong>设<span class="math inline">\(T\)</span>沿<span class="math inline">\(E\)</span>趋于<span class="math inline">\(x_0\)</span>时极限为<span class="math inline">\(y\in Y\)</span>，则对于任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，存在<span class="math inline">\(\delta_1\)</span>使得当<span class="math inline">\(\rho_X(x,x_0)&lt;\delta_1\)</span>时有<span class="math inline">\(\rho_Y(Tx,y)&lt;\dfrac{\varepsilon}{2}\)</span>，存在<span class="math inline">\(\delta_1\)</span>使得当<span class="math inline">\(\rho_X(x',x_0)&lt;\delta_2\)</span>时有<span class="math inline">\(\rho_Y(Tx',y)&lt;\dfrac{\varepsilon}{2}\)</span>。取<span class="math inline">\(\delta=\min\{\delta_1,\delta_2\}\)</span>则当<span class="math inline">\(\rho_X(x,x_0)&lt;\delta\)</span>且<span class="math inline">\(\rho_X(x',x_0)&lt;\delta\)</span>时有<span class="math inline">\(\rho_Y(Tx,y)&lt;\dfrac{\varepsilon}{2}\)</span>和<span class="math inline">\(\rho_Y(Tx',y)&lt;\dfrac{\varepsilon}{2}\)</span>，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho_Y(Tx,Tx')\leqslant\rho_Y(Tx,y)+\rho_Y(Tx',y)&lt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p><strong>充分性：</strong>因为<span class="math inline">\(x_0\)</span>是<span class="math inline">\(E\)</span>的聚点，所以存在<span class="math inline">\(\{x_n\}\subseteq E\setminus\{x_0\}\)</span>满足<span class="math inline">\(\{x_n\}\to x_0\)</span>。对于任意的<span class="math inline">\(\varepsilon&gt;0\)</span>，取任意一个满足上述条件的<span class="math inline">\(\{x_n\}\)</span>，则对于条件中给定的<span class="math inline">\(\delta&gt;0\)</span>，存在<span class="math inline">\(N\in\mathbb{N}^+\)</span>使得当<span class="math inline">\(n&gt;N\)</span>时有<span class="math inline">\(\rho_X(x_n,x_0)&lt;\delta\)</span>，于是当<span class="math inline">\(m,n&gt;N\)</span>时就有<span class="math inline">\(\rho_Y(Tx_n,Tx_m)&lt;\varepsilon\)</span>。因为<span class="math inline">\((Y,\rho_Y)\)</span>是完备的度量空间，所以<span class="math inline">\(\{Tx_n\}\)</span>有极限。下面证明所有<span class="math inline">\(\{Tx_n\}\)</span>的极限都相同。假设存在不同的<span class="math inline">\(\{x_n'\}\)</span>和<span class="math inline">\(\{x_n''\}\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 \{x_n'\},\{x_n''\}\subseteq E\setminus\{x_0\},\quad\{x_n'\},\{x_n''\}\to x_0,\quad\lim_{n\to+\infty}Tx_n'\ne\lim_{n\to+\infty}Tx_n''
-
 \end{equation*}\]</span></p>
 <p>定义<span class="math inline">\(\{x_n\}\)</span>：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -2688,7 +2671,6 @@ x_n=
 x_n',&amp;n\text{为奇数} \\
 x_n'',&amp;n\text{为偶数}
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\{x_n\}\subseteq E\setminus\{x_0\}\)</span>且<span class="math inline">\(\{x_n\}\to x_0\)</span>，但由<a href="#prop-ConvergentSeqOfPoints-9fdcf3e3" data-reference-type="ref+label" data-reference="prop:ConvergentSeqOfPoints">性质 3.1.1</a>可知<span class="math inline">\(\{Tx_n\}\)</span>不收敛，矛盾，所以所有<span class="math inline">\(\{Tx_n\}\)</span>的极限都相同，充分性得证。&nbsp;◻</p>
 </div>
@@ -2700,7 +2682,6 @@ x_n'',&amp;n\text{为偶数}
 <li><p>设<span class="math inline">\((Z,\rho_Z)\)</span>是度量空间，<span class="math inline">\(S\)</span>是<span class="math inline">\(F\subseteq Y\)</span>到<span class="math inline">\(Z\)</span>的映射，<span class="math inline">\(x_0\in X\)</span>是<span class="math inline">\(E\)</span>的聚点，<span class="math inline">\(y\in Y\)</span>是<span class="math inline">\(T(E\setminus\{x_0\})\)</span>的聚点，<span class="math inline">\(T(E\setminus\{x_0\})\subseteq F\setminus\{y\}\)</span>，<span class="math inline">\(z\in Z\)</span>。若<span class="math inline">\(T\)</span>沿<span class="math inline">\(E\)</span>趋于<span class="math inline">\(x_0\)</span>时极限为<span class="math inline">\(y\)</span>，<span class="math inline">\(S\)</span>沿<span class="math inline">\(F\)</span>趋于<span class="math inline">\(y\)</span>时极限为<span class="math inline">\(z\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
                 \lim_{\substack{x\to x_0 \\ E}}S(Tx)=z
-
     \end{equation*}\]</span></p></li>
 </ol>
 </div>
@@ -2747,7 +2728,6 @@ x_n'',&amp;n\text{为偶数}
 <p><strong>Definition 3.59</strong>. 设<span class="math inline">\((X,\rho)\)</span>是度量空间，<span class="math inline">\(T\)</span>是<span class="math inline">\(X\)</span>到<span class="math inline">\(X\)</span>的一个映射，如果存在一个数<span class="math inline">\(\alpha\)</span>，<span class="math inline">\(0\leqslant\alpha&lt;1\)</span>，使得对任意的<span class="math inline">\(x,y\in X\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(Tx,Ty)\leqslant\alpha\rho(x,y)
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(T\)</span>是<a href="../chapters/page-042.html#term-ContractionMap" class="term" title="contraction mapping">压缩映射<span class="term-english">（contraction mapping）</span></a>。</p>
 </div>
@@ -2756,7 +2736,6 @@ x_n'',&amp;n\text{为偶数}
 <p>设<span class="math inline">\((X,\rho)\)</span>是完备的度量空间，<span class="math inline">\(T\)</span>是<span class="math inline">\(X\)</span>到<span class="math inline">\(X\)</span>的一个压缩映射，那么<span class="math inline">\(T\)</span>有且只有一个不动点，该不动点为任取<span class="math inline">\(x_0\in X\)</span>序列<span class="math inline">\(\{x_n=T^nx_0\}\)</span>的极限<span class="math inline">\(x\in X\)</span>，并有下述两种误差估计：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_n,x)\leqslant\frac{\alpha^n}{1-\alpha}\rho(x_0,x_1),\quad\rho(x_n,x)\leqslant\frac{1}{1-\alpha}\rho(x_{n+1},x_{n})
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -2765,7 +2744,6 @@ x_n'',&amp;n\text{为偶数}
 \rho(x_{m+1},x_m)&amp;=\rho(Tx_m,Tx_{m-1})\leqslant\alpha\rho(x_m,x_{m+1}) \\
 &amp;=\cdots \\
 &amp;=\alpha^{m-1}\rho(Tx_1,Tx_0)\leqslant\alpha^m\rho(x_1,x_0)
-
 \end{align*}\]</span>取<span class="math inline">\(n&gt;m\)</span>，由距离的三角不等式：</p>
 <p><span class="math display">\[\begin{align*}
 \rho(x_m,x_n)
@@ -2773,38 +2751,31 @@ x_n'',&amp;n\text{为偶数}
 &amp;\leqslant(\alpha^m+\alpha^{m+1}+\cdots+\alpha^{n-1})\rho(x_0,x_1) \\
 &amp;=\alpha^m\frac{1-\alpha^{n-m}}{1-\alpha}\rho(x_0,x_1) \\
 &amp;\leqslant\frac{\alpha^m}{1-\alpha}\rho(x_0,x_1)
-
 \end{align*}\]</span></p>
 <p>因为<span class="math inline">\(0\leqslant\alpha&lt;1\)</span>，所以当<span class="math inline">\(m\)</span>足够大的时候，<span class="math inline">\(\rho(x_m,x_n)\rightarrow 0\)</span>，即<span class="math inline">\(\{x_n\}\)</span>是<span class="math inline">\(X\)</span>中的Cauchy点列。又因为<span class="math inline">\(X\)</span>完备，所以<span class="math inline">\(\{x_n\}\rightarrow x\in X\)</span>。由三角不等式：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,Tx)\leqslant\rho(x,x_m)+\rho(x_m,Tx)\leqslant\rho(x,x_m)+\alpha\rho(x_{m-1},x)
-
 \end{equation*}\]</span></p>
 <p>当<span class="math inline">\(m\to+\infty\)</span>时上式右端趋于0，因此<span class="math inline">\(\rho(x,Tx)=0\)</span>，即<span class="math inline">\(Tx=x\)</span>，<span class="math inline">\(T\)</span>存在一个不动点。由上上式可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_m,x_{m+k})\leqslant\frac{\alpha^m}{1-\alpha}\rho(x_0,x_1)
-
 \end{equation*}\]</span></p>
 <p>令<span class="math inline">\(k\to+\infty\)</span>，由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(6)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_m,x)\leqslant\frac{\alpha^m}{1-\alpha}\rho(x_0,x_1)
-
 \end{equation*}\]</span></p>
 <p><strong>唯一性：</strong>假设<span class="math inline">\(T\)</span>还有一个不动点<span class="math inline">\(y\)</span>，则</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)=\rho(Tx,Ty)\leqslant\alpha\rho(x,y)
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(0\leqslant\alpha&lt;1\)</span>，所以<span class="math inline">\(\rho(x,y)=0\)</span>，即<span class="math inline">\(x=y\)</span>，唯一性得证。</p>
 <p>对于第二种误差估计，只需注意到：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_n,x_{n+p})\leqslant(\alpha^{p-1}+\alpha^{p-2}+\cdots+1)\rho(x_n,x_{n+1})\leqslant\frac{1}{1-\alpha}\rho(x_n,x_{n+1})
-
 \end{equation*}\]</span></p>
 <p>令<span class="math inline">\(p\to+\infty\)</span>，由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(6)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x_n,x)\leqslant\frac{1}{1-\alpha}\rho(x_n,x_{n+1})
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -2813,7 +2784,6 @@ x_n'',&amp;n\text{为偶数}
 <p><strong>Theorem 3.21</strong>. 设<span class="math inline">\(T\)</span>是完备度量空间<span class="math inline">\(X\)</span>到自身的映射，如果存在常数<span class="math inline">\(\alpha\)</span>及<span class="math inline">\(n\in\mathbb{N}^+\)</span>，<span class="math inline">\(0\leqslant\alpha&lt;1\)</span>，使得对任意<span class="math inline">\(x,y\in X\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(T^{n}x,T^{n}y)\leqslant\alpha\rho(x,y)
-
 \end{equation*}\]</span></p>
 <p>那么<span class="math inline">\(T\)</span>在<span class="math inline">\(X\)</span>中有且只有一个不动点。</p>
 </div>
@@ -2821,13 +2791,11 @@ x_n'',&amp;n\text{为偶数}
 <p><span class="proof-title"><em>证明</em>. </span><strong>存在性：</strong><span class="math inline">\(T^{n}\)</span>满足<a href="#theo-ContractionMapTheorem-043e5e3d" data-reference-type="ref+label" data-reference="theo:ContractionMapTheorem">定理 3.20</a>的条件，因此<span class="math inline">\(T^{n}\)</span>有且只有一个不动点<span class="math inline">\(x_0\)</span>。下证<span class="math inline">\(x_0\)</span>也是<span class="math inline">\(T\)</span>在<span class="math inline">\(X\)</span>中唯一的不动点。因为</p>
 <p><span class="math display">\[\begin{equation*}
 T^{n}(Tx_0)=T^{n+1}x_0=T(T^{n}x_0)=Tx_0
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(Tx_0\)</span>是<span class="math inline">\(T^{n}\)</span>的一个不动点，由不动点的唯一性，<span class="math inline">\(Tx_0=x_0\)</span>，所以<span class="math inline">\(x_0\)</span>是<span class="math inline">\(T\)</span>的一个不动点。</p>
 <p><strong>唯一性：</strong>若<span class="math inline">\(T\)</span>存在另一个不动点<span class="math inline">\(x_1\)</span>，则</p>
 <p><span class="math display">\[\begin{equation*}
 T^{n}x_1=T^{n-1}Tx_1=T^{n-1}x_1=\cdots=Tx_1=x_1
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(x_1\)</span>也是<span class="math inline">\(T^{n}\)</span>的一个不动点，由<span class="math inline">\(T^{n}\)</span>不动点的唯一性，<span class="math inline">\(x_0=x_1\)</span>。&nbsp;◻</p>
 </div>
@@ -2842,7 +2810,6 @@ T^{n}x_1=T^{n-1}Tx_1=T^{n-1}x_1=\cdots=Tx_1=x_1
 <p>设<span class="math inline">\((X,\rho_X)\)</span>和<span class="math inline">\((Y,\rho_Y)\)</span>为度量空间，<span class="math inline">\(T\)</span>是<span class="math inline">\(E\subseteq X\)</span>到<span class="math inline">\(Y\)</span>上的映射。<span class="math inline">\(T\)</span>在<span class="math inline">\(E\)</span>上一致连续的充分必要条件为：对于任意满足条件<span class="math inline">\(\lim\limits_{n\to+\infty}\rho_X(x_n,y_n)\)</span>的点列<span class="math inline">\(\{x_n\},\{y_n\}\subseteq E\)</span>，都有：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}\rho_Y(Tx_n,Ty_n)=0
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -2862,7 +2829,6 @@ T^{n}x_1=T^{n-1}Tx_1=T^{n-1}x_1=\cdots=Tx_1=x_1
 <p><span class="proof-title"><em>证明</em>. </span>(1)设<span class="math inline">\(\{y_n\}\)</span>为<span class="math inline">\(TA\)</span>中的一个点列，则有<span class="math inline">\(X\)</span>中的点列<span class="math inline">\(\{x_n\}\)</span>使得<span class="math inline">\(y_n=Tx_n,\;n\in\mathbb{N}^+\)</span>。因为<span class="math inline">\(A\)</span>是紧集，所以<span class="math inline">\(\{x_n\}\)</span>存在子列<span class="math inline">\(\{x_{n_k}\}\to x_0\in A\)</span>。因为<span class="math inline">\(T\)</span>连续，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{k\to+\infty}y_{n_k}=\lim_{k\to+\infty}Tx_{n_k}=T\left(\lim_{k\to+\infty}x_{n_k}\right)=Tx_0\in TA
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(TA\)</span>是紧集。</p>
 <p>(2)由(1)可知<span class="math inline">\(TA\)</span>是紧集，根据<a href="#prop-CompactSet-6ade9af0" data-reference-type="ref+label" data-reference="prop:CompactSet">性质 3.2.7</a>(2)可得<span class="math inline">\(T\)</span>在<span class="math inline">\(A\)</span>上有界。</p>
@@ -2870,22 +2836,18 @@ T^{n}x_1=T^{n-1}Tx_1=T^{n-1}x_1=\cdots=Tx_1=x_1
 <p>(4)假设此时<span class="math inline">\(T\)</span>不一致连续，则存在<span class="math inline">\(\varepsilon_0&gt;0\)</span>以及点列<span class="math inline">\(\{x_n\},\{y_n\}\subseteq A\)</span>，使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}\rho_X(x_n,y_n)=0,\quad\rho_Y(Tx_n,Ty_n)\geqslant\varepsilon_0,\;\forall\;n\in\mathbb{N}^+
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(A\)</span>是紧集，所以<span class="math inline">\(\{x_n\}\)</span>存在子列<span class="math inline">\(\{x_{n_k}\}\to x_0\in A\)</span>，即<span class="math inline">\(\rho_X(x_{n_k},x_0)\to 0\)</span>，于是由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(8.b)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho_X(y_{n_k},x_0)\leqslant\rho_X(y_{n_k},x_{n_k})+\rho_X(x_{n_k},x_0)\to0
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(T\)</span>是连续的，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho_Y(Tx_{n_k},Tx_0)\to0,\;\rho_Y(Ty_{n_k},Tx_0)\to0
-
 \end{equation*}\]</span></p>
 <p>于是由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(8.b)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho_Y(Tx_{n_k},Ty_{n_k})\leqslant\rho_Y(Tx_{n_k},Tx_0)+\rho_Y(Tx_0,Ty_{n_k})\to 0
-
 \end{equation*}\]</span></p>
 <p>与第一个式子中的第二部分矛盾，所以<span class="math inline">\(T\)</span>一致连续。&nbsp;◻</p>
 </div>
@@ -2910,13 +2872,11 @@ T^{n}x_1=T^{n-1}Tx_1=T^{n-1}x_1=\cdots=Tx_1=x_1
 <li><p>若<span class="math inline">\(\lim\limits_{\substack{x\to x_0 \\ E}}f(x)\)</span>和<span class="math inline">\(\lim\limits_{\substack{x\to x_0 \\ E}}g(x)\)</span>存在，且有：</p>
 <p><span class="math display">\[\begin{equation*}
                 \lim_{\substack{x\to x_0 \\ E}}f(x)&lt;\lim_{\substack{x\to x_0 \\ E}}g(x)
-
     \end{equation*}\]</span></p>
 <p>则存在<span class="math inline">\(\delta&gt;0\)</span>，使得当<span class="math inline">\(x\in U(x_0,\delta)\cap E\setminus\{x_0\}\)</span>时，<span class="math inline">\(f(x)&lt;g(x)\)</span>；</p></li>
 <li><p>若存在<span class="math inline">\(\delta&gt;0\)</span>使得当<span class="math inline">\(x\in U(x_0,\delta)\cap E\setminus\{x_0\}\)</span>时有<span class="math inline">\(f(x)\leqslant g(x)\)</span>，且<span class="math inline">\(\lim\limits_{\substack{x\to x_0 \\ E}}f(x)\)</span>和<span class="math inline">\(\lim\limits_{\substack{x\to x_0 \\ E}}g(x)\)</span>都存在，则：</p>
 <p><span class="math display">\[\begin{equation*}
                 \lim_{\substack{x\to x_0 \\ E}}f(x)\leqslant\lim_{\substack{x\to x_0 \\ E}}g(x)
-
     \end{equation*}\]</span></p></li>
 <li><p>若<span class="math inline">\(\lim\limits_{\substack{x\to x_0 \\ E}}f(x)\)</span>和<span class="math inline">\(\lim\limits_{\substack{x\to x_0 \\ E}}g(x)\)</span>存在，且下式右侧有意义，则公式成立：</p>
 <ol type="1">
@@ -2961,12 +2921,10 @@ T^{n}x_1=T^{n-1}Tx_1=T^{n-1}x_1=\cdots=Tx_1=x_1
 <p>不断重复上述讨论，要么存在一个<span class="math inline">\(c_n\)</span>使得<span class="math inline">\(f(c_n)=0\)</span>，结论成立，要么得到一个闭区间套<span class="math inline">\(\{[a_n,b_n]\}\)</span>和一个点列<span class="math inline">\(\{c_n\}\)</span>，满足<span class="math inline">\(a_n\leqslant c_n\leqslant b_n\)</span>。由<a href="#theo-ClosedCubeTheorem-171ac679" data-reference-type="ref+label" data-reference="theo:ClosedCubeTheorem">定理 3.7</a>和<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(4.a)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}a_n=\lim_{n\to+\infty}c_n=\lim_{n\to+\infty}b_n\coloneq c\in(a,b)
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(f\)</span>在区间<span class="math inline">\([a,b]\)</span>上连续，由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(6)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 f(c)=\lim_{n\to+\infty}f(a_n)\leqslant0\leqslant\lim_{n\to+\infty}f(b_n)=f(c)
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(f(c)=0\)</span>。</p>
 <p>(2)对任意介于<span class="math inline">\(f(a),f(b)\)</span>之间的<span class="math inline">\(\alpha\)</span>，取辅助函数<span class="math inline">\(f(x)-\alpha\)</span>。由<a href="#prop-RMap-d00343b3" data-reference-type="ref+label" data-reference="prop:RMap">性质 3.3.3</a>(5.b)可得<span class="math inline">\(f(x)-\alpha\)</span>是区间<span class="math inline">\([a,b]\)</span>上的连续函数，由(1)即可得出结论。&nbsp;◻</p>
@@ -2979,7 +2937,6 @@ f(c)=\lim_{n\to+\infty}f(a_n)\leqslant0\leqslant\lim_{n\to+\infty}f(b_n)=f(c)
 <p><span class="proof-title"><em>证明</em>. </span>任取<span class="math inline">\(y_0,y_1\in f(E)\)</span>，设<span class="math inline">\(f(x_0)=y_0,\;f(x_1)=y_1\)</span>。因为<span class="math inline">\(E\)</span>路径连通，所以存在连续映射<span class="math inline">\(\gamma:[0,1]\to E\)</span>满足<span class="math inline">\(\gamma(0)=x_0,\;\gamma(1)=x_1\)</span>。考虑复合映射<span class="math inline">\(f\circ\gamma\)</span>，由<a href="#theo-CompositeContinuousMap-96e3ace8" data-reference-type="ref+label" data-reference="theo:CompositeContinuousMap">定理 3.19</a>可知<span class="math inline">\(f\circ\gamma\)</span>在<span class="math inline">\([0,1]\)</span>上连续。因为：</p>
 <p><span class="math display">\[\begin{equation*}
 f\circ\gamma(0)=f(x_0)=y_0,\quad f\circ\gamma(1)=f(x_1)=y_1
-
 \end{equation*}\]</span></p>
 <p>由<a href="#lem-IntermediateValueR-75b6e15a" data-reference-type="ref+label" data-reference="lem:IntermediateValueR">引理 3.3</a>可知<span class="math inline">\(f\circ\gamma\)</span>在<span class="math inline">\([0,1]\)</span>上可以取到介于<span class="math inline">\(y_0\)</span>和<span class="math inline">\(y_1\)</span>之间的所有值，即<span class="math inline">\(f\)</span>在<span class="math inline">\(E\)</span>上可以取到介于<span class="math inline">\(y_0\)</span>和<span class="math inline">\(y_1\)</span>之间的所有值。由<span class="math inline">\(y_0,y_1\)</span>的任意性，结论成立。&nbsp;◻</p>
 </div>
@@ -3021,13 +2978,11 @@ f\circ\gamma(0)=f(x_0)=y_0,\quad f\circ\gamma(1)=f(x_1)=y_1
 <p>(4)由<a href="#prop-RMap-d00343b3" data-reference-type="ref+label" data-reference="prop:RMap">性质 3.3.3</a>(5.c)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{x\to a}f(x)g(x)=\lim_{x\to a}f(x)\frac{h(x)}{g(x)}g(x)=\lim_{x\to a}f(x)h(x)
-
 \end{equation*}\]</span></p>
 <p>(5)由(4)立即可得。</p>
 <p>(6)由<a href="#prop-RMap-d00343b3" data-reference-type="ref+label" data-reference="prop:RMap">性质 3.3.3</a>(5.c)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{x\to a}\dfrac{f(x)}{g(x)p(x)}=\lim_{x\to a}\dfrac{f(x)h(x)}{g(x)h(x)p(x)}=\lim_{x\to a}\dfrac{f(x)}{h(x)p(x)}
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -3049,7 +3004,6 @@ f\circ\gamma(0)=f(x_0)=y_0,\quad f\circ\gamma(1)=f(x_1)=y_1
 <p><strong>Definition 3.68</strong>. 对于数域<span class="math inline">\(K\)</span>上的赋范线性空间<span class="math inline">\(X\)</span>，我们定义<span class="math inline">\(X\)</span>中元素<span class="math inline">\(x\)</span>和<span class="math inline">\(y\)</span>之间的距离为它们差的范数，即：</p>
 <p><span class="math display">\[\begin{equation*}
 \rho(x,y)=||x-y||
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -3067,7 +3021,6 @@ f\circ\gamma(0)=f(x_0)=y_0,\quad f\circ\gamma(1)=f(x_1)=y_1
 <p><strong>Definition 3.71</strong>. 设<span class="math inline">\(X\)</span>是线性空间，<span class="math inline">\(||\cdot||_1,\;||\cdot||_2\)</span>是定义在<span class="math inline">\(X\)</span>上的两个范数，<span class="math inline">\(X\)</span>按照这两个范数均为赋范线性空间。若：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;K_1,K_2&gt;0,\;\forall\;x\in X,\;K_1||x||_1\leqslant||x_2||\leqslant K_2||x||_1
-
 \end{equation*}\]</span></p>
 <p>则称范数<span class="math inline">\(||\cdot||_1,\;||\cdot||_2\)</span><strong>等价</strong>。</p>
 </div>
@@ -3090,7 +3043,6 @@ f\circ\gamma(0)=f(x_0)=y_0,\quad f\circ\gamma(1)=f(x_1)=y_1
 &amp;\leqslant||a_nx_n-ax||+||b_ny_n-by|| \\
 &amp;=||a_nx_n-a_nx+a_nx-ax||+||b_ny_n-b_ny+b_ny-by|| \\
 &amp;\leqslant|a_n|\;||x_n-x||+|a_n-a|\;||x||+|b_n|\;||y_n-y||+|b_n-b|\;||y||
-
 \end{align*}\]</span></p>
 <p>由<span class="math inline">\(\{a_n\}\)</span>和<span class="math inline">\(\{b_n\}\)</span>的收敛性以及<span class="math inline">\(\{x_n\}\)</span>和<span class="math inline">\(\{y_n\}\)</span>的收敛性立即可得<span class="math inline">\(a_nx_n+b_ny_n\to ax+bx\)</span>。</p>
 <p>(4)由定义即可得到。&nbsp;◻</p>
@@ -3099,7 +3051,6 @@ f\circ\gamma(0)=f(x_0)=y_0,\quad f\circ\gamma(1)=f(x_1)=y_1
 <p><strong>Definition 3.72</strong>. 在<span class="math inline">\(\mathbb{R}^{n}\)</span>中定义元素<span class="math inline">\(x=(\xi_1,\xi_2,\dots,\xi_n)\)</span>的范数为：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x||_2=\left(\sum_{i=1}^n\xi_i^2\right)^{\frac{1}{2}}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\mathbb{R}^{n}\)</span>成为一个赋范线性空间。称上述范数为<strong>欧式范数</strong>。</p>
 </div>
@@ -3115,12 +3066,10 @@ f\circ\gamma(0)=f(x_0)=y_0,\quad f\circ\gamma(1)=f(x_1)=y_1
 <p>由<a href="#theo-CompactRn-9843b1f0" data-reference-type="ref+label" data-reference="theo:CompactRn">定理 3.9</a>可知<span class="math inline">\(\{x:||x||_2=1\}\)</span>是紧集，根据<a href="#prop-Norm-bc271cd1" data-reference-type="ref+label" data-reference="prop:Norm">性质 3.4.1</a>(2)和<a href="#prop-CompactMap-65799bca" data-reference-type="ref+label" data-reference="prop:CompactMap">性质 3.3.2</a>(3)可知<span class="math inline">\(N(x)\)</span>在<span class="math inline">\(\{x:||x||_2=1\}\)</span>上存在最小值<span class="math inline">\(a\)</span>和最大值<span class="math inline">\(b\)</span>。对于任意不为<span class="math inline">\(\mathbf{0}\)</span>的<span class="math inline">\(x\in\mathbb{R}^{n}\)</span>有<span class="math inline">\(\dfrac{x}{||x||_2}\in\{x:||x||_2=1\}\)</span>，于是有：</p>
 <p><span class="math display">\[\begin{equation*}
 a\leqslant N\left(\frac{x}{||x||_2}\right)\leqslant b
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 a||x||_2\leqslant N(x)\leqslant b||x||_2
-
 \end{equation*}\]</span></p>
 <p>当<span class="math inline">\(x=\mathbf{0}\)</span>时，上式也成立，所以<span class="math inline">\(N(x)\)</span>与欧式范数<span class="math inline">\(||x||_2\)</span>等价。&nbsp;◻</p>
 </div>
@@ -3130,12 +3079,10 @@ a||x||_2\leqslant N(x)\leqslant b||x||_2
 <p><strong>Definition 3.73</strong>. 设<span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>是数域<span class="math inline">\(K\)</span>上的线性空间，<span class="math inline">\(E\subseteq X\)</span>，<span class="math inline">\(T:E\to Y\)</span>是映射。若对任意的<span class="math inline">\(x,y\in E\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 T(x+y)=Tx+Ty
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(T\)</span><strong>可加</strong>。若对任意的<span class="math inline">\(\alpha\in K\)</span>和任意的<span class="math inline">\(x\in E\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 T(\alpha x)=\alpha Tx
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(T\)</span><strong>齐次</strong>。称可加齐次映射为<a href="../chapters/page-051.html#term-LinearOperator" class="term" title="linear operator">线性算子<span class="term-english">（linear operator）</span></a>。</p>
 </div>
@@ -3158,29 +3105,24 @@ T(\alpha x)=\alpha Tx
 <p><span class="proof-title"><em>证明</em>. </span>(1)由可加性可以得到：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;n\in\mathbb{N}^+,\;\forall\;x\in X,\;T(nx)=nTx
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(T\)</span>对正整数集满足齐次性。</p>
 <p>取<span class="math inline">\(x_1=\dfrac{x}{n}\)</span>，代入上式可得：</p>
 <p><span class="math display">\[\begin{equation*}
 Tx=nT\left(\frac{x}{n}\right)
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 T\left(\frac{x}{n}\right)=\frac{Tx}{n}
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(T\)</span>对正有理数集满足齐次性。</p>
 <p>取<span class="math inline">\(\mathbf{0}_X\in X\)</span>，由<span class="math inline">\(T\)</span>对正有理数的齐次性，<span class="math inline">\(T\mathbf{0}_X=T(2\mathbf{0}_X)=2T\mathbf{0}_X\)</span>，所以<span class="math inline">\(T\mathbf{0}_X=\mathbf{0}_Y\)</span>。由<span class="math inline">\(T\)</span>的可加性可得：</p>
 <p><span class="math display">\[\begin{equation*}
 T\mathbf{0}_X=T[x+(-x)]=Tx+T(-x)=\mathbf{0}_Y\in Y
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 T(-x)=-Tx
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(T\)</span>对有理数集满足齐次性。</p>
 <p>因为任意无理数都可用一个有理数序列去逼近，由<span class="math inline">\(T\)</span>的连续性，<span class="math inline">\(T\)</span>对无理数集也满足齐次性。</p>
@@ -3189,7 +3131,6 @@ T(-x)=-Tx
 <p><span class="math display">\[\begin{align*}
 T(ax)&amp;=T[(a_1+ia_2)x]=T(a_1x+ia_2x)=T(a_1x)+T(ia_2x) \\
 &amp;=a_1Tx+iT(a_2x)=a_1Tx+ia_2Tx=(a_1+ia_2)Tx=aTx
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -3203,40 +3144,33 @@ T(ax)&amp;=T[(a_1+ia_2)x]=T(a_1x+ia_2x)=T(a_1x)+T(ia_2x) \\
 <p><strong>Property 3.4.3</strong>. 设<span class="math inline">\(X\)</span>和<span class="math inline">\(Y\)</span>是<span class="math inline">\(\mathbb{R}^{}\)</span>上的赋范线性空间，<span class="math inline">\(E\subseteq X\)</span>，<span class="math inline">\(T:E\to Y\)</span>是映射。<span class="math inline">\(T\)</span>有界的充分必要条件为：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;M&gt;0,\;\forall\;x\in E,\;||Tx||_Y\leqslant M||x||_X
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span><strong>(1)充分性：</strong>任取<span class="math inline">\(A\subseteq E\)</span>是有界集，由赋范线性空间上距离的定义和有界集的定义可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;K&gt;0,\;\forall\;x\in A,\;||x||_X\leqslant K
-
 \end{equation*}\]</span></p>
 <p>因此：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;M&gt;0,\;\exists\;K&gt;0,\;\forall\;x\in A,\;||Tx||_Y\leqslant M||x||_X\leqslant MK
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(TA\)</span>是<span class="math inline">\(Y\)</span>中的有界集。由<span class="math inline">\(A\)</span>的任意性，<span class="math inline">\(T\)</span>有界。</p>
 <p>(2)必要性：在<span class="math inline">\(E\)</span>中取单位球面<span class="math inline">\(S=\{x\in E:||x||_X=1\}\)</span>，<span class="math inline">\(S\)</span>有界，因此<span class="math inline">\(TS\)</span>有界。于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;M&gt;0,\;\forall\;x\in S,\;||Tx||_Y\leqslant M
-
 \end{equation*}\]</span></p>
 <p>设<span class="math inline">\(x\)</span>为<span class="math inline">\(E\)</span>中任意非<span class="math inline">\(\mathbf{0}\)</span>的元素，则：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{x}{||x||_X}\in S
-
 \end{equation*}\]</span></p>
 <p>所以有：</p>
 <p><span class="math display">\[\begin{equation*}
 \left\|T\left(\frac{x}{||x||_X}\right)\right\|_Y\leqslant M
-
 \end{equation*}\]</span></p>
 <p>由<span class="math inline">\(T\)</span>的齐次性：</p>
 <p><span class="math display">\[\begin{equation*}
 ||Tx||_Y\leqslant M||x||_X
-
 \end{equation*}\]</span></p>
 <p>根据<a href="../chapters/page-002.html#prop-LinearMapping-e3beabe4" data-reference-type="ref+label" data-reference="prop:LinearMapping">性质 1.3.1</a>(2)可知当<span class="math inline">\(x=\mathbf{0}\)</span>时，<span class="math inline">\(Tx\)</span>必然是<span class="math inline">\(Y\)</span>中的零元，上式也成立。&nbsp;◻</p>
 </div>
@@ -3256,32 +3190,26 @@ T(ax)&amp;=T[(a_1+ia_2)x]=T(a_1x+ia_2x)=T(a_1x)+T(ia_2x) \\
 <p>因为<span class="math inline">\(T\)</span>在<span class="math inline">\(x_0\)</span>连续，因此对<span class="math inline">\(\varepsilon=1,\;\exists\;\delta&gt;0,\;\forall\;x\in E\)</span>，当<span class="math inline">\(||x-x_0||_X\leqslant\delta\)</span>时，有：</p>
 <p><span class="math display">\[\begin{equation*}
 ||Tx-Tx_0||_Y=||T(x-x_0)||_Y\leqslant\varepsilon=1
-
 \end{equation*}\]</span></p>
 <p>任取<span class="math inline">\(x_1\ne x_0\)</span>，且<span class="math inline">\(x_1\in E\)</span>，因为：</p>
 <p><span class="math display">\[\begin{equation*}
 \left\|\frac{\delta(x_1-x_0)}{||x_1-x_0||_X}\right\|_X=\delta\leqslant\delta
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \left\|T\left[\frac{\delta(x_1-x_0)}{||x_1-x_0||_X}\right]\right\|_Y\leqslant1
-
 \end{equation*}\]</span></p>
 <p>作变形即有：</p>
 <p><span class="math display">\[\begin{equation*}
 ||T(x_1-x_0)||_Y\leqslant\frac{1}{\delta}||x_1-x_0||_X
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-002.html#prop-LinearMapping-e3beabe4" data-reference-type="ref+label" data-reference="prop:LinearMapping">性质 1.3.1</a>(2)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 ||T(x_0-x_0)||_Y=0=\frac{1}{\delta}||x_0-x_0||_X
-
 \end{equation*}\]</span></p>
 <p>所以对任意的<span class="math inline">\(x\in E\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 ||T(x-x_0)||_Y\leqslant\frac{1}{\delta}||x-x_0||_X
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-BoundedLinearOperator-564a5e64" data-reference-type="ref+label" data-reference="prop:BoundedLinearOperator">性质 3.4.3</a>可知<span class="math inline">\(T\)</span>定义在<span class="math inline">\(E-x_0\)</span>上的时候是有界的，而<span class="math inline">\(E-x_0\)</span>实际上就是<span class="math inline">\(E\)</span>，所以<span class="math inline">\(T\)</span>是有界的。</p>
 <p><span class="math inline">\((3)\to(1)\)</span>：由<a href="#prop-BoundedLinearOperator-564a5e64" data-reference-type="ref+label" data-reference="prop:BoundedLinearOperator">性质 3.4.3</a>立即可得。&nbsp;◻</p>
@@ -3320,7 +3248,6 @@ T(ax)&amp;=T[(a_1+ia_2)x]=T(a_1x+ia_2x)=T(a_1x)+T(ia_2x) \\
 <p>设<span class="math inline">\(X\)</span>是实的<span class="math inline">\(n\)</span>维赋范线性空间，<span class="math inline">\(\{e_1,e_2,\dots,e_n\}\)</span>是<span class="math inline">\(X\)</span>的一个基。定义一个映射<span class="math inline">\(T:\mathbb{R}^{n}\mapsto X\)</span>如下（<span class="math inline">\(\xi\in\mathbb{R}^{n}\)</span>）：</p>
 <p><span class="math display">\[\begin{equation*}
 T\xi=\sum_{i=1}^n\xi_ie_i
-
 \end{equation*}\]</span></p>
 <p>由于<span class="math inline">\(\{e_1,e_2,\dots,e_n\}\)</span>是<span class="math inline">\(X\)</span>的一个基，根据<a href="../chapters/page-002.html#prop-LinearlyDependent-0205c98a" data-reference-type="ref+label" data-reference="prop:LinearlyDependent">性质 1.1.2</a>(4)可知<span class="math inline">\(T\xi\)</span>的表出方式唯一，即<span class="math inline">\(T\)</span>是单射。其次对任意的<span class="math inline">\(x\in X\)</span>，根据基的定义它必然能由<span class="math inline">\(\{e_1,e_2,\dots,e_n\}\)</span>线性表出，因此有<span class="math inline">\(\eta=(\eta_1,\eta_2,\dots,\eta_n)\in\mathbb{R}^{n}\)</span>，使得<span class="math inline">\(x=\sum\limits_{i=1}^n\eta_ie_i=T\eta\)</span>，因此<span class="math inline">\(T\)</span>是满射。</p>
 <p>映射<span class="math inline">\(T\)</span>保持线性运算是显然的。</p>
@@ -3331,34 +3258,28 @@ T\xi=\sum_{i=1}^n\xi_ie_i
 ||T\xi-T\eta||_X
 &amp;=\left\|\sum_{i=1}^n(\xi_i-\eta_i)e_i\right\|_X\leqslant\sum_{i=1}^n|\xi_i-\eta_i|\;||e_i||_X \\
 &amp;\leqslant\left(\sum_{i=1}^n|\xi_i-\eta_i|^2\right)^\frac{1}{2}\cdot\left(\sum_{i=1}^n||e_i||_X^2\right)^\frac{1}{2}
-
 \end{align*}\]</span></p>
 <p>所以<span class="math inline">\(T\)</span>是连续映射。</p>
 <p>下证<span class="math inline">\(T^{-1}\)</span>是连续映射。</p>
 <p>要证<span class="math inline">\(T^{-1}\)</span>是连续映射，证明<span class="math inline">\(\forall\;x,y\in X\)</span>，<span class="math inline">\(\exists\;\alpha\geqslant0\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 ||T^{-1}x-T^{-1}y||\leqslant\alpha||x-y||_X
-
 \end{equation*}\]</span></p>
 <p>即可。因为已经证得<span class="math inline">\(T\)</span>是双射且保持线性运算，所以只需证<span class="math inline">\(||T^{-1}x||\leqslant\alpha||x||_X\)</span>，即：</p>
 <p><span class="math display">\[\begin{equation*}
 \exists\;\alpha&gt;0,\;\forall\;x\in X,\;\frac{||x||_X}{||T^{-1}x||}\geqslant\alpha
-
 \end{equation*}\]</span></p>
 <p>对<span class="math inline">\(x=\sum\limits_{i=1}^n\xi_ie_i\in X\)</span>，令：</p>
 <p><span class="math display">\[\begin{equation*}
 f(\xi_1,\xi_2,\dots,\xi_n)=||x||_X
-
 \end{equation*}\]</span></p>
 <p>当<span class="math inline">\((\xi_1,\xi_2,\dots,\xi_n)\)</span>在<span class="math inline">\(\mathbb{R}^{n}\)</span>的单位球面上时，即<span class="math inline">\(\sum\limits_{i=1}^n\xi_i^2=1\)</span>时，由<a href="../chapters/page-002.html#prop-IsomorphicOfLinearSpace-86b98faf" data-reference-type="ref+label" data-reference="prop:IsomorphicOfLinearSpace">性质 1.1.7</a>(1)可知<span class="math inline">\(||x||_X\ne0\)</span>。又因为单位球面是有界闭集（因为<span class="math inline">\(\{1\}\)</span>是闭集，根据<a href="#prop-Norm-bc271cd1" data-reference-type="ref+label" data-reference="prop:Norm">性质 3.4.1</a>(2)和<a href="#theo-ContinousMapO2OC2C-0a21099f" data-reference-type="ref+label" data-reference="theo:ContinousMapO2OC2C">定理 3.18</a>可知<span class="math inline">\(\{x;||x||_2=1\}\)</span>是闭集。），由<a href="#theo-CompactRn-9843b1f0" data-reference-type="ref+label" data-reference="theo:CompactRn">定理 3.9</a>和<a href="#prop-CompactMap-65799bca" data-reference-type="ref+label" data-reference="prop:CompactMap">性质 3.3.2</a>(3)可得<span class="math inline">\(f(\xi_1,\xi_2,\dots,\xi_n)\)</span>在单位球面上有正的下确界<span class="math inline">\(\alpha\)</span>，即<span class="math inline">\(||x||_X\geqslant\alpha\)</span>。对任意的<span class="math inline">\(x\in X\)</span>进行单位化，即取<span class="math inline">\(x'\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 x'=\frac{x}{||T^{-1}x||}
-
 \end{equation*}\]</span></p>
 <p>那么就有<span class="math inline">\(||x'||_X\geqslant\alpha\)</span>，即：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{||x||_X}{||T^{-1}x||}\geqslant\alpha
-
 \end{equation*}\]</span></p>
 <p>复：类似，<span class="math inline">\(\mathbb{R}^{2n}\)</span>。</p>
 <p>(2)由(1)可知<span class="math inline">\(X\)</span>与<span class="math inline">\(\mathbb{R}^{n}\)</span>是拓扑同构的，那么<span class="math inline">\(X\)</span>与<span class="math inline">\(\mathbb{R}^{n}\)</span>之间存在一个双射<span class="math inline">\(T:X\rightarrow\mathbb{R}^{n}\)</span>，且<span class="math inline">\(T\)</span>和<span class="math inline">\(T^{-1}\)</span>是连续的。任取<span class="math inline">\(X\)</span>上的一个Cauchy点列<span class="math inline">\(\{x_n\}\)</span>，<span class="math inline">\(Tx_n=y_n\in\mathbb{R}^{n}\)</span>。</p>
@@ -3367,12 +3288,10 @@ x'=\frac{x}{||T^{-1}x||}
 <p>由<a href="#theo-RnComplete-67c1ecd6" data-reference-type="ref+label" data-reference="theo:RnComplete">定理 3.8</a>可知<span class="math inline">\(\mathbb{R}^{n}\)</span>是完备的，所以<span class="math inline">\(\{y_n\}\rightarrow y\in\mathbb{R}^{n}\)</span>，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}T^{-1}y_n=T^{-1}\left(\lim_{n\to+\infty}y_n\right)=T^{-1}y
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(T\)</span>是双射，那么存在<span class="math inline">\(x\in X\)</span>使得<span class="math inline">\(x=T^{-1}y\)</span>。因为：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}T^{-1}y_n=\lim_{n\to+\infty}x_n
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\{x_n\}\rightarrow x\in X\)</span>。由<span class="math inline">\(\{x_n\}\)</span>的任意性，<span class="math inline">\(X\)</span>是完备的。</p>
 <p>(3)<strong>必要性：</strong>由(1)可知<span class="math inline">\(X\)</span>与<span class="math inline">\(\mathbb{R}^{n}\)</span>拓扑同构，那么<span class="math inline">\(X\)</span>与<span class="math inline">\(\mathbb{R}^{n}\)</span>之间存在一个双射<span class="math inline">\(T:X\rightarrow\mathbb{R}^{n}\)</span>，且<span class="math inline">\(T\)</span>和<span class="math inline">\(T^{-1}\)</span>是连续的。由<a href="#theo-ContinousMapO2OC2C-0a21099f" data-reference-type="ref+label" data-reference="theo:ContinousMapO2OC2C">定理 3.18</a>(2)和<a href="#theo-LinearOperatorBoundedContinuous-ad64c73f" data-reference-type="ref+label" data-reference="theo:LinearOperatorBoundedContinuous">定理 3.26</a>(3)可知<span class="math inline">\(X\)</span>中的有界闭集映成<span class="math inline">\(\mathbb{R}^{n}\)</span>中的有界闭集，反之亦然。由<a href="#theo-CompactRn-9843b1f0" data-reference-type="ref+label" data-reference="theo:CompactRn">定理 3.9</a>和<a href="#prop-CompactMap-65799bca" data-reference-type="ref+label" data-reference="prop:CompactMap">性质 3.3.2</a>(1)可知<span class="math inline">\(X\)</span>中的任一有界闭集也是紧的，所以<span class="math inline">\(X\)</span>是局部紧的。</p>
@@ -3386,7 +3305,6 @@ x'=\frac{x}{||T^{-1}x||}
 <p><strong>Definition 3.79</strong>. 设<span class="math inline">\(X\)</span>是内积空间，在其上定义如下范数：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x||=\sqrt{(x,x)}
-
 \end{equation*}\]</span></p>
 <p>那么<span class="math inline">\(X\)</span>成为赋范线性空间。若<span class="math inline">\(X\)</span>是完备的，则称其为<a href="../chapters/page-047.html#term-HilbertSpace" class="term" title="Hilbert space">Hilbert空间<span class="term-english">（Hilbert space）</span></a>。若<span class="math inline">\(X\)</span>不完备，则称其为<a href="../chapters/page-055.html#term-PreHilbertSpace" class="term" title="pre-Hilbert space">准Hilbert空间<span class="term-english">（pre-Hilbert space）</span></a>。</p>
 </div>
@@ -3397,7 +3315,6 @@ x'=\frac{x}{||T^{-1}x||}
 <p><span class="math display">\[\begin{align*}
 &amp;||x+y||^2=(x+y,x+y)=(x,x+y)+(y,x+y) \\
 =&amp;(x,x)+(x,y)+(y,x)+(y,y)\leqslant||x||^2+2||x|||\;|y||+||y||^2=(||x||+||y||)^2
-
 \end{align*}\]</span></p>
 <p>即<span class="math inline">\(||x+y||\leqslant||x||+||y||\)</span>。&nbsp;◻</p>
 </div>
@@ -3409,7 +3326,6 @@ x'=\frac{x}{||T^{-1}x||}
 <li><p>(Parallelogram Law) 对任意的<span class="math inline">\(x,y\in X\)</span>，由<span class="math inline">\(X\)</span>的内积导出的范数<span class="math inline">\(||\cdot||\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
                 ||x+y||^2+||x-y||^2=2||x||^2+2||y||^2
-
     \end{equation*}\]</span></p>
 <p>反之，如果<span class="math inline">\(X\)</span>是赋范线性空间，<span class="math inline">\(X\)</span>的范数满足上式，则可以在<span class="math inline">\(X\)</span>中定义内积<span class="math inline">\((\cdot,\cdot)\)</span>使<span class="math inline">\(X\)</span>成为内积空间。</p></li>
 </ol>
@@ -3421,7 +3337,6 @@ x'=\frac{x}{||T^{-1}x||}
 &amp;=|(x_n,y_n-y)+(x_n-x,y)| \\
 &amp;\leqslant|(x_n,y_n-y)|+|(x_n-x,y)| \\
 &amp;\leqslant||x_n||\;||y_n-y||+||x_n-x||\;||y||
-
 \end{align*}\]</span></p>
 <p>根据<a href="#prop-ConvergentSeqOfPoints-9fdcf3e3" data-reference-type="ref+label" data-reference="prop:ConvergentSeqOfPoints">性质 3.1.1</a>(3)可知<span class="math inline">\(\{x_n\}\)</span>有界，所以<span class="math inline">\(||x_n||\)</span>有界。由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(8.b)(8.c)可知上式极限为<span class="math inline">\(0\)</span>，即内积是连续函数。</p>
 <p>(2)当<span class="math inline">\(X\)</span>是实内积空间时有：</p>
@@ -3429,7 +3344,6 @@ x'=\frac{x}{||T^{-1}x||}
 &amp;\frac{1}{4}(||x+y||^2-||x-y||^2)=\frac{1}{4}[(x+y,x+y)-(x-y,x-y)] \\
 =&amp;\frac{1}{4}[(x,x)+(x,y)+(y,x)+(y,y)-(x,x)-(x,-y)-(-y,x)-(-y,-y)] \\
 =&amp;\frac{1}{4}[(x,x)+(x,y)+(x,y)+(y,y)-(x,x)+(x,y)+(x,y)-(y,y)]=(x,y)
-
 \end{align*}\]</span></p>
 <p>当<span class="math inline">\(X\)</span>是复内积空间时有：</p>
 <p><span class="math display">\[\begin{align*}
@@ -3439,14 +3353,12 @@ x'=\frac{x}{||T^{-1}x||}
 &amp;\quad\;\frac{1}{4}i[(x,x)+(x,iy)+(iy,x)+(iy,iy)-(x,x)-(x,-iy)-(-iy,x)-(-iy,-iy)] \\
 &amp;=\frac{1}{4}[2(x,y)+2(y,x)+2i(x,iy)+2i(iy,x)] \\
 &amp;=\frac{1}{4}[2(x,y)+2(y,x)+2(x,y)-2(y,x)=(x,y)
-
 \end{align*}\]</span></p>
 <p>(3)对于第一个结论，注意到：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;||x+y||^2+||x-y||^2=(x+y,x+y)+(x-y,x-y) \\
 =&amp;(x,x)+(x,y)+(y,x)+(y,y)+(x,x)-(x,y)-(y,x)+(y,y) \\
 =&amp;2(x,x)+2(y,y)=2||x||^2+2||y||^2
-
 \end{align*}\]</span></p>
 <p>第二个结论利用(2)来定义内积再代回验证即可。&nbsp;◻</p>
 </div>
@@ -3459,7 +3371,6 @@ x'=\frac{x}{||T^{-1}x||}
 <p><strong>Definition 3.81</strong>. 设<span class="math inline">\(X\)</span>是内积空间，<span class="math inline">\(E\subseteq X\)</span>，<span class="math inline">\(x\in X\)</span>。若存在<span class="math inline">\(y\in E\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 x=y+z,\quad y\in E,\;z\in E^{\perp}
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(y\)</span>为<span class="math inline">\(x\)</span>在<span class="math inline">\(E\)</span>中的<a href="../chapters/page-054.html#term-OrthogonalProjection" class="term" title="orthogonal projection">正交投影<span class="term-english">（orthogonal projection）</span></a>。</p>
 </div>
@@ -3469,7 +3380,6 @@ x=y+z,\quad y\in E,\;z\in E^{\perp}
 <li><p>若<span class="math inline">\(x_1,x_2,\dots,x_n\in X\)</span>互相正交，则：</p>
 <p><span class="math display">\[\begin{equation*}
                 \left\|\sum\limits_{i=1}^nx_i\right\|^2=\sum_{i=1}^{n}||x_i||^2
-
     \end{equation*}\]</span></p></li>
 <li><p>若<span class="math inline">\(x\in X\)</span>，<span class="math inline">\(\{y_n\}\subseteq X\)</span>，<span class="math inline">\(\{y_n\}\to y\in X\)</span>，对任意的<span class="math inline">\(n\in\mathbb{N}^+\)</span>有<span class="math inline">\(x\perp y_n\)</span>，则<span class="math inline">\(x\perp y\)</span>；</p></li>
 <li><p>若<span class="math inline">\(x\in X\)</span>与<span class="math inline">\(X\)</span>中的一个稠密子集<span class="math inline">\(E\)</span>正交，则<span class="math inline">\(x=\mathbf{0}\)</span>；</p></li>
@@ -3485,12 +3395,10 @@ x=y+z,\quad y\in E,\;z\in E^{\perp}
 =\left(\sum_{i=1}^nx_i,\sum_{i=1}^nx_i\right)
 =\sum_{i=1}^{n}(x_i,x_i)
 =\sum_{i=1}^{n}||x_i||^2
-
 \end{equation*}\]</span></p>
 <p>(2)根据<a href="#prop-InnerProduct-21510444" data-reference-type="ref+label" data-reference="prop:InnerProduct">性质 3.4.5</a>(1)和<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(5)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 (x,y)=\left(x,\lim_{n\to\infty}y_n\right)=\lim_{n\to\infty}(x,y_n)=0
-
 \end{equation*}\]</span></p>
 <p>(3)因为<span class="math inline">\(E\)</span>在<span class="math inline">\(X\)</span>中稠密，由<a href="#theo-Density-062642be" data-reference-type="ref+label" data-reference="theo:Density">定理 3.2</a>(3)可知存在<span class="math inline">\(\{x_n\}\subseteq E\)</span>使得<span class="math inline">\(\{x_n\}\to x\)</span>。根据(2)可得<span class="math inline">\((x,x)=0\)</span>，由内积的定义即可得到<span class="math inline">\(x=\mathbf{0}\)</span>。</p>
 <p>(4)由内积的线性性立即可得。</p>
@@ -3501,7 +3409,6 @@ x=y+z,\quad y\in E,\;z\in E^{\perp}
 <p><strong>Definition 3.82</strong>. 设<span class="math inline">\(X\)</span>是内积空间，<span class="math inline">\(E\subseteq M\)</span>，<span class="math inline">\(x\in X\)</span>。如果存在<span class="math inline">\(y\in E\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x-y||=\inf_{z\in E}||x-z||
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(y\)</span>是<span class="math inline">\(x\)</span>在<span class="math inline">\(M\)</span>中的一个<a href="../chapters/page-041.html#term-BestApproximationElement" class="term" title="best approximation element">最佳逼近元<span class="term-english">（best approximation element）</span></a>。</p>
 </div>
@@ -3512,47 +3419,39 @@ x=y+z,\quad y\in E,\;z\in E^{\perp}
 <p><span class="proof-title"><em>证明</em>. </span>任取<span class="math inline">\(x\in X\)</span>，记：</p>
 <p><span class="math display">\[\begin{equation*}
 \inf_{z\in E}||x-z||=a
-
 \end{equation*}\]</span></p>
 <p><strong>(1)存在性：</strong>由下确界的定义，可从<span class="math inline">\(E\)</span>中得到一个点列<span class="math inline">\(\{y_n\}\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to+\infty}||x-y_n||=a
-
 \end{equation*}\]</span></p>
 <p>下证<span class="math inline">\(\{y_n\}\)</span>是Cauchy点列。令<span class="math inline">\(n&gt;m\)</span>，由<a href="#prop-InnerProduct-21510444" data-reference-type="ref+label" data-reference="prop:InnerProduct">性质 3.4.5</a>(3)可得到：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;||y_n-y_m||^2=||y_n-x+x-y_m||^2 \\
 =&amp;2||y_n-x||^2+2||x-y_m||^2-||2x-y_m-y_n||^2 \\
 =&amp;2||y_n-x||^2+2||x-y_m||^2-4\left\|x-\frac{y_m+y_n}{2}\right\|^2
-
 \end{align*}\]</span></p>
 <p>因为<span class="math inline">\(E\)</span>是<span class="math inline">\(X\)</span>中的闭凸集，<span class="math inline">\(y_m,y_n\in E\)</span>，所以<span class="math inline">\(\dfrac{y_m+y_n}{2}\in E\)</span>，进而有：</p>
 <p><span class="math display">\[\begin{equation*}
 \left\|x-\frac{y_m+y_n}{2}\right\|^2\geqslant a^2
-
 \end{equation*}\]</span></p>
 <p>又因<span class="math inline">\(n,m\to+\infty\)</span>时，有：</p>
 <p><span class="math display">\[\begin{equation*}
 ||y_n-x||^2\to a^2,\;||x-y_m||^2\to a^2
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(6)(8.b)(8.c)可得：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;\lim_{m\to+\infty}||y_n-y_m||^2\leqslant\lim_{m\to+\infty}\left(2||y_n-x||^2+2||x-y_m||^2-4a^2\right) \\
 =&amp;\lim_{m\to+\infty}2||y_n-x||^2+\lim_{m\to+\infty}2||x-y_m||^2-4a^2=2a^2+2a^2-4a^2=0
-
 \end{align*}\]</span></p>
 <p>故<span class="math inline">\(\{y_n\}\)</span>是Cauchy点列。因为<span class="math inline">\(X\)</span>是完备的，所以<span class="math inline">\(\{y_n\}\to y\in X\)</span>。又因<span class="math inline">\(E\)</span>是闭集，所以<span class="math inline">\(y\in E\)</span>。由<a href="#prop-Norm-bc271cd1" data-reference-type="ref+label" data-reference="prop:Norm">性质 3.4.1</a>(2)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x-y||=\left\|x-\lim_{n\to+\infty}y_n\right\|=\lim_{n\to+\infty}||x-y_n||=a
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(y\)</span>是<span class="math inline">\(x\)</span>在<span class="math inline">\(E\)</span>中的最佳逼近元。</p>
 <p><strong>(2)唯一性：</strong>假设<span class="math inline">\(x\)</span>在<span class="math inline">\(E\)</span>中存在另一最佳逼近元<span class="math inline">\(y'\)</span>，由<a href="#prop-InnerProduct-21510444" data-reference-type="ref+label" data-reference="prop:InnerProduct">性质 3.4.5</a>(3)可得：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;||y-y'||^2=||y-x+x-y'||^2 \\
 =&amp;2||y-x||^2+2||x-y'||^2-4\left\|x-\frac{y+y'}{2}\right\|^2\leqslant0
-
 \end{align*}\]</span></p>
 <p>所以<span class="math inline">\(||y-y'||=0\)</span>，<span class="math inline">\(y=y'\)</span>。</p>
 <p><span class="math inline">\(y\)</span>是<span class="math inline">\(x\)</span>在<span class="math inline">\(E\)</span>上的投影由<a href="#theo-OrthogonalProjection-9e621cb6" data-reference-type="ref+label" data-reference="theo:OrthogonalProjection">定理 3.28</a>的证明过程立即可得。&nbsp;◻</p>
@@ -3561,7 +3460,6 @@ x=y+z,\quad y\in E,\;z\in E^{\perp}
 <p><strong>Theorem 3.28</strong>. 设<span class="math inline">\(X\)</span>是Hilbert空间，<span class="math inline">\(E\)</span>是<span class="math inline">\(X\)</span>中的闭子空间。对任意的<span class="math inline">\(x\in X\)</span>，存在下述唯一的正交分解：</p>
 <p><span class="math display">\[\begin{equation*}
 x=y+z,\quad y\in E,\;z\in E^{\perp}
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -3570,17 +3468,14 @@ x=y+z,\quad y\in E,\;z\in E^{\perp}
 a^2
 &amp;\leqslant||x-(y+\lambda u)||^2 =\Bigl((x-y)-\lambda u,(x-y)-\lambda u\Bigr) \\
 &amp;=||x-y||^2-\overline{\lambda}(x-y,u)-\lambda(u,x-y)+|\lambda|^2||u||^2
-
 \end{align*}\]</span></p>
 <p>取<span class="math inline">\(\lambda=\dfrac{(x-y,u)}{||u||^2}\)</span>，上式即可化为：</p>
 <p><span class="math display">\[\begin{equation*}
 a^2\leqslant a^2-\frac{|(x-y,u)|^2}{||u||^2}-\frac{|(x-y,u)|^2}{||u||^2}+\frac{|(x-y,u)|^2}{||u||^4}||u||^2=a^2-\frac{|(x-y,u)|^2}{||u||^2}
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\((x-y,u)=0\)</span>。由<span class="math inline">\(u\)</span>的任意性，<span class="math inline">\((x-y)\perp E\)</span>。令<span class="math inline">\(z=x-y\)</span>，即有：</p>
 <p><span class="math display">\[\begin{equation*}
 x=y+z,\quad y\in E,\;z\in E^{\perp}
-
 \end{equation*}\]</span></p>
 <p><strong>(2)唯一性：</strong>由<a href="#prop-Orthogonal-dd705229" data-reference-type="ref+label" data-reference="prop:Orthogonal">性质 3.4.6</a>(6)立即可得。&nbsp;◻</p>
 </div>
@@ -3592,7 +3487,6 @@ x=y+z,\quad y\in E,\;z\in E^{\perp}
 0,&amp;m\ne n \\
 1,&amp;m=n
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\{e_n\}\)</span>是<span class="math inline">\(X\)</span>中的一个<a href="../chapters/page-054.html#term-OrthonormalSystem" class="term" title="orthonormall system">规范正交系<span class="term-english">（orthonormall system）</span></a>。对任意的<span class="math inline">\(x\in X\)</span>，称<span class="math inline">\(c_n=(x,e_n)\)</span>为<span class="math inline">\(x\)</span>关于<span class="math inline">\(\{e_n\}\)</span>的第<span class="math inline">\(n\)</span>个<a href="../chapters/page-045.html#term-FourierCoefficient" class="term" title="Fourier coefficient">傅里叶系数<span class="term-english">（Fourier coefficient）</span></a>，称<span class="math inline">\(\{(x,e_n)\}\)</span>为<span class="math inline">\(x\)</span>关于<span class="math inline">\(\{e_n\}\)</span>的<a href="../chapters/page-058.html#term-SetOfFourierCoefficients" class="term" title="set of Fourier coefficients">傅里叶系数集<span class="term-english">（set of Fourier coefficients）</span></a>。</p>
 </div>
@@ -3600,14 +3494,12 @@ x=y+z,\quad y\in E,\;z\in E^{\perp}
 <p><span class="theorem-title"><strong>引理 4.4</strong></span> <strong>Lemma 3.4</strong>. <span class="math inline">\(X\)</span>是内积空间，<span class="math inline">\(\{e_1,e_2,\dots,e_n\}\)</span>是<span class="math inline">\(X\)</span>中的一个规范正交系，<span class="math inline">\(E=\operatorname{span}\{e_1,e_2,\dots,e_n\}\)</span>。对任意的<span class="math inline">\(x\in X\)</span>，<span class="math inline">\(x\)</span>在<span class="math inline">\(E\)</span>上的正交投影为：</p>
 <p><span class="math display">\[\begin{equation*}
 y=\sum_{i=1}^{n}(x,e_i)e_i
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>对任意的<span class="math inline">\(i=1,2,\dots,n\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 (x-y,e_i)=\left(x-\sum_{j=1}^{n}(x,e_j)e_j,e_i\right)=(x,e_i)-\sum_{j=1}^{n}(x,e_j)(e_j,e_i)=(x,e_i)-(x,e_i)=0
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-Orthogonal-dd705229" data-reference-type="ref+label" data-reference="prop:Orthogonal">性质 3.4.6</a>(4)可知<span class="math inline">\(x-y\perp E\)</span>，所以<span class="math inline">\(y\)</span>是<span class="math inline">\(X\)</span>在<span class="math inline">\(E\)</span>上的正交投影。&nbsp;◻</p>
 </div>
@@ -3616,20 +3508,17 @@ y=\sum_{i=1}^{n}(x,e_i)e_i
 <p>] <span class="math inline">\(X\)</span>是内积空间，<span class="math inline">\(\{e_n\}\)</span>是<span class="math inline">\(X\)</span>中的一个规范正交系。对任意的<span class="math inline">\(x\in X\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{+\infty}|(x,e_n)|^2\leqslant||x||^2
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>由<a href="#lem-OrthogonalProjectionSpan-a7eaedb4" data-reference-type="ref+label" data-reference="lem:OrthogonalProjectionSpan">引理 3.4</a>可知<span class="math inline">\(x\)</span>在<span class="math inline">\(\operatorname{span}\{e_1,e_2,\dots,e_n\}\)</span>中存在正交投影：</p>
 <p><span class="math display">\[\begin{equation*}
 y=\sum_{i=1}^{n}(x,e_i)e_i
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-Orthogonal-dd705229" data-reference-type="ref+label" data-reference="prop:Orthogonal">性质 3.4.6</a>(1)可得<span class="math inline">\(||y||\leqslant||x||\)</span>，故：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;||y||^2=\left\|\sum_{i=1}^{n}(x,e_i)e_i\right\|^2 =\left(\sum_{i=1}^{n}(x,e_i)e_i,\sum_{i=1}^{n}(x,e_i)e_i\right) \\
 =&amp;\sum_{i=1}^n\Bigl((x,e_i)e_i,(x,e_i)e_i\Bigr) =\sum_{i=1}^n|(x,e_i)|^2(e_i,e_i) =\sum_{i=1}^n|(x,e_i)|^2\leqslant||x||^2
-
 \end{align*}\]</span></p>
 <p>由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(6)即可得到结果。&nbsp;◻</p>
 </div>
@@ -3638,7 +3527,6 @@ y=\sum_{i=1}^{n}(x,e_i)e_i
 <p>设<span class="math inline">\(X\)</span>是Hilbert空间，<span class="math inline">\(\{e_n\}\)</span>是<span class="math inline">\(X\)</span>中的一个规范正交系，数列<span class="math inline">\(\{c_n\}\in l^2\)</span>。存在唯一的<span class="math inline">\(x\in X\)</span>，使得<span class="math inline">\(\{c_n\}\)</span>是<span class="math inline">\(x\)</span>关于<span class="math inline">\(\{e_n\}\)</span>的Fourier系数集，且等式：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x||^2=\sum_{n=1}^{+\infty}|c_n|^2
-
 \end{equation*}\]</span></p>
 <p>成立。</p>
 </div>
@@ -3646,23 +3534,19 @@ y=\sum_{i=1}^{n}(x,e_i)e_i
 <p><span class="proof-title"><em>证明</em>. </span><strong>(1)存在性：</strong>构建点列<span class="math inline">\(\left\{x_n=\sum\limits_{i=1}^{n}c_ie_i\right\}\)</span>，设<span class="math inline">\(m&gt;n\)</span>，则有：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x_m-x_n||^2=\left\|\sum_{i=n+1}^{m}c_ie_i\right\|^2=\left(\sum_{i=n+1}^{m}c_ie_i,\sum_{i=n+1}^{m}c_ie_i\right)=\sum_{i=n+1}^{m}|c_i|^2(e_i,e_i)=\sum_{i=n+1}^{m}|c_i|^2
-
 \end{equation*}\]</span></p>
 <p>因为数列<span class="math inline">\(\{c_n\}\in l^2\)</span>，所以<span class="math inline">\(\sum\limits_{i=1}^{+\infty}|c_i|^2\)</span>收敛，由<a href="#prop-Series-457db7a2" data-reference-type="ref+label" data-reference="prop:Series">性质 3.2.12</a>(3)可得<span class="math inline">\(||x_m-x_n||^2\to0\)</span>，因此<span class="math inline">\(\{x_n\}\)</span>是<span class="math inline">\(X\)</span>中的Cauchy点列。又因为<span class="math inline">\(X\)</span>完备，所以<span class="math inline">\(\{x_n\}\to x\in X\)</span>。</p>
 <p>由<a href="#prop-InnerProduct-21510444" data-reference-type="ref+label" data-reference="prop:InnerProduct">性质 3.4.5</a>(1)可知，对任意的<span class="math inline">\(i\in\mathbb{N}^+\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 (x,e_{i})=\left(\lim_{n\to+\infty}x_n,e_{i}\right)=\lim_{n\to+\infty}(x_n,e_{i})
-
 \end{equation*}\]</span></p>
 <p>由<span class="math inline">\(\{x_n\}\)</span>的定义可知，当<span class="math inline">\(n\geqslant i\)</span>时，<span class="math inline">\((x_n,e_{i})=c_{i}\)</span>，所以<span class="math inline">\((x,e_{i})=c_{i}\)</span>，即<span class="math inline">\((x,e_n)=c_n\)</span>，所以<span class="math inline">\(\{c_n\}\)</span>是<span class="math inline">\(x\)</span>关于<span class="math inline">\(\{e_n\}\)</span>的Fourier系数集。又因为：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x_n||^2=\left\|\sum_{i=1}^{n}c_ie_i\right\|^2=\left(\sum_{i=1}^{n}c_ie_i,\sum_{i=1}^{n}c_ie_i\right)=\sum_{i=1}^{n}|c_i|^2(e_i,e_i)=\sum_{i=1}^{n}|c_i|^2
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-Norm-bc271cd1" data-reference-type="ref+label" data-reference="prop:Norm">性质 3.4.1</a>(2)即可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x||^2=\lim_{n\to\infty}||x_n||^2=\lim_{n\to\infty}\sum_{i=1}^{n}|c_i|^2=\sum_{i=1}^{+\infty}|c_i|^2
-
 \end{equation*}\]</span></p>
 <p><strong>(2)唯一性：</strong>&nbsp;◻</p>
 </div>
@@ -3670,7 +3554,6 @@ y=\sum_{i=1}^{n}(x,e_i)e_i
 <p><strong>Definition 3.84</strong>. <span class="math inline">\(X\)</span>是内积空间，<span class="math inline">\(\{e_n\}\)</span>是<span class="math inline">\(X\)</span>中的一个规范正交系。如果对任意的<span class="math inline">\(x\in X\)</span>，Parseval’s identity：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x||^2=\sum_{n=1}^{+\infty}|(x,e_n)|^2
-
 \end{equation*}\]</span></p>
 <p>恒成立，则称<span class="math inline">\(\{e_n\}\)</span>是完备的。</p>
 </div>
@@ -3684,12 +3567,10 @@ y=\sum_{i=1}^{n}(x,e_i)e_i
 <li><p>对任意的<span class="math inline">\(x\in X\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
                 x=\sum_{n=1}^{+\infty}(x,e_n)e_n
-
     \end{equation*}\]</span></p></li>
 <li><p>对任意的<span class="math inline">\(x,y\in X\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
                 (x,y)=\sum_{n=1}^{+\infty}(x,e_n)\overline{(y,e_n)}
-
     \end{equation*}\]</span></p>
 <p>且上式右端级数绝对收敛。</p></li>
 </ol>
@@ -3708,61 +3589,50 @@ y=\sum_{i=1}^{n}(x,e_i)e_i
 =&amp;(x,x)-\sum_{i=1}^{n}\overline{(x,e_i)}(x,e_i)-\sum_{i=1}^{n}(x,e_i)(e_i,x)+\sum_{i=1}^{n}(x,e_i)\overline{(x,e_i)} \\
 =&amp;||x||^2-\sum_{i=1}^{n}\overline{(x,e_i)}(x,e_i)-\sum_{i=1}^{n}(x,e_i)\overline{(x,e_i)}+\sum_{i=1}^{n}(x,e_i)\overline{(x,e_i)} \\
 =&amp;||x||^2-\sum_{i=1}^{n}\overline{(x,e_i)}(x,e_i)=||x||^2-\sum_{i=1}^{n}|(x,e_i)|^2
-
 \end{align*}\]</span></p>
 <p>因为<span class="math inline">\(\{e_n\}\)</span>是完备的，所以Parseval’s identity成立，于是由<a href="#prop-Norm-bc271cd1" data-reference-type="ref+label" data-reference="prop:Norm">性质 3.4.1</a>(2)和<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(8.b)：</p>
 <p><span class="math display">\[\begin{equation*}
 \left\|x-\sum_{n=1}^{+\infty}(x,e_n)e_n\right\|=\lim_{n\to+\infty}\left\|x-\sum_{i=1}^{n}(x,e_i)e_i\right\|=\lim_{n\to+\infty}\left[||x||^2-\sum_{i=1}^{n}|(x,e_i)|^2\right]=0
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(x=\sum\limits_{n=1}^{+\infty}(x,e_n)e_n\)</span>。</p>
 <p>(2)任取<span class="math inline">\(x,y\in X\)</span>，取点列<span class="math inline">\(\{x_n\},\{y_n\}\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 x_n=\sum_{i=1}^{n}(x,e_i)e_i,\;y_n=\sum_{i=1}^{n}(y,e_i)e_i
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\{x_n\}\to x,\;\{y_n\}\to y\)</span>。因为：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;(x_n,y_n)=\left(\sum_{i=1}^{n}(x,e_i)e_i,\sum_{i=1}^{n}(y,e_i)e_i\right)=\sum_{i=1}^{n}(x,e_i)\left(e_i,\sum_{j=1}^{n}(y,e_j)e_j\right) \\
 =&amp;\sum_{i=1}^{n}(x,e_i)\sum_{j=1}^{n}\overline{(y,e_j)}(e_i,e_j) =\sum_{i=1}^{n}(x,e_i)\overline{(y,e_i)}
-
 \end{align*}\]</span></p>
 <p>由<a href="#prop-InnerProduct-21510444" data-reference-type="ref+label" data-reference="prop:InnerProduct">性质 3.4.5</a>(1)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 (x,y)=\lim_{n\to+\infty}(x_n,y_n)=\lim_{n\to+\infty}\left[\sum_{i=1}^{n}(x,e_i)\overline{(y,e_i)}\right]=\sum_{n=1}^{+\infty}(x,e_n)\overline{(y,e_n)}
-
 \end{equation*}\]</span></p>
 <p>对任意的<span class="math inline">\(N\in\mathbb{N}^+\)</span>，由<a href="#theo-BesselInequality-b8ab7495" data-reference-type="ref+label" data-reference="theo:BesselInequality">定理 3.29</a>可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{N}|(x,e_n)|^2\leqslant||x||^2,\quad\sum_{n=1}^{N}|(y,e_n)|^2\leqslant||y||^2
-
 \end{equation*}\]</span></p>
 <p>根据<a href="../chapters/page-017.html#ineq-cauchy-ineq-R-143b29da" data-reference-type="ref+label" data-reference="ineq:cauchy-ineq-R">不等式 1</a>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=1}^{N}|(x,e_n)\overline{(y,e_n)}|=\sum_{n=1}^{N}|(x,e_n)(y,e_n)|\leqslant\left(\sum_{n=1}^{N}|(x,e_n)|^2\right)^{\frac{1}{2}}\left(\sum_{n=1}^{N}|(y,e_n)|^2\right)^{\frac{1}{2}}\leqslant||x||\;||y||
-
 \end{equation*}\]</span></p>
 <p>由<a href="#prop-RSeq-69872747" data-reference-type="ref+label" data-reference="prop:RSeq">性质 3.2.9</a>(6)即可得出结论。</p>
 <p>(3)取<span class="math inline">\(y=x\)</span>即有：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x||^2=(x,x)=\sum_{n=1}^{+\infty}(x,e_n)\overline{(x,e_n)}=\sum_{n=1}^{+\infty}|(x,e_n)|^2
-
 \end{equation*}\]</span></p>
 <p>(4)因为对任意的<span class="math inline">\(x\in X\)</span>，有<span class="math inline">\((x,e_n)=0\)</span>，所以对任意的<span class="math inline">\(y\in X\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 (x,y)=\sum_{n=1}^{+\infty}(x,e_n)\overline{(y,e_n)}=0
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(x=\mathbf{0}\)</span>，<span class="math inline">\(\{e_n\}\)</span>是完全的。</p>
 <p>(5)任取<span class="math inline">\(x\in X\)</span>。由<a href="#theo-BesselInequality-b8ab7495" data-reference-type="ref+label" data-reference="theo:BesselInequality">定理 3.29</a>可知<span class="math inline">\(\{(x,e_n)\}\in l^2\)</span>。因为<span class="math inline">\(X\)</span>是Hilbert空间，由<a href="#theo-ParsevalIdentity-49a6060d" data-reference-type="ref+label" data-reference="theo:ParsevalIdentity">定理 3.30</a>，存在<span class="math inline">\(y\in X\)</span>，使得<span class="math inline">\(\{(x,e_n)\}\)</span>是<span class="math inline">\(y\)</span>关于<span class="math inline">\(\{e_n\}\)</span>的Fourier系数集，且：</p>
 <p><span class="math display">\[\begin{equation*}
 ||y||^2=\sum_{n=1}^{+\infty}|(x,e_n)|^2
-
 \end{equation*}\]</span></p>
 <p>而<span class="math inline">\(\{(x,e_n)\}\)</span>也是<span class="math inline">\(x\)</span>关于<span class="math inline">\(\{e_n\}\)</span>的Fourier系数集，所以<span class="math inline">\(x-y\)</span>关于<span class="math inline">\(\{e_n\}\)</span>的Fourier系数满足<span class="math inline">\((x-y,e_n)=(x,e_n)-(y,e_n)=(x,e_n)-(x,e_n)=0\)</span>。因为<span class="math inline">\(\{e_n\}\)</span>是完全的，所以<span class="math inline">\(x-y=\mathbf{0}\)</span>，即<span class="math inline">\(x=y\)</span>，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x||^2=\sum_{n=1}^{+\infty}|(x,e_n)|^2
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -3777,43 +3647,35 @@ x_n=\sum_{i=1}^{n}(x,e_i)e_i,\;y_n=\sum_{i=1}^{n}(y,e_i)e_i
 <p><span class="proof-title"><em>证明</em>. </span>取<span class="math inline">\(y_1\ne\mathbf{0}\)</span>且<span class="math inline">\(y_1\in E\)</span>，令：</p>
 <p><span class="math display">\[\begin{equation*}
 e_1=\frac{y_1}{||y_1||}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(||e_1||=1\)</span>。取<span class="math inline">\(y_2\in E\)</span>与<span class="math inline">\(e_1\)</span>线性无关（若不存在这样的<span class="math inline">\(y_2\)</span>，则结论成立），令：</p>
 <p><span class="math display">\[\begin{equation*}
 h_2=y_2-(y_2,e_1)e_1
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(h_2\ne\mathbf{0}\)</span>，否则的话就有<span class="math inline">\(y_2=(y_2,e_1)e_1\)</span>，即<span class="math inline">\(y_2\)</span>与<span class="math inline">\(e_1\)</span>线性相关，与<span class="math inline">\(y_2\)</span>的取法矛盾。因为：</p>
 <p><span class="math display">\[\begin{equation*}
 \Big(y_2-(y_2,e_1)e_1,e_1\Big)=(y_2,e_1)-(y_2,e_1)(e_1,e_1)=0
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(h_2=y_2-(y_2,e_1)e_1\perp e_1\)</span>。令：</p>
 <p><span class="math display">\[\begin{equation*}
 e_2=\frac{h_2}{||h_2||}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(||e_2||=1,\;e_2\perp e_1\)</span>。取<span class="math inline">\(y_3\)</span>与<span class="math inline">\(e_1,e_2\)</span>线性无关（若不存在这样的<span class="math inline">\(y_2\)</span>，则结论成立），令：</p>
 <p><span class="math display">\[\begin{equation*}
 h_3=y_3-(y_3,e_1)e_1-(y_3,e_2)e_2
-
 \end{equation*}\]</span></p>
 <p>与前面相似，<span class="math inline">\(h_3\ne\mathbf{0}\)</span>，且<span class="math inline">\(h_3\perp e_j,\;j=1,2\)</span>。令：</p>
 <p><span class="math display">\[\begin{equation*}
 e_3=\frac{h_3}{||h_3||}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(||e_3||=1,\;e_i\perp e_j,\;i=1,2,3,\;j=1,2,3,\;i\ne j\)</span>。</p>
 <p>重复上述步骤，假设已作好相互正交且范数为<span class="math inline">\(1\)</span>的元素<span class="math inline">\(e_1,,e_2,\dots,e_{n}\)</span>。取<span class="math inline">\(y_{n+1}\in E\)</span>与<span class="math inline">\(e_1,,e_2,\dots,e_{n}\)</span>线性无关（若不存在这样的<span class="math inline">\(y_2\)</span>，则结论成立），令：</p>
 <p><span class="math display">\[\begin{equation*}
 h_{n+1}=y_{n+1}-\sum_{i=1}^{n}(y_{n+1},e_i)e_i
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(h_{n+1}\ne\mathbf{0}\)</span>，且有<span class="math inline">\(h_{n+1}\perp e_i,\;i=1,2,\dots,n\)</span>。再令：</p>
 <p><span class="math display">\[\begin{equation*}
 e_{n+1}=\frac{h_{n+1}}{||h_{n+1}||}
-
 \end{equation*}\]</span></p>
 <p>于是得到<span class="math inline">\(n+1\)</span>个相互正交且范数均为<span class="math inline">\(1\)</span>的元素<span class="math inline">\(e_1,e_2,\dots,e_{n+1}\)</span>。由归纳法，可以得到最多含可列个元素的规范正交系<span class="math inline">\(\{e_n\}\)</span>。</p>
 <p>接下来证明<span class="math inline">\(E\)</span>张成的子空间<span class="math inline">\(L\)</span>与<span class="math inline">\(\{e_n\}\)</span>张成的子空间<span class="math inline">\(L'\)</span>相同。</p>
@@ -3826,35 +3688,29 @@ e_{n+1}=\frac{h_{n+1}}{||h_{n+1}||}
 <p><strong>Theorem 3.33</strong>. 设<span class="math inline">\(f\)</span>是从Hilbert空间<span class="math inline">\(X\)</span>到<span class="math inline">\(X\)</span>的标量域<span class="math inline">\(K\)</span>上的连续线性映射，则存在唯一的<span class="math inline">\(y\in X\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;x\in X,\;f(x)=(x,y)
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span><strong>(1)存在性：</strong>当<span class="math inline">\(E=\{x\in X:f(x)=0\}\ne X\)</span>时（反之取<span class="math inline">\(y=\mathbf{0}\)</span>即可），因为<span class="math inline">\(f\)</span>是连续线性映射，由<a href="../chapters/page-002.html#theo-Subspace-e4ba2d14" data-reference-type="ref+label" data-reference="theo:Subspace">定理 1.5</a>和<a href="#theo-ContinousMapO2OC2C-0a21099f" data-reference-type="ref+label" data-reference="theo:ContinousMapO2OC2C">定理 3.18</a>(2)可知<span class="math inline">\(E\)</span>是<span class="math inline">\(X\)</span>的闭线性子空间，由<a href="#theo-OrthogonalProjection-9e621cb6" data-reference-type="ref+label" data-reference="theo:OrthogonalProjection">定理 3.28</a>可知存在<span class="math inline">\(x_0\in X\)</span>满足<span class="math inline">\(x_0\perp E\)</span>且<span class="math inline">\(||x_0||=1\)</span>，<span class="math inline">\(X\)</span>中的任意元素<span class="math inline">\(x\)</span>可以分解为：</p>
 <p><span class="math display">\[\begin{equation*}
 x=\alpha x_0+y
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(y\in E\)</span>，<span class="math inline">\(\alpha\in K\)</span>。因为<span class="math inline">\(f\)</span>是线性映射，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 f(y)=f(x-\alpha x_0)=f(x)-\alpha f(x_0)=0
-
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(\alpha=\dfrac{f(x)}{f(x_0)}\)</span>（因为<span class="math inline">\(x_0\perp E\)</span>，结合<span class="math inline">\(E\)</span>的定义可知<span class="math inline">\(f(x_0)=0\)</span>当且仅当<span class="math inline">\(x_0=\mathbf{0}\)</span>，但<span class="math inline">\(||x_0||=1\)</span>）。注意到：</p>
 <p><span class="math display">\[\begin{equation*}
 (x,x_0)=(\alpha x_0+y,x_0)=\alpha(x_0,x_0)+(y,x_0)=\alpha
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=\alpha f(x_0)=(x,x_0)f(x_0)=\Big(x,\overline{f(x_0)}x_0\Big)
-
 \end{equation*}\]</span></p>
 <p>取<span class="math inline">\(y=\overline{f(x_0)}x_0\)</span>即可。</p>
 <p><strong>(2)唯一性：</strong>若存在不同于<span class="math inline">\(y\)</span>的<span class="math inline">\(y'\)</span>也满足条件，则对任意的<span class="math inline">\(x\in X\)</span>有<span class="math inline">\(f(x)=(x,y)=(x,y')\)</span>，即：</p>
 <p><span class="math display">\[\begin{equation*}
 (x,y)-(x,y')=(x,y-y')=0
-
 \end{equation*}\]</span></p>
 <p>取<span class="math inline">\(x=y-y'\)</span>即可得到<span class="math inline">\(y=y'\)</span>。&nbsp;◻</p>
 </div>

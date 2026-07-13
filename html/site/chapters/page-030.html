@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,59 +1079,30 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#id--bd4c9c51" id="toc-id--bd4c9c51" class="nav-link active" data-scroll-target="#id--bd4c9c51"><span class="header-section-number">28.1</span> 模型评价</a>
-  <ul>
+  <ul class="collapse">
   <li><a href="#id--2cc4d48c" id="toc-id--2cc4d48c" class="nav-link" data-scroll-target="#id--2cc4d48c"><span class="header-section-number">28.1.1</span> 分类任务</a></li>
   <li><a href="#id--e700b9f8" id="toc-id--e700b9f8" class="nav-link" data-scroll-target="#id--e700b9f8"><span class="header-section-number">28.1.2</span> 回归任务</a></li>
   <li><a href="#id--fdebdaba" id="toc-id--fdebdaba" class="nav-link" data-scroll-target="#id--fdebdaba"><span class="header-section-number">28.1.3</span> 过拟合与数据集划分</a></li>
   </ul></li>
   <li><a href="#id--a70d8d20" id="toc-id--a70d8d20" class="nav-link" data-scroll-target="#id--a70d8d20"><span class="header-section-number">28.2</span> 树模型</a>
-  <ul>
-  <li><a href="#id--9f71c77f" id="toc-id--9f71c77f" class="nav-link" data-scroll-target="#id--9f71c77f"><span class="header-section-number">28.2.1</span> 信息度量与分裂准则</a>
   <ul class="collapse">
-  <li><a href="#id--9274531b" id="toc-id--9274531b" class="nav-link" data-scroll-target="#id--9274531b"><span class="header-section-number">28.2.1.1</span> 信息量</a></li>
-  <li><a href="#gini-0fa0870b" id="toc-gini-0fa0870b" class="nav-link" data-scroll-target="#gini-0fa0870b"><span class="header-section-number">28.2.1.2</span> Gini系数</a></li>
-  <li><a href="#id--a93ea801" id="toc-id--a93ea801" class="nav-link" data-scroll-target="#id--a93ea801"><span class="header-section-number">28.2.1.3</span> 交叉熵</a></li>
-  </ul></li>
+  <li><a href="#id--9f71c77f" id="toc-id--9f71c77f" class="nav-link" data-scroll-target="#id--9f71c77f"><span class="header-section-number">28.2.1</span> 信息度量与分裂准则</a></li>
   <li><a href="#id--642df3fd" id="toc-id--642df3fd" class="nav-link" data-scroll-target="#id--642df3fd"><span class="header-section-number">28.2.2</span> 决策树</a></li>
   <li><a href="#bagging-79cdf299" id="toc-bagging-79cdf299" class="nav-link" data-scroll-target="#bagging-79cdf299"><span class="header-section-number">28.2.3</span> Bagging模型</a></li>
-  <li><a href="#boosting-19406e53" id="toc-boosting-19406e53" class="nav-link" data-scroll-target="#boosting-19406e53"><span class="header-section-number">28.2.4</span> Boosting模型</a>
-  <ul class="collapse">
-  <li><a href="#gbdt" id="toc-gbdt" class="nav-link" data-scroll-target="#gbdt"><span class="header-section-number">28.2.4.1</span> GBDT</a></li>
-  <li><a href="#xgboost" id="toc-xgboost" class="nav-link" data-scroll-target="#xgboost"><span class="header-section-number">28.2.4.2</span> XGBoost</a></li>
-  </ul></li>
-  <li><a href="#id--892747a0" id="toc-id--892747a0" class="nav-link" data-scroll-target="#id--892747a0"><span class="header-section-number">28.2.5</span> 工程优化</a>
-  <ul class="collapse">
-  <li><a href="#histogram" id="toc-histogram" class="nav-link" data-scroll-target="#histogram"><span class="header-section-number">28.2.5.1</span> Histogram</a></li>
-  <li><a href="#column-block" id="toc-column-block" class="nav-link" data-scroll-target="#column-block"><span class="header-section-number">28.2.5.2</span> Column Block</a></li>
-  <li><a href="#id--57f8ebf9" id="toc-id--57f8ebf9" class="nav-link" data-scroll-target="#id--57f8ebf9"><span class="header-section-number">28.2.5.3</span> 稀疏感知与缺失值处理</a></li>
-  </ul></li>
+  <li><a href="#boosting-19406e53" id="toc-boosting-19406e53" class="nav-link" data-scroll-target="#boosting-19406e53"><span class="header-section-number">28.2.4</span> Boosting模型</a></li>
+  <li><a href="#id--892747a0" id="toc-id--892747a0" class="nav-link" data-scroll-target="#id--892747a0"><span class="header-section-number">28.2.5</span> 工程优化</a></li>
   </ul></li>
   <li><a href="#k-84fe4a86" id="toc-k-84fe4a86" class="nav-link" data-scroll-target="#k-84fe4a86"><span class="header-section-number">28.3</span> K近邻模型</a></li>
   <li><a href="#id--bd3f6adc" id="toc-id--bd3f6adc" class="nav-link" data-scroll-target="#id--bd3f6adc"><span class="header-section-number">28.4</span> 核方法</a></li>
   <li><a href="#id--4cc38cf8" id="toc-id--4cc38cf8" class="nav-link" data-scroll-target="#id--4cc38cf8"><span class="header-section-number">28.5</span> 神经网络</a>
-  <ul>
-  <li><a href="#id--f33eee8e" id="toc-id--f33eee8e" class="nav-link" data-scroll-target="#id--f33eee8e"><span class="header-section-number">28.5.1</span> 模型学习</a>
   <ul class="collapse">
-  <li><a href="#id--cbc2d3d2" id="toc-id--cbc2d3d2" class="nav-link" data-scroll-target="#id--cbc2d3d2"><span class="header-section-number">28.5.1.1</span> 损失函数</a></li>
-  <li><a href="#id--c66ad796" id="toc-id--c66ad796" class="nav-link" data-scroll-target="#id--c66ad796"><span class="header-section-number">28.5.1.2</span> 梯度下降</a></li>
-  </ul></li>
-  <li><a href="#id--00412c7d" id="toc-id--00412c7d" class="nav-link" data-scroll-target="#id--00412c7d"><span class="header-section-number">28.5.2</span> 序列网络</a>
-  <ul class="collapse">
-  <li><a href="#recurrent-neural-network-rnn-b2b3accd" id="toc-recurrent-neural-network-rnn-b2b3accd" class="nav-link" data-scroll-target="#recurrent-neural-network-rnn-b2b3accd"><span class="header-section-number">28.5.2.1</span> 循环神经网络（Recurrent Neural Network, RNN）</a></li>
-  <li><a href="#long-short-term-memory-lstm-41eaa6e2" id="toc-long-short-term-memory-lstm-41eaa6e2" class="nav-link" data-scroll-target="#long-short-term-memory-lstm-41eaa6e2"><span class="header-section-number">28.5.2.2</span> 长短期记忆网络（Long Short-Term Memory, LSTM）</a></li>
-  <li><a href="#gated-recurrent-unit-gru-202febd7" id="toc-gated-recurrent-unit-gru-202febd7" class="nav-link" data-scroll-target="#gated-recurrent-unit-gru-202febd7"><span class="header-section-number">28.5.2.3</span> 门控循环单元（Gated Recurrent Unit, GRU）</a></li>
-  </ul></li>
-  <li><a href="#id--37a3cc83" id="toc-id--37a3cc83" class="nav-link" data-scroll-target="#id--37a3cc83"><span class="header-section-number">28.5.3</span> 图像网络</a>
-  <ul class="collapse">
-  <li><a href="#id--255a6582" id="toc-id--255a6582" class="nav-link" data-scroll-target="#id--255a6582"><span class="header-section-number">28.5.3.1</span> 卷积</a></li>
-  <li><a href="#id--a660ade6" id="toc-id--a660ade6" class="nav-link" data-scroll-target="#id--a660ade6"><span class="header-section-number">28.5.3.2</span> 池化</a></li>
-  <li><a href="#id--e2e93aca" id="toc-id--e2e93aca" class="nav-link" data-scroll-target="#id--e2e93aca"><span class="header-section-number">28.5.3.3</span> 填充</a></li>
-  <li><a href="#cnn" id="toc-cnn" class="nav-link" data-scroll-target="#cnn"><span class="header-section-number">28.5.3.4</span> CNN</a></li>
-  </ul></li>
+  <li><a href="#id--f33eee8e" id="toc-id--f33eee8e" class="nav-link" data-scroll-target="#id--f33eee8e"><span class="header-section-number">28.5.1</span> 模型学习</a></li>
+  <li><a href="#id--00412c7d" id="toc-id--00412c7d" class="nav-link" data-scroll-target="#id--00412c7d"><span class="header-section-number">28.5.2</span> 序列网络</a></li>
+  <li><a href="#id--37a3cc83" id="toc-id--37a3cc83" class="nav-link" data-scroll-target="#id--37a3cc83"><span class="header-section-number">28.5.3</span> 图像网络</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -989,14 +1148,12 @@ window.Quarto = {
 <p><strong>Definition 28.2</strong>. <a href="../chapters/page-040.html#term-Accuracy" class="term" title="accuracy">准确率<span class="term-english">（accuracy）</span></a>度量模型预测正确的比例：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Accuracy}=\frac{\operatorname{TP}+\operatorname{TN}}{\operatorname{TP}+\operatorname{TN}+\operatorname{FP}+\operatorname{FN}}.
-
 \end{equation*}\]</span></p>
 </div>
 <div id="definition-28-3" class="definition theorem-block env-definition">
 <p><strong>Definition 28.3</strong>. <a href="../chapters/page-055.html#term-Precision" class="term" title="precision">精确率<span class="term-english">（precision）</span></a>度量被预测为正类的样本中有多少是真正的正类：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Precision}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FP}}.
-
 \end{equation*}\]</span></p>
 </div>
 <div id="note-28-1" class="note theorem-block env-note">
@@ -1006,7 +1163,6 @@ window.Quarto = {
 <p><strong>Definition 28.4</strong>. <a href="../chapters/page-057.html#term-Recall" class="term" title="recall">召回率<span class="term-english">（recall）</span></a>又称<a href="../chapters/page-058.html#term-Sensitivity" class="term" title="sensitivity">灵敏度<span class="term-english">（sensitivity）</span></a>，衡量真实正类中有多少被模型成功识别，定义为：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Recall}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FN}}.
-
 \end{equation*}\]</span></p>
 </div>
 <div id="note-28-2" class="note theorem-block env-note">
@@ -1016,7 +1172,6 @@ window.Quarto = {
 <p><strong>Definition 28.5</strong>. <a href="../chapters/page-045.html#term-F1Score" class="term" title="f1 score">f1分数<span class="term-english">（f1 score）</span></a>是精确率与召回率的调和平均，用于在二者之间取得平衡：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{F1}=2\times\frac{\operatorname{Precision}\times\operatorname{Recall}}{\operatorname{Precision}+\operatorname{Recall}}.
-
 \end{equation*}\]</span></p>
 </div>
 <div id="note-28-3" class="note theorem-block env-note">
@@ -1028,7 +1183,6 @@ window.Quarto = {
 <p><span class="math display">\[\begin{equation*}
 \operatorname{TPR}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FN}},\quad
 \operatorname{FPR}=\frac{\operatorname{FP}}{\operatorname{FP}+\operatorname{TN}}
-
 \end{equation*}\]</span></p>
 <p>分别为<a href="../chapters/page-059.html#term-TPR" class="term" title="true positive rate">真阳率<span class="term-english">（true positive rate）</span></a>与<a href="../chapters/page-045.html#term-FPR" class="term" title="false positive rate">假阳率<span class="term-english">（false positive rate）</span></a>。</p>
 </div>
@@ -1037,7 +1191,6 @@ window.Quarto = {
 <p><span class="math display">\[\begin{equation*}
 \operatorname{TPR}(t)=\frac{\operatorname{TP}(t)}{\operatorname{TP}(t)+\operatorname{FN}(t)},\quad
 \operatorname{FPR}(t)=  \frac{\operatorname{FP}(t)}{\operatorname{FP}(t)+\operatorname{TN}(t)}
-
 \end{equation*}\]</span></p>
 <p>然后以<span class="math inline">\(\mathrm{FPR}(t)\)</span>为横轴、<span class="math inline">\(\mathrm{TPR}(t)\)</span>为纵轴作图得到的曲线。<a href="../chapters/page-040.html#term-AUROC" class="term" title="area under ROC">受试者工作特征曲线下面积<span class="term-english">（area under ROC）</span></a>定义为ROC曲线与<span class="math inline">\(\mathrm{FPR}(t)\)</span>轴和<span class="math inline">\(\mathrm{FPR}(t)=1\)</span>围成区域的面积。</p>
 </div>
@@ -1070,7 +1223,6 @@ PR曲线示意
 <p><strong>Definition 28.9</strong>. 称：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{MAE}=\frac{1}{n}\sum_{i=1}^n|y_i-\hat{y}_i|
-
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/page-052.html#term-MAE" class="term" title="mean absolute error">平均绝对误差<span class="term-english">（mean absolute error）</span></a>。</p>
 </div>
@@ -1081,7 +1233,6 @@ PR曲线示意
 <p><strong>Definition 28.10</strong>. 称：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{MAPE}=\frac{1}{n}\sum_{i=1}^n\left|\frac{y_i-\hat{y}_i}{y_i}\right|
-
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/page-052.html#term-MAPE" class="term" title="mean absolute percentage error">平均绝对百分比误差<span class="term-english">（mean absolute percentage error）</span></a>。</p>
 </div>
@@ -1127,7 +1278,6 @@ PR曲线示意
 <p><span class="math display">\[\begin{align*}
 H(f)&amp;=\operatorname{E}[I(f)]=-\sum_{i=1}^{n}P(f=x_i)\log[P(f=x_i)]=\sum_{i=1}^{n}P(f=x_i)\log\left[\frac{1}{P(f=x_i)}\right] \\
 &amp;\leqslant\log\left[\sum_{i=1}^{n}P(f=x_i)\frac{1}{P(f=x_i)}\right]=\log(n)
-
 \end{align*}\]</span></p>
 <p>上式取等当且仅当<span class="math inline">\(\dfrac{1}{P(f=x_i)}\)</span>为常数，即<span class="math inline">\(P(f=x_1)=P(f=x_2)=\cdots=P(f=x_n)\)</span>。&nbsp;◻</p>
 </div>
@@ -1138,7 +1288,6 @@ H(f)&amp;=\operatorname{E}[I(f)]=-\sum_{i=1}^{n}P(f=x_i)\log[P(f=x_i)]=\sum_{i=1
 <p><strong>Definition 28.13</strong>. 设分类问题的类别空间为<span class="math inline">\(\mathcal{Y}=\{1,\dots,m\}\)</span>，<span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n\)</span>为观测样本集，其中<span class="math inline">\(y_i\in\mathcal{Y}\)</span>表示第<span class="math inline">\(i\)</span>个样本的真实类别，记<span class="math inline">\(p_i\)</span>为第<span class="math inline">\(i\)</span>类样本在<span class="math inline">\(\mathcal{D}\)</span>中所占比例。称：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Gini}(\mathcal{D})=1-\sum_{i=1}^mp_i^2
-
 \end{equation*}\]</span></p>
 <p>为观测样本集<span class="math inline">\(\mathcal{D}\)</span>的<a href="../chapters/page-046.html#term-GiniIndex" class="term" title="Gini index">基尼指数<span class="term-english">（Gini index）</span></a>。</p>
 </div>
@@ -1154,12 +1303,10 @@ H(f)&amp;=\operatorname{E}[I(f)]=-\sum_{i=1}^{n}P(f=x_i)\log[P(f=x_i)]=\sum_{i=1
 <p>(2)由<a href="../chapters/page-017.html#ineq-cauchy-ineq-R-143b29da" data-reference-type="ref+label" data-reference="ineq:cauchy-ineq-R">不等式 1</a>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=1}^{m}1^2\sum_{i=1}^{m}p_i^2\geqslant\left(\sum_{i=1}^{m}p_i\right)^2=1
-
 \end{equation*}\]</span></p>
 <p>上式取等当且仅当<span class="math inline">\(p_1=\cdots=p_m=\frac{1}{m}\)</span>，因此：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Gini}(\mathcal{D})=1-\sum_{i=1}^{m}p_i^2\leqslant1-\frac{1}{m}
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1173,12 +1320,10 @@ H(f)&amp;=\operatorname{E}[I(f)]=-\sum_{i=1}^{n}P(f=x_i)\log[P(f=x_i)]=\sum_{i=1
 <p><strong>Definition 28.14</strong>. 设 <span class="math inline">\((X,\mathscr{A},P)\)</span> 为概率空间，<span class="math inline">\(f\)</span>为<span class="math inline">\(X\)</span>上取值于有限集合 <span class="math inline">\(\{x_1,\dots,x_n\}\)</span> 的离散型随机变量，其真实分布为：</p>
 <p><span class="math display">\[\begin{equation*}
 p_i=P(f=x_i),\quad i=1,\dots,n
-
 \end{equation*}\]</span></p>
 <p>另设<span class="math inline">\(q=(q_1,\dots,q_n)\)</span>为定义在同一取值集合上的另一概率分布，满足<span class="math inline">\(q_i&gt;0\)</span>。称：</p>
 <p><span class="math display">\[\begin{equation*}
 H(p,q)=-\sum_{i=1}^np_i\log q_i
-
 \end{equation*}\]</span></p>
 <p>为分布<span class="math inline">\(p\)</span>相对于分布<span class="math inline">\(q\)</span>的<a href="../chapters/page-042.html#term-CrossEntropy" class="term" title="cross entropy">交叉熵<span class="term-english">（cross entropy）</span></a>。</p>
 </div>
@@ -1189,17 +1334,14 @@ H(p,q)=-\sum_{i=1}^np_i\log q_i
 <p><span class="proof-title"><em>证明</em>. </span>因为：</p>
 <p><span class="math display">\[\begin{equation*}
 H(p,q)=-\sum_{i=1}^np_i\log q_i=-\sum_{i=1}^np_i\log\frac{q_i}{p_i}+\sum_{i=1}^np_i\log p_i
-
 \end{equation*}\]</span></p>
 <p>并且<span class="math inline">\(\log(\cdot)\)</span>在<span class="math inline">\((0,+\infty)\)</span>上为凹函数，由<a href="../chapters/page-017.html#ineq-Jensen-4973d767" data-reference-type="ref+label" data-reference="ineq:Jensen">不等式 19</a>可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=1}^np_i\log\frac{q_i}{p_i}\leqslant\log\left[\sum_{i=1}^{n}p_i\frac{q_i}{p_i}\right]=0
-
 \end{equation*}\]</span></p>
 <p>上式取等当且仅当<span class="math inline">\(\dfrac{q_i}{p_i}\)</span>为常数，即<span class="math inline">\(q_i=p_i\)</span>。所以：</p>
 <p><span class="math display">\[\begin{equation*}
 H(p,q)\geqslant\sum_{i=1}^np_i\log p_i=H(p,p)
-
 \end{equation*}\]</span></p>
 <p>且当且仅当<span class="math inline">\(q=p\)</span>时取等。&nbsp;◻</p>
 </div>
@@ -1231,7 +1373,6 @@ H(p,q)\geqslant\sum_{i=1}^np_i\log p_i=H(p,p)
 <p><strong>return</strong> a leaf node predicting the majority class with class distribution:</p>
 <p><span class="math display">\[\begin{equation*}
 \left\{p_i=\frac{n_i}{|\mathcal{D}|}:n_i=|\{(x,y)\in\mathcal{D}:y=i\}|,\;i=1,2,\dots,m,\;m=\text{number of classes}\right\}
-
 \end{equation*}\]</span></p>
 <p>or the constant minimizing the chosen criterion (for regression) on <span class="math inline">\(\mathcal{D}\)</span></p>
 </div>
@@ -1445,7 +1586,6 @@ I_{\text{split}}=\frac{|\mathcal{D}_L|}{|\mathcal{D}|}I(\mathcal{D}_L)+\frac{|\m
 <li><p>若对任意<span class="math inline">\(b\)</span>和<span class="math inline">\(b'\ne b\)</span>有<span class="math inline">\(\operatorname{Var}(f_b)=\sigma^2\)</span>且<span class="math inline">\(\operatorname{Corr}(f_b,f_{b'})=\rho\)</span>，则Bagging模型预测的方差满足：</p>
 <p><span class="math display">\[\begin{equation*}
                 \operatorname{Var}[f_{\text{bag}}(x)]=\sigma^2\left(\rho+\frac{1-\rho}{B}\right)
-
     \end{equation*}\]</span></p></li>
 <li><p>二分类多数投票情形下，若每个基分类器的错误率<span class="math inline">\(p&lt;\dfrac{1}{2}\)</span>，则在各分类器相互独立的假设下，Bagging 集成分类器的错误率随<span class="math inline">\(B\)</span>指数下降；当基分类器之间存在正相关时，错误率下降速度受相关性限制，并趋于一个正值。</p></li>
 </ol>
@@ -1457,37 +1597,31 @@ I_{\text{split}}=\frac{|\mathcal{D}_L|}{|\mathcal{D}|}I(\mathcal{D}_L)+\frac{|\m
 &amp;=\operatorname{Var}\left(\frac{1}{B}\sum_{b=1}^Bf_b\right)=\frac{1}{B^2}\left[\sum_{b=1}^B\operatorname{Var}(f_b)+2\sum_{1\leqslant b&lt;b'\leqslant B}\operatorname{Cov}(f_b,f_{b'})\right] \\
 &amp;=\frac{1}{B^2}\left[B\sigma^2+B(B-1)\rho\sigma^2\right]=\sigma^2\left(\frac{1}{B}+\frac{B-1}{B}\rho\right)
 =\sigma^2\left(\rho+\frac{1-\rho}{B}\right)
-
 \end{align*}\]</span></p>
 <p>(2)设二分类情形中类别为<span class="math inline">\(\{-1,1\}\)</span>，样本<span class="math inline">\(x\)</span>的真实类别为<span class="math inline">\(y\)</span>，第<span class="math inline">\(b\)</span>个基分类器的错误指示变量记为<span class="math inline">\(I_b=I[f^{(b)}(x)\ne y]\)</span>。</p>
 <p>若各分类器相互独立，则由条件和<a href="../chapters/page-013.html#prop-Binom-e6beba11" data-reference-type="ref+label" data-reference="prop:Binom">性质 12.4.1</a>(1)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 P(I_b=1)=p&lt;\dfrac{1}{2},\quad S_B=\sum_{b=1}^BI_b\sim\operatorname{Binomial}(B,p)
-
 \end{equation*}\]</span></p>
 <p>且多数投票出错当且仅当<span class="math inline">\(S_B&gt;B/2\)</span>。根据<a href="../chapters/page-017.html#theo-HoeffdingBound-4a7415de" data-reference-type="ref+label" data-reference="theo:HoeffdingBound">定理 16.21</a>可知当<span class="math inline">\(p&lt;1/2\)</span>时，Bagging模型出错的概率为：</p>
 <p><span class="math display">\[\begin{equation*}
 P\left(S_B&gt;\frac{B}{2}\right)=P\left(\frac{S_B}{B}-p\geqslant\frac{1}{2}-p\right)\leqslant\exp\left[-\frac{2B^2}{B}\left(\frac{1}{2}-p\right)^2\right]=\exp\left[-2B\left(\frac{1}{2}-p\right)^2\right]
-
 \end{equation*}\]</span></p>
 <p>即Bagging的错误率随基学习器个数<span class="math inline">\(B\)</span>指数级下降。</p>
 <p>若误差之间满足<span class="math inline">\(\operatorname{Corr}(I_b,I_{b'})=\rho&gt;0\)</span>，则由<a href="../chapters/page-013.html#prop-Variance-c0d6c124" data-reference-type="ref+label" data-reference="prop:Variance">性质 12.3.5</a>(3)和<a href="../chapters/page-013.html#prop-Binom-e6beba11" data-reference-type="ref+label" data-reference="prop:Binom">性质 12.4.1</a>(2)可知：</p>
 <p><span class="math display">\[\begin{align*}
 \operatorname{Var}(S_B)     &amp;=\operatorname{Var}\left(\sum_{b=1}^BI_b\right)=\sum_{b=1}^B\operatorname{Var}(I_b)+2\sum_{1\leqslant b&lt;b'\leqslant B}\operatorname{Cov}(I_b,I_{b'}) \\
 &amp;=Bp(1-p)+B(B-1)\rho p(1-p)=Bp(1-p)[1+(B-1)\rho]
-
 \end{align*}\]</span></p>
 <p>根据<a href="../chapters/page-013.html#prop-CovMat-3a62d09d" data-reference-type="ref+label" data-reference="prop:CovMat">性质 12.3.4</a>(3)可得<span class="math inline">\(\operatorname{E}(S_B)=Bp\)</span>。因为<span class="math inline">\(\operatorname{Var}(S_B)\sim B^2\rho p(1-p)(B\to+\infty)\)</span>，于是由可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{S_B-Bp}{\sqrt{B^2\rho p(1-p)}}\overset{d}{\longrightarrow}\operatorname{N}(0,1)
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{align*}
 P\left(S_B&gt;\frac{B}{2}\right)&amp;=P\left(\frac{S_B-Bp}{\sqrt{B^2\rho p(1-p)}}&gt;\frac{\frac{1}{2}-p}{\sqrt{\rho p(1-p)}}
 \right)  \\
 &amp;\longrightarrow1-\Phi\left(\frac{\frac{1}{2}-p}{\sqrt{\rho p(1-p)}}\right)&lt;1,\;(B\to+\infty)
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1539,7 +1673,6 @@ P\left(S_B&gt;\frac{B}{2}\right)&amp;=P\left(\frac{S_B-Bp}{\sqrt{B^2\rho p(1-p)}
 <p><span class="math display">\[\begin{equation*}
 r_{ib}\gets-\nabla\ell[y_i,F_{b-1}(x_i)],
 \quad i=1,2,\dots,n
-
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="7">
@@ -1558,7 +1691,6 @@ r_{ib}\gets-\nabla\ell[y_i,F_{b-1}(x_i)],
 \underset{\gamma\in\mathbb{R}}{\arg\min}
 \sum_{x_i\in R_{jb}}
 \ell[y_i,F_{b-1}(x_i)+\gamma]
-
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="11">
@@ -1749,7 +1881,6 @@ H_R=H-H_L
 <p>Compute the optimal leaf output</p>
 <p><span class="math display">\[\begin{equation*}
 w_{jb}\gets-\frac{G_{jb}}{H_{jb}+\lambda}
-
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="14">
@@ -1821,25 +1952,21 @@ w_{jb}\gets-\frac{G_{jb}}{H_{jb}+\lambda}
 <p><strong>Definition 28.17</strong>. 设<span class="math inline">\(\mathcal{D}={(x_i,y_i)}_{i=1}^{n}\)</span>为观测样本集，其中<span class="math inline">\(x_i\)</span>为第<span class="math inline">\(i\)</span>个样本的特征向量，<span class="math inline">\(y_i\)</span>是第<span class="math inline">\(i\)</span>个样本的标签或值。给定距离度量<span class="math inline">\(\rho\)</span>以及整数<span class="math inline">\(k\geqslant1\)</span>，对任意样本<span class="math inline">\(x\)</span>，记其<span class="math inline">\(k\)</span>个最近邻样本索引集合为：</p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{N}_k(x)=\underset{S\subset\{1,\dots,n\},|S|=k}{\arg\min}\sum_{i\in S}\rho(x,x_i)
-
 \end{equation*}\]</span></p>
 <p>则称如下规则为<a href="../chapters/page-050.html#term-KNN" class="term" title="k-nearest neighbours">k近邻<span class="term-english">（k-nearest neighbours）</span></a>模型：</p>
 <ol type="1">
 <li><p><strong>分类情形：</strong></p>
 <p><span class="math display">\[\begin{equation*}
                 \hat y(x)=\underset{c\in\mathcal{Y}}{\arg\min}{}\sum*{i\in\mathcal{N}_k(x)}\mathbf{1}(y_i=c)
-
     \end{equation*}\]</span></p></li>
 <li><p><strong>回归情形：</strong></p>
 <p><span class="math display">\[\begin{equation*}
                 \hat y(x)=\frac{1}{k}\sum_{i\in\mathcal{N}_k(x)}y_i
-
     \end{equation*}\]</span></p></li>
 </ol>
 <p>若进一步引入权重函数<span class="math inline">\(w_i(x)\)</span>，则可得到加权KNN估计：</p>
 <p><span class="math display">\[\begin{equation*}
 \hat y(x)=\sum_{i\in\mathcal{N}*k(x)}w_i(x)y_i,\qquad\sum*{i\in\mathcal{N}_k(x)}w_i(x)=1
-
 \end{equation*}\]</span></p>
 <p>其中权重通常取为距离的单调递减函数。</p>
 </div>
@@ -1854,7 +1981,6 @@ w_{jb}\gets-\frac{G_{jb}}{H_{jb}+\lambda}
 <li><p>若对任意的<span class="math inline">\(x_1, x_2, \dots, x_{n}\in X\)</span>和任意的<span class="math inline">\(a_1, a_2, \dots, a_{n}\in\mathbb{R}^{}\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
                 \sum_{i=1}^{n}\sum_{j=1}^{n}a_ia_jk(x_i,x_j)\geqslant0
-
     \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(k\)</span>为<strong>半正定核</strong>。</p></li>
 </ol>
@@ -1866,7 +1992,6 @@ w_{jb}\gets-\frac{G_{jb}}{H_{jb}+\lambda}
 <p><strong>Definition 28.20</strong>. 设<span class="math inline">\(X\)</span>是空间，<span class="math inline">\(k:X\times X\to\mathbb{R}^{}\)</span>，<span class="math inline">\(Y\)</span>是Hilbert空间。若存在<span class="math inline">\(\varphi:X\to Y\)</span>使得对任意的<span class="math inline">\(x_1,x_2\in X\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 k(x_1,x_2)=\Big(\varphi(x_1),\varphi(x_2)\Big)
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\varphi\)</span>是<span class="math inline">\(k\)</span>关于<span class="math inline">\(Y\)</span>的一个<strong>特征映射</strong>。</p>
 </div>
@@ -1878,7 +2003,6 @@ k(x_1,x_2)=\Big(\varphi(x_1),\varphi(x_2)\Big)
 <p><span class="math display">\[\begin{align*}
 \sum_{i=1}^{n}\sum_{j=1}^{n}a_ia_jk(x_i,x_j)&amp;=\sum_{i=1}^{n}\sum_{j=1}^{n}a_ia_j\Big(\varphi(x_i),\varphi(x_j)\Big)=\left(\sum_{i=1}^{n}a_i\varphi(x_i),\sum_{i=1}^{n}a_j\varphi(x_i)\right) \\
 &amp;=\left\|\sum_{i=1}^{n}a_i\varphi(x_i)\right\|^2\geqslant0
-
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1889,7 +2013,6 @@ k(x_1,x_2)=\Big(\varphi(x_1),\varphi(x_2)\Big)
 <p><strong>Definition 28.22</strong>. 设<span class="math inline">\(Y\)</span>是<span class="math inline">\(X\)</span>上的实Hilbert函数空间。若对任意的<span class="math inline">\(x\in X\)</span>，泛函：</p>
 <p><span class="math display">\[\begin{equation*}
 L_x:Y\to\mathbb{R}^{},\quad\forall\;f\in Y,\;L_x(f)=f(x)
-
 \end{equation*}\]</span></p>
 <p>都是有界线性泛函，则称<span class="math inline">\(Y\)</span>为<span class="math inline">\(X\)</span>上的<a href="../chapters/page-057.html#term-RKHS" class="term" title="reproducing kernel Hilbert space">再生核Hilbert空间<span class="term-english">（reproducing kernel Hilbert space）</span></a>。</p>
 </div>
@@ -1900,7 +2023,6 @@ L_x:Y\to\mathbb{R}^{},\quad\forall\;f\in Y,\;L_x(f)=f(x)
 <p><span class="proof-title"><em>证明</em>. </span>因为<span class="math inline">\(Y\)</span>是<span class="math inline">\(X\)</span>上的RKHS，所以对于任意的<span class="math inline">\(x\in X\)</span>，泛函：</p>
 <p><span class="math display">\[\begin{equation*}
 L_x:Y\to\mathbb{R}^{},\quad\forall\;f\in Y,\;L_x(f)=f(x)
-
 \end{equation*}\]</span></p>
 <p>都是有界线性泛函。由<a href="../chapters/page-004.html#theo-LinearOperatorBoundedContinuous-ad64c73f" data-reference-type="ref+label" data-reference="theo:LinearOperatorBoundedContinuous">定理 3.26</a>(1)可知<span class="math inline">\(L_x\)</span>是连续泛函，根据<a href="../chapters/page-004.html#theo-RieszRepresentation-1c3b1560" data-reference-type="ref+label" data-reference="theo:RieszRepresentation">定理 3.33</a>可知存在唯一的<span class="math inline">\(k_x\in Y\)</span>使得对任意的<span class="math inline">\(f\in Y\)</span>有<span class="math inline">\(L_x(f)=f(x)=(f,k_x)\)</span>。&nbsp;◻</p>
 </div>
@@ -1935,12 +2057,10 @@ L_x:Y\to\mathbb{R}^{},\quad\forall\;f\in Y,\;L_x(f)=f(x)
 <p>设<span class="math inline">\(X\)</span>是空间，<span class="math inline">\(k:X\times X\to\mathbb{R}^{}\)</span>是半正定核，由<a href="#theo-AronszajnTheorem-65def681" data-reference-type="ref+label" data-reference="theo:AronszajnTheorem">定理 28.3</a>，记<span class="math inline">\(Y\)</span>是由<span class="math inline">\(k\)</span>导出的<span class="math inline">\(X\)</span>上的RKHS，<span class="math inline">\(\{(x_i,y_i)\}_{i=1}^{n}\)</span>为训练样本。对于优化问题：</p>
 <p><span class="math display">\[\begin{equation*}
 \min_{f\in Y}\Omega[f(x_1),f(x_2),\dots,f(x_n)]+\lambda||f||^2,\quad\lambda&gt;0
-
 \end{equation*}\]</span></p>
 <p>其任一最优解<span class="math inline">\(f^*\)</span>都可以表示为：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)=\sum_{i=1}^{n}a_ik(x,x_i)
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(a_i\in\mathbb{R}^{}\)</span>。</p>
 </div>
@@ -1948,22 +2068,18 @@ f(x)=\sum_{i=1}^{n}a_ik(x,x_i)
 <p><span class="proof-title"><em>证明</em>. </span>由<a href="../chapters/page-002.html#prop-SpanSubspace-5b082085" data-reference-type="ref+label" data-reference="prop:SpanSubspace">性质 1.1.5</a>(1)，取<span class="math inline">\(Y\)</span>的子空间：</p>
 <p><span class="math display">\[\begin{equation*}
 Y_n=\operatorname{span}\{k_{x_1},k_{x_2},\dots,k_{x_n}\}
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-002.html#prop-SpanSubspace-5b082085" data-reference-type="ref+label" data-reference="prop:SpanSubspace">性质 1.1.5</a>(2)、<a href="../chapters/page-004.html#prop-FiniteDimensionalNormedLinearSpace-2cb2a75d" data-reference-type="ref+label" data-reference="prop:FiniteDimensionalNormedLinearSpace">性质 3.4.4</a>(2)和<a href="../chapters/page-004.html#prop-CauchySeq-796ed018" data-reference-type="ref+label" data-reference="prop:CauchySeq">性质 3.2.5</a>(1)可知<span class="math inline">\(Y_n\)</span>是闭的。根据<a href="../chapters/page-004.html#theo-OrthogonalProjection-9e621cb6" data-reference-type="ref+label" data-reference="theo:OrthogonalProjection">定理 3.28</a>可知对任意的<span class="math inline">\(f\in Y\)</span>，存在下述唯一的分解：</p>
 <p><span class="math display">\[\begin{equation*}
 f=f_1+f_2,\quad f_1\in Y_n,\;f_2\in Y_n^{\perp}
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-004.html#prop-Orthogonal-dd705229" data-reference-type="ref+label" data-reference="prop:Orthogonal">性质 3.4.6</a>(1)可知<span class="math inline">\(||f||^2=||f_1||^2+||f_2||^2\)</span>。因为<span class="math inline">\(f_2\in Y_n^{\perp}\)</span>，所以对任意的<span class="math inline">\(i=1,2,\dots,n\)</span>有<span class="math inline">\(f_2\perp k_{x_i}\)</span>，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 (f_2,k_{x_i})=f_2(x_i)=0
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(f(x_i)=f_1(x_i)\)</span>，优化问题可被改写为：</p>
 <p><span class="math display">\[\begin{equation*}
 \min_{f\in Y}\Omega[f_1(x_1),f_1(x_2),\dots,f_1(x_n)]+\lambda[||f_1||^2+||f_2||^2],\quad\lambda&gt;0
-
 \end{equation*}\]</span></p>
 <p>若<span class="math inline">\(f^*\)</span>是最优解，则<span class="math inline">\(f^*\)</span>必然在<span class="math inline">\(Y_n\)</span>中，否则<span class="math inline">\(f^*\)</span>在<span class="math inline">\(Y_n\)</span>上的正交投影对应的目标函数值一定比<span class="math inline">\(f^*\)</span>对应的目标函数值小。&nbsp;◻</p>
 </div>
@@ -1982,12 +2098,10 @@ f=f_1+f_2,\quad f_1\in Y_n,\;f_2\in Y_n^{\perp}
 <p><strong>Definition 28.24</strong>. 若映射<span class="math inline">\(f_\theta:\mathbb{R}^m\rightarrow\mathbb{R}^n\)</span>可以表示为若干线性变换与逐元素非线性映射的复合：</p>
 <p><span class="math display">\[\begin{equation*}
 f_\theta(x)=\phi^{(L)}\!\circ \phi^{(L-1)} \circ \cdots \circ \phi^{(1)}(x)
-
 \end{equation*}\]</span></p>
 <p>其中第<span class="math inline">\(l\)</span>层映射<span class="math inline">\(\phi^{(l)}:\mathbb{R}^{n_{l-1}}\to\mathbb{R}^{n_l}\)</span> 定义为:</p>
 <p><span class="math display">\[\begin{equation*}
 \phi^{(l)}(z)=\sigma^{(l)}\!\left(W^{(l)}z+b^{(l)}\right),\quad l=1,2,\dots,L
-
 \end{equation*}\]</span></p>
 <p>这里：</p>
 <ul>
@@ -2010,7 +2124,6 @@ f_\theta(x)=\phi^{(L)}\!\circ \phi^{(L-1)} \circ \cdots \circ \phi^{(1)}(x)
 <p><strong>Definition 28.25</strong>. 称函数：</p>
 <p><span class="math display">\[\begin{equation*}
 \sigma(x) = \frac{1}{1+\exp(-x)}
-
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/page-058.html#term-SigmoidFunction" class="term" title="sigmoid function">sigmoid函数<span class="term-english">（sigmoid function）</span></a>。</p>
 </div>
@@ -2024,7 +2137,6 @@ Sigmoid 激活函数<span class="math inline"><span class="math inline">\(\sigma
 <p><strong>Definition 28.26</strong>. 称函数：</p>
 <p><span class="math display">\[\begin{equation*}
 \tanh(x)=\frac{e^x - e^{-x}}{e^x + e^{-x}}
-
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/page-059.html#term-TanhFunction" class="term" title="tanh function">双曲正切函数<span class="term-english">（tanh function）</span></a>。</p>
 </div>
@@ -2038,7 +2150,6 @@ Tanh 激活函数 <span class="math inline">tanh (<em>x</em>)</span>
 <p><strong>Definition 28.27</strong>. 称函数：</p>
 <p><span class="math display">\[\begin{equation*}
 \sigma(x)=\max(0,x)
-
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/page-057.html#term-ReLU" class="term" title="rectified linear unit">整流线型单元<span class="term-english">（rectified linear unit）</span></a>。</p>
 </div>
@@ -2057,7 +2168,6 @@ x,&amp; x&gt;0 \\
 \alpha x, &amp; x\leqslant 0
 \end{cases}
 \quad (\alpha&gt;0 \text{为较小常数})
-
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/page-051.html#term-LeakyRectifiedLinearUnit" class="term" title="leaky ReLU">泄漏整流线性单元<span class="term-english">（leaky ReLU）</span></a>。</p>
 </div>
@@ -2075,7 +2185,6 @@ Leaky ReLU 激活函数（<span class="math inline"><em>α</em> = 0.1</span>
 x, &amp; x&gt;0 \\
 \alpha(e^x-1), &amp; x\leqslant 0
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/page-044.html#term-ELU" class="term" title="Exponential Linear Unit">指数线性单元<span class="term-english">（Exponential Linear Unit）</span></a>。</p>
 </div>
@@ -2089,7 +2198,6 @@ ELU 激活函数（<span class="math inline"><em>α</em> = 1</span>）
 <p><strong>Definition 28.30</strong>. 设输入向量<span class="math inline">\(z=(x_1, x_2, \dots, x_{n})^\top\)</span>，称映射：</p>
 <p><span class="math display">\[\begin{equation*}
 \sigma(x)_i=\frac{e^{x_i}}{\sum\limits_{j=1}^ne^{x_j}}, \quad i=1,\dots,n
-
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/page-058.html#term-SoftmaxFunction" class="term" title="softmax function">softmax函数<span class="term-english">（softmax function）</span></a>。</p>
 </div>
@@ -2101,7 +2209,6 @@ ELU 激活函数（<span class="math inline"><em>α</em> = 1</span>）
 <p><strong>Definition 28.31</strong>. 设观测样本集为<span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n\)</span>，模型为函数<span class="math inline">\(f_\theta\)</span>，记<span class="math inline">\(\hat{y}_i=f_\theta(x_i)\)</span>。若函数<span class="math inline">\(L(y,\hat{y})\)</span>用于衡量模型预测值与真实值之间差异，则称<span class="math inline">\(L\)</span>为<a href="../chapters/page-051.html#term-LossFunction" class="term" title="loss function">损失函数<span class="term-english">（loss function）</span></a>。称：</p>
 <p><span class="math display">\[\begin{equation*}
 \widehat{\mathcal{R}}(\theta)=\frac{1}{n}\sum_{i=1}^{n}L[y_i,f_\theta(x_i)]
-
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/page-044.html#term-EmpiricalRisk" class="term" title="empirical risk">经验风险<span class="term-english">（empirical risk）</span></a>。</p>
 </div>
@@ -2118,7 +2225,6 @@ ELU 激活函数（<span class="math inline"><em>α</em> = 1</span>）
 <p><strong>note 28.14</strong>. 在第<span class="math inline">\(t\)</span>次迭代中，参数更新通常写为：</p>
 <p><span class="math display">\[\begin{equation*}
 \theta_{t+1}=\theta_t-\eta g_t
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(g_t\)</span>为当前点处目标函数关于参数<span class="math inline">\(\theta\)</span>的梯度估计。</p>
 <p>学习率决定了参数更新的幅度：<span class="math inline">\(\eta\)</span>过大会导致算法发散或震荡，<span class="math inline">\(\eta\)</span>过小则会使收敛速度显著变慢。</p>
@@ -2150,7 +2256,6 @@ ELU 激活函数（<span class="math inline"><em>α</em> = 1</span>）
 <p>Update the parameter:</p>
 <p><span class="math display">\[\begin{equation*}
 \theta_{t+1} \gets \theta_t - \eta\, g_t
-
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="6">
@@ -2347,42 +2452,36 @@ W_h^{(l)} h_{t-1}^{(l)}
 <p>Forget gate: controls how much of <span class="math inline">\(c_{t-1}^{(l)}\)</span> is retained</p>
 <p><span class="math display">\[\begin{equation*}
 f_t^{(l)} \gets \sigma\!\left(W_f^{(l)}[h_{t-1}^{(l)},x_t^{(l)}]+b_f^{(l)}\right)
-
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="8">
 <p>Input gate: controls how much new information is written</p>
 <p><span class="math display">\[\begin{equation*}
 i_t^{(l)} \gets \sigma\!\left(W_i^{(l)}[h_{t-1}^{(l)},x_t^{(l)}]+b_i^{(l)}\right)
-
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="9">
 <p>Candidate cell state: new content to be added</p>
 <p><span class="math display">\[\begin{equation*}
 \tilde c_t^{(l)} \gets \tanh\!\left(W_c^{(l)}[h_{t-1}^{(l)},x_t^{(l)}]+b_c^{(l)}\right)
-
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="10">
 <p>Cell state update: forget old + write new</p>
 <p><span class="math display">\[\begin{equation*}
 c_t^{(l)} \gets f_t^{(l)}\odot c_{t-1}^{(l)} + i_t^{(l)}\odot \tilde c_t^{(l)}
-
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="11">
 <p>Output gate: controls exposure of cell state</p>
 <p><span class="math display">\[\begin{equation*}
 o_t^{(l)} \gets \sigma\!\left(W_o^{(l)}[h_{t-1}^{(l)},x_t^{(l)}]+b_o^{(l)}\right)
-
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="12">
 <p>Hidden state: gated and activated cell state</p>
 <p><span class="math display">\[\begin{equation*}
 h_t^{(l)} \gets o_t^{(l)}\odot \tanh(c_t^{(l)})
-
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="13">
@@ -2442,28 +2541,24 @@ h_t^{(l)} \gets o_t^{(l)}\odot \tanh(c_t^{(l)})
 <p>Update gate: controls how much of the past state is retained</p>
 <p><span class="math display">\[\begin{equation*}
 z_t^{(l)} \gets \sigma\!\left(W_z^{(l)}[h_{t-1}^{(l)},x_t^{(l)}]+b_z^{(l)}\right)
-
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="8">
 <p>Reset gate: controls how much past information is ignored</p>
 <p><span class="math display">\[\begin{equation*}
 r_t^{(l)} \gets \sigma\!\left(W_r^{(l)}[h_{t-1}^{(l)},x_t^{(l)}]+b_r^{(l)}\right)
-
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="9">
 <p>Candidate hidden state: new content to be written</p>
 <p><span class="math display">\[\begin{equation*}
 \tilde h_t^{(l)} \gets \tanh\!\left(W_h^{(l)}[r_t^{(l)}\odot h_{t-1}^{(l)},x_t^{(l)}]+b_h^{(l)}\right)
-
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="10">
 <p>Hidden state update: interpolate between old and new</p>
 <p><span class="math display">\[\begin{equation*}
 h_t^{(l)} \gets (1-z_t^{(l)})\odot h_{t-1}^{(l)} + z_t^{(l)}\odot \tilde h_t^{(l)}
-
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="11">
@@ -2509,12 +2604,10 @@ I^{(R)},I^{(G)},I^{(B)}\in\mathbb{R}^{H\times W}
 <p><strong>Definition 28.36</strong>. 设输入图像为<span class="math inline">\(X\in M_{H\times W}(\mathbb{R}^{})\)</span>。在图像的每一个空间位置<span class="math inline">\((i,j)\)</span>，取其邻域窗口：</p>
 <p><span class="math display">\[\begin{equation*}
 \{(i+u-1,\; j+v-1) : u=1,\dots,h,\; v=1,\dots,w\}
-
 \end{equation*}\]</span></p>
 <p>并对该邻域内的像素值施加一组固定权重<span class="math inline">\(K=(K_{u,v})\in M_{h\times w}(\mathbb{R}^{})\)</span>，定义局部加权求和</p>
 <p><span class="math display">\[\begin{equation*}
 S_{i,j}=\sum_{u=1}^h\sum_{v=1}^wK_{u,v}X_{i+u-1,j+v-1}
-
 \end{equation*}\]</span></p>
 <p>由此在整个空间网格上得到的二维数组<span class="math inline">\(S=(S_{i,j})\)</span>称为由该局部加权算子产生的<a href="../chapters/page-045.html#term-FeatureMap" class="term" title="feature map">特征图<span class="term-english">（feature map）</span></a>。</p>
 </div>
@@ -2538,7 +2631,6 @@ S_{i,j}=\sum_{u=1}^h\sum_{v=1}^wK_{u,v}X_{i+u-1,j+v-1}
 <p><span class="math display">\[\begin{equation*}
 W_{i,j}=\bigl\{\, (\, (i-1)s_h + u,\; (j-1)s_w + v \,) :
 u=1,\dots,h,\; v=1,\dots,w \,\bigr\}
-
 \end{equation*}\]</span></p>
 <p>并在该邻域内对像素值施加一个映射<span class="math inline">\(P:\mathbb{R}^{h\times w}\to \mathbb{R}\)</span>，称<span class="math inline">\(P\)</span>为<a href="../chapters/page-055.html#term-PoolingOperator" class="term" title="pooling operator">池化算子<span class="term-english">（pooling operator）</span></a>，该操作称为<span class="term-missing" data-key="Poolig">Poolig</span>。</p>
 </div>

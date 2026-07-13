@@ -81,9 +81,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -186,6 +186,201 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -235,6 +430,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -773,152 +972,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -926,16 +1114,13 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#id--1a18a226" id="toc-id--1a18a226" class="nav-link active" data-scroll-target="#id--1a18a226"><span class="header-section-number">19.1</span> 多重假设检验</a></li>
   <li><a href="#id--9dc73101" id="toc-id--9dc73101" class="nav-link" data-scroll-target="#id--9dc73101"><span class="header-section-number">19.2</span> 非参数假设检验</a>
-  <ul>
-  <li><a href="#id--32e19df5" id="toc-id--32e19df5" class="nav-link" data-scroll-target="#id--32e19df5"><span class="header-section-number">19.2.1</span> 位置检验</a>
   <ul class="collapse">
-  <li><a href="#id--997b7324" id="toc-id--997b7324" class="nav-link" data-scroll-target="#id--997b7324"><span class="header-section-number">19.2.1.1</span> 单样本位置检验</a></li>
-  </ul></li>
+  <li><a href="#id--32e19df5" id="toc-id--32e19df5" class="nav-link" data-scroll-target="#id--32e19df5"><span class="header-section-number">19.2.1</span> 位置检验</a></li>
   <li><a href="#id--dca5b0c0" id="toc-id--dca5b0c0" class="nav-link" data-scroll-target="#id--dca5b0c0"><span class="header-section-number">19.2.2</span> 趋势检验</a></li>
   <li><a href="#id--44b7a5cf" id="toc-id--44b7a5cf" class="nav-link" data-scroll-target="#id--44b7a5cf"><span class="header-section-number">19.2.3</span> 随机性检验</a></li>
   </ul></li>
@@ -980,7 +1165,6 @@ window.Quarto = {
 <p><strong>Definition 19.3</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是统计结构，<span class="math inline">\(f_1, f_2, \dots, f_{n}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\((H_0,H_1)\)</span>是检验问题，<span class="math inline">\(W\)</span>为拒绝域。称满足条件：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;P\in\mathscr{P},\;g(P)=P(W)
-
 \end{equation*}\]</span></p>
 <p>的函数<span class="math inline">\(g\)</span>为检验问题<span class="math inline">\((H_0,H_1)\)</span>的<a href="../chapters/page-055.html#term-PowerFunction" class="term" title="power function">势函数<span class="term-english">（power function）</span></a>。当<span class="math inline">\(F\in H_0\)</span>时，<span class="math inline">\(g(F)\leqslant\alpha\)</span>的检验被称之为<a href="../chapters/page-058.html#term-SignificanceLevel" class="term" title="significance level">显著性水平<span class="term-english">（significance level）</span></a>为<span class="math inline">\(\alpha\)</span>的检验。</p>
 </div>
@@ -1005,7 +1189,6 @@ window.Quarto = {
 <p>如何求<span class="math inline">\(p\)</span>值？为了得到拒绝原假设的最小显著性水平，那必然需要使得当前样本下的统计量值在拒绝域内且在拒绝域的边界上，否则拒绝域还能进一步缩小，即该显著性水平不是最小的。因为此时拒绝域的形式已经确定了，边界值也给出了，那么实际上我们就得到了一个具体的拒绝域，所以有：</p>
 <p><span class="math display">\[\begin{equation*}
 p=\sup_{P\in H_0}g(P)
-
 \end{equation*}\]</span></p>
 <p>如果<span class="math inline">\(p\)</span>更小，那么就无法保证当<span class="math inline">\(F\in H_0\)</span>的时候<span class="math inline">\(g(F)\leqslant\alpha\)</span>；如果<span class="math inline">\(p\)</span>更大则不最小。</p>
 </div>
@@ -1013,7 +1196,6 @@ p=\sup_{P\in H_0}g(P)
 <p><strong>note 19.3</strong>. 实际中我们根本不知道<span class="math inline">\(F\)</span>到底是在<span class="math inline">\(H_0\)</span>中还是在<span class="math inline">\(H_1\)</span>中，假设检验本就是为了判断这个问题才出现的，为了得到显著性为<span class="math inline">\(\alpha\)</span>的检验，实际上我们做的是找到<span class="math inline">\(X\)</span>的一个划分使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \sup_{P\in H_0}g(P)\leqslant\alpha
-
 \end{equation*}\]</span></p>
 <p>这就会导致当<span class="math inline">\(F\)</span>真的在<span class="math inline">\(H_0\)</span>中时，犯第一类错误的概率实际上有可能小于<span class="math inline">\(\alpha\)</span>。这代表着检验还能进一步优化，由此引入下述随机化检验的概念。</p>
 </div>
@@ -1036,7 +1218,6 @@ p=\sup_{P\in H_0}g(P)
 <p><strong>Definition 19.7</strong>. 称：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}\left(\frac{V}{\max\{R,1\}}\right)
-
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/page-045.html#term-FDR" class="term" title="false discovery rate">错误检出率<span class="term-english">（false discovery rate）</span></a>。</p>
 </div>
@@ -1049,7 +1230,6 @@ p=\sup_{P\in H_0}g(P)
 <p>设<span class="math inline">\(n\)</span>个假设检验对应的<span class="math inline">\(p\)</span>值为<span class="math inline">\(p_1,p_2\dots,p_n\)</span>，将其从小到大排序为<span class="math inline">\(p_{(1)}\leqslant p_{(2)}\leqslant\cdots\leqslant p_{(n)}\)</span>。给定目标水平<span class="math inline">\(\alpha\)</span>，取最大的<span class="math inline">\(k\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 p_{(k)}\leqslant\frac{k}{n}\alpha
-
 \end{equation*}\]</span></p>
 <p>则拒绝<span class="math inline">\(H_{(1)},H_{(2)}\dots,H_{(k)}\)</span>。若各真原假设对应的<span class="math inline">\(p\)</span>值独立且服从<span class="math inline">\(U(0,1)\)</span>，并且与其余<span class="math inline">\(p\)</span>值独立，则此时的FDR不超过<span class="math inline">\(\alpha\)</span>。</p>
 </div>
@@ -1057,12 +1237,10 @@ p_{(k)}\leqslant\frac{k}{n}\alpha
 <p><span class="proof-title"><em>证明</em>. </span>记<span class="math inline">\(I_0\)</span>为真原假设的指标集合，<span class="math inline">\(m_0=|I_0|\)</span>。对每个<span class="math inline">\(i\in I_0\)</span>，记<span class="math inline">\(R^{(-i)}\)</span>为删去<span class="math inline">\(p_i\)</span>之后，其余<span class="math inline">\(n-1\)</span>个<span class="math inline">\(p\)</span>值按同一Benjamini–Hochberg规则所产生的拒绝数。由逐步上升法的结构可知，若第<span class="math inline">\(i\)</span>个真原假设被错误拒绝且<span class="math inline">\(R=r\)</span>，则必有</p>
 <p><span class="math display">\[\begin{equation*}
 p_i\leqslant \frac{r}{n}\alpha
-
 \end{equation*}\]</span></p>
 <p>并且</p>
 <p><span class="math display">\[\begin{equation*}
 R^{(-i)}=r-1
-
 \end{equation*}\]</span></p>
 <p>于是</p>
 <p><span class="math display">\[\begin{align*}
@@ -1071,7 +1249,6 @@ R^{(-i)}=r-1
 &amp;=\sum_{i\in I_0}E\left(\frac{\mathbf{1}\{p_i\text{被拒绝}\}}{R\vee1}\right)\\
 &amp;=\sum_{i\in I_0}\sum_{r=1}^n\frac1rP\left(p_i\leqslant \frac{r}{n}\alpha,R=r\right)\\
 &amp;\leqslant \sum_{i\in I_0}\sum_{r=1}^n\frac1rP\left(p_i\leqslant \frac{r}{n}\alpha,R^{(-i)}=r-1\right)
-
 \end{align*}\]</span></p>
 <p>若各真原假设对应的<span class="math inline">\(p\)</span>值独立且服从<span class="math inline">\(U(0,1)\)</span>，并且与其余<span class="math inline">\(p\)</span>值独立，则</p>
 <p><span class="math display">\[\begin{align*}
@@ -1081,7 +1258,6 @@ R^{(-i)}=r-1
 &amp;=\sum_{i\in I_0}\frac{\alpha}{n}\sum_{r=1}^nP\left(R^{(-i)}=r-1\right)\\
 &amp;=\frac{m_0}{n}\alpha\\
 &amp;\leqslant \alpha
-
 \end{align*}\]</span></p>
 <p>故Benjamini–Hochberg方法在独立情形下控制FDR&nbsp;◻</p>
 </div>
@@ -1090,42 +1266,34 @@ R^{(-i)}=r-1
 <p>设<span class="math inline">\(n\)</span>个假设检验对应的<span class="math inline">\(p\)</span>值为<span class="math inline">\(p_1,\dots,p_n\)</span>，将其从小到大排序为</p>
 <p><span class="math display">\[\begin{equation*}
 p_{(1)}\leqslant p_{(2)}\leqslant\cdots\leqslant p_{(n)}
-
 \end{equation*}\]</span></p>
 <p>记</p>
 <p><span class="math display">\[\begin{equation*}
 c_n=\sum_{j=1}^n\frac1j
-
 \end{equation*}\]</span></p>
 <p>给定目标水平<span class="math inline">\(\alpha\)</span>，取最大的<span class="math inline">\(k\)</span>使得</p>
 <p><span class="math display">\[\begin{equation*}
 p_{(k)}\leqslant \frac{k}{n\,c_n}\alpha
-
 \end{equation*}\]</span></p>
 <p>则拒绝</p>
 <p><span class="math display">\[\begin{equation*}
 H_{(1)},\dots,H_{(k)}
-
 \end{equation*}\]</span></p>
 <p>证明：Benjamini–Yekutieli证明了如下上界：对任意依赖结构，若采用Benjamini–Hochberg型逐步上升法，并以</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha_i=\frac{i}{n}\gamma,\qquad i=1,\dots,n
-
 \end{equation*}\]</span></p>
 <p>作为临界值，则有</p>
 <p><span class="math display">\[\begin{equation*}
 \mathrm{FDR}\leqslant \frac{m_0}{n}\gamma c_n
-
 \end{equation*}\]</span></p>
 <p>现在取</p>
 <p><span class="math display">\[\begin{equation*}
 \gamma=\frac{\alpha}{c_n}
-
 \end{equation*}\]</span></p>
 <p>则对应临界值恰为</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha_i=\frac{i}{n\,c_n}\alpha
-
 \end{equation*}\]</span></p>
 <p>于是</p>
 <p><span class="math display">\[\begin{align*}
@@ -1133,7 +1301,6 @@ H_{(1)},\dots,H_{(k)}
 &amp;\leqslant \frac{m_0}{n}\frac{\alpha}{c_n}c_n\\
 &amp;=\frac{m_0}{n}\alpha\\
 &amp;\leqslant \alpha
-
 \end{align*}\]</span></p>
 <p>故Benjamini–Yekutieli方法在任意依赖结构下控制FDR</p>
 </div>
@@ -1158,24 +1325,20 @@ H_0:Q_\pi\leqslant q_0,\;H_1:Q_\pi&gt;q_0 \\
 H_0:Q_\pi\geqslant q_0,\;H_1:Q_\pi&lt;q_0 \\
 H_0:Q_\pi=q_0,\;H_1:Q_\pi\ne q_0
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>记<span class="math inline">\(\mathbf{X}\)</span>中大于<span class="math inline">\(q_0\)</span>的样本单元的个数为<span class="math inline">\(S^+\)</span>，小于<span class="math inline">\(q_0\)</span>的个数为<span class="math inline">\(S^-\)</span>。令<span class="math inline">\(K\sim\operatorname{Binom}(S^++S^-,\pi)\)</span>，则上述检验问题的<span class="math inline">\(p\)</span>值分别为：</p>
 <p><span class="math display">\[\begin{equation*}
 P_{H_0}(K\leqslant S^-),\quad P_{H_0}(K\geqslant S^-),\quad 2\min\{P_{H_0}(K\leqslant S^-),\;P_{H_0}(K\geqslant S^-)\}
-
 \end{equation*}\]</span></p>
 <p>当<span class="math inline">\(n\to+\infty\)</span>时，令<span class="math inline">\(Z=\dfrac{K-(S^++S^-)\pi}{\sqrt{(S^++S^-)\pi(1-\pi)}}\)</span>，<span class="math inline">\(\Phi\)</span>为标准正态分布的分布函数，则有如下对应的近似<span class="math inline">\(p\)</span>值：</p>
 <p><span class="math display">\[\begin{equation*}
 \Phi(Z),\quad1-\Phi(Z),\quad2\min\{\Phi(Z),1-\Phi(Z)\}
-
 \end{equation*}\]</span></p>
 </div>
 <div id="derivation-19-1" class="derivation theorem-block env-derivation">
 <p><strong>Derivation 19.1</strong>. 直观上来讲，如果<span class="math inline">\(Q_{\pi}&gt;q_0\)</span>，那么<span class="math inline">\(K\)</span>的实现值<span class="math inline">\(S^-\)</span>应偏小，原假设的拒绝域应具有形式<span class="math inline">\(\{S^-\leqslant c\}\)</span>。由<a href="../chapters/page-013.html#prop-Binom-e6beba11" data-reference-type="ref+label" data-reference="prop:Binom">性质 12.4.1</a>(3)可知对于检验的<span class="math inline">\(p\)</span>值可仅考虑<span class="math inline">\(Q_\pi=q_0\)</span>，设<span class="math inline">\(K\)</span>为<span class="math inline">\(S^-\)</span>的随机变量形式，则应有<span class="math inline">\(K\sim\operatorname{Binom}(S^++S^-,\pi)\)</span>，于是此时<span class="math inline">\(p\)</span>值为：</p>
 <p><span class="math display">\[\begin{equation*}
 p=P_{H_0}(K\leqslant S^-)=\sum_{i=0}^{S^-}\binom{S^++S^-}{i}\pi^{i}(1-\pi)^{S^++S^--i}
-
 \end{equation*}\]</span></p>
 <p>同理可得另外两种情况。不对正态近似作解释。</p>
 </div>
@@ -1226,12 +1389,10 @@ M&gt;M_0 \\
 M&lt;M_0 \\
 M\ne M_0
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>记<span class="math inline">\(W^+,W^-\)</span>为Wilcoxon秩统计量，<span class="math inline">\(W\)</span>服从Wilcoxon秩分布，则上述检验问题的<span class="math inline">\(p\)</span>值分别为：</p>
 <p><span class="math display">\[\begin{equation*}
 P_{H_0}(W\geqslant W^+),\quad P_{H_0}(W\leqslant W^+)
-
 \end{equation*}\]</span></p>
 <ol type="1">
 <li><p>对<span class="math inline">\(i=1,2,\dots,n\)</span>，<span class="math inline">\(d_i=|X_i-M_0|\)</span>。</p></li>
@@ -1254,7 +1415,6 @@ H_0:\text{序列无上升趋势},\;H_1:\text{序列有上升趋势，即}\theta_
 H_0:\text{序列无下降趋势},\;H_1:\text{序列有下降趋势，即}\theta_1\geqslant\theta_2\geqslant\cdots\geqslant\theta_n\text{且至少成立一个严格不等式} \\
 H_0:\text{序列无趋势},\;H_1:\text{序列有上升或下降趋势}
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>取数对<span class="math inline">\((X_i,X_{i+c})\)</span>，其中：</p>
 <p><span class="math display">\[\begin{equation*}
@@ -1263,17 +1423,14 @@ c=
 \dfrac{n}{2},&amp;n\text{为偶数} \\
 \dfrac{n+1}{2},&amp;n\text{为奇数}
 \end{cases}
-
 \end{equation*}\]</span></p>
 <p>记<span class="math inline">\(D_i=X_{i+c}-X_i\)</span>，<span class="math inline">\(D_i\)</span>中大于<span class="math inline">\(0\)</span>的样本单元的个数为<span class="math inline">\(S^+\)</span>，小于<span class="math inline">\(0\)</span>的个数为<span class="math inline">\(S^-\)</span>。令<span class="math inline">\(K\sim\operatorname{Binom}(S^++S^-,0.5)\)</span>，则上述检验问题的<span class="math inline">\(p\)</span>值分别为：</p>
 <p><span class="math display">\[\begin{equation*}
 P_{H_0}(K\leqslant S^-),\quad P_{H_0}(K\geqslant S^-),\quad 2\min\{P_{H_0}(K\leqslant S^-),\;P_{H_0}(K\geqslant S^-)\}
-
 \end{equation*}\]</span></p>
 <p>当<span class="math inline">\(n\to+\infty\)</span>时，令<span class="math inline">\(Z=\dfrac{K-(S^++S^-)\pi}{\sqrt{(S^++S^-)\pi(1-\pi)}}\)</span>，<span class="math inline">\(\Phi\)</span>为标准正态分布的分布函数，则有如下对应的近似<span class="math inline">\(p\)</span>值：</p>
 <p><span class="math display">\[\begin{equation*}
 \Phi(Z),\quad1-\Phi(Z),\quad2\min\{\Phi(Z),1-\Phi(Z)\}
-
 \end{equation*}\]</span></p>
 </div>
 <div id="derivation-19-3" class="derivation theorem-block env-derivation">
@@ -1314,7 +1471,6 @@ P_{H_0}(K\leqslant S^-),\quad P_{H_0}(K\geqslant S^-),\quad 2\min\{P_{H_0}(K\leq
 P(R=2k)=\frac{2\binom{m-1}{k-1}\binom{n-1}{k-1}}{\binom{N}{n}} \\
 P(R=2k+1)=\frac{\binom{m-1}{k-1}\binom{n-1}{k}+\binom{m-1}{k}\binom{n-1}{k-1}}{\binom{N}{n}} \\
 E(R) = \frac{2mn}{m+1}+1\quad Var(R)=\dfrac{2mn(2mn-m-n)}{(m+n)^2(m+n-1)}
-
 \end{gather*}\]</span></p>
 </div>
 <div id="method-19-8" class="method theorem-block env-method">

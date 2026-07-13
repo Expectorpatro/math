@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,16 +1079,12 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
   <li><a href="#id--f2d09318" id="toc-id--f2d09318" class="nav-link active" data-scroll-target="#id--f2d09318"><span class="header-section-number">29.1</span> 潜在结果框架</a>
-  <ul>
-  <li><a href="#id--3576437f" id="toc-id--3576437f" class="nav-link" data-scroll-target="#id--3576437f"><span class="header-section-number">29.1.1</span> 观察性研究</a>
   <ul class="collapse">
-  <li><a href="#id--f02007ac" id="toc-id--f02007ac" class="nav-link" data-scroll-target="#id--f02007ac"><span class="header-section-number">29.1.1.1</span> 倾向性评分</a></li>
-  <li><a href="#id--95e3cc08" id="toc-id--95e3cc08" class="nav-link" data-scroll-target="#id--95e3cc08"><span class="header-section-number">29.1.1.2</span> 逆概率加权</a></li>
-  </ul></li>
+  <li><a href="#id--3576437f" id="toc-id--3576437f" class="nav-link" data-scroll-target="#id--3576437f"><span class="header-section-number">29.1.1</span> 观察性研究</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -938,7 +1122,6 @@ window.Quarto = {
 <p><strong>Definition 29.1</strong>. 定义可测映射：</p>
 <p><span class="math display">\[\begin{equation*}
 T:(X,\mathscr{F})\to(\mathcal{A},2^{\mathcal{A}})
-
 \end{equation*}\]</span></p>
 <p><span class="math inline">\(Tx\)</span>表示个体<span class="math inline">\(x\)</span>接受的处理水平。</p>
 </div>
@@ -946,7 +1129,6 @@ T:(X,\mathscr{F})\to(\mathcal{A},2^{\mathcal{A}})
 <p><strong>Definition 29.2</strong>. 对每个处理水平<span class="math inline">\(a\in\mathcal{A}\)</span>，称可测函数：</p>
 <p><span class="math display">\[\begin{equation*}
 Y^a:(X,\mathscr{F})\to(\mathcal{Y},\mathscr{Y})
-
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/page-055.html#term-PotentialOutcome" class="term" title="potential outcome">潜在结果<span class="term-english">（potential outcome）</span></a>，其中<span class="math inline">\(Y^a(x)\)</span>表示同一个体<span class="math inline">\(x\)</span>在处理<span class="math inline">\(T=a\)</span>时应产生的结果。定义<span class="math inline">\(Y(x)\)</span>为个体<span class="math inline">\(x\)</span>的实际结果。</p>
 </div>
@@ -958,7 +1140,6 @@ Y^a:(X,\mathscr{F})\to(\mathcal{Y},\mathscr{Y})
 <p><a href="../chapters/page-058.html#term-SUTVA" class="term" title="stable unit treatment value assumption">稳定个体处理值假设<span class="term-english">（stable unit treatment value assumption）</span></a>要求潜在结果<span class="math inline">\(Y^a(x)\)</span>只依赖于个体<span class="math inline">\(x\)</span>自身接受的处理水平<span class="math inline">\(a\)</span>，不依赖于其他个体的处理分配，也不依赖于处理水平<span class="math inline">\(a\)</span>的不同实施版本。即，对任意<span class="math inline">\(a\in\mathcal{A}\)</span>，<span class="math inline">\(Y^a\)</span>是良定义的可测映射：</p>
 <p><span class="math display">\[\begin{equation*}
 Y^a:(X,\mathscr{F})\to(\mathcal{Y},\mathscr{Y})
-
 \end{equation*}\]</span></p>
 <p>若存在不同版本的同一个处理<span class="math inline">\(a\)</span>会导致不同结果，则应将这些版本重新编码为不同处理水平，否则<span class="math inline">\(Y^a\)</span>不是良定义对象。</p>
 </div>
@@ -967,14 +1148,12 @@ Y^a:(X,\mathscr{F})\to(\mathcal{Y},\mathscr{Y})
 <p>一致性假设要求：若个体实际接受处理<span class="math inline">\(T=a\)</span>，则其观测结果等于对应处理水平下的潜在结果，即对任意的<span class="math inline">\(a\in\mathcal{A}\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 \{x\in X:Tx=a\}\subseteq\{x\in X:Y(x)=Y^a(x)\}
-
 \end{equation*}\]</span></p>
 </div>
 <div id="definition-29-6" class="definition theorem-block env-definition">
 <p><strong>Definition 29.6</strong>. 定义处理前协变量<span class="math inline">\(L\)</span>为可测映射：</p>
 <p><span class="math display">\[\begin{equation*}
 L:(X,\mathscr{F})\to(\mathcal{L},\mathscr{L})
-
 \end{equation*}\]</span></p>
 </div>
 <div id="definition-29-7" class="definition theorem-block env-definition">
@@ -982,12 +1161,10 @@ L:(X,\mathscr{F})\to(\mathcal{L},\mathscr{L})
 <p>可交换性假设要求：在给定处理前协变量<span class="math inline">\(L\)</span>后，实际处理分配<span class="math inline">\(T\)</span>与所有潜在结果条件独立，即</p>
 <p><span class="math display">\[\begin{equation*}
 (Y^{a_1},\ldots,Y^{a_K})\perp\!\!\!\perp T\mid L
-
 \end{equation*}\]</span></p>
 <p>等价地，对任意<span class="math inline">\(a,t\in\mathcal{A}\)</span>和任意<span class="math inline">\(A\in\mathscr{Y}\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 P(Y^a\in A\mid T=t,L)=P(Y^a\in A\mid L)
-
 \end{equation*}\]</span></p>
 <p>在相应条件概率有定义时成立。该假设表示：给定<span class="math inline">\(L\)</span>后，处理组之间在潜在结果分布上可比，不存在未被<span class="math inline">\(L\)</span>控制的<a href="../chapters/page-042.html#term-webscope-aa152cecb1-ConfoundingFactor" class="term" title="confounding factor">混杂因素<span class="term-english">（confounding factor）</span></a>。</p>
 </div>
@@ -1001,12 +1178,10 @@ P(Y^a\in A\mid T=t,L)=P(Y^a\in A\mid L)
 <p>正值假设要求：在协变量分布的定义域内，每个处理水平被分配的概率都为正，即对任意<span class="math inline">\(a\in\mathcal{A}\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 P(T=a\mid L)&gt;0
-
 \end{equation*}\]</span></p>
 <p>若只关心处理水平<span class="math inline">\(a\)</span>与<span class="math inline">\(b\)</span>之间的因果效应，则只需要求：</p>
 <p><span class="math display">\[\begin{equation*}
 P(T=a\mid L)&gt;0,\quad P(T=b\mid L)&gt;0
-
 \end{equation*}\]</span></p>
 <p>该假设排除了某些协变量取值下只能接受某一种处理、从而无法比较不同处理潜在结果的情形。</p>
 </div>
@@ -1014,7 +1189,6 @@ P(T=a\mid L)&gt;0,\quad P(T=b\mid L)&gt;0
 <p><strong>Definition 29.9</strong>. 对任意<span class="math inline">\(a,b\in\mathcal{A}\)</span>，称：</p>
 <p><span class="math display">\[\begin{equation*}
 \tau(a,b)=\operatorname{E}(Y^a-Y^b)
-
 \end{equation*}\]</span></p>
 <p>为处理<span class="math inline">\(a\)</span>和<span class="math inline">\(b\)</span>之间的<a href="../chapters/page-040.html#term-ATE" class="term" title="averaged treatment effect">平均处理效应<span class="term-english">（averaged treatment effect）</span></a>。</p>
 </div>
@@ -1025,29 +1199,24 @@ P(T=a\mid L)&gt;0,\quad P(T=b\mid L)&gt;0
 <p><strong>Theorem 29.1</strong>. 在稳定个体处理值、一致性、可交换性和正值假设同时成立时，对任意<span class="math inline">\(a,b\in\mathcal{A}\)</span>，处理<span class="math inline">\(a\)</span>和<span class="math inline">\(b\)</span>之间的平均潜在结果可以由观测数据分布识别：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}(Y^a)=\operatorname{E}[\operatorname{E}(Y\mid T=a,L)]
-
 \end{equation*}\]</span></p>
 <p>对任意<span class="math inline">\(a,b\in\mathcal{A}\)</span>，平均因果效应可以写为：</p>
 <p><span class="math display">\[\begin{equation*}
 \tau(a,b)=\operatorname{E}[\operatorname{E}(Y\mid T=a,L)]-\operatorname{E}[\operatorname{E}(Y\mid T=b,L)]
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>由<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(3)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 E(Y^a)=E[E(Y^a\mid L)]
-
 \end{equation*}\]</span></p>
 <p>在可交换性假设和一致性假设下有：</p>
 <p><span class="math display">\[\begin{equation*}
 E(Y^a\mid L)=\operatorname{E}(Y^a\mid T=a,L)=\operatorname{E}(Y\mid T=a,L)
-
 \end{equation*}\]</span></p>
 <p>根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \tau(a,b)=\operatorname{E}(Y^a-Y^b)=\operatorname{E}(Y^a)-\operatorname{E}(Y^b)=\operatorname{E}[\operatorname{E}(Y\mid T=a,L)]-\operatorname{E}[\operatorname{E}(Y\mid T=b,L)]
-
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
@@ -1061,7 +1230,6 @@ E(Y^a\mid L)=\operatorname{E}(Y^a\mid T=a,L)=\operatorname{E}(Y\mid T=a,L)
 <p><strong>Definition 29.11</strong>. 称<span class="math inline">\(P(T=a\mid L)\)</span>为处理<span class="math inline">\(a\)</span>的<a href="../chapters/page-055.html#term-PropensityScore" class="term" title="propensity score">倾向性评分<span class="term-english">（propensity score）</span></a>，记作<span class="math inline">\(e_a(L)\)</span>，记：</p>
 <p><span class="math display">\[\begin{equation*}
 e(L)=\Big(e_{a_1}(L),e_{a_2}(L),\dots,e_{a_K}(L)\Big)
-
 \end{equation*}\]</span></p>
 </div>
 <div id="note-29-2" class="note theorem-block env-note">
@@ -1074,7 +1242,6 @@ e(L)=\Big(e_{a_1}(L),e_{a_2}(L),\dots,e_{a_K}(L)\Big)
 <li><p>给定倾向性评分后，<span class="math inline">\(L\)</span>对<span class="math inline">\(T\)</span>不再提供额外信息，即：</p>
 <p><span class="math display">\[\begin{equation*}
                 P\Big(T=a\mid L,e_a(L)\Big)=P\Big(T=a\mid e_a(L)\Big)=e_a(L)
-
     \end{equation*}\]</span></p></li>
 <li><p><span class="math inline">\((Y^{a_1},\ldots,Y^{a_K})\perp\!\!\!\perp T\mid e(L)\)</span>。</p></li>
 </ol>
@@ -1083,13 +1250,11 @@ e(L)=\Big(e_{a_1}(L),e_{a_2}(L),\dots,e_{a_K}(L)\Big)
 <p><span class="proof-title"><em>证明</em>. </span>(1)注意到：</p>
 <p><span class="math display">\[\begin{equation*}
 P\Big(T=a\mid L,e_a(L)\Big)=P(T=a\mid L)=e_a(L)
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(3)(1)可得：</p>
 <p><span class="math display">\[\begin{align*}
 P\Big(T=a\mid e_a(L)\Big)&amp;=\operatorname{E}[I(T=a)\mid e_a(L)]=\operatorname{E}\{\operatorname{E}[I(T=a)\mid L]\mid e_a(L)\} \\
 &amp;=\operatorname{E}[e_a(L)\mid e_a(L)]=e_a(L)
-
 \end{align*}\]</span></p>
 <p>所以结论成立。</p>
 <p>(2)记<span class="math inline">\(Y^*=(Y^{a_1},Y^{a_2},\dots,Y^{a_K})\)</span>，由<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(3)(1)和可交换性假设可得：</p>
@@ -1099,13 +1264,11 @@ P\Big(T=a\mid e_a(L)\Big)&amp;=\operatorname{E}[I(T=a)\mid e_a(L)]=\operatorname
 =&amp;\operatorname{E}\{\operatorname{E}[I(T=a)\mid Y^*,L]\mid Y^*,e(L)\} \\
 =&amp;\operatorname{E}\{\operatorname{E}[I(T=a)\mid L]\mid Y^*,e(L)\} \\
 =&amp;\operatorname{E}[e_a(L)\mid Y^*,e(L)]=e_a(L)
-
 \end{align*}\]</span></p>
 <p>而根据<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(3)(1)可知：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;P\Big(T=a\mid e(L)\Big)=\operatorname{E}[I(T=a)\mid e(L)]=\operatorname{E}\{\operatorname{E}[I(T=a)\mid L]\mid e(L)\} \\
 =&amp;\operatorname{E}[e_a(L)\mid e(L)]=e_a(L)=P\Big(T=a\mid Y^*,e(L)\Big)
-
 \end{align*}\]</span></p>
 <p>所以结论成立。&nbsp;◻</p>
 </div>
@@ -1120,7 +1283,6 @@ P\Big(T=a\mid e_a(L)\Big)&amp;=\operatorname{E}[I(T=a)\mid e_a(L)]=\operatorname
 <p><strong>Definition 29.12</strong>. 在正值假设成立时，对任意<span class="math inline">\(a\in\mathcal{A}\)</span>，称：</p>
 <p><span class="math display">\[\begin{equation*}
 w_a(T,L)=\frac{I(T=a)}{e_a(L)}
-
 \end{equation*}\]</span></p>
 <p>为处理<span class="math inline">\(a\)</span>对应的<a href="../chapters/page-048.html#term-InverseProbabilityWeight" class="term" title="inverse probability weight">逆概率权重<span class="term-english">（inverse probability weight）</span></a>。</p>
 </div>
@@ -1128,45 +1290,37 @@ w_a(T,L)=\frac{I(T=a)}{e_a(L)}
 <p><strong>Theorem 29.2</strong>. 在稳定个体处理值、一致性、可交换性和正值假设同时成立时，对任意<span class="math inline">\(a\in\mathcal{A}\)</span>：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{I(T=a)Y}{e_a(L)}
-
 \end{equation*}\]</span></p>
 <p>是<span class="math inline">\((X,\mathscr{F})\)</span>上的随机变量，平均潜在结果可以表示为：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}(Y^a)=\operatorname{E}\left[\frac{I(T=a)Y}{e_a(L)}\right]
-
 \end{equation*}\]</span></p>
 <p>对任意<span class="math inline">\(a,b\in\mathcal{A}\)</span>，处理<span class="math inline">\(a\)</span>和处理<span class="math inline">\(b\)</span>之间的平均因果效应可以写为：</p>
 <p><span class="math display">\[\begin{equation*}
 \tau(a,b)=\operatorname{E}\left[\frac{I(T=a)Y}{e_a(L)}\right]-\operatorname{E}\left[\frac{I(T=b)Y}{e_b(L)}\right]
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>由正值假设可知<span class="math inline">\(e_a(L)&gt;0\)</span>。考虑函数：</p>
 <p><span class="math display">\[\begin{equation*}
 g(y,t,l)=\frac{I(t=a)y}{e_a(l)}
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-012.html#prop-ProductSpaceProjectionMapping-92c2ce28" data-reference-type="ref+label" data-reference="prop:ProductSpaceProjectionMapping">性质 11.7.2</a>、<a href="../chapters/page-012.html#prop-SimpleFunction-f55e53f8" data-reference-type="ref+label" data-reference="prop:SimpleFunction">性质 11.3.2</a>(1)、<a href="../chapters/page-012.html#prop-MeasurableFunction-4dbcbd65" data-reference-type="ref+label" data-reference="prop:MeasurableFunction">性质 11.3.3</a>(5.b)、正值性假设和<a href="../chapters/page-012.html#prop-MeasurableFunction-4dbcbd65" data-reference-type="ref+label" data-reference="prop:MeasurableFunction">性质 11.3.3</a>(5.c)可知<span class="math inline">\(g\)</span>是可测函数，由<a href="../chapters/page-012.html#theo-ProductMeasurable-7c90a256" data-reference-type="ref+label" data-reference="theo:ProductMeasurable">定理 11.37</a>和<a href="../chapters/page-012.html#prop-MeasurableMapping-34bb2891" data-reference-type="ref+label" data-reference="prop:MeasurableMapping">性质 11.3.1</a>(2)可知<span class="math inline">\(\dfrac{I(T=a)Y}{e_a(L)}\)</span>是<span class="math inline">\((X,\mathscr{F})\)</span>上的随机变量。</p>
 <p>由<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(3)和<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}\left[\frac{I(T=a)Y}{e_a(L)}\right]=\operatorname{E}\left\{\operatorname{E}\left[\frac{I(T=a)Y}{e_a(L)}\mid L\right]\right\}=\operatorname{E}\left\{\frac{1}{e_a(L)}\operatorname{E}\left[I(T=a)Y\mid L\right]\right\}
-
 \end{equation*}\]</span></p>
 <p>根据一致性假设可知<span class="math inline">\(I(T=a)Y=I(T=a)Y^a\)</span>，于是：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}\left[I(T=a)Y\mid L\right]=\operatorname{E}\left[I(T=a)Y^a\mid L\right]
-
 \end{equation*}\]</span></p>
 <p>由可交换性假设、<a href="../chapters/page-012.html#prop-SimpleFunction-f55e53f8" data-reference-type="ref+label" data-reference="prop:SimpleFunction">性质 11.3.2</a>(1)、<a href="../chapters/page-013.html#prop-Independent-c50d54ba" data-reference-type="ref+label" data-reference="prop:Independent">性质 12.2.1</a>(4)和<a href="../chapters/page-013.html#prop-Expectation-c89ff5d4" data-reference-type="ref+label" data-reference="prop:Expectation">性质 12.3.1</a>(2)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}\left[I(T=a)Y^a\mid L\right]=\operatorname{E}(Y^a\mid L)\operatorname{E}[I(T=a)\mid L]=\operatorname{E}(Y^a\mid L)e_a(L)
-
 \end{equation*}\]</span></p>
 <p>根据<a href="../chapters/page-013.html#prop-ConditionalExpectation-2c941867" data-reference-type="ref+label" data-reference="prop:ConditionalExpectation">性质 12.3.2</a>(3)可得：</p>
 <p><span class="math display">\[\begin{align*}
 \operatorname{E}\left[\frac{I(T=a)Y}{e_a(L)}\right]=\operatorname{E}\left[\frac{1}{e_a(L)}\operatorname{E}(Y^a\mid L)e_a(L)\right]=\operatorname{E}(Y^a)
-
 \end{align*}\]</span></p>
 <p>由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可知关于平均因果效应的结论成立。&nbsp;◻</p>
 </div>
@@ -1174,24 +1328,20 @@ g(y,t,l)=\frac{I(t=a)y}{e_a(l)}
 <p><strong>Definition 29.13</strong>. 根据<a href="#theo-IPWIdentification-d0e9e7ec" data-reference-type="ref+label" data-reference="theo:IPWIdentification">定理 29.2</a>，若观测到独立同分布样本<span class="math inline">\(\{(Y_i,T_i,L_i)\}_{i=1}^n\)</span>，则定义<span class="math inline">\(\operatorname{E}(Y^a)\)</span>的逆概率加权估计量为：</p>
 <p><span class="math display">\[\begin{equation*}
 \hat{\mu}_a^{\text{IPW}}=\frac{1}{n}\sum_{i=1}^n\frac{I(T_i=a)Y_i}{\hat{e}_a(L_i)}
-
 \end{equation*}\]</span></p>
 <p>相应地，定义处理<span class="math inline">\(a\)</span>和处理<span class="math inline">\(b\)</span>之间的平均因果效应估计量为：</p>
 <p><span class="math display">\[\begin{equation*}
 \hat{\tau}^{\text{IPW}}(a,b)=\frac{1}{n}\sum_{i=1}^n\frac{I(T_i=a)Y_i}{\hat e_a(L_i)}-\frac{1}{n}\sum_{i=1}^n\frac{I(T_i=b)Y_i}{\hat e_b(L_i)}
-
 \end{equation*}\]</span></p>
 </div>
 <div id="prop-IPWKnownPropensity-0917c8ff" class="property theorem-block env-property">
 <p><strong>Property 29.1.2</strong>. 若稳定个体处理值、一致性、可交换性和正值假设同时成立，样本<span class="math inline">\(\{(Y_i,T_i,L_i)\}_{i=1}^n\)</span>独立同分布，对任意<span class="math inline">\(a\in\mathcal{A}\)</span>，倾向性评分<span class="math inline">\(e_a(L)\)</span>已知，定义：</p>
 <p><span class="math display">\[\begin{equation*}
 \hat{\mu}_a^{\text{IPW}}=\frac{1}{n}\sum_{i=1}^n\frac{I(T_i=a)Y_i}{e_a(L_i)}
-
 \end{equation*}\]</span></p>
 <p>记：</p>
 <p><span class="math display">\[\begin{equation*}
 \mu_a=\operatorname{E}(Y^a),\quad Z_a=\frac{I(T=a)Y}{e_a(L)}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\hat{\mu}_a^{\text{IPW}}\)</span>具有如下性质：</p>
 <ol type="1">
@@ -1200,7 +1350,6 @@ g(y,t,l)=\frac{I(t=a)y}{e_a(l)}
 <li><p>渐近正态性：若<span class="math inline">\(0&lt;\sigma_a^2=\operatorname{Var}(Z_a)&lt;+\infty\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
                 \sqrt{n}\frac{\hat{\mu}_a^{\text{IPW}}-\mu_a}{\sigma_a}\overset{d}{\longrightarrow}\operatorname{N}(0,1)
-
     \end{equation*}\]</span></p></li>
 </ol>
 </div>
@@ -1208,27 +1357,22 @@ g(y,t,l)=\frac{I(t=a)y}{e_a(l)}
 <p><span class="proof-title"><em>证明</em>. </span>记：</p>
 <p><span class="math display">\[\begin{equation*}
 Z_{ai}=\frac{I(T_i=a)Y_i}{e_a(L_i)},\;i=1,2,\dots,n
-
 \end{equation*}\]</span></p>
 <p>由<a href="#theo-IPWIdentification-d0e9e7ec" data-reference-type="ref+label" data-reference="theo:IPWIdentification">定理 29.2</a>可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}(Z_{ai})=\operatorname{E}\left[\frac{I(T_i=a)Y_i}{e_a(L_i)}\right]=\operatorname{E}(Y^a)=\mu_a
-
 \end{equation*}\]</span></p>
 <p>(1)由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
 <p><span class="math display">\[\begin{align*}
 \operatorname{E}\left(\hat{\mu}_a^{\text{IPW}}\right)=\operatorname{E}\left(\frac{1}{n}\sum_{i=1}^nZ_{ai}\right)=\frac{1}{n}\sum_{i=1}^n\operatorname{E}(Z_{ai})=\mu_a
-
 \end{align*}\]</span></p>
 <p>(2)考虑<a href="#theo-IPWIdentification-d0e9e7ec" data-reference-type="ref+label" data-reference="theo:IPWIdentification">定理 29.2</a>证明过程中的可测函数：</p>
 <p><span class="math display">\[\begin{equation*}
 g(y,t,l)=\frac{I(t=a)y}{e_a(l)}
-
 \end{equation*}\]</span></p>
 <p>在<a href="#theo-IPWIdentification-d0e9e7ec" data-reference-type="ref+label" data-reference="theo:IPWIdentification">定理 29.2</a>中我们已经证明了<span class="math inline">\((Y_i,T_i,L_i)\)</span>是可测映射（<a href="../chapters/page-012.html#theo-ProductMeasurable-7c90a256" data-reference-type="ref+label" data-reference="theo:ProductMeasurable">定理 11.37</a>），结合<a href="../chapters/page-013.html#prop-Independent-c50d54ba" data-reference-type="ref+label" data-reference="prop:Independent">性质 12.2.1</a>(4)可知<span class="math inline">\(Z_{a1},Z_{a2},\dots,Z_{an}\)</span>是相互独立同分布的随机变量。由可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \hat{\mu}_a^{\text{IPW}}=\frac{1}{n}\sum_{i=1}^nZ_{ai}\overset{P}{\longrightarrow}\operatorname{E}(Z_a)=\mu_a
-
 \end{equation*}\]</span></p>
 <p>(3)由(2)和即可得出结论。&nbsp;◻</p>
 </div>
@@ -1236,12 +1380,10 @@ g(y,t,l)=\frac{I(t=a)y}{e_a(l)}
 <p><strong>Property 29.1.3</strong>. 在<a href="#prop-IPWKnownPropensity-0917c8ff" data-reference-type="ref+label" data-reference="prop:IPWKnownPropensity">性质 29.1.2</a>的条件下，对任意<span class="math inline">\(a,b\in\mathcal{A}\)</span>，定义：</p>
 <p><span class="math display">\[\begin{equation*}
 \hat{\tau}^{\text{IPW}}(a,b)=\frac{1}{n}\sum_{i=1}^n\left[\frac{I(T_i=a)Y_i}{e_a(L_i)}-\frac{I(T_i=b)Y_i}{e_b(L_i)}\right]
-
 \end{equation*}\]</span></p>
 <p>记：</p>
 <p><span class="math display">\[\begin{equation*}
 \psi_{ab}=\frac{I(T=a)Y}{e_a(L)}-\frac{I(T=b)Y}{e_b(L)}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(\hat{\tau}^{\text{IPW}}(a,b)\)</span>具有如下性质：</p>
 <ol type="1">
@@ -1250,7 +1392,6 @@ g(y,t,l)=\frac{I(t=a)y}{e_a(l)}
 <li><p>渐进正态性：若<span class="math inline">\(0&lt;\sigma_{ab}^2=\operatorname{Var}(\psi_{ab})&lt;+\infty\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
                 \sqrt{n}\frac{\hat{\tau}^{\text{IPW}}(a,b)-\tau(a,b)}{\sigma_{ab}}\overset{d}{\longrightarrow}\operatorname{N}(0,1)
-
     \end{equation*}\]</span></p></li>
 </ol>
 </div>
@@ -1258,27 +1399,22 @@ g(y,t,l)=\frac{I(t=a)y}{e_a(l)}
 <p><span class="proof-title"><em>证明</em>. </span>记：</p>
 <p><span class="math display">\[\begin{equation*}
 \psi_{abi}=\frac{I(T_i=a)Y_i}{e_a(L_i)}-\frac{I(T_i=b)Y_i}{e_b(L_i)}
-
 \end{equation*}\]</span></p>
 <p>由<a href="#theo-IPWIdentification-d0e9e7ec" data-reference-type="ref+label" data-reference="theo:IPWIdentification">定理 29.2</a>和<a href="../chapters/page-012.html#prop-MeasurableFunction-4dbcbd65" data-reference-type="ref+label" data-reference="prop:MeasurableFunction">性质 11.3.3</a>(5.a)可知<span class="math inline">\(\psi_{abi}\)</span>是<span class="math inline">\((X,\mathscr{F})\)</span>上的随机变量，根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}(\psi_{abi})=\operatorname{E}\left[\frac{I(T_i=a)Y_i}{e_a(L_i)}\right]-\operatorname{E}\left[\frac{I(T_i=b)Y_i}{e_b(L_i)}\right]=\operatorname{E}(Y^a)-\operatorname{E}(Y^b)=\tau(a,b)
-
 \end{equation*}\]</span></p>
 <p>(1)由<a href="#prop-IPWKnownPropensity-0917c8ff" data-reference-type="ref+label" data-reference="prop:IPWKnownPropensity">性质 29.1.2</a>(2)可知。若<span class="math inline">\(\operatorname{E}(|\psi_{ab}|)&lt;+\infty\)</span>，由<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}(\hat{\tau}_{ab}^{\text{IPW}})=\operatorname{E}\left(\frac{1}{n}\sum_{i=1}^{n}\psi_{abi}\right)=\frac{1}{n}\sum_{i=1}^{n}\operatorname{E}(\psi_{abi})=\tau(a,b)
-
 \end{equation*}\]</span></p>
 <p>(2)类似<a href="#theo-IPWIdentification-d0e9e7ec" data-reference-type="ref+label" data-reference="theo:IPWIdentification">定理 29.2</a>可以证明：</p>
 <p><span class="math display">\[\begin{equation*}
 g_{ab}(y,t,l)=\frac{I(t=a)y}{e_a(l)}-\frac{I(t=b)y}{e_b(l)}
-
 \end{equation*}\]</span></p>
 <p>为可测函数，类似<a href="#prop-IPWKnownPropensity-0917c8ff" data-reference-type="ref+label" data-reference="prop:IPWKnownPropensity">性质 29.1.2</a>(2)可以证明<span class="math inline">\(\psi_{ab1},\psi_{ab2},\dots,\psi_{abn}\)</span>是相互独立同分布的随机变量。由可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \hat{\tau}_{ab}^{\text{IPW}}=\frac{1}{n}\sum_{i=1}^{n}\psi_{abi}\overset{P}{\longrightarrow}\operatorname{E}(\psi_{ab})=\tau(a,b)
-
 \end{equation*}\]</span></p>
 <p>(3)由(2)和即可得出结论。&nbsp;◻</p>
 </div>

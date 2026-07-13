@@ -46,9 +46,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-7a5f5713081f35e0d79e87512a826793.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-d987ea1a954c064ee2ebadfe6c2898c5.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -151,6 +151,201 @@ ul.task-list li input[type="checkbox"] {
     updateButton(button);
   };
 
+  const mountReadingTools = () => {
+    const main = document.querySelector("main.content");
+    if (!main || document.querySelector(".textbook-reading-progress")) {
+      return;
+    }
+
+    const progress = document.createElement("div");
+    progress.className = "textbook-reading-progress";
+    progress.setAttribute("aria-hidden", "true");
+    progress.innerHTML = "<span></span>";
+    document.body.appendChild(progress);
+
+    const progressFill = progress.firstElementChild;
+    const backToTop = document.createElement("button");
+    backToTop.type = "button";
+    backToTop.className = "btn textbook-back-to-top";
+    backToTop.setAttribute("aria-label", "返回页面顶部");
+    backToTop.setAttribute("title", "返回页面顶部");
+    backToTop.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+    document.body.appendChild(backToTop);
+
+    let ticking = false;
+    const updateReadingTools = () => {
+      const scrollable = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
+      const amount = Math.min(Math.max(window.scrollY / scrollable, 0), 1);
+      progressFill.style.transform = `scaleX(${amount})`;
+      backToTop.classList.toggle("is-visible", window.scrollY > 640);
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateReadingTools);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
+    });
+    updateReadingTools();
+  };
+
+  const polishDocument = () => {
+    const home = document.querySelector(".textbook-home");
+    document.body.classList.toggle("textbook-home-page", Boolean(home));
+
+    const sidebarTitle = document.querySelector("#quarto-sidebar .sidebar-title");
+    const titleLink = sidebarTitle?.querySelector(":scope > a");
+    if (sidebarTitle && titleLink && !sidebarTitle.querySelector(".textbook-brand-mark")) {
+      const mark = document.createElement("span");
+      mark.className = "textbook-brand-mark";
+      mark.setAttribute("aria-hidden", "true");
+      mark.textContent = "x\u0304";
+      sidebarTitle.insertBefore(mark, titleLink);
+    }
+
+    document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.parentElement?.classList.contains("textbook-table-scroll")) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "textbook-table-scroll";
+      wrapper.setAttribute("role", "region");
+      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.tabIndex = 0;
+      table.parentNode.insertBefore(wrapper, table);
+      wrapper.appendChild(table);
+    });
+
+    const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
+    if (searchInput && !searchInput.getAttribute("placeholder")) {
+      searchInput.setAttribute("placeholder", "搜索全书…");
+    }
+
+    const tocTitle = document.querySelector("#TOC #toc-title");
+    if (tocTitle) {
+      const textNode = Array.from(tocTitle.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+      );
+      if (textNode) {
+        textNode.textContent = "本页目录";
+      }
+    }
+  };
+
+  const mountTocContext = () => {
+    const toc = document.querySelector("#TOC");
+    const root = toc?.querySelector(":scope > ul");
+    if (!toc || !root || toc.dataset.contextReady === "true") {
+      return;
+    }
+    toc.dataset.contextReady = "true";
+
+    const depthOf = (list) => {
+      let depth = 0;
+      let current = list;
+      while (current && current !== root) {
+        depth += 1;
+        current = current.parentElement?.closest("ul");
+      }
+      return depth;
+    };
+
+    const applyVisibility = (active) => {
+      const activeItem = active?.closest("li");
+      toc.querySelectorAll("ul").forEach((list) => {
+        if (list === root) return;
+        const depth = depthOf(list);
+        let parentItem = list.parentElement;
+        let show = false;
+        if (depth === 1 && activeItem) {
+          let cursor = activeItem;
+          while (cursor && cursor !== root) {
+            if (cursor === parentItem) {
+              show = true;
+              break;
+            }
+            cursor = cursor.parentElement?.closest("li");
+          }
+        }
+        // Keep only the active first-level branch. Deeper branches remain
+        // hidden so the TOC never reaches subsubsection depth.
+        if (parentItem?.classList.contains("computation-toc-item")) {
+          show = true;
+        }
+        list.hidden = !show;
+      });
+    };
+
+    const links = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => ({
+        link,
+        target: document.querySelector(link.getAttribute("href")),
+      }))
+      .filter((entry) => entry.target);
+
+    const setActive = (link) => {
+      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
+        item.classList.remove("active");
+      });
+      if (link) {
+        link.classList.add("active");
+      }
+      applyVisibility(link);
+    };
+
+    const refresh = () => {
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
+      let current = links[0]?.link;
+      for (const entry of links) {
+        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
+          current = entry.link;
+        }
+      }
+      setActive(current);
+    };
+
+    links.forEach(({ link }) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => setActive(link), 0);
+      });
+    });
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        refresh();
+        ticking = false;
+      });
+    }, { passive: true });
+    window.addEventListener("resize", refresh);
+    refresh();
+
+    const observer = new MutationObserver(() => {
+      applyVisibility(toc.querySelector("a.nav-link.active"));
+    });
+    observer.observe(toc, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  };
+
   const mountThemeToggle = () => {
     if (document.getElementById("textbook-theme-toggle")) {
       return;
@@ -200,6 +395,10 @@ ul.task-list li input[type="checkbox"] {
     window.addEventListener("pageshow", () => {
       applyTheme(readStoredTheme() || currentTheme(), button);
     });
+
+    polishDocument();
+    mountTocContext();
+    mountReadingTools();
   };
 
   if (document.readyState === "loading") {
@@ -738,152 +937,141 @@ window.Quarto = {
  <span class="menu-text">后记</span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
- <span class="menu-text">中英术语表</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">术语表总览</span></a>
+  <a href="../chapters/page-039.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-040.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-041.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-042.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-043.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-044.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-045.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-046.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-047.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-048.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-049.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-050.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-051.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-052.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-053.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-054.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-055.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-056.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-057.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-058.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-059.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-060.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-061.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-062.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-063.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-064.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/page-065.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
   </div>
 </li>
-      </ul>
-  </li>
     </ul>
     </div>
 </nav>
@@ -891,21 +1079,12 @@ window.Quarto = {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">目录</h2>
+    <h2 id="toc-title">本页目录</h2>
    
   <ul>
-  <li><a href="#id--1082f4e9" id="toc-id--1082f4e9" class="nav-link active" data-scroll-target="#id--1082f4e9"><span class="header-section-number">14.0.0.1</span> 直线</a></li>
-  <li><a href="#id-1-255bd876" id="toc-id-1-255bd876" class="nav-link" data-scroll-target="#id-1-255bd876"><span class="header-section-number">14.0.0.2</span> 凸集</a></li>
-  <li><a href="#id--120e2dc5" id="toc-id--120e2dc5" class="nav-link" data-scroll-target="#id--120e2dc5"><span class="header-section-number">14.0.0.3</span> 仿射集</a></li>
-  <li><a href="#id--3b7b1f2b" id="toc-id--3b7b1f2b" class="nav-link" data-scroll-target="#id--3b7b1f2b"><span class="header-section-number">14.0.0.4</span> 锥</a></li>
-  <li><a href="#id--7b687f0a" id="toc-id--7b687f0a" class="nav-link" data-scroll-target="#id--7b687f0a"><span class="header-section-number">14.0.0.5</span> 超平面与半空间</a></li>
-  <li><a href="#id--0efaa617" id="toc-id--0efaa617" class="nav-link" data-scroll-target="#id--0efaa617"><span class="header-section-number">14.0.0.6</span> 多面体</a></li>
-  <li><a href="#id--779bf940" id="toc-id--779bf940" class="nav-link" data-scroll-target="#id--779bf940"><span class="header-section-number">14.0.0.7</span> 球与椭球</a></li>
-  <li><a href="#id--de8dfbc6" id="toc-id--de8dfbc6" class="nav-link" data-scroll-target="#id--de8dfbc6"><span class="header-section-number">14.0.1</span> 凸函数</a></li>
+  <li><a href="#id--de8dfbc6" id="toc-id--de8dfbc6" class="nav-link active" data-scroll-target="#id--de8dfbc6"><span class="header-section-number">14.0.1</span> 凸函数</a></li>
   <li><a href="#id--346e764a" id="toc-id--346e764a" class="nav-link" data-scroll-target="#id--346e764a"><span class="header-section-number">14.1</span> 最优性理论</a>
-  <ul>
-  <li><a href="#id--98d4bb40" id="toc-id--98d4bb40" class="nav-link" data-scroll-target="#id--98d4bb40"><span class="header-section-number">14.1.0.1</span> 可微函数的最优性</a></li>
-  <li><a href="#id--966c0e3b" id="toc-id--966c0e3b" class="nav-link" data-scroll-target="#id--966c0e3b"><span class="header-section-number">14.1.0.2</span> 不可微函数的最优性</a></li>
+  <ul class="collapse">
   <li><a href="#id--bdb945e7" id="toc-id--bdb945e7" class="nav-link" data-scroll-target="#id--bdb945e7"><span class="header-section-number">14.1.1</span> 映射的上下极限与半连续性</a></li>
   <li><a href="#id--8d38c465" id="toc-id--8d38c465" class="nav-link" data-scroll-target="#id--8d38c465"><span class="header-section-number">14.1.2</span> 线搜索法</a></li>
   <li><a href="#newton-a1474c7c" id="toc-newton-a1474c7c" class="nav-link" data-scroll-target="#newton-a1474c7c"><span class="header-section-number">14.1.3</span> Newton法</a></li>
@@ -942,7 +1121,6 @@ window.Quarto = {
 <p><strong>Definition 14.1</strong>. 设<span class="math inline">\(x_1,x_2\in\mathbb{R}^{n}\)</span>且<span class="math inline">\(x_1\ne x_2\)</span>。若<span class="math inline">\(\theta\in[0,1]\)</span>，称所有满足形式：</p>
 <p><span class="math display">\[\begin{equation*}
 y=\theta x_1+(1-\theta)x_2
-
 \end{equation*}\]</span></p>
 <p>的点<span class="math inline">\(y\)</span>构成的集合为<a href="../chapters/page-051.html#term-LineSegment" class="term" title="line segment">线段<span class="term-english">（line segment）</span></a>。若<span class="math inline">\(\theta\in\mathbb{R}^{}\)</span>，称所有满足上述形式的点<span class="math inline">\(y\)</span>构成的集合为<a href="../chapters/page-051.html#term-Line" class="term" title="line">直线<span class="term-english">（line）</span></a>。</p>
 </div>
@@ -950,7 +1128,6 @@ y=\theta x_1+(1-\theta)x_2
 <p><strong>note 14.1</strong>. 上述形式等价于：</p>
 <p><span class="math display">\[\begin{equation*}
 y=x_2+\theta(x_1-x_2)
-
 \end{equation*}\]</span></p>
 <p>这给出了另一种直观：<span class="math inline">\(y\)</span>是基<span class="math inline">\(x_2\)</span>和被<span class="math inline">\(\theta\)</span>缩放的方向<span class="math inline">\(x_1-x_2\)</span>的和。</p>
 </div>
@@ -964,7 +1141,6 @@ y=x_2+\theta(x_1-x_2)
 <p><strong>Definition 14.3</strong>. 设<span class="math inline">\(n\in\mathbb{N}^+\)</span>，<span class="math inline">\(\theta_1, \theta_2, \dots, \theta_{n}\geqslant0\)</span>且<span class="math inline">\(\sum\limits_{i=1}^{n}\theta_i=1\)</span>，<span class="math inline">\(x_1, x_2, \dots, x_{n}\in\mathbb{R}^{n}\)</span>。称：</p>
 <p><span class="math display">\[\begin{equation*}
 \theta_1x_1+\theta_2x_2+\cdots+\theta_nx_n
-
 \end{equation*}\]</span></p>
 <p>为<span class="math inline">\(x_1, x_2, \dots, x_{n}\)</span>构成的一个<a href="../chapters/page-042.html#term-ConvexCombination" class="term" title="convex combination">凸组合<span class="term-english">（convex combination）</span></a>。</p>
 </div>
@@ -972,7 +1148,6 @@ y=x_2+\theta(x_1-x_2)
 <p><strong>Definition 14.4</strong>. 设<span class="math inline">\(E\subseteq\mathbb{R}^{n}\)</span>。定义：</p>
 <p><span class="math display">\[\begin{equation*}
 \left\{\sum_{i=1}^{n}\theta_ix_i:x_i\in E,\;\theta_i\geqslant0,\;\sum_{i=1}^{n}\theta_i=1,\;n\in\mathbb{N}^+\right\}
-
 \end{equation*}\]</span></p>
 <p>为<span class="math inline">\(E\)</span>的<a href="../chapters/page-042.html#term-ConvexHull" class="term" title="convex hull">凸包<span class="term-english">（convex hull）</span></a>，记作<span class="math inline">\(\operatorname{Conv}(E)\)</span>。</p>
 </div>
@@ -993,17 +1168,14 @@ y=x_2+\theta(x_1-x_2)
 <p>任取<span class="math inline">\(\theta_1, \theta_2, \dots, \theta_{n}\geqslant0\)</span>且<span class="math inline">\(\sum\limits_{i=1}^{n}\theta_i=1\)</span>，<span class="math inline">\(x_1, x_2, \dots, x_{n}\in E\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=1}^{n}\theta_ix_i=\sum_{i=1}^{n-1}\theta_ix_i+\theta_nx_n=\sum_{i=1}^{n-1}\theta_ix_i+\left(1-\sum_{i=1}^{n-1}\theta_i\right)x_i
-
 \end{equation*}\]</span></p>
 <p>若<span class="math inline">\(\sum\limits_{i=1}^{n-1}\theta_i=0\)</span>，则上式退化为<span class="math inline">\(x_n\)</span>，结论成立。若<span class="math inline">\(\sum\limits_{i=1}^{n-1}\theta_i\ne0\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
 y=\sum_{i=1}^{n-1}\frac{\theta_i}{\sum\limits_{j=1}^{n-1}\theta_j}x_i
-
 \end{equation*}\]</span></p>
 <p>是关于<span class="math inline">\(x_1, x_2, \dots, x_{n-1}\)</span>的一个凸组合，由归纳假设可知<span class="math inline">\(y\in E\)</span>。变形可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=1}^{n}\theta_ix_i=\sum_{i=1}^{n-1}\theta_ix_i+\left(1-\sum_{i=1}^{n-1}\theta_i\right)x_i=\sum\limits_{j=1}^{n-1}\theta_jy+\left(1-\sum_{i=1}^{n-1}\theta_i\right)x_i\in E
-
 \end{equation*}\]</span></p>
 <p>必要性得证。</p>
 <p><strong>充分性：</strong>任意有限个包含<span class="math inline">\(2\)</span>个。</p>
@@ -1021,7 +1193,6 @@ y=\sum_{i=1}^{n-1}\frac{\theta_i}{\sum\limits_{j=1}^{n-1}\theta_j}x_i
 <p><strong>Definition 14.6</strong>. 设<span class="math inline">\(n\in\mathbb{N}^+\)</span>，<span class="math inline">\(\theta_1, \theta_2, \dots, \theta_{n}\in\mathbb{R}^{}\)</span>且<span class="math inline">\(\sum\limits_{i=1}^{n}\theta_i=1\)</span>，<span class="math inline">\(x_1, x_2, \dots, x_{n}\in\mathbb{R}^{n}\)</span>。称：</p>
 <p><span class="math display">\[\begin{equation*}
 \theta_1x_1+\theta_2x_2+\cdots+\theta_nx_n
-
 \end{equation*}\]</span></p>
 <p>为<span class="math inline">\(x_1, x_2, \dots, x_{n}\)</span>构成的一个<a href="../chapters/page-040.html#term-AffineCombination" class="term" title="affine combination">仿射组合<span class="term-english">（affine combination）</span></a>。</p>
 </div>
@@ -1029,7 +1200,6 @@ y=\sum_{i=1}^{n-1}\frac{\theta_i}{\sum\limits_{j=1}^{n-1}\theta_j}x_i
 <p><strong>Definition 14.7</strong>. 设<span class="math inline">\(E\subseteq\mathbb{R}^{n}\)</span>。定义：</p>
 <p><span class="math display">\[\begin{equation*}
 \left\{\sum_{i=1}^{n}\theta_ix_i:x_i\in E,\;\theta_i\in\mathbb{R}^{},\;\sum_{i=1}^{n}\theta_i=1,\;n\in\mathbb{N}^+\right\}
-
 \end{equation*}\]</span></p>
 <p>为<span class="math inline">\(E\)</span>的<a href="../chapters/page-040.html#term-AffineHull" class="term" title="affine hull">仿射包<span class="term-english">（affine hull）</span></a>，记作<span class="math inline">\(\operatorname{Aff}(E)\)</span>。</p>
 </div>
@@ -1048,14 +1218,12 @@ y=\sum_{i=1}^{n-1}\frac{\theta_i}{\sum\limits_{j=1}^{n-1}\theta_j}x_i
 <p>任取<span class="math inline">\(\alpha,\beta\in\mathbb{R}^{}\)</span>和<span class="math inline">\(x_1,x_2\in V\)</span>，则：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha x_1+\beta x_2+x_0=\alpha(x_1+x_0)+\beta(x_2+x_0)+(1-\alpha-\beta)x_0\in E
-
 \end{equation*}\]</span></p>
 <p>于是<span class="math inline">\(\alpha x_1+\beta x_2\in V\)</span>。由<a href="../chapters/page-002.html#theo-Subspace-e4ba2d14" data-reference-type="ref+label" data-reference="theo:Subspace">定理 1.5</a>可知<span class="math inline">\(V\)</span>是子空间。</p>
 <p>取不同于<span class="math inline">\(x_0\)</span>的<span class="math inline">\(x_1\in E\)</span>构成集合<span class="math inline">\(V'=\{x-x_1:x\in C\}\)</span>。任取<span class="math inline">\(V'\)</span>中的元素<span class="math inline">\(\alpha=x-x_1\)</span>，则<span class="math inline">\(\alpha=x+x_1-x_0\)</span>是<span class="math inline">\(x,x_1,x_0\)</span>构成的一个仿射组合，于是<span class="math inline">\(\alpha\in V\)</span>。由<span class="math inline">\(\alpha\)</span>的任意性可知<span class="math inline">\(V'\subseteq V\)</span>。同理可得<span class="math inline">\(V\subseteq V'\)</span>，于是有<span class="math inline">\(V=V'\)</span>，即表达式与<span class="math inline">\(x_0\)</span>的选择无关。</p>
 <p><strong>充分性：</strong>任取<span class="math inline">\(E\)</span>中不同的两点<span class="math inline">\(x_1+x_0,x_2+x_0\)</span>和<span class="math inline">\(\theta\in\mathbb{R}^{}\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \theta(x_1+x_0)+(1-\theta)(x_2+x_0)=\theta x_1+(1-\theta)x_2+x_0
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(V\)</span>是子空间，由<a href="../chapters/page-002.html#theo-Subspace-e4ba2d14" data-reference-type="ref+label" data-reference="theo:Subspace">定理 1.5</a>可知<span class="math inline">\(\theta x_1+(1-\theta)x_2\in V\)</span>，所以<span class="math inline">\(\theta x_1+(1-\theta)x_2+x_0\in E\)</span>。由<span class="math inline">\(x_1+x_0,x_2+x_0\)</span>和<span class="math inline">\(\theta\)</span>的任意性可知<span class="math inline">\(E\)</span>是仿射集。</p>
 <p>(3)由(1)立即可得。</p>
@@ -1071,7 +1239,6 @@ y=\sum_{i=1}^{n-1}\frac{\theta_i}{\sum\limits_{j=1}^{n-1}\theta_j}x_i
 <p><strong>Definition 14.9</strong>. 设<span class="math inline">\(n\in\mathbb{N}^+\)</span>，<span class="math inline">\(\theta_1, \theta_2, \dots, \theta_{n}\geqslant0\)</span>，<span class="math inline">\(x_1, x_2, \dots, x_{n}\in\mathbb{R}^{n}\)</span>。称：</p>
 <p><span class="math display">\[\begin{equation*}
 \theta_1x_1+\theta_2x_2+\cdots+\theta_nx_n
-
 \end{equation*}\]</span></p>
 <p>为<span class="math inline">\(x_1, x_2, \dots, x_{n}\)</span>构成的一个<a href="../chapters/page-042.html#term-ConicCombination" class="term" title="Conic combination">锥组合<span class="term-english">（Conic combination）</span></a>。</p>
 </div>
@@ -1079,7 +1246,6 @@ y=\sum_{i=1}^{n-1}\frac{\theta_i}{\sum\limits_{j=1}^{n-1}\theta_j}x_i
 <p><strong>Definition 14.10</strong>. 设<span class="math inline">\(E\subseteq\mathbb{R}^{n}\)</span>。定义：</p>
 <p><span class="math display">\[\begin{equation*}
 \left\{\sum_{i=1}^{n}\theta_ix_i:x_i\in E,\;\theta_i\geqslant0,\;n\in\mathbb{N}^+\right\}
-
 \end{equation*}\]</span></p>
 <p>为<span class="math inline">\(E\)</span>的<a href="../chapters/page-042.html#term-ConicHull" class="term" title="conic hull">锥包<span class="term-english">（conic hull）</span></a>，记作<span class="math inline">\(\operatorname{Cone}(E)\)</span>。</p>
 </div>
@@ -1111,13 +1277,11 @@ y=\sum_{i=1}^{n-1}\frac{\theta_i}{\sum\limits_{j=1}^{n-1}\theta_j}x_i
 <p><span class="proof-title"><em>证明</em>. </span>(1)任取超平面<span class="math inline">\(\{x\in\mathbb{R}^{n}:a^{\top}x=b\}\)</span>和其中任意两点<span class="math inline">\(x_1,x_2\)</span>，再任取<span class="math inline">\(\theta\in\mathbb{R}^{}\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 a^{\top}[\theta x_1+(1-\theta)x_2]=\theta b+(1-\theta)b=b
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\theta x_1+(1-\theta)x_2\in\{x\in\mathbb{R}^{n}:a^{\top}x=b\}\)</span>，超平面是仿射集。</p>
 <p>(2)任取闭半空间<span class="math inline">\(\{x\in\mathbb{R}^{n}:a^{\top}x\leqslant b\}\)</span>和其中任意两点<span class="math inline">\(x_1,x_2\)</span>，再任取<span class="math inline">\(\theta\geqslant0\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 a^{\top}[\theta x_1+(1-\theta)x_2]\leqslant\theta b+(1-\theta)b=b
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\theta x_1+(1-\theta)x_2\in\{x\in\mathbb{R}^{n}:a^{\top}x\leqslant b\}\)</span>，闭半空间是凸集。开半空间同理可得。&nbsp;◻</p>
 </div>
@@ -1154,26 +1318,22 @@ a^{\top}[\theta x_1+(1-\theta)x_2]\leqslant\theta b+(1-\theta)b=b
 <p><span class="proof-title"><em>证明</em>. </span>(1)任取球<span class="math inline">\(\{x\in\mathbb{R}^{n}:||x-x_c||\leqslant r\}\)</span>和其中任意两点<span class="math inline">\(x_1,x_2\)</span>，再任取<span class="math inline">\(\theta\geqslant0\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 ||\theta x_1+(1-\theta)x_2-x_c||=||\theta(x_1-x_c)+(1-\theta)(x_2-x_c)||\leqslant\theta||x_1-x_c||+(1-\theta)||x_2-x_c||\leqslant\theta r+(1-\theta)r=r
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\theta x_1+(1-\theta)x_2\in\{x\in\mathbb{R}^{n}:||x-x_c||\leqslant r\}\)</span>，球是凸集。</p>
 <p>(2)任取<span class="math inline">\(x\in\{x_c+P^{\frac{1}{2}}u:u\in\mathbb{R}^{n},\;||u||_2\leqslant1\}\)</span>，由<a href="../chapters/page-003.html#prop-Transpose-559e1e5a" data-reference-type="ref+label" data-reference="prop:Transpose">性质 2.1.2</a>(4)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 (x-x_c)^{\top}P^{-1}(x-x_c)=(P^{\frac{1}{2}}u)^{\top}P^{-1}P^{\frac{1}{2}}u=||u||_2\leqslant1
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\{x_c+P^{\frac{1}{2}}u:u\in\mathbb{R}^{n},\;||u||_2\leqslant1\}\subseteq\{x\in\mathbb{R}^{n}:(x-x_c)^{\top}P^{-1}(x-x_c)\leqslant1\}\)</span>。</p>
 <p>任取<span class="math inline">\(x\in\{x\in\mathbb{R}^{n}:(x-x_c)^{\top}P^{-1}(x-x_c)\leqslant1\}\)</span>。由<span class="math inline">\(P\)</span>的正定性可得<span class="math inline">\(P^{-\frac{1}{2}}\)</span>的存在性，取<span class="math inline">\(u=P^{-\frac{1}{2}}(x-x_c)\)</span>，根据<a href="../chapters/page-003.html#prop-Transpose-559e1e5a" data-reference-type="ref+label" data-reference="prop:Transpose">性质 2.1.2</a>(4)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 ||u||_2=[P^{-\frac{1}{2}}(x-x_c)]^{\top}P^{-\frac{1}{2}}(x-x_c)=(x-x_c)^{\top}P^{-1}(x-x_c)\leqslant1
-
 \end{equation*}\]</span></p>
 <p>所以<span class="math inline">\(\{x\in\mathbb{R}^{n}:(x-x_c)^{\top}P^{-1}(x-x_c)\leqslant1\}\subseteq\{x_c+P^{\frac{1}{2}}u:u\in\mathbb{R}^{n},\;||u||_2\leqslant1\}\)</span>。</p>
 <p>综上，<span class="math inline">\(\{x\in\mathbb{R}^{n}:(x-x_c)^{\top}P^{-1}(x-x_c)\leqslant1\}=\{x_c+P^{\frac{1}{2}}u:u\in\mathbb{R}^{n},\;||u||_2\leqslant1\}\)</span>。</p>
 <p>(3)任取椭球<span class="math inline">\(\{x\in\mathbb{R}^{n}:(x-x_c)^{\top}P^{-1}(x-x_c)\leqslant1\}\)</span>和其中任意两点<span class="math inline">\(x_1=x_c+P^{\frac{1}{2}}u_1,x_2=x_c+P^{\frac{1}{2}}u_2\)</span>，再任取<span class="math inline">\(\theta\geqslant0\)</span>，有：</p>
 <p><span class="math display">\[\begin{equation*}
 \theta x_1+(1-\theta)x_2=x_c+P^{\frac{1}{2}}[\theta u_1+(1-\theta)u_2]
-
 \end{equation*}\]</span></p>
 <p>由(1)可知<span class="math inline">\(||\theta u_1+(1-\theta)u_2||_2\leqslant1\)</span>，所以<span class="math inline">\(\theta x_1+(1-\theta)x_2\in\{x\in\mathbb{R}^{n}:(x-x_c)^{\top}P^{-1}(x-x_c)\leqslant1\}\)</span>，椭球是凸集。&nbsp;◻</p>
 </div>
@@ -1192,13 +1352,11 @@ a^{\top}[\theta x_1+(1-\theta)x_2]\leqslant\theta b+(1-\theta)b=b
 <p><span class="math display">\[\begin{align*}
 \theta y_1+(1-\theta)y_2&amp;=\theta f(x_1)+(1-\theta)f(x_2)=\theta(Ax_1+b)+(1-\theta)(Ax_2+b) \\
 &amp;=A[\theta x_1+(1-\theta)x_2]+b=f[\theta x_1+(1-\theta)x_2]
-
 \end{align*}\]</span></p>
 <p>因为<span class="math inline">\(E\)</span>是凸集，所以<span class="math inline">\(\theta x_1+(1-\theta)x_2\in E\)</span>，于是<span class="math inline">\(\theta y_1+(1-\theta)y_2\in f(E)\)</span>。由<span class="math inline">\(y_1,y_2,\theta\)</span>的任意性可知<span class="math inline">\(f(E)\)</span>是<span class="math inline">\(\mathbb{R}^{m}\)</span>中的凸集。</p>
 <p>(2)任取<span class="math inline">\(x_1,x_2\in f^{-1}(E)\)</span>和<span class="math inline">\(\theta\in[0,1]\)</span>，则存在<span class="math inline">\(y_1,y_2\in E\)</span>使得<span class="math inline">\(f(x_1)=y_1,f(x_2)=y_2\)</span>，于是有：</p>
 <p><span class="math display">\[\begin{equation*}
 f[\theta x_1+(1-\theta)x_2]=A[\theta x_1+(1-\theta)x_2]+b=\theta(Ax_1+b)+(1-\theta)(Ax_2+b)=\theta y_1+(1-\theta)y_2
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(E\)</span>是凸集，所以<span class="math inline">\(\theta y_1+(1-\theta)y_2\in E\)</span>，于是<span class="math inline">\(\theta x_1+(1-\theta)x_2\in f^{-1}(E)\)</span>。由<span class="math inline">\(x_1,x_2,\theta\)</span>的任意性可知<span class="math inline">\(f^{-1}(E)\)</span>是<span class="math inline">\(\mathbb{R}^{n}\)</span>中的凸集。&nbsp;◻</p>
 </div>
@@ -1212,7 +1370,6 @@ f[\theta x_1+(1-\theta)x_2]=A[\theta x_1+(1-\theta)x_2]+b=\theta(Ax_1+b)+(1-\the
 <p><strong>Definition 14.17</strong>. 设<span class="math inline">\(f\)</span>是关于凸集<span class="math inline">\(E\subseteq\mathbb{R}^{n}\)</span>的适当函数。若对任意的<span class="math inline">\(x,y\in E\)</span>和任意的<span class="math inline">\(\alpha\in[0,1]\)</span>都有：</p>
 <p><span class="math display">\[\begin{equation*}
 f[\alpha x+(1-\alpha)y]\leqslant\alpha f(x)+(1-\alpha)f(y)
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(f\)</span>是<a href="../chapters/page-042.html#term-ConvexFunction" class="term" title="convex function">凸函数<span class="term-english">（convex function）</span></a>，若上式取严格的小于号则称<span class="math inline">\(f\)</span><a href="../chapters/page-058.html#term-StrictlyConvex" class="term" title="strictly convex">严格凸<span class="term-english">（strictly convex）</span></a>。若<span class="math inline">\(-f\)</span>是凸函数，则称<span class="math inline">\(f\)</span>为<a href="../chapters/page-042.html#term-ConcaveFunction" class="term" title="concave function">凹函数<span class="term-english">（concave function）</span></a>。若<span class="math inline">\(-f\)</span>严格凸，则称<span class="math inline">\(f\)</span><a href="../chapters/page-058.html#term-StrictlyConcave" class="term" title="strictly concave">严格凹<span class="term-english">（strictly concave）</span></a>。</p>
 </div>
@@ -1223,12 +1380,10 @@ f[\alpha x+(1-\alpha)y]\leqslant\alpha f(x)+(1-\alpha)f(y)
 <li><p>若<span class="math inline">\(f\)</span>在<span class="math inline">\(E\)</span>上Fréchet可微，根据<a href="../chapters/page-005.html#prop-FrechetGateaux-d5eddb88" data-reference-type="ref+label" data-reference="prop:FrechetGateaux">性质 4.1.2</a>(1)，则<span class="math inline">\(f\)</span>是<span class="math inline">\(E\)</span>上的凸函数的充分必要条件为对任意的<span class="math inline">\(x,y\in E\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
                 f(y)\geqslant f(x)+(\nabla fx,y-x)
-
     \end{equation*}\]</span></p>
 <p><span class="math inline">\(f\)</span>是<span class="math inline">\(E\)</span>上的严格凸函数的充分必要条件为对任意不等的<span class="math inline">\(x,y\in E\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
                 f(y)&gt;f(x)+(\nabla fx,y-x)
-
     \end{equation*}\]</span></p></li>
 <li><p>若<span class="math inline">\(f\)</span>在<span class="math inline">\(E\)</span>上二次可微，则<span class="math inline">\(f\)</span>是凸函数的充分必要条件为对任意的<span class="math inline">\(x,h\in E\)</span>有<span class="math inline">\(\operatorname{D}^2fx(h,h)\geqslant0\)</span>，对非零的<span class="math inline">\(h\)</span>有<span class="math inline">\(\operatorname{D}^2fx(h,h)&gt;0\)</span>是<span class="math inline">\(f\)</span>严格凸的充分条件；</p></li>
 <li><p>若<span class="math inline">\(f\)</span>是凸函数，<span class="math inline">\(t\in(a,b)\)</span>，则存在经过点<span class="math inline">\((t,f(t))\)</span>的直线<span class="math inline">\(g(x)=c(x-t)+f(t)\)</span>满足对任意的<span class="math inline">\(x\in(a,b)\)</span>有<span class="math inline">\(g(x)\leqslant f(x)\)</span>。当<span class="math inline">\(f\)</span>为严格凸函数时，<span class="math inline">\(g(x)=f(x)\)</span>当且仅当<span class="math inline">\(x=t\)</span>。</p></li>
@@ -1239,70 +1394,57 @@ f[\alpha x+(1-\alpha)y]\leqslant\alpha f(x)+(1-\alpha)f(y)
 <p><span class="math display">\[\begin{align*}
 &amp;f\{A[\alpha x_1+(1-\alpha)x_2]+b\}=f[A\alpha x_1+\alpha b+A(1-\alpha)x_2+(1-\alpha)b] \\
 =&amp;f[\alpha(Ax_1+b)+(1-\alpha)(Ax_2+b)]\leqslant\alpha f(Ax_1+b)+(1-\alpha)f(x_2+b)
-
 \end{align*}\]</span></p>
 <p>(2)<strong>必要性：</strong>对任意的<span class="math inline">\(x,y\in E\)</span>，因为<span class="math inline">\(f\)</span>是凸函数，由(1)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \varphi(t)=f[x+t(y-x)]
-
 \end{equation*}\]</span></p>
 <p>在<span class="math inline">\([0,1]\)</span>上是凸函数，所以对任意的<span class="math inline">\(t\in(0,1]\)</span>有：</p>
 <p><span class="math display">\[\begin{equation*}
 \varphi(t)\leqslant(1-t)\varphi(0)+t\varphi(1)
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{\varphi(t)-\varphi(0)}{t}\leqslant\varphi(1)-\varphi(0)
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(f\)</span>在<span class="math inline">\(x\)</span>处Fréchet可微，由<a href="../chapters/page-005.html#prop-FrechetGateaux-d5eddb88" data-reference-type="ref+label" data-reference="prop:FrechetGateaux">性质 4.1.2</a>(1)可知<span class="math inline">\(\varphi\)</span>在<span class="math inline">\(t=0\)</span>处可微，于是取<span class="math inline">\(t\downarrow0\)</span>，根据<a href="../chapters/page-004.html#prop-RMap-d00343b3" data-reference-type="ref+label" data-reference="prop:RMap">性质 3.3.3</a>(4)可知：</p>
 <p><span class="math display">\[\begin{equation*}
 \varphi'(0)=\operatorname{D}_Gfx(y-x)=(\nabla fx,y-x)\leqslant f(y)-f(x)
-
 \end{equation*}\]</span></p>
 <p><strong>充分性：</strong>任取<span class="math inline">\(x,y\in E\)</span>和<span class="math inline">\(\alpha\in[0,1]\)</span>，记<span class="math inline">\(z=\alpha x+(1-\alpha)y\)</span>，由条件可得：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)\geqslant f(z)+(\nabla fz,x-z),\quad f(y)\geqslant f(z)+(\nabla fz,y-z)
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha f(x)\geqslant\alpha f(z)+\alpha(\nabla fz,x-z),\quad(1-\alpha)f(y)\geqslant(1-\alpha)f(z)+(1-\alpha)(\nabla fz,y-z)
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha f(x)+(1-\alpha)f(y)\geqslant f(z)+\alpha(\nabla fz,x-z)+(1-\alpha)(\nabla fz,y-z)
-
 \end{equation*}\]</span></p>
 <p>注意到：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;\alpha(\nabla fz,x-z)+(1-\alpha)(\nabla fz,y-z)=\Big(\nabla fz,\alpha(x-z)+(1-\alpha)(y-z)\Big) \\
 =&amp;\Big(\nabla fz,\alpha x+(1-\alpha)y-\alpha z-(1-\alpha)z\Big)=\Big(\nabla fz,z-\alpha z-(1-\alpha)z\Big) \\
 =&amp;\Big(\nabla fz,\mathbf{0}\Big)=0
-
 \end{align*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha f(x)+(1-\alpha)f(y)\geqslant f[\alpha x+(1-\alpha)y]
-
 \end{equation*}\]</span></p>
 <p>由<span class="math inline">\(x,y,\alpha\)</span>的任意性可知<span class="math inline">\(f\)</span>是<span class="math inline">\(E\)</span>上的凸函数。</p>
 <p>(3)<strong>必要性：</strong>对任意的<span class="math inline">\(x\in E\)</span>，若存在<span class="math inline">\(h\in E\)</span>使得<span class="math inline">\(\operatorname{D}^2f(h,h)&lt;0\)</span>，由<a href="../chapters/page-005.html#theo-TaylorTheorem-f2dab84a" data-reference-type="ref+label" data-reference="theo:TaylorTheorem">定理 4.6</a>(1)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x_0+th)=f(x_0)+t\operatorname{D}fx(h)+\frac{t^2}{2}\operatorname{D}^2fx(h,h)+\operatorname{o}(t^2),\;(t\to0)
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{f(x_0+th)-f(x_0)-t\operatorname{D}fx(h)}{t^2}=\frac{1}{2}\operatorname{D}^2fx(h,h)+\frac{\operatorname{o}(t^2)}{t^2},\;(t\to0)
-
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/page-004.html#prop-RMap-d00343b3" data-reference-type="ref+label" data-reference="prop:RMap">性质 3.3.3</a>(5.b)(3)可知当<span class="math inline">\(t\)</span>足够小时有：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{f(x_0+th)-f(x_0)-t(\operatorname{D}fx)h}{t^2}&lt;0
-
 \end{equation*}\]</span></p>
 <p>根据<a href="../chapters/page-005.html#prop-FrechetGateaux-d5eddb88" data-reference-type="ref+label" data-reference="prop:FrechetGateaux">性质 4.1.2</a>(1)可知这与(2)矛盾。</p>
 <p><strong>充分性：</strong>由<a href="../chapters/page-005.html#theo-TaylorTheorem-f2dab84a" data-reference-type="ref+label" data-reference="theo:TaylorTheorem">定理 4.6</a>(2)和(2)立即可得。&nbsp;◻</p>
@@ -1320,7 +1462,6 @@ f(x_0+th)=f(x_0)+t\operatorname{D}fx(h)+\frac{t^2}{2}\operatorname{D}^2fx(h,h)+\
 <p><strong>Definition 14.18</strong>. 设<span class="math inline">\(f\)</span>关于<span class="math inline">\(\mathbb{R}^{n}\)</span>是适当函数，<span class="math inline">\(x\in\mathbb{R}^{n}\)</span>。若<span class="math inline">\(g\in\mathbb{R}^{n}\)</span>对任意的<span class="math inline">\(y\in\mathbb{R}^{n}\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 f(y)\geqslant f(x)+g^T(y-x)
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(g\)</span>为<span class="math inline">\(f\)</span>在<span class="math inline">\(x\)</span>处的一个<a href="../chapters/page-058.html#term-Subgradient" class="term" title="subgradient">次梯度<span class="term-english">（subgradient）</span></a>，称<span class="math inline">\(f\)</span>在<span class="math inline">\(x\)</span>处所有次梯度构成的集合为<a href="../chapters/page-058.html#term-Subdifferential" class="term" title="subdifferential">次微分<span class="term-english">（subdifferential）</span></a>。</p>
 </div>
@@ -1330,7 +1471,6 @@ f(y)\geqslant f(x)+g^T(y-x)
 <p>设<span class="math inline">\(A\)</span>和<span class="math inline">\(B\)</span>是<span class="math inline">\(\mathbb{R}^{n}\)</span>上不交的非空凸集，则存在非零的<span class="math inline">\(a\in\mathbb{R}^{n}\)</span>和<span class="math inline">\(b\in\mathbb{R}^{}\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;x\in A,\;(a,x)\geqslant b,\quad\forall\;y\in B,\;(a,y)\leqslant b
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
@@ -1351,19 +1491,16 @@ f(y)\geqslant f(x)+g^T(y-x)
 <p><span class="math display">\[\begin{gather*}
 \liminf_{x\to a}f(x)=\lim_{\varepsilon\to0}\Bigl(\inf\{f(x):x\in U(a,\varepsilon)\}\setminus\{a\}\Bigr) \\
 \limsup_{x\to a}f(x)=\lim_{\varepsilon\to0}\Bigl(\sup\{f(x):x\in U(a,\varepsilon)\}\setminus\{a\}\Bigr)
-
 \end{gather*}\]</span></p>
 </div>
 <div id="definition-14-21" class="definition theorem-block env-definition">
 <p><strong>Definition 14.21</strong>. <span class="math inline">\((X,\rho)\)</span>是度量空间，<span class="math inline">\(f\)</span>是<span class="math inline">\(X\)</span>到<span class="math inline">\(\overline{\mathbb{R}}\)</span>上的映射。若：</p>
 <p><span class="math display">\[\begin{equation*}
 \limsup_{x\to a}f(x)\leqslant f(x_0)
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(f(x)\)</span>在<span class="math inline">\(a\)</span>点<a href="../chapters/page-060.html#term-UpperSemicontinuous" class="term" title="upper semicontinuous">上半连续<span class="term-english">（upper semicontinuous）</span></a>。 若：</p>
 <p><span class="math display">\[\begin{equation*}
 \liminf_{x\to a}f(x)\leqslant f(x_0)
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(f(x)\)</span>在<span class="math inline">\(a\)</span>点<span class="term-missing" data-key="lowerSemicontinuous">lowerSemicontinuous</span>。</p>
 </div>
@@ -1376,7 +1513,6 @@ f(y)\geqslant f(x)+g^T(y-x)
 <p><strong>Definition 14.22</strong>. 给定初始步长<span class="math inline">\(\alpha&gt;0\)</span>和收缩因子<span class="math inline">\(\rho\in(0,1)\)</span>，定义候选步长序列：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha_n=\rho^n\alpha,\quad n\in\mathbb{N}
-
 \end{equation*}\]</span></p>
 <p>从<span class="math inline">\(n=0\)</span>开始依次检验<span class="math inline">\(\alpha_n\)</span>是否满足预先给定的步长接受准则。若取第一个满足该准则的步长<span class="math inline">\(\alpha_n\)</span>作为当前迭代步长，则称这种步长选择方法为<a href="../chapters/page-041.html#term-BacktrackingMethod" class="term" title="backtracking method">回溯法<span class="term-english">（backtracking method）</span></a>。</p>
 </div>
@@ -1384,7 +1520,6 @@ f(y)\geqslant f(x)+g^T(y-x)
 <p><strong>Definition 14.23</strong>. 设<span class="math inline">\(X\)</span>为实赋范线性空间，<span class="math inline">\(E\subseteq X\)</span>为开集，函数<span class="math inline">\(f:E\to\mathbb{R}\)</span>在<span class="math inline">\(x\in E\)</span>处Fréchet可微，<span class="math inline">\(c\in(0,1)\)</span>，<span class="math inline">\(d\in X\)</span>是一个下降方向。若<span class="math inline">\(\alpha&gt;0\)</span>满足<span class="math inline">\(x+\alpha d\in E\)</span>，并且</p>
 <p><span class="math display">\[\begin{equation*}
 f(x+\alpha d)\leqslant f(x)+c\alpha\operatorname{D}fx(d)
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\alpha\)</span>满足沿方向<span class="math inline">\(d\)</span>的<strong>Armijo准则</strong>。</p>
 </div>
@@ -1392,12 +1527,10 @@ f(x+\alpha d)\leqslant f(x)+c\alpha\operatorname{D}fx(d)
 <p><strong>note 14.2</strong>. 因为<span class="math inline">\(d\in X\)</span>为下降方向，所以<span class="math inline">\(\operatorname{D}fx(d)&lt;0\)</span>。由<a href="../chapters/page-005.html#theo-TaylorTheorem-f2dab84a" data-reference-type="ref+label" data-reference="theo:TaylorTheorem">定理 4.6</a>(1)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x+\alpha d)=f(x)+\alpha\operatorname{D}fx(d)+\operatorname{o}(\alpha),\;(\alpha\to0)
-
 \end{equation*}\]</span></p>
 <p>因此一阶线性近似预示着，沿方向<span class="math inline">\(d\)</span>移动一个小步长<span class="math inline">\(\alpha\)</span>后，函数值应当下降，其线性预测下降量为<span class="math inline">\(-\alpha\operatorname{D}fx(d)&gt;0\)</span>。Armijo准则要求步长<span class="math inline">\(\alpha\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x)-f(x+\alpha d)\geqslant-c\alpha\operatorname{D}fx(d)
-
 \end{equation*}\]</span></p>
 <p>因此，Armijo准则的含义是实际下降量至少要达到一阶Taylor线性预测下降量的<span class="math inline">\(c\)</span>倍。参数<span class="math inline">\(c\in(0,1)\)</span>控制这个要求的严格程度，<span class="math inline">\(c\)</span>越大，要求实际下降越接近线性预测下降量。在应用中，<span class="math inline">\(c\)</span>常取较小的数值，如<span class="math inline">\(c=10^{-4}\)</span>。</p>
 <p>Armijo准则的缺陷在于它只控制了步长<span class="math inline">\(\alpha\)</span>不能太大，因为太大的步长通常会违反下降条件，但它没有控制”步长不能太小”。如果步长非常非常小，函数值虽然下降得很少，但也可能满足Armijo准则。</p>
@@ -1410,7 +1543,6 @@ f(x)+(1-c)\alpha\operatorname{D}fx(d)
 f(x+\alpha d)
 \leqslant
 f(x)+c\alpha\operatorname{D}fx(d),
-
 \end{equation*}\]</span></p>
 <p>则称<span class="math inline">\(\alpha\)</span>满足沿方向<span class="math inline">\(d\)</span>的<strong>Goldstein准则</strong>。</p>
 </div>
@@ -1421,12 +1553,10 @@ f(x)+c\alpha\operatorname{D}fx(d),
 f(x)-f(x+\alpha d)
 \leqslant
 -(1-c)\alpha\operatorname{D}fx(d)
-
 \end{equation*}\]</span></p>
 <p>由于<span class="math inline">\(-\alpha\operatorname{D}fx(d)&gt;0\)</span>是一阶Taylor线性近似预示的下降量，因此左侧不等式要求实际下降量不能超过线性预测下降量的<span class="math inline">\((1-c)\)</span>倍。由<a href="../chapters/page-005.html#theo-TaylorTheorem-f2dab84a" data-reference-type="ref+label" data-reference="theo:TaylorTheorem">定理 4.6</a>(1)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x+\alpha d)=f(x)+\alpha\operatorname{D}fx(d)+\operatorname{o}(\alpha),\;(\alpha\to0)
-
 \end{equation*}\]</span></p>
 <p>因此当<span class="math inline">\(\alpha\)</span>过小时，实际下降量会过于接近完整的一阶线性预测下降量，从而违反Goldstein左侧条件。直观地说，这表示沿方向<span class="math inline">\(d\)</span>还没有走得足够远，函数沿该方向的下降趋势尚未明显减弱。</p>
 <p>综上，Goldstein准则通过两个不等式同时控制步长：右侧的Armijo条件保证步长不能太大，左侧条件保证步长不能太小。</p>
@@ -1438,7 +1568,6 @@ f(x+\alpha d)=f(x)+\alpha\operatorname{D}fx(d)+\operatorname{o}(\alpha),\;(\alph
 f(x+\alpha d)\leqslant
 f(x)+c_1\alpha\operatorname{D}fx(d),\\
 \operatorname{D}f(x+\alpha d)(d)\geqslant c_2\operatorname{D}fx(d)
-
 \end{gather*}\]</span></p>
 <p>则称<span class="math inline">\(\alpha\)</span>满足沿方向<span class="math inline">\(d\)</span>的<strong>Wolfe准则</strong>。</p>
 </div>
@@ -1452,7 +1581,6 @@ f(x)+c_1\alpha\operatorname{D}fx(d),\\
 <p><span class="math display">\[\begin{gather*}
 f(x+\alpha d)\leqslant f(x)+c_1\alpha\operatorname{D}fx(d) \\
 \left|\operatorname{D}f(x+\alpha d)(d)\right|\leqslant c_2\left|\operatorname{D}fx(d)\right|
-
 \end{gather*}\]</span></p>
 <p>则称<span class="math inline">\(\alpha\)</span>满足沿方向<span class="math inline">\(d\)</span>的<strong>强Wolfe准则</strong>。</p>
 </div>
@@ -1463,55 +1591,45 @@ f(x+\alpha d)\leqslant f(x)+c_1\alpha\operatorname{D}fx(d) \\
 <p><strong>Theorem 14.3</strong>. 设<span class="math inline">\(X\)</span>为实Hilbert空间，<span class="math inline">\(E\subseteq X\)</span>为开集，函数<span class="math inline">\(f\in C^1:E\to\mathbb{R}\)</span>，<span class="math inline">\(f\)</span>在<span class="math inline">\(E\)</span>上有下界，<span class="math inline">\(\nabla f\)</span>在<span class="math inline">\(E\)</span>的Lipschitz连续，即存在常数<span class="math inline">\(L&gt;0\)</span>，使得：</p>
 <p><span class="math display">\[\begin{equation*}
 ||\nabla fx-\nabla fy||\leqslant L||x-y||
-
 \end{equation*}\]</span></p>
 <p>给定初始点<span class="math inline">\(x_0\in E\)</span>，考虑由线搜索方法生成的迭代序列<span class="math inline">\(\{x_{n+1}=x_n+\alpha_nd_n\}\)</span>，其中<span class="math inline">\(d_n\)</span>是<span class="math inline">\(f\)</span>在<span class="math inline">\(x_n\)</span>处的下降方向。若步长<span class="math inline">\(\alpha_k&gt;0\)</span>满足Wolfe准则，则有：</p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{n=0}^{+\infty}\cos^2\theta_n||\nabla fx_n||^2&lt;+\infty
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(\theta_n\)</span>为<span class="math inline">\(-\nabla fx_n\)</span>与<span class="math inline">\(d_n\)</span>之间的夹角，即：</p>
 <p><span class="math display">\[\begin{equation*}
 \cos\theta_n=\frac{-(\nabla fx_n,d_n)}{||\nabla fx_n||\;||d_n||}
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>由Wolfe准则可知：</p>
 <p><span class="math display">\[\begin{equation*}
 (\nabla fx_{n+1},d_n)\geqslant c_2(\nabla fx_n,d_n)
-
 \end{equation*}\]</span></p>
 <p>所以：</p>
 <p><span class="math display">\[\begin{equation*}
 (\nabla fx_{n+1}-\nabla fx_n,d_n)\geqslant(c_2-1)(\nabla fx_n,d_n)
-
 \end{equation*}\]</span></p>
 <p>根据<a href="../chapters/page-017.html#ineq-cauchy-schiwarz-inner-product-ccb1d695" data-reference-type="ref+label" data-reference="ineq:cauchy-schiwarz-inner-product">不等式 3</a>可知：</p>
 <p><span class="math display">\[\begin{equation*}
 (\nabla fx_{n+1}-\nabla fx_n,d_n)\leqslant||\nabla fx_{n+1}-\nabla fx_n||\;||d_n||\leqslant L||x_{n+1}-x_n||\;||d_n|=\alpha_nL||d_n||^2
-
 \end{equation*}\]</span></p>
 <p>联合上两式可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \alpha_nL||d_n||^2\geqslant(c_2-1)(\nabla fx_n,d_n) \\
 \alpha_n\geqslant\frac{(c_2-1)(\nabla fx_n,d_n)}{L||d_n||^2}
-
 \end{equation*}\]</span></p>
 <p>由Wolfe准则可知：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x_{n+1})\leqslant f(x_n)+c_1\alpha_n(\nabla fx_n,d_n)\leqslant f(x_n)+c_1\frac{(c_2-1)(\nabla fx_n,d_n)}{L||d_n||^2}(\nabla fx_n,d_n)
-
 \end{equation*}\]</span></p>
 <p>即：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x_{n+1})\leqslant f(x_n)+c_1\frac{(c_2-1)(\nabla fx_n,d_n)^2}{L||d_n||^2}=f(x_n)+c_1\frac{(c_2-1)\cos^2\theta_n}{L}||\nabla fx_n||^2
-
 \end{equation*}\]</span></p>
 <p>对上式求和即可得到：</p>
 <p><span class="math display">\[\begin{equation*}
 f(x_{n+1})\leqslant f(x_0)-\frac{c_1(1-c_2)}{L}\sum_{i=0}^{n}\cos^2\theta_i||\nabla fx_i||^2
-
 \end{equation*}\]</span></p>
 <p>因为<span class="math inline">\(0&lt;c_1&lt;c_2&lt;1\)</span>，所以<span class="math inline">\(c_1(1-c_2)&gt;0\)</span>，即对任意的<span class="math inline">\(n\in\mathbb{N}\)</span>有<span class="math inline">\(f(x_{n+1})\leqslant f(x_0)\)</span>。因为<span class="math inline">\(f\)</span>在<span class="math inline">\(E\)</span>上有下界，所以结论成立。&nbsp;◻</p>
 </div>
@@ -1519,34 +1637,28 @@ f(x_{n+1})\leqslant f(x_0)-\frac{c_1(1-c_2)}{L}\sum_{i=0}^{n}\cos^2\theta_i||\na
 <p><strong>Theorem 14.4</strong>. 设<span class="math inline">\(X\)</span>为实Hilbert空间，<span class="math inline">\(E\subseteq X\)</span>为开集，函数<span class="math inline">\(f\in C^1(E):E\to\mathbb{R}\)</span>，<span class="math inline">\(f\)</span>在<span class="math inline">\(E\)</span>上有下界，<span class="math inline">\(\nabla f\)</span>在<span class="math inline">\(E\)</span>上Lipschitz连续，即存在常数<span class="math inline">\(L&gt;0\)</span>，使得：</p>
 <p><span class="math display">\[\begin{equation*}
 ||\nabla fx-\nabla fy||\leqslant L||x-y||
-
 \end{equation*}\]</span></p>
 <p>给定初始点<span class="math inline">\(x_0\in E\)</span>，考虑由线搜索方法生成的迭代序列<span class="math inline">\(\{x_{n+1}=x_n+\alpha_nd_n\}\)</span>，其中<span class="math inline">\(d_n\)</span>是<span class="math inline">\(f\)</span>在<span class="math inline">\(x_n\)</span>处的下降方向。若步长<span class="math inline">\(\alpha_k&gt;0\)</span>满足Wolfe准则，且对任意的<span class="math inline">\(n\in\mathbb{N}\)</span>，存在<span class="math inline">\(\beta&gt;0\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \theta_n&lt;\frac{\pi}{2}-\beta
-
 \end{equation*}\]</span></p>
 <p>则：</p>
 <p><span class="math display">\[\begin{equation*}
 \lim_{n\to\infty}||\nabla fx_n||=0
-
 \end{equation*}\]</span></p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>若结论不成立，由<a href="../chapters/page-004.html#prop-ConvergentSeqOfPoints-9fdcf3e3" data-reference-type="ref+label" data-reference="prop:ConvergentSeqOfPoints">性质 3.1.1</a>(4)可知存在<span class="math inline">\(\{\nabla fx_n\}\)</span>的子列<span class="math inline">\(\{\nabla fx_{n_k}\}\)</span>和<span class="math inline">\(\varepsilon&gt;0\)</span>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 \forall\;k\in\mathbb{N}^+,\;||\nabla fx_{n_k}||&gt;\varepsilon
-
 \end{equation*}\]</span></p>
 <p>注意到：</p>
 <p><span class="math display">\[\begin{equation*}
 \cos(\theta_n)&gt;\cos\left(\frac{\pi}{2}-\beta\right)=\sin\beta
-
 \end{equation*}\]</span></p>
 <p>根据<a href="#theo-Zoutendijk-78da95ff" data-reference-type="ref+label" data-reference="theo:Zoutendijk">定理 14.3</a>可得：</p>
 <p><span class="math display">\[\begin{equation*}
 +\infty&gt;\sum_{n=0}^{+\infty}\cos^2\theta_n||\nabla fx_n||^2&gt;\sum_{k=0}^{+\infty}\cos^2\theta_{n_k}||\nabla fx_{n_k}||^2&gt;\sum_{k=0}^{+\infty}\sin^2\beta\varepsilon^2
-
 \end{equation*}\]</span></p>
 <p>矛盾，所以结论成立。&nbsp;◻</p>
 </div>
@@ -1562,22 +1674,18 @@ f(x_{n+1})\leqslant f(x_0)-\frac{c_1(1-c_2)}{L}\sum_{i=0}^{n}\cos^2\theta_i||\na
 <p><span class="math display">\[\begin{align*}
 f(x_n+d_n)&amp;\approx f(x_n)+\operatorname{D}fx_n(d_n)+\frac{1}{2}\operatorname{D}^2fx_n(d_n,d_n) \\
 &amp;=f(x_n)+(\nabla fx_n)^Td_n+\frac{1}{2}d_n^T\nabla^2fx_nd_n
-
 \end{align*}\]</span></p>
 <p>Newton法的基本思想是：不直接最小化原函数<span class="math inline">\(f(x_n+d_n)\)</span>，而是在当前点<span class="math inline">\(x_n\)</span>处求解方向<span class="math inline">\(d_n\)</span>使得其二次近似最小化。因此，根据<a href="../chapters/page-005.html#theo-FrechetExtremumOptimality-57f333dd" data-reference-type="ref+label" data-reference="theo:FrechetExtremumOptimality">定理 4.7</a>(1)，令上右式关于<span class="math inline">\(d_n\)</span>的一阶Fréchet微分为零可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \nabla^2fx_nd_n=-\nabla fx_n
-
 \end{equation*}\]</span></p>
 <p>从而得到：</p>
 <p><span class="math display">\[\begin{equation*}
 d_n=-\left(\nabla^2fx_n\right)^{-1}\nabla fx_n
-
 \end{equation*}\]</span></p>
 <p>于是Newton法的迭代格式为：</p>
 <p><span class="math display">\[\begin{equation*}
 x_{n+1}=x_n+d_n=x_n-\left(\nabla^2fx_n\right)^{-1}\nabla fx_n
-
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(d_n\)</span>称为<span class="math inline">\(f\)</span>在<span class="math inline">\(x_n\)</span>处的Newton方向。</p>
 </div>
@@ -1585,17 +1693,14 @@ x_{n+1}=x_n+d_n=x_n-\left(\nabla^2fx_n\right)^{-1}\nabla fx_n
 <p><strong>Theorem 14.5</strong>. 设<span class="math inline">\(E\subseteq \mathbb{R}^m\)</span>为开集，函数<span class="math inline">\(f\in C^2(E):E\to\mathbb{R}\)</span>，<span class="math inline">\(f\)</span>在<span class="math inline">\(E\)</span>上的最小值点<span class="math inline">\(x\)</span>满足：</p>
 <p><span class="math display">\[\begin{equation*}
 \nabla fx=\mathbf{0},\quad\nabla^2fx&gt;0
-
 \end{equation*}\]</span></p>
 <p><span class="math inline">\(\nabla^2fx\)</span>在<span class="math inline">\(x\)</span>的<span class="math inline">\(\delta\)</span>邻域（<span class="math inline">\(\delta&gt;0\)</span>）<span class="math inline">\(U(x,\delta)\)</span>上满足Lipschitz条件：</p>
 <p><span class="math display">\[\begin{equation*}
 ||\nabla^2fx-\nabla^2fy||\leqslant L||x-y||,\quad\forall x,y\in U(x,\delta)
-
 \end{equation*}\]</span></p>
 <p>考虑Newton迭代：</p>
 <p><span class="math display">\[\begin{equation*}
 x_{n+1}=x_n+d_n=x_n-\left(\nabla^2fx_n\right)^{-1}\nabla fx_n
-
 \end{equation*}\]</span></p>
 <p>则：</p>
 <ol type="1">
@@ -1608,12 +1713,10 @@ x_{n+1}=x_n+d_n=x_n-\left(\nabla^2fx_n\right)^{-1}\nabla fx_n
 <p><span class="math display">\[\begin{align*}
 x_{n+1}-x&amp;=x_n-\left(\nabla^2fx_n\right)^{-1}\nabla fx_n-x=\left(\nabla^2fx_n\right)^{-1}\left[\nabla^2fx_n(x_n-x)-\nabla fx_n\right] \\
 &amp;=\left(\nabla^2fx_n\right)^{-1}\left[\nabla^2fx_n(x_n-x)-\left(\nabla fx_n-\nabla fx\right)\right]
-
 \end{align*}\]</span></p>
 <p>由、<a href="../chapters/page-005.html#prop-FrechetDifferential-9f3018f4" data-reference-type="ref+label" data-reference="prop:FrechetDifferential">性质 4.1.1</a>(6)和<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)可得：</p>
 <p><span class="math display">\[\begin{equation*}
 \nabla fx_n-\nabla fx=\int_{0}^{1}\nabla^2f[x_n+t(x-x_n)](x_n-x)\mathop{}\!\mathrm{d}t
-
 \end{equation*}\]</span></p>
 <p>根据<a href="../chapters/page-012.html#prop-MeasurableIntegral-c2153bd8" data-reference-type="ref+label" data-reference="prop:MeasurableIntegral">性质 11.4.3</a>(6)(7)可得：</p>
 <p><span class="math display">\[\begin{align*}
@@ -1623,39 +1726,32 @@ x_{n+1}-x&amp;=x_n-\left(\nabla^2fx_n\right)^{-1}\nabla fx_n-x=\left(\nabla^2fx_
 \leqslant&amp;\int_{0}^{1}\left\|\left\{\nabla^2fx_n-\nabla^2f[x_n+t(x-x_n)]\right\}(x_n-x)\right\|\mathop{}\!\mathrm{d}t \\
 \leqslant&amp;\int_{0}^{1}\left\|\left\{\nabla^2fx_n-\nabla^2f[x_n+t(x-x_n)]\right\}\right\|||x_n-x||\mathop{}\!\mathrm{d}t \\
 \leqslant&amp;||x_n-x||\int_{0}^{1}Lt||x-x_n||\mathop{}\!\mathrm{d}t=\frac{||x_n-x||^2L}{2}
-
 \end{align*}\]</span></p>
 <p>于是由可得：</p>
 <p><span class="math display">\[\begin{align*}
 &amp;||x_{n+1}-x||=\left\|\left(\nabla^2fx_n\right)^{-1}\left[\nabla^2fx_n(x_n-x)-\left(\nabla fx_n-\nabla fx\right)\right]\right\| \\
 \leqslant&amp;\left\|\left(\nabla^2fx_n\right)^{-1}\right\|\left\|\left[\nabla^2fx_n(x_n-x)-\left(\nabla fx_n-\nabla fx\right)\right]\right\|  \\
 \leqslant&amp;\left\|\left(\nabla^2fx_n\right)^{-1}\right\|\frac{||x_n-x||^2L}{2}
-
 \end{align*}\]</span></p>
 <p>可以证明存在<span class="math inline">\(r&gt;0\)</span>，当<span class="math inline">\(||x_n-x||\leqslant r\)</span>时有<span class="math inline">\(\left\|\left(\nabla^2fx_n\right)^{-1}\right\|\leqslant2\left\|\left(\nabla^2fx\right)^{-1}\right\|\)</span><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>，所以：</p>
 <p><span class="math display">\[\begin{equation*}
 \frac{||x_{n+1}-x||}{||x_n-x||^2}\leqslant L\left\|\left(\nabla^2fx\right)^{-1}\right\|
-
 \end{equation*}\]</span></p>
 <p>当：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x_0-x||\leqslant\min\left\{\delta,r,\frac{1}{2L\left\|\left(\nabla^2fx\right)^{-1}\right\|}\right\}
-
 \end{equation*}\]</span></p>
 <p>时结论成立，第三式是因为：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x_1-x||\leqslant L\left\|\left(\nabla^2fx\right)^{-1}\right\|||x_0-x||^2
-
 \end{equation*}\]</span></p>
 <p>右式未必满足小于等于<span class="math inline">\(||x_0-x||\)</span>，这将导致序列<span class="math inline">\(\{x_n:n\geqslant1\}\)</span>不在<span class="math inline">\(U(x,\delta)\)</span>中。一旦控制了该不等式，则<span class="math inline">\(||x_1-x||\leqslant\dfrac{1}{2}||x_0-x||\)</span>。设<span class="math inline">\(n\)</span>时有：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x_n-x||\leqslant\frac{1}{2L\left\|\left(\nabla^2fx\right)^{-1}\right\|}
-
 \end{equation*}\]</span></p>
 <p>则<span class="math inline">\(n+1\)</span>时有：</p>
 <p><span class="math display">\[\begin{equation*}
 ||x_{n+1}-x||\leqslant L\left\|\left(\nabla^2fx\right)^{-1}\right\|||x_n-x||^2\leqslant\frac{1}{2}||x_n-x||
-
 \end{equation*}\]</span></p>
 <p>这保证了<span class="math inline">\(\{x_n\}\subseteq U(x,\delta)\)</span>，并且每进行一步范数误差至少减少一半。</p>
 <p>(2)由Newton方程、、<a href="../chapters/page-005.html#prop-FrechetDifferential-9f3018f4" data-reference-type="ref+label" data-reference="prop:FrechetDifferential">性质 4.1.1</a>(6)可得：</p>
@@ -1664,7 +1760,6 @@ x_{n+1}-x&amp;=x_n-\left(\nabla^2fx_n\right)^{-1}\nabla fx_n-x=\left(\nabla^2fx_
 =&amp;\left\|\int_{0}^{1}\left[\nabla^2f(x_n+td_n)-\nabla^2fx_n\right]d_n\mathop{}\!\mathrm{d}t\right\|\leqslant\int_{0}^{1}\left\|\left[\nabla^2f(x_n+td_n)-\nabla^2fx_n\right]d_n\right\|\mathop{}\!\mathrm{d}t \\
 \leqslant&amp;\int_{0}^{1}\left\|\nabla^2f(x_n+td_n)-\nabla^2fx_n\right\|||d_n||\mathop{}\!\mathrm{d}t\leqslant\int_{0}^{1}L||td_n||\;||d_n||\mathop{}\!\mathrm{d}t=\frac{L||d_n||^2}{2} \\
 =&amp;\frac{L}{2}\left\|\left(\nabla^2fx_n\right)^{-1}\nabla fx_n\right\|^2\leqslant\frac{L}{2}\left\|\left(\nabla^2fx_n\right)^{-1}\right\|^2||\nabla fx_n||^2\leqslant2L\left\|\left(\nabla^2fx\right)^{-1}\right\|^2||\nabla fx_n||^2
-
 \end{align*}\]</span></p>
 <p>所以<span class="math inline">\(\{||\nabla fx_n||\}\)</span>Q-二次收敛到<span class="math inline">\(0\)</span>。&nbsp;◻</p>
 </div>

@@ -100,6 +100,12 @@ class QuartoPage:
     sidebar_visible: bool = True
 
 
+@dataclass(frozen=True)
+class ComputationGroup:
+    title: str
+    result_paths: tuple[Path, ...]
+
+
 class LinkCollector(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
@@ -1877,7 +1883,7 @@ class BookTransformer:
                         "glossary",
                         classes=["glossary-page"],
                     ),
-                    [str_inline("术语表总览")],
+                    [str_inline("中英术语表")],
                 ],
             }
         )
@@ -2813,6 +2819,15 @@ def write_quarto_config(
         if HOME_CONTENT.exists()
         else "这是由项目中的 `main.tex` 自动生成的在线版本。"
     )
+    if email:
+        home_content = home_content.replace(
+            "__BOOK_EMAIL__",
+            html.escape(email, quote=True),
+        )
+    home_content = home_content.replace(
+        "__BUILD_DATE__",
+        calendar_date.today().strftime("%Y.%m.%d"),
+    )
     index.extend(
         [
             "---",
@@ -2820,7 +2835,7 @@ def write_quarto_config(
             home_content,
         ]
     )
-    if email:
+    if email and "textbook-home" not in home_content:
         index.extend(
             [
                 "",
@@ -2836,6 +2851,10 @@ def write_quarto_config(
     chapter_lines = ["    - index.qmd"]
     current_part: str | None = None
     for page in pages:
+        if page.part == "中英术语表":
+            current_part = None
+            chapter_lines.append(f"    - {page.source_path.as_posix()}")
+            continue
         if page.part is None:
             current_part = None
             chapter_lines.append(f"    - {page.source_path.as_posix()}")
@@ -2914,7 +2933,8 @@ def write_quarto_config(
             "      - style.css",
             "      - sidebar.css",
             "    toc: true",
-            "    toc-depth: 4",
+            "    toc-title: 本页目录",
+            "    toc-depth: 3",
             "    number-sections: false",
             "    code-copy: true",
             "    code-overflow: wrap",
@@ -2922,10 +2942,10 @@ def write_quarto_config(
             "    link-external-newwindow: true",
             "    html-math-method: mathjax",
             "    grid:",
-            "      sidebar-width: 320px",
-            "      body-width: 1100px",
-            "      margin-width: 210px",
-            "      gutter-width: 1.15rem",
+            "      sidebar-width: 305px",
+            "      body-width: 920px",
+            "      margin-width: 230px",
+            "      gutter-width: 1.4rem",
             "",
         ]
     )
@@ -2983,10 +3003,354 @@ def copy_quarto_resources(document: dict[str, Any]) -> None:
     shutil.copy2(BIBLIOGRAPHY_STYLE, QUARTO_PROJECT_DIR / "textbook.csl")
 
 
+def load_computation_orders() -> dict[str, list[ComputationGroup]]:
+    orders: dict[str, list[ComputationGroup]] = {}
+    missing_results: list[Path] = []
+    for order_path in sorted(PROJECT_ROOT.rglob("computations.order")):
+        if is_inside(order_path, HTML_DIR):
+            continue
+        chapter_source = order_path.parent / "main.tex"
+        if not chapter_source.is_file():
+            fail(
+                "computations.order 必须与包含 chapter 的 main.tex 放在同一目录："
+                f"{order_path.relative_to(PROJECT_ROOT)}"
+            )
+        chapter_text = strip_tex_comments(
+            chapter_source.read_text(encoding="utf-8")
+        )
+        chapter_match = re.search(
+            r"\\chapter(?:\s*\[[^\]]*\])?\s*\{([^{}]+)\}",
+            chapter_text,
+        )
+        if not chapter_match:
+            fail(
+                "找不到 computations.order 对应的 chapter："
+                f"{chapter_source.relative_to(PROJECT_ROOT)}"
+            )
+        chapter_title = latex_to_plain(chapter_match.group(1)).strip()
+        if chapter_title in orders:
+            fail(f"章节 {chapter_title!r} 存在多个 computations.order")
+
+        groups: list[ComputationGroup] = []
+        current_title: str | None = None
+        current_results: list[Path] = []
+
+        def finish_group() -> None:
+            nonlocal current_title, current_results
+            if current_title is None:
+                return
+            if not current_results:
+                fail(
+                    f"计算案例 {current_title!r} 没有结果文件："
+                    f"{order_path.relative_to(PROJECT_ROOT)}"
+                )
+            groups.append(
+                ComputationGroup(
+                    title=current_title,
+                    result_paths=tuple(current_results),
+                )
+            )
+            current_title = None
+            current_results = []
+
+        for line_number, raw_line in enumerate(
+            order_path.read_text(encoding="utf-8").splitlines(),
+            start=1,
+        ):
+            line = raw_line.strip()
+            if not line or line.startswith("<!--"):
+                continue
+            if line.startswith("## "):
+                finish_group()
+                current_title = line[3:].strip()
+                if not current_title:
+                    fail(
+                        f"空的计算案例标题：{order_path.relative_to(PROJECT_ROOT)}:"
+                        f"{line_number}"
+                    )
+                continue
+            if line.startswith("#"):
+                continue
+            if line.startswith("- "):
+                if current_title is None:
+                    fail(
+                        f"结果路径必须位于二级标题之后："
+                        f"{order_path.relative_to(PROJECT_ROOT)}:{line_number}"
+                    )
+                relative = Path(line[2:].strip())
+                target = (order_path.parent / relative).resolve()
+                if not is_inside(target, PROJECT_ROOT) or target.suffix.lower() != ".html":
+                    fail(
+                        f"计算结果必须是项目内的 HTML 文件："
+                        f"{order_path.relative_to(PROJECT_ROOT)}:{line_number}"
+                    )
+                current_results.append(target)
+                if not target.is_file():
+                    missing_results.append(target)
+                continue
+            fail(
+                f"无法识别 computations.order 中的内容："
+                f"{order_path.relative_to(PROJECT_ROOT)}:{line_number}"
+            )
+        finish_group()
+        if not groups:
+            fail(f"没有计算案例：{order_path.relative_to(PROJECT_ROOT)}")
+        orders[chapter_title] = groups
+
+    if missing_results:
+        details = "\n".join(
+            f"  - {path.relative_to(PROJECT_ROOT)}"
+            for path in missing_results
+        )
+        fail(
+            "数值计算结果尚未生成。请先在各自的 Python/R 环境中渲染：\n"
+            + details
+        )
+    return orders
+
+
+def prefix_computation_identifiers(fragment: str, prefix: str) -> str:
+    identifiers = set(
+        re.findall(
+            r"\bid\s*=\s*[\"']([^\"']+)[\"']",
+            fragment,
+            flags=re.IGNORECASE,
+        )
+    )
+
+    def replace_id(match: re.Match[str]) -> str:
+        return f'{match.group(1)}{match.group(2)}{prefix}{match.group(3)}{match.group(2)}'
+
+    fragment = re.sub(
+        r"(\bid\s*=\s*)([\"'])([^\"']+)(?:\2)",
+        replace_id,
+        fragment,
+        flags=re.IGNORECASE,
+    )
+
+    def replace_fragment_link(match: re.Match[str]) -> str:
+        identifier = match.group(3)
+        if identifier not in identifiers:
+            return match.group(0)
+        return f'{match.group(1)}{match.group(2)}#{prefix}{identifier}{match.group(2)}'
+
+    fragment = re.sub(
+        r"(\bhref\s*=\s*)([\"'])#([^\"']+)(?:\2)",
+        replace_fragment_link,
+        fragment,
+        flags=re.IGNORECASE,
+    )
+    for attribute in ("aria-labelledby", "aria-describedby", "for"):
+        pattern = rf"(\b{attribute}\s*=\s*)([\"'])([^\"']+)(?:\2)"
+
+        def replace_reference(match: re.Match[str]) -> str:
+            values = " ".join(
+                prefix + value if value in identifiers else value
+                for value in match.group(3).split()
+            )
+            return f"{match.group(1)}{match.group(2)}{values}{match.group(2)}"
+
+        fragment = re.sub(
+            pattern,
+            replace_reference,
+            fragment,
+            flags=re.IGNORECASE,
+        )
+    return fragment
+
+
+def extract_computation_fragment(result_path: Path, prefix: str) -> str:
+    markup = result_path.read_text(encoding="utf-8")
+    main_match = re.search(
+        r'<main\b(?=[^>]*\bid=["\']quarto-document-content["\'])[^>]*>'
+        r"(.*?)</main>",
+        markup,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if main_match:
+        fragment = main_match.group(1)
+    else:
+        body_match = re.search(
+            r"<body\b[^>]*>(.*?)</body>",
+            markup,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+        if not body_match:
+            fail(
+                "无法从计算结果中提取 HTML 正文："
+                f"{result_path.relative_to(PROJECT_ROOT)}"
+            )
+        fragment = body_match.group(1)
+
+    fragment = re.sub(
+        r'<header\b(?=[^>]*\bid=["\']title-block-header["\'])[^>]*>'
+        r".*?</header>",
+        "",
+        fragment,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    fragment = re.sub(
+        r"<(?:script|style)\b[^>]*>.*?</(?:script|style)>",
+        "",
+        fragment,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+
+    for match in re.finditer(
+        r"\b(?:src|poster)\s*=\s*[\"']([^\"']+)[\"']",
+        fragment,
+        flags=re.IGNORECASE,
+    ):
+        target = match.group(1).strip()
+        parsed = urlsplit(target)
+        if target.startswith(("#", "//")) or parsed.scheme:
+            continue
+        fail(
+            "计算结果包含未嵌入的资源，请使用 embed-resources: true 重新渲染："
+            f"{result_path.relative_to(PROJECT_ROOT)} -> {target}"
+        )
+
+    def shift_heading(match: re.Match[str]) -> str:
+        level = min(6, int(match.group(2)) + 2)
+        return f"{match.group(1)}h{level}{match.group(3)}"
+
+    fragment = re.sub(
+        r"(<\/?)(?:h)([1-6])(\b[^>]*>)",
+        shift_heading,
+        fragment,
+        flags=re.IGNORECASE,
+    )
+    return prefix_computation_identifiers(fragment.strip(), prefix)
+
+
+def inject_computation_results(
+    pages: list[QuartoPage],
+    orders: dict[str, list[ComputationGroup]],
+) -> dict[Path, str]:
+    if not orders:
+        return {}
+    pages_by_title: dict[str, Path] = {}
+    for page in pages:
+        if not page.blocks or page.blocks[0].get("t") != "Header":
+            continue
+        title = ast_plain_text(page.blocks[0]["c"][2]).strip()
+        if title:
+            pages_by_title[title] = QUARTO_PROJECT_DIR / page.source_path
+            # Quarto adds the printed chapter number to chapter headers, while
+            # computations.order is intentionally written with the plain title.
+            normalized_title = re.sub(r"^第\s*\d+\s*章\s*", "", title).strip()
+            pages_by_title.setdefault(
+                normalized_title,
+                QUARTO_PROJECT_DIR / page.source_path,
+            )
+
+    appendices: dict[Path, str] = {}
+    for chapter_title, groups in orders.items():
+        qmd_path = pages_by_title.get(chapter_title)
+        if qmd_path is None or not qmd_path.is_file():
+            fail(f"找不到数值计算结果对应的网页章节：{chapter_title}")
+
+        articles: list[str] = []
+        for group_index, group in enumerate(groups, start=1):
+            results: list[str] = []
+            for result_index, result_path in enumerate(
+                group.result_paths,
+                start=1,
+            ):
+                language = result_path.parent.name.lower()
+                label = {
+                    "python": "Python · Jupyter",
+                    "r": "R · Quarto",
+                }.get(language, result_path.parent.name)
+                prefix = f"computation-{group_index:02d}-{result_index:02d}-"
+                fragment = extract_computation_fragment(result_path, prefix)
+                results.append(
+                    '<section class="computation-result">'
+                    '<div class="computation-result-label">'
+                    f"{html.escape(label)}</div>"
+                    '<div class="computation-result-body">'
+                    f"{fragment}</div></section>"
+                )
+            articles.append(
+                f'<article class="computation-case" id="computation-case-{group_index:02d}">'
+                '<div class="computation-case-index">'
+                f'<span>实验</span><strong>{group_index:02d}</strong></div>'
+                f'<h3>{html.escape(group.title)}</h3>'
+                + "".join(results)
+                + "</article>"
+            )
+
+        appendix = (
+            '<section class="computation-appendix" id="computed-results">'
+            '<header class="computation-appendix-header">'
+            '<p>COMPUTATIONAL NOTES</p><h2>计算实验</h2>'
+            "</header>"
+            + "".join(articles)
+            + "</section>"
+        )
+        appendices[qmd_path] = appendix
+    log(f"已插入 {sum(len(groups) for groups in orders.values())} 个计算实验")
+    return appendices
+
+
+def append_computation_html(
+    appendices: dict[Path, str],
+    rendered_site: Path,
+) -> None:
+    """Append rendered computation HTML after Quarto has preserved its math."""
+    for qmd_path, appendix in appendices.items():
+        relative_html = qmd_path.relative_to(QUARTO_PROJECT_DIR).with_suffix(".html")
+        html_path = rendered_site / relative_html
+        if not html_path.is_file():
+            fail(f"找不到数值实验对应的已渲染网页：{relative_html}")
+        markup = html_path.read_text(encoding="utf-8")
+        closing_main = re.search(r"</main>", markup, flags=re.IGNORECASE)
+        if closing_main is None:
+            fail(f"网页缺少 main 容器，无法插入数值实验：{relative_html}")
+        position = closing_main.start()
+        markup = markup[:position] + appendix + "\n" + markup[position:]
+        markup = append_computation_toc(markup, appendix)
+        html_path.write_text(markup, encoding="utf-8")
+
+
+def append_computation_toc(markup: str, appendix: str) -> str:
+    """Add a compact, hierarchical computation entry to Quarto's page TOC."""
+    toc_start = markup.find('<nav id="TOC"')
+    if toc_start < 0:
+        return markup
+    toc_end = markup.find("</nav>", toc_start)
+    if toc_end < 0:
+        return markup
+    first_ul = markup.find("<ul", toc_start, toc_end)
+    last_ul = markup.rfind("</ul>", first_ul, toc_end)
+    if first_ul < 0 or last_ul < 0:
+        return markup
+
+    cases = re.findall(
+        r'<article\b[^>]*id="(computation-case-[^"]+)"[^>]*>.*?'
+        r'<h3\b[^>]*>(.*?)</h3>',
+        appendix,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    case_links = "".join(
+        f'<li><a href="#{identifier}" class="nav-link" '
+        f'data-scroll-target="#{identifier}">实验 {index:02d} · {title}</a></li>'
+        for index, (identifier, title) in enumerate(cases, start=1)
+    )
+    toc_item = (
+        '<li class="computation-toc-item">'
+        '<a href="#computed-results" class="nav-link" '
+        'data-scroll-target="#computed-results">计算实验</a>'
+        f'<ul class="collapse">{case_links}</ul></li>'
+    )
+    return markup[:last_ul] + toc_item + markup[last_ul:]
+
+
 def write_quarto_site(
     document: dict[str, Any],
     transformer: BookTransformer,
     output_dir: Path,
+    computation_orders: dict[str, list[ComputationGroup]],
 ) -> None:
     if not QUARTO.exists():
         fail(
@@ -3014,6 +3378,8 @@ def write_quarto_site(
         )
         write_qmd_page(page, document)
 
+    computation_appendices = inject_computation_results(pages, computation_orders)
+
     write_quarto_config(document, pages)
     quarto_home = BUILD_DIR / "quarto-home"
     quarto_cache = BUILD_DIR / "quarto-cache"
@@ -3030,8 +3396,26 @@ def write_quarto_site(
         },
     )
 
+    append_computation_html(computation_appendices, QUARTO_PROJECT_DIR / "_site")
+
     rendered_index = QUARTO_PROJECT_DIR / "_site" / "index.html"
     index_html = rendered_index.read_text(encoding="utf-8")
+    index_html = re.sub(
+        r'<nav class="page-navigation">.*?</nav>',
+        "",
+        index_html,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    # The Home page is its own layout.  Quarto automatically adds its
+    # page-column helpers to raw sections, which makes the hero inherit the
+    # book's narrow reading grid and shifts its contents unexpectedly.
+    index_html = index_html.replace(
+        '<div class="textbook-home page-columns page-full">',
+        '<div class="textbook-home">',
+    ).replace(
+        '<section class="home-intro page-columns page-full"',
+        '<section class="home-intro"',
+    )
     index_html = index_html.replace(
         '<div class="quarto-title-meta-heading">修改于</div>',
         '<div class="quarto-title-meta-heading">编译于</div>',
@@ -3068,7 +3452,7 @@ def write_site(
         "--to=chunkedhtml",
         "--standalone",
         "--toc",
-        "--toc-depth=5",
+        "--toc-depth=3",
         f"--split-level={split_level}",
         "--chunk-template=%n-%i.html",
         "--mathjax",
@@ -3259,6 +3643,8 @@ def build(arguments: argparse.Namespace) -> int:
     if not is_inside(output_dir, HTML_DIR):
         fail("输出目录必须位于 html/ 内")
 
+    computation_orders = load_computation_orders()
+
     log("读取术语和定理配置")
     (
         glossary,
@@ -3293,7 +3679,12 @@ def build(arguments: argparse.Namespace) -> int:
     document = transformer.transform(document)
 
     log("使用 Quarto Book 生成多页面 HTML")
-    write_quarto_site(document, transformer, output_dir)
+    write_quarto_site(
+        document,
+        transformer,
+        output_dir,
+        computation_orders,
+    )
     validation = validate_site(output_dir)
     write_build_report(
         output_dir,
