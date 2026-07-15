@@ -49,6 +49,27 @@
 	\end{align*}
 	上式取等当且仅当$\dfrac{1}{P(f=x_i)}$为常数，即$P(f=x_1)=P(f=x_2)=\cdots=P(f=x_n)$。
 \end{proof}
+对于二分类样本，记第一类样本比例为$p$，第二类比例为$1-p$，则信息熵为$H(p)=-p\log_2p-(1-p)\log_2(1-p)$。如下图所示，只含一个类别时熵为$0$；两类各占一半时不确定性最大。
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			width=9.2cm, height=5.6cm,
+			xlabel={$p$}, ylabel={$H(p)$},
+			xmin=0, xmax=1, ymin=0, ymax=1.08,
+			xtick={0,0.25,0.5,0.75,1}, ytick={0,0.5,1},
+			axis lines=left, grid=major,
+			grid style={draw=gray!18},
+			samples=200,
+		]
+			\addplot[very thick, blue, domain=0.001:0.999]
+				{-(x*ln(x)+(1-x)*ln(1-x))/ln(2)};
+			\addplot[only marks, mark=*, blue] coordinates {(0.5,1)};
+			\draw[dashed, gray] (axis cs:0.5,0) -- (axis cs:0.5,1);
+		\end{axis}
+	\end{tikzpicture}
+	\caption{二分类样本的信息熵。$p=0.5$时两类样本数量相同，信息熵达到最大值。}
+\end{figure}
 \subsubsection{Gini系数}
 \begin{definition}
 	设分类问题的类别空间为$\mathcal{Y}=\{1,\dots,m\}$，$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$为观测样本集，其中$y_i\in\mathcal{Y}$表示第$i$个样本的真实类别，记$p_i$为第$i$类样本在$\mathcal{D}$中所占比例。称：
@@ -78,6 +99,26 @@
 \begin{note}
 	由\cref{prop:GiniIndex}(1)(2)可以看出Gini指数可以用来刻画样本类别分布的不纯度。当所有样本属于同一类别时$\operatorname{Gini}(\mathcal{D})=0$，表示完全纯净；当类别分布均匀时$\operatorname{Gini}(\mathcal{D})$达到最大值，表示类别混杂程度最高。
 \end{note}
+对于二分类样本，Gini指数可写为$G(p)=1-p^2-(1-p)^2=2p(1-p)$。它与信息熵具有相同的对称性，但计算形式更简单。
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			width=9.2cm, height=5.6cm,
+			xlabel={$p$}, ylabel={$G(p)$},
+			xmin=0, xmax=1, ymin=0, ymax=0.55,
+			xtick={0,0.25,0.5,0.75,1}, ytick={0,0.25,0.5},
+			axis lines=left, grid=major,
+			grid style={draw=gray!18},
+			samples=200,
+		]
+			\addplot[very thick, teal, domain=0:1] {2*x*(1-x)};
+			\addplot[only marks, mark=*, teal] coordinates {(0.5,0.5)};
+			\draw[dashed, gray] (axis cs:0.5,0) -- (axis cs:0.5,0.5);
+		\end{axis}
+	\end{tikzpicture}
+	\caption{二分类样本的Gini指数。节点越接近单一类别，Gini指数越接近$0$。}
+\end{figure}
 \subsubsection{交叉熵}
 \begin{definition}
 	设 $(X,\mathscr{A},P)$ 为概率空间，$f$为$X$上取值于有限集合
@@ -97,7 +138,7 @@
 \begin{proof}
 	因为：
 	\begin{equation*}
-		H(p,q)=-\sum_{i=1}^np_i\log q_i=-\sum_{i=1}^np_i\log\frac{q_i}{p_i}+\sum_{i=1}^np_i\log p_i
+		H(p,q)=-\sum_{i=1}^np_i\log q_i=-\sum_{i=1}^np_i\log\frac{q_i}{p_i}-\sum_{i=1}^np_i\log p_i
 	\end{equation*}
 	并且$\log(\cdot)$在$(0,+\infty)$上为凹函数\info{补充判断理由}，由\cref{ineq:Jensen}可知：
 	\begin{equation*}
@@ -105,7 +146,7 @@
 	\end{equation*}
 	上式取等当且仅当$\dfrac{q_i}{p_i}$为常数，即$q_i=p_i$。所以：
 	\begin{equation*}
-		H(p,q)\geqslant\sum_{i=1}^np_i\log p_i=H(p,p)
+		H(p,q)\geqslant-\sum_{i=1}^np_i\log p_i=H(p,p)
 	\end{equation*}
 	且当且仅当$q=p$时取等。
 \end{proof}
@@ -113,7 +154,77 @@
 	由\cref{prop:CrossEntropy}可知，交叉熵在所有概率分布$q$中以$q=p$为唯一最小值。因而最小化经验交叉熵等价于逼近真实分布$p$，这正是对数损失函数的理论基础。
 \end{note}
 
+交叉熵需要区分真实概率$p$和预测概率$q$。固定真实概率$p=0.25$后，预测概率$q$与$p$一致时交叉熵最小；预测越偏离真实概率，交叉熵越大。
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			width=9.2cm, height=5.6cm,
+			xlabel={$q$}, ylabel={$H(p,q)$},
+			xmin=0, xmax=1, ymin=0, ymax=4.5,
+			xtick={0,0.25,0.5,0.75,1}, ytick={0,1,2,3,4},
+			axis lines=left, grid=major,
+			grid style={draw=gray!18},
+			samples=200,
+		]
+			\addplot[very thick, orange!85!black, domain=0.02:0.98]
+				{-(0.25*ln(x)+0.75*ln(1-x))/ln(2)};
+			\addplot[only marks, mark=*, orange!85!black] coordinates {(0.25,0.81128)};
+			\draw[dashed, gray] (axis cs:0.25,0) -- (axis cs:0.25,0.81128);
+		\end{axis}
+	\end{tikzpicture}
+	\caption{真实概率固定为$p=0.25$时的二分类交叉熵。横轴$q$为模型预测第一类的概率。}
+\end{figure}
+
 \subsection{决策树}
+决策树从根节点开始，根据某个条件将样本递归地分到不同子节点。内部节点保存判断规则，叶节点保存最终预测。下图以判断今天是否适合户外活动为例；方括号中的两个数字依次表示适合和不适合的历史样本数。对一个新样本，只需从根节点开始依次判断，直至到达叶节点。
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[
+		>=Stealth,
+		decision/.style={
+			draw=blue!65!black,
+			fill=blue!6,
+			rounded corners=3pt,
+			align=center,
+			minimum width=4.2cm,
+			minimum height=1.25cm,
+			font=\small,
+		},
+		leafGood/.style={
+			draw=teal!70!black,
+			fill=teal!9,
+			rounded corners=3pt,
+			align=center,
+			minimum width=3.2cm,
+			minimum height=1.15cm,
+			font=\small,
+		},
+		leafBad/.style={
+			draw=orange!85!black,
+			fill=orange!10,
+			rounded corners=3pt,
+			align=center,
+			minimum width=3.2cm,
+			minimum height=1.15cm,
+			font=\small,
+		},
+		edge/.style={draw=gray!75, very thick, ->},
+	]
+		\node[decision] (root) at (0,0) {今天下雨吗？\\样本数：$100$，类别计数：$[60,40]$};
+		\node[leafGood] (dry) at (-4,-2.35) {预测：适合户外活动\\样本数：$60$，$[52,8]$};
+		\node[decision] (wind) at (2.7,-2.35) {风力较大吗？\\样本数：$40$，类别计数：$[8,32]$};
+		\node[leafBad] (windy) at (0.7,-4.7) {预测：不适合户外活动\\样本数：$28$，$[1,27]$};
+		\node[leafGood] (calm) at (4.7,-4.7) {预测：适合户外活动\\样本数：$12$，$[7,5]$};
+		\draw[edge] (root) -- node[above left, font=\small] {否} (dry);
+		\draw[edge] (root) -- node[above right, font=\small] {是} (wind);
+		\draw[edge] (wind) -- node[above left, font=\small] {是} (windy);
+		\draw[edge] (wind) -- node[above right, font=\small] {否} (calm);
+	\end{tikzpicture}
+	\caption{二分类决策树示意图。每次判断都把当前节点中的样本分到两个子节点，叶节点以占比最高的类别作为预测。}
+	\label{fig:decision-tree-example}
+\end{figure}
+
 \begin{algorithm}[H]
 	\caption{Classification and Regression Tree}
 	\begin{algorithmic}[1]

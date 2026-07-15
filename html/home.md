@@ -18,8 +18,8 @@
 <span class="home-edition-label">DIGITAL EDITION · 2026</span>
 <span class="home-edition-symbol" aria-hidden="true">x̄</span>
 <dl class="home-facts">
-<div><dt>章节</dt><dd>34+</dd></div>
-<div><dt>领域</dt><dd>9</dd></div>
+<div><dt>章节</dt><dd>19+</dd></div>
+<div><dt>领域</dt><dd>4</dd></div>
 <div><dt>术语索引</dt><dd>A–Z</dd></div>
 </dl>
 </aside>

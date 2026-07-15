@@ -33,6 +33,39 @@
 	\end{equation*}
 	为$E$的\gls{ConvexHull}，记作$\operatorname{Conv}(E)$。
 \end{definition}
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[every node/.style={font=\small}]
+		\begin{scope}[shift={(0,0)}]
+			\draw[fill=blue!8, draw=blue!65!black, thick] (0,0) ellipse (1.65 and 1.15);
+			\coordinate (a) at (-0.9,-0.35);
+			\coordinate (b) at (0.95,0.45);
+			\draw[very thick, teal!75!black] (a) -- (b);
+			\fill[blue!75!black] (a) circle (2pt) node[below left] {$x_1$};
+			\fill[blue!75!black] (b) circle (2pt) node[above right] {$x_2$};
+			\node[font=\small\bfseries] at (0,-1.55) {凸集：线段始终留在集合内};
+		\end{scope}
+		\begin{scope}[shift={(5,0)}]
+			\draw[fill=orange!8, draw=orange!85!black, thick]
+				(-1.65,-1.05) -- (1.65,-1.05) -- (1.65,1.05) -- (0.45,1.05)
+				-- (0.45,-0.1) -- (-0.45,-0.1) -- (-0.45,1.05) -- (-1.65,1.05) -- cycle;
+			\coordinate (c) at (-1.05,0.65);
+			\coordinate (d) at (1.05,0.65);
+			\draw[very thick, red!70!black, dashed] (c) -- (d);
+			\fill[orange!85!black] (c) circle (2pt) node[above] {$x_1$};
+			\fill[orange!85!black] (d) circle (2pt) node[above] {$x_2$};
+			\node[font=\small\bfseries] at (0,-1.55) {非凸集：部分线段离开集合};
+		\end{scope}
+		\begin{scope}[shift={(10,0)}]
+			\fill[teal!10] (-1.45,-0.75) -- (-0.65,0.95) -- (0.75,1.05) -- (1.5,-0.35) -- (0.2,-1.0) -- cycle;
+			\draw[teal!75!black, very thick] (-1.45,-0.75) -- (-0.65,0.95) -- (0.75,1.05) -- (1.5,-0.35) -- (0.2,-1.0) -- cycle;
+			\foreach \p in {(-1.45,-0.75),(-0.65,0.95),(0.75,1.05),(1.5,-0.35),(0.2,-1.0),(-0.25,0.15),(0.55,-0.25)}
+				\fill[teal!80!black] \p circle (2.2pt);
+			\node[font=\small\bfseries] at (0,-1.55) {凸包：包住全部点的最小凸集};
+		\end{scope}
+	\end{tikzpicture}
+	\caption{凸集、非凸集与凸包的二维几何结构。}
+\end{figure}
 \begin{property}\label{prop:ConvexSet}
 	设$E\subseteq\mathbb{R}^{n}$。凸集具有如下性质：
 	\begin{enumerate}
@@ -83,6 +116,36 @@
 	\end{equation*}
 	为$E$的\gls{AffineHull}，记作$\operatorname{Aff}(E)$。
 \end{definition}
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[>=Stealth, every node/.style={font=\small}]
+		\begin{scope}[shift={(-3.4,0)}]
+			\draw[->, thick, black!70] (-2.2,0) -- (2.2,0);
+			\draw[->, thick, black!70] (0,-1.6) -- (0,1.7);
+			\draw[blue!70!black, very thick, <->] (-1.9,-0.8) -- (1.9,0.8);
+			\fill[black] (0,0) circle (2.2pt) node[below left] {$0$};
+			\coordinate (v) at (1.25,0.53);
+			\draw[->, teal!75!black, very thick] (0,0) -- (v) node[above] {$v$};
+			\node[font=\small\bfseries] at (0,-2.05) {方向子空间 $V$ 经过原点};
+		\end{scope}
+		\draw[->, orange!85!black, very thick] (-0.85,-0.15) -- (0.85,0.75)
+			node[midway, above left] {$+x_0$};
+		\begin{scope}[shift={(3.4,0)}]
+			\draw[->, thick, black!70] (-2.2,0) -- (2.2,0);
+			\draw[->, thick, black!70] (0,-1.6) -- (0,1.7);
+			\draw[blue!25, thick, dashed, <->] (-1.9,-0.8) -- (1.9,0.8);
+			\draw[orange!85!black, very thick, <->] (-1.55,-0.15) -- (1.95,1.32);
+			\coordinate (xzero) at (-0.35,0.35);
+			\coordinate (xzerov) at (0.9,0.88);
+			\fill[orange!85!black] (xzero) circle (2.4pt) node[above left] {$x_0$};
+			\draw[->, teal!75!black, very thick] (xzero) -- (xzerov)
+				node[midway, below right] {$v$};
+			\fill[teal!75!black] (xzerov) circle (2.4pt) node[above] {$x_0+v$};
+			\node[font=\small\bfseries] at (0,-2.05) {平移后的仿射集 $E=x_0+V$};
+		\end{scope}
+	\end{tikzpicture}
+	\caption{仿射集是子空间的平移。它不必经过原点，并且沿方向子空间$V$的正、负方向无限延伸。}
+\end{figure}
 \begin{property}\label{prop:AffineSet}
 	设$E\subseteq\mathbb{R}^{n}$。仿射集具有如下性质：
 	\begin{enumerate}
@@ -127,6 +190,37 @@
 	\end{equation*}
 	为$E$的\gls{ConicHull}，记作$\operatorname{Cone}(E)$。
 \end{definition}
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[>=Stealth, every node/.style={font=\small}]
+		\begin{scope}[shift={(-3.6,0)}]
+			\draw[->, thick, black!70] (-0.5,0) -- (3.1,0);
+			\draw[->, thick, black!70] (0,-0.45) -- (0,2.55);
+			\coordinate (uone) at (2.7,0.55);
+			\coordinate (utwo) at (0.85,2.2);
+			\draw[blue!70!black, very thick, ->] (0,0) -- (uone) node[right] {$x_1$};
+			\draw[blue!70!black, very thick, ->] (0,0) -- (utwo) node[above] {$x_2$};
+			\coordinate (sum) at (1.775,1.375);
+			\fill[red!75!black] (sum) circle (2.7pt) node[above right] {$\frac{1}{2}(x_1+x_2)\notin E$};
+			\draw[red!70!black, dashed, thick] (0,0) -- (sum);
+			\node[align=center, font=\small\bfseries] at (1.25,-0.95)
+				{锥但非凸锥\\$E=\{\theta x_1:\theta\geqslant0\}\cup\{\theta x_2:\theta\geqslant0\}$};
+		\end{scope}
+		\begin{scope}[shift={(3.6,0)}]
+			\draw[->, thick, black!70] (-0.5,0) -- (3.1,0);
+			\draw[->, thick, black!70] (0,-0.45) -- (0,2.55);
+			\fill[teal!13] (0,0) -- (2.7,0.55) -- (0.85,2.2) -- cycle;
+			\draw[teal!75!black, very thick, ->] (0,0) -- (2.7,0.55) node[right] {$x_1$};
+			\draw[teal!75!black, very thick, ->] (0,0) -- (0.85,2.2) node[above] {$x_2$};
+			\fill[black] (0,0) circle (2pt) node[below left] {$0$};
+			\draw[->, orange!85!black, very thick] (0,0) -- (1.45,1.18)
+				node[above right] {$\theta_1x_1+\theta_2x_2\in E$};
+			\node[align=center, font=\small\bfseries] at (1.25,-0.95)
+				{凸锥\\非负线性组合仍在$E$中};
+		\end{scope}
+	\end{tikzpicture}
+	\caption{锥只要求沿每条射线对非负缩放封闭；凸锥还要求对加法封闭，因此包含两条射线之间的全部非负线性组合。}
+\end{figure}
 \begin{property}
 	设$E\subseteq\mathbb{R}^{n}$。锥具有如下性质：
 	\begin{enumerate}
@@ -176,7 +270,7 @@
 	设$||\cdot||$是$\mathbb{R}^{n}$上的一个范数，$x_c\in\mathbb{R}^{n},\;r\in\mathbb{R}^{}$。称$\{x\in\mathbb{R}^{n}:||x-x_c||\leqslant r\}$为\gls{Ball}。
 \end{definition}
 \begin{definition}
-	设$P\in M_{n}(\mathbb{R}^{})$是正定矩阵，$x_c\in\mathbb{R}^{n}$。由\cref{theo:PositiveDefinite}(6)可得$P$的可逆性，称$\{x\in\mathbb{R}^{n}:(x-x_c)^{\top}P^{-1}(x-x_c)\leqslant1\}$为\gls{Elliposid}。
+	设$P\in M_{n}(\mathbb{R}^{})$是正定矩阵，$x_c\in\mathbb{R}^{n}$。由\cref{theo:PositiveDefinite}(6)可得$P$的可逆性，称$\{x\in\mathbb{R}^{n}:(x-x_c)^{\top}P^{-1}(x-x_c)\leqslant1\}$为\gls{Ellipsoid}。
 \end{definition}
 \begin{property}
 	球与椭球具有如下性质：
@@ -405,6 +499,30 @@
 \subsection{线搜索法}
 在迭代优化算法中，一次迭代通常包含两个基本问题：首先确定一个搜索方向，其次确定沿该方向移动的步长。如果步长过小，则每次迭代的推进幅度有限，算法收敛速度可能很慢；如果步长过大，则损失函数值不但不能下降，反而可能上升。因此，步长选择需要在“保证下降”和“保持足够推进”之间取得平衡。\par
 线搜索法正是为了解决这一问题而引入的。所谓线搜索法，是指在当前点$x_n$和搜索方向$d_n$确定之后，沿着射线$\{x_n+\alpha d_n:\alpha>0\}$寻找一个合适的步长$\alpha_n$，并用它更新迭代点。
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			width=10.5cm, height=6cm,
+			xmin=0, xmax=3.2, ymin=0, ymax=3.25,
+			xlabel={步长$\alpha$}, ylabel={$\varphi(\alpha)=f(x_n+\alpha d_n)$},
+			axis lines=left, grid=major,
+			grid style={draw=gray!15},
+			samples=180,
+		]
+			\addplot[blue!75!black, very thick, domain=0:3.1] {(x-1.25)^2+0.35};
+			\addplot[gray!70, dashed, domain=0:3.1] {1.9125};
+			\addplot[only marks, mark=*, blue!75!black] coordinates {(0,1.9125)};
+			\addplot[only marks, mark=*, orange!85!black] coordinates {(0.2,1.4525) (2.8,2.7525)};
+			\addplot[only marks, mark=*, teal!75!black] coordinates {(1.25,0.35)};
+			\node[anchor=south west, font=\small] at (axis cs:0.03,1.95) {当前函数值$f(x_n)$};
+			\node[anchor=south west, orange!85!black, font=\small] at (axis cs:0.23,1.48) {过小：下降有限};
+			\node[anchor=north, teal!75!black, font=\small] at (axis cs:1.25,0.31) {合适};
+			\node[anchor=south east, orange!85!black, font=\small] at (axis cs:2.77,2.78) {过大：越过低点};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{沿固定下降方向的一维函数。步长过小会使每次下降有限；步长过大可能越过低点，甚至使函数值高于当前点。}
+\end{figure}
 \begin{definition}
 	给定初始步长$\alpha>0$和收缩因子$\rho\in(0,1)$，定义候选步长序列：
 	\begin{equation*}

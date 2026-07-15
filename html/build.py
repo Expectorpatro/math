@@ -10,6 +10,7 @@ chunked HTML.
 from __future__ import annotations
 
 import argparse
+import base64
 from collections import Counter
 import hashlib
 import html
@@ -39,6 +40,13 @@ TIKZ_WORK_DIR = BUILD_DIR / "tikz-work"
 DEFAULT_OUTPUT_DIR = HTML_DIR / "site"
 HOME_CONTENT = HTML_DIR / "home.md"
 BIBLIOGRAPHY_STYLE = HTML_DIR / "textbook.csl"
+DENSITY_PLOT_SCRIPT = HTML_DIR / "density-plots.js"
+DENSITY_PLOT_INCLUDE = HTML_DIR / "density-plots.html"
+DENSITY_LOADER_SCRIPT = HTML_DIR / "density-loader.js"
+DENSITY_MATH_SCRIPT = HTML_DIR / "density-math.js"
+DENSITY_PROBE_SCRIPT = HTML_DIR / "density-probe.js"
+FORMULA_COPY_SCRIPT = HTML_DIR / "formula-copy.js"
+FORMULA_COPY_INCLUDE = HTML_DIR / "formula-copy.html"
 MAIN_TEX = PROJECT_ROOT / "main.tex"
 SETTINGS_TEX = PROJECT_ROOT / "settings.tex"
 QUARTO = Path(
@@ -55,6 +63,16 @@ TITLE_END_PREFIX = "WEBTITLEEND"
 ALGORITHM_TITLE_START_PREFIX = "WEBALGOTITLESTART"
 ALGORITHM_TITLE_END_PREFIX = "WEBALGOTITLEEND"
 ALGORITHM_COMMAND_PREFIX = "WEBALGOCMD-"
+DENSITY_PLOT_MARKER_PREFIX = "WEBDENSITYPLOT-"
+DENSITY_PLOT_NAMES = {
+    "uniform",
+    "normal",
+    "chi-square",
+    "student-t",
+    "f",
+    "gamma",
+    "beta",
+}
 
 BLOCK_TYPES = {
     "BlockQuote",
@@ -856,6 +874,29 @@ def render_tikz_image(
     return Path("_tikz") / filename
 
 
+def patch_density_plots(
+    text: str,
+    source: Path,
+    rendered_counter: list[int],
+) -> str:
+    """Replace PDF-only densityplot figures with web component markers."""
+    pattern = re.compile(
+        r"\\begin\s*\{densityplot\}\s*\{(?P<name>[a-z0-9-]+)\}"
+        r".*?\\end\s*\{densityplot\}",
+        flags=re.DOTALL,
+    )
+
+    def replacement(match: re.Match[str]) -> str:
+        name = match.group("name")
+        if name not in DENSITY_PLOT_NAMES:
+            relative = source.relative_to(PROJECT_ROOT)
+            fail(f"未知的密度图类型 {name!r}：{relative}")
+        rendered_counter[0] += 1
+        return f"\n\n{DENSITY_PLOT_MARKER_PREFIX}{name}\n\n"
+
+    return pattern.sub(replacement, text)
+
+
 def patch_tikz_pictures(
     text: str,
     source: Path,
@@ -923,6 +964,7 @@ def stage_sources(
     STAGED_SOURCE_DIR.mkdir(parents=True)
     marker_counter = [0]
     algorithm_marker_counter = [0]
+    density_plot_counter = [0]
     tikz_counter = [0]
     copied = 0
     copied_code_files: set[Path] = set()
@@ -945,6 +987,11 @@ def stage_sources(
         text = patch_custom_math_environments(text)
         text = patch_algorithm_environments(
             text, algorithm_marker_counter
+        )
+        text = patch_density_plots(
+            text,
+            source,
+            density_plot_counter,
         )
         text = patch_tikz_pictures(
             text,
@@ -987,6 +1034,7 @@ def stage_sources(
         f"{len(copied_code_files)} 个代码文件，"
         f"标记 {marker_counter[0]} 个环境标题、"
         f"{algorithm_marker_counter[0]} 个算法，"
+        f"{density_plot_counter[0]} 幅交互密度图、"
         f"转换 {tikz_counter[0]} 幅 TikZ 图片"
     )
 
@@ -1612,10 +1660,12 @@ class BookTransformer:
         if block.get("t") not in {"Para", "Plain"}:
             return block
         equation_labels: list[tuple[str, str]] = []
+        original_sources: dict[int, str] = {}
         for inline in self.iter_math_nodes(block["c"]):
             if inline["c"][0].get("t") != "DisplayMath":
                 continue
             source = inline["c"][1]
+            original_sources[id(inline)] = source
             labels = re.findall(r"\\label\s*\{([^{}]+)\}", source)
             before = self.equation
             self.increment_unlabelled_equations(source)
@@ -1642,6 +1692,9 @@ class BookTransformer:
                     self.labels[label] = (reference_name, number)
                     equation_labels.append((label, number))
                 inline["c"][1] = source
+        block["c"] = self.wrap_display_math_sources(
+            block["c"], original_sources
+        )
         if not equation_labels:
             return block
         first_label = equation_labels[0][0]
@@ -1660,6 +1713,49 @@ class BookTransformer:
                 [block],
             ],
         }
+
+    def wrap_display_math_sources(
+        self,
+        value: Any,
+        original_sources: dict[int, str],
+    ) -> Any:
+        if isinstance(value, list):
+            result: list[Any] = []
+            for item in value:
+                if (
+                    isinstance(item, dict)
+                    and item.get("t") == "Math"
+                    and item["c"][0].get("t") == "DisplayMath"
+                ):
+                    source = original_sources.get(id(item), item["c"][1])
+                    encoded = base64.b64encode(
+                        source.encode("utf-8")
+                    ).decode("ascii")
+                    result.append(
+                        {
+                            "t": "RawInline",
+                            "c": [
+                                "html",
+                                (
+                                    '<span class="display-math-copy-marker" '
+                                    f'data-source-tex="{encoded}"></span>'
+                                ),
+                            ],
+                        }
+                    )
+                    result.append(item)
+                else:
+                    result.append(
+                        self.wrap_display_math_sources(item, original_sources)
+                    )
+            return result
+        if not isinstance(value, dict):
+            return value
+        if "c" in value:
+            value["c"] = self.wrap_display_math_sources(
+                value["c"], original_sources
+            )
+        return value
 
     def process_child_block_lists(self, value: Any) -> Any:
         if isinstance(value, list):
@@ -1711,6 +1807,29 @@ class BookTransformer:
                 result.append(block)
                 continue
             if block_type in {"Para", "Plain"}:
+                marker = ast_plain_text(block).strip()
+                density_match = re.fullmatch(
+                    re.escape(DENSITY_PLOT_MARKER_PREFIX)
+                    + r"([a-z0-9-]+)",
+                    marker,
+                )
+                if density_match:
+                    name = density_match.group(1)
+                    result.append(
+                        {
+                            "t": "RawBlock",
+                            "c": [
+                                "html",
+                                (
+                                    '<div class="density-plot" '
+                                    f'data-distribution="{name}">'
+                                    "<noscript>请启用 JavaScript 以调整参数并绘制密度曲线。"
+                                    "</noscript></div>"
+                                ),
+                            ],
+                        }
+                    )
+                    continue
                 result.append(self.process_equations_in_block(block))
                 continue
             block["c"] = self.process_child_block_lists(block.get("c"))
@@ -2891,6 +3010,12 @@ def write_quarto_config(
         "project:",
         "  type: book",
         "  output-dir: _site",
+        "  resources:",
+        "    - density-plots.js",
+        "    - density-loader.js",
+        "    - density-math.js",
+        "    - density-probe.js",
+        "    - formula-copy.js",
         "",
         "lang: zh",
         "date-format: long",
@@ -2929,6 +3054,9 @@ def write_quarto_config(
             "      light: cosmo",
             "      dark: darkly",
             "    include-in-header: theme-toggle.html",
+            "    include-after-body:",
+            "      - density-plots.html",
+            "      - formula-copy.html",
             "    css:",
             "      - style.css",
             "      - sidebar.css",
@@ -2996,6 +3124,13 @@ def copy_quarto_resources(document: dict[str, Any]) -> None:
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
     shutil.copy2(HTML_DIR / "style.css", QUARTO_PROJECT_DIR / "style.css")
+    shutil.copy2(DENSITY_PLOT_SCRIPT, QUARTO_PROJECT_DIR / "density-plots.js")
+    shutil.copy2(DENSITY_PLOT_INCLUDE, QUARTO_PROJECT_DIR / "density-plots.html")
+    shutil.copy2(DENSITY_LOADER_SCRIPT, QUARTO_PROJECT_DIR / "density-loader.js")
+    shutil.copy2(DENSITY_MATH_SCRIPT, QUARTO_PROJECT_DIR / "density-math.js")
+    shutil.copy2(DENSITY_PROBE_SCRIPT, QUARTO_PROJECT_DIR / "density-probe.js")
+    shutil.copy2(FORMULA_COPY_SCRIPT, QUARTO_PROJECT_DIR / "formula-copy.js")
+    shutil.copy2(FORMULA_COPY_INCLUDE, QUARTO_PROJECT_DIR / "formula-copy.html")
     shutil.copy2(
         HTML_DIR / "theme-toggle.html",
         QUARTO_PROJECT_DIR / "theme-toggle.html",

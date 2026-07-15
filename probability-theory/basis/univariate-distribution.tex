@@ -163,6 +163,23 @@
 	\end{equation*}
 	其中$a,b\in\mathbb{R}^{}$为参数且$a<b$，则称$X$服从\gls{UniformDistribution}，记作$X\sim\operatorname{U}(a,b)$。
 \end{definition}
+\begin{densityplot}{uniform}
+	\begin{tikzpicture}
+		\begin{axis}[
+			density plot,
+			xmin=-0.4, xmax=1.4,
+			ymin=0, ymax=1.25,
+			title={$\operatorname{U}(0,1)$},
+		]
+			\addplot[domain=-0.4:0] {0};
+			\addplot[domain=0:1] {1};
+			\addplot[domain=1:1.4] {0};
+			\addplot[gray, densely dashed] coordinates {(0,0) (0,1)};
+			\addplot[gray, densely dashed] coordinates {(1,0) (1,1)};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{均匀分布 $\operatorname{U}(0,1)$ 的概率密度函数}
+\end{densityplot}
 \begin{property}
 	均匀分布族具有如下性质：
 	\begin{enumerate}
@@ -194,6 +211,20 @@
 	\end{equation*}
 	其中$\mu\in\mathbb{R}^{}$和$\sigma^2\in\mathbb{R}^{+}$为参数，则称$X$服从\gls{NormalDistribution}，记作$X\sim\operatorname{N}(\mu,\sigma^2)$。称$\operatorname{N}(0,1)$为\gls{StandardNormalDistribution}。
 \end{definition}
+\begin{densityplot}{normal}
+	\begin{tikzpicture}
+		\begin{axis}[
+			density plot,
+			domain=-4.5:4.5,
+			xmin=-4.5, xmax=4.5,
+			ymin=0, ymax=0.45,
+			title={$\operatorname{N}(0,1)$},
+		]
+			\addplot {exp(-x^2/2)/sqrt(2*pi)};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{标准正态分布 $\operatorname{N}(0,1)$ 的概率密度函数}
+\end{densityplot}
 \begin{note}
 	将标准正态分布的$\alpha$分位点记作$u_{\alpha}$。
 \end{note}
@@ -884,7 +915,26 @@
 \subsection{$\chi^2$分布}
 \begin{definition}
 	设$\mathbf{X}\sim N_n(\boldsymbol{\mu}, I_n)$，则随机变量$Y=X^{\top}X$的分布称为自由度为$n$、非中心参数为$\lambda=\boldsymbol{\mu}^{\top}\boldsymbol{\mu}$的$\chi^2$分布，记为$\mathbf{Y}\sim \chi^2_{n,\lambda}$。当$\lambda=0$时，称$Y$的分布为中心$\chi^2$分布，记为$Y\sim\chi_n^2$。
+	其概率密度函数可以写为Poisson混合形式：
+	\begin{equation*}
+		p(y)=e^{-\frac{\lambda}{2}}\sum_{j=0}^{+\infty}\frac{(\lambda/2)^j}{j!}
+		\frac{y^{\frac{n}{2}+j-1}e^{-\frac{y}{2}}}{2^{\frac{n}{2}+j}\Gamma\left(\frac{n}{2}+j\right)},\quad y>0
+	\end{equation*}
 \end{definition}
+\begin{densityplot}{chi-square}
+	\begin{tikzpicture}
+		\begin{axis}[
+			density plot,
+			domain=0:18,
+			xmin=0, xmax=18,
+			ymin=0, ymax=0.21,
+			title={$\chi^2_{4,0}$},
+		]
+			\addplot {x*exp(-x/2)/4};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{中心 $\chi^2$ 分布 $\chi^2_{4,0}$ 的概率密度函数}
+\end{densityplot}
 \begin{property}\label{prop:Chi2Distribution}
 	$\chi^2$分布具有如下性质：
 	\begin{enumerate}
@@ -989,7 +1039,26 @@
 		T=\frac{X}{\sqrt{Y/ n}}
 	\end{equation*}
 	为自由度是$n$的$t$变量，其分布称为自由度为$n$的$t$分布，记为$T\sim \operatorname{t}_n$。
+	其概率密度函数为：
+	\begin{equation*}
+		p(x)=\frac{\Gamma\left(\frac{n+1}{2}\right)}{\sqrt{n\pi}\,\Gamma\left(\frac{n}{2}\right)}
+		\left(1+\frac{x^2}{n}\right)^{-\frac{n+1}{2}},\quad x\in\mathbb{R}
+	\end{equation*}
 \end{definition}
+\begin{densityplot}{student-t}
+	\begin{tikzpicture}
+		\begin{axis}[
+			density plot,
+			domain=-5:5,
+			xmin=-5, xmax=5,
+			ymin=0, ymax=0.42,
+			title={$\operatorname{t}_5$},
+		]
+			\addplot {0.3796066898*(1+x^2/5)^(-3)};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{$t$ 分布 $\operatorname{t}_5$ 的概率密度函数}
+\end{densityplot}
 
 \subsection{$F$分布}
 \begin{definition}
@@ -998,7 +1067,27 @@
 		F=\frac{X/m}{Y/n}
 	\end{equation*}
 	为自由度是$m$和$n$的$F$变量，其分布称为自由度为$m$和$n$的$F$分布，记为$F\sim \operatorname{F}_{m,n}$。
+	其概率密度函数为：
+	\begin{equation*}
+		p(x)=\frac{1}{\operatorname{B}\left(\frac{m}{2},\frac{n}{2}\right)}
+		\left(\frac{m}{n}\right)^{\frac{m}{2}}x^{\frac{m}{2}-1}
+		\left(1+\frac{m}{n}x\right)^{-\frac{m+n}{2}},\quad x>0
+	\end{equation*}
 \end{definition}
+\begin{densityplot}{f}
+	\begin{tikzpicture}
+		\begin{axis}[
+			density plot,
+			domain=0:5,
+			xmin=0, xmax=5,
+			ymin=0, ymax=0.8,
+			title={$\operatorname{F}_{5,10}$},
+		]
+			\addplot {10.3683675*x^1.5*(1+0.5*x)^(-7.5)};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{$F$ 分布 $\operatorname{F}_{5,10}$ 的概率密度函数}
+\end{densityplot}
 \begin{property}\label{prop:FDistribution}
 	$F$分布具有如下性质：
 	\begin{enumerate}
@@ -1040,6 +1129,20 @@
 	\end{equation*}
 	其中$\alpha,\lambda\in\mathbb{R}^{+}$为参数，则称$X$服从Gamma分布，记作$X\sim\operatorname{Gamma}(\alpha,\lambda)$。$\operatorname{Gamma}(1,\lambda)$也称作\gls{ExponentialDistribution}，记作$X\sim\operatorname{Exp}(\lambda)$。
 \end{definition}
+\begin{densityplot}{gamma}
+	\begin{tikzpicture}
+		\begin{axis}[
+			density plot,
+			domain=0:12,
+			xmin=0, xmax=12,
+			ymin=0, ymax=0.3,
+			title={$\operatorname{Gamma}(3,1)$},
+		]
+			\addplot {x^2*exp(-x)/2};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Gamma分布 $\operatorname{Gamma}(3,1)$ 的概率密度函数，其中 $\lambda$ 为率参数}
+\end{densityplot}
 \begin{property}
 	Gamma分布具有如下性质：
 	\begin{enumerate}
@@ -1071,6 +1174,20 @@
 	\end{equation*}
 	其中$a,b\in\mathbb{R}^{+}$为参数，则称$X$服从Beta分布，记作$X\sim\operatorname{Beta}(a,b)$。
 \end{definition}
+\begin{densityplot}{beta}
+	\begin{tikzpicture}
+		\begin{axis}[
+			density plot,
+			domain=0:1,
+			xmin=0, xmax=1,
+			ymin=0, ymax=2.6,
+			title={$\operatorname{Beta}(2,5)$},
+		]
+			\addplot {30*x*(1-x)^4};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{Beta分布 $\operatorname{Beta}(2,5)$ 的概率密度函数}
+\end{densityplot}
 \begin{property}
 	Beta分布具有如下性质：
 	\begin{enumerate}
