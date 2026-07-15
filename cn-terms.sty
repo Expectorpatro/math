@@ -1,0 +1,551 @@
+\NeedsTeXFormat{LaTeX2e}[2022-11-01]
+\ProvidesExplPackage
+  {cn-terms}
+  {2026-07-13}
+  {1.1.0}
+  {A lightweight, scoped bilingual term system for cn-terms}
+
+% xcolor is the package's only non-kernel dependency.  Hyperlinks are enabled
+% automatically when the document already loads hyperref.
+\RequirePackage{xcolor}
+
+\ExplSyntaxOn
+
+\tl_new:N  \g__cn_terms_title_tl
+\tl_new:N  \g__cn_terms_color_tl
+\int_new:N \g__cn_terms_id_int
+\seq_new:N \g__cn_terms_ids_seq
+
+% Definition fields are keyed by a small numeric ID and stored in directly
+% addressed control sequences.  A label may map to more than one ID.  This
+% avoids linear database scans both in the body and while sorting the list.
+
+\seq_new:N \l__cn_terms_sorted_seq
+\seq_new:N \l__cn_terms_current_path_seq
+\seq_new:N \l__cn_terms_definition_path_seq
+\tl_new:N  \l__cn_terms_id_tl
+\tl_new:N  \l__cn_terms_ids_tl
+\tl_new:N  \l__cn_terms_label_tl
+\tl_new:N  \l__cn_terms_type_tl
+\tl_new:N  \l__cn_terms_english_tl
+\tl_new:N  \l__cn_terms_chinese_tl
+\tl_new:N  \l__cn_terms_source_tl
+\tl_new:N  \l__cn_terms_current_path_tl
+\tl_new:N  \l__cn_terms_initial_tl
+\tl_new:N  \l__cn_terms_previous_initial_tl
+\int_new:N \l__cn_terms_common_depth_int
+\int_new:N \l__cn_terms_distance_int
+\int_new:N \l__cn_terms_best_distance_int
+\bool_new:N \l__cn_terms_common_prefix_bool
+\bool_new:N \l__cn_terms_first_in_group_bool
+
+\tl_gset:Nn \g__cn_terms_title_tl { Term~List }
+\tl_gset:Nn \g__cn_terms_color_tl { black }
+
+\msg_new:nnn { cn-terms } { invalid-type }
+  { Unknown~term~type~'#1'.~Use~'default'~or~'no~acronym'. }
+\msg_new:nnn { cn-terms } { undefined-label }
+  {
+    Term~label~'#1'~is~undefined.~Define~it~with~\token_to_str:N \NewTerm
+    ~before~using~\token_to_str:N \gls.
+  }
+\msg_new:nnn { cn-terms } { empty-list }
+  {
+    The~term~list~is~empty.~Define~terms~before~calling
+    ~\token_to_str:N \PrintTermList.
+  }
+
+\keys_define:nn { cn-terms }
+  {
+    term~list~title .tl_gset:N = \g__cn_terms_title_tl,
+    term~color      .tl_gset:N = \g__cn_terms_color_tl,
+  }
+
+\NewDocumentCommand \glssetup { m }
+  { \keys_set:nn { cn-terms } {#1} }
+
+\cs_new_protected:Npn \__cn_terms_format_no_acronym:nn #1#2
+  {
+    \textcolor { \tl_use:N \g__cn_terms_color_tl }
+      { #2(#1) }
+  }
+
+\cs_new_protected:Npn \__cn_terms_format_default:nnn #1#2#3
+  {
+    \textcolor { \tl_use:N \g__cn_terms_color_tl }
+      { #3(#2,~#1) }
+  }
+
+\cs_new_protected:Npn \__cn_terms_normalize_path:N #1
+  {
+    \regex_replace_once:nnN { \A \./ } { } #1
+    \regex_replace_all:nnN  { /+ \Z } { } #1
+  }
+
+\cs_new_protected:Npn \__cn_terms_store:nnnn #1#2#3#4
+  {
+    \int_gincr:N \g__cn_terms_id_int
+    \tl_set:Nx \l__cn_terms_id_tl
+      { \int_use:N \g__cn_terms_id_int }
+    \tl_set:Nx \l__cn_terms_source_tl { \CurrentFilePath }
+    \__cn_terms_normalize_path:N \l__cn_terms_source_tl
+
+    \cs_gset:cpx
+      { __cn_terms_label_\tl_use:N \l__cn_terms_id_tl }
+      { \exp_not:V \l__cn_terms_label_tl }
+    \cs_gset:cpn
+      { __cn_terms_type_\tl_use:N \l__cn_terms_id_tl }
+      {#1}
+    \cs_gset:cpn
+      { __cn_terms_english_\tl_use:N \l__cn_terms_id_tl }
+      {#3}
+    \cs_gset:cpn
+      { __cn_terms_chinese_\tl_use:N \l__cn_terms_id_tl }
+      {#4}
+    \cs_gset:cpx
+      { __cn_terms_source_\tl_use:N \l__cn_terms_id_tl }
+      { \exp_not:V \l__cn_terms_source_tl }
+    \tl_set:Nx \l_tmpa_tl
+      { \str_lowercase:f { \tl_to_str:n {#3} } }
+    \cs_gset:cpx
+      { __cn_terms_sort_\tl_use:N \l__cn_terms_id_tl }
+      { \exp_not:V \l_tmpa_tl }
+    \seq_gput_right:NV
+      \g__cn_terms_ids_seq
+      \l__cn_terms_id_tl
+
+    % Store every definition ID associated with this public label.
+    \cs_if_exist:cTF
+      { __cn_terms_ids_\tl_to_str:V \l__cn_terms_label_tl }
+      {
+        \tl_set:Nx \l__cn_terms_ids_tl
+          {
+            \use:c
+              { __cn_terms_ids_\tl_to_str:V \l__cn_terms_label_tl }
+            ,\tl_use:N \l__cn_terms_id_tl
+          }
+        \cs_gset:cpx
+          { __cn_terms_ids_\tl_to_str:V \l__cn_terms_label_tl }
+          { \exp_not:V \l__cn_terms_ids_tl }
+      }
+      {
+        \cs_gset:cpx
+          { __cn_terms_ids_\tl_to_str:V \l__cn_terms_label_tl }
+          { \exp_not:V \l__cn_terms_id_tl }
+      }
+
+    % Each concrete definition has a direct display command.  Once a label has
+    % resolved to an ID, rendering performs no registry scan.
+    \str_if_eq:nnTF {#1} { default }
+      {
+        \cs_gset_protected:cpn
+          { __cn_terms_display_\tl_use:N \l__cn_terms_id_tl }
+          { \__cn_terms_format_default:nnn {#2} {#3} {#4} }
+      }
+      {
+        \cs_gset_protected:cpn
+          { __cn_terms_display_\tl_use:N \l__cn_terms_id_tl }
+          { \__cn_terms_format_no_acronym:nn {#3} {#4} }
+      }
+  }
+
+\cs_new_protected:Npn \__cn_terms_new:nnnn #1#2#3#4
+  {
+    \tl_set:Nn \l__cn_terms_type_tl {#1}
+    \tl_trim_spaces:N \l__cn_terms_type_tl
+    \tl_set:Nn \l__cn_terms_label_tl {#2}
+    \tl_trim_spaces:N \l__cn_terms_label_tl
+
+    \str_case:VnF \l__cn_terms_type_tl
+      {
+        { default }
+          { \__cn_terms_store:nnnn { default } {#2} {#3} {#4} }
+        { no~acronym }
+          { \__cn_terms_store:nnnn { no~acronym } {#2} {#3} {#4} }
+      }
+      {
+        \msg_error:nnV
+          { cn-terms } { invalid-type }
+          \l__cn_terms_type_tl
+      }
+  }
+
+\NewDocumentCommand \NewTerm { O{default} m m m }
+  { \__cn_terms_new:nnnn {#1} {#2} {#3} {#4} }
+
+\cs_generate_variant:Nn \clist_map_inline:nn { Vn }
+
+\cs_new_protected:Npn \__cn_terms_path_to_seq:NN #1#2
+  {
+    \seq_clear:N #2
+    \tl_if_blank:VF #1
+      { \seq_set_split:NnV #2 {/} #1 }
+  }
+
+% Compute tree distance between the current source directory and one definition
+% directory: depth(A) + depth(B) - 2 * depth(common prefix).
+\cs_new_protected:Npn \__cn_terms_path_distance:n #1
+  {
+    \cs_set_eq:Nc \l__cn_terms_source_tl
+      { __cn_terms_source_#1 }
+    \__cn_terms_path_to_seq:NN
+      \l__cn_terms_current_path_tl
+      \l__cn_terms_current_path_seq
+    \__cn_terms_path_to_seq:NN
+      \l__cn_terms_source_tl
+      \l__cn_terms_definition_path_seq
+    \int_zero:N \l__cn_terms_common_depth_int
+    \bool_set_true:N \l__cn_terms_common_prefix_bool
+    \int_step_inline:nn
+      {
+        \int_min:nn
+          { \seq_count:N \l__cn_terms_current_path_seq }
+          { \seq_count:N \l__cn_terms_definition_path_seq }
+      }
+      {
+        \bool_if:NT \l__cn_terms_common_prefix_bool
+          {
+            \tl_set:Nx \l_tmpa_tl
+              { \seq_item:Nn \l__cn_terms_current_path_seq {##1} }
+            \tl_set:Nx \l_tmpb_tl
+              { \seq_item:Nn \l__cn_terms_definition_path_seq {##1} }
+            \tl_if_eq:NNTF \l_tmpa_tl \l_tmpb_tl
+              { \int_incr:N \l__cn_terms_common_depth_int }
+              { \bool_set_false:N \l__cn_terms_common_prefix_bool }
+          }
+      }
+    \int_set:Nn \l__cn_terms_distance_int
+      {
+        \seq_count:N \l__cn_terms_current_path_seq
+        + \seq_count:N \l__cn_terms_definition_path_seq
+        - 2 * \l__cn_terms_common_depth_int
+      }
+  }
+
+\cs_new_protected:Npn \__cn_terms_resolve_duplicates:
+  {
+    \tl_set:Nx \l__cn_terms_current_path_tl { \CurrentFilePath }
+    \__cn_terms_normalize_path:N \l__cn_terms_current_path_tl
+    \int_set:Nn \l__cn_terms_best_distance_int { 1000000 }
+    \tl_clear:N \l__cn_terms_id_tl
+    \clist_map_inline:Vn \l__cn_terms_ids_tl
+      {
+        \__cn_terms_path_distance:n {##1}
+        % A tie is resolved by the later definition, providing deterministic
+        % local override semantics when two definitions share a directory.
+        \int_compare:nNnF
+          { \l__cn_terms_distance_int }
+          >
+          { \l__cn_terms_best_distance_int }
+          {
+            \int_set_eq:NN
+              \l__cn_terms_best_distance_int
+              \l__cn_terms_distance_int
+            \tl_set:Nn \l__cn_terms_id_tl {##1}
+          }
+      }
+  }
+
+\cs_new_protected:Npn \__cn_terms_resolve:n #1
+  {
+    \tl_set:Nn \l__cn_terms_label_tl {#1}
+    \tl_trim_spaces:N \l__cn_terms_label_tl
+    \cs_if_exist:cTF
+      { __cn_terms_ids_\tl_to_str:V \l__cn_terms_label_tl }
+      {
+        \tl_set:Nx \l__cn_terms_ids_tl
+          {
+            \use:c
+              { __cn_terms_ids_\tl_to_str:V \l__cn_terms_label_tl }
+          }
+        \tl_if_in:VnTF \l__cn_terms_ids_tl {,}
+          { \__cn_terms_resolve_duplicates: }
+          { \tl_set_eq:NN \l__cn_terms_id_tl \l__cn_terms_ids_tl }
+      }
+      {
+        \msg_warning:nnV
+          { cn-terms } { undefined-label }
+          \l__cn_terms_label_tl
+        \tl_clear:N \l__cn_terms_id_tl
+      }
+  }
+
+\cs_new_protected:Npn \__cn_terms_get_id:n #1
+  {
+    \cs_set_eq:Nc \l__cn_terms_label_tl
+      { __cn_terms_label_#1 }
+    \cs_set_eq:Nc \l__cn_terms_type_tl
+      { __cn_terms_type_#1 }
+    \cs_set_eq:Nc \l__cn_terms_english_tl
+      { __cn_terms_english_#1 }
+    \cs_set_eq:Nc \l__cn_terms_chinese_tl
+      { __cn_terms_chinese_#1 }
+    \cs_set_eq:Nc \l__cn_terms_source_tl
+      { __cn_terms_source_#1 }
+  }
+
+\cs_new_protected:Npn \__cn_terms_use_id:n #1
+  {
+    \cs_if_exist:cTF { __cn_terms_used_#1 }
+      { \use:c { __cn_terms_display_#1 } }
+      {
+        \cs_gset:cpn { __cn_terms_used_#1 } { }
+        \cs_if_exist:NTF \hypertarget
+          {
+            \hypertarget { cn-term.#1 }
+              { \use:c { __cn_terms_display_#1 } }
+          }
+          { \use:c { __cn_terms_display_#1 } }
+      }
+  }
+
+% Every occurrence is expanded in full.  Only the first resolved occurrence of
+% each concrete definition receives a hyperlink target.
+\NewDocumentCommand \gls { m }
+  {
+    \__cn_terms_resolve:n {#1}
+    \tl_if_blank:VTF \l__cn_terms_id_tl
+      {
+        \textcolor { \tl_use:N \g__cn_terms_color_tl }
+          { ??(#1) }
+      }
+      {
+        \exp_args:NV \__cn_terms_use_id:n
+          \l__cn_terms_id_tl
+      }
+  }
+
+\NewDocumentCommand \glsdesc { m }
+  {
+    \__cn_terms_resolve:n {#1}
+    \tl_if_blank:VTF \l__cn_terms_id_tl
+      { ?? }
+      {
+        \exp_args:NV \__cn_terms_get_id:n
+          \l__cn_terms_id_tl
+        \textcolor { \tl_use:N \g__cn_terms_color_tl }
+          { \tl_use:N \l__cn_terms_chinese_tl }
+      }
+  }
+
+% Intended for headings and table-of-contents text: plain Chinese, no link box.
+\NewDocumentCommand \glsintoc { m }
+  {
+    \__cn_terms_resolve:n {#1}
+    \tl_if_blank:VTF \l__cn_terms_id_tl
+      { ?? }
+      {
+        \exp_args:NV \__cn_terms_get_id:n
+          \l__cn_terms_id_tl
+        \tl_use:N \l__cn_terms_chinese_tl
+      }
+  }
+
+\cs_generate_variant:Nn \str_compare:nNnTF { eNe }
+
+\cs_new_protected:Npn \__cn_terms_sort:
+  {
+    \seq_set_eq:NN
+      \l__cn_terms_sorted_seq
+      \g__cn_terms_ids_seq
+    \seq_sort:Nn \l__cn_terms_sorted_seq
+      {
+        \tl_set:Nx \l_tmpa_tl
+          { \use:c { __cn_terms_sort_##1 } }
+        \tl_set:Nx \l_tmpb_tl
+          { \use:c { __cn_terms_sort_##2 } }
+        \str_compare:eNeTF
+          { \tl_use:N \l_tmpa_tl }
+          >
+          { \tl_use:N \l_tmpb_tl }
+          { \sort_return_swapped: }
+          {
+            \str_compare:eNeTF
+              { \tl_use:N \l_tmpa_tl }
+              =
+              { \tl_use:N \l_tmpb_tl }
+              {
+                \int_compare:nNnTF {##1} > {##2}
+                  { \sort_return_swapped: }
+                  { \sort_return_same: }
+              }
+              { \sort_return_same: }
+          }
+      }
+  }
+
+\cs_new_protected:Npn \__cn_terms_heading:
+  {
+    \cs_if_exist:NTF \chapter
+      {
+        \chapter* { \tl_use:N \g__cn_terms_title_tl }
+        \markboth
+          { \tl_use:N \g__cn_terms_title_tl }
+          { \tl_use:N \g__cn_terms_title_tl }
+        \addcontentsline { toc } { chapter }
+          { \tl_use:N \g__cn_terms_title_tl }
+      }
+      {
+        \section* { \tl_use:N \g__cn_terms_title_tl }
+        \markboth
+          { \tl_use:N \g__cn_terms_title_tl }
+          { \tl_use:N \g__cn_terms_title_tl }
+        \addcontentsline { toc } { section }
+          { \tl_use:N \g__cn_terms_title_tl }
+      }
+
+    \par\smallskip
+    \noindent
+    \textcolor { \tl_use:N \g__cn_terms_color_tl }
+      {
+        \bfseries\small
+        \makebox[\linewidth][s]
+          {
+            A\hfill B\hfill C\hfill D\hfill E\hfill F\hfill G\hfill
+            H\hfill I\hfill J\hfill K\hfill L\hfill M\hfill N\hfill
+            O\hfill P\hfill Q\hfill R\hfill S\hfill T\hfill U\hfill
+            V\hfill W\hfill X\hfill Y\hfill Z
+          }
+      }
+    \par\medskip
+    \noindent
+    {
+      \small\color{black!58}
+      按英文名称排序；彩色标签表示英文缩写；点击术语可跳转到首次引用。
+    }
+    \par
+  }
+
+\cs_new_protected:Npn \__cn_terms_group:n #1
+  {
+    \par\addvspace{0.9\baselineskip}
+    \noindent
+    { \color{\tl_use:N \g__cn_terms_color_tl}\rule{1.65em}{1.1pt} }
+    \hspace{0.55em}
+    { \color{\tl_use:N \g__cn_terms_color_tl}\Large\bfseries #1 }
+    \hspace{0.55em}
+    { \color{\tl_use:N \g__cn_terms_color_tl!35}
+      \leaders\hrule height 0.45pt\hfill\kern0pt }
+    \par\nobreak\smallskip\nopagebreak[4]
+    \noindent
+    \bool_set_true:N \l__cn_terms_first_in_group_bool
+  }
+
+\cs_new_protected:Npn \__cn_terms_entry_content:n #1
+  {
+    \__cn_terms_get_id:n {#1}
+    { \bfseries\color{\tl_use:N \g__cn_terms_color_tl}
+      \tl_use:N \l__cn_terms_chinese_tl }
+    \hspace{0.75em}
+    { \sffamily\color{black!68}
+      \tl_use:N \l__cn_terms_english_tl }
+    \str_if_eq:VnT \l__cn_terms_type_tl { default }
+      {
+        \nobreak\hspace{0.7em}
+        \group_begin:
+          \setlength\fboxsep{2.2pt}
+          \setlength\fboxrule{0.45pt}
+          \fcolorbox
+            { \tl_use:N \g__cn_terms_color_tl }
+            { \tl_use:N \g__cn_terms_color_tl!7 }
+            {
+              \sffamily\footnotesize
+              \color{\tl_use:N \g__cn_terms_color_tl}
+              \tl_use:N \l__cn_terms_label_tl
+            }
+        \group_end:
+      }
+    \tl_set:Nx \l__cn_terms_ids_tl
+      {
+        \use:c
+          { __cn_terms_ids_\tl_to_str:V \l__cn_terms_label_tl }
+      }
+    \tl_if_in:VnT \l__cn_terms_ids_tl {,}
+      {
+        \hspace{0.7em}\allowbreak
+        {
+          \sffamily\scriptsize\color{black!45}
+          [
+          \tl_if_blank:VTF \l__cn_terms_source_tl
+            { 项目根目录 }
+            { \tl_to_str:V \l__cn_terms_source_tl }
+          ]
+        }
+      }
+  }
+
+\cs_new_protected:Npn \__cn_terms_entry:n #1
+  {
+    \bool_if:NTF \l__cn_terms_first_in_group_bool
+      { \bool_set_false:N \l__cn_terms_first_in_group_bool }
+      {
+        \nobreak\hspace{0.52em}
+        {
+          \color{\tl_use:N \g__cn_terms_color_tl!42}
+          \raisebox{0.12ex}{\scriptsize\textbullet}
+        }
+        \hspace{0.52em}\allowbreak
+      }
+    \cs_if_exist:cTF { __cn_terms_used_#1 }
+      {
+        \cs_if_exist:NTF \hyperlink
+          {
+            \hyperlink { cn-term.#1 }
+              { \__cn_terms_entry_content:n {#1} }
+          }
+          { \__cn_terms_entry_content:n {#1} }
+      }
+      { \__cn_terms_entry_content:n {#1} }
+  }
+
+\cs_new_protected:Npn \__cn_terms_set_initial:n #1
+  {
+    \cs_set_eq:Nc \l__cn_terms_english_tl
+      { __cn_terms_english_#1 }
+    \tl_set:Nx \l__cn_terms_initial_tl
+      { \str_uppercase:f { \tl_head:V \l__cn_terms_english_tl } }
+    \regex_match:nVTF { \A [A-Z] \Z } \l__cn_terms_initial_tl
+      { }
+      { \tl_set:Nn \l__cn_terms_initial_tl { \# } }
+  }
+
+\cs_new_protected:Npn \__cn_terms_print_list:
+  {
+    \seq_if_empty:NTF \g__cn_terms_ids_seq
+      { \msg_warning:nn { cn-terms } { empty-list } }
+      {
+        \__cn_terms_sort:
+        \__cn_terms_heading:
+        \tl_clear:N \l__cn_terms_previous_initial_tl
+        \group_begin:
+          \setlength\parindent{0pt}
+          \raggedright
+          \emergencystretch=2em
+          \seq_map_inline:Nn \l__cn_terms_sorted_seq
+            {
+              \__cn_terms_set_initial:n {##1}
+              \tl_if_eq:NNTF
+                \l__cn_terms_initial_tl
+                \l__cn_terms_previous_initial_tl
+                { }
+                {
+                  \__cn_terms_group:n
+                    { \tl_use:N \l__cn_terms_initial_tl }
+                  \tl_set_eq:NN
+                    \l__cn_terms_previous_initial_tl
+                    \l__cn_terms_initial_tl
+                }
+              \__cn_terms_entry:n {##1}
+            }
+          \par
+        \group_end:
+        \addvspace{0.8\baselineskip}
+      }
+  }
+
+\NewDocumentCommand \PrintTermList { }
+  { \__cn_terms_print_list: }
+
+\ExplSyntaxOff
+
+\endinput

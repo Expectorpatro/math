@@ -176,38 +176,16 @@
     }
     toc.dataset.contextReady = "true";
 
-    const depthOf = (list) => {
-      let depth = 0;
-      let current = list;
-      while (current && current !== root) {
-        depth += 1;
-        current = current.parentElement?.closest("ul");
-      }
-      return depth;
-    };
-
     const applyVisibility = (active) => {
       const activeItem = active?.closest("li");
-      toc.querySelectorAll("ul").forEach((list) => {
-        if (list === root) return;
-        const depth = depthOf(list);
-        let parentItem = list.parentElement;
-        let show = false;
-        if (depth === 1 && activeItem) {
-          let cursor = activeItem;
-          while (cursor && cursor !== root) {
-            if (cursor === parentItem) {
-              show = true;
-              break;
-            }
-            cursor = cursor.parentElement?.closest("li");
-          }
-        }
-        // Keep only the active first-level branch. Deeper branches remain
-        // hidden so the TOC never reaches subsubsection depth.
-        if (parentItem?.classList.contains("computation-toc-item")) {
-          show = true;
-        }
+      let activeBranch = activeItem;
+      while (activeBranch && activeBranch.parentElement !== root) {
+        activeBranch = activeBranch?.parentElement?.closest("li");
+      }
+
+      root.querySelectorAll(":scope > li > ul").forEach((list) => {
+        const show = list.parentElement === activeBranch;
+        list.classList.toggle("textbook-toc-branch-open", show);
         list.hidden = !show;
       });
     };

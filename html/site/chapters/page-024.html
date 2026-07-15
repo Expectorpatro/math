@@ -255,38 +255,16 @@ ul.task-list li input[type="checkbox"] {
     }
     toc.dataset.contextReady = "true";
 
-    const depthOf = (list) => {
-      let depth = 0;
-      let current = list;
-      while (current && current !== root) {
-        depth += 1;
-        current = current.parentElement?.closest("ul");
-      }
-      return depth;
-    };
-
     const applyVisibility = (active) => {
       const activeItem = active?.closest("li");
-      toc.querySelectorAll("ul").forEach((list) => {
-        if (list === root) return;
-        const depth = depthOf(list);
-        let parentItem = list.parentElement;
-        let show = false;
-        if (depth === 1 && activeItem) {
-          let cursor = activeItem;
-          while (cursor && cursor !== root) {
-            if (cursor === parentItem) {
-              show = true;
-              break;
-            }
-            cursor = cursor.parentElement?.closest("li");
-          }
-        }
-        // Keep only the active first-level branch. Deeper branches remain
-        // hidden so the TOC never reaches subsubsection depth.
-        if (parentItem?.classList.contains("computation-toc-item")) {
-          show = true;
-        }
+      let activeBranch = activeItem;
+      while (activeBranch && activeBranch.parentElement !== root) {
+        activeBranch = activeBranch?.parentElement?.closest("li");
+      }
+
+      root.querySelectorAll(":scope > li > ul").forEach((list) => {
+        const show = list.parentElement === activeBranch;
+        list.classList.toggle("textbook-toc-branch-open", show);
         list.hidden = !show;
       });
     };
@@ -1677,7 +1655,7 @@ F=A^{\top}\Sigma^{-1}(\mathbf{X}-\boldsymbol{\mu})
 <p><span class="math display">\[\begin{equation*}
 W=(w_{ik})\in\mathbb{R}^{n\times r},\quad H=(h_{kj})\in\mathbb{R}^{r\times p},\quad w_{ik}\geqslant0,\quad h_{kj}\geqslant0
 \end{equation*}\]</span></p>
-<p>使得</p>
+<p>使得：</p>
 <p><span class="math display">\[\begin{equation*}
 X\approx WH,\quad r&lt;\min\{n,p\}
 \end{equation*}\]</span></p>
@@ -1702,7 +1680,7 @@ X\approx WH,\quad W=(w_{ik})\in\mathbb{R}^{n\times r},\quad H=(h_{kj})\in\mathbb
 </ol>
 </div>
 <div class="proof-block proof">
-<p><span class="proof-title"><em>证明</em>. </span>(1)改变分解矩阵行列的排列顺序或对分解矩阵进行可逆变换即可给出同一矩阵的多种分解结果。</p>
+<p><span class="proof-title"><em>证明</em>. </span>(1)改变分解矩阵行列的排列顺序、对分解矩阵进行放缩或对分解矩阵进行可逆变换即可给出同一矩阵的多种分解结果。</p>
 <p>(4)由<a href="../chapters/page-002.html#prop-Rank-99b0b0fd" data-reference-type="ref+label" data-reference="prop:Rank">性质 1.1.3</a>(9)立即可得。&nbsp;◻</p>
 </div>
 <section id="id--1ef67cd7" class="level3">
