@@ -28,7 +28,7 @@ from html.parser import HTMLParser
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Iterable
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote, urlencode, urlsplit
 
 
 HTML_DIR = Path(__file__).resolve().parent
@@ -47,6 +47,17 @@ DENSITY_MATH_SCRIPT = HTML_DIR / "density-math.js"
 DENSITY_PROBE_SCRIPT = HTML_DIR / "density-probe.js"
 FORMULA_COPY_SCRIPT = HTML_DIR / "formula-copy.js"
 FORMULA_COPY_INCLUDE = HTML_DIR / "formula-copy.html"
+TEXTBOOK_UI_SCRIPT = HTML_DIR / "textbook-ui.js"
+FAVICON = HTML_DIR / "favicon.svg"
+SITE_META = HTML_DIR / "site-meta.json"
+CHAPTER_PROGRESS = HTML_DIR / "chapter-progress.json"
+NOTATION_CATALOG = (
+    PROJECT_ROOT
+    / "skills"
+    / "textbook-latex-style"
+    / "references"
+    / "notation-catalog.json"
+)
 MAIN_TEX = PROJECT_ROOT / "main.tex"
 SETTINGS_TEX = PROJECT_ROOT / "settings.tex"
 QUARTO = Path(
@@ -73,6 +84,37 @@ DENSITY_PLOT_NAMES = {
     "gamma",
     "beta",
 }
+
+PAGE_SLUGS = {
+    "前言": "preface",
+    "线性空间": "linear-space",
+    "矩阵": "matrix",
+    "度量空间": "metric-space",
+    "微积分": "calculus",
+    "概率测度": "probability-measure",
+    "概率初步": "probability-basics",
+    "渐进理论初步": "asymptotic-theory",
+    "凸集": "convex-sets",
+    "不等式": "inequalities",
+    "统计初步": "statistics-basics",
+    "点估计理论": "point-estimation",
+    "假设检验理论": "hypothesis-testing",
+    "贝叶斯统计": "bayesian-statistics",
+    "统计计算方法": "statistical-computing",
+    "线性模型": "linear-models",
+    "多元统计": "multivariate-statistics",
+    "时间序列分析": "time-series",
+    "机器学习": "machine-learning",
+    "因果推断": "causal-inference",
+    "附录": "appendix",
+    "后记": "epilogue",
+    "中英术语表": "glossary",
+}
+
+SITE_DESCRIPTION = (
+    "持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，"
+    "强调逻辑自洽、证明完整与持续维护。"
+)
 
 BLOCK_TYPES = {
     "BlockQuote",
@@ -1310,6 +1352,9 @@ class BookTransformer:
         self.missing_terms: set[str] = set()
         self.unresolved_references: set[str] = set()
         self.used_terms: set[str] = set()
+        self.environment_counts: Counter[str] = Counter()
+        self.content_counts: Counter[str] = Counter()
+        self.proof_count = 0
 
         self.has_parts = False
         self.part_level = 1
@@ -1430,6 +1475,7 @@ class BookTransformer:
         blocks, labels = remove_theorem_labels(blocks)
 
         self.counter_values[spec.counter] += 1
+        self.environment_counts[environment] += 1
         self.reset_counters_for_parent(spec.counter)
         number = self.counter_number(spec.counter)
         blocks = replace_first_strong(
@@ -1530,6 +1576,7 @@ class BookTransformer:
         blocks, title = extract_algorithm_caption(blocks)
 
         self.algorithm += 1
+        self.content_counts["algorithm"] += 1
         number = (
             f"{self.chapter}.{self.algorithm}"
             if self.chapter
@@ -1660,11 +1707,13 @@ class BookTransformer:
         if block.get("t") not in {"Para", "Plain"}:
             return block
         equation_labels: list[tuple[str, str]] = []
+        labels_by_math: dict[int, list[str]] = {}
         original_sources: dict[int, str] = {}
         for inline in self.iter_math_nodes(block["c"]):
             if inline["c"][0].get("t") != "DisplayMath":
                 continue
             source = inline["c"][1]
+            self.content_counts["display-math"] += 1
             original_sources[id(inline)] = source
             labels = re.findall(r"\\label\s*\{([^{}]+)\}", source)
             before = self.equation
@@ -1674,6 +1723,10 @@ class BookTransformer:
             ]
             if standard_labels and self.equation == before:
                 self.equation += 1
+            self.content_counts["numbered-equation"] += max(
+                self.equation - before,
+                0,
+            )
             if labels:
                 for label in labels:
                     if label.startswith("ineq:"):
@@ -1691,21 +1744,23 @@ class BookTransformer:
                     )
                     self.labels[label] = (reference_name, number)
                     equation_labels.append((label, number))
+                    labels_by_math.setdefault(id(inline), []).append(label)
                 inline["c"][1] = source
-        block["c"] = self.wrap_display_math_sources(
-            block["c"], original_sources
-        )
         if not equation_labels:
+            block["c"] = self.wrap_display_math_sources(
+                block["c"], original_sources, {}
+            )
             return block
         first_label = equation_labels[0][0]
-        for additional_label, _ in reversed(equation_labels[1:]):
-            block["c"].insert(
-                0,
-                {
-                    "t": "Span",
-                    "c": [make_attr(additional_label), []],
-                },
-            )
+        additional_anchors = {
+            math_id: [
+                label for label in labels if label != first_label
+            ]
+            for math_id, labels in labels_by_math.items()
+        }
+        block["c"] = self.wrap_display_math_sources(
+            block["c"], original_sources, additional_anchors
+        )
         return {
             "t": "Div",
             "c": [
@@ -1718,6 +1773,7 @@ class BookTransformer:
         self,
         value: Any,
         original_sources: dict[int, str],
+        equation_anchors: dict[int, list[str]],
     ) -> Any:
         if isinstance(value, list):
             result: list[Any] = []
@@ -1731,6 +1787,19 @@ class BookTransformer:
                     encoded = base64.b64encode(
                         source.encode("utf-8")
                     ).decode("ascii")
+                    for identifier in equation_anchors.get(id(item), []):
+                        result.append(
+                            {
+                                "t": "Span",
+                                "c": [
+                                    make_attr(
+                                        identifier,
+                                        classes=["equation-anchor"],
+                                    ),
+                                    [],
+                                ],
+                            }
+                        )
                     result.append(
                         {
                             "t": "RawInline",
@@ -1746,14 +1815,18 @@ class BookTransformer:
                     result.append(item)
                 else:
                     result.append(
-                        self.wrap_display_math_sources(item, original_sources)
+                        self.wrap_display_math_sources(
+                            item,
+                            original_sources,
+                            equation_anchors,
+                        )
                     )
             return result
         if not isinstance(value, dict):
             return value
         if "c" in value:
             value["c"] = self.wrap_display_math_sources(
-                value["c"], original_sources
+                value["c"], original_sources, equation_anchors
             )
         return value
 
@@ -1798,7 +1871,15 @@ class BookTransformer:
                     result.append(self.process_theorem(block, environment))
                     continue
                 if "proof" in classes:
-                    classes.append("proof-block")
+                    identifier, _, attributes = attr_parts(block["c"][0])
+                    self.proof_count += 1
+                    if "proof-block" not in classes:
+                        classes.append("proof-block")
+                    block["c"][0] = make_attr(
+                        identifier,
+                        classes,
+                        [(key, value) for key, value in attributes],
+                    )
                     remove_pandoc_proof_prefix(block["c"][1])
                     block["c"][1] = self.process_blocks(block["c"][1])
                     result.append(block)
@@ -1815,6 +1896,7 @@ class BookTransformer:
                 )
                 if density_match:
                     name = density_match.group(1)
+                    self.content_counts["interactive-density-plot"] += 1
                     result.append(
                         {
                             "t": "RawBlock",
@@ -1865,12 +1947,92 @@ class BookTransformer:
             ],
         }
 
+    @staticmethod
+    def reference_suffix_path(text: str) -> tuple[list[str], str]:
+        """Parse immediate item selectors such as ``(5)(3.c)``.
+
+        Consecutive parentheses are parallel selectors.  Dots inside one
+        selector express the hierarchy used by the source, for example 3.c.
+        The returned raw string is sliced from the original text so spacing in
+        forms such as ``( 2 )`` is preserved exactly.
+        """
+        if not text.startswith("("):
+            return [], ""
+        result: list[str] = []
+        cursor = 0
+        last_valid_cursor = 0
+        while cursor < len(text) and text[cursor] == "(":
+            start = cursor + 1
+            depth = 1
+            cursor += 1
+            while cursor < len(text) and depth:
+                if text[cursor] == "(":
+                    depth += 1
+                elif text[cursor] == ")":
+                    depth -= 1
+                cursor += 1
+            if depth:
+                break
+            value = text[start : cursor - 1].strip()
+            if not re.fullmatch(
+                r"(?:[0-9]+|[A-Za-z])(?:\.[0-9A-Za-z]+)*",
+                value,
+            ):
+                break
+            result.append(value)
+            last_valid_cursor = cursor
+        return result, text[:last_valid_cursor]
+
+    def annotate_reference_suffixes(
+        self, inlines: list[Any]
+    ) -> list[Any]:
+        for index, inline in enumerate(inlines):
+            if not isinstance(inline, dict) or inline.get("t") != "Link":
+                continue
+            identifier, classes, attributes = attr_parts(inline["c"][0])
+            if "textbook-cross-reference" not in classes:
+                continue
+            if index + 1 >= len(inlines):
+                continue
+            following = inlines[index + 1]
+            if not isinstance(following, dict) or following.get("t") != "Str":
+                continue
+            suffix_text = str(following.get("c", ""))
+            path, raw_suffix = self.reference_suffix_path(suffix_text)
+            if not path:
+                continue
+            hint = "请查看第 " + "、".join(path) + " 项"
+            attribute_map = dict(attributes)
+            attribute_map["data-reference-items"] = "|".join(path)
+            attribute_map["data-reference-hint"] = hint
+            inline["c"][0] = make_attr(
+                identifier,
+                classes,
+                list(attribute_map.items()),
+            )
+            inline["c"][1].append(str_inline(raw_suffix))
+            following["c"] = suffix_text[len(raw_suffix) :]
+        return [
+            inline
+            for inline in inlines
+            if not (
+                isinstance(inline, dict)
+                and inline.get("t") == "Str"
+                and inline.get("c") == ""
+            )
+        ]
+
     def transform_inlines(self, value: Any, *, rewrite_references: bool) -> Any:
         if isinstance(value, list):
-            return [
+            transformed = [
                 self.transform_inlines(item, rewrite_references=rewrite_references)
                 for item in value
             ]
+            return (
+                self.annotate_reference_suffixes(transformed)
+                if rewrite_references
+                else transformed
+            )
         if not isinstance(value, dict):
             return value
 
@@ -1920,6 +2082,25 @@ class BookTransformer:
                     }
                 else:
                     reference_name, number = label_info
+                    identifier, classes, attribute_pairs = attr_parts(attribute)
+                    if "textbook-cross-reference" not in classes:
+                        classes.append("textbook-cross-reference")
+                    reference_attributes = dict(attribute_pairs)
+                    # The reference is fully resolved by this transformer.
+                    # Leaving Pandoc's original markers makes Quarto attempt a
+                    # second cross-reference pass over item-suffixed link text.
+                    reference_attributes.pop("reference", None)
+                    reference_attributes.pop("reference-type", None)
+                    reference_attributes["data-reference-key"] = reference
+                    reference_attributes["data-reference-kind"] = reference_type
+                    reference_attributes["data-reference-title"] = (
+                        f"{reference_name} {number}"
+                    )
+                    attribute = make_attr(
+                        identifier,
+                        classes,
+                        list(reference_attributes.items()),
+                    )
                     if reference_type == "eqref":
                         content = [str_inline(f"（{number}）")]
                     elif reference_type == "ref":
@@ -2462,6 +2643,155 @@ def quarto_date(value: str) -> str:
     return ""
 
 
+def load_site_metadata() -> dict[str, str]:
+    if not SITE_META.is_file():
+        fail(f"缺少站点元数据：{SITE_META.relative_to(PROJECT_ROOT)}")
+    try:
+        metadata = json.loads(SITE_META.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        fail(f"站点元数据不是有效 JSON：{error}")
+    required = ("first_published", "content_updated", "repository")
+    for key in required:
+        if not isinstance(metadata.get(key), str) or not metadata[key].strip():
+            fail(f"site-meta.json 缺少字符串字段 {key!r}")
+    for key in ("first_published", "content_updated"):
+        try:
+            calendar_date.fromisoformat(metadata[key])
+        except ValueError:
+            fail(f"site-meta.json 的 {key} 必须使用 YYYY-MM-DD")
+    repository = metadata["repository"].strip()
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
+        fail("site-meta.json 的 repository 必须写成 owner/repository")
+    owner, repository_name = repository.split("/", 1)
+    metadata["repository"] = repository
+    metadata["github_url"] = f"https://github.com/{repository}"
+    metadata["site_url"] = (
+        f"https://{owner.lower()}.github.io/{repository_name}/"
+    )
+    return metadata
+
+
+def load_chapter_progress() -> dict[str, int | None]:
+    if not CHAPTER_PROGRESS.is_file():
+        fail(f"缺少章节进度文件：{CHAPTER_PROGRESS.relative_to(PROJECT_ROOT)}")
+    try:
+        progress = json.loads(CHAPTER_PROGRESS.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        fail(f"章节进度文件不是有效 JSON：{error}")
+    if not isinstance(progress, dict):
+        fail("chapter-progress.json 顶层必须是对象")
+    result: dict[str, int | None] = {}
+    for key, value in progress.items():
+        if not isinstance(key, str):
+            fail("chapter-progress.json 的章节键必须是字符串")
+        if value is not None and (
+            not isinstance(value, int)
+            or isinstance(value, bool)
+            or not 0 <= value <= 100
+        ):
+            fail(f"章节 {key!r} 的完成度必须是 0–100 的整数或 null")
+        result[key] = value
+    return result
+
+
+def load_notation_catalog() -> dict[str, Any]:
+    if not NOTATION_CATALOG.is_file():
+        fail(
+            "缺少 notation 规范："
+            f"{NOTATION_CATALOG.relative_to(PROJECT_ROOT)}"
+        )
+    try:
+        catalog = json.loads(NOTATION_CATALOG.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        fail(f"notation catalog 不是有效 JSON：{error}")
+    entries = catalog.get("entries")
+    if not isinstance(entries, list) or not entries:
+        fail("notation-catalog.json 必须包含非空 entries 列表")
+    required = ("symbol", "name", "meaning", "category", "scope")
+    seen_symbols: set[tuple[str, str]] = set()
+    seen_identifiers: set[str] = set()
+    for list_key in ("principles", "category_order"):
+        value = catalog.get(list_key, [])
+        if not isinstance(value, list) or not all(
+            isinstance(item, str) and item.strip() for item in value
+        ):
+            fail(f"notation-catalog.json 的 {list_key} 必须是字符串列表")
+    for index, entry in enumerate(entries, start=1):
+        if not isinstance(entry, dict):
+            fail(f"notation entry {index} 必须是对象")
+        for key in required:
+            if key == "scope":
+                if (
+                    not isinstance(entry.get(key), list)
+                    or not entry[key]
+                    or not all(
+                        isinstance(item, str) and item.strip()
+                        for item in entry[key]
+                    )
+                ):
+                    fail(f"notation entry {index} 的 scope 必须是非空列表")
+            elif not isinstance(entry.get(key), str) or not entry[key].strip():
+                fail(f"notation entry {index} 缺少字符串字段 {key!r}")
+        identity = (entry["category"], entry["symbol"])
+        if identity in seen_symbols:
+            fail(f"notation catalog 重复条目：{identity}")
+        seen_symbols.add(identity)
+        identifier = entry.get("id")
+        if not isinstance(identifier, str) or not re.fullmatch(
+            r"[a-z][a-z0-9-]*", identifier
+        ):
+            fail(f"notation entry {index} 缺少稳定的 id（小写字母、数字、连字符）")
+        if identifier in seen_identifiers:
+            fail(f"notation catalog 重复 id：{identifier}")
+        seen_identifiers.add(identifier)
+        convention = entry.get("convention", "")
+        if convention and not isinstance(convention, str):
+            fail(f"notation entry {index} 的 convention 必须是字符串")
+        render_tex = entry.get("render_tex", "")
+        if render_tex and not isinstance(render_tex, str):
+            fail(f"notation entry {index} 的 render_tex 必须是字符串")
+        for list_key in ("avoid", "sources"):
+            value = entry.get(list_key, [])
+            if not isinstance(value, list) or not all(
+                isinstance(item, str) and item.strip() for item in value
+            ):
+                fail(f"notation entry {index} 的 {list_key} 必须是字符串列表")
+    return catalog
+
+
+def recent_git_commits(limit: int = 3) -> list[dict[str, str]]:
+    result = subprocess.run(
+        [
+            "git",
+            "log",
+            f"-{limit}",
+            "--date=short",
+            "--format=%H%x1f%h%x1f%ad%x1f%s",
+        ],
+        cwd=PROJECT_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return []
+    commits: list[dict[str, str]] = []
+    for line in result.stdout.splitlines():
+        fields = line.split("\x1f", 3)
+        if len(fields) != 4:
+            continue
+        full_hash, short_hash, commit_date, subject = fields
+        commits.append(
+            {
+                "hash": full_hash,
+                "short_hash": short_hash,
+                "date": commit_date,
+                "subject": subject,
+            }
+        )
+    return commits
+
+
 def shift_header_levels(value: Any, amount: int) -> Any:
     if isinstance(value, list):
         return [shift_header_levels(item, amount) for item in value]
@@ -2472,6 +2802,16 @@ def shift_header_levels(value: Any, amount: int) -> Any:
     if "c" in value:
         value["c"] = shift_header_levels(value["c"], amount)
     return value
+
+
+def quarto_page_slug(title: str, identifier: str, page_number: int) -> str:
+    normalized = re.sub(r"^第\s*\d+\s*章\s*", "", title).strip()
+    if identifier == "glossary":
+        return "glossary"
+    letter_match = re.fullmatch(r"glossary-letter-([A-Z])", identifier)
+    if letter_match:
+        return f"glossary-{letter_match.group(1).lower()}"
+    return PAGE_SLUGS.get(normalized, f"page-{page_number:03d}")
 
 
 def split_quarto_pages(
@@ -2489,13 +2829,15 @@ def split_quarto_pages(
             return
         page_number += 1
         page_identifier = node_identifier(current_blocks[0])
+        title = ast_plain_text(current_blocks[0]["c"][2]).strip()
+        page_slug = quarto_page_slug(title, page_identifier, page_number)
         shifted = shift_header_levels(
             current_blocks,
             1 - transformer.chapter_level,
         )
         pages.append(
             QuartoPage(
-                source_path=Path("chapters") / f"page-{page_number:03d}.qmd",
+                source_path=Path("chapters") / f"{page_slug}.qmd",
                 blocks=shifted,
                 part=page_part,
                 sidebar_visible=not page_identifier.startswith(
@@ -2724,6 +3066,7 @@ def rewrite_quarto_targets(
 def write_qmd_page(
     page: QuartoPage,
     document: dict[str, Any],
+    chapter_progress: dict[str, int | None],
 ) -> None:
     destination = QUARTO_PROJECT_DIR / page.source_path
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -2896,14 +3239,375 @@ def write_qmd_page(
     markdown = "\n".join(lines) + ("\n" if markdown.endswith("\n") else "")
 
     markdown = re.sub(r"\n{3,}", "\n\n", markdown)
+    page_slug = page.source_path.stem
+    if page_slug in chapter_progress:
+        value = chapter_progress[page_slug]
+        if value is None:
+            value_label = "待填写"
+            state_class = "chapter-progress--unset"
+            progress_attributes = 'aria-label="本章完成度尚未填写"'
+            progress_width = 0
+        else:
+            value_label = f"{value}%"
+            state_class = ""
+            progress_attributes = (
+                'role="progressbar" aria-label="本章完成度" '
+                f'aria-valuemin="0" aria-valuemax="100" aria-valuenow="{value}"'
+            )
+            progress_width = value
+        progress_markup = (
+            f'<div class="chapter-progress {state_class}" role="region" '
+            f'aria-label="当前章节完成度" data-chapter="{page_slug}" '
+            f'data-progress="{value_label}">\n'
+            '<div class="chapter-progress__heading">'
+            '<span class="chapter-progress__eyebrow">CHAPTER STATUS</span>'
+            '<span class="chapter-progress__label">编写进度</span>'
+            f'<strong>{value_label}</strong>'
+            '<a href="../project-status.html">查看全书进度</a></div>\n'
+            f'<div class="chapter-progress__track" {progress_attributes}>'
+            f'<span style="--chapter-progress: {progress_width}%"></span></div>\n'
+            "</div>"
+        )
+        markdown_lines = markdown.splitlines()
+        header_index = next(
+            (
+                index
+                for index, line in enumerate(markdown_lines)
+                if line.startswith("# ")
+            ),
+            None,
+        )
+        if header_index is not None:
+            markdown_lines[header_index + 1 : header_index + 1] = [
+                "",
+                progress_markup,
+                "",
+            ]
+            markdown = "\n".join(markdown_lines) + "\n"
     if page.source_path.name == "references.qmd":
         markdown = "---\nnocite: '@*'\n---\n\n" + markdown.lstrip()
     destination.write_text(markdown, encoding="utf-8")
 
 
+def github_issue_url(
+    metadata: dict[str, str],
+    *,
+    title: str,
+    body: str,
+    labels: str = "",
+) -> str:
+    query: dict[str, str] = {"title": title, "body": body}
+    if labels:
+        query["labels"] = labels
+    return f"{metadata['github_url']}/issues/new?{urlencode(query)}"
+
+
+def render_site_timeline(metadata: dict[str, str]) -> str:
+    return (
+        '<dl class="site-timeline" aria-label="项目时间线">'
+        '<div><dt>首次发布</dt>'
+        f'<dd><time datetime="{metadata["first_published"]}">'
+        f'{metadata["first_published"]}</time></dd></div>'
+        '<div><dt>最近内容更新</dt>'
+        f'<dd><time datetime="{metadata["content_updated"]}">'
+        f'{metadata["content_updated"]}</time></dd></div>'
+        '<div><dt>网站构建</dt>'
+        f'<dd><time datetime="{calendar_date.today().isoformat()}">'
+        f'{calendar_date.today().isoformat()}</time></dd></div></dl>'
+    )
+
+
+def render_recent_commits(
+    metadata: dict[str, str], commits: list[dict[str, str]]
+) -> str:
+    if commits:
+        items = "".join(
+            '<li><a href="'
+            + metadata["github_url"]
+            + "/commit/"
+            + html.escape(commit["hash"], quote=True)
+            + '"><code>'
+            + html.escape(commit["short_hash"])
+            + "</code><span>"
+            + html.escape(commit["subject"])
+            + "</span><time datetime=\""
+            + html.escape(commit["date"], quote=True)
+            + '\">'
+            + html.escape(commit["date"])
+            + "</time></a></li>"
+            for commit in commits
+        )
+    else:
+        items = '<li class="home-commit-empty">当前构建无法读取本地提交记录。</li>'
+    return (
+        '<div class="home-update-heading"><span class="home-live-badge">'
+        '<i aria-hidden="true"></i>持续更新中</span>'
+        f'<a href="{metadata["github_url"]}/commits/main/">查看全部提交</a></div>'
+        f'<ol class="home-commits">{items}</ol>'
+    )
+
+
+def render_github_actions(metadata: dict[str, str]) -> str:
+    error_url = github_issue_url(
+        metadata,
+        title="[错误报告] ",
+        body="请描述发现的问题，并附上相关页面地址或章节位置。\n\n问题描述：\n\n页面地址：",
+        labels="bug",
+    )
+    suggestion_url = github_issue_url(
+        metadata,
+        title="[内容建议] ",
+        body="请说明建议修改或补充的内容，并附上相关章节位置。\n\n建议内容：\n\n相关章节：",
+        labels="content",
+    )
+    actions = [
+        ("bi-code-slash", "查看源代码", metadata["github_url"]),
+        ("bi-bug", "报告错误", error_url),
+        ("bi-chat-left-text", "提出内容建议", suggestion_url),
+        ("bi-clock-history", "查看更新记录", f'{metadata["github_url"]}/commits/main/'),
+    ]
+    return '<nav class="github-actions" aria-label="GitHub 项目入口">' + "".join(
+        f'<a href="{html.escape(url, quote=True)}"><i class="bi {icon}" '
+        f'aria-hidden="true"></i><span>{label}</span>'
+        '<i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>'
+        for icon, label, url in actions
+    ) + "</nav>"
+
+
+def project_statistics(
+    transformer: BookTransformer,
+    pages: list[QuartoPage],
+) -> list[tuple[str, int, str]]:
+    chapter_count = sum(
+        page.part not in {None, "中英术语表"} for page in pages
+    )
+    counts = transformer.environment_counts
+    return [
+        ("正文章节", chapter_count, "chapter"),
+        ("定义", counts.get("definition", 0), "definition"),
+        ("定理", counts.get("theorem", 0), "theorem"),
+        ("性质", counts.get("property", 0), "property"),
+        ("引理", counts.get("lemma", 0), "lemma"),
+        ("推论", counts.get("corollary", 0), "corollary"),
+        ("证明", transformer.proof_count, "proof"),
+        ("算法", transformer.content_counts.get("algorithm", 0), "algorithm"),
+        ("行间公式", transformer.content_counts.get("display-math", 0), "equation"),
+        ("交互图", transformer.content_counts.get("interactive-density-plot", 0), "plot"),
+        ("中英术语", transformer.glossary_entry_count, "glossary"),
+    ]
+
+
+def render_project_snapshot(statistics: list[tuple[str, int, str]]) -> str:
+    featured = [
+        item
+        for item in statistics
+        if item[2] in {"definition", "theorem", "property", "proof"}
+    ]
+    return '<div class="project-snapshot">' + "".join(
+        f'<div><strong>{value}</strong><span>{html.escape(label)}</span></div>'
+        for label, value, _key in featured
+    ) + '</div><a class="home-section-link" href="project-status.html">查看完整项目状态 <span aria-hidden="true">→</span></a>'
+
+
+def render_statistics_grid(statistics: list[tuple[str, int, str]]) -> str:
+    return '<div class="statistics-grid">' + "".join(
+        f'<article class="statistic-card statistic-card--{key}">'
+        f'<span>{html.escape(label)}</span><strong>{value}</strong></article>'
+        for label, value, key in statistics
+    ) + "</div>"
+
+
+def render_progress_overview(
+    pages: list[QuartoPage],
+    progress: dict[str, int | None],
+) -> str:
+    groups: list[tuple[str, list[QuartoPage]]] = []
+    group_lookup: dict[str, list[QuartoPage]] = {}
+    displayed_progress = {
+        key: value for key, value in progress.items() if key != "inequalities"
+    }
+    for page in pages:
+        slug = page.source_path.stem
+        if slug not in displayed_progress or page.part is None:
+            continue
+        part = page.part or "其他"
+        if part not in group_lookup:
+            group_lookup[part] = []
+            groups.append((part, group_lookup[part]))
+        group_lookup[part].append(page)
+    sections: list[str] = []
+    for part, group_pages in groups:
+        rows: list[str] = []
+        for page in group_pages:
+            slug = page.source_path.stem
+            value = displayed_progress[slug]
+            label = "待填写" if value is None else f"{value}%"
+            width = 0 if value is None else value
+            state = " status-progress-row--unset" if value is None else ""
+            title = re.sub(r"^第\s*\d+\s*章\s*", "", page_title(page)).strip()
+            rows.append(
+                f'<a class="status-progress-row{state}" '
+                f'href="{page.source_path.with_suffix(".html").as_posix()}">'
+                f'<span class="status-progress-row__title">{html.escape(title)}</span>'
+                '<span class="status-progress-row__track" aria-hidden="true">'
+                f'<i style="--chapter-progress: {width}%"></i></span>'
+                f'<strong>{label}</strong></a>'
+            )
+        display_part = re.sub(
+            r"^第\s*\d+\s*部分\s*", "", part
+        ).strip()
+        sections.append(
+            f'<section class="status-part"><h2>{html.escape(display_part)}</h2>'
+            + "".join(rows)
+            + "</section>"
+        )
+    values = [
+        value for value in displayed_progress.values() if value is not None
+    ]
+    average = round(sum(values) / len(values)) if values else None
+    summary = (
+        f"已填写 {len(values)} / {len(displayed_progress)} 章"
+        + (f"，已填写章节平均完成度 {average}%" if average is not None else "")
+    )
+    return (
+        f'<p class="status-progress-summary">{summary}</p>'
+        '<div class="status-progress-groups">'
+        + "".join(sections)
+        + "</div>"
+    )
+
+
+def write_project_status_page(
+    *,
+    metadata: dict[str, str],
+    commits: list[dict[str, str]],
+    pages: list[QuartoPage],
+    progress: dict[str, int | None],
+    statistics: list[tuple[str, int, str]],
+) -> None:
+    content = "\n".join(
+        [
+            "---",
+            "title: 项目状态",
+            f"description: {yaml_quote('笔记维护时间、章节完成度与内容统计。')}",
+            "---",
+            "",
+            ':::: {.project-status-page}',
+            '::: {.status-section}',
+            '<p class="status-kicker">MAINTENANCE</p>',
+            "## 维护时间",
+            "",
+            render_site_timeline(metadata),
+            render_recent_commits(metadata, commits),
+            "",
+            ":::",
+            "",
+            '::: {.status-section}',
+            '<p class="status-kicker">PROGRESS</p>',
+            "## 章节完成度",
+            "",
+            render_progress_overview(pages, progress),
+            "",
+            ":::",
+            "",
+            '::: {.status-section}',
+            '<p class="status-kicker">CONTENT</p>',
+            "## 笔记数据",
+            "",
+            render_statistics_grid(statistics),
+            "",
+            ":::",
+            "",
+            '::: {.status-section}',
+            '<p class="status-kicker">CONTRIBUTE</p>',
+            "## 参与维护",
+            "",
+            render_github_actions(metadata),
+            "",
+            ":::",
+            "",
+            "::::",
+            "",
+        ]
+    )
+    (QUARTO_PROJECT_DIR / "project-status.qmd").write_text(
+        content, encoding="utf-8"
+    )
+
+
+def write_notation_page(catalog: dict[str, Any]) -> None:
+    def raw_html_text(value: Any) -> str:
+        """Escape text that Pandoc will encounter inside a raw HTML table.
+
+        Pandoc still interprets Markdown punctuation in raw table cells.  Emit
+        ASCII punctuation as numeric HTML entities so TeX operators, scripts,
+        delimiters and literal code survive unchanged.  The browser decodes
+        the entities before MathJax inspects the DOM.
+        """
+        return "".join(
+            character
+            if character.isalnum()
+            or character.isspace()
+            or ord(character) >= 128
+            else f"&#{ord(character)};"
+            for character in str(value)
+        )
+
+    entries = catalog["entries"]
+    category_order = catalog.get("category_order", [])
+    categories = list(category_order)
+    categories.extend(
+        category
+        for category in dict.fromkeys(entry["category"] for entry in entries)
+        if category not in categories
+    )
+    sections: list[str] = []
+    for category in categories:
+        rows: list[str] = []
+        for entry in entries:
+            if entry["category"] != category:
+                continue
+            source = raw_html_text(entry["symbol"])
+            rendered = raw_html_text(entry.get("render_tex", entry["symbol"]))
+            rows.append(
+                f'<tr id="notation-{html.escape(entry["id"], quote=True)}">'
+                f'<td class="notation-rendered">&#92;({rendered}&#92;)</td>'
+                f'<td class="notation-source"><code>{source}</code></td>'
+                f'<td class="notation-meaning"><strong>{raw_html_text(entry["name"])}</strong>'
+                f'<p>{raw_html_text(entry["meaning"])}</p></td>'
+                f'<td class="notation-scope">{raw_html_text("、".join(entry["scope"]))}</td>'
+                '</tr>'
+            )
+        if rows:
+            sections.append(
+                f'## {category} {{.notation-section-title}}\n\n'
+                '<table class="notation-table">'
+                '<thead><tr><th>数学记号</th><th>LaTeX</th><th>含义</th><th>适用范围</th></tr></thead>'
+                f'<tbody>{"".join(rows)}</tbody></table>\n'
+            )
+    content = "\n".join(
+        [
+            "---",
+            "title: 符号与记号说明",
+            f"description: {yaml_quote('本书常用数学符号索引。')}",
+            "---",
+            "",
+            '[$0$]{.notation-math-bootstrap aria-hidden="true"}',
+            "",
+            *sections,
+            "",
+        ]
+    )
+    (QUARTO_PROJECT_DIR / "notation.qmd").write_text(content, encoding="utf-8")
+
+
 def write_quarto_config(
     document: dict[str, Any],
     pages: list[QuartoPage],
+    transformer: BookTransformer,
+    site_metadata: dict[str, str],
+    chapter_progress: dict[str, int | None],
+    notation_catalog: dict[str, Any],
 ) -> None:
     title = ast_plain_text(document["meta"].get("title", {})).strip()
     author = ast_plain_text(document["meta"].get("author", {})).strip()
@@ -2911,10 +3615,54 @@ def write_quarto_config(
     date = quarto_date(raw_date)
     email = book_contact_email()
     title = title or "数学教材"
+    commits = recent_git_commits()
+    statistics = project_statistics(transformer, pages)
+    write_project_status_page(
+        metadata=site_metadata,
+        commits=commits,
+        pages=pages,
+        progress=chapter_progress,
+        statistics=statistics,
+    )
+    write_notation_page(notation_catalog)
+    preface_href = next(
+        (
+            page.source_path.with_suffix(".html").as_posix()
+            for page in pages
+            if re.sub(r"^第\s*\d+\s*章\s*", "", page_title(page)).strip()
+            == "前言"
+        ),
+        "chapters/preface.html",
+    )
+    glossary_href = next(
+        (
+            page.source_path.with_suffix(".html").as_posix()
+            for page in pages
+            if page.blocks and node_identifier(page.blocks[0]) == "glossary"
+        ),
+        "chapters/glossary.html",
+    )
+    chapter_count = sum(
+        page.part not in {None, "中英术语表"} for page in pages
+    )
+    knowledge_parts: list[str] = []
+    for page in pages:
+        if page.part is None:
+            continue
+        part_title = re.sub(
+            r"^第\s*\d+\s*部分\s*", "", page.part
+        ).strip()
+        if (
+            part_title in {"中英术语表", "不等式"}
+            or part_title in knowledge_parts
+        ):
+            continue
+        knowledge_parts.append(part_title)
 
     index = [
         "---",
         f"title: {yaml_quote(title)}",
+        f"description: {yaml_quote(SITE_DESCRIPTION)}",
     ]
     if author:
         if email:
@@ -2938,15 +3686,22 @@ def write_quarto_config(
         if HOME_CONTENT.exists()
         else "这是由项目中的 `main.tex` 自动生成的在线版本。"
     )
-    if email:
-        home_content = home_content.replace(
-            "__BOOK_EMAIL__",
-            html.escape(email, quote=True),
-        )
-    home_content = home_content.replace(
-        "__BUILD_DATE__",
-        calendar_date.today().strftime("%Y.%m.%d"),
+    home_content = (
+        home_content.replace("__BOOK_EMAIL__", html.escape(email, quote=True))
+        .replace("__BUILD_DATE__", calendar_date.today().isoformat())
+        .replace("__BUILD_YEAR__", str(calendar_date.today().year))
+        .replace("__PREFACE_HREF__", preface_href)
+        .replace("__GLOSSARY_HREF__", glossary_href)
+        .replace("__CHAPTER_COUNT__", str(chapter_count))
+        .replace("__PART_COUNT__", str(len(knowledge_parts)))
+        .replace("__SITE_TIMELINE__", render_site_timeline(site_metadata))
+        .replace("__RECENT_COMMITS__", render_recent_commits(site_metadata, commits))
+        .replace("__GITHUB_ACTIONS__", render_github_actions(site_metadata))
+        .replace("__PROJECT_SNAPSHOT__", render_project_snapshot(statistics))
     )
+    remaining_placeholders = sorted(set(re.findall(r"__[A-Z][A-Z_]+__", home_content)))
+    if remaining_placeholders:
+        fail("首页存在未替换占位符：" + "、".join(remaining_placeholders))
     index.extend(
         [
             "---",
@@ -2983,6 +3738,14 @@ def write_quarto_config(
             chapter_lines.append(f"    - part: {yaml_quote(current_part)}")
             chapter_lines.append("      chapters:")
         chapter_lines.append(f"        - {page.source_path.as_posix()}")
+    chapter_lines.extend(
+        [
+            "    - part: 项目",
+            "      chapters:",
+            "        - project-status.qmd",
+            "        - notation.qmd",
+        ]
+    )
 
     hidden_sidebar_pages = [
         page.source_path.with_suffix(".html").name
@@ -3016,6 +3779,8 @@ def write_quarto_config(
         "    - density-math.js",
         "    - density-probe.js",
         "    - formula-copy.js",
+        "    - textbook-ui.js",
+        "    - favicon.svg",
         "",
         "lang: zh",
         "date-format: long",
@@ -3024,6 +3789,10 @@ def write_quarto_config(
         "",
         "book:",
         f"  title: {yaml_quote(title)}",
+        f"  description: {yaml_quote(SITE_DESCRIPTION)}",
+        f"  site-url: {yaml_quote(site_metadata['site_url'])}",
+        f"  repo-url: {yaml_quote(site_metadata['github_url'])}",
+        "  favicon: favicon.svg",
     ]
     if author:
         if email:
@@ -3068,6 +3837,8 @@ def write_quarto_config(
             "    code-overflow: wrap",
             "    smooth-scroll: true",
             "    link-external-newwindow: true",
+            "    open-graph: true",
+            "    twitter-card: true",
             "    html-math-method: mathjax",
             "    grid:",
             "      sidebar-width: 305px",
@@ -3135,6 +3906,8 @@ def copy_quarto_resources(document: dict[str, Any]) -> None:
         HTML_DIR / "theme-toggle.html",
         QUARTO_PROJECT_DIR / "theme-toggle.html",
     )
+    shutil.copy2(TEXTBOOK_UI_SCRIPT, QUARTO_PROJECT_DIR / "textbook-ui.js")
+    shutil.copy2(FAVICON, QUARTO_PROJECT_DIR / "favicon.svg")
     shutil.copy2(BIBLIOGRAPHY_STYLE, QUARTO_PROJECT_DIR / "textbook.csl")
 
 
@@ -3486,6 +4259,9 @@ def write_quarto_site(
     transformer: BookTransformer,
     output_dir: Path,
     computation_orders: dict[str, list[ComputationGroup]],
+    site_metadata: dict[str, str],
+    chapter_progress: dict[str, int | None],
+    notation_catalog: dict[str, Any],
 ) -> None:
     if not QUARTO.exists():
         fail(
@@ -3499,6 +4275,21 @@ def write_quarto_site(
     copy_quarto_resources(document)
     pages = split_quarto_pages(document, transformer)
     add_reference_page(pages)
+    expected_progress_keys = {
+        page.source_path.stem
+        for page in pages
+        if page.part not in {None, "中英术语表"}
+    }
+    configured_progress_keys = set(chapter_progress)
+    if expected_progress_keys != configured_progress_keys:
+        missing = sorted(expected_progress_keys - configured_progress_keys)
+        unknown = sorted(configured_progress_keys - expected_progress_keys)
+        details: list[str] = []
+        if missing:
+            details.append("缺少：" + "、".join(missing))
+        if unknown:
+            details.append("未知：" + "、".join(unknown))
+        fail("chapter-progress.json 必须与正文 19 章完全一致（" + "；".join(details) + "）")
     labels_to_pages: dict[str, Path] = {}
     for page in pages:
         identifiers: set[str] = set()
@@ -3511,11 +4302,18 @@ def write_quarto_site(
             page.source_path,
             labels_to_pages,
         )
-        write_qmd_page(page, document)
+        write_qmd_page(page, document, chapter_progress)
 
     computation_appendices = inject_computation_results(pages, computation_orders)
 
-    write_quarto_config(document, pages)
+    write_quarto_config(
+        document,
+        pages,
+        transformer,
+        site_metadata,
+        chapter_progress,
+        notation_catalog,
+    )
     quarto_home = BUILD_DIR / "quarto-home"
     quarto_cache = BUILD_DIR / "quarto-cache"
     deno_cache = BUILD_DIR / "deno-cache"
@@ -3563,6 +4361,7 @@ def write_quarto_site(
     clean_generated_directory(output_dir)
     shutil.copytree(QUARTO_PROJECT_DIR / "_site", output_dir)
     postprocess_reference_pages(output_dir)
+    postprocess_site_markup(output_dir, site_metadata)
     (output_dir / ".nojekyll").write_text("", encoding="utf-8")
 
 
@@ -3658,6 +4457,39 @@ def postprocess_reference_pages(output_dir: Path) -> None:
             path.write_text(updated, encoding="utf-8")
 
 
+def postprocess_site_markup(
+    output_dir: Path, site_metadata: dict[str, str]
+) -> None:
+    """Add project metadata and low-risk image loading hints."""
+    repository_meta = (
+        '<meta name="textbook-repository" content="'
+        + html.escape(site_metadata["repository"], quote=True)
+        + '">\n'
+    )
+
+    def optimize_image(match: re.Match[str]) -> str:
+        tag = match.group(0)
+        closing = "/>" if tag.endswith("/>") else ">"
+        core = tag[: -len(closing)].rstrip()
+        if not re.search(r"\bloading\s*=", tag, flags=re.IGNORECASE):
+            core += ' loading="lazy"'
+        if not re.search(r"\bdecoding\s*=", tag, flags=re.IGNORECASE):
+            core += ' decoding="async"'
+        return core + closing
+
+    for path in sorted(output_dir.rglob("*.html")):
+        markup = path.read_text(encoding="utf-8")
+        if 'name="textbook-repository"' not in markup:
+            markup = markup.replace("</head>", repository_meta + "</head>", 1)
+        markup = re.sub(
+            r"<img\b[^>]*>",
+            optimize_image,
+            markup,
+            flags=re.IGNORECASE,
+        )
+        path.write_text(markup, encoding="utf-8")
+
+
 def localize_navigation(output_dir: Path) -> None:
     replacements = {
         '<span class="navlink-label">Next:</span>': (
@@ -3683,8 +4515,9 @@ def localize_navigation(output_dir: Path) -> None:
 def validate_site(output_dir: Path) -> dict[str, Any]:
     pages: dict[Path, LinkCollector] = {}
     for path in sorted(output_dir.rglob("*.html")):
+        markup = path.read_text(encoding="utf-8")
         collector = LinkCollector()
-        collector.feed(path.read_text(encoding="utf-8"))
+        collector.feed(markup)
         pages[path.resolve()] = collector
 
     broken_links: list[dict[str, str]] = []
@@ -3779,6 +4612,9 @@ def build(arguments: argparse.Namespace) -> int:
         fail("输出目录必须位于 html/ 内")
 
     computation_orders = load_computation_orders()
+    site_metadata = load_site_metadata()
+    chapter_progress = load_chapter_progress()
+    notation_catalog = load_notation_catalog()
 
     log("读取术语和定理配置")
     (
@@ -3819,6 +4655,9 @@ def build(arguments: argparse.Namespace) -> int:
         transformer,
         output_dir,
         computation_orders,
+        site_metadata,
+        chapter_progress,
+        notation_catalog,
     )
     validation = validate_site(output_dir)
     write_build_report(

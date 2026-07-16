@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-Hans" xml:lang="zh-Hans"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，强调逻辑自洽、证明完整与持续维护。">
+
+<title>第 12 章 假设检验理论 – 你永远不知道一个强迫症能干出什么事情</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/bayesian-statistics.html" rel="next">
+<link href="../chapters/point-estimation.html" rel="prev">
+<link href="../favicon.svg" rel="icon" type="image/svg+xml">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<script>
+(() => {
+  "use strict";
+  try {
+    const theme = window.localStorage.getItem("textbook-color-scheme");
+    if (theme === "dark" || theme === "light") {
+      window.localStorage.setItem(
+        "quarto-color-scheme",
+        theme === "dark" ? "alternate" : "default"
+      );
+    }
+  } catch (_error) {
+    // Storage can be unavailable; Quarto's default theme still works.
+  }
+
+  const mathJax = window.MathJax || {};
+  mathJax.tex = mathJax.tex || {};
+  mathJax.tex.macros = {
+    ...(mathJax.tex.macros || {}),
+    dif: "\\mathop{}\\!\\mathrm{d}",
+    seq: ["#1_1,#1_2,\\dots,#1_{#2}", 2],
+    varLambda: "\\mathit{\\Lambda}",
+  };
+  window.MathJax = mathJax;
+
+  const loadUserInterface = () => {
+    if (document.querySelector('script[data-textbook-ui]')) return;
+    const stylesheet = Array.from(
+      document.querySelectorAll('link[rel="stylesheet"]')
+    ).find((link) =>
+      /(?:^|\/)style\.css(?:[?#]|$)/.test(link.getAttribute("href") || "")
+    );
+    const base = stylesheet
+      ? new URL(stylesheet.href)
+      : new URL(window.location.href);
+    const script = document.createElement("script");
+    script.dataset.textbookUi = "true";
+    script.src = new URL("textbook-ui.js", base).href;
+    script.async = false;
+    document.head.appendChild(script);
+  };
+
+  // Quarto emits this include before the page-specific stylesheet links.
+  // Waiting for the parsed document makes the same loader work at the site
+  // root and in nested chapter routes, including GitHub Pages subpaths.
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadUserInterface, {
+      once: true,
+    });
+  } else {
+    loadUserInterface();
+  }
+})();
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../sidebar.css">
+<meta property="og:title" content="第 12 章 假设检验理论 – 你永远不知道一个强迫症能干出什么事情">
+<meta property="og:description" content="持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，强调逻辑自洽、证明完整与持续维护。">
+<meta property="og:site_name" content="你永远不知道一个强迫症能干出什么事情">
+<meta name="twitter:title" content="第 12 章 假设检验理论 – 你永远不知道一个强迫症能干出什么事情">
+<meta name="twitter:description" content="持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，强调逻辑自洽、证明完整与持续维护。">
+<meta name="twitter:card" content="summary">
+<meta name="textbook-repository" content="Expectopatro/math">
+</head>
+
+<body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/statistics-basics.html">第 6 部分 统计学</a></li><li class="breadcrumb-item"><a href="../chapters/hypothesis-testing.html"><span class="chapter-title"><span class="header-section-number">第 12 章</span> 假设检验理论</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="展开或折叠侧边栏导航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="搜索" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">你永远不知道一个强迫症能干出什么事情</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/Expectopatro/math" title="源代码" class="quarto-navigation-tool px-1" aria-label="源代码"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="切换深色模式"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="搜索"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">你永远不知道一个强迫症能干出什么事情</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/preface.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">前言</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 1 部分 代数</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/linear-space.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 1 章</span> 线性空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/matrix.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 2 章</span> 矩阵</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 2 部分 分析学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/metric-space.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 3 章</span> 度量空间</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/calculus.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 4 章</span> 微积分</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 3 部分 概率论</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/probability-measure.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 5 章</span> 概率测度</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/probability-basics.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 6 章</span> 概率初步</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/asymptotic-theory.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 7 章</span> 渐进理论初步</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 4 部分 最优化</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/convex-sets.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 8 章</span> 凸集</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 5 部分 不等式</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/inequalities.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 9 章</span> 不等式</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">第 6 部分 统计学</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/statistics-basics.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 10 章</span> 统计初步</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/point-estimation.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 11 章</span> 点估计理论</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/hypothesis-testing.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title"><span class="header-section-number">第 12 章</span> 假设检验理论</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/bayesian-statistics.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 13 章</span> 贝叶斯统计</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/statistical-computing.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 14 章</span> 统计计算方法</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/linear-models.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 15 章</span> 线性模型</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/multivariate-statistics.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 16 章</span> 多元统计</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/time-series.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 17 章</span> 时间序列分析</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/machine-learning.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 18 章</span> 机器学习</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/causal-inference.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 19 章</span> 因果推断</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/appendix.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">附录</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">参考文献</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/epilogue.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">后记</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">中英术语表</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-a.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">A · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-b.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">B · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-c.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">C · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-d.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">D · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-e.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">E · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-f.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">F · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-g.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">G · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-h.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">H · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-i.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">I · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-j.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">J · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-k.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">K · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-l.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">L · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-m.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">M · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-n.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">N · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-o.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">O · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-p.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">P · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-q.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Q · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-r.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">R · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-s.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">S · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-t.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">T · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-u.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">U · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-v.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">V · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-w.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">W · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-x.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">X · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-y.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Y · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/glossary-z.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Z · 中英术语</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">项目</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="展开或折叠此栏">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../project-status.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">项目状态</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../notation.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">符号与记号说明</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">本页目录</h2>
+   
+  <ul>
+  <li><a href="#id--1a18a226" id="toc-id--1a18a226" class="nav-link active" data-scroll-target="#id--1a18a226"><span class="header-section-number">12.1</span> 多重假设检验</a></li>
+  <li><a href="#id--9dc73101" id="toc-id--9dc73101" class="nav-link" data-scroll-target="#id--9dc73101"><span class="header-section-number">12.2</span> 非参数假设检验</a>
+  <ul class="collapse">
+  <li><a href="#id--32e19df5" id="toc-id--32e19df5" class="nav-link" data-scroll-target="#id--32e19df5"><span class="header-section-number">12.2.1</span> 位置检验</a></li>
+  <li><a href="#id--dca5b0c0" id="toc-id--dca5b0c0" class="nav-link" data-scroll-target="#id--dca5b0c0"><span class="header-section-number">12.2.2</span> 趋势检验</a></li>
+  <li><a href="#id--44b7a5cf" id="toc-id--44b7a5cf" class="nav-link" data-scroll-target="#id--44b7a5cf"><span class="header-section-number">12.2.3</span> 随机性检验</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/statistics-basics.html">第 6 部分 统计学</a></li><li class="breadcrumb-item"><a href="../chapters/hypothesis-testing.html"><span class="chapter-title"><span class="header-section-number">第 12 章</span> 假设检验理论</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span id="id--2177193b" class="quarto-section-identifier"><span class="chapter-title"><span class="header-section-number">第 12 章</span> 假设检验理论</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="chapter-progress" role="region" aria-label="当前章节完成度" data-chapter="hypothesis-testing" data-progress="1%">
+<div class="chapter-progress__heading">
+<span class="chapter-progress__eyebrow">CHAPTER STATUS</span><span class="chapter-progress__label">编写进度</span><strong>1%</strong><a href="../project-status.html">查看全书进度</a>
+</div>
+<div class="chapter-progress__track" role="progressbar" aria-label="本章完成度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="1">
+<span style="--chapter-progress: 1%"></span>
+</div>
+</div>
+<div id="definition-12-1" class="definition theorem-block env-definition">
+<p><strong>Definition 12.1</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是统计结构，则称<span class="math inline">\(\mathscr{P}\)</span>的非空子集为<a href="../chapters/glossary-h.html#term-Hypothesis" class="term" title="hypothesis">假设<span class="term-english">（hypothesis）</span></a>。若<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是参数结构，<span class="math inline">\(\Theta\)</span>是参数空间，则<span class="math inline">\(\Theta\)</span>的非空子集也被称之为假设。设<span class="math inline">\(f_1, f_2, \dots, f_{n}\)</span>是从总体<span class="math inline">\(F\)</span>中抽取的简单样本，判断<span class="math inline">\(F\)</span>是否服从某一假设的问题是<a href="../chapters/glossary-h.html#term-HypothesisTesting" class="term" title="hypothesis testing">假设检验<span class="term-english">（hypothesis testing）</span></a>问题。称要检验的假设<span class="math inline">\(\mathscr{P}_0(\Theta_0)\)</span>为<a href="../chapters/glossary-n.html#term-NullHypothesis" class="term" title="null hypothesis">原假设<span class="term-english">（null hypothesis）</span></a>，记为<span class="math inline">\(H_0\)</span>，<span class="math inline">\(\mathscr{P}_1\subseteq\mathscr{P}\setminus\mathscr{P}_0(\Theta_1\subseteq\Theta\setminus\Theta_0)\)</span>被称之为<a href="../chapters/glossary-a.html#term-AlternativeHypothesis" class="term" title="alternative hypothesis">备择假设<span class="term-english">（alternative hypothesis）</span></a>，记为<span class="math inline">\(H_1\)</span>。检验指的是：</p>
+<ol type="1">
+<li><p>将<span class="math inline">\(X\)</span>划分为互不相交的两个<span class="math inline">\(\mathscr{A}\)</span>中的元素，即<span class="math inline">\(X=W\cup\overline{W},\;W\cap\overline{W}=\varnothing,\;W,\overline{W}\in\mathscr{A}\)</span>；</p></li>
+<li><p>作如下规定，若一次试验中<span class="math inline">\(\underset{i=1}{\overset{n}{\cap}}\{f_i\in W\}\)</span>发生了，则拒绝原假设<span class="math inline">\(H_0\)</span>，接受备择假设<span class="math inline">\(H_1\)</span>；反之则接受原假设<span class="math inline">\(H_0\)</span>，拒绝备择假设<span class="math inline">\(H_1\)</span>。</p></li>
+</ol>
+<p>称<span class="math inline">\(W\)</span>为<a href="../chapters/glossary-r.html#term-RejectRegion" class="term" title="reject region">拒绝域<span class="term-english">（reject region）</span></a>。</p>
+</div>
+<div id="definition-12-2" class="definition theorem-block env-definition">
+<p><strong>Definition 12.2</strong>. 在检验问题<span class="math inline">\((H_0,H_1)\)</span>中，若<span class="math inline">\(H_0\)</span>为真但由于样本的随机性拒绝了<span class="math inline">\(H_0\)</span>，称此时犯的错误为<a href="../chapters/glossary-t.html#term-Type1Error" class="term" title="type I error">第一类错误<span class="term-english">（type I error）</span></a>或<strong>拒真错误</strong>；若<span class="math inline">\(H_0\)</span>为伪但由于样本的随机性接受了<span class="math inline">\(H_0\)</span>，称此时犯的错误为<a href="../chapters/glossary-t.html#term-Type2Error" class="term" title="type II error">第二类错误<span class="term-english">（type II error）</span></a>或<strong>取伪错误</strong>。</p>
+</div>
+<div id="definition-12-3" class="definition theorem-block env-definition">
+<p><strong>Definition 12.3</strong>. 设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是统计结构，<span class="math inline">\(f_1, f_2, \dots, f_{n}\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\((H_0,H_1)\)</span>是检验问题，<span class="math inline">\(W\)</span>为拒绝域。称满足条件： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcZm9yYWxsXDtQXGluXG1hdGhzY3J7UH0sXDtnKFApPVAoVykKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\forall\;P\in\mathscr{P},\;g(P)=P(W)
+\end{equation*}\]</span></p>
+<p>的函数<span class="math inline">\(g\)</span>为检验问题<span class="math inline">\((H_0,H_1)\)</span>的<a href="../chapters/glossary-p.html#term-PowerFunction" class="term" title="power function">势函数<span class="term-english">（power function）</span></a>。当<span class="math inline">\(F\in H_0\)</span>时，<span class="math inline">\(g(F)\leqslant\alpha\)</span>的检验被称之为<a href="../chapters/glossary-s.html#term-SignificanceLevel" class="term" title="significance level">显著性水平<span class="term-english">（significance level）</span></a>为<span class="math inline">\(\alpha\)</span>的检验。</p>
+</div>
+<div id="note-12-1" class="note theorem-block env-note">
+<p><strong>note 12.1</strong>. 当<span class="math inline">\(F\in H_0\)</span>时，<span class="math inline">\(g(F)\)</span>为犯第一类错误的概率；当<span class="math inline">\(F\in H_1\)</span>时，<span class="math inline">\(1-g(F)\)</span>为犯第二类错误的概率。</p>
+</div>
+<div id="method-12-1" class="method theorem-block env-method">
+<p><strong>Method 12.1</strong>. 假设检验基本步骤为：</p>
+<ol type="1">
+<li><p>建立假设检验问题；</p></li>
+<li><p>选取统计量，由直观得出拒绝域形式；</p></li>
+<li><p>选择检验的显著性水平；</p></li>
+<li><p>确定具体的拒绝域；</p></li>
+<li><p>做出判断。</p></li>
+</ol>
+</div>
+<div id="definition-12-4" class="definition theorem-block env-definition">
+<p><strong>Definition 12.4</strong>. 设<span class="math inline">\((H_0,H_1)\)</span>是统计结构<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>上的一个假设检验问题，<span class="math inline">\(f_1, f_2, \dots, f_{n}\)</span>是从总体<span class="math inline">\(F\)</span>中抽取的简单样本，利用<span class="math inline">\(f_1, f_2, \dots, f_{n}\)</span>能够作出拒绝原假设的最小显著性水平被称为检验的<a href="../chapters/glossary-p.html#term-PValue" class="term" title="pvalue">p值<span class="term-english">（pvalue）</span></a>。</p>
+</div>
+<div id="note-12-2" class="note theorem-block env-note">
+<p><strong>note 12.2</strong>. 为什么需要<span class="math inline">\(p\)</span>值的概念？由于不同的人对原假设的保守性程度不一样，他们选择的显著性水平就会不一样，对原假设越保守那所选取的<span class="math inline">\(\alpha\)</span>就会越小，只关注是否拒绝原假设这一结论就会引起争议。如果能够给出p值让大家有一个大致的参照，虽然此时还是会有争议，但至少我们有了一个参考值。</p>
+<p>如何求<span class="math inline">\(p\)</span>值？为了得到拒绝原假设的最小显著性水平，那必然需要使得当前样本下的统计量值在拒绝域内且在拒绝域的边界上，否则拒绝域还能进一步缩小，即该显著性水平不是最小的。因为此时拒绝域的形式已经确定了，边界值也给出了，那么实际上我们就得到了一个具体的拒绝域，所以有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlwPVxzdXBfe1BcaW4gSF8wfWcoUCkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+p=\sup_{P\in H_0}g(P)
+\end{equation*}\]</span></p>
+<p>如果<span class="math inline">\(p\)</span>更小，那么就无法保证当<span class="math inline">\(F\in H_0\)</span>的时候<span class="math inline">\(g(F)\leqslant\alpha\)</span>；如果<span class="math inline">\(p\)</span>更大则不最小。</p>
+</div>
+<div id="note-12-3" class="note theorem-block env-note">
+<p><strong>note 12.3</strong>. 实际中我们根本不知道<span class="math inline">\(F\)</span>到底是在<span class="math inline">\(H_0\)</span>中还是在<span class="math inline">\(H_1\)</span>中，假设检验本就是为了判断这个问题才出现的，为了得到显著性为<span class="math inline">\(\alpha\)</span>的检验，实际上我们做的是找到<span class="math inline">\(X\)</span>的一个划分使得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc3VwX3tQXGluIEhfMH1nKFApXGxlcXNsYW50XGFscGhhClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\sup_{P\in H_0}g(P)\leqslant\alpha
+\end{equation*}\]</span></p>
+<p>这就会导致当<span class="math inline">\(F\)</span>真的在<span class="math inline">\(H_0\)</span>中时，犯第一类错误的概率实际上有可能小于<span class="math inline">\(\alpha\)</span>。这代表着检验还能进一步优化，由此引入下述随机化检验的概念。</p>
+</div>
+<div id="definition-12-5" class="definition theorem-block env-definition">
+<p><strong>Definition 12.5</strong>. 设<span class="math inline">\(\varphi\)</span>是可测空间<span class="math inline">\((X,\mathscr{A})\)</span>上的可测函数。若<span class="math inline">\(0\leqslant\varphi\leqslant1\)</span>，则称<span class="math inline">\(\varphi\)</span>是<a href="../chapters/glossary-t.html#term-TestFunction" class="term" title="test function">检验函数<span class="term-english">（test function）</span></a>。当<span class="math inline">\(\varphi\)</span>只取<span class="math inline">\(0,1\)</span>两个值时，称对应的检验为<a href="../chapters/glossary-n.html#term-NonrandomizedTesting" class="term" title="non-randomized testing">非随机化检验<span class="term-english">（non-randomized testing）</span></a>，否则称为<a href="../chapters/glossary-r.html#term-RandomizedTesting" class="term" title="randomized testing">随机化检验<span class="term-english">（randomized testing）</span></a>。<span class="math inline">\(\varphi\)</span>的势函数为<span class="math inline">\(\operatorname{E}(\varphi)\)</span>。</p>
+</div>
+<section id="id--1a18a226" class="level2">
+<h2 class="anchored" data-anchor-id="id--1a18a226"><span class="header-section-number">12.1</span> 多重假设检验</h2>
+<div id="property-12-1-1" class="property theorem-block env-property">
+<p><strong>Property 12.1.1</strong>. 若控制每一次假设检验的显著性水平为<span class="math inline">\(\alpha\)</span>，<span class="math inline">\(n\)</span>次独立假设检验中至少犯一次第一次错误的概率为<span class="math inline">\(1-(1-\alpha)^n\)</span>。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>此时一次第一类错误都没犯的概率为<span class="math inline">\((1-\alpha)^n\)</span>。&nbsp;◻</p>
+</div>
+<p>设<span class="math inline">\(n\)</span>个原假设中有<span class="math inline">\(n_0\)</span>个为真，<span class="math inline">\(n_0\)</span>个为假。记试验中被错误拒绝的假设个数为<span class="math inline">\(V\)</span>，被正确拒绝的假设个数为<span class="math inline">\(S\)</span>，总拒绝数为<span class="math inline">\(R=V+S\)</span>。</p>
+<div id="definition-12-6" class="definition theorem-block env-definition">
+<p><strong>Definition 12.6</strong>. 称<span class="math inline">\(P(V\geqslant1)\)</span>为<a href="../chapters/glossary-f.html#term-FWER" class="term" title="family-wise error rate">族错误率<span class="term-english">（family-wise error rate）</span></a>。</p>
+</div>
+<div id="definition-12-7" class="definition theorem-block env-definition">
+<p><strong>Definition 12.7</strong>. 称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0V9XGxlZnQoXGZyYWN7Vn17XG1heFx7UiwxXH19XHJpZ2h0KQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\operatorname{E}\left(\frac{V}{\max\{R,1\}}\right)
+\end{equation*}\]</span></p>
+<p>为<a href="../chapters/glossary-f.html#term-FDR" class="term" title="false discovery rate">错误检出率<span class="term-english">（false discovery rate）</span></a>。</p>
+</div>
+<div id="method-12-2" class="method theorem-block env-method">
+<p><strong>Method 12.2</strong>. <strong>（BonFerroni）</strong></p>
+<p>由<a href="../chapters/probability-measure.html#prop-Measure-9acfc4ac" class="textbook-cross-reference" data-reference-key="prop:Measure" data-reference-kind="ref+label" data-reference-title="性质 5.2.1" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 5.2.1(3)</a>（次有限可加性）可知，将<span class="math inline">\(n\)</span>个假设检验问题中单个假设检验的显著性水平设置为<span class="math inline">\(\dfrac{\alpha}{n}\)</span>，即可保证FWER小于<span class="math inline">\(\alpha\)</span>。</p>
+</div>
+<div id="method-12-3" class="method theorem-block env-method">
+<p><strong>Method 12.3</strong>. <strong>（Benjamini–Hochberg）</strong></p>
+<p>设<span class="math inline">\(n\)</span>个假设检验对应的<span class="math inline">\(p\)</span>值为<span class="math inline">\(p_1,p_2\dots,p_n\)</span>，将其从小到大排序为<span class="math inline">\(p_{(1)}\leqslant p_{(2)}\leqslant\cdots\leqslant p_{(n)}\)</span>。给定目标水平<span class="math inline">\(\alpha\)</span>，取最大的<span class="math inline">\(k\)</span>使得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlwX3soayl9XGxlcXNsYW50XGZyYWN7a317bn1cYWxwaGEKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+p_{(k)}\leqslant\frac{k}{n}\alpha
+\end{equation*}\]</span></p>
+<p>则拒绝<span class="math inline">\(H_{(1)},H_{(2)}\dots,H_{(k)}\)</span>。若各真原假设对应的<span class="math inline">\(p\)</span>值独立且服从<span class="math inline">\(U(0,1)\)</span>，并且与其余<span class="math inline">\(p\)</span>值独立，则此时的FDR不超过<span class="math inline">\(\alpha\)</span>。</p>
+</div>
+<div class="proof-block proof">
+<p><span class="proof-title"><em>证明</em>. </span>记<span class="math inline">\(I_0\)</span>为真原假设的指标集合，<span class="math inline">\(m_0=|I_0|\)</span>。对每个<span class="math inline">\(i\in I_0\)</span>，记<span class="math inline">\(R^{(-i)}\)</span>为删去<span class="math inline">\(p_i\)</span>之后，其余<span class="math inline">\(n-1\)</span>个<span class="math inline">\(p\)</span>值按同一Benjamini–Hochberg规则所产生的拒绝数。由逐步上升法的结构可知，若第<span class="math inline">\(i\)</span>个真原假设被错误拒绝且<span class="math inline">\(R=r\)</span>，则必有 <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlwX2lcbGVxc2xhbnQgXGZyYWN7cn17bn1cYWxwaGEKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+p_i\leqslant \frac{r}{n}\alpha
+\end{equation*}\]</span></p>
+<p>并且 <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlSXnsoLWkpfT1yLTEKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+R^{(-i)}=r-1
+\end{equation*}\]</span></p>
+<p>于是 <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlcbWF0aHJte0ZEUn0KCQkmPUVcbGVmdChcZnJhY3tWfXtSXHZlZTF9XHJpZ2h0KVxcCgkJJj1cc3VtX3tpXGluIElfMH1FXGxlZnQoXGZyYWN7XG1hdGhiZnsxfVx7cF9pXHRleHR76KKr5ouS57udfVx9fXtSXHZlZTF9XHJpZ2h0KVxcCgkJJj1cc3VtX3tpXGluIElfMH1cc3VtX3tyPTF9Xm5cZnJhYzFyUFxsZWZ0KHBfaVxsZXFzbGFudCBcZnJhY3tyfXtufVxhbHBoYSxSPXJccmlnaHQpXFwKCQkmXGxlcXNsYW50IFxzdW1fe2lcaW4gSV8wfVxzdW1fe3I9MX1eblxmcmFjMXJQXGxlZnQocF9pXGxlcXNsYW50IFxmcmFje3J9e259XGFscGhhLFJeeygtaSl9PXItMVxyaWdodCkKXGVuZHthbGlnbip9"></span></p>
+<p><span class="math display">\[\begin{align*}
+\mathrm{FDR}
+&amp;=E\left(\frac{V}{R\vee1}\right)\\
+&amp;=\sum_{i\in I_0}E\left(\frac{\mathbf{1}\{p_i\text{被拒绝}\}}{R\vee1}\right)\\
+&amp;=\sum_{i\in I_0}\sum_{r=1}^n\frac1rP\left(p_i\leqslant \frac{r}{n}\alpha,R=r\right)\\
+&amp;\leqslant \sum_{i\in I_0}\sum_{r=1}^n\frac1rP\left(p_i\leqslant \frac{r}{n}\alpha,R^{(-i)}=r-1\right)
+\end{align*}\]</span></p>
+<p>若各真原假设对应的<span class="math inline">\(p\)</span>值独立且服从<span class="math inline">\(U(0,1)\)</span>，并且与其余<span class="math inline">\(p\)</span>值独立，则 <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlcbWF0aHJte0ZEUn0KCQkmXGxlcXNsYW50IFxzdW1fe2lcaW4gSV8wfVxzdW1fe3I9MX1eblxmcmFjMXJQXGxlZnQocF9pXGxlcXNsYW50IFxmcmFje3J9e259XGFscGhhXHJpZ2h0KVBcbGVmdChSXnsoLWkpfT1yLTFccmlnaHQpXFwKCQkmPVxzdW1fe2lcaW4gSV8wfVxzdW1fe3I9MX1eblxmcmFjMXJcZnJhY3tyXGFscGhhfXtufVBcbGVmdChSXnsoLWkpfT1yLTFccmlnaHQpXFwKCQkmPVxzdW1fe2lcaW4gSV8wfVxmcmFje1xhbHBoYX17bn1cc3VtX3tyPTF9Xm5QXGxlZnQoUl57KC1pKX09ci0xXHJpZ2h0KVxcCgkJJj1cZnJhY3ttXzB9e259XGFscGhhXFwKCQkmXGxlcXNsYW50IFxhbHBoYQpcZW5ke2FsaWduKn0="></span></p>
+<p><span class="math display">\[\begin{align*}
+\mathrm{FDR}
+&amp;\leqslant \sum_{i\in I_0}\sum_{r=1}^n\frac1rP\left(p_i\leqslant \frac{r}{n}\alpha\right)P\left(R^{(-i)}=r-1\right)\\
+&amp;=\sum_{i\in I_0}\sum_{r=1}^n\frac1r\frac{r\alpha}{n}P\left(R^{(-i)}=r-1\right)\\
+&amp;=\sum_{i\in I_0}\frac{\alpha}{n}\sum_{r=1}^nP\left(R^{(-i)}=r-1\right)\\
+&amp;=\frac{m_0}{n}\alpha\\
+&amp;\leqslant \alpha
+\end{align*}\]</span></p>
+<p>故Benjamini–Hochberg方法在独立情形下控制FDR&nbsp;◻</p>
+</div>
+<div id="method-12-4" class="method theorem-block env-method">
+<p><strong>Method 12.4</strong>. <strong>（Benjamini–Yekutieli）</strong></p>
+<p>设<span class="math inline">\(n\)</span>个假设检验对应的<span class="math inline">\(p\)</span>值为<span class="math inline">\(p_1,\dots,p_n\)</span>，将其从小到大排序为 <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlwX3soMSl9XGxlcXNsYW50IHBfeygyKX1cbGVxc2xhbnRcY2RvdHNcbGVxc2xhbnQgcF97KG4pfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+p_{(1)}\leqslant p_{(2)}\leqslant\cdots\leqslant p_{(n)}
+\end{equation*}\]</span></p>
+<p>记 <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQljX249XHN1bV97aj0xfV5uXGZyYWMxagpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+c_n=\sum_{j=1}^n\frac1j
+\end{equation*}\]</span></p>
+<p>给定目标水平<span class="math inline">\(\alpha\)</span>，取最大的<span class="math inline">\(k\)</span>使得 <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlwX3soayl9XGxlcXNsYW50IFxmcmFje2t9e25cLGNfbn1cYWxwaGEKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+p_{(k)}\leqslant \frac{k}{n\,c_n}\alpha
+\end{equation*}\]</span></p>
+<p>则拒绝 <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlIX3soMSl9LFxkb3RzLEhfeyhrKX0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+H_{(1)},\dots,H_{(k)}
+\end{equation*}\]</span></p>
+<p>证明：Benjamini–Yekutieli证明了如下上界：对任意依赖结构，若采用Benjamini–Hochberg型逐步上升法，并以 <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYWxwaGFfaT1cZnJhY3tpfXtufVxnYW1tYSxccXF1YWQgaT0xLFxkb3RzLG4KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\alpha_i=\frac{i}{n}\gamma,\qquad i=1,\dots,n
+\end{equation*}\]</span></p>
+<p>作为临界值，则有 <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbWF0aHJte0ZEUn1cbGVxc2xhbnQgXGZyYWN7bV8wfXtufVxnYW1tYSBjX24KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\mathrm{FDR}\leqslant \frac{m_0}{n}\gamma c_n
+\end{equation*}\]</span></p>
+<p>现在取 <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcZ2FtbWE9XGZyYWN7XGFscGhhfXtjX259ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\gamma=\frac{\alpha}{c_n}
+\end{equation*}\]</span></p>
+<p>则对应临界值恰为 <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYWxwaGFfaT1cZnJhY3tpfXtuXCxjX259XGFscGhhClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\alpha_i=\frac{i}{n\,c_n}\alpha
+\end{equation*}\]</span></p>
+<p>于是 <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlcbWF0aHJte0ZEUn0KCQkmXGxlcXNsYW50IFxmcmFje21fMH17bn1cZnJhY3tcYWxwaGF9e2Nfbn1jX25cXAoJCSY9XGZyYWN7bV8wfXtufVxhbHBoYVxcCgkJJlxsZXFzbGFudCBcYWxwaGEKXGVuZHthbGlnbip9"></span></p>
+<p><span class="math display">\[\begin{align*}
+\mathrm{FDR}
+&amp;\leqslant \frac{m_0}{n}\frac{\alpha}{c_n}c_n\\
+&amp;=\frac{m_0}{n}\alpha\\
+&amp;\leqslant \alpha
+\end{align*}\]</span></p>
+<p>故Benjamini–Yekutieli方法在任意依赖结构下控制FDR</p>
+</div>
+</section>
+<section id="id--9dc73101" class="level2">
+<h2 class="anchored" data-anchor-id="id--9dc73101"><span class="header-section-number">12.2</span> 非参数假设检验</h2>
+<section id="id--32e19df5" class="level3">
+<h3 class="anchored" data-anchor-id="id--32e19df5"><span class="header-section-number">12.2.1</span> 位置检验</h3>
+<p>位置检验分为两类：</p>
+<ol type="1">
+<li><p>单样本位置检验：给定一个数<span class="math inline">\(q_0\)</span>，检验它与总体<span class="math inline">\(\pi\)</span>分位点<span class="math inline">\(Q_{\pi}\)</span>之间的大小关系；</p></li>
+<li><p>多样本位置检验：检验多个总体位置参数的大小关系。</p></li>
+</ol>
+<section id="id--997b7324" class="level4">
+<h4 class="anchored" data-anchor-id="id--997b7324"><span class="header-section-number">12.2.1.1</span> 单样本位置检验</h4>
+<div id="method-12-5" class="method theorem-block env-method">
+<p><strong>Method 12.5</strong>. <strong>（Sign Test）</strong></p>
+<p>设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是统计结构，<span class="math inline">\(\mathbf{X}=(X_1, X_2, \dots, X_{n})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(\mathscr{P}\mathbf{X}^{-1}\)</span>为连续型随机变量的概率分布族，检验问题为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYmVnaW57Y2FzZXN9CgkJCUhfMDpRX1xwaVxsZXFzbGFudCBxXzAsXDtIXzE6UV9ccGk+cV8wIFxcCgkJCUhfMDpRX1xwaVxnZXFzbGFudCBxXzAsXDtIXzE6UV9ccGk8cV8wIFxcCgkJCUhfMDpRX1xwaT1xXzAsXDtIXzE6UV9ccGlcbmUgcV8wCgkJXGVuZHtjYXNlc30KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+H_0:Q_\pi\leqslant q_0,\;H_1:Q_\pi&gt;q_0 \\
+H_0:Q_\pi\geqslant q_0,\;H_1:Q_\pi&lt;q_0 \\
+H_0:Q_\pi=q_0,\;H_1:Q_\pi\ne q_0
+\end{cases}
+\end{equation*}\]</span></p>
+<p>记<span class="math inline">\(\mathbf{X}\)</span>中大于<span class="math inline">\(q_0\)</span>的样本单元的个数为<span class="math inline">\(S^+\)</span>，小于<span class="math inline">\(q_0\)</span>的个数为<span class="math inline">\(S^-\)</span>。令<span class="math inline">\(K\sim\operatorname{Binom}(S^++S^-,\pi)\)</span>，则上述检验问题的<span class="math inline">\(p\)</span>值分别为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlQX3tIXzB9KEtcbGVxc2xhbnQgU14tKSxccXVhZCBQX3tIXzB9KEtcZ2Vxc2xhbnQgU14tKSxccXVhZCAyXG1pblx7UF97SF8wfShLXGxlcXNsYW50IFNeLSksXDtQX3tIXzB9KEtcZ2Vxc2xhbnQgU14tKVx9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+P_{H_0}(K\leqslant S^-),\quad P_{H_0}(K\geqslant S^-),\quad 2\min\{P_{H_0}(K\leqslant S^-),\;P_{H_0}(K\geqslant S^-)\}
+\end{equation*}\]</span></p>
+<p>当<span class="math inline">\(n\to+\infty\)</span>时，令<span class="math inline">\(Z=\dfrac{K-(S^++S^-)\pi}{\sqrt{(S^++S^-)\pi(1-\pi)}}\)</span>，<span class="math inline">\(\Phi\)</span>为标准正态分布的分布函数，则有如下对应的近似<span class="math inline">\(p\)</span>值： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcUGhpKFopLFxxdWFkMS1cUGhpKFopLFxxdWFkMlxtaW5ce1xQaGkoWiksMS1cUGhpKFopXH0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\Phi(Z),\quad1-\Phi(Z),\quad2\min\{\Phi(Z),1-\Phi(Z)\}
+\end{equation*}\]</span></p>
+</div>
+<div id="derivation-12-1" class="derivation theorem-block env-derivation">
+<p><strong>Derivation 12.1</strong>. 直观上来讲，如果<span class="math inline">\(Q_{\pi}&gt;q_0\)</span>，那么<span class="math inline">\(K\)</span>的实现值<span class="math inline">\(S^-\)</span>应偏小，原假设的拒绝域应具有形式<span class="math inline">\(\{S^-\leqslant c\}\)</span>。由<a href="../chapters/probability-basics.html#prop-Binom-e6beba11" class="textbook-cross-reference" data-reference-key="prop:Binom" data-reference-kind="ref+label" data-reference-title="性质 6.4.1" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 6.4.1(3)</a>可知对于检验的<span class="math inline">\(p\)</span>值可仅考虑<span class="math inline">\(Q_\pi=q_0\)</span>，设<span class="math inline">\(K\)</span>为<span class="math inline">\(S^-\)</span>的随机变量形式，则应有<span class="math inline">\(K\sim\operatorname{Binom}(S^++S^-,\pi)\)</span>，于是此时<span class="math inline">\(p\)</span>值为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlwPVBfe0hfMH0oS1xsZXFzbGFudCBTXi0pPVxzdW1fe2k9MH1ee1NeLX1cYmlub217U14rK1NeLX17aX1ccGlee2l9KDEtXHBpKV57U14rK1NeLS1pfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+p=P_{H_0}(K\leqslant S^-)=\sum_{i=0}^{S^-}\binom{S^++S^-}{i}\pi^{i}(1-\pi)^{S^++S^--i}
+\end{equation*}\]</span></p>
+<p>同理可得另外两种情况。不对正态近似作解释。</p>
+</div>
+<div id="note-12-4" class="note theorem-block env-note">
+<p><strong>note 12.4</strong>. 符号检验仅对连续型随机变量成立，离散型随机变量无法满足<span class="math inline">\(K\sim\operatorname{Binom}(S^++S^-,\pi)\)</span>（分布函数阶梯形，分位点唯一但小于等于该分位点的概率不一定等于对应的分位数，处在该阶梯上的所有点都小于等于该分位点）。</p>
+<p>能否不删除等于<span class="math inline">\(q_0\)</span>的数值？实际上可以，甚至我个人觉得从严谨的角度来讲应该不删除，考虑到符号检验的原理<span class="math inline">\(K\sim\operatorname{Binom}\)</span>，二项分布的概率<span class="math inline">\(p\)</span>实际上是<span class="math inline">\(X_i\)</span>小于等于<span class="math inline">\(q_0\)</span>的概率呀，但我们约定删除，删除也没影响（连续型随机变量在单点集上测度为<span class="math inline">\(0\)</span>）。</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-bgcolor="white" data-linenos="" data-frame="single" data-numbersep="5pt" data-breaklines=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>sign.test <span class="ot">&lt;-</span> <span class="cf">function</span>(x, q0, pi, <span class="at">exact =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">alternative =</span> <span class="fu">c</span>(<span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"less"</span>)) {</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  alternative <span class="ot">&lt;-</span> <span class="fu">match.arg</span>(alternative)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  s_pos <span class="ot">&lt;-</span> <span class="fu">sum</span>(x <span class="sc">&gt;</span> q0)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  STATISTIC <span class="ot">&lt;-</span> <span class="fu">sum</span>(x <span class="sc">&lt;</span> q0)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> s_pos <span class="sc">+</span> STATISTIC</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  STATISTIC <span class="ot">&lt;-</span> <span class="fu">setNames</span>(STATISTIC, <span class="st">"s_neg"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  hypothesis_message <span class="ot">&lt;-</span> <span class="cf">switch</span>(alternative,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"greater"</span> <span class="ot">=</span> <span class="fu">paste</span>(<span class="st">"Q0 &gt;"</span>, pi),</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"less"</span> <span class="ot">=</span> <span class="fu">paste</span>(<span class="st">"Q0 &lt;"</span>, pi),</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"two.sided"</span> <span class="ot">=</span> <span class="fu">paste</span>(<span class="st">"Q0 !="</span>, pi))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (exact) {</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    METHOD <span class="ot">&lt;-</span> <span class="st">"Sign Test (Exact)"</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    p.value <span class="ot">&lt;-</span> <span class="cf">switch</span>(alternative,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"greater"</span> <span class="ot">=</span> <span class="fu">pbinom</span>(<span class="at">q =</span> STATISTIC, <span class="at">size =</span> n, <span class="at">prob =</span> pi),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"less"</span> <span class="ot">=</span> <span class="fu">pbinom</span>(<span class="at">q =</span> STATISTIC<span class="dv">-1</span>, <span class="at">size =</span> n, <span class="at">prob =</span> pi, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"two.sided"</span> <span class="ot">=</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">min</span>(<span class="fu">pbinom</span>(<span class="at">q =</span> STATISTIC<span class="dv">-1</span>, <span class="at">size =</span> n, <span class="at">prob =</span> pi, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>                                            <span class="fu">pbinom</span>(<span class="at">q =</span> STATISTIC, <span class="at">size =</span> n, <span class="at">prob =</span> pi)))</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    METHOD <span class="ot">&lt;-</span> <span class="st">"Sign Test (Approximate)"</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    z_score <span class="ot">&lt;-</span> (STATISTIC <span class="sc">-</span> n <span class="sc">*</span> pi) <span class="sc">/</span> <span class="fu">sqrt</span>(n <span class="sc">*</span> pi <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> pi)) </span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    p.value <span class="ot">&lt;-</span> <span class="cf">switch</span>(alternative,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"greater"</span> <span class="ot">=</span> <span class="fu">pnorm</span>(z_score, <span class="at">lower.tail =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"less"</span> <span class="ot">=</span> <span class="fu">pnorm</span>(z_score, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"two.sided"</span> <span class="ot">=</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">min</span>(<span class="fu">pnorm</span>(z_score), <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(z_score)))</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  RVAL <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">statistic =</span> STATISTIC, <span class="at">p.value =</span> p.value,</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>               <span class="at">data.name =</span> <span class="fu">deparse</span>(<span class="fu">substitute</span>(x)),</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>               <span class="at">method =</span> METHOD, <span class="at">alternative =</span> hypothesis_message)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class</span>(RVAL) <span class="ot">&lt;-</span> <span class="st">"htest"</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  RVAL</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="method-12-6" class="method theorem-block env-method">
+<p><strong>Method 12.6</strong>. <strong>（Wilcoxon Signed Rank Test）</strong></p>
+<p>设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>是统计结构，<span class="math inline">\(\mathbf{X}=(X_1, X_2, \dots, X_{n})\)</span>为从总体<span class="math inline">\(F\)</span>中抽取的简单样本，<span class="math inline">\(\mathscr{P}\mathbf{X}^{-1}\)</span>为对称连续型随机变量的概率分布族，检验问题为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlIXzA6TT1NXzAsXHF1YWQgSF8xOgoJCVxiZWdpbntjYXNlc30KCQkJTT5NXzAgXFwKCQkJTTxNXzAgXFwKCQkJTVxuZSBNXzAKCQlcZW5ke2Nhc2VzfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+H_0:M=M_0,\quad H_1:
+\begin{cases}
+M&gt;M_0 \\
+M&lt;M_0 \\
+M\ne M_0
+\end{cases}
+\end{equation*}\]</span></p>
+<p>记<span class="math inline">\(W^+,W^-\)</span>为Wilcoxon秩统计量，<span class="math inline">\(W\)</span>服从Wilcoxon秩分布，则上述检验问题的<span class="math inline">\(p\)</span>值分别为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlQX3tIXzB9KFdcZ2Vxc2xhbnQgV14rKSxccXVhZCBQX3tIXzB9KFdcbGVxc2xhbnQgV14rKQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+P_{H_0}(W\geqslant W^+),\quad P_{H_0}(W\leqslant W^+)
+\end{equation*}\]</span></p>
+<ol type="1">
+<li><p>对<span class="math inline">\(i=1,2,\dots,n\)</span>，<span class="math inline">\(d_i=|X_i-M_0|\)</span>。</p></li>
+<li><p>对<span class="math inline">\(d_i\)</span>进行排序，求对应的秩<span class="math inline">\(R_i\)</span>。</p></li>
+<li><p><span class="math inline">\(W^+=\sum\limits_{i\in\{i:X_i-M_0&gt;0\}}R_i,\;W^-=\sum\limits_{i\in\{i:X_i-M_0&lt;0\}}R_i\)</span>。</p></li>
+</ol>
+</div>
+<div id="derivation-12-2" class="derivation theorem-block env-derivation">
+<p><strong>Derivation 12.2</strong>. 若零假设成立，则<span class="math inline">\(W^+\)</span>和<span class="math inline">\(W^-\)</span>应相差不大，如果<span class="math inline">\(M&gt;M_0\)</span>，则<span class="math inline">\(W^+\)</span>应较大，原假设的拒绝域应具有形式<span class="math inline">\(\{W^+\geqslant c\}\)</span>，<span class="math inline">\(p\)</span>值为<span class="math inline">\(p=P_{H_0}(W\geqslant W^+)\)</span>；如果<span class="math inline">\(M&lt;M_0\)</span>，则<span class="math inline">\(W^+\)</span>应较小，原假设的拒绝域应具有形式<span class="math inline">\(\{W^+\leqslant c\}\)</span>，<span class="math inline">\(p\)</span>值为<span class="math inline">\(p=P_{H_0}(W\leqslant W^+)\)</span>；</p>
+</div>
+</section>
+</section>
+<section id="id--dca5b0c0" class="level3">
+<h3 class="anchored" data-anchor-id="id--dca5b0c0"><span class="header-section-number">12.2.2</span> 趋势检验</h3>
+<div id="method-12-7" class="method theorem-block env-method">
+<p><strong>Method 12.7</strong>. 设<span class="math inline">\(F(x)\)</span>为某连续型随机变量的分布函数，<span class="math inline">\(X_1, X_2, \dots, X_{n}\)</span>是按一定顺序收集到的样本，<span class="math inline">\(X_i\sim F(x-\theta_i)\)</span>。检验问题为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYmVnaW57Y2FzZXN9CgkJCUhfMDpcdGV4dHvluo/liJfml6DkuIrljYfotovlir99LFw7SF8xOlx0ZXh0e+W6j+WIl+acieS4iuWNh+i2i+WKv++8jOWNs31cdGhldGFfMVxsZXFzbGFudFx0aGV0YV8yXGxlcXNsYW50XGNkb3RzXGxlcXNsYW50XHRoZXRhX25cdGV4dHvkuJToh7PlsJHmiJDnq4vkuIDkuKrkuKXmoLzkuI3nrYnlvI99IFxcCgkJCUhfMDpcdGV4dHvluo/liJfml6DkuIvpmY3otovlir99LFw7SF8xOlx0ZXh0e+W6j+WIl+acieS4i+mZjei2i+WKv++8jOWNs31cdGhldGFfMVxnZXFzbGFudFx0aGV0YV8yXGdlcXNsYW50XGNkb3RzXGdlcXNsYW50XHRoZXRhX25cdGV4dHvkuJToh7PlsJHmiJDnq4vkuIDkuKrkuKXmoLzkuI3nrYnlvI99IFxcCgkJCUhfMDpcdGV4dHvluo/liJfml6Dotovlir99LFw7SF8xOlx0ZXh0e+W6j+WIl+acieS4iuWNh+aIluS4i+mZjei2i+WKv30KCQlcZW5ke2Nhc2VzfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\begin{cases}
+H_0:\text{序列无上升趋势},\;H_1:\text{序列有上升趋势，即}\theta_1\leqslant\theta_2\leqslant\cdots\leqslant\theta_n\text{且至少成立一个严格不等式} \\
+H_0:\text{序列无下降趋势},\;H_1:\text{序列有下降趋势，即}\theta_1\geqslant\theta_2\geqslant\cdots\geqslant\theta_n\text{且至少成立一个严格不等式} \\
+H_0:\text{序列无趋势},\;H_1:\text{序列有上升或下降趋势}
+\end{cases}
+\end{equation*}\]</span></p>
+<p>取数对<span class="math inline">\((X_i,X_{i+c})\)</span>，其中： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQljPQoJCVxiZWdpbntjYXNlc30KCQkJXGRmcmFje259ezJ9LCZuXHRleHR75Li65YG25pWwfSBcXAoJCQlcZGZyYWN7bisxfXsyfSwmblx0ZXh0e+S4uuWlh+aVsH0KCQlcZW5ke2Nhc2VzfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+c=
+\begin{cases}
+\dfrac{n}{2},&amp;n\text{为偶数} \\
+\dfrac{n+1}{2},&amp;n\text{为奇数}
+\end{cases}
+\end{equation*}\]</span></p>
+<p>记<span class="math inline">\(D_i=X_{i+c}-X_i\)</span>，<span class="math inline">\(D_i\)</span>中大于<span class="math inline">\(0\)</span>的样本单元的个数为<span class="math inline">\(S^+\)</span>，小于<span class="math inline">\(0\)</span>的个数为<span class="math inline">\(S^-\)</span>。令<span class="math inline">\(K\sim\operatorname{Binom}(S^++S^-,0.5)\)</span>，则上述检验问题的<span class="math inline">\(p\)</span>值分别为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlQX3tIXzB9KEtcbGVxc2xhbnQgU14tKSxccXVhZCBQX3tIXzB9KEtcZ2Vxc2xhbnQgU14tKSxccXVhZCAyXG1pblx7UF97SF8wfShLXGxlcXNsYW50IFNeLSksXDtQX3tIXzB9KEtcZ2Vxc2xhbnQgU14tKVx9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+P_{H_0}(K\leqslant S^-),\quad P_{H_0}(K\geqslant S^-),\quad 2\min\{P_{H_0}(K\leqslant S^-),\;P_{H_0}(K\geqslant S^-)\}
+\end{equation*}\]</span></p>
+<p>当<span class="math inline">\(n\to+\infty\)</span>时，令<span class="math inline">\(Z=\dfrac{K-(S^++S^-)\pi}{\sqrt{(S^++S^-)\pi(1-\pi)}}\)</span>，<span class="math inline">\(\Phi\)</span>为标准正态分布的分布函数，则有如下对应的近似<span class="math inline">\(p\)</span>值： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcUGhpKFopLFxxdWFkMS1cUGhpKFopLFxxdWFkMlxtaW5ce1xQaGkoWiksMS1cUGhpKFopXH0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\Phi(Z),\quad1-\Phi(Z),\quad2\min\{\Phi(Z),1-\Phi(Z)\}
+\end{equation*}\]</span></p>
+</div>
+<div id="derivation-12-3" class="derivation theorem-block env-derivation">
+<p><strong>Derivation 12.3</strong>. 原理与符号检验相同，不作解释。但这里的情况其实与符号检验还是有区别的，势函数在<span class="math inline">\(H_0\)</span>上的上确界真的是由上述<span class="math inline">\(p\)</span>值给出的吗？还是说在这里我们只是考虑一个近似呢？</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-bgcolor="white" data-linenos="" data-frame="single" data-numbersep="5pt" data-breaklines="" data-mathescape=""><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cox.stuart.test <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">exact =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">alternative =</span> <span class="fu">c</span>(<span class="st">"two.sided"</span>, <span class="st">"greater"</span>, <span class="st">"less"</span>)) {</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    alternative <span class="ot">&lt;-</span> <span class="fu">match.arg</span>(alternative)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    n <span class="ot">&lt;-</span> <span class="fu">length</span>(x)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    c <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(n <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>, n <span class="sc">/</span> <span class="dv">2</span>, (n <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    D <span class="ot">&lt;-</span> x[(c <span class="sc">+</span> <span class="dv">1</span>)<span class="sc">:</span>n] <span class="sc">-</span> x[<span class="dv">1</span><span class="sc">:</span>c]</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    D_nonzero <span class="ot">&lt;-</span> D[D <span class="sc">!=</span> <span class="dv">0</span>]</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(D_nonzero) <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="fu">stop</span>(<span class="st">"All paired differences are zero; cannot perform Cox–Stuart test."</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    RVAL <span class="ot">&lt;-</span> <span class="fu">sign.test</span>(<span class="at">x =</span> D_nonzero, <span class="at">q0 =</span> <span class="dv">0</span>, <span class="at">pi =</span> <span class="fl">0.5</span>, </span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">exact =</span> exact, <span class="at">alternative =</span> alternative)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    RVA<span class="sc">$</span>method <span class="ot">&lt;-</span> <span class="cf">if</span> (exact) {</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Cox–Stuart Trend Test (Exact via Sign Test)"</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Cox–Stuart Trend Test (Approximate via Sign Test)"</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    RVA<span class="sc">$</span>data.name <span class="ot">&lt;-</span> <span class="fu">deparse</span>(<span class="fu">substitute</span>(x))</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    RVA</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="id--44b7a5cf" class="level3">
+<h3 class="anchored" data-anchor-id="id--44b7a5cf"><span class="header-section-number">12.2.3</span> 随机性检验</h3>
+<div id="definition-12-8" class="definition theorem-block env-definition">
+<p><strong>Definition 12.8</strong>. 设<span class="math inline">\(X_1, X_2, \dots, X_{n}\)</span>是一个序列，若<span class="math inline">\(X_{i},X_{i+1},\dots,X_{j}\)</span>满足某条件，而<span class="math inline">\(X_{i-1},X_{j+1}\)</span>不满足该条件，则称<span class="math inline">\(X_{i},X_{i+1},\dots,X_{j}\)</span>是一个<a href="../chapters/glossary-r.html#term-Run" class="term" title="run">游程<span class="term-english">（run）</span></a>。</p>
+</div>
+<div id="example-12-1" class="example theorem-block env-example">
+<p><strong>example 12.1</strong>. 将满足条件的数转换为<span class="math inline">\(1\)</span>，不满足的转换为<span class="math inline">\(0\)</span>（下面我们将延续该约定），则数据<span class="math inline">\(0,0,0,0,1,1,0,1,1,1,0,0,0\)</span>中，一共有<span class="math inline">\(5\)</span>个游程（<span class="math inline">\(3\)</span>个<span class="math inline">\(0\)</span>游程，<span class="math inline">\(2\)</span>个<span class="math inline">\(1\)</span>游程）。</p>
+</div>
+<div id="prop-Runs-e54e29fc" class="property theorem-block env-property">
+<p><strong>Property 12.2.1</strong>. 设<span class="math inline">\(R\)</span>为游程数，则： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2dhdGhlcip9CgkJUChSPTJrKT1cZnJhY3syXGJpbm9te20tMX17ay0xfVxiaW5vbXtuLTF9e2stMX19e1xiaW5vbXtOfXtufX0gXFwKCQlQKFI9MmsrMSk9XGZyYWN7XGJpbm9te20tMX17ay0xfVxiaW5vbXtuLTF9e2t9K1xiaW5vbXttLTF9e2t9XGJpbm9te24tMX17ay0xfX17XGJpbm9te059e259fSBcXAoJCUUoUikgPSBcZnJhY3sybW59e20rMX0rMVxxdWFkIFZhcihSKT1cZGZyYWN7Mm1uKDJtbi1tLW4pfXsobStuKV4yKG0rbi0xKX0KXGVuZHtnYXRoZXIqfQ=="></span></p>
+<p><span class="math display">\[\begin{gather*}
+P(R=2k)=\frac{2\binom{m-1}{k-1}\binom{n-1}{k-1}}{\binom{N}{n}} \\
+P(R=2k+1)=\frac{\binom{m-1}{k-1}\binom{n-1}{k}+\binom{m-1}{k}\binom{n-1}{k-1}}{\binom{N}{n}} \\
+E(R) = \frac{2mn}{m+1}+1\quad Var(R)=\dfrac{2mn(2mn-m-n)}{(m+n)^2(m+n-1)}
+\end{gather*}\]</span></p>
+</div>
+<div id="method-12-8" class="method theorem-block env-method">
+<p><strong>Method 12.8</strong>. 设<span class="math inline">\(X_1, X_2, \dots, X_{n}\)</span>独立同分布，将满足某条件的样本值转换为<span class="math inline">\(1\)</span>，不满足的转换为<span class="math inline">\(0\)</span>。</p>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script>
+(() => {
+  if (!document.querySelector(".density-plot[data-distribution]")) return;
+  const stylesheet = document.querySelector('link[rel="stylesheet"][href$="style.css"]');
+  if (!stylesheet) return;
+  const script = document.createElement("script");
+  script.src = new URL("density-loader.js", stylesheet.href).href;
+  document.head.appendChild(script);
+})();
+</script>
+<script>
+(() => {
+  const stylesheet = document.querySelector('link[rel="stylesheet"][href$="style.css"]');
+  if (!stylesheet) return;
+  const script = document.createElement("script");
+  script.src = new URL("formula-copy.js", stylesheet.href).href;
+  document.head.appendChild(script);
+})();
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/expectopatro\.github\.io\/math\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/point-estimation.html" class="pagination-link" aria-label="[第 11 章]{.header-section-number} 点估计理论">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title"><span class="header-section-number">第 11 章</span> 点估计理论</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/bayesian-statistics.html" class="pagination-link" aria-label="[第 13 章]{.header-section-number} 贝叶斯统计">
+        <span class="nav-page-text"><span class="chapter-title"><span class="header-section-number">第 13 章</span> 贝叶斯统计</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

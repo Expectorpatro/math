@@ -18,6 +18,16 @@ python3 html/build.py
 首页正文写在 `html/home.md`，可直接使用 Markdown 修改或补充。标题、作者、
 邮箱和日期读取自 `settings.tex` 中的 `title/author/date`。
 
+站点的首次发布日期、最近内容更新日期和 GitHub 仓库写在
+`html/site-meta.json`；网站构建日期由构建当天自动生成。19 个正文章节的完成度
+集中写在 `html/chapter-progress.json`：填写 `0`–`100` 的整数即可，`null`
+表示尚未填写。构建会严格检查章节键，避免拼写错误被静默忽略。
+
+符号规范的唯一来源是
+`skills/textbook-latex-style/references/notation-catalog.json`。构建会据此生成
+“符号与记号说明”页面，项目内的 `textbook-latex-style` skill 也读取同一文件，
+因此网页说明与后续 Agent 的写作约定保持一致。
+
 构建并启动本地预览：
 
 ```bash
@@ -154,7 +164,10 @@ python3 html/build.py
 需要提交到 GitHub 的内容包括：
 
 - 原始 LaTeX 文件和正文引用的图片、代码等资源；
-- `html/build.py`、`html/home.md` 和 `html/style.css`；
+- `html/build.py`、`html/home.md`、`html/style.css`、`html/textbook-ui.js`
+  与 `html/favicon.svg`；
+- `html/site-meta.json`、`html/chapter-progress.json`，以及
+  `skills/textbook-latex-style/` 中由网页和 Agent 共同使用的符号规范；
 - 完整的 `html/site/`，包括 `index.html`、`chapters/`、`site_libs/`、
   `search.json` 和样式文件；
 - `.github/workflows/pages.yml`。
@@ -186,7 +199,7 @@ git push origin main
 
 当前仓库的网页地址预计为：
 
-<https://expectorpatro.github.io/math/>
+<https://expectopatro.github.io/math/>
 
 ### 日常更新
 
@@ -212,8 +225,12 @@ git push origin main
 - 暂存时自动启用 `main.tex` 中被注释的 `part` 和章节 `include`，但不修改
   原始 `main.tex`。
 - `newtheorem` 声明会从 `settings.tex` 读取，定理环境按原父计数器编号。
-- `proof` 保留为独立证明块。
-- `label/ref/eqref/cref` 转换为网页内或跨页面链接。
+- `proof` 保留为独立证明块，默认展开并允许逐个或整页折叠；折叠状态在当前
+  浏览会话中保留，打印时始终显示证明正文。
+- `label/ref/eqref/cref` 转换为网页内或跨页面链接。点击 `cref` 后来源链接会
+  显示已访问状态，目标短暂高亮；紧随引用的 `(2)`、`(5.b)(5.c)` 等条目提示会
+  纳入整条链接，并在跳转后说明应查看的具体项目。
+- 浏览器后退或前进时会按最近标题与相对偏移恢复阅读位置。
 - `equation/align/gather` 保留为 MathJax 数学环境。
 - `enumerate/itemize` 中的显示公式会保留对应列表层级，公式后续条目不会被
   误判为代码块。
@@ -242,6 +259,10 @@ git push origin main
 - 与章节同目录的 `computations.order` 控制 Jupyter/Quarto 结果的顺序，
   构建时自动编号并追加到相应 chapter 末尾。
 - 右侧当前章目录会随正文滚动自动高亮，并保持当前条目可见。
+- 每个正文页提供“在 GitHub 上报告本页问题”入口；首页和项目状态页提供源代码、
+  错误报告、内容建议与提交记录入口。
+- 项目状态页自动汇总章节进度、定理类环境、证明、算法、行间公式、交互图和术语
+  数量，不需要手工维护统计数字。
 
 构建时使用 `--strict`，可以让未定义术语或未解析引用导致构建失败：
 
@@ -253,6 +274,9 @@ python3 html/build.py --strict
 
 - `build.py`：唯一构建入口。
 - `style.css`：网页样式。
+- `textbook-ui.js`：主题、证明折叠、阅读位置、交叉引用提示与页面反馈入口。
+- `site-meta.json`：发布日期、内容更新日期和 GitHub 仓库。
+- `chapter-progress.json`：19 个正文章节的完成百分比。
 - `.build/`：Pandoc AST、临时 `.qmd` 和 Quarto 工程，每次构建时更新。
 - `site/`：最终静态网站，可发布到 GitHub Pages。
 - `site/build-report.json`：未定义术语、未解析引用和失效链接报告。
@@ -267,3 +291,10 @@ python3 html/build.py --strict
 ```
 
 如需使用其他版本，可以设置 `QUARTO` 环境变量。
+
+## GitHub 语言统计
+
+根目录 `.gitattributes` 将所有 `.html` 标记为不参与语言识别，并额外将生成站点与
+计算结果标记为生成文件。该设置必须提交到默认分支后 GitHub Linguist 才会采用；
+仓库语言条可能存在短暂缓存，但以后构建产生的 HTML 不会再把项目识别为 HTML
+项目。此规则只影响 GitHub 的语言统计，不影响 GitHub Pages 发布这些文件。
