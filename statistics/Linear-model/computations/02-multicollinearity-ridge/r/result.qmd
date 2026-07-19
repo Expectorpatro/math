@@ -1,0 +1,191 @@
+---
+title: "复共线性与岭回归"
+format:
+  html:
+    embed-resources: true
+    toc: false
+    code-copy: true
+execute:
+  echo: true
+  warning: false
+  message: false
+  fig-align: center
+  fig-width: 8
+  fig-height: 5
+---
+
+`longley`是展示复共线性的经典数据。这里不先计算相关系数或VIF，而是先像普通回归一样拟合模型，从结果本身发现问题。
+
+## 先拟合普通最小二乘模型
+
+以就业人数`Employed`为响应变量，其余6个变量全部进入模型。对原始数据做标准化后再拟合模型。
+
+```{r}
+#| label: longley-ols
+
+longley_data <- datasets::longley
+longley_predictors <- c(
+  "GNP.deflator",
+  "GNP",
+  "Unemployed",
+  "Armed.Forces",
+  "Population",
+  "Year"
+)
+longley_standardized_predictors <- as.data.frame(
+  scale(longley_data[longley_predictors])
+)
+longley_data <- cbind(
+  Employed = longley_data$Employed,
+  longley_standardized_predictors
+)
+longley_ols <- lm(Employed ~ ., data = longley_data)
+summary(longley_ols)
+```
+
+这个输出出现了值得追问的现象：系数表显示若干估计的标准误相对于系数本身很大。
+
+“整体显著且$R^2$很高，单个系数却不稳定”是复共线性的典型信号。多个自变量可能共同解释了就业人数，却很难把这部分解释力稳定地分配给某一个系数。此时有必要返回自变量本身，检查它们是否包含大量重复信息。
+
+## 相关性热图与VIF
+
+```{r}
+#| label: longley-correlation
+#| fig-width: 7
+#| fig-height: 6.5
+
+longley_x <- longley_data[
+  setdiff(names(longley_data), "Employed")
+]
+colour_main <- "#355c8a"
+colour_smooth <- "#c45a3c"
+
+plot_correlation_heatmap <- function(correlation, title) {
+  distance <- as.dist(1 - abs(correlation))
+  variable_order <- hclust(distance)$order
+  ordered_correlation <- correlation[
+    variable_order,
+    variable_order,
+    drop = FALSE
+  ]
+  displayed_correlation <- ordered_correlation[
+    nrow(ordered_correlation):1,
+    ,
+    drop = FALSE
+  ]
+  palette <- colorRampPalette(
+    c("#b2182b", "#f7f7f7", "#2166ac")
+  )(201)
+
+  old_par <- par(mar = c(7, 7, 3, 1))
+  image(
+    x = seq_len(ncol(displayed_correlation)),
+    y = seq_len(nrow(displayed_correlation)),
+    z = t(displayed_correlation),
+    col = palette,
+    zlim = c(-1, 1),
+    axes = FALSE,
+    xlab = "",
+    ylab = "",
+    main = title,
+    asp = 1
+  )
+  axis(
+    1,
+    at = seq_len(ncol(displayed_correlation)),
+    labels = colnames(displayed_correlation),
+    las = 2,
+    tick = FALSE
+  )
+  axis(
+    2,
+    at = seq_len(nrow(displayed_correlation)),
+    labels = rownames(displayed_correlation),
+    las = 2,
+    tick = FALSE
+  )
+
+  for (row in seq_len(nrow(displayed_correlation))) {
+    for (column in seq_len(ncol(displayed_correlation))) {
+      value <- displayed_correlation[row, column]
+      text(
+        column,
+        row,
+        labels = sprintf("%.2f", value),
+        col = ifelse(abs(value) >= 0.55, "white", "grey15"),
+        cex = 0.78,
+        font = ifelse(row + column == nrow(displayed_correlation) + 1, 2, 1)
+      )
+    }
+  }
+
+  box()
+  par(old_par)
+}
+
+longley_correlation <- cor(longley_x)
+
+plot_correlation_heatmap(
+  longley_correlation,
+  "Longley Predictors: Correlation Heatmap"
+)
+```
+
+从图中可以发现`Year`、`GNP`、`Population`和`GNP.deflator`之间存在强相关关系。再计算VIF值与条件数：
+
+```{r}
+#| label: longley-vif
+
+longley_x_matrix <- as.matrix(longley_x)
+calculate_vif <- function(x) {
+  result <- vapply(
+    seq_len(ncol(x)),
+    function(j) {
+      auxiliary_model <- lm(x[, j] ~ x[, -j, drop = FALSE])
+      1 / (1 - summary(auxiliary_model)$r.squared)
+    },
+    numeric(1)
+  )
+
+  names(result) <- colnames(x)
+  result
+}
+
+longley_vif <- calculate_vif(longley_x_matrix)
+longley_eigenvalues <- eigen(
+  longley_correlation,
+  symmetric = TRUE,
+  only.values = TRUE
+)$values
+longley_condition_indices <- max(longley_eigenvalues) / min(longley_eigenvalues)
+
+sort(longley_vif, decreasing = TRUE)
+longley_condition_indices
+```
+
+由输出可见，多个VIF远大于常用警示值，条件数也很高。这解释了前面系数标准误较大、显著性结论不稳定的原因。删除变量并不是唯一选择：若变量具有明确含义而分析目标主要是预测，可以保留它们并使用岭回归。
+
+## 岭回归
+
+下面使用`MASS::lm.ridge`计算岭迹。
+
+```{r}
+#| label: longley-ridge
+#| fig-width: 10
+#| fig-height: 8
+
+if (!requireNamespace("MASS", quietly = TRUE)) {
+  stop("This document requires the MASS package.")
+}
+
+lambda_grid <- seq(0, 0.2, by = 0.0005)
+longley_ridge_path <- MASS::lm.ridge(
+  Employed ~ .,
+  data = longley_data,
+  lambda = lambda_grid
+)
+
+plot(longley_ridge_path)
+```
+
+岭迹展示了系数随$\lambda$增加逐渐收缩并趋于稳定的过程。从岭际图上看，我们可以选择0.1作为惩罚强度。

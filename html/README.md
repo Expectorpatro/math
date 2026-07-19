@@ -1,9 +1,5 @@
 # LaTeX 教材网页构建
 
-这里的构建过程不会修改项目中的任何 `.tex` 文件。`main.tex` 仍是唯一正文
-来源；脚本只在 `html/.build/` 中创建临时副本、Pandoc AST 和临时 Quarto
-章节。最终网页使用原生 Quarto Book 布局。
-
 ## 构建
 
 在项目根目录执行：
@@ -23,10 +19,8 @@ python3 html/build.py
 集中写在 `html/chapter-progress.json`：填写 `0`–`100` 的整数即可，`null`
 表示尚未填写。构建会严格检查章节键，避免拼写错误被静默忽略。
 
-符号规范的唯一来源是
-`skills/textbook-latex-style/references/notation-catalog.json`。构建会据此生成
-“符号与记号说明”页面，项目内的 `textbook-latex-style` skill 也读取同一文件，
-因此网页说明与后续 Agent 的写作约定保持一致。
+网页“符号与记号说明”页的构建数据位于 `html/notation-catalog.json`。该文件是
+网站源码的一部分，构建会据此生成页面。
 
 构建并启动本地预览：
 
@@ -42,30 +36,52 @@ Quarto 读取 `search.json`，站内搜索因此无法工作。GitHub Pages 等 
 
 ## 计算实验
 
-计算实验由 Python/Jupyter 或 R/Quarto 在各自环境中独立运行。网页构建不会
-执行分析代码，只读取已经渲染好的、自包含的 `result.html`，并按照章节旁边
-`computations.order` 中规定的顺序追加到该 chapter 的末尾。
+网页构建不会执行分析代码，只读取已经渲染好的、自包含的 `result.html`，并按照
+章节旁边 `computations.order` 中规定的顺序追加到对应 chapter 的末尾。
 
-### 目录约定
+当前所有 R 计算实验共用**整个 textbook 的一个 `renv` 项目**，不再为每个实验
+单独建立 `renv`。实际项目根是 textbook 根目录：根目录的 `.Rprofile` 会激活
+`renv/activate.R`，而根目录的 `renv.lock` 是全书 R 包版本的唯一锁文件。
+`environment/r/` 保留环境说明；这样 `renv::snapshot()` 才能扫描全书章节与计算实验，
+而不会遗漏该目录以外使用的包。
 
-每个数学模块把计算文档放在自身目录中。例如线性模型模块：
+完整的恢复与依赖更新流程分别见 `environment/r/README.md` 和
+`environment/python/README.md`；不要只复制某个章节中的包安装命令。
+
+### 目录与提交约定
+
+例如线性模型模块可以保持下列目录布局：
 
 ```text
-statistics/Linear-model/
-├── main.tex
-├── computations.order
-└── computations/
-    └── 01-linear-regression/
-        ├── python/              # 使用 Python 时创建
-        │   ├── environment.yml  # Conda 环境定义，提交
-        │   ├── analysis.ipynb
-        │   └── result.html      # 执行并渲染后生成，需要提交
-        └── r/                   # 使用 R 时创建
-            ├── analysis.qmd
-            ├── renv.lock        # 初始化后生成，提交
-            ├── renv/            # 本地环境，不提交
-            └── result.html      # 执行并渲染后生成，需要提交
+textbook/
+├── .Rprofile                   # 提交：自动激活根目录的 renv
+├── .renvignore                  # 提交：仅排除本机环境与生成输出
+├── renv.lock                   # 提交：全书 R 依赖的唯一锁文件
+├── renv/
+│   ├── activate.R              # 提交：renv 引导文件
+│   ├── settings.json           # 提交：renv 设置
+│   └── library/                # 本机包库，不提交
+├── environment/
+│   ├── r/
+│   │   └── README.md           # R 环境说明与上述布局的原因
+│   └── python/
+│       ├── .python-version     # 提交：固定 Python 解释器版本
+│       ├── pyproject.toml      # 提交：直接依赖
+│       ├── uv.lock             # 提交：精确依赖锁文件
+│       └── .venv/              # 本机环境，不提交
+└── statistics/Linear-model/
+    ├── main.tex
+    ├── computations.order
+    └── computations/
+        └── 01-linear-regression/
+            └── r/
+                ├── analysis.qmd
+                └── result.html # 执行并渲染后生成，需要提交
 ```
+
+`.gitignore` 会保留上述可复现所需的 R 与 Python 入口、设置与锁文件。各环境目录
+下的 `README.md` 分别说明首次恢复、依赖更新、锁定文件检查与提交边界；修改环境时
+应遵循对应 README，而不要只修改某一个章节的计算文件。
 
 `computations.order` 使用普通 Markdown，不需要 JSON 或其他清单格式：
 
@@ -78,59 +94,46 @@ statistics/Linear-model/
 - computations/01-linear-regression/r/result.html
 ```
 
-每个二级标题表示一个计算实验，标题出现的顺序决定网页编号；每个实验可以只列
-一个 Python 结果、只列一个 R 结果，也可以同时列出两个结果。上面的例子会生成
-“实验 01”，其中先显示 Python Notebook，再显示 R Quarto 文档。如果实验只
-适合一种语言，就只保留对应的一行路径。
+每个二级标题表示一个计算实验，标题出现的顺序决定网页编号。
 
-### Python/Jupyter 环境（Conda）
+### R/Python 的渲染
 
-在 Python 案例目录创建并激活 Conda 环境：
+以下命令均从教材根目录执行。每次渲染都会覆盖对应实验目录的 `result.html`；完成后
+按 `computations.order` 所列路径检查并提交该结果文件。
 
-```bash
-cd statistics/Linear-model/computations/01-linear-regression/python
-conda env create -f environment.yml
-conda activate textbook-linear-regression
-jupyter lab analysis.ipynb
-```
+#### R / Quarto
 
-`environment.yml` 是项目需要提交的 Conda 环境定义；`conda env create` 会读取它，
-创建其中 `name` 指定的环境。已有同名环境时不需要重复创建。
-
-在 Jupyter 中执行 `Run All` 并保存 Notebook，然后使用同一个已激活环境渲染
-自包含 HTML：
+`analysis.qmd` 使用全书根目录的 `renv`。渲染时显式指定根目录的 R 启动配置，
+使 Quarto 启动的 R 进程也加载同一套 `renv`：
 
 ```bash
-quarto render analysis.ipynb --to html --output result.html \
-  -M embed-resources:true
+TEXTBOOK_ROOT="$PWD" R_PROFILE_USER="$PWD/.Rprofile" \
+quarto render statistics/Linear-model/computations/01-linear-regression/r/analysis.qmd \
+  --to html --output result.html -M embed-resources:true
 ```
 
-### R/Quarto 环境
+将路径替换为实际实验的 `.qmd` 文件。新增 R 包前先按
+`environment/r/README.md` 更新 `renv.lock`，再进行渲染。
 
-在 R 案例目录使用独立的 `renv` 环境：
+#### Python / Jupyter
+
+先将 Jupyter 声明为全书 Python 依赖（只需首次执行）：
 
 ```bash
-cd statistics/Linear-model/computations/01-linear-regression/r
-R
+uv --directory environment/python add jupyter
 ```
 
-在 R 中初始化并记录依赖：
-
-```r
-install.packages("renv")
-renv::init()
-renv::install(c("dplyr", "ggplot2", "broom"))
-renv::snapshot()
-```
-
-退出 R 后渲染文档：
+随后通过 UV 执行 Notebook，并直接输出自包含的 HTML：
 
 ```bash
-quarto render analysis.qmd --to html --output result.html
+uv --directory environment/python run --locked jupyter nbconvert \
+  --to html --execute --embed-images --output result \
+  --output-dir statistics/Linear-model/computations/01-linear-regression/python \
+  statistics/Linear-model/computations/01-linear-regression/python/analysis.ipynb
 ```
 
-`analysis.qmd` 已设置 `embed-resources: true`，因此文字、代码、表格、公式和
-图片都会包含在单个 `result.html` 中。
+上述命令会在 Notebook 所在目录写入 `result.html`。若 Notebook 使用外部文件，仍
+应确认渲染后的 HTML 不依赖未提交的本地资源。
 
 ### 插入教材网页
 
@@ -151,9 +154,12 @@ python3 html/build.py
 - 在结果缺失或仍引用外部图片时给出明确错误并停止构建。
 
 提交和发布时，应提交 Notebook、QMD、`computations.order`、生成的
-`result.html`、Conda 的 `environment.yml` 和更新后的 `html/site/`；不要提交 `renv/`、
-`.quarto/` 或 Notebook 缓存。GitHub Pages 仍然只发布 `html/site/`，因此每次
-修改计算案例后都要先重新渲染结果，再执行网页构建。
+`result.html`、根目录的 `.Rprofile`、`.renvignore`、`renv.lock` 与 `renv/` 中的引导/设置文件，
+以及更新后的 `html/site/`；不要提交 `renv/library/`、`.quarto/` 或 Notebook 缓存。Python 环境应提交
+`environment/python/.python-version`、`pyproject.toml`、`uv.lock` 与说明文件；不要
+提交 `environment/python/.venv/`。
+GitHub Pages 仍然只发布 `html/site/`，因此每次修改计算案例后都要先重新渲染结果，
+再执行网页构建。
 
 ## 发布到 GitHub Pages
 
@@ -166,8 +172,8 @@ python3 html/build.py
 - 原始 LaTeX 文件和正文引用的图片、代码等资源；
 - `html/build.py`、`html/home.md`、`html/style.css`、`html/textbook-ui.js`
   与 `html/favicon.svg`；
-- `html/site-meta.json`、`html/chapter-progress.json`，以及
-  `skills/textbook-latex-style/` 中由网页和 Agent 共同使用的符号规范；
+- `html/site-meta.json`、`html/chapter-progress.json` 与
+  `html/notation-catalog.json`；
 - 完整的 `html/site/`，包括 `index.html`、`chapters/`、`site_libs/`、
   `search.json` 和样式文件；
 - `.github/workflows/pages.yml`。

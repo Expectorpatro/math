@@ -196,6 +196,20 @@
 \end{definition}
 
 \subsection{约束最小二乘估计}
+\begin{lemma}\label{lem:AXTXAT}
+	若$A\in M_{k\times p}(K)$，$\operatorname{rank}(A)=k$且$\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top})$，则$A(X^{\top}X)^{-}A^{\top}$正定，于是根据\cref{theo:PositiveDefinite}(6)可知$A(X^{\top}X)^{-}A^{\top}$可逆。
+\end{lemma}
+\begin{proof}
+	由\cref{theo:VectorSpaceAAAT}可知$\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top}X)$，于是存在$B\in M_{p\times k}(K)$使得$A^{\top}=X^{\top}XB$。根据\cref{prop:Transpose}(4)可得：
+	\begin{equation*}
+		A(X^{\top}X)^{-}A^{\top}=B^{\top}X^{\top}X(X^{\top}X)^{-}X^{\top}XB=B^{\top}X^{\top}XB
+	\end{equation*}
+	注意到对任意的$x\in K^k$有$x^{\top}B^{\top}X^{\top}XBx=||XBx||^2\geqslant0$。若存在非零的$x\in K^k$使得$x^{\top}B^{\top}X^{\top}XBx=||XBx||^2=0$，则：
+	\begin{equation*}
+		A^{\top}x=X^{\top}XBx=\mathbf{0}
+	\end{equation*}
+	于是$\operatorname{rank}(A)\ne k$，矛盾，所以$A(X^{\top}X)^{-}A^{\top}$正定。
+\end{proof}
 \begin{theorem}\label{theo:ConstraintLinearModel}
 	对于\cref{model:LinearModel}，假设：
 	\begin{equation*}
@@ -236,7 +250,7 @@
 	\begin{equation*}
 		A\hat{\beta}-A(X^{\top}X)^-A^{\top}\hat{\lambda}=b
 	\end{equation*}
-	由\info{$A(X^{\top}X)^-A^{\top}$的可逆性}可知：
+	由\cref{lem:AXTXAT}可知：
 	\begin{equation*}
 		\hat{\lambda}=[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b)
 	\end{equation*}

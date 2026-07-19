@@ -1,0 +1,706 @@
+---
+title: "R：探索性数据分析"
+subtitle: "以 airquality 数据为例"
+lang: zh-CN
+format:
+  html:
+    embed-resources: true
+    toc: false
+    code-copy: true
+execute:
+  echo: true
+  warning: false
+  message: false
+  fig-align: center
+  fig-width: 8
+  fig-height: 5
+---
+
+探索性数据分析（exploratory data analysis，EDA）发生在正式建模之前。它不以检验
+某个预先指定的模型为目的，而是从数据本身出发，依次检查数据质量、变量分布、变量
+关系与观测顺序，并据此确定后续分析中需要处理的问题。
+
+本实验使用R自带的`airquality`数据。数据记录了1973年5月至9月纽约每日的臭氧浓度
+与气象条件，包含真实的缺失值和极端观测。分析围绕一个具体问题展开：臭氧浓度怎样
+分布，它与太阳辐射、风速、气温、月份和日期有什么关系？全部图形只使用英文标题、
+坐标轴、图例和标注，避免中文字体缺失导致图片无法绘制。
+
+```{r}
+#| label: setup
+#| include: false
+
+options(width = 100, digits = 4, scipen = 6)
+
+colour_main <- "#52649a"
+colour_line <- "#397d78"
+colour_warn <- "#b85c38"
+
+sample_skewness <- function(x) {
+  x <- x[is.finite(x)]
+  centered <- x - mean(x)
+  second_moment <- mean(centered^2)
+
+  if (length(x) < 3 || second_moment == 0) {
+    return(NA_real_)
+  }
+
+  mean(centered^3) / second_moment^(3 / 2)
+}
+
+numeric_summary <- function(data, variables) {
+  result <- lapply(variables, function(variable) {
+    x_all <- data[[variable]]
+    x <- x_all[!is.na(x_all)]
+    five <- quantile(
+      x,
+      probs = c(0, 0.25, 0.5, 0.75, 1),
+      names = FALSE
+    )
+
+    data.frame(
+      Variable = variable,
+      N = length(x),
+      Missing = sum(is.na(x_all)),
+      Min = five[1],
+      Q1 = five[2],
+      Median = five[3],
+      Q3 = five[4],
+      Max = five[5],
+      Mean = mean(x),
+      SD = sd(x),
+      IQR = IQR(x),
+      Skewness = sample_skewness(x),
+      row.names = NULL
+    )
+  })
+
+  do.call(rbind, result)
+}
+
+iqr_outliers <- function(data, variables) {
+  result <- lapply(variables, function(variable) {
+    x <- data[[variable]]
+    quartiles <- quantile(
+      x,
+      probs = c(0.25, 0.75),
+      na.rm = TRUE,
+      names = FALSE
+    )
+    spread <- quartiles[2] - quartiles[1]
+    lower_fence <- quartiles[1] - 1.5 * spread
+    upper_fence <- quartiles[2] + 1.5 * spread
+    index <- which(!is.na(x) & (x < lower_fence | x > upper_fence))
+
+    if (length(index) == 0) {
+      return(NULL)
+    }
+
+    data.frame(
+      Row = data$Row[index],
+      Date = data$Date[index],
+      Variable = variable,
+      Value = x[index],
+      LowerFence = lower_fence,
+      UpperFence = upper_fence,
+      row.names = NULL
+    )
+  })
+
+  result <- do.call(rbind, result)
+  if (is.null(result)) {
+    return(data.frame(
+      Row = integer(),
+      Date = as.Date(character()),
+      Variable = character(),
+      Value = numeric(),
+      LowerFence = numeric(),
+      UpperFence = numeric()
+    ))
+  }
+
+  result[order(result$Variable, result$Date), ]
+}
+```
+
+## 认识数据
+
+先建立分析数据。`Row`保留原数据行号，便于返回原始记录；`Date`由月份和日期构造；
+`MonthName`把月份作为有序分类变量，而不是把5至9当作普通连续数值。
+
+```{r}
+#| label: data-structure
+
+air <- datasets::airquality
+air$Row <- seq_len(nrow(air))
+air$Date <- as.Date(sprintf("1973-%02d-%02d", air$Month, air$Day))
+air$MonthName <- factor(
+  air$Month,
+  levels = 5:9,
+  labels = c("May", "Jun", "Jul", "Aug", "Sep"),
+  ordered = TRUE
+)
+
+dim(air)
+str(air)
+head(air)
+summary(air[c("Ozone", "Solar.R", "Wind", "Temp")])
+table(air$MonthName)
+```
+
+数据共有153个日观测。`Ozone`为13:00至15:00的平均臭氧浓度，单位为ppb；
+`Solar.R`为08:00至12:00的太阳辐射强度，单位为Langleys；`Wind`为平均风速，
+单位为mph；`Temp`为当日最高气温，单位为华氏度。`Month`与`Day`共同给出时间位置，
+不应把`Day`当作普通解释变量单独研究。
+
+EDA的第一步不是画图，而是确认一行表示什么、各列采用什么单位、哪些变量是数值变量、
+哪些变量只是编码或索引。若这一层判断错误，后续图形即使绘制正确也会被错误解释。
+
+## 数据质量
+
+### 重复记录与取值范围
+
+下面检查重复日期、完全重复的原始记录以及明显不可能的取值。范围规则只能发现数据
+录入中的明显错误，不能证明测量本身准确。
+
+```{r}
+#| label: data-validation
+
+original_variables <- c("Ozone", "Solar.R", "Wind", "Temp", "Month", "Day")
+numeric_variables <- c("Ozone", "Solar.R", "Wind", "Temp")
+
+data.frame(
+  Check = c(
+    "Duplicated dates",
+    "Duplicated original rows",
+    "Negative Ozone",
+    "Negative Solar.R",
+    "Nonpositive Wind",
+    "Month outside 5 to 9",
+    "Invalid Date"
+  ),
+  Violations = c(
+    sum(duplicated(air$Date)),
+    sum(duplicated(air[original_variables])),
+    sum(air$Ozone < 0, na.rm = TRUE),
+    sum(air$Solar.R < 0, na.rm = TRUE),
+    sum(air$Wind <= 0, na.rm = TRUE),
+    sum(!air$Month %in% 5:9),
+    sum(is.na(air$Date))
+  )
+)
+
+sapply(air[numeric_variables], range, na.rm = TRUE)
+```
+
+本数据没有重复日期或明显越界值，因此没有理由在分析开始前删除记录。极端值与不可能
+值必须区分：例如较高的臭氧浓度可能是需要解释的污染事件，而不一定是数据错误。
+
+### 缺失值
+
+缺失值首先按列统计。`Ozone`缺失37个，`Solar.R`缺失7个，`Wind`与`Temp`没有缺失。
+除了缺失数，还要报告缺失率，因为相同的缺失数在不同样本量下具有不同意义。
+
+```{r}
+#| label: missing-summary
+
+missing_count <- colSums(is.na(air[original_variables]))
+missing_rate <- colMeans(is.na(air[original_variables]))
+
+data.frame(
+  Variable = original_variables,
+  Missing = missing_count,
+  MissingRate = missing_rate,
+  row.names = NULL
+)
+
+air$OzoneStatus <- factor(
+  ifelse(is.na(air$Ozone), "Missing", "Observed"),
+  levels = c("Observed", "Missing")
+)
+
+table(air$MonthName, air$OzoneStatus)
+prop.table(table(air$MonthName, air$OzoneStatus), margin = 1)
+```
+
+逐列缺失数不能说明缺失发生在什么时间。下面左图比较各列缺失规模，右图将每个日期与
+变量的缺失状态画成色块。月份交叉表则用于判断`Ozone`缺失是否集中在某些月份。
+
+```{r}
+#| label: missing-plots
+#| fig-width: 10
+#| fig-height: 4.2
+
+old_par <- par(mfrow = c(1, 2), mar = c(5, 4, 3, 1))
+
+barplot(
+  missing_count,
+  col = colour_main,
+  border = NA,
+  las = 2,
+  main = "Missing Values by Variable",
+  xlab = "",
+  ylab = "Count"
+)
+
+missing_matrix <- 1 * is.na(air[original_variables])
+image(
+  x = seq_len(nrow(air)),
+  y = seq_along(original_variables),
+  z = missing_matrix,
+  col = c("grey90", colour_warn),
+  zlim = c(0, 1),
+  axes = FALSE,
+  xlab = "Month",
+  ylab = "",
+  main = "Missingness over Time"
+)
+month_start <- which(air$Day == 1)
+axis(1, at = month_start, labels = c("May", "Jun", "Jul", "Aug", "Sep"))
+axis(
+  2,
+  at = seq_along(original_variables),
+  labels = original_variables,
+  las = 2
+)
+box()
+legend(
+  "topright",
+  legend = c("Observed", "Missing"),
+  fill = c("grey90", colour_warn),
+  border = NA,
+  bty = "n",
+  cex = 0.8
+)
+
+par(old_par)
+```
+
+本实验不在EDA阶段填补缺失值。单变量概括使用该变量的全部非缺失观测；相关系数使用
+成对完整观测；需要四个数值变量同时出现的图形则使用完整案例。每次改变有效样本都在
+代码中明确说明，避免把不同样本得到的结果当作完全可比。
+
+## 单变量分布
+
+### 五数概括、离散程度与偏度
+
+对数值变量先计算五数概括
+
+$$
+\min,\quad Q_1,\quad Q_2,\quad Q_3,\quad \max,
+$$
+
+其中$Q_2$为中位数。均值与标准差描述中心和平均离散程度，中位数与IQR对极端值更加
+稳健。样本偏度大于$0$表示右尾较长，即右偏；小于$0$表示左尾较长，即左偏。
+
+```{r}
+#| label: numeric-summary
+
+summary_table <- numeric_summary(air, numeric_variables)
+print(summary_table, digits = 3, row.names = FALSE)
+```
+
+由输出可见，`Ozone`的均值高于中位数，最大值又远离上四分位数，偏度为正，呈明显
+右偏；`Solar.R`和`Temp`的偏度为负，左尾相对较长。偏度只概括分布的不对称方向，
+仍需结合直方图判断峰数、尾部和取值集中的位置。
+
+### 直方图与密度曲线
+
+下面对四个变量分别作直方图。柱高按密度计算，实线为核密度曲线，虚线分别表示均值
+和中位数。各变量的单位不同，因此使用各自的横轴尺度。
+
+```{r}
+#| label: histograms
+#| fig-width: 10
+#| fig-height: 7
+
+old_par <- par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
+
+for (variable in numeric_variables) {
+  x <- air[[variable]]
+  x <- x[!is.na(x)]
+
+  hist(
+    x,
+    breaks = "FD",
+    probability = TRUE,
+    col = colour_main,
+    border = "white",
+    main = paste(variable, "Distribution"),
+    xlab = variable,
+    ylab = "Density"
+  )
+  lines(density(x), col = colour_warn, lwd = 2)
+  abline(v = mean(x), col = colour_line, lwd = 2)
+  abline(v = median(x), col = "black", lwd = 2, lty = 2)
+  legend(
+    "topright",
+    legend = c("Density", "Mean", "Median"),
+    col = c(colour_warn, colour_line, "black"),
+    lty = c(1, 1, 2),
+    lwd = 2,
+    bty = "n",
+    cex = 0.75
+  )
+}
+
+par(old_par)
+```
+
+对近似对称的分布，均值与中位数通常接近；右偏分布的均值容易被右尾拉高，左偏分布
+则相反。直方图的形状会随组距改变，所以不能把某一次分组出现的小峰直接解释为总体
+具有多个峰。
+
+### 箱线图与离群观测
+
+箱线图以$Q_1-1.5\operatorname{IQR}$和$Q_3+1.5\operatorname{IQR}$为围栏，超出
+围栏的点只是需要核查的观测。下面同时输出这些观测的原数据行号和日期，使图形判断
+可以返回原始记录。
+
+```{r}
+#| label: boxplots
+#| fig-width: 10
+#| fig-height: 6.5
+
+old_par <- par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
+
+for (variable in numeric_variables) {
+  boxplot(
+    air[[variable]],
+    horizontal = TRUE,
+    col = colour_main,
+    border = colour_main,
+    outcol = colour_warn,
+    pch = 16,
+    main = paste(variable, "Boxplot"),
+    xlab = variable,
+    ylab = ""
+  )
+}
+
+par(old_par)
+
+outlier_table <- iqr_outliers(air, numeric_variables)
+print(outlier_table, digits = 3, row.names = FALSE)
+```
+
+`Ozone`右尾的若干高值会被箱线图标记，但它们与高温、低风速等气象条件同时出现时，
+可能是合理的高污染日。EDA只形成核查清单，不根据箱线图自动删点。对于偏态分布，
+箱线图在长尾一侧标出观测本来就是常见现象。
+
+### 对右偏变量作尺度比较
+
+严重右偏会使少数大值在散点图中占据较大空间。由于`Ozone`的非缺失值全部为正，可以
+考察$\log(\operatorname{Ozone})$。这里的变换只是帮助观察分布与关系，不表示原变量
+必须服从正态分布。
+
+```{r}
+#| label: ozone-transformation
+#| fig-width: 9
+#| fig-height: 4
+
+ozone <- air$Ozone[!is.na(air$Ozone)]
+
+c(
+  OriginalSkewness = sample_skewness(ozone),
+  LogSkewness = sample_skewness(log(ozone))
+)
+
+old_par <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+
+hist(
+  ozone,
+  breaks = "FD",
+  col = colour_main,
+  border = "white",
+  main = "Original Ozone",
+  xlab = "Ozone",
+  ylab = "Count"
+)
+hist(
+  log(ozone),
+  breaks = "FD",
+  col = colour_line,
+  border = "white",
+  main = "Log-transformed Ozone",
+  xlab = "log(Ozone)",
+  ylab = "Count"
+)
+
+par(old_par)
+```
+
+对数变换压缩右尾，使高值不再主导横轴尺度。是否在后续模型中采用该尺度，还应根据
+关系是否更接近线性、方差是否更稳定以及结果是否容易解释共同决定，不能只比较偏度。
+
+## 数值变量之间的关系
+
+### 相关系数与相关性热图
+
+Pearson相关系数度量线性关系。数据存在缺失值，下面使用成对完整观测，并另行输出每一
+对变量的有效样本量。这样可以看出，相关矩阵的不同元素并非都由同一批日期计算。
+
+```{r}
+#| label: correlation
+
+numeric_data <- air[numeric_variables]
+
+correlation <- cor(
+  numeric_data,
+  use = "pairwise.complete.obs",
+  method = "pearson"
+)
+
+observed_matrix <- !is.na(as.matrix(numeric_data))
+pairwise_n <- t(observed_matrix) %*% observed_matrix
+
+round(correlation, 3)
+pairwise_n
+```
+
+```{r}
+#| label: correlation-heatmap
+#| fig-width: 7
+#| fig-height: 6
+
+displayed_correlation <- correlation[nrow(correlation):1, , drop = FALSE]
+colour_scale <- colorRampPalette(
+  c(colour_warn, "white", colour_line)
+)(101)
+
+old_par <- par(mar = c(6, 6, 3, 1))
+image(
+  x = seq_len(ncol(displayed_correlation)),
+  y = seq_len(nrow(displayed_correlation)),
+  z = t(displayed_correlation),
+  col = colour_scale,
+  zlim = c(-1, 1),
+  axes = FALSE,
+  xlab = "",
+  ylab = "",
+  main = "Pearson Correlation"
+)
+axis(
+  1,
+  at = seq_len(ncol(displayed_correlation)),
+  labels = colnames(displayed_correlation),
+  las = 2
+)
+axis(
+  2,
+  at = seq_len(nrow(displayed_correlation)),
+  labels = rownames(displayed_correlation),
+  las = 2
+)
+
+for (row in seq_len(nrow(displayed_correlation))) {
+  for (column in seq_len(ncol(displayed_correlation))) {
+    text(
+      column,
+      row,
+      labels = sprintf("%.2f", displayed_correlation[row, column]),
+      cex = 0.9
+    )
+  }
+}
+
+box()
+par(old_par)
+```
+
+`Ozone`与`Temp`呈较强正相关，与`Wind`呈较强负相关，与`Solar.R`呈较弱的正相关。
+这与高温、低风条件下臭氧浓度容易升高的样本现象一致，但相关关系本身不能说明因果。
+相关系数还可能掩盖曲线关系、分组结构和极端点，因此必须继续查看散点图。
+
+### 散点矩阵与局部趋势
+
+散点矩阵在四个变量均非缺失的完整案例上绘制，使所有面板使用同一批观测。平滑线用于
+观察总体趋势，不作为正式模型。
+
+```{r}
+#| label: scatterplot-matrix
+#| fig-width: 8
+#| fig-height: 8
+
+complete_numeric <- na.omit(numeric_data)
+
+pairs(
+  complete_numeric,
+  panel = panel.smooth,
+  pch = 16,
+  cex = 0.55,
+  col = adjustcolor(colour_main, alpha.f = 0.55),
+  col.smooth = colour_warn,
+  main = "Scatterplot Matrix: Complete Cases"
+)
+```
+
+再以`Ozone`为纵轴分别观察三个气象变量。实线为最小二乘直线，虚线为LOWESS局部
+平滑。两条线若明显分离，说明单一直线可能不能充分概括关系。
+
+```{r}
+#| label: ozone-relations
+#| fig-width: 11
+#| fig-height: 4
+
+draw_ozone_relation <- function(x, x_name, show_legend = FALSE) {
+  y <- air$Ozone
+  complete <- complete.cases(x, y)
+  x_complete <- x[complete]
+  y_complete <- y[complete]
+
+  plot(
+    x_complete,
+    y_complete,
+    pch = 16,
+    cex = 0.65,
+    col = adjustcolor(colour_main, alpha.f = 0.6),
+    main = paste("Ozone vs", x_name),
+    xlab = x_name,
+    ylab = "Ozone"
+  )
+  abline(lm(y_complete ~ x_complete), col = colour_line, lwd = 2)
+  lines(
+    lowess(x_complete, y_complete),
+    col = colour_warn,
+    lwd = 2,
+    lty = 2
+  )
+
+  if (show_legend) {
+    legend(
+      "topleft",
+      legend = c("Linear fit", "LOWESS"),
+      col = c(colour_line, colour_warn),
+      lty = c(1, 2),
+      lwd = 2,
+      bty = "n",
+      cex = 0.8
+    )
+  }
+}
+
+old_par <- par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+draw_ozone_relation(air$Solar.R, "Solar.R", show_legend = TRUE)
+draw_ozone_relation(air$Wind, "Wind")
+draw_ozone_relation(air$Temp, "Temp")
+par(old_par)
+```
+
+点云表明气温越高，臭氧浓度总体越高；风速越高，臭氧浓度总体越低；太阳辐射与臭氧
+浓度的关系较弱且离散程度较大。图中还可见高臭氧观测主要位于高温、低风区域，因此
+单变量箱线图标记的高值并非脱离其他变量背景的孤立点。
+
+## 分组比较与时间顺序
+
+### 按月份比较
+
+月份是有序分类变量。下面同时报告每月的观测数、`Ozone`缺失数、均值、中位数与IQR，
+并用箱线图比较完整分布。只比较均值会遗漏偏态、离散程度和组间重叠。
+
+```{r}
+#| label: month-summary
+
+month_summary <- do.call(
+  rbind,
+  lapply(levels(air$MonthName), function(month) {
+    month_data <- air[air$MonthName == month, ]
+
+    data.frame(
+      Month = month,
+      Days = nrow(month_data),
+      OzoneObserved = sum(!is.na(month_data$Ozone)),
+      OzoneMissing = sum(is.na(month_data$Ozone)),
+      OzoneMean = mean(month_data$Ozone, na.rm = TRUE),
+      OzoneMedian = median(month_data$Ozone, na.rm = TRUE),
+      OzoneIQR = IQR(month_data$Ozone, na.rm = TRUE),
+      TempMean = mean(month_data$Temp),
+      WindMean = mean(month_data$Wind),
+      row.names = NULL
+    )
+  })
+)
+
+print(month_summary, digits = 3, row.names = FALSE)
+```
+
+```{r}
+#| label: month-boxplot
+#| fig-width: 8
+#| fig-height: 4.5
+
+boxplot(
+  Ozone ~ MonthName,
+  data = air,
+  col = colour_main,
+  border = colour_main,
+  outcol = colour_warn,
+  pch = 16,
+  xlab = "Month",
+  ylab = "Ozone",
+  main = "Ozone Distribution by Month"
+)
+stripchart(
+  Ozone ~ MonthName,
+  data = air,
+  vertical = TRUE,
+  method = "jitter",
+  pch = 16,
+  cex = 0.55,
+  col = adjustcolor("black", alpha.f = 0.35),
+  add = TRUE
+)
+```
+
+7月和8月的臭氧浓度整体高于5月、6月和9月，但各月分布仍有明显重叠。月份差异也与
+气温和风速的季节变化同时出现，因此不能把箱线图中的组间差异直接解释为月份本身的
+因果效应。
+
+### 按日期观察
+
+`airquality`是按日期排列的数据。若只看直方图和散点图，会丢失季节变化、相邻日期
+聚集以及缺失发生位置。下面保留原始单位分别绘图；折线断开的位置表示缺失值。
+
+```{r}
+#| label: time-order
+#| fig-width: 10
+#| fig-height: 7
+
+old_par <- par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
+
+for (variable in numeric_variables) {
+  plot(
+    air$Date,
+    air[[variable]],
+    type = "o",
+    pch = 16,
+    cex = 0.4,
+    lwd = 0.7,
+    col = colour_main,
+    main = paste(variable, "over Time"),
+    xlab = "Date",
+    ylab = variable
+  )
+}
+
+par(old_par)
+```
+
+时间图说明臭氧和气温具有明显的季节结构，高值主要集中在夏季中段；缺失也不是均匀
+散布在整个时间轴上。若后续建立回归模型，月份或更平滑的时间趋势可能需要进入模型，
+同时还应检查相邻日期误差是否相关。
+
+## 分析结论
+
+本例的EDA得到以下数据事实。153个日观测中，`Ozone`缺失37个，`Solar.R`缺失7个，
+缺失处理会使不同分析使用不同的有效样本。`Ozone`明显右偏，并含有若干位于右尾的
+高值；对数尺度能压缩右尾，但是否采用变换仍取决于后续模型。`Solar.R`和`Temp`呈
+左偏，说明左偏与右偏必须由偏度符号和图形共同判断，不能只看均值大小。
+
+变量关系方面，`Ozone`随`Temp`升高而总体升高，随`Wind`升高而总体降低，与
+`Solar.R`的正相关较弱。7月和8月的臭氧浓度较高，日期图又显示这种月份差异与季节
+变化相连。箱线图标记的高臭氧观测大多可以在高温、低风的变量组合中得到解释，因此
+不应在缺少原始记录依据时删除。
+
+由此，后续建模至少需要明确缺失值处理方法，考虑臭氧的响应尺度，保留气温、风速、
+太阳辐射与月份或时间趋势，并对高臭氧日作敏感性分析。EDA的作用正是把这些建模前提
+从真实数据中整理出来，而不是在分析开始时预先指定一个结论。

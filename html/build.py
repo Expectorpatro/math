@@ -51,13 +51,7 @@ TEXTBOOK_UI_SCRIPT = HTML_DIR / "textbook-ui.js"
 FAVICON = HTML_DIR / "favicon.svg"
 SITE_META = HTML_DIR / "site-meta.json"
 CHAPTER_PROGRESS = HTML_DIR / "chapter-progress.json"
-NOTATION_CATALOG = (
-    PROJECT_ROOT
-    / "skills"
-    / "textbook-latex-style"
-    / "references"
-    / "notation-catalog.json"
-)
+NOTATION_CATALOG = HTML_DIR / "notation-catalog.json"
 MAIN_TEX = PROJECT_ROOT / "main.tex"
 SETTINGS_TEX = PROJECT_ROOT / "settings.tex"
 QUARTO = Path(

@@ -1,0 +1,212 @@
+---
+title: "线性回归"
+format:
+  html:
+    embed-resources: true
+    toc: false
+    code-copy: true
+execute:
+  echo: true
+  warning: false
+  message: false
+  fig-align: center
+  fig-width: 8
+  fig-height: 5
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+if (!requireNamespace("MASS", quietly = TRUE)) {
+  stop("This document requires the MASS package.")
+}
+
+options(width = 100, digits = 5, scipen = 6)
+
+colour_main <- "#355c8a"
+colour_smooth <- "#c45a3c"
+```
+
+本实验回答怎样完成一次普通多元线性回归分析，重点是回归方程显著性、各变量显著性、$R^2$、残差诊断、Cook距离和Box-Cox变换。
+
+`MASS::cpus`记录了209台计算机的硬件参数与相对性能。以实际性能`perf`为响应变量，使用机器周期`syct`、最小内存`mmin`、最大内存`mmax`、缓存`cach`、最小通道数`chmin`和最大通道数`chmax`作为自变量。`estperf`是数据中已有的性能估计，若把它作为自变量会把目标信息重新送入模型，因此不使用。
+
+考虑模型
+
+$$
+\operatorname{perf}_i
+=\beta_0+\beta_1\operatorname{syct}_i
++\beta_2\operatorname{mmin}_i
++\beta_3\operatorname{mmax}_i
++\beta_4\operatorname{cach}_i
++\beta_5\operatorname{chmin}_i
++\beta_6\operatorname{chmax}_i+\varepsilon_i
+$$
+
+## 数据概况
+
+先确认样本量、变量含义、缺失情况和基本取值。
+
+```{r}
+#| label: cpu-data
+
+cpu <- MASS::cpus
+cpu_predictors <- c("syct", "mmin", "mmax", "cach", "chmin", "chmax")
+cpu_model_data <- cpu[c(cpu_predictors, "perf")]
+
+dim(cpu_model_data)
+summary(cpu_model_data)
+sum(!complete.cases(cpu_model_data))
+```
+
+对数据进行标准化。
+
+```{r}
+#| label: data-standardization
+
+cpu_standardized_predictors <- as.data.frame(
+  scale(cpu_model_data[cpu_predictors])
+)
+cpu_standardized_data <- cbind(
+  perf = cpu_model_data$perf,
+  cpu_standardized_predictors
+)
+```
+
+计算条件数。
+
+```{r}
+#| label: condition-number
+#|
+cpu_condition_number <- kappa(
+  as.matrix(cpu_standardized_predictors),
+  exact = TRUE
+)
+
+cat(
+  sprintf(
+    "\nCondition number of the standardized CPU design matrix: %.4f\n",
+    cpu_condition_number
+  )
+)
+```
+
+条件数未超过10，无需额外处理。
+
+## 拟合与显著性
+
+拟合全模型并查看结果。
+
+```{r}
+#| label: cpu-ols
+
+cpu_ols <- lm(perf ~ ., data = cpu_standardized_data)
+summary(cpu_ols)
+```
+
+## 残差与强影响观测
+
+诊断只保留三幅最常用的图：残差与拟合值图、正态Q--Q图和Cook距离图。第一幅图检查残差是否大致分布在$0$附近、残差方差是否大致稳定（残差分布宽度与拟合值之间无系统性关系）；第二幅图检查残差是否近似符合正态分布；第三幅图检查哪些观测会明显影响拟合结果。
+
+```{r}
+#| label: cpu-diagnostics
+#| fig-width: 12
+#| fig-height: 4
+
+plot_regression_diagnostics <- function(model) {
+  old_par <- par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+  plot(model, which = 1, id.n = 3)
+  plot(model, which = 2, id.n = 3)
+  plot(model, which = 4, id.n = 3)
+  par(old_par)
+}
+
+plot_regression_diagnostics(cpu_ols)
+```
+
+从残差—拟合值图看，残差并没有随机地围绕零水平线分布，而是呈现明显的弯曲趋势：在较小拟合值处残差偏正，中等拟合值处偏负，随后又逐渐上升；同时，随着拟合值增大，残差的波动范围明显扩大，存在异方差现象。Q–Q 图中部虽然大致贴近参考直线，但两端，尤其是右尾，出现严重偏离，表明残差分布具有重尾或右偏特征，并不满足正态性假设。
+
+从 Cook 距离图看，大多数观测的 Cook 距离接近于零，对回归结果的影响较小，但第 200 个观测的 Cook 距离接近 3，远高于常用警戒值 1，说明它是一个极强的影响点，可能显著改变回归系数、拟合曲线及推断结论；第 10 个观测的 Cook 距离也接近 1，同样需要重点检查，第 199 个观测以及少数其他观测也表现出一定影响力。结合前面的残差图，第 200 个观测同时具有较大的残差，因此其异常性尤其值得关注。不过，Cook 距离较大并不意味着应直接删除该观测，而应首先检查是否存在测量异常或特殊的数据生成机制，并分别在保留和剔除这些观测的情况下重新拟合模型，比较回归系数、显著性和预测结果是否发生明显变化。
+
+## Box-Cox变换
+
+`perf`的观测全部为正，可以考虑
+
+$$
+y_i^{(\lambda)}=
+\begin{cases}
+\dfrac{y_i^\lambda-1}{\lambda},&\lambda\ne0,\\[6pt]
+\log y_i,&\lambda=0.
+\end{cases}
+$$
+
+`MASS::boxcox`通过轮廓似然选择$\lambda$。最大点给出$\hat{\lambda}$，水平虚线
+对应近似95%置信区间。
+
+```{r}
+#| label: cpu-boxcox-profile
+#| fig-width: 8
+#| fig-height: 5
+
+cpu_boxcox_profile <- MASS::boxcox(
+  cpu_ols,
+  lambda = seq(-1, 1, by = 0.01),
+  plotit = TRUE
+)
+
+cpu_lambda <- cpu_boxcox_profile$x[
+  which.max(cpu_boxcox_profile$y)
+]
+cpu_loglik_cutoff <- max(cpu_boxcox_profile$y) -
+  qchisq(0.95, df = 1) / 2
+cpu_lambda_interval <- range(
+  cpu_boxcox_profile$x[
+    cpu_boxcox_profile$y >= cpu_loglik_cutoff
+  ]
+)
+
+abline(h = cpu_loglik_cutoff, lty = 2, col = colour_smooth)
+abline(v = cpu_lambda, lty = 2, col = colour_main)
+
+c(
+  LambdaEstimate = cpu_lambda,
+  Lower = cpu_lambda_interval[1],
+  Upper = cpu_lambda_interval[2]
+)
+```
+
+按$\hat{\lambda}$变换响应变量后重新拟合。需要重新检查总体显著性、各变量显著性和
+残差图；原尺度与变换尺度的$R^2$解释的是不同响应，不能直接比较大小。
+
+```{r}
+#| label: cpu-boxcox-model
+
+box_cox_transform <- function(y, lambda) {
+  if (abs(lambda) < 1e-8) {
+    log(y)
+  } else {
+    (y^lambda - 1) / lambda
+  }
+}
+
+cpu_boxcox_data <- cpu[cpu_predictors]
+cpu_boxcox_data$perf.bc <- box_cox_transform(
+  cpu$perf,
+  cpu_lambda
+)
+cpu_boxcox_data <- cpu_boxcox_data[c("perf.bc", cpu_predictors)]
+
+cpu_boxcox_model <- lm(perf.bc ~ ., data = cpu_boxcox_data)
+summary(cpu_boxcox_model)
+```
+
+```{r}
+#| label: cpu-boxcox-diagnostics
+#| fig-width: 12
+#| fig-height: 4
+
+plot_regression_diagnostics(cpu_boxcox_model)
+```
+
+可以发现经过变换后模型的异方差性与非正态性得到了很好的治理。
