@@ -716,9 +716,9 @@
   };
 
   const mountRecentCommits = () => {
-    const list = document.querySelector(".textbook-home .home-commits");
+    const lists = Array.from(document.querySelectorAll(".home-commits"));
     const repository = document.querySelector('meta[name="textbook-repository"]')?.content;
-    if (!list || !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository || "")) {
+    if (!lists.length || !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository || "")) {
       return;
     }
 
@@ -749,7 +749,7 @@
       return item;
     };
 
-    list.setAttribute("aria-busy", "true");
+    lists.forEach((list) => list.setAttribute("aria-busy", "true"));
     fetch(`https://api.github.com/repos/${repository}/commits?sha=main&per_page=3`, {
       headers: { Accept: "application/vnd.github+json" },
       cache: "no-store",
@@ -760,15 +760,19 @@
       })
       .then((commits) => {
         if (!Array.isArray(commits)) return;
-        const items = commits.map(createCommitItem).filter(Boolean);
-        if (!items.length) return;
-        list.replaceChildren(...items);
-        list.dataset.source = "github";
+        lists.forEach((list) => {
+          const items = commits.map(createCommitItem).filter(Boolean);
+          if (!items.length) return;
+          list.replaceChildren(...items);
+          list.dataset.source = "github";
+        });
       })
       .catch(() => {
         // Keep the build-time list visible when offline or rate-limited.
       })
-      .finally(() => list.removeAttribute("aria-busy"));
+      .finally(() => {
+        lists.forEach((list) => list.removeAttribute("aria-busy"));
+      });
   };
 
   const mount = () => {
