@@ -4399,9 +4399,16 @@ def copy_quarto_resources(document: dict[str, Any]) -> None:
     shutil.copy2(DENSITY_PROBE_SCRIPT, QUARTO_PROJECT_DIR / "density-probe.js")
     shutil.copy2(FORMULA_COPY_SCRIPT, QUARTO_PROJECT_DIR / "formula-copy.js")
     shutil.copy2(FORMULA_COPY_INCLUDE, QUARTO_PROJECT_DIR / "formula-copy.html")
-    shutil.copy2(
-        HTML_DIR / "theme-toggle.html",
-        QUARTO_PROJECT_DIR / "theme-toggle.html",
+    user_interface_version = hashlib.sha256(
+        TEXTBOOK_UI_SCRIPT.read_bytes()
+    ).hexdigest()[:12]
+    theme_toggle = (HTML_DIR / "theme-toggle.html").read_text(encoding="utf-8")
+    theme_toggle = theme_toggle.replace(
+        "__TEXTBOOK_UI_VERSION__", user_interface_version
+    )
+    (QUARTO_PROJECT_DIR / "theme-toggle.html").write_text(
+        theme_toggle,
+        encoding="utf-8",
     )
     shutil.copy2(TEXTBOOK_UI_SCRIPT, QUARTO_PROJECT_DIR / "textbook-ui.js")
     shutil.copy2(FAVICON, QUARTO_PROJECT_DIR / "favicon.svg")
