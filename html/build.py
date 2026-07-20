@@ -4859,6 +4859,7 @@ def write_quarto_site(
     shutil.copytree(QUARTO_PROJECT_DIR / "_site", output_dir)
     postprocess_reference_pages(output_dir)
     postprocess_site_markup(output_dir, site_metadata)
+    cache_bust_favicon(output_dir)
     (output_dir / ".nojekyll").write_text("", encoding="utf-8")
 
 
@@ -4985,6 +4986,25 @@ def postprocess_site_markup(
             flags=re.IGNORECASE,
         )
         path.write_text(markup, encoding="utf-8")
+
+
+def cache_bust_favicon(output_dir: Path) -> None:
+    """Version favicon URLs so browsers do not retain an obsolete icon."""
+    favicon = output_dir / "favicon.svg"
+    if not favicon.is_file():
+        return
+
+    version = hashlib.sha256(favicon.read_bytes()).hexdigest()[:12]
+    icon_link = re.compile(
+        r'(<link\b(?=[^>]*\brel=["\']icon["\'])[^>]*\bhref=["\'])'
+        r'([^"\']*favicon\.svg)(?:\?[^"\']*)?(["\'])',
+        flags=re.IGNORECASE,
+    )
+    for path in sorted(output_dir.rglob("*.html")):
+        markup = path.read_text(encoding="utf-8")
+        updated = icon_link.sub(rf"\1\2?v={version}\3", markup)
+        if updated != markup:
+            path.write_text(updated, encoding="utf-8")
 
 
 def localize_navigation(output_dir: Path) -> None:

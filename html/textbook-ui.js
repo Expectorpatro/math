@@ -715,6 +715,62 @@
     main.insertBefore(link, navigation || null);
   };
 
+  const mountRecentCommits = () => {
+    const list = document.querySelector(".textbook-home .home-commits");
+    const repository = document.querySelector('meta[name="textbook-repository"]')?.content;
+    if (!list || !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository || "")) {
+      return;
+    }
+
+    const createCommitItem = (commit) => {
+      const hash = typeof commit?.sha === "string" ? commit.sha : "";
+      const url = typeof commit?.html_url === "string" ? commit.html_url : "";
+      const message = typeof commit?.commit?.message === "string"
+        ? commit.commit.message.split(/\r?\n/, 1)[0].trim()
+        : "";
+      const rawDate = commit?.commit?.author?.date;
+      const date = typeof rawDate === "string" ? rawDate.slice(0, 10) : "";
+      if (!hash || !url || !message || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return null;
+      }
+
+      const item = document.createElement("li");
+      const link = document.createElement("a");
+      const code = document.createElement("code");
+      const subject = document.createElement("span");
+      const time = document.createElement("time");
+      link.href = url;
+      code.textContent = hash.slice(0, 7);
+      subject.textContent = message;
+      time.dateTime = date;
+      time.textContent = date;
+      link.append(code, subject, time);
+      item.appendChild(link);
+      return item;
+    };
+
+    list.setAttribute("aria-busy", "true");
+    fetch(`https://api.github.com/repos/${repository}/commits?sha=main&per_page=3`, {
+      headers: { Accept: "application/vnd.github+json" },
+      cache: "no-store",
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(`GitHub commits request failed: ${response.status}`);
+        return response.json();
+      })
+      .then((commits) => {
+        if (!Array.isArray(commits)) return;
+        const items = commits.map(createCommitItem).filter(Boolean);
+        if (!items.length) return;
+        list.replaceChildren(...items);
+        list.dataset.source = "github";
+      })
+      .catch(() => {
+        // Keep the build-time list visible when offline or rate-limited.
+      })
+      .finally(() => list.removeAttribute("aria-busy"));
+  };
+
   const mount = () => {
     polishDocument();
     mountThemeToggle();
@@ -725,6 +781,7 @@
     mountReferenceInteractions();
     mountMathOverflow();
     mountIssueLink();
+    mountRecentCommits();
 
     window.addEventListener("pagehide", saveReadingPosition);
     document.addEventListener("visibilitychange", () => {
