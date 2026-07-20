@@ -8,19 +8,15 @@
 python3 html/build.py
 ```
 
-网页生成在 `html/site/`，每个 `chapter` 对应一个 Quarto Book 页面，左侧是
-整本书的章节索引，页面右侧是当前章目录。
+网页生成在 `html/site/`，每个 `chapter` 对应一个 Quarto Book 页面，左侧是整本书的章节索引，页面右侧是当前章目录。
 
-首页正文写在 `html/home.md`，可直接使用 Markdown 修改或补充。标题、作者、
-邮箱和日期读取自 `settings.tex` 中的 `title/author/date`。
+右侧当前章目录在桌面端只向右额外拓宽，增量由 `html/style.css` 中的 `--book-toc-extra-width` 控制；修改该值不会挤占正文栏。
 
-站点的首次发布日期、最近内容更新日期和 GitHub 仓库写在
-`html/site-meta.json`；网站构建日期由构建当天自动生成。19 个正文章节的完成度
-集中写在 `html/chapter-progress.json`：填写 `0`–`100` 的整数即可，`null`
-表示尚未填写。构建会严格检查章节键，避免拼写错误被静默忽略。
+首页正文写在 `html/home.md`，可直接使用 Markdown 修改或补充。标题、作者、邮箱和日期读取自 `settings.tex` 中的 `title/author/date`。
 
-网页“符号与记号说明”页的构建数据位于 `html/notation-catalog.json`。该文件是
-网站源码的一部分，构建会据此生成页面。
+站点的首次发布日期、最近内容更新日期和 GitHub 仓库写在`html/site-meta.json`；网站构建日期由构建当天自动生成。19 个正文章节的完成度集中写在 `html/chapter-progress.json`：填写 `0`–`100` 的整数即可，`null`表示尚未填写。构建会严格检查章节键，避免拼写错误被静默忽略。
+
+网页“符号与记号说明”页的构建数据位于 `html/notation-catalog.json`。该文件是网站源码的一部分，构建会据此生成页面。
 
 构建并启动本地预览：
 
@@ -30,23 +26,15 @@ python3 html/build.py --serve
 
 然后访问 <http://127.0.0.1:8000/>。
 
-不要直接双击 `site/index.html` 预览：浏览器在 `file://` 模式下会阻止
-Quarto 读取 `search.json`，站内搜索因此无法工作。GitHub Pages 等 HTTP
-部署不受此限制。
+不要直接双击 `site/index.html` 预览：浏览器在 `file://` 模式下会阻止Quarto 读取 `search.json`，站内搜索因此无法工作。GitHub Pages 等 HTTP部署不受此限制。
 
 ## 计算实验
 
-网页构建不会执行分析代码，只读取已经渲染好的、自包含的 `result.html`，并按照
-章节旁边 `computations.order` 中规定的顺序追加到对应 chapter 的末尾。
+网页构建不会执行分析代码，只读取已经渲染好的、自包含的 `result.html`，并按照章节旁边 `computations.order` 中规定的顺序追加到对应 chapter 的末尾。
 
-当前所有 R 计算实验共用**整个 textbook 的一个 `renv` 项目**，不再为每个实验
-单独建立 `renv`。实际项目根是 textbook 根目录：根目录的 `.Rprofile` 会激活
-`renv/activate.R`，而根目录的 `renv.lock` 是全书 R 包版本的唯一锁文件。
-`environment/r/` 保留环境说明；这样 `renv::snapshot()` 才能扫描全书章节与计算实验，
-而不会遗漏该目录以外使用的包。
+当前所有 R 计算实验共用**整个 textbook 的一个 `renv` 项目**，不再为每个实验单独建立 `renv`。实际项目根是 textbook 根目录：根目录的 `.Rprofile` 会激活`renv/activate.R`，而根目录的 `renv.lock` 是全书 R 包版本的唯一锁文件。`environment/r/` 保留环境说明；这样 `renv::snapshot()` 才能扫描全书章节与计算实验，而不会遗漏该目录以外使用的包。
 
-完整的恢复与依赖更新流程分别见 `environment/r/README.md` 和
-`environment/python/README.md`；不要只复制某个章节中的包安装命令。
+完整的恢复与依赖更新流程分别见 `environment/r/README.md` 和`environment/python/README.md`；不要只复制某个章节中的包安装命令。
 
 ### 目录与提交约定
 
@@ -79,9 +67,7 @@ textbook/
                 └── result.html # 执行并渲染后生成，需要提交
 ```
 
-`.gitignore` 会保留上述可复现所需的 R 与 Python 入口、设置与锁文件。各环境目录
-下的 `README.md` 分别说明首次恢复、依赖更新、锁定文件检查与提交边界；修改环境时
-应遵循对应 README，而不要只修改某一个章节的计算文件。
+`.gitignore` 会保留上述可复现所需的 R 与 Python 入口、设置与锁文件。各环境目录下的 `README.md` 分别说明首次恢复、依赖更新、锁定文件检查与提交边界；修改环境时应遵循对应 README，而不要只修改某一个章节的计算文件。
 
 `computations.order` 使用普通 Markdown，不需要 JSON 或其他清单格式：
 
@@ -98,13 +84,11 @@ textbook/
 
 ### R/Python 的渲染
 
-以下命令均从教材根目录执行。每次渲染都会覆盖对应实验目录的 `result.html`；完成后
-按 `computations.order` 所列路径检查并提交该结果文件。
+以下命令均从教材根目录执行。每次渲染都会覆盖对应实验目录的 `result.html`；完成后按 `computations.order` 所列路径检查并提交该结果文件。
 
 #### R / Quarto
 
-`analysis.qmd` 使用全书根目录的 `renv`。渲染时显式指定根目录的 R 启动配置，
-使 Quarto 启动的 R 进程也加载同一套 `renv`：
+`analysis.qmd` 使用全书根目录的 `renv`。渲染时显式指定根目录的 R 启动配置，使 Quarto 启动的 R 进程也加载同一套 `renv`：
 
 ```bash
 TEXTBOOK_ROOT="$PWD" R_PROFILE_USER="$PWD/.Rprofile" \
@@ -112,8 +96,7 @@ quarto render statistics/Linear-model/computations/01-linear-regression/r/analys
   --to html --output result.html -M embed-resources:true
 ```
 
-将路径替换为实际实验的 `.qmd` 文件。新增 R 包前先按
-`environment/r/README.md` 更新 `renv.lock`，再进行渲染。
+将路径替换为实际实验的 `.qmd` 文件。新增 R 包前先按`environment/r/README.md` 更新 `renv.lock`，再进行渲染。
 
 #### Python / Jupyter
 
@@ -132,8 +115,7 @@ uv --directory environment/python run --locked jupyter nbconvert \
   statistics/Linear-model/computations/01-linear-regression/python/analysis.ipynb
 ```
 
-上述命令会在 Notebook 所在目录写入 `result.html`。若 Notebook 使用外部文件，仍
-应确认渲染后的 HTML 不依赖未提交的本地资源。
+上述命令会在 Notebook 所在目录写入 `result.html`。若 Notebook 使用外部文件，仍应确认渲染后的 HTML 不依赖未提交的本地资源。
 
 ### 插入教材网页
 
@@ -153,34 +135,21 @@ python3 html/build.py
 - 为 Python/Jupyter 和 R/Quarto 增加统一的语言标签和教材样式；
 - 在结果缺失或仍引用外部图片时给出明确错误并停止构建。
 
-提交和发布时，应提交 Notebook、QMD、`computations.order`、生成的
-`result.html`、根目录的 `.Rprofile`、`.renvignore`、`renv.lock` 与 `renv/` 中的引导/设置文件，
-以及更新后的 `html/site/`；不要提交 `renv/library/`、`.quarto/` 或 Notebook 缓存。Python 环境应提交
-`environment/python/.python-version`、`pyproject.toml`、`uv.lock` 与说明文件；不要
-提交 `environment/python/.venv/`。
-GitHub Pages 仍然只发布 `html/site/`，因此每次修改计算案例后都要先重新渲染结果，
-再执行网页构建。
+提交和发布时，应提交 Notebook、QMD、`computations.order`、生成的`result.html`、根目录的 `.Rprofile`、`.renvignore`、`renv.lock` 与 `renv/` 中的引导/设置文件，以及更新后的 `html/site/`；不要提交 `renv/library/`、`.quarto/` 或 Notebook 缓存。Python 环境应提交`environment/python/.python-version`、`pyproject.toml`、`uv.lock` 与说明文件；不要提交 `environment/python/.venv/`。GitHub Pages 仍然只发布 `html/site/`，因此每次修改计算案例后都要先重新渲染结果，再执行网页构建。
 
 ## 发布到 GitHub Pages
 
-项目使用 `.github/workflows/pages.yml` 发布已经在本地生成的
-`html/site/`。GitHub Actions 不会重新运行 Quarto，因此每次修改 `.tex`
-文件后，应先在本地构建，再提交和推送。
+项目使用 `.github/workflows/pages.yml` 发布已经在本地生成的`html/site/`。GitHub Actions 不会重新运行 Quarto，因此每次修改 `.tex`文件后，应先在本地构建，再提交和推送。
 
 需要提交到 GitHub 的内容包括：
 
 - 原始 LaTeX 文件和正文引用的图片、代码等资源；
-- `html/build.py`、`html/home.md`、`html/style.css`、`html/textbook-ui.js`
-  与 `html/favicon.svg`；
-- `html/site-meta.json`、`html/chapter-progress.json` 与
-  `html/notation-catalog.json`；
-- 完整的 `html/site/`，包括 `index.html`、`chapters/`、`site_libs/`、
-  `search.json` 和样式文件；
+- `html/build.py`、`html/home.md`、`html/style.css`、`html/textbook-ui.js`与 `html/favicon.svg`；
+- `html/site-meta.json`、`html/chapter-progress.json` 与`html/notation-catalog.json`；
+- 完整的 `html/site/`，包括 `index.html`、`chapters/`、`site_libs/`、`search.json` 和样式文件；
 - `.github/workflows/pages.yml`。
 
-`html/.build/`、LaTeX 编译临时文件和 `.DS_Store` 不需要提交，已经由
-`.gitignore` 排除。根目录 `.gitignore` 对 `html/site/` 中的 HTML 文件
-设置了例外，因此构建结果可以正常进入 Git。
+`html/.build/`、LaTeX 编译临时文件和 `.DS_Store` 不需要提交，已经由`.gitignore` 排除。根目录 `.gitignore` 对 `html/site/` 中的 HTML 文件设置了例外，因此构建结果可以正常进入 Git。
 
 ### 第一次启用
 
@@ -194,14 +163,9 @@ git commit -m "github.pages"
 git push origin main
 ```
 
-提交前检查 `git status`，其中应能看到 `html/site/index.html` 和
-`html/site/chapters/` 下的网页文件；如果看不到，不要提交，先检查
-`.gitignore`。
+提交前检查 `git status`，其中应能看到 `html/site/index.html` 和`html/site/chapters/` 下的网页文件；如果看不到，不要提交，先检查`.gitignore`。
 
-随后打开 GitHub 仓库的 `Settings` → `Pages`，在
-`Build and deployment` 中将 `Source` 设置为 `GitHub Actions`。推送到
-`main` 后，可以在仓库的 `Actions` 页面查看部署进度，也可以在该页面手动
-运行 `Deploy textbook to GitHub Pages` 工作流。
+随后打开 GitHub 仓库的 `Settings` → `Pages`，在`Build and deployment` 中将 `Source` 设置为 `GitHub Actions`。推送到`main` 后，可以在仓库的 `Actions` 页面查看部署进度，也可以在该页面手动运行 `Deploy textbook to GitHub Pages` 工作流。
 
 当前仓库的网页地址预计为：
 
@@ -219,56 +183,35 @@ git commit -m "更新教材网页"
 git push origin main
 ```
 
-推送到 `main` 后，GitHub Actions 会自动用最新的 `html/site/` 覆盖线上
-版本。首页显示的编译日期是执行 `build.py` 时生成的日期。
+推送到 `main` 后，GitHub Actions 会自动用最新的 `html/site/` 覆盖线上版本。首页显示的编译日期是执行 `build.py` 时生成的日期。
 
-如果本次修改涉及计算实验，应先在对应的 Python 或 R 环境中生成最新的
-`result.html`，再执行上述日常更新流程。
+如果本次修改涉及计算实验，应先在对应的 Python 或 R 环境中生成最新的`result.html`，再执行上述日常更新流程。
 
 ## 当前转换规则
 
 - `part/chapter/section/subsection/subsubsection` 保留为对应网页层级。
-- 暂存时自动启用 `main.tex` 中被注释的 `part` 和章节 `include`，但不修改
-  原始 `main.tex`。
+- 暂存时自动启用 `main.tex` 中被注释的 `part` 和章节 `include`，但不修改原始 `main.tex`。
 - `newtheorem` 声明会从 `settings.tex` 读取，定理环境按原父计数器编号。
-- `proof` 保留为独立证明块，默认展开并允许逐个或整页折叠；折叠状态在当前
-  浏览会话中保留，打印时始终显示证明正文。
-- `label/ref/eqref/cref` 转换为网页内或跨页面链接。点击 `cref` 后来源链接会
-  显示已访问状态，目标短暂高亮；紧随引用的 `(2)`、`(5.b)(5.c)` 等条目提示会
-  纳入整条链接，并在跳转后说明应查看的具体项目。
+- `proof` 保留为独立证明块，默认展开并允许逐个或整页折叠；折叠状态在当前浏览会话中保留，打印时始终显示证明正文。
+- `label/ref/eqref/cref` 转换为网页内或跨页面链接。点击 `cref` 后来源链接会显示已访问状态，目标短暂高亮；紧随引用的 `(2)`、`(5.b)(5.c)` 等条目提示会纳入整条链接，并在跳转后说明应查看的具体项目。
 - 浏览器后退或前进时会按最近标题与相对偏移恢复阅读位置。
 - `equation/align/gather` 保留为 MathJax 数学环境。
-- `enumerate/itemize` 中的显示公式会保留对应列表层级，公式后续条目不会被
-  误判为代码块。
-- 所有 `english.tex` 中的 `NewTerm` 都会进入术语表；总览提供 A–Z 导航，
-  每个字母独立成页并按英文名称排序。
-- 每条术语都建立独立搜索记录，搜索结果可直接跳到对应条目；重复索引键的
-  不同定义会分别保留并显示来源。
-- 左侧目录只显示“中英术语表”；A–Z 字母页通过总览卡片、前后导航和搜索
-  访问，不占用侧栏长度。
+- `enumerate/itemize` 中的显示公式会保留对应列表层级，公式后续条目不会被误判为代码块。
+- 所有 `english.tex` 中的 `NewTerm` 都会进入术语表；总览提供 A–Z 导航，每个字母独立成页并按英文名称排序。
+- 每条术语都建立独立搜索记录，搜索结果可直接跳到对应条目；重复索引键的不同定义会分别保留并显示来源。
+- 左侧目录只显示“中英术语表”；A–Z 字母页通过总览卡片、前后导航和搜索访问，不占用侧栏长度。
 - `gls{Key}` 按“中文（English）”显示，并链接到中英术语表。
 - `qedhere` 交由网页证明块统一显示结尾方块，不再传给 MathJax。
-- `algorithm` 与 `algpseudocode` 会转换为带标题、章内编号、行号和缩进的
-  算法块；支持 `Require/Ensure/State/Statex`、条件、循环、函数、注释、
-  `Call/Return` 以及 `label/cref` 算法引用。
-- 行内数学公式通过 CSS 在左右各保留少量视觉间距，不修改原始 TeX 中的
-  `$...$`。
-- `minted` 和 `inputminted` 由 Pandoc 转成带语法高亮的代码块；后者引用的
-  代码文件会自动复制到暂存目录。
-- `densityplot` 环境在 PDF 中保留固定参数的 TikZ/PGFPlots 图，在网页中替换为
-  可调整参数的 SVG 密度曲线；支持 PDF/CDF 切换、PDF 区间概率、坐标缩放和
-  曲线对比。鼠标移入曲线区域时会显示当前位置与函数值；图表滚动到视口附近
-  才加载数值计算、探针和绘图脚本。相关逻辑按加载器、数学计算、鼠标探针与
-  图表界面拆分，脚本随静态站点一同发布，不依赖外部服务。
-- 每个行间公式会保留转换前的原始 LaTeX；网页在公式右上角提供复制按钮，
-  复制结果不会包含网页构建时生成的编号标签。
-- 与章节同目录的 `computations.order` 控制 Jupyter/Quarto 结果的顺序，
-  构建时自动编号并追加到相应 chapter 末尾。
+- `\info/\unsure/\change/\improvement` 四类 `todonotes` 项目批注会保留为带颜色的网页内联提示，不再在转换时丢失内容。
+- `algorithm` 与 `algpseudocode` 会转换为带标题、章内编号、行号和缩进的算法块；支持 `Require/Ensure/State/Statex`、条件、循环、函数、注释、`Call/Return` 以及 `label/cref` 算法引用。
+- 行内数学公式通过 CSS 在左右各保留少量视觉间距，不修改原始 TeX 中的`$...$`；只有实际越过正文右边界的公式才会变成可横向滚动区域，普通公式的行高和基线不受影响。
+- `minted` 和 `inputminted` 由 Pandoc 转成带语法高亮的代码块；后者引用的代码文件会自动复制到暂存目录。
+- `densityplot` 环境在 PDF 中保留固定参数的 TikZ/PGFPlots 图，在网页中替换为可调整参数的 SVG 密度曲线；支持 PDF/CDF 切换、PDF 区间概率、坐标缩放和曲线对比。鼠标移入曲线区域时会显示当前位置与函数值；图表滚动到视口附近才加载数值计算、探针和绘图脚本。相关逻辑按加载器、数学计算、鼠标探针与图表界面拆分，脚本随静态站点一同发布，不依赖外部服务。
+- 每个行间公式会保留转换前的原始 LaTeX；网页在公式右上角提供复制按钮，复制结果不会包含网页构建时生成的编号标签。
+- 与章节同目录的 `computations.order` 控制 Jupyter/Quarto 结果的顺序，构建时自动编号并追加到相应 chapter 末尾。
 - 右侧当前章目录会随正文滚动自动高亮，并保持当前条目可见。
-- 每个正文页提供“在 GitHub 上报告本页问题”入口；首页和项目状态页提供源代码、
-  错误报告、内容建议与提交记录入口。
-- 项目状态页自动汇总章节进度、定理类环境、证明、算法、行间公式、交互图和术语
-  数量，不需要手工维护统计数字。
+- 每个正文页提供“在 GitHub 上报告本页问题”入口；首页和项目状态页提供源代码、错误报告、内容建议与提交记录入口。
+- 项目状态页自动汇总章节进度、定理类环境、证明、算法、行间公式、交互图和术语数量，不需要手工维护统计数字。
 
 构建时使用 `--strict`，可以让未定义术语或未解析引用导致构建失败：
 
@@ -287,8 +230,7 @@ python3 html/build.py --strict
 - `site/`：最终静态网站，可发布到 GitHub Pages。
 - `site/build-report.json`：未定义术语、未解析引用和失效链接报告。
 - `computations.order`：某一数学章节的计算实验标题与结果显示顺序。
-- `.github/workflows/pages.yml`：从项目根目录发布 `html/site/` 的 GitHub
-  Pages 工作流。
+- `.github/workflows/pages.yml`：从项目根目录发布 `html/site/` 的 GitHubPages 工作流。
 
 默认调用 Positron 内置的 Quarto：
 
@@ -300,7 +242,4 @@ python3 html/build.py --strict
 
 ## GitHub 语言统计
 
-根目录 `.gitattributes` 将所有 `.html` 标记为不参与语言识别，并额外将生成站点与
-计算结果标记为生成文件。该设置必须提交到默认分支后 GitHub Linguist 才会采用；
-仓库语言条可能存在短暂缓存，但以后构建产生的 HTML 不会再把项目识别为 HTML
-项目。此规则只影响 GitHub 的语言统计，不影响 GitHub Pages 发布这些文件。
+根目录 `.gitattributes` 将所有 `.html` 标记为不参与语言识别，并额外将生成站点与计算结果标记为生成文件。该设置必须提交到默认分支后 GitHub Linguist 才会采用；仓库语言条可能存在短暂缓存，但以后构建产生的 HTML 不会再把项目识别为 HTML项目。此规则只影响 GitHub 的语言统计，不影响 GitHub Pages 发布这些文件。

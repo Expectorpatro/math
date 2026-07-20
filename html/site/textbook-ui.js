@@ -621,6 +621,74 @@
     handleReferenceArrival();
   };
 
+  const mountMathOverflow = () => {
+    const main = document.querySelector("main.content");
+    if (!main) return;
+
+    let frame = 0;
+    const resetManagedFormula = (formula) => {
+      formula.classList.remove("math-inline-overflow");
+      formula.style.removeProperty("--math-inline-available-width");
+      if (formula.dataset.mathOverflowManaged === "true") {
+        formula.removeAttribute("tabindex");
+        formula.removeAttribute("aria-label");
+        delete formula.dataset.mathOverflowManaged;
+      }
+    };
+    const measure = () => {
+      const formulas = [...main.querySelectorAll("span.math.inline")];
+      formulas.forEach(resetManagedFormula);
+      window.requestAnimationFrame(() => {
+        formulas.forEach((formula) => {
+          const container =
+            formula.closest("p, li, dd, dt, figcaption, .theorem-block, .proof-block") ||
+            main;
+          const formulaRect = formula.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          const containerStyle = window.getComputedStyle(container);
+          const paddingRight = Number.parseFloat(containerStyle.paddingRight) || 0;
+          const contentRight = containerRect.right - paddingRight;
+          const availableWidth = Math.max(contentRight - formulaRect.left, 96);
+          if (
+            formulaRect.width <= availableWidth + 1 &&
+            formulaRect.right <= contentRight + 1
+          ) {
+            return;
+          }
+          formula.classList.add("math-inline-overflow");
+          formula.style.setProperty(
+            "--math-inline-available-width",
+            `${Math.floor(availableWidth)}px`
+          );
+          formula.tabIndex = 0;
+          formula.setAttribute("aria-label", "横向滚动查看完整公式");
+          formula.dataset.mathOverflowManaged = "true";
+        });
+      });
+    };
+    const schedule = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(measure);
+    };
+
+    const mathReady = window.MathJax?.startup?.promise;
+    if (mathReady && typeof mathReady.then === "function") {
+      mathReady.then(schedule, schedule);
+    } else {
+      let attempts = 0;
+      const waitForMath = () => {
+        attempts += 1;
+        if (main.querySelector("span.math.inline mjx-container") || attempts >= 20) {
+          schedule();
+          return;
+        }
+        window.setTimeout(waitForMath, 100);
+      };
+      waitForMath();
+    }
+    window.addEventListener("resize", schedule, { passive: true });
+  };
+
   const mountIssueLink = () => {
     if (document.querySelector(".textbook-home, .page-report-issue")) return;
     const main = document.querySelector("main.content");
@@ -655,6 +723,7 @@
     mountReadingTools();
     mountProofFolding();
     mountReferenceInteractions();
+    mountMathOverflow();
     mountIssueLink();
 
     window.addEventListener("pagehide", saveReadingPosition);

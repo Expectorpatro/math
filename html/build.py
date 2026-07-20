@@ -69,6 +69,10 @@ ALGORITHM_TITLE_START_PREFIX = "WEBALGOTITLESTART"
 ALGORITHM_TITLE_END_PREFIX = "WEBALGOTITLEEND"
 ALGORITHM_COMMAND_PREFIX = "WEBALGOCMD-"
 DENSITY_PLOT_MARKER_PREFIX = "WEBDENSITYPLOT-"
+TODO_START_PREFIX = "WEBTODOSTART-"
+TODO_END_PREFIX = "WEBTODOEND-"
+TODO_COMMANDS = {"info", "unsure", "change", "improvement"}
+TABLE_MARKER_PREFIX = "WEBLATEXTABLE-"
 DENSITY_PLOT_NAMES = {
     "uniform",
     "normal",
@@ -158,6 +162,32 @@ class QuartoPage:
 class ComputationGroup:
     title: str
     result_paths: tuple[Path, ...]
+
+
+@dataclass(frozen=True)
+class LatexTableCell:
+    content: str
+    colspan: int = 1
+    alignment: str | None = None
+    diagonal: tuple[str, str] | None = None
+
+
+@dataclass(frozen=True)
+class LatexTableRow:
+    cells: tuple[LatexTableCell, ...]
+    rule_above: bool = False
+    rule_below: bool = False
+
+
+@dataclass(frozen=True)
+class LatexTable:
+    caption: str
+    alignments: tuple[str, ...]
+    vertical_rules: frozenset[int]
+    rows: tuple[LatexTableRow, ...]
+
+
+STAGED_LATEX_TABLES: dict[str, LatexTable] = {}
 
 
 class LinkCollector(HTMLParser):
@@ -282,6 +312,337 @@ def read_balanced(
                 return text[start:cursor], cursor + 1
         cursor += 1
     raise ValueError(f"unclosed {opening!r} at character {position}")
+
+
+def patch_todo_macros(text: str, marker_counter: list[int]) -> str:
+    """Preserve project todo macros as styled inline notes in the web AST."""
+    pattern = re.compile(
+        r"\\(?P<kind>info|unsure|change|improvement)\b"
+    )
+    pieces: list[str] = []
+    cursor = 0
+    while True:
+        match = pattern.search(text, cursor)
+        if match is None:
+            pieces.append(text[cursor:])
+            break
+        pieces.append(text[cursor : match.start()])
+        position = skip_space(text, match.end())
+        try:
+            if position < len(text) and text[position] == "[":
+                _, position = read_balanced(text, position, "[", "]")
+                position = skip_space(text, position)
+            content, end = read_balanced(text, position, "{", "}")
+        except ValueError:
+            pieces.append(match.group(0))
+            cursor = match.end()
+            continue
+        kind = match.group("kind")
+        pieces.append(
+            rf"\textbf{{{TODO_START_PREFIX}{kind} "
+            + content
+            + rf" {TODO_END_PREFIX}{kind}}}"
+        )
+        marker_counter[0] += 1
+        cursor = end
+    return "".join(pieces)
+
+
+def expand_table_column_repetitions(specification: str) -> str:
+    """Expand TeX ``*{n}{...}`` column specifications recursively."""
+    output: list[str] = []
+    cursor = 0
+    while cursor < len(specification):
+        if specification[cursor] != "*":
+            output.append(specification[cursor])
+            cursor += 1
+            continue
+        position = skip_space(specification, cursor + 1)
+        try:
+            count_text, position = read_balanced(
+                specification, position, "{", "}"
+            )
+            position = skip_space(specification, position)
+            repeated, position = read_balanced(
+                specification, position, "{", "}"
+            )
+            count = int(count_text.strip())
+        except (ValueError, TypeError):
+            output.append("*")
+            cursor += 1
+            continue
+        output.append(expand_table_column_repetitions(repeated) * count)
+        cursor = position
+    return "".join(output)
+
+
+def parse_table_column_specification(
+    specification: str,
+) -> tuple[list[str], set[int]]:
+    """Return column alignments and 1-based boundaries carrying ``|``."""
+    specification = expand_table_column_repetitions(specification)
+    alignments: list[str] = []
+    vertical_rules: set[int] = set()
+    cursor = 0
+    while cursor < len(specification):
+        char = specification[cursor]
+        if char.isspace():
+            cursor += 1
+            continue
+        if char == "|":
+            vertical_rules.add(len(alignments))
+            cursor += 1
+            continue
+        if char in "><@!":
+            position = skip_space(specification, cursor + 1)
+            try:
+                _, cursor = read_balanced(
+                    specification, position, "{", "}"
+                )
+            except ValueError:
+                cursor += 1
+            continue
+        if char in "lcrX":
+            alignments.append(
+                {
+                    "l": "left",
+                    "c": "center",
+                    "r": "right",
+                    "X": "center",
+                }[char]
+            )
+            cursor += 1
+            continue
+        if char in "pmb":
+            alignments.append("left")
+            position = skip_space(specification, cursor + 1)
+            try:
+                _, cursor = read_balanced(
+                    specification, position, "{", "}"
+                )
+            except ValueError:
+                cursor += 1
+            continue
+        cursor += 1
+    return alignments, vertical_rules
+
+
+def split_latex_table_rows(content: str) -> list[str]:
+    rows: list[str] = []
+    current: list[str] = []
+    depth = 0
+    cursor = 0
+    while cursor < len(content):
+        char = content[cursor]
+        if char == "\\" and cursor + 1 < len(content):
+            following = content[cursor + 1]
+            if following == "\\" and depth == 0:
+                rows.append("".join(current))
+                current = []
+                cursor += 2
+                continue
+            current.extend((char, following))
+            cursor += 2
+            continue
+        if char == "{":
+            depth += 1
+        elif char == "}" and depth:
+            depth -= 1
+        current.append(char)
+        cursor += 1
+    rows.append("".join(current))
+    return rows
+
+
+def split_latex_table_cells(row: str) -> list[str]:
+    cells: list[str] = []
+    current: list[str] = []
+    depth = 0
+    cursor = 0
+    while cursor < len(row):
+        char = row[cursor]
+        if char == "\\" and cursor + 1 < len(row):
+            current.extend((char, row[cursor + 1]))
+            cursor += 2
+            continue
+        if char == "{":
+            depth += 1
+        elif char == "}" and depth:
+            depth -= 1
+        if char == "&" and depth == 0:
+            cells.append("".join(current).strip())
+            current = []
+        else:
+            current.append(char)
+        cursor += 1
+    cells.append("".join(current).strip())
+    return cells
+
+
+def parse_latex_table_cell(content: str) -> LatexTableCell:
+    stripped = content.strip()
+    if stripped.startswith(r"\multicolumn"):
+        position = skip_space(stripped, len(r"\multicolumn"))
+        try:
+            colspan_text, position = read_balanced(
+                stripped, position, "{", "}"
+            )
+            position = skip_space(stripped, position)
+            cell_spec, position = read_balanced(
+                stripped, position, "{", "}"
+            )
+            position = skip_space(stripped, position)
+            cell_content, position = read_balanced(
+                stripped, position, "{", "}"
+            )
+            alignments, _ = parse_table_column_specification(cell_spec)
+            return LatexTableCell(
+                content=cell_content.strip() + stripped[position:].strip(),
+                colspan=max(int(colspan_text.strip()), 1),
+                alignment=alignments[0] if alignments else "center",
+            )
+        except (ValueError, TypeError):
+            pass
+    if stripped.startswith(r"\diagbox"):
+        position = skip_space(stripped, len(r"\diagbox"))
+        try:
+            lower_left, position = read_balanced(
+                stripped, position, "{", "}"
+            )
+            position = skip_space(stripped, position)
+            upper_right, position = read_balanced(
+                stripped, position, "{", "}"
+            )
+            return LatexTableCell(
+                content="",
+                diagonal=(lower_left.strip(), upper_right.strip()),
+                alignment="center",
+            )
+        except ValueError:
+            pass
+    return LatexTableCell(content=stripped)
+
+
+TABLE_RULE_PATTERN = re.compile(
+    r"\\(?:toprule|midrule|bottomrule|hline)\b"
+    r"|\\cline\s*\{[^{}]*\}"
+)
+
+
+def parse_latex_table(
+    table_source: str,
+) -> LatexTable | None:
+    tabular_match = re.search(
+        r"\\begin\s*\{(?P<environment>tabularx|tabular)\}",
+        table_source,
+    )
+    if tabular_match is None:
+        return None
+    environment = tabular_match.group("environment")
+    position = skip_space(table_source, tabular_match.end())
+    try:
+        if environment == "tabularx":
+            _, position = read_balanced(table_source, position, "{", "}")
+            position = skip_space(table_source, position)
+        specification, position = read_balanced(
+            table_source, position, "{", "}"
+        )
+    except ValueError:
+        return None
+    end_marker = rf"\end{{{environment}}}"
+    tabular_end = table_source.find(end_marker, position)
+    if tabular_end < 0:
+        return None
+
+    caption = ""
+    caption_match = re.search(r"\\caption\b", table_source)
+    if caption_match is not None:
+        caption_position = skip_space(table_source, caption_match.end())
+        try:
+            if (
+                caption_position < len(table_source)
+                and table_source[caption_position] == "["
+            ):
+                _, caption_position = read_balanced(
+                    table_source, caption_position, "[", "]"
+                )
+                caption_position = skip_space(
+                    table_source, caption_position
+                )
+            caption, _ = read_balanced(
+                table_source, caption_position, "{", "}"
+            )
+        except ValueError:
+            caption = ""
+
+    parsed_rows: list[LatexTableRow] = []
+    for raw_row in split_latex_table_rows(
+        strip_tex_comments(table_source[position:tabular_end])
+    ):
+        has_rule = TABLE_RULE_PATTERN.search(raw_row) is not None
+        cleaned = TABLE_RULE_PATTERN.sub("", raw_row).strip()
+        if not cleaned:
+            if has_rule and parsed_rows:
+                previous = parsed_rows[-1]
+                parsed_rows[-1] = LatexTableRow(
+                    cells=previous.cells,
+                    rule_above=previous.rule_above,
+                    rule_below=True,
+                )
+            continue
+        cells = tuple(
+            parse_latex_table_cell(cell)
+            for cell in split_latex_table_cells(cleaned)
+        )
+        parsed_rows.append(
+            LatexTableRow(cells=cells, rule_above=has_rule)
+        )
+    if not parsed_rows:
+        return None
+
+    actual_column_count = max(
+        sum(cell.colspan for cell in row.cells)
+        for row in parsed_rows
+    )
+    alignments, vertical_rules = parse_table_column_specification(
+        specification
+    )
+    alignments = (alignments + ["center"] * actual_column_count)[
+        :actual_column_count
+    ]
+    vertical_rules = {
+        boundary
+        for boundary in vertical_rules
+        if 0 < boundary <= actual_column_count
+    }
+    return LatexTable(
+        caption=caption.strip(),
+        alignments=tuple(alignments),
+        vertical_rules=frozenset(vertical_rules),
+        rows=tuple(parsed_rows),
+    )
+
+
+def patch_latex_tables(
+    text: str, marker_counter: list[int]
+) -> str:
+    pattern = re.compile(
+        r"^[ \t]*\\begin\s*\{table\}(?:\s*\[[^\]]*\])?"
+        r"(?P<body>.*?)"
+        r"^[ \t]*\\end\s*\{table\}",
+        flags=re.DOTALL | re.MULTILINE,
+    )
+
+    def replacement(match: re.Match[str]) -> str:
+        table = parse_latex_table(match.group(0))
+        if table is None:
+            return match.group(0)
+        marker_counter[0] += 1
+        marker = f"{marker_counter[0]:06d}"
+        STAGED_LATEX_TABLES[marker] = table
+        return rf"\par\textbf{{{TABLE_MARKER_PREFIX}{marker}}}\par"
+
+    return pattern.sub(replacement, text)
 
 
 def parse_new_terms(text: str, source: Path) -> list[Term]:
@@ -1002,6 +1363,9 @@ def stage_sources(
     algorithm_marker_counter = [0]
     density_plot_counter = [0]
     tikz_counter = [0]
+    todo_marker_counter = [0]
+    table_marker_counter = [0]
+    STAGED_LATEX_TABLES.clear()
     copied = 0
     copied_code_files: set[Path] = set()
     for source in sorted(PROJECT_ROOT.rglob("*.tex")):
@@ -1020,6 +1384,9 @@ def stage_sources(
             terms_by_directory,
             conflicting_keys,
         )
+        if source != SETTINGS_TEX:
+            text = patch_todo_macros(text, todo_marker_counter)
+        text = patch_latex_tables(text, table_marker_counter)
         text = patch_custom_math_environments(text)
         text = patch_algorithm_environments(
             text, algorithm_marker_counter
@@ -1071,7 +1438,9 @@ def stage_sources(
         f"标记 {marker_counter[0]} 个环境标题、"
         f"{algorithm_marker_counter[0]} 个算法，"
         f"{density_plot_counter[0]} 幅交互密度图、"
-        f"转换 {tikz_counter[0]} 幅 TikZ 图片"
+        f"转换 {tikz_counter[0]} 幅 TikZ 图片、"
+        f"转换 {table_marker_counter[0]} 张 LaTeX 表格、"
+        f"保留 {todo_marker_counter[0]} 条项目批注"
     )
 
 
@@ -1165,6 +1534,38 @@ def rewrite_title_markers(value: Any) -> Any:
             return value
     if "c" in value:
         value["c"] = rewrite_title_markers(value["c"])
+    return value
+
+
+def rewrite_todo_markers(value: Any) -> Any:
+    if isinstance(value, list):
+        return [rewrite_todo_markers(item) for item in value]
+    if not isinstance(value, dict):
+        return value
+    if value.get("t") == "Strong":
+        inlines = list(value["c"])
+        if (
+            len(inlines) >= 2
+            and inlines[0].get("t") == "Str"
+            and inlines[-1].get("t") == "Str"
+        ):
+            start = str(inlines[0].get("c", ""))
+            end = str(inlines[-1].get("c", ""))
+            if start.startswith(TODO_START_PREFIX):
+                kind = start[len(TODO_START_PREFIX) :]
+                if kind in TODO_COMMANDS and end == f"{TODO_END_PREFIX}{kind}":
+                    return {
+                        "t": "Span",
+                        "c": [
+                            make_attr(
+                                classes=["todo-note", f"todo-{kind}"],
+                                attributes=[("role", "note")],
+                            ),
+                            trim_inline_spaces(inlines[1:-1]),
+                        ],
+                    }
+    if "c" in value:
+        value["c"] = rewrite_todo_markers(value["c"])
     return value
 
 
@@ -1326,6 +1727,91 @@ def latex_to_html_fragment(text: str) -> str:
         cursor = match.end()
     pieces.append(html.escape(latex_to_plain(text[cursor:])))
     return "".join(pieces)
+
+
+def latex_to_table_html_fragment(text: str) -> str:
+    """Render table cells without Quarto consuming TeX backslashes."""
+    pieces: list[str] = []
+    cursor = 0
+    for match in re.finditer(r"\$(.+?)\$", text, flags=re.DOTALL):
+        pieces.append(html.escape(latex_to_plain(text[cursor : match.start()])))
+        math_source = html.escape(match.group(1).strip()).replace(
+            "\\", "&#92;"
+        )
+        pieces.append(
+            '<span class="math inline">&#92;('
+            + math_source
+            + "&#92;)</span>"
+        )
+        cursor = match.end()
+    pieces.append(html.escape(latex_to_plain(text[cursor:])))
+    return "".join(pieces)
+
+
+def render_latex_table(table: LatexTable) -> str:
+    parts = [
+        '<div class="textbook-table-scroll textbook-latex-table-scroll" '
+        'role="region" tabindex="0">',
+        '<table class="textbook-latex-table">',
+    ]
+    if table.caption:
+        parts.append(
+            "<caption>" + html.escape(latex_to_plain(table.caption)) + "</caption>"
+        )
+    for row_index, row in enumerate(table.rows):
+        if row_index == 0:
+            parts.append("<thead>")
+        elif row_index == 1:
+            parts.append("</thead><tbody>")
+        row_classes: list[str] = []
+        if row.rule_above:
+            row_classes.append("latex-table-rule-above")
+        if row.rule_below:
+            row_classes.append("latex-table-rule-below")
+        class_attribute = (
+            f' class="{" ".join(row_classes)}"' if row_classes else ""
+        )
+        parts.append(f"<tr{class_attribute}>")
+        column = 0
+        for cell in row.cells:
+            start_column = column
+            column += cell.colspan
+            alignment = (
+                cell.alignment
+                or table.alignments[
+                    min(start_column, len(table.alignments) - 1)
+                ]
+            )
+            classes = [f"latex-table-align-{alignment}"]
+            if column in table.vertical_rules:
+                classes.append("latex-table-vrule-right")
+            tag = "th" if row_index == 0 else "td"
+            attributes = [f'class="{" ".join(classes)}"']
+            if cell.colspan > 1:
+                attributes.append(f'colspan="{cell.colspan}"')
+            if cell.diagonal is not None:
+                lower_left, upper_right = cell.diagonal
+                cell_markup = (
+                    '<span class="latex-table-diagbox">'
+                    '<span class="latex-table-diagbox-upper">'
+                    + latex_to_table_html_fragment(upper_right)
+                    + "</span>"
+                    '<span class="latex-table-diagbox-lower">'
+                    + latex_to_table_html_fragment(lower_left)
+                    + "</span></span>"
+                )
+            else:
+                cell_markup = latex_to_table_html_fragment(cell.content)
+            parts.append(
+                f"<{tag} {' '.join(attributes)}>{cell_markup}</{tag}>"
+            )
+        parts.append("</tr>")
+    if len(table.rows) == 1:
+        parts.append("</thead>")
+    else:
+        parts.append("</tbody>")
+    parts.extend(("</table>", "</div>"))
+    return "".join(parts)
 
 
 class BookTransformer:
@@ -1883,6 +2369,22 @@ class BookTransformer:
                 continue
             if block_type in {"Para", "Plain"}:
                 marker = ast_plain_text(block).strip()
+                table_match = re.fullmatch(
+                    re.escape(TABLE_MARKER_PREFIX) + r"([0-9]{6})",
+                    marker,
+                )
+                if table_match:
+                    table = STAGED_LATEX_TABLES.get(table_match.group(1))
+                    if table is None:
+                        fail(f"找不到暂存表格：{marker}")
+                    self.content_counts["latex-table"] += 1
+                    result.append(
+                        {
+                            "t": "RawBlock",
+                            "c": ["html", render_latex_table(table)],
+                        }
+                    )
+                    continue
                 density_match = re.fullmatch(
                     re.escape(DENSITY_PLOT_MARKER_PREFIX)
                     + r"([a-z0-9-]+)",
@@ -2569,6 +3071,7 @@ class BookTransformer:
     def transform(self, document: dict[str, Any]) -> dict[str, Any]:
         self.detect_structure(document["blocks"])
         document["blocks"] = self.process_blocks(document["blocks"])
+        document["blocks"] = rewrite_todo_markers(document["blocks"])
         document = self.transform_inlines(document, rewrite_references=False)
         self.append_glossary(document)
         document = self.transform_inlines(document, rewrite_references=True)

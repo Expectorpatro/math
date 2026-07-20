@@ -35,6 +35,7 @@
   --book-serif: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", Georgia, serif;
   --book-sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --book-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --book-toc-extra-width: 6rem;
 }
 
 html {
@@ -386,6 +387,11 @@ h5 {
 }
 
 @media (min-width: 992px) {
+  #quarto-margin-sidebar {
+    width: calc(100% + var(--book-toc-extra-width));
+    max-width: none;
+  }
+
   #quarto-margin-sidebar.chapter-progress-sidebar {
     display: flex;
     max-height: calc(100vh - 0.5rem);
@@ -394,7 +400,7 @@ h5 {
     overflow: hidden;
   }
 
-  #quarto-margin-sidebar.chapter-progress-sidebar > #TOC {
+  #quarto-margin-sidebar.chapter-progress-sidebar>#TOC {
     min-height: 0;
     flex: 1 1 auto;
     margin: 0;
@@ -402,7 +408,7 @@ h5 {
     overscroll-behavior: contain;
   }
 
-  #quarto-margin-sidebar > .chapter-progress--docked {
+  #quarto-margin-sidebar>.chapter-progress--docked {
     position: relative;
     top: auto;
     z-index: auto;
@@ -608,6 +614,90 @@ h5 {
 /* Rich textbook components */
 span.math.inline {
   margin-inline: 0.12em;
+}
+
+span.math.inline.math-inline-overflow {
+  display: inline-flex;
+  max-width: var(--math-inline-available-width, 100%);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  vertical-align: baseline;
+}
+
+span.math.inline.math-inline-overflow::-webkit-scrollbar {
+  display: none;
+}
+
+span.math.display {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+main.content :where(p, li, dd, .theorem-block, .proof-block) {
+  min-width: 0;
+}
+
+.todo-note {
+  padding: 0.08em 0.42em 0.12em;
+  border: 1px solid var(--book-border-strong);
+  border-radius: 0.38rem;
+  background: var(--book-surface-soft);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  color: var(--book-ink-soft);
+  font-size: 0.88em;
+  line-height: 1.65;
+}
+
+.todo-note::before {
+  margin-right: 0.38em;
+  font-size: 0.72em;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.todo-info {
+  border-color: color-mix(in srgb, var(--book-teal) 38%, transparent);
+  background: var(--book-teal-soft);
+}
+
+.todo-info::before {
+  color: var(--book-teal);
+  content: "INFO";
+}
+
+.todo-unsure {
+  border-color: color-mix(in srgb, var(--book-rose) 38%, transparent);
+  background: var(--book-rose-soft);
+}
+
+.todo-unsure::before {
+  color: var(--book-rose);
+  content: "存疑";
+}
+
+.todo-change {
+  border-color: color-mix(in srgb, var(--book-primary) 38%, transparent);
+  background: var(--book-primary-soft);
+}
+
+.todo-change::before {
+  color: var(--book-primary-deep);
+  content: "修改";
+}
+
+.todo-improvement {
+  border-color: color-mix(in srgb, var(--book-amber) 42%, transparent);
+  background: var(--book-amber-soft);
+}
+
+.todo-improvement::before {
+  color: var(--book-amber);
+  content: "改进";
 }
 
 .theorem-block,
@@ -876,6 +966,77 @@ pre {
   width: 100%;
   margin: 0;
   font-size: 0.92rem;
+}
+
+.textbook-latex-table {
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.textbook-latex-table caption {
+  padding: 0.8rem 1rem 0.65rem;
+  color: var(--book-ink-soft);
+  font-weight: 700;
+  text-align: center;
+}
+
+.textbook-latex-table :is(th, td) {
+  min-width: 4.5rem;
+  vertical-align: middle;
+}
+
+.textbook-latex-table .latex-table-align-left {
+  text-align: left;
+}
+
+.textbook-latex-table .latex-table-align-center {
+  text-align: center;
+}
+
+.textbook-latex-table .latex-table-align-right {
+  text-align: right;
+}
+
+.textbook-latex-table .latex-table-vrule-right {
+  border-right: 1.5px solid var(--book-border-strong) !important;
+}
+
+.textbook-latex-table tr.latex-table-rule-above > * {
+  border-top: 1.5px solid var(--book-border-strong) !important;
+}
+
+.textbook-latex-table tr.latex-table-rule-below > * {
+  border-bottom: 1.5px solid var(--book-border-strong) !important;
+}
+
+.latex-table-diagbox {
+  position: relative;
+  display: block;
+  min-width: 7rem;
+  min-height: 3.4rem;
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 0.75px),
+    var(--book-border-strong) 50%,
+    transparent calc(50% + 0.75px)
+  );
+}
+
+.latex-table-diagbox-upper,
+.latex-table-diagbox-lower {
+  position: absolute;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.latex-table-diagbox-upper {
+  top: 0.15rem;
+  right: 0.2rem;
+}
+
+.latex-table-diagbox-lower {
+  bottom: 0.15rem;
+  left: 0.2rem;
 }
 
 table th,
@@ -1326,7 +1487,7 @@ body.textbook-home-page #quarto-margin-sidebar {
   line-height: 1.85;
 }
 
-.home-lead > span {
+.home-lead>span {
   display: block;
 }
 
@@ -1347,7 +1508,7 @@ body.textbook-home-page #quarto-margin-sidebar {
   white-space: normal;
 }
 
-.home-quote p > span {
+.home-quote p>span {
   display: block;
   white-space: nowrap;
 }
@@ -2131,7 +2292,7 @@ body.quarto-dark {
   font-size: 0.86rem;
 }
 
-.density-plot__interval-controls > span:first-child {
+.density-plot__interval-controls>span:first-child {
   margin-right: 0.15rem;
   color: var(--book-ink);
   font-weight: 700;
@@ -2416,7 +2577,9 @@ body.quarto-dark {
     grid-template-columns: minmax(0, 1.45fr) minmax(13rem, 0.6fr);
   }
 
-  .home-quote p { white-space: normal; }
+  .home-quote p {
+    white-space: normal;
+  }
 }
 
 @media (max-width: 767.98px) {
@@ -2440,7 +2603,7 @@ body.quarto-dark {
     min-height: 8rem;
   }
 
-  .home-quote p > span {
+  .home-quote p>span {
     white-space: normal;
   }
 
@@ -2624,7 +2787,7 @@ body.quarto-dark {
 }
 
 .home-proof-promise p:first-child,
-.home-panel > header p,
+.home-panel>header p,
 .status-eyebrow,
 .status-kicker {
   margin: 0 0 0.35rem;
@@ -2636,7 +2799,7 @@ body.quarto-dark {
 }
 
 .home-proof-promise h2,
-.home-panel > header h2 {
+.home-panel>header h2 {
   margin: 0;
   padding: 0;
   border: 0;
@@ -2644,7 +2807,7 @@ body.quarto-dark {
 }
 
 .home-proof-promise h2::after,
-.home-panel > header h2::after {
+.home-panel>header h2::after {
   display: none;
 }
 
@@ -2669,7 +2832,7 @@ body.quarto-dark {
   box-shadow: var(--book-shadow-sm);
 }
 
-.home-panel > header {
+.home-panel>header {
   margin-bottom: 1.2rem;
 }
 
@@ -2686,7 +2849,7 @@ body.quarto-dark {
   margin: 0;
 }
 
-.site-timeline > div {
+.site-timeline>div {
   min-width: 0;
   padding: 0.9rem;
   border: 1px solid var(--book-border);
@@ -2717,7 +2880,7 @@ body.quarto-dark {
   margin-bottom: 0.7rem;
 }
 
-.home-update-heading > a,
+.home-update-heading>a,
 .home-section-link {
   color: var(--book-primary-deep);
   font-size: 0.76rem;
@@ -2754,7 +2917,7 @@ body.quarto-dark {
   min-width: 0;
 }
 
-.home-commits li > a {
+.home-commits li>a {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0.65rem;
@@ -2766,7 +2929,7 @@ body.quarto-dark {
   text-decoration: none;
 }
 
-.home-commits li > a:hover {
+.home-commits li>a:hover {
   border-color: var(--book-border);
   background: var(--book-surface-soft);
 }
@@ -2797,7 +2960,7 @@ body.quarto-dark {
   margin-bottom: 0.9rem;
 }
 
-.project-snapshot > div {
+.project-snapshot>div {
   display: grid;
   gap: 0.08rem;
   padding: 0.8rem 0.55rem;
@@ -2824,7 +2987,7 @@ body.quarto-dark {
   gap: 0.55rem;
 }
 
-.github-actions > a {
+.github-actions>a {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0.6rem;
@@ -2840,13 +3003,13 @@ body.quarto-dark {
   text-decoration: none;
 }
 
-.github-actions > a:hover {
+.github-actions>a:hover {
   border-color: rgb(82 100 154 / 38%);
   background: var(--book-primary-soft);
   color: var(--book-primary-deep);
 }
 
-.github-actions > a .bi-arrow-up-right {
+.github-actions>a .bi-arrow-up-right {
   color: var(--book-faint);
   font-size: 0.68rem;
 }
@@ -2914,8 +3077,8 @@ body.quarto-dark {
   overflow: hidden;
 }
 
-.chapter-progress__track > span,
-.status-progress-row__track > i {
+.chapter-progress__track>span,
+.status-progress-row__track>i {
   display: block;
   width: var(--chapter-progress);
   height: 100%;
@@ -2926,17 +3089,15 @@ body.quarto-dark {
 
 .chapter-progress--unset .chapter-progress__track,
 .status-progress-row--unset .status-progress-row__track {
-  background: repeating-linear-gradient(
-    135deg,
-    rgb(115 124 141 / 7%) 0,
-    rgb(115 124 141 / 7%) 0.45rem,
-    transparent 0.45rem,
-    transparent 0.9rem
-  );
+  background: repeating-linear-gradient(135deg,
+      rgb(115 124 141 / 7%) 0,
+      rgb(115 124 141 / 7%) 0.45rem,
+      transparent 0.45rem,
+      transparent 0.9rem);
 }
 
 .chapter-progress--unset .chapter-progress__heading strong,
-.status-progress-row--unset > strong {
+.status-progress-row--unset>strong {
   color: var(--book-muted);
 }
 
@@ -2956,8 +3117,8 @@ body.quarto-dark {
   color: var(--book-ink-soft);
 }
 
-.status-hero > :last-child,
-.notation-hero > :last-child {
+.status-hero> :last-child,
+.notation-hero> :last-child {
   margin-bottom: 0;
 }
 
@@ -2965,14 +3126,14 @@ body.quarto-dark {
   margin-top: 3rem;
 }
 
-.project-status-page .site-timeline + .home-update-heading {
+.project-status-page .site-timeline+.home-update-heading {
   margin-top: 1.35rem;
 }
 
-.status-section > h2,
-.notation-section > h2,
+.status-section>h2,
+.notation-section>h2,
 .notation-section-title,
-.notation-principles > h2 {
+.notation-principles>h2 {
   margin-top: 0.25rem;
 }
 
@@ -3039,7 +3200,7 @@ body.quarto-dark {
   height: 0.42rem;
 }
 
-.status-progress-row > strong {
+.status-progress-row>strong {
   color: var(--book-primary-deep);
   font-family: var(--book-mono);
   font-size: 0.7rem;
@@ -3152,7 +3313,7 @@ details.proof-block.proof-collapsible {
   padding: 0;
 }
 
-details.proof-block.proof-collapsible > .proof-summary {
+details.proof-block.proof-collapsible>.proof-summary {
   position: relative;
   z-index: 1;
   display: flex;
@@ -3168,11 +3329,11 @@ details.proof-block.proof-collapsible > .proof-summary {
   user-select: none;
 }
 
-details.proof-block.proof-collapsible > .proof-summary::-webkit-details-marker {
+details.proof-block.proof-collapsible>.proof-summary::-webkit-details-marker {
   display: none;
 }
 
-.proof-summary > span {
+.proof-summary>span {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -3198,11 +3359,11 @@ details.proof-block[open] .proof-summary .bi {
   border-top: 1px solid var(--book-border);
 }
 
-.proof-content > p:first-child > .proof-title:first-child {
+.proof-content>p:first-child>.proof-title:first-child {
   display: none;
 }
 
-.proof-content > :last-child {
+.proof-content> :last-child {
   margin-bottom: 0;
 }
 
@@ -3312,10 +3473,10 @@ a.textbook-cross-reference.is-reference-visited {
 }
 
 .quarto-dark .home-panel,
-.quarto-dark .site-timeline > div,
+.quarto-dark .site-timeline>div,
 .quarto-dark .status-part,
 .quarto-dark .statistic-card,
-.quarto-dark .github-actions > a,
+.quarto-dark .github-actions>a,
 .quarto-dark .chapter-progress,
 .quarto-dark .page-report-issue,
 .quarto-dark .proof-control {
@@ -3340,7 +3501,7 @@ a.textbook-cross-reference.is-reference-visited {
   color: #f2cf92;
 }
 
-.quarto-dark .github-actions > a:hover,
+.quarto-dark .github-actions>a:hover,
 .quarto-dark .page-report-issue:hover,
 .quarto-dark .proof-control:hover {
   border-color: rgb(182 195 229 / 38%);
@@ -3438,7 +3599,7 @@ a.textbook-cross-reference.is-reference-visited {
     padding: 1.05rem;
   }
 
-  .home-commits li > a {
+  .home-commits li>a {
     grid-template-columns: auto minmax(0, 1fr);
   }
 
@@ -3474,6 +3635,7 @@ a.textbook-cross-reference.is-reference-visited {
 }
 
 @media print {
+
   .home-proof-promise,
   .home-panel,
   .chapter-progress,
@@ -3490,11 +3652,11 @@ a.textbook-cross-reference.is-reference-visited {
     display: none !important;
   }
 
-  details.proof-block:not([open]) > .proof-content {
+  details.proof-block:not([open])>.proof-content {
     display: block !important;
   }
 
-  .proof-content > p:first-child > .proof-title:first-child {
+  .proof-content>p:first-child>.proof-title:first-child {
     display: inline;
   }
 
