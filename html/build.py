@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import binascii
 from collections import Counter
 import hashlib
 import html
@@ -4965,19 +4966,62 @@ def postprocess_reference_pages(output_dir: Path) -> None:
 def postprocess_site_markup(
     output_dir: Path, site_metadata: dict[str, str]
 ) -> None:
-    """Add project metadata and low-risk image loading hints."""
+    """Add project metadata and stable, low-risk image loading hints."""
     repository_meta = (
         '<meta name="textbook-repository" content="'
         + html.escape(site_metadata["repository"], quote=True)
         + '">\n'
     )
 
+    def embedded_png_dimensions(tag: str) -> tuple[int, int] | None:
+        """Read a data-URI PNG size without decoding the whole image."""
+        source_match = re.search(
+            r"\bsrc\s*=\s*([\"'])data:image/png;base64,([^\"']+)\1",
+            tag,
+            flags=re.IGNORECASE,
+        )
+        if source_match is None:
+            return None
+        encoded = re.sub(r"\s+", "", source_match.group(2))
+        try:
+            # A PNG stores its width and height in bytes 16--23.  The first
+            # 32 Base64 characters decode to the 24 bytes needed here.
+            header = base64.b64decode(encoded[:32], validate=True)
+        except (ValueError, binascii.Error):
+            return None
+        if len(header) < 24 or header[:8] != b"\x89PNG\r\n\x1a\n":
+            return None
+        width = int.from_bytes(header[16:20], "big")
+        height = int.from_bytes(header[20:24], "big")
+        if width <= 0 or height <= 0:
+            return None
+        return width, height
+
     def optimize_image(match: re.Match[str]) -> str:
         tag = match.group(0)
         closing = "/>" if tag.endswith("/>") else ">"
         core = tag[: -len(closing)].rstrip()
+        is_embedded_image = bool(
+            re.search(
+                r"\bsrc\s*=\s*([\"'])data:image/",
+                tag,
+                flags=re.IGNORECASE,
+            )
+        )
+        dimensions = embedded_png_dimensions(tag)
+        if dimensions is not None:
+            width, height = dimensions
+            if not re.search(r"\bwidth\s*=", tag, flags=re.IGNORECASE):
+                core += f' width="{width}"'
+            if not re.search(r"\bheight\s*=", tag, flags=re.IGNORECASE):
+                core += f' height="{height}"'
         if not re.search(r"\bloading\s*=", tag, flags=re.IGNORECASE):
-            core += ' loading="lazy"'
+            # Embedded computation figures are already part of the HTML file:
+            # lazy loading saves no transfer and leaves their layout unresolved
+            # while the browser positions chapter anchors.  Eagerly initialize
+            # them; keep ordinary file-backed figures lazy.
+            loading = "eager" if is_embedded_image else "lazy"
+            core += f' loading="{loading}"'
         if not re.search(r"\bdecoding\s*=", tag, flags=re.IGNORECASE):
             core += ' decoding="async"'
         return core + closing

@@ -10,8 +10,6 @@ python3 html/build.py
 
 网页生成在 `html/site/`，每个 `chapter` 对应一个 Quarto Book 页面，左侧是整本书的章节索引，页面右侧是当前章目录。
 
-右侧当前章目录在桌面端只向右额外拓宽，增量由 `html/style.css` 中的 `--book-toc-extra-width` 控制；修改该值不会挤占正文栏。
-
 首页正文写在 `html/home.md`，可直接使用 Markdown 修改或补充。标题、作者、邮箱和日期读取自 `settings.tex` 中的 `title/author/date`。
 
 站点的首次发布日期、最近内容更新日期和 GitHub 仓库写在`html/site-meta.json`；网站构建日期由构建当天自动生成。19 个正文章节的完成度集中写在 `html/chapter-progress.json`：填写 `0`–`100` 的整数即可，`null`表示尚未填写。构建会严格检查章节键，避免拼写错误被静默忽略。
@@ -74,15 +72,19 @@ textbook/
 ```markdown
 # 线性模型计算实验
 
-## 线性回归：Python 与 R 对照
+## 线性回归
 
-- computations/01-linear-regression/python/result.html
 - computations/01-linear-regression/r/result.html
+
+## 复共线性与岭回归
+
+- computations/02-multicollinearity-ridge/r/result.html
+
 ```
 
 每个二级标题表示一个计算实验，标题出现的顺序决定网页编号。
 
-### R/Python 的渲染
+### R/Python 的执行与 HTML 生成
 
 以下命令均从教材根目录执行。每次渲染都会覆盖对应实验目录的 `result.html`；完成后按 `computations.order` 所列路径检查并提交该结果文件。
 
@@ -91,31 +93,37 @@ textbook/
 `analysis.qmd` 使用全书根目录的 `renv`。渲染时显式指定根目录的 R 启动配置，使 Quarto 启动的 R 进程也加载同一套 `renv`：
 
 ```bash
+QUARTO_BIN="${QUARTO:-/Applications/Positron.app/Contents/Resources/app/quarto/bin/quarto}"
 TEXTBOOK_ROOT="$PWD" R_PROFILE_USER="$PWD/.Rprofile" \
-quarto render statistics/Linear-model/computations/01-linear-regression/r/analysis.qmd \
+"$QUARTO_BIN" render statistics/Linear-model/computations/01-linear-regression/r/result.qmd \
   --to html --output result.html -M embed-resources:true
 ```
 
-将路径替换为实际实验的 `.qmd` 文件。新增 R 包前先按`environment/r/README.md` 更新 `renv.lock`，再进行渲染。
+将路径替换为实际实验的 `.qmd` 文件。`QUARTO_BIN` 默认与 `build.py` 一样使用 Positron 内置的 Quarto；如果 Quarto 位于其他位置，先设置项目已支持的 `QUARTO` 环境变量即可。`--output result.html` 会把结果写到输入 `.qmd` 所在目录；`embed-resources:true` 保证生成的 HTML 不依赖外部图片或样式文件。
 
-#### Python / Jupyter
+#### Python / Jupyter + Pandoc
 
-先将 Jupyter 声明为全书 Python 依赖（只需首次执行）：
+全书 Python 环境已在 `environment/python/pyproject.toml` 和 `uv.lock` 中锁定 Jupyter。
 
-```bash
-uv --directory environment/python add jupyter
-```
+Python 计算实验分两步处理：UV 锁定的 Jupyter 只负责执行 Notebook，Pandoc 负责把已执行的 Notebook 生成与现有实验一致的、自包含的 HTML。
 
-随后通过 UV 执行 Notebook，并直接输出自包含的 HTML：
+首先在 UV 锁定环境中执行 Notebook，并把新的单元格输出保存回 `.ipynb`：
 
 ```bash
-uv --directory environment/python run --locked jupyter nbconvert \
-  --to html --execute --embed-images --output result \
-  --output-dir statistics/Linear-model/computations/01-linear-regression/python \
-  statistics/Linear-model/computations/01-linear-regression/python/analysis.ipynb
+uv run --project environment/python --locked jupyter nbconvert \
+  --to notebook --execute --inplace \
+  statistics/multivariate/computations/01-kmeans/python/analysis.ipynb
 ```
 
-上述命令会在 Notebook 所在目录写入 `result.html`。若 Notebook 使用外部文件，仍应确认渲染后的 HTML 不依赖未提交的本地资源。
+再使用 Pandoc 生成最终 `result.html`：
+
+```bash
+pandoc statistics/multivariate/computations/01-kmeans/python/analysis.ipynb \
+  --from ipynb --to html --standalone --embed-resources \
+  --output statistics/multivariate/computations/01-kmeans/python/result.html
+```
+
+将两条命令中的路径同时替换为实际实验路径。`--embed-resources` 会将 Notebook 输出的图片等资源嵌入 HTML；若 Notebook 还会读取数据文件，该数据文件仍需按项目约定提交。
 
 ### 插入教材网页
 

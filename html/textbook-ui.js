@@ -89,6 +89,48 @@
     updateThemeButton(button);
   };
 
+  const polishDataframe = (table) => {
+    table.classList.add("textbook-dataframe");
+    table.removeAttribute("border");
+
+    const headerRows = Array.from(table.tHead?.rows || []);
+    const firstHeaderCells = Array.from(headerRows[0]?.cells || []);
+    const indexNameRow = headerRows[headerRows.length - 1];
+    const indexNameCells = Array.from(indexNameRow?.cells || []);
+    const namedIndexCells = indexNameCells.filter((cell) => cell.textContent.trim());
+
+    // pandas renders an index name (for example, K) on a sparse second row.
+    // Move that label into the empty corner cell so every heading sits over
+    // the column it describes.
+    if (
+      headerRows.length > 1 &&
+      firstHeaderCells.length === indexNameCells.length &&
+      !firstHeaderCells[0]?.textContent.trim() &&
+      namedIndexCells.length === 1 &&
+      namedIndexCells[0] === indexNameCells[0]
+    ) {
+      firstHeaderCells[0].append(...Array.from(indexNameCells[0].childNodes));
+      indexNameRow.remove();
+    }
+
+    table.querySelectorAll("thead tr[style]").forEach((row) => {
+      row.removeAttribute("style");
+    });
+    table.querySelectorAll("thead th").forEach((cell) => {
+      cell.scope = "col";
+    });
+
+    const bodyRows = Array.from(table.tBodies).flatMap((body) =>
+      Array.from(body.rows)
+    );
+    bodyRows.forEach((row) => {
+      Array.from(row.cells).forEach((cell) => {
+        if (cell.tagName === "TH") cell.scope = "row";
+      });
+    });
+
+  };
+
   const mountReadingTools = () => {
     const main = document.querySelector("main.content");
     if (!main || document.querySelector(".textbook-reading-progress")) return;
@@ -147,6 +189,7 @@
     }
 
     document.querySelectorAll("main.content table").forEach((table) => {
+      if (table.classList.contains("dataframe")) polishDataframe(table);
       const notationWrapper = table.closest(".notation-table-wrap");
       if (notationWrapper) {
         notationWrapper.setAttribute("role", "region");
@@ -167,8 +210,16 @@
       if (table.parentElement?.classList.contains("textbook-table-scroll")) return;
       const wrapper = document.createElement("div");
       wrapper.className = "textbook-table-scroll";
+      if (table.classList.contains("textbook-dataframe")) {
+        wrapper.classList.add("textbook-dataframe-scroll");
+      }
       wrapper.setAttribute("role", "region");
-      wrapper.setAttribute("aria-label", "可横向滚动的数据表格");
+      wrapper.setAttribute(
+        "aria-label",
+        table.classList.contains("textbook-dataframe")
+          ? "可横向滚动的 Python 数据表格"
+          : "可横向滚动的数据表格"
+      );
       wrapper.tabIndex = 0;
       table.parentNode.insertBefore(wrapper, table);
       wrapper.appendChild(table);
