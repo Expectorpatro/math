@@ -1,8 +1,10 @@
 \section{模型评价}
 
+在监督学习中，模型评价是衡量模型预测能力、比较不同模型并指导模型选择的重要环节。
+
 \subsection{分类任务}
 
-设真实标签 $y\in\{1,\dots,r\}$，模型预测为 $\hat{y}\in\{1,\dots,r\}$，对二分类问题可记正类为$1$，负类为$0$。
+设真实标签$y\in\{1,\dots,r\}$，模型预测为$\hat{y}\in\{1,\dots,r\}$，对二分类问题可分别记为$0,1$，$0$对应负类，$1$对应正类。
 \begin{definition}
 	\gls{ConfusionMatrix}按真实标签与预测标签的组合统计样本个数，其每个元素含义如下：
 	\begin{itemize}
@@ -123,4 +125,207 @@
   MAPE 将误差按照真实值比例归一化，适合对预测误差的相对大小进行衡量。
 \end{note}
 
-\subsection{过拟合与数据集划分}
+\subsection{过拟合与预防方式}
+\subsubsection{训练目标与过拟合}
+设观测数据集为$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^{n}$，数据来自未知分布$P$，候选模型组成函数类$\mathcal{F}=\{f_\theta:\theta\in\Theta\}$，$\Theta$为参数空间。模型训练通常先根据任务希望达到的效果选定评价指标，再构造与该指标一致的训练目标。若$L[y,f_\theta(x)]$为损失函数，则训练过程通常求解：
+\begin{equation*}
+	\hat{\theta}\in\mathop{\arg\min}_{\theta\in\Theta}\widehat{\mathcal{R}}_{\mathrm{train}}(\theta),\quad\widehat{\mathcal{R}}_{\mathrm{train}}(\theta)\coloneq\frac{1}{n}\sum_{i=1}^{n}L[y_i,f_\theta(x_i)]
+\end{equation*}
+这里，$\widehat{\mathcal{R}}_{\mathrm{train}}$为训练数据集上的经验风险，只度量模型在训练数据集上的平均损失。需要注意，我们最终关心的通常不是模型在训练数据集上的表现，而是模型对同一分布中新样本的预测能力，即总体风险：
+\begin{equation*}
+	\mathcal{R}(\theta)\coloneq\operatorname{E}\{L[Y,f_\theta(X)]\}
+\end{equation*}\par
+有时持续降低$\widehat{\mathcal{R}}_{\mathrm{train}}$未必会同时降低$\mathcal{R}$：模型可能不是在提取能够推广到新样本的稳定规律，而是利用训练数据中的偶然噪声、异常点甚至样本的细微特征，对有限训练集作近似记忆。此时训练损失较低，而新样本上的损失较高，这种现象称为\gls{Overfitting}。\par
+\begin{figure}[htbp]
+	\centering
+	\makebox[\textwidth][c]{%
+		\begin{tikzpicture}
+			\begin{groupplot}[
+				group style={
+					group size=3 by 1,
+					horizontal sep=0.025\textwidth
+				},
+				width=0.30\textwidth,
+				height=0.27\textwidth,
+				xmin=-1.25,
+				xmax=1.25,
+				ymin=-2.2,
+				ymax=2.2,
+				domain=-1.2:1.2,
+				samples=300,
+				axis lines=middle,
+				xlabel={$x$},
+				ylabel={$y$},
+				xtick={-1,0,1},
+				ytick={-2,-1,0,1,2},
+				tick label style={font=\small},
+				label style={font=\small},
+				title style={
+					font=\small,
+					yshift=-0.5ex
+				},
+				clip=false
+				]
+				
+				% 第一种复杂拟合
+				\nextgroupplot[
+				title={Cubic fit}
+				]
+				
+				\addplot[
+				dashed,
+				thick,
+				gray
+				] {x};
+				
+				\addplot[
+				thick
+				] {
+					x
+					+1.8*(x+1)*x*(x-1)
+				};
+				
+				\addplot[
+				only marks,
+				mark=*,
+				mark size=2.2pt
+				] coordinates {
+					(-1,-1)
+					(0,0)
+					(1,1)
+				};
+				
+				% 第二种复杂拟合
+				\nextgroupplot[
+				title={Quintic fit}
+				]
+				
+				\addplot[
+				dashed,
+				thick,
+				gray
+				] {x};
+				
+				\addplot[
+				thick
+				] {
+					x
+					-3.2*(x+1)*x*(x-1)*(x^2-0.35)
+				};
+				
+				\addplot[
+				only marks,
+				mark=*,
+				mark size=2.2pt
+				] coordinates {
+					(-1,-1)
+					(0,0)
+					(1,1)
+				};
+				
+				% 第三种复杂拟合
+				\nextgroupplot[
+				title={Oscillatory fit}
+				]
+				
+				\addplot[
+				dashed,
+				thick,
+				gray
+				] {x};
+				
+				\addplot[
+				thick
+				] {
+					x
+					+1.1*(x+1)*x*(x-1)
+					*sin(deg(7*x))
+				};
+				
+				\addplot[
+				only marks,
+				mark=*,
+				mark size=2.2pt
+				] coordinates {
+					(-1,-1)
+					(0,0)
+					(1,1)
+				};
+				
+			\end{groupplot}
+			
+			% 公共图例
+			\draw[dashed,thick,gray]
+			(1.3,-1.15) -- (1.9,-1.15)
+			node[right,black,font=\small] {true relation $y=x$};
+			
+			\draw[thick]
+			(5.0,-1.15) -- (5.6,-1.15)
+			node[right,font=\small] {fitted curve};
+			
+			\node[
+			circle,
+			fill,
+			inner sep=1.5pt
+			] at (7.8,-1.15) {};
+			
+			\node[
+			right,
+			font=\small
+			] at (7.9,-1.15) {training point};
+			
+		\end{tikzpicture}%
+	}
+	\caption{取自$y=x$的三个样本可由不同的模型进行解释。}
+	\label{fig:overfitting-three-points}
+\end{figure}
+从\cref{fig:overfitting-three-points}可以看出，三条复杂程度不同的曲线都完美地拟合了由三个观测点构成的训练数据集，因此它们在该训练集上取得了相同且最小的经验风险$\widehat{\mathcal{R}}_{\mathrm{train}}(\theta)$。然而，在训练样本之外，若新的观测仍来自真实关系$y=x$，这些模型会产生较大的预测误差，即它们存在过拟合的现象。由此可见，仅凭训练数据上的经验风险无法判断模型的真实预测能力；即使多个模型具有相同的训练误差，它们的总体风险$\mathcal{R}(\theta)$也可能存在显著差异。\par
+综上，我们需要关注差值：
+\begin{equation*}
+	\mathcal{R}(\theta)-\widehat{\mathcal{R}}_{\mathrm{train}}(\theta)
+\end{equation*}
+它反映了模型从训练数据推广到新数据时的性能差异。
+\subsubsection{训练集、验证集与测试集}
+计算上述差值需要计算$\mathcal{R}(\theta)$，但是由于分布$P$未知，$\mathcal{R}(\theta)$通常无法直接计算，只能通过未参与训练的数据加以估计，所以我们通常将原始数据随机划分为三个互不相交的部分：
+\begin{equation*}
+	\mathcal{D}=\mathcal{D}_{\mathrm{train}}\cup\mathcal{D}_{\mathrm{val}}\cup\mathcal{D}_{\mathrm{test}}
+\end{equation*}
+分别称为\gls{TrainingSet}、\gls{ValidationSet}和\gls{TestSet}。三者应当尽可能来自相同的目标分布；对于类别不平衡的分类问题，通常采用分层抽样，使各部分的类别比例大致一致。\par
+\begin{method}
+	数据集划分后的模型训练与选择通常按下列顺序进行：
+	\begin{enumerate}
+		\item 在训练集$\mathcal{D}_{\mathrm{train}}$上估计模型的可学习参数$\theta$；
+		\item 在验证集$\mathcal{D}_{\mathrm{val}}$上比较模型结构与超参数，并据此选择模型；
+		\item 确定全部建模方案后，只在测试集$\mathcal{D}_{\mathrm{test}}$上进行一次最终评价，报告模型对未见数据的性能估计。
+	\end{enumerate}
+\end{method}
+验证集虽然不参与参数的直接拟合，却参与模型选择；若反复根据测试集结果修改模型，测试集实际上也参与了训练流程，其评价结果便会过于乐观。因此，测试集必须与整个训练和选择过程隔离。数据预处理也应遵循相同原则：缺失值填补、标准化、特征选择等步骤只能在训练集上估计所需参数，再将已经确定的变换应用到验证集和测试集，不能提前利用后两者的信息。\par
+当样本量较小时，可以在训练数据内部使用$K$折\gls{CV}：将训练数据分为$K$份，依次用其中一份验证、其余$K-1$份训练，并对$K$次验证结果取平均以选择模型。此时仍应保留独立测试集；交叉验证用于模型选择，测试集只用于最终评价。
+\subsubsection{正则化与模型空间约束}
+对$f=f_\theta\in\mathcal{F}$，记$\widehat{\mathcal{R}}_{\mathrm{train}}(f)\coloneq\widehat{\mathcal{R}}_{\mathrm{train}}(\theta)$及$\mathcal{R}(f)\coloneq\mathcal{R}(\theta)$。\par
+若$\mathcal{F}_1\subseteq\mathcal{F}_2$，则：
+\begin{equation*}
+	\inf_{f\in\mathcal{F}_2}\widehat{\mathcal{R}}_{\mathrm{train}}(f)
+	\leqslant
+	\inf_{f\in\mathcal{F}_1}\widehat{\mathcal{R}}_{\mathrm{train}}(f).
+\end{equation*}
+也就是说，扩大模型空间不会使最优训练风险变大，因为新增的模型为拟合训练数据提供了更多选择；但总体风险并不具有相同的单调性。模型空间越大，训练过程越容易从大量候选模型中找到一个恰好迎合当前样本偶然性的模型，因而经验风险虽然可以很低，经验风险与总体风险之间的偏差却更难控制。极端情况下，一个足够复杂的模型可以记住每个训练样本，使训练风险接近$0$；但训练样本之外的函数取值仍可能几乎不受约束，这正是过拟合产生的原因。
+\begin{definition}
+	设$\Omega:\mathcal{F}\to[0,+\infty]$为模型复杂度函数，$\Omega(f)$越大表示模型$f$越复杂。对$c\geqslant0$，定义受限模型空间：
+	\begin{equation*}
+		\mathcal{F}_c\coloneq\{f\in\mathcal{F}:\Omega(f)\leqslant c\}
+	\end{equation*}
+	在$\mathcal{F}_c$中最小化经验风险：
+	\begin{equation*}
+		\hat{f}_c\in\mathop{\arg\min}_{f\in\mathcal{F}_c}\widehat{\mathcal{R}}_{\mathrm{train}}(f)
+	\end{equation*}
+	称为约束形式的\gls{Regularization}。其中，$c$称为复杂度上界。
+\end{definition}
+实际计算中更常使用正则化的惩罚形式：
+\begin{equation*}
+	\hat{f}_\lambda\in\mathop{\arg\min}_{f\in\mathcal{F}}\left\{\widehat{\mathcal{R}}_{\mathrm{train}}(f)+\lambda\Omega(f)\right\},\;\lambda\geqslant0
+\end{equation*}
+其中，$\widehat{\mathcal{R}}_{\mathrm{train}}(f)+\lambda\Omega(f)$称为正则化目标函数，$\lambda$称为\gls{RegularizationStrength}。当$\lambda=0$时，该问题退化为原来的经验风险最小化；$\lambda$越大，模型复杂度在目标函数中付出的代价越大，训练过程便越倾向于选择简单模型。
+\begin{note}
+	限制模型空间的本质是在拟合训练数据与控制模型复杂度避免过拟合之间取得平衡：模型空间过小会导致模型无法很好的拟合训练数据，也即\gls{Underfitting}，模型空间过大会导致过拟合。
+\end{note}
