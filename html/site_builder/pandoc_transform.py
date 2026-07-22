@@ -17,6 +17,8 @@ from pathlib import Path
 import re
 from typing import Any, Iterable
 
+from .commands import CommandRunner
+from .config import BuildConfig
 from .constants import (
     ALGORITHM_COMMAND_PREFIX,
     ALGORITHM_TITLE_END_PREFIX,
@@ -34,27 +36,14 @@ from .constants import (
 )
 from .errors import BuildError
 from .models import LatexTable, Term, TheoremSpec
-from .runtime import CONFIG, RUNNER
-
-PROJECT_ROOT = CONFIG.paths.project_root
-STAGED_SOURCE_DIR = CONFIG.paths.staged_source_dir
 
 
 def fail(message: str) -> None:
     raise BuildError(message)
 
 
-def run(
-    command: list[str],
-    *,
-    cwd: Path,
-    input_text: str | None = None,
-) -> str:
-    return RUNNER.run(command, cwd=cwd, input_text=input_text)
-
-
-def scoped_term_key(directory: Path, key: str) -> str:
-    relative = directory.relative_to(PROJECT_ROOT).as_posix()
+def scoped_term_key(directory: Path, key: str, project_root: Path) -> str:
+    relative = directory.relative_to(project_root).as_posix()
     digest = hashlib.sha1(relative.encode("utf-8")).hexdigest()[:10]
     return f"webscope-{digest}-{key}"
 
@@ -448,11 +437,14 @@ class BookTransformer:
         glossary: dict[str, Term],
         glossary_catalog: list[Term],
         latex_tables: dict[str, LatexTable],
+        *,
+        project_root: Path | None = None,
     ) -> None:
         self.theorem_specs = theorem_specs
         self.glossary = glossary
         self.glossary_catalog = glossary_catalog
         self.latex_tables = latex_tables
+        self.project_root = project_root.resolve() if project_root else None
         self.glossary_entry_count = len(glossary_catalog)
         self.glossary_key_count = len(
             {term.key for term in glossary_catalog}
@@ -1602,12 +1594,13 @@ class BookTransformer:
                 if key_counts[term.key] == 1:
                     entry_identifier = f"term-{term.key}"
                 else:
-                    source_directory = (
-                        PROJECT_ROOT / term.source
-                    ).parent
+                    if self.project_root is None:
+                        fail("生成重复术语锚点需要明确的项目根目录")
+                    source_directory = (self.project_root / term.source).parent
                     scoped_key = scoped_term_key(
                         source_directory,
                         term.key,
+                        self.project_root,
                     )
                     if term.key not in first_key_occurrence:
                         entry_identifier = f"term-{term.key}"
@@ -1744,15 +1737,21 @@ class BookTransformer:
         return document
 
 
-def parse_latex_to_ast() -> dict[str, Any]:
+def parse_latex_to_ast(
+    config: BuildConfig,
+    runner: CommandRunner,
+) -> dict[str, Any]:
     command = [
-        CONFIG.tools.pandoc,
+        config.tools.pandoc,
         "main.tex",
         "--from=latex",
         "--to=json",
-        f"--resource-path={STAGED_SOURCE_DIR}{os.pathsep}{PROJECT_ROOT}",
+        (
+            f"--resource-path={config.paths.staged_source_dir}"
+            f"{os.pathsep}{config.paths.project_root}"
+        ),
     ]
-    output = run(command, cwd=STAGED_SOURCE_DIR)
+    output = runner.run(command, cwd=config.paths.staged_source_dir)
     return json.loads(output)
 
 

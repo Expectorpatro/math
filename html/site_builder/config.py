@@ -198,6 +198,7 @@ class ImageQuality:
     computation_preferred_format: str
     computation_raster_dpi: int
     computation_min_raster_width: int
+    computation_min_pixel_ratio: float
 
 
 @dataclass(frozen=True, slots=True)
@@ -292,6 +293,7 @@ class BuildConfig:
                     "computation_preferred_format",
                     "computation_raster_dpi",
                     "computation_min_raster_width",
+                    "computation_min_pixel_ratio",
                 },
             ),
             "render": (
@@ -483,6 +485,10 @@ class BuildConfig:
                 computation_min_raster_width=_positive_int(
                     images["computation_min_raster_width"],
                     "images.computation_min_raster_width",
+                ),
+                computation_min_pixel_ratio=_positive_float(
+                    images["computation_min_pixel_ratio"],
+                    "images.computation_min_pixel_ratio",
                 ),
             ),
             render=RenderConfig(

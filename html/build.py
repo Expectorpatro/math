@@ -22,14 +22,16 @@ from site_builder.errors import BuildError
 
 try:
     from site_builder.assets import AssetManager
+    from site_builder.commands import CommandRunner
     from site_builder.computation_orders import load_computation_orders
     from site_builder.computations import ComputationImporter
+    from site_builder.config import BuildConfig
     from site_builder.filesystem import (
         atomic_publish_directory,
         prepare_empty_directory,
     )
+    from site_builder.freshness import write_site_fingerprint
     from site_builder.latex_sources import (
-        TIKZ_RENDERER,
         load_glossary,
         parse_theorem_specs,
         stage_sources,
@@ -57,26 +59,29 @@ try:
         RenderedSitePostprocessor,
     )
     from site_builder.qmd_writer import write_qmd_page
-    from site_builder.runtime import CONFIG, RUNNER
     from site_builder.site_content import write_quarto_config
     from site_builder.validation import validate_site as validate_rendered_site
+
+    HTML_DIR = Path(__file__).resolve().parent
+    CONFIG = BuildConfig.load(HTML_DIR)
+    RUNNER = CommandRunner()
 except BuildError as error:
     if __name__ == "__main__":
         print(f"[web] 错误：{error}", file=sys.stderr)
         raise SystemExit(1) from None
     raise
 
-
-HTML_DIR = CONFIG.paths.html_dir
 PROJECT_ROOT = CONFIG.paths.project_root
-MAIN_TEX = PROJECT_ROOT / "main.tex"
-SETTINGS_TEX = PROJECT_ROOT / "settings.tex"
+MAIN_TEX = CONFIG.paths.main_tex
+SETTINGS_TEX = CONFIG.paths.settings_tex
 QUARTO = CONFIG.tools.quarto_path()
 QUARTO_PROJECT_DIR = CONFIG.paths.quarto_project_dir
 ASSET_MANAGER = AssetManager(CONFIG, RUNNER)
 COMPUTATION_IMPORTER = ComputationImporter(
     project_root=PROJECT_ROOT,
     quarto_project_dir=QUARTO_PROJECT_DIR,
+    minimum_raster_width=CONFIG.images.computation_min_raster_width,
+    minimum_pixel_ratio=CONFIG.images.computation_min_pixel_ratio,
     logger=RUNNER.log,
 )
 SITE_POSTPROCESSOR = RenderedSitePostprocessor(RUNNER.warning)
@@ -180,7 +185,13 @@ def write_quarto_site(
             page.source_path,
             labels_to_pages,
         )
-        write_qmd_page(page, document, chapter_progress)
+        write_qmd_page(
+            page,
+            document,
+            chapter_progress,
+            config=CONFIG,
+            runner=RUNNER,
+        )
 
     computation_appendices = COMPUTATION_IMPORTER.build_appendices(
         pages,
@@ -195,6 +206,7 @@ def write_quarto_site(
         site_metadata,
         chapter_progress,
         notation_catalog,
+        config=CONFIG,
     )
     runtime_directories = (
         CONFIG.paths.quarto_cache_dir,
@@ -267,11 +279,19 @@ def write_build_diagnostics(
     )
 
 
-def mark_generated_site(output_dir: Path) -> None:
-    """Mark a publication directory without exposing build diagnostics."""
+def mark_generated_site(
+    rendered_site: Path,
+    publication_dir: Path,
+) -> None:
+    """Mark a rendered site using the planned publication path as context."""
 
-    (output_dir / ".generated-site").write_text(
+    (rendered_site / ".generated-site").write_text(
         "site-build-v1\n", encoding="utf-8"
+    )
+    write_site_fingerprint(
+        PROJECT_ROOT,
+        rendered_site,
+        output_dir=publication_dir,
     )
 
 
@@ -295,10 +315,10 @@ def build(arguments: argparse.Namespace) -> int:
 
     output_dir = CONFIG.paths.resolve_output(arguments.output)
 
-    computation_orders = load_computation_orders()
-    site_metadata = load_site_metadata()
-    chapter_progress = load_chapter_progress()
-    notation_catalog = load_notation_catalog()
+    computation_orders = load_computation_orders(CONFIG.paths)
+    site_metadata = load_site_metadata(CONFIG.paths)
+    chapter_progress = load_chapter_progress(CONFIG.paths)
+    notation_catalog = load_notation_catalog(CONFIG.paths)
 
     log("读取术语和定理配置")
     (
@@ -307,8 +327,8 @@ def build(arguments: argparse.Namespace) -> int:
         conflicting_term_keys,
         glossary_warnings,
         glossary_catalog,
-    ) = load_glossary()
-    theorem_specs = parse_theorem_specs()
+    ) = load_glossary(CONFIG.paths)
+    theorem_specs = parse_theorem_specs(CONFIG.paths)
     for warning in glossary_warnings:
         print(f"[web] 警告：{warning}", file=sys.stderr)
     log(
@@ -322,15 +342,18 @@ def build(arguments: argparse.Namespace) -> int:
         glossary,
         terms_by_directory,
         conflicting_term_keys,
+        config=CONFIG,
+        runner=RUNNER,
     )
     log("Pandoc 正在解析完整 LaTeX 文档")
-    document = parse_latex_to_ast()
+    document = parse_latex_to_ast(CONFIG, RUNNER)
 
     transformer = BookTransformer(
         theorem_specs,
         glossary,
         glossary_catalog,
         latex_tables,
+        project_root=PROJECT_ROOT,
     )
     document = transformer.transform(document)
 
@@ -351,7 +374,7 @@ def build(arguments: argparse.Namespace) -> int:
         glossary_warnings,
         postprocess_report,
     )
-    mark_generated_site(rendered_site)
+    mark_generated_site(rendered_site, output_dir)
 
     if transformer.missing_terms:
         print(
@@ -370,6 +393,7 @@ def build(arguments: argparse.Namespace) -> int:
         validation["broken_links"]
         or validation["broken_resources"]
         or validation["duplicate_ids"]
+        or validation["duplicate_resource_ids"]
     )
     if validation_errors and CONFIG.policy.strict_broken_resources:
         fail(
@@ -377,6 +401,8 @@ def build(arguments: argparse.Namespace) -> int:
             f"失效链接 {len(validation['broken_links'])} 个，"
             f"失效资源 {len(validation['broken_resources'])} 个，"
             f"含重复内容 ID 的页面 {len(validation['duplicate_ids'])} 个；"
+            "含重复资源 ID 的页面 "
+            f"{len(validation['duplicate_resource_ids'])} 个；"
             "旧站点未被替换"
         )
     if arguments.strict and (
@@ -418,12 +444,6 @@ def parse_arguments() -> argparse.Namespace:
             "html/ 内的输出目录，默认 "
             + CONFIG.paths.default_output_dir.relative_to(HTML_DIR).as_posix()
         ),
-    )
-    parser.add_argument(
-        "--split",
-        choices=("part", "chapter", "section"),
-        default="chapter",
-        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--strict",

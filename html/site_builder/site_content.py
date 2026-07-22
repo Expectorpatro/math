@@ -4,22 +4,21 @@ from __future__ import annotations
 
 from datetime import date as calendar_date
 import html
+from pathlib import Path
 import re
 from typing import Any
 from urllib.parse import urlencode
 
+from .config import BuildConfig
 from .errors import BuildError
+from .markup import Markup, element, join, text
 from .metadata import book_contact_email, quarto_date, recent_git_commits, yaml_quote
 from .models import QuartoPage
 from .pages import page_title
 from .pandoc_transform import BookTransformer, ast_plain_text, node_identifier
 from .quarto import QuartoProjectWriter
-from .runtime import CONFIG
 
-HTML_DIR = CONFIG.paths.html_dir
-HOME_CONTENT = HTML_DIR / "home.md"
-QUARTO_PROJECT_DIR = CONFIG.paths.quarto_project_dir
-QUARTO_WRITER = QuartoProjectWriter(CONFIG)
+
 SITE_DESCRIPTION = (
     "持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，"
     "强调逻辑自洽、证明完整与持续维护。"
@@ -44,17 +43,30 @@ def github_issue_url(
 
 
 def render_site_timeline(metadata: dict[str, str]) -> str:
-    return (
-        '<dl class="site-timeline" aria-label="项目时间线">'
-        '<div><dt>首次发布</dt>'
-        f'<dd><time datetime="{metadata["first_published"]}">'
-        f'{metadata["first_published"]}</time></dd></div>'
-        '<div><dt>最近内容更新</dt>'
-        f'<dd><time datetime="{metadata["content_updated"]}">'
-        f'{metadata["content_updated"]}</time></dd></div>'
-        '<div><dt>网站构建</dt>'
-        f'<dd><time datetime="{calendar_date.today().isoformat()}">'
-        f'{calendar_date.today().isoformat()}</time></dd></div></dl>'
+    today = calendar_date.today().isoformat()
+
+    def timeline_item(label: str, value: str) -> Markup:
+        return element(
+            "div",
+            [
+                element("dt", text(label)),
+                element(
+                    "dd",
+                    element("time", text(value), attributes={"datetime": value}),
+                ),
+            ],
+        )
+
+    return str(
+        element(
+            "dl",
+            [
+                timeline_item("首次发布", metadata["first_published"]),
+                timeline_item("最近内容更新", metadata["content_updated"]),
+                timeline_item("网站构建", today),
+            ],
+            attributes={"class": "site-timeline", "aria-label": "项目时间线"},
+        )
     )
 
 
@@ -62,29 +74,59 @@ def render_recent_commits(
     metadata: dict[str, str], commits: list[dict[str, str]]
 ) -> str:
     if commits:
-        items = "".join(
-            '<li><a href="'
-            + metadata["github_url"]
-            + "/commit/"
-            + html.escape(commit["hash"], quote=True)
-            + '"><code>'
-            + html.escape(commit["short_hash"])
-            + "</code><span>"
-            + html.escape(commit["subject"])
-            + "</span><time datetime=\""
-            + html.escape(commit["date"], quote=True)
-            + '\">'
-            + html.escape(commit["date"])
-            + "</time></a></li>"
+        items = join(
+            element(
+                "li",
+                element(
+                    "a",
+                    [
+                        element("code", text(commit["short_hash"])),
+                        element("span", text(commit["subject"])),
+                        element(
+                            "time",
+                            text(commit["date"]),
+                            attributes={"datetime": commit["date"]},
+                        ),
+                    ],
+                    attributes={
+                        "href": f'{metadata["github_url"]}/commit/{commit["hash"]}'
+                    },
+                ),
+            )
             for commit in commits
         )
     else:
-        items = '<li class="home-commit-empty">当前构建无法读取本地提交记录。</li>'
-    return (
-        '<div class="home-update-heading"><span class="home-live-badge">'
-        '<i aria-hidden="true"></i>持续更新中</span>'
-        f'<a href="{metadata["github_url"]}/commits/main/">查看全部提交</a></div>'
-        f'<ol class="home-commits">{items}</ol>'
+        items = element(
+            "li",
+            text("当前构建无法读取本地提交记录。"),
+            attributes={"class": "home-commit-empty"},
+        )
+    heading = element(
+        "div",
+        [
+            element(
+                "span",
+                [
+                    element("i", attributes={"aria-hidden": "true"}),
+                    text("持续更新中"),
+                ],
+                attributes={"class": "home-live-badge"},
+            ),
+            element(
+                "a",
+                text("查看全部提交"),
+                attributes={"href": f'{metadata["github_url"]}/commits/main/'},
+            ),
+        ],
+        attributes={"class": "home-update-heading"},
+    )
+    return str(
+        join(
+            [
+                heading,
+                element("ol", items, attributes={"class": "home-commits"}),
+            ]
+        )
     )
 
 
@@ -107,12 +149,37 @@ def render_github_actions(metadata: dict[str, str]) -> str:
         ("bi-chat-left-text", "提出内容建议", suggestion_url),
         ("bi-clock-history", "查看更新记录", f'{metadata["github_url"]}/commits/main/'),
     ]
-    return '<nav class="github-actions" aria-label="GitHub 项目入口">' + "".join(
-        f'<a href="{html.escape(url, quote=True)}"><i class="bi {icon}" '
-        f'aria-hidden="true"></i><span>{label}</span>'
-        '<i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>'
+    links = (
+        element(
+            "a",
+            [
+                element(
+                    "i",
+                    attributes={"class": f"bi {icon}", "aria-hidden": "true"},
+                ),
+                element("span", text(label)),
+                element(
+                    "i",
+                    attributes={
+                        "class": "bi bi-arrow-up-right",
+                        "aria-hidden": "true",
+                    },
+                ),
+            ],
+            attributes={"href": url},
+        )
         for icon, label, url in actions
-    ) + "</nav>"
+    )
+    return str(
+        element(
+            "nav",
+            links,
+            attributes={
+                "class": "github-actions",
+                "aria-label": "GitHub 项目入口",
+            },
+        )
+    )
 
 
 def project_statistics(
@@ -144,18 +211,43 @@ def render_project_snapshot(statistics: list[tuple[str, int, str]]) -> str:
         for item in statistics
         if item[2] in {"definition", "theorem", "property", "proof"}
     ]
-    return '<div class="project-snapshot">' + "".join(
-        f'<div><strong>{value}</strong><span>{html.escape(label)}</span></div>'
+    cards = (
+        element(
+            "div",
+            [element("strong", text(value)), element("span", text(label))],
+        )
         for label, value, _key in featured
-    ) + '</div><a class="home-section-link" href="project-status.html">查看完整项目状态 <span aria-hidden="true">→</span></a>'
+    )
+    return str(
+        join(
+            [
+                element("div", cards, attributes={"class": "project-snapshot"}),
+                element(
+                    "a",
+                    [
+                        text("查看完整项目状态 "),
+                        element("span", text("→"), attributes={"aria-hidden": "true"}),
+                    ],
+                    attributes={
+                        "class": "home-section-link",
+                        "href": "project-status.html",
+                    },
+                ),
+            ]
+        )
+    )
 
 
 def render_statistics_grid(statistics: list[tuple[str, int, str]]) -> str:
-    return '<div class="statistics-grid">' + "".join(
-        f'<article class="statistic-card statistic-card--{key}">'
-        f'<span>{html.escape(label)}</span><strong>{value}</strong></article>'
+    cards = (
+        element(
+            "article",
+            [element("span", text(label)), element("strong", text(value))],
+            attributes={"class": f"statistic-card statistic-card--{key}"},
+        )
         for label, value, key in statistics
-    ) + "</div>"
+    )
+    return str(element("div", cards, attributes={"class": "statistics-grid"}))
 
 
 def render_progress_overview(
@@ -176,9 +268,9 @@ def render_progress_overview(
             group_lookup[part] = []
             groups.append((part, group_lookup[part]))
         group_lookup[part].append(page)
-    sections: list[str] = []
+    sections: list[Markup] = []
     for part, group_pages in groups:
-        rows: list[str] = []
+        rows: list[Markup] = []
         for page in group_pages:
             slug = page.source_path.stem
             value = displayed_progress[slug]
@@ -187,20 +279,46 @@ def render_progress_overview(
             state = " status-progress-row--unset" if value is None else ""
             title = re.sub(r"^第\s*\d+\s*章\s*", "", page_title(page)).strip()
             rows.append(
-                f'<a class="status-progress-row{state}" '
-                f'href="{page.source_path.with_suffix(".html").as_posix()}">'
-                f'<span class="status-progress-row__title">{html.escape(title)}</span>'
-                '<span class="status-progress-row__track" aria-hidden="true">'
-                f'<i style="--chapter-progress: {width}%"></i></span>'
-                f'<strong>{label}</strong></a>'
+                element(
+                    "a",
+                    [
+                        element(
+                            "span",
+                            text(title),
+                            attributes={"class": "status-progress-row__title"},
+                        ),
+                        element(
+                            "span",
+                            element(
+                                "i",
+                                attributes={
+                                    "style": f"--chapter-progress: {width}%"
+                                },
+                            ),
+                            attributes={
+                                "class": "status-progress-row__track",
+                                "aria-hidden": "true",
+                            },
+                        ),
+                        element("strong", text(label)),
+                    ],
+                    attributes={
+                        "class": f"status-progress-row{state}",
+                        "href": page.source_path.with_suffix(
+                            ".html"
+                        ).as_posix(),
+                    },
+                )
             )
         display_part = re.sub(
             r"^第\s*\d+\s*部分\s*", "", part
         ).strip()
         sections.append(
-            f'<section class="status-part"><h2>{html.escape(display_part)}</h2>'
-            + "".join(rows)
-            + "</section>"
+            element(
+                "section",
+                [element("h2", text(display_part)), join(rows)],
+                attributes={"class": "status-part"},
+            )
         )
     values = [
         value for value in displayed_progress.values() if value is not None
@@ -210,11 +328,21 @@ def render_progress_overview(
         f"已填写 {len(values)} / {len(displayed_progress)} 章"
         + (f"，已填写章节平均完成度 {average}%" if average is not None else "")
     )
-    return (
-        f'<p class="status-progress-summary">{summary}</p>'
-        '<div class="status-progress-groups">'
-        + "".join(sections)
-        + "</div>"
+    return str(
+        join(
+            [
+                element(
+                    "p",
+                    text(summary),
+                    attributes={"class": "status-progress-summary"},
+                ),
+                element(
+                    "div",
+                    sections,
+                    attributes={"class": "status-progress-groups"},
+                ),
+            ]
+        )
     )
 
 
@@ -225,6 +353,7 @@ def write_project_status_page(
     pages: list[QuartoPage],
     progress: dict[str, int | None],
     statistics: list[tuple[str, int, str]],
+    destination_dir: Path,
 ) -> None:
     content = "\n".join(
         [
@@ -271,12 +400,12 @@ def write_project_status_page(
             "",
         ]
     )
-    (QUARTO_PROJECT_DIR / "project-status.qmd").write_text(
+    (destination_dir / "project-status.qmd").write_text(
         content, encoding="utf-8"
     )
 
 
-def write_notation_page(catalog: dict[str, Any]) -> None:
+def write_notation_page(catalog: dict[str, Any], destination_dir: Path) -> None:
     def raw_html_text(value: Any) -> str:
         """Escape text that Pandoc will encounter inside a raw HTML table.
 
@@ -339,7 +468,7 @@ def write_notation_page(catalog: dict[str, Any]) -> None:
             "",
         ]
     )
-    (QUARTO_PROJECT_DIR / "notation.qmd").write_text(content, encoding="utf-8")
+    (destination_dir / "notation.qmd").write_text(content, encoding="utf-8")
 
 
 def write_quarto_config(
@@ -349,14 +478,16 @@ def write_quarto_config(
     site_metadata: dict[str, str],
     chapter_progress: dict[str, int | None],
     notation_catalog: dict[str, Any],
+    *,
+    config: BuildConfig,
 ) -> None:
     title = ast_plain_text(document["meta"].get("title", {})).strip()
     author = ast_plain_text(document["meta"].get("author", {})).strip()
     raw_date = ast_plain_text(document["meta"].get("date", {})).strip()
     date = quarto_date(raw_date)
-    email = book_contact_email()
+    email = book_contact_email(config.paths)
     title = title or "数学教材"
-    commits = recent_git_commits()
+    commits = recent_git_commits(config.paths.project_root)
     statistics = project_statistics(transformer, pages)
     write_project_status_page(
         metadata=site_metadata,
@@ -364,8 +495,9 @@ def write_quarto_config(
         pages=pages,
         progress=chapter_progress,
         statistics=statistics,
+        destination_dir=config.paths.quarto_project_dir,
     )
-    write_notation_page(notation_catalog)
+    write_notation_page(notation_catalog, config.paths.quarto_project_dir)
     preface_href = next(
         (
             page.source_path.with_suffix(".html").as_posix()
@@ -422,9 +554,10 @@ def write_quarto_config(
     index.append(
         f"date-modified: {yaml_quote(calendar_date.today().isoformat())}"
     )
+    home_content_path = config.paths.html_dir / "home.md"
     home_content = (
-        HOME_CONTENT.read_text(encoding="utf-8").strip()
-        if HOME_CONTENT.exists()
+        home_content_path.read_text(encoding="utf-8").strip()
+        if home_content_path.exists()
         else "这是由项目中的 `main.tex` 自动生成的在线版本。"
     )
     home_content = (
@@ -458,13 +591,14 @@ def write_quarto_config(
             ]
         )
     index.append("")
-    (QUARTO_PROJECT_DIR / "index.qmd").write_text(
+    (config.paths.quarto_project_dir / "index.qmd").write_text(
         "\n".join(index),
         encoding="utf-8",
     )
 
-    QUARTO_WRITER.write_sidebar_rules(pages)
-    QUARTO_WRITER.write_config(
+    quarto_writer = QuartoProjectWriter(config)
+    quarto_writer.write_sidebar_rules(pages)
+    quarto_writer.write_config(
         pages=pages,
         title=title,
         author=author,

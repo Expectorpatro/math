@@ -4,32 +4,42 @@ from __future__ import annotations
 
 from datetime import date as calendar_date
 import json
+from pathlib import Path
 import re
 import subprocess
-from typing import Any
+from typing import Any, NoReturn
 
+from .config import BuildPaths
 from .errors import BuildError
 from .latex_sources import strip_tex_comments
-from .runtime import CONFIG
-
-PROJECT_ROOT = CONFIG.paths.project_root
-HTML_DIR = CONFIG.paths.html_dir
-SETTINGS_TEX = CONFIG.paths.settings_tex
-SITE_META = HTML_DIR / "site-meta.json"
-CHAPTER_PROGRESS = HTML_DIR / "chapter-progress.json"
-NOTATION_CATALOG = HTML_DIR / "notation-catalog.json"
 
 
-def fail(message: str) -> None:
+def fail(message: str) -> NoReturn:
     raise BuildError(message)
+
+
+def _read_json(path: Path, *, description: str, project_root: Path) -> Any:
+    """Read one checked-in JSON document with consistent build diagnostics."""
+
+    relative = path.relative_to(project_root)
+    try:
+        source = path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        fail(f"缺少{description}：{relative}")
+    except (OSError, UnicodeError) as error:
+        raise BuildError(f"无法读取{description}：{relative}（{error}）") from error
+    try:
+        return json.loads(source)
+    except json.JSONDecodeError as error:
+        fail(f"{description}不是有效 JSON：{error}")
 
 
 def yaml_quote(value: str) -> str:
     return json.dumps(" ".join(value.split()), ensure_ascii=False)
 
 
-def book_contact_email() -> str:
-    text = strip_tex_comments(SETTINGS_TEX.read_text(encoding="utf-8"))
+def book_contact_email(paths: BuildPaths) -> str:
+    text = strip_tex_comments(paths.settings_tex.read_text(encoding="utf-8"))
     match = re.search(
         r"\bEmail\s*:\s*"
         r"([A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+"
@@ -54,13 +64,15 @@ def quarto_date(value: str) -> str:
     return ""
 
 
-def load_site_metadata() -> dict[str, str]:
-    if not SITE_META.is_file():
-        fail(f"缺少站点元数据：{SITE_META.relative_to(PROJECT_ROOT)}")
-    try:
-        metadata = json.loads(SITE_META.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as error:
-        fail(f"站点元数据不是有效 JSON：{error}")
+def load_site_metadata(paths: BuildPaths) -> dict[str, str]:
+    site_meta = paths.html_dir / "site-meta.json"
+    metadata = _read_json(
+        site_meta,
+        description="站点元数据",
+        project_root=paths.project_root,
+    )
+    if not isinstance(metadata, dict):
+        fail("站点元数据顶层必须是对象")
     required = ("first_published", "content_updated", "repository")
     for key in required:
         if not isinstance(metadata.get(key), str) or not metadata[key].strip():
@@ -82,13 +94,13 @@ def load_site_metadata() -> dict[str, str]:
     return metadata
 
 
-def load_chapter_progress() -> dict[str, int | None]:
-    if not CHAPTER_PROGRESS.is_file():
-        fail(f"缺少章节进度文件：{CHAPTER_PROGRESS.relative_to(PROJECT_ROOT)}")
-    try:
-        progress = json.loads(CHAPTER_PROGRESS.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as error:
-        fail(f"章节进度文件不是有效 JSON：{error}")
+def load_chapter_progress(paths: BuildPaths) -> dict[str, int | None]:
+    chapter_progress = paths.html_dir / "chapter-progress.json"
+    progress = _read_json(
+        chapter_progress,
+        description="章节进度文件",
+        project_root=paths.project_root,
+    )
     if not isinstance(progress, dict):
         fail("chapter-progress.json 顶层必须是对象")
     result: dict[str, int | None] = {}
@@ -105,16 +117,15 @@ def load_chapter_progress() -> dict[str, int | None]:
     return result
 
 
-def load_notation_catalog() -> dict[str, Any]:
-    if not NOTATION_CATALOG.is_file():
-        fail(
-            "缺少 notation 规范："
-            f"{NOTATION_CATALOG.relative_to(PROJECT_ROOT)}"
-        )
-    try:
-        catalog = json.loads(NOTATION_CATALOG.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as error:
-        fail(f"notation catalog 不是有效 JSON：{error}")
+def load_notation_catalog(paths: BuildPaths) -> dict[str, Any]:
+    notation_catalog = paths.html_dir / "notation-catalog.json"
+    catalog = _read_json(
+        notation_catalog,
+        description="notation 规范",
+        project_root=paths.project_root,
+    )
+    if not isinstance(catalog, dict):
+        fail("notation-catalog.json 顶层必须是对象")
     entries = catalog.get("entries")
     if not isinstance(entries, list) or not entries:
         fail("notation-catalog.json 必须包含非空 entries 列表")
@@ -170,7 +181,10 @@ def load_notation_catalog() -> dict[str, Any]:
     return catalog
 
 
-def recent_git_commits(limit: int = 3) -> list[dict[str, str]]:
+def recent_git_commits(
+    project_root: Path,
+    limit: int = 3,
+) -> list[dict[str, str]]:
     result = subprocess.run(
         [
             "git",
@@ -179,7 +193,7 @@ def recent_git_commits(limit: int = 3) -> list[dict[str, str]]:
             "--date=short",
             "--format=%H%x1f%h%x1f%ad%x1f%s",
         ],
-        cwd=PROJECT_ROOT,
+        cwd=project_root,
         text=True,
         capture_output=True,
         check=False,

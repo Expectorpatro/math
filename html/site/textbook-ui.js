@@ -2,8 +2,6 @@
   "use strict";
 
   const KEYS = {
-    theme: "textbook-color-scheme",
-    quartoTheme: "quarto-color-scheme",
     proofs: "textbook-proof-state-v1",
     scrollPrefix: "textbook-scroll-v1:",
     visitedReferences: "textbook-reference-visits-v1",
@@ -45,62 +43,6 @@
     } catch (_error) {
       return fallback;
     }
-  };
-
-  const currentTheme = () =>
-    document.body.classList.contains("quarto-dark") ? "dark" : "light";
-
-  const readStoredTheme = () => {
-    const value = readStorage(window.localStorage, KEYS.theme);
-    return value === "dark" || value === "light" ? value : null;
-  };
-
-  const writeTheme = (theme) => {
-    writeStorage(window.localStorage, KEYS.theme, theme);
-    writeStorage(
-      window.localStorage,
-      KEYS.quartoTheme,
-      theme === "dark" ? "alternate" : "default"
-    );
-  };
-
-  const updateThemeButton = (button) => {
-    const isDark = currentTheme() === "dark";
-    const targetName = isDark ? "浅色" : "深色";
-    const icon = button.querySelector("i");
-    icon.className = isDark ? "bi bi-sun-fill" : "bi bi-moon-stars-fill";
-    button.setAttribute("aria-label", `切换到${targetName}模式`);
-    button.setAttribute("title", `切换到${targetName}模式`);
-    button.setAttribute("aria-pressed", String(isDark));
-  };
-
-  const setQuartoColorScheme = (theme) => {
-    const wantsDark = theme === "dark";
-    const alternateSheets = document.querySelectorAll(
-      "link.quarto-color-scheme.quarto-color-alternate"
-    );
-    const primarySheets = document.querySelectorAll(
-      "link.quarto-color-scheme:not(.quarto-color-alternate)"
-    );
-
-    alternateSheets.forEach((sheet) => {
-      sheet.rel = wantsDark ? "stylesheet" : "disabled-stylesheet";
-    });
-    primarySheets.forEach((sheet) => {
-      sheet.rel = "stylesheet";
-    });
-    document.body.classList.toggle("quarto-dark", wantsDark);
-    document.body.classList.toggle("quarto-light", !wantsDark);
-    document.querySelectorAll(".quarto-color-scheme-toggle").forEach((toggle) => {
-      toggle.classList.toggle("alternate", wantsDark);
-    });
-    window.dispatchEvent(new Event("resize"));
-  };
-
-  const applyTheme = (theme, button) => {
-    setQuartoColorScheme(theme);
-    writeTheme(theme);
-    updateThemeButton(button);
   };
 
   const polishDataframe = (table) => {
@@ -317,77 +259,6 @@
     }
   };
 
-  const mountTocContext = () => {
-    const toc = document.querySelector("#TOC");
-    const root = toc?.querySelector(":scope > ul");
-    if (!toc || !root || toc.dataset.contextReady === "true") return;
-    toc.dataset.contextReady = "true";
-
-    const updateSecondaryEntries = (active) => {
-      let activeTopLevelItem = active?.closest("li") || null;
-      while (activeTopLevelItem?.parentElement !== root) {
-        activeTopLevelItem = activeTopLevelItem?.parentElement?.closest("li") || null;
-      }
-      root.querySelectorAll(":scope > li > ul").forEach((list) => {
-        const isCurrentSection = list.parentElement === activeTopLevelItem;
-        list.hidden = !isCurrentSection;
-        list.classList.toggle("textbook-toc-branch-open", isCurrentSection);
-      });
-    };
-
-    const links = Array.from(toc.querySelectorAll("a.nav-link"))
-      .map((link) => ({
-        link,
-        target: document.getElementById(
-          decodeURIComponent((link.getAttribute("href") || "").replace(/^#/, ""))
-        ),
-      }))
-      .filter((entry) => entry.target);
-    const setActive = (link) => {
-      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
-        item.classList.remove("active");
-      });
-      if (link) link.classList.add("active");
-      updateSecondaryEntries(link);
-    };
-    const refresh = () => {
-      const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
-      let current = links[0]?.link;
-      for (const entry of links) {
-        if (entry.target.getBoundingClientRect().top + window.scrollY <= marker) {
-          current = entry.link;
-        }
-      }
-      setActive(current);
-    };
-    links.forEach(({ link }) => {
-      link.addEventListener("click", () => window.setTimeout(() => setActive(link), 0));
-    });
-    let ticking = false;
-    window.addEventListener(
-      "scroll",
-      () => {
-        if (ticking) return;
-        ticking = true;
-        window.requestAnimationFrame(() => {
-          refresh();
-          ticking = false;
-        });
-      },
-      { passive: true }
-    );
-    window.addEventListener("resize", refresh);
-    refresh();
-    const observer = new MutationObserver(() => {
-      updateSecondaryEntries(toc.querySelector("a.nav-link.active"));
-    });
-    observer.observe(toc, {
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-  };
-
   const mountChapterProgressDock = () => {
     const progress = document.querySelector("main.content .chapter-progress");
     const margin = document.getElementById("quarto-margin-sidebar");
@@ -429,44 +300,6 @@
     });
     window.addEventListener("pageshow", place);
     place();
-  };
-
-  const mountThemeToggle = () => {
-    if (document.getElementById("textbook-theme-toggle")) return;
-    const button = document.createElement("button");
-    button.id = "textbook-theme-toggle";
-    button.type = "button";
-    button.className = "btn textbook-theme-toggle";
-    button.innerHTML = '<i class="bi" aria-hidden="true"></i>';
-
-    const place = () => {
-      const tocTitle = document.querySelector("#TOC #toc-title");
-      const useToc = Boolean(
-        tocTitle && window.matchMedia("(min-width: 992px)").matches
-      );
-      document.querySelectorAll(".textbook-toc-title-with-toggle").forEach((element) => {
-        element.classList.remove("textbook-toc-title-with-toggle");
-      });
-      if (useToc) {
-        tocTitle.classList.add("textbook-toc-title-with-toggle");
-        tocTitle.appendChild(button);
-        button.classList.add("textbook-theme-toggle-in-toc");
-        button.classList.remove("textbook-theme-toggle-floating");
-      } else {
-        document.body.appendChild(button);
-        button.classList.add("textbook-theme-toggle-floating");
-        button.classList.remove("textbook-theme-toggle-in-toc");
-      }
-    };
-    place();
-    window.addEventListener("resize", place);
-    applyTheme(readStoredTheme() || currentTheme(), button);
-    button.addEventListener("click", () => {
-      applyTheme(currentTheme() === "dark" ? "light" : "dark", button);
-    });
-    window.addEventListener("pageshow", () => {
-      applyTheme(readStoredTheme() || currentTheme(), button);
-    });
   };
 
   const proofStorageKey = () => `${KEYS.proofs}:${window.location.pathname}`;
@@ -953,9 +786,7 @@
   const mount = () => {
     const initializers = [
       ["页面排版", polishDocument],
-      ["主题切换", mountThemeToggle],
       ["章节进度", mountChapterProgressDock],
-      ["页内目录", mountTocContext],
       ["阅读工具", mountReadingTools],
       ["证明折叠", mountProofFolding],
       ["交叉引用", mountReferenceInteractions],

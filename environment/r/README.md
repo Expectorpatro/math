@@ -36,6 +36,10 @@ renv::project()
 
 输出应是仓库根目录的绝对路径，而不是 `environment/r` 或某个章节目录。从子目录启动 R 时，先切换到项目根目录，或设置 `BOOK_PROJECT_ROOT` 为项目根目录后再加载根目录 `.Rprofile`。
 
+## macOS 绘图设备
+
+计算实验默认优先生成 SVG。macOS 上 R 的内置 SVG 设备依赖 Cairo/X11，在 Quarto 的无界面 R 进程中可能错误报告为可用，因此 `figure_settings/figures.R` 在 macOS 会直接使用原生 Quartz 设备生成 2× 高分辨率 PNG，不需要为了渲染实验额外安装 XQuartz。若仍出现图形设备错误，先确认实验的隐藏 setup 块调用了 `configure_knitr_figures()`，不要在单个 QMD 中直接设置 `dev = "svg"`。
+
 ## 修改 R 依赖
 
 所有操作均从教材根目录启动的 R 会话进行。依赖变化后，应检查状态并更新唯一的锁文件：

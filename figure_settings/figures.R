@@ -48,10 +48,38 @@ configure_knitr_figures <- function(project_root = Sys.getenv("BOOK_PROJECT_ROOT
     stop("computation_raster_dpi must be a positive integer.")
   }
 
+  actual_format <- format_value
+  device_arguments <- list()
+  if (identical(format_value, "svg")) {
+    is_macos <- identical(Sys.info()[["sysname"]], "Darwin")
+    cairo_available <- isTRUE(suppressWarnings(capabilities("cairo")))
+    if (is_macos || !cairo_available) {
+      actual_format <- "png"
+      warning(
+        paste0(
+          "Using a high-resolution PNG device because R's built-in SVG ",
+          "device is not portable in this environment."
+        )
+      )
+    }
+  }
+  if (
+    identical(actual_format, "png") &&
+      identical(Sys.info()[["sysname"]], "Darwin")
+  ) {
+    # The macOS Quartz device is native and does not require XQuartz/Cairo.
+    device_arguments <- list(type = "quartz")
+  }
+
   knitr::opts_chunk$set(
-    dev = format_value,
+    dev = actual_format,
+    dev.args = device_arguments,
     dpi = dpi,
-    fig.retina = if (identical(format_value, "png")) 2 else 1
+    fig.retina = if (identical(actual_format, "png")) 2 else 1
   )
-  invisible(list(format = format_value, dpi = dpi))
+  invisible(list(
+    preferred_format = format_value,
+    format = actual_format,
+    dpi = dpi
+  ))
 }

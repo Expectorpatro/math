@@ -59,7 +59,19 @@ def quarto_page_slug(title: str, identifier: str, page_number: int) -> str:
     letter_match = re.fullmatch(r"glossary-letter-([A-Z])", identifier)
     if letter_match:
         return f"glossary-{letter_match.group(1).lower()}"
-    return PAGE_SLUGS.get(normalized, f"page-{page_number:03d}")
+    configured = PAGE_SLUGS.get(normalized)
+    if configured:
+        return configured
+    # Unknown chapters must not have their public URL changed merely because a
+    # new page was inserted earlier in the book.  Keep the readable registry
+    # for known chapters and use a deterministic content identity as fallback.
+    identity = (
+        f"{normalized}\0{identifier}"
+        if normalized or identifier
+        else f"page-{page_number:03d}"
+    )
+    digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:10]
+    return f"page-{digest}"
 
 
 def split_quarto_pages(

@@ -7,6 +7,8 @@ import re
 import shutil
 from typing import Any, Iterable
 
+from .commands import CommandRunner
+from .config import BuildConfig, BuildPaths
 from .constants import (
     ALGORITHM_COMMAND_PREFIX,
     ALGORITHM_TITLE_END_PREFIX,
@@ -25,23 +27,10 @@ from .filesystem import prepare_empty_directory
 from .images import TikzRenderer
 from .models import LatexTable, LatexTableCell, LatexTableRow, Term, TheoremSpec
 from .pandoc_transform import scoped_term_key
-from .runtime import CONFIG, RUNNER
-
-HTML_DIR = CONFIG.paths.html_dir
-PROJECT_ROOT = CONFIG.paths.project_root
-STAGED_SOURCE_DIR = CONFIG.paths.staged_source_dir
-TIKZ_WORK_DIR = CONFIG.paths.tikz_work_dir
-MAIN_TEX = CONFIG.paths.main_tex
-SETTINGS_TEX = CONFIG.paths.settings_tex
-TIKZ_RENDERER = TikzRenderer(CONFIG, RUNNER)
 
 
 def fail(message: str) -> None:
     raise BuildError(message)
-
-
-def log(message: str) -> None:
-    RUNNER.log(message)
 
 
 def is_inside(path: Path, parent: Path) -> bool:
@@ -52,10 +41,14 @@ def is_inside(path: Path, parent: Path) -> bool:
         return False
 
 
-def clean_generated_directory(path: Path) -> None:
+def clean_generated_directory(
+    path: Path,
+    *,
+    managed: tuple[Path, ...],
+) -> None:
     prepare_empty_directory(
         path,
-        managed=(STAGED_SOURCE_DIR, TIKZ_WORK_DIR),
+        managed=managed,
     )
 
 
@@ -441,7 +434,12 @@ def patch_latex_tables(
     return pattern.sub(replacement, text)
 
 
-def parse_new_terms(text: str, source: Path) -> list[Term]:
+def parse_new_terms(
+    text: str,
+    source: Path,
+    *,
+    project_root: Path,
+) -> list[Term]:
     terms: list[Term] = []
     cursor = 0
     command = r"\NewTerm"
@@ -469,14 +467,14 @@ def parse_new_terms(text: str, source: Path) -> list[Term]:
                     key=key,
                     english=english_name,
                     chinese=chinese_name,
-                    source=str(source.relative_to(PROJECT_ROOT)),
+                    source=str(source.relative_to(project_root)),
                 )
             )
         cursor = position
     return terms
 
 
-def load_glossary() -> tuple[
+def load_glossary(paths: BuildPaths) -> tuple[
     dict[str, Term],
     dict[Path, dict[str, Term]],
     set[str],
@@ -488,11 +486,15 @@ def load_glossary() -> tuple[
     conflicting_keys: set[str] = set()
     warnings: list[str] = []
     catalog: list[Term] = []
-    for path in sorted(PROJECT_ROOT.rglob("english.tex")):
-        if is_inside(path, HTML_DIR):
+    for path in sorted(paths.project_root.rglob("english.tex")):
+        if is_inside(path, paths.html_dir):
             continue
         text = strip_tex_comments(path.read_text(encoding="utf-8"))
-        for term in parse_new_terms(text, path):
+        for term in parse_new_terms(
+            text,
+            path,
+            project_root=paths.project_root,
+        ):
             catalog.append(term)
             terms_by_directory.setdefault(path.parent, {})[term.key] = term
             previous = glossary.get(term.key)
@@ -514,8 +516,8 @@ def load_glossary() -> tuple[
     )
 
 
-def parse_theorem_specs() -> dict[str, TheoremSpec]:
-    text = strip_tex_comments(SETTINGS_TEX.read_text(encoding="utf-8"))
+def parse_theorem_specs(paths: BuildPaths) -> dict[str, TheoremSpec]:
+    text = strip_tex_comments(paths.settings_tex.read_text(encoding="utf-8"))
     cref_names: dict[str, str] = {}
     for match in re.finditer(
         r"\\crefname\s*\{([^{}]+)\}\s*\{([^{}]+)\}\s*\{([^{}]+)\}", text
@@ -583,6 +585,8 @@ def patch_scoped_glossary_terms(
     glossary: dict[str, Term],
     terms_by_directory: dict[Path, dict[str, Term]],
     conflicting_keys: set[str],
+    *,
+    project_root: Path,
 ) -> str:
     if not conflicting_keys:
         return text
@@ -592,10 +596,10 @@ def patch_scoped_glossary_terms(
         if key not in conflicting_keys:
             return match.group(0)
         directory = source.parent
-        while is_inside(directory, PROJECT_ROOT):
+        while is_inside(directory, project_root):
             local_term = terms_by_directory.get(directory, {}).get(key)
             if local_term is not None:
-                synthetic_key = scoped_term_key(directory, key)
+                synthetic_key = scoped_term_key(directory, key, project_root)
                 glossary[synthetic_key] = Term(
                     key=synthetic_key,
                     english=local_term.english,
@@ -603,7 +607,7 @@ def patch_scoped_glossary_terms(
                     source=local_term.source,
                 )
                 return rf"\gls{{{synthetic_key}}}"
-            if directory == PROJECT_ROOT:
+            if directory == project_root:
                 break
             directory = directory.parent
         return match.group(0)
@@ -935,6 +939,8 @@ def render_tikz_image(
     tikz_source: str,
     source: Path,
     picture_index: int,
+    *,
+    renderer: TikzRenderer,
 ) -> Path:
     """Render one generated TikZ picture through the shared quality policy."""
 
@@ -942,11 +948,15 @@ def render_tikz_image(
     # caching no longer depends on source order. Inserting a preceding figure
     # therefore does not invalidate every subsequent cached asset.
     del picture_index
-    return TIKZ_RENDERER.render(tikz_source, source)
+    return renderer.render(tikz_source, source)
+
+
 def patch_density_plots(
     text: str,
     source: Path,
     rendered_counter: list[int],
+    *,
+    project_root: Path,
 ) -> str:
     """Replace PDF-only densityplot figures with web component markers."""
     pattern = re.compile(
@@ -958,7 +968,7 @@ def patch_density_plots(
     def replacement(match: re.Match[str]) -> str:
         name = match.group("name")
         if name not in DENSITY_PLOT_NAMES:
-            relative = source.relative_to(PROJECT_ROOT)
+            relative = source.relative_to(project_root)
             fail(f"未知的密度图类型 {name!r}：{relative}")
         rendered_counter[0] += 1
         return f"\n\n{DENSITY_PLOT_MARKER_PREFIX}{name}\n\n"
@@ -970,6 +980,8 @@ def patch_tikz_pictures(
     text: str,
     source: Path,
     rendered_counter: list[int],
+    *,
+    renderer: TikzRenderer,
 ) -> str:
     pattern = re.compile(
         r"^(?P<indent>[ \t]*)"
@@ -987,6 +999,7 @@ def patch_tikz_pictures(
             match.group("picture"),
             source,
             picture_index,
+            renderer=renderer,
         )
         return (
             match.group("indent")
@@ -1013,7 +1026,7 @@ def patch_tikz_pictures(
     )
 
 
-def patch_main_for_full_book(text: str) -> str:
+def patch_main_for_full_book(text: str, *, project_root: Path) -> str:
     """Enable every part and chapter include in the staged main.tex copy."""
 
     pattern = re.compile(
@@ -1026,7 +1039,7 @@ def patch_main_for_full_book(text: str) -> str:
     def replacement(match: re.Match[str]) -> str:
         command = match.group("command")
         if command.startswith(r"\include"):
-            target = PROJECT_ROOT / f"{match.group('value')}.tex"
+            target = project_root / f"{match.group('value')}.tex"
             if not target.is_file():
                 return match.group(0)
         return (
@@ -1043,9 +1056,24 @@ def stage_sources(
     glossary: dict[str, Term],
     terms_by_directory: dict[Path, dict[str, Term]],
     conflicting_keys: set[str],
+    *,
+    config: BuildConfig,
+    runner: CommandRunner,
 ) -> dict[str, LatexTable]:
-    clean_generated_directory(STAGED_SOURCE_DIR)
-    clean_generated_directory(TIKZ_WORK_DIR)
+    paths = config.paths
+    managed_directories = (
+        paths.staged_source_dir,
+        paths.tikz_work_dir,
+    )
+    clean_generated_directory(
+        paths.staged_source_dir,
+        managed=managed_directories,
+    )
+    clean_generated_directory(
+        paths.tikz_work_dir,
+        managed=managed_directories,
+    )
+    tikz_renderer = TikzRenderer(config, runner)
     marker_counter = [0]
     algorithm_marker_counter = [0]
     density_plot_counter = [0]
@@ -1055,23 +1083,27 @@ def stage_sources(
     staged_tables: dict[str, LatexTable] = {}
     copied = 0
     copied_code_files: set[Path] = set()
-    for source in sorted(PROJECT_ROOT.rglob("*.tex")):
-        if is_inside(source, HTML_DIR):
+    for source in sorted(paths.project_root.rglob("*.tex")):
+        if is_inside(source, paths.html_dir):
             continue
-        relative = source.relative_to(PROJECT_ROOT)
-        destination = STAGED_SOURCE_DIR / relative
+        relative = source.relative_to(paths.project_root)
+        destination = paths.staged_source_dir / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         text = source.read_text(encoding="utf-8")
-        if source == MAIN_TEX:
-            text = patch_main_for_full_book(text)
+        if source == paths.main_tex:
+            text = patch_main_for_full_book(
+                text,
+                project_root=paths.project_root,
+            )
         text = patch_scoped_glossary_terms(
             text,
             source,
             glossary,
             terms_by_directory,
             conflicting_keys,
+            project_root=paths.project_root,
         )
-        if source != SETTINGS_TEX:
+        if source != paths.settings_tex:
             text = patch_todo_macros(text, todo_marker_counter)
         text = patch_latex_tables(text, table_marker_counter, staged_tables)
         text = patch_custom_math_environments(text)
@@ -1082,11 +1114,13 @@ def stage_sources(
             text,
             source,
             density_plot_counter,
+            project_root=paths.project_root,
         )
         text = patch_tikz_pictures(
             text,
             source,
             tikz_counter,
+            renderer=tikz_renderer,
         )
         text = patch_optional_theorem_titles(
             text, theorem_specs.keys(), marker_counter
@@ -1099,7 +1133,7 @@ def stage_sources(
         ):
             requested = Path(match.group(1))
             candidates = [
-                PROJECT_ROOT / requested,
+                paths.project_root / requested,
                 source.parent / requested,
             ]
             code_source = next(
@@ -1107,19 +1141,19 @@ def stage_sources(
                     candidate
                     for candidate in candidates
                     if candidate.is_file()
-                    and is_inside(candidate, PROJECT_ROOT)
+                    and is_inside(candidate, paths.project_root)
                 ),
                 None,
             )
             if code_source is None:
                 continue
-            code_relative = code_source.relative_to(PROJECT_ROOT)
-            code_destination = STAGED_SOURCE_DIR / code_relative
+            code_relative = code_source.relative_to(paths.project_root)
+            code_destination = paths.staged_source_dir / code_relative
             code_destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(code_source, code_destination)
             copied_code_files.add(code_relative)
         copied += 1
-    log(
+    runner.log(
         f"已暂存 {copied} 个 TeX 文件、"
         f"{len(copied_code_files)} 个代码文件，"
         f"标记 {marker_counter[0]} 个环境标题、"

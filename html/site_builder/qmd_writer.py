@@ -4,25 +4,13 @@ from __future__ import annotations
 
 from collections.abc import Callable
 import json
-from pathlib import Path
 import re
 import textwrap
 from typing import Any
 
+from .commands import CommandRunner
+from .config import BuildConfig
 from .models import QuartoPage
-from .runtime import CONFIG, RUNNER
-
-PROJECT_ROOT = CONFIG.paths.project_root
-QUARTO_PROJECT_DIR = CONFIG.paths.quarto_project_dir
-
-
-def run(
-    command: list[str],
-    *,
-    cwd: Path,
-    input_text: str | None = None,
-) -> str:
-    return RUNNER.run(command, cwd=cwd, input_text=input_text)
 
 
 _FENCE = re.compile(r"^[ \t]*(?P<marker>`{3,}|~{3,})(?P<rest>.*)$")
@@ -161,22 +149,25 @@ def write_qmd_page(
     page: QuartoPage,
     document: dict[str, Any],
     chapter_progress: dict[str, int | None],
+    *,
+    config: BuildConfig,
+    runner: CommandRunner,
 ) -> None:
-    destination = QUARTO_PROJECT_DIR / page.source_path
+    destination = config.paths.quarto_project_dir / page.source_path
     destination.parent.mkdir(parents=True, exist_ok=True)
     page_document = {
         "pandoc-api-version": document["pandoc-api-version"],
         "meta": {},
         "blocks": page.blocks,
     }
-    markdown = run(
+    markdown = runner.run(
         [
-            CONFIG.tools.pandoc,
+            config.tools.pandoc,
             "--from=json",
             "--to=markdown+fenced_divs+raw_html+tex_math_dollars",
             "--wrap=none",
         ],
-        cwd=PROJECT_ROOT,
+        cwd=config.paths.project_root,
         input_text=json.dumps(page_document, ensure_ascii=False),
     )
 

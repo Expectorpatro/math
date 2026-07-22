@@ -17,13 +17,14 @@ from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 import html
 from html.parser import HTMLParser
+import math
 from pathlib import Path
 import re
 from typing import Any, Protocol
 from urllib.parse import urlsplit
 
 from .errors import BuildError
-from .images import inspect_data_image
+from .images import GeneratedImageInfo, inspect_data_image
 from .markup import Markup, element, join, raw, text
 
 
@@ -45,8 +46,36 @@ _VOID_ELEMENTS = frozenset(
         "wbr",
     }
 )
-_REMOVED_ELEMENTS = frozenset({"script", "style"})
+_REMOVED_ELEMENTS = frozenset({"style"})
+_FORBIDDEN_ELEMENTS = frozenset(
+    {
+        "animate",
+        "animatemotion",
+        "animatetransform",
+        "applet",
+        "discard",
+        "embed",
+        "fencedframe",
+        "foreignobject",
+        "form",
+        "frame",
+        "frameset",
+        "iframe",
+        "object",
+        "portal",
+        "script",
+        "set",
+    }
+)
 _DOCUMENT_ONLY_ELEMENTS = frozenset({"base", "link", "meta", "title"})
+_FORBIDDEN_ATTRIBUTES = frozenset(
+    {
+        "autoplay",
+        "formaction",
+        "ping",
+        "srcdoc",
+    }
+)
 _SINGLE_IDREF_ATTRIBUTES = frozenset(
     {
         "aria-activedescendant",
@@ -91,7 +120,8 @@ _RESOURCE_ATTRIBUTES: Mapping[str, frozenset[str]] = {
     "track": frozenset({"src"}),
     "video": frozenset({"poster", "src"}),
 }
-_SVG_RESOURCE_TAGS = frozenset({"image", "use"})
+_SVG_IMAGE_TAGS = frozenset({"image"})
+_SVG_FRAGMENT_RESOURCE_TAGS = frozenset({"mpath", "textpath", "use"})
 _CSS_URL = re.compile(r"url\(\s*(['\"]?)(.*?)\1\s*\)", re.IGNORECASE)
 _VALID_PREFIX = re.compile(r"^[A-Za-z][A-Za-z0-9_.:-]*$")
 
@@ -142,6 +172,15 @@ class _Element(_Node):
             if key == name:
                 return value
         return None
+
+
+@dataclass(frozen=True, slots=True)
+class _SrcsetCandidate:
+    """One validated ``srcset`` candidate and its selection descriptor."""
+
+    target: str
+    descriptor_kind: str
+    descriptor_value: float
 
 
 class _TreeParser(HTMLParser):
@@ -292,10 +331,18 @@ class ComputationImporter:
         *,
         project_root: Path,
         quarto_project_dir: Path,
+        minimum_raster_width: int = 1,
+        minimum_pixel_ratio: float = 1.0,
         logger: Callable[[str], None] | None = None,
     ) -> None:
+        if minimum_raster_width < 1:
+            raise ValueError("minimum_raster_width must be positive")
+        if not math.isfinite(minimum_pixel_ratio) or minimum_pixel_ratio <= 0:
+            raise ValueError("minimum_pixel_ratio must be finite and positive")
         self.project_root = project_root.resolve()
         self.quarto_project_dir = quarto_project_dir.resolve()
+        self.minimum_raster_width = minimum_raster_width
+        self.minimum_pixel_ratio = minimum_pixel_ratio
         self.logger = logger
 
     def prefix_identifiers(
@@ -648,6 +695,11 @@ class ComputationImporter:
                 continue
             if node.tag in _REMOVED_ELEMENTS or self._is_title_header(node):
                 continue
+            if node.tag in _FORBIDDEN_ELEMENTS:
+                raise BuildError(
+                    f"计算结果包含不允许的活动元素 <{node.tag}>："
+                    f"{source}"
+                )
             if node.tag in _DOCUMENT_ONLY_ELEMENTS:
                 raise BuildError(
                     f"计算结果正文不应包含 <{node.tag}>：{source}"
@@ -655,12 +707,16 @@ class ComputationImporter:
             tag = node.tag
             if shift_headings and re.fullmatch(r"h[1-6]", tag):
                 tag = f"h{min(6, int(tag[1]) + 2)}"
+            known_data_images: dict[str, GeneratedImageInfo] = {}
+            if tag in {"img", "source"} or tag in _SVG_IMAGE_TAGS:
+                known_data_images = self._validate_image_quality(node, source)
             attributes = self._rewrite_attributes(
                 tag,
                 node.attributes,
                 identifiers=identifiers,
                 prefix=prefix,
                 source=source,
+                known_data_images=known_data_images,
             )
             if tag == "img" and not any(
                 name == "alt" for name, _value in attributes
@@ -694,6 +750,7 @@ class ComputationImporter:
         identifiers: frozenset[str],
         prefix: str,
         source: str,
+        known_data_images: Mapping[str, GeneratedImageInfo],
     ) -> list[tuple[str, str | None]]:
         rewritten: list[tuple[str, str | None]] = []
         seen: set[str] = set()
@@ -707,6 +764,17 @@ class ComputationImporter:
             if name.startswith("on"):
                 raise BuildError(
                     f"计算结果包含不允许的事件属性 {name!r}：{source}"
+                )
+            if name in _FORBIDDEN_ATTRIBUTES:
+                raise BuildError(
+                    f"计算结果包含不允许的活动属性 {name!r}：{source}"
+                )
+            if value is None and (
+                name in _RESOURCE_ATTRIBUTES.get(tag, frozenset())
+                or name in {"background", "href", "xlink:href"}
+            ):
+                raise BuildError(
+                    f"计算结果包含空资源属性 <{tag}> {name}：{source}"
                 )
             updated = value
             if value is not None:
@@ -733,7 +801,11 @@ class ComputationImporter:
                     updated, identifiers, prefix
                 )
                 self._validate_attribute_resource(
-                    tag, name, updated, source
+                    tag,
+                    name,
+                    updated,
+                    source,
+                    known_data_images=known_data_images,
                 )
             rewritten.append((name, updated))
         return rewritten
@@ -775,22 +847,33 @@ class ComputationImporter:
         return updated
 
     def _validate_attribute_resource(
-        self, tag: str, attribute: str, value: str, source: str
+        self,
+        tag: str,
+        attribute: str,
+        value: str,
+        source: str,
+        *,
+        known_data_images: Mapping[str, GeneratedImageInfo],
     ) -> None:
         resource_attributes = _RESOURCE_ATTRIBUTES.get(tag, frozenset())
-        is_svg_resource = tag in _SVG_RESOURCE_TAGS and attribute in {
+        is_svg_image = tag in _SVG_IMAGE_TAGS and attribute in {
             "href",
             "xlink:href",
         }
-        if attribute == "style":
-            for match in _CSS_URL.finditer(value):
-                target = match.group(2).strip()
-                self._validate_resource_target(
-                    target,
-                    source=f"{source} -> <{tag}> style",
-                    allow_fragment=True,
-                )
-        elif attribute in resource_attributes:
+        is_svg_fragment_resource = (
+            tag in _SVG_FRAGMENT_RESOURCE_TAGS
+            and attribute in {"href", "xlink:href"}
+        )
+        for match in _CSS_URL.finditer(value):
+            target = match.group(2).strip()
+            self._validate_resource_target(
+                target,
+                source=f"{source} -> <{tag}> {attribute}",
+                allow_fragment=True,
+                known_data_images=known_data_images,
+                enforce_raster_quality=True,
+            )
+        if attribute in resource_attributes:
             targets = (
                 self._srcset_targets(value)
                 if attribute == "srcset"
@@ -801,20 +884,43 @@ class ComputationImporter:
                     target,
                     source=f"{source} -> <{tag}> {attribute}",
                     allow_fragment=False,
+                    known_data_images=known_data_images,
                 )
-        elif is_svg_resource:
+        elif is_svg_image:
             self._validate_resource_target(
                 value,
                 source=f"{source} -> <{tag}> {attribute}",
                 allow_fragment=True,
+                known_data_images=known_data_images,
             )
-        elif tag == "a" and attribute == "href":
+        elif is_svg_fragment_resource:
+            self._validate_local_fragment(
+                value,
+                source=f"{source} -> <{tag}> {attribute}",
+            )
+        elif tag in {"a", "area"} and attribute == "href":
             self._validate_navigation_target(value, source)
-        elif tag == "form" and attribute == "action":
-            self._validate_navigation_target(value, source)
+        elif attribute in {"href", "xlink:href"}:
+            self._validate_local_fragment(
+                value,
+                source=f"{source} -> <{tag}> {attribute}",
+            )
+        elif attribute == "background":
+            self._validate_resource_target(
+                value,
+                source=f"{source} -> <{tag}> {attribute}",
+                allow_fragment=False,
+                known_data_images=known_data_images,
+            )
 
     def _validate_resource_target(
-        self, target: str, *, source: str, allow_fragment: bool
+        self,
+        target: str,
+        *,
+        source: str,
+        allow_fragment: bool,
+        known_data_images: Mapping[str, GeneratedImageInfo],
+        enforce_raster_quality: bool = False,
     ) -> None:
         stripped = target.strip()
         if not stripped:
@@ -825,12 +931,33 @@ class ComputationImporter:
             raise BuildError(f"计算结果包含无效资源地址 {stripped!r}：{source}")
         parsed = urlsplit(stripped)
         if parsed.scheme.lower() == "data":
-            self._inspect_data_uri(stripped, source)
+            image = known_data_images.get(stripped)
+            if image is None:
+                image = self._inspect_data_uri(stripped, source)
+            if (
+                enforce_raster_quality
+                and not image.vector
+                and image.width is not None
+            ):
+                self._require_raster_quality(
+                    image.width,
+                    logical_width=None,
+                    source=source,
+                )
             return
         raise BuildError(
             "计算结果包含未嵌入或外部资源，请使用 embed-resources: true "
             f"重新渲染：{source} -> {stripped}"
         )
+
+    @staticmethod
+    def _validate_local_fragment(target: str, *, source: str) -> None:
+        stripped = target.strip()
+        if not stripped.startswith("#") or len(stripped) == 1:
+            raise BuildError(
+                "计算结果中的 SVG 引用必须指向当前片段："
+                f"{source} -> {stripped!r}"
+            )
 
     @staticmethod
     def _validate_navigation_target(target: str, source: str) -> None:
@@ -848,7 +975,11 @@ class ComputationImporter:
             f"计算结果包含导入后会失效的相对链接：{source} -> {stripped}"
         )
 
-    def _inspect_data_uri(self, target: str, source: str) -> None:
+    def _inspect_data_uri(
+        self,
+        target: str,
+        source: str,
+    ) -> GeneratedImageInfo:
         header, separator, encoded = target.partition(",")
         if not separator:
             raise BuildError(f"嵌入资源 data URI 无效：{source}")
@@ -859,13 +990,183 @@ class ComputationImporter:
             raise BuildError(
                 f"计算结果只允许 Base64 编码的嵌入图片：{source}"
             )
-        inspect_data_image(mime, encoded, source)
+        return inspect_data_image(mime, encoded, source)
+
+    def _validate_image_quality(
+        self,
+        node: _Element,
+        source: str,
+    ) -> dict[str, GeneratedImageInfo]:
+        """Check raster density against the image's intended CSS width.
+
+        Quarto writes an intrinsic ``width`` attribute for generated plots.
+        Comparing physical pixels with that logical width correctly accepts a
+        narrow 2x plot while still rejecting a blurry 1x plot.  Results without
+        a logical width use the conservative absolute-width fallback.
+        """
+
+        declared_width = node.attribute("width")
+        logical_width: int | None = None
+        if declared_width is not None:
+            normalized_width = declared_width.strip()
+            if re.fullmatch(r"[1-9][0-9]*", normalized_width):
+                logical_width = int(normalized_width)
+            elif node.tag in {"img", "source"}:
+                raise BuildError(
+                    f"计算结果图片 width 必须是正整数：{source} -> "
+                    f"{declared_width!r}"
+                )
+
+        src = node.attribute("src")
+        if src is None and node.tag in _SVG_IMAGE_TAGS:
+            src = node.attribute("href") or node.attribute("xlink:href")
+        srcset = node.attribute("srcset")
+        candidates = self._srcset_candidates(srcset) if srcset else ()
+        targets = ([src] if src else []) + [
+            candidate.target for candidate in candidates
+        ]
+        known_images: dict[str, GeneratedImageInfo] = {}
+        for target in targets:
+            if not target.strip().lower().startswith("data:"):
+                continue
+            if target not in known_images:
+                known_images[target] = self._inspect_data_uri(
+                    target,
+                    f"{source} -> <{node.tag}> generated image",
+                )
+        if candidates:
+            self._validate_srcset_quality(
+                candidates,
+                known_images,
+                logical_width=logical_width,
+                source=source,
+            )
+            return known_images
+        if src is None or src not in known_images:
+            return known_images
+        image = known_images[src]
+        if image.vector or image.width is None:
+            return known_images
+        self._require_raster_quality(
+            image.width,
+            logical_width=logical_width,
+            source=source,
+        )
+        return known_images
+
+    def _validate_srcset_quality(
+        self,
+        candidates: tuple[_SrcsetCandidate, ...],
+        known_images: Mapping[str, GeneratedImageInfo],
+        *,
+        logical_width: int | None,
+        source: str,
+    ) -> None:
+        embedded = [
+            (candidate, known_images[candidate.target])
+            for candidate in candidates
+            if candidate.target in known_images
+        ]
+        if not embedded:
+            return
+        raster = [
+            (candidate, image)
+            for candidate, image in embedded
+            if image.width is not None
+        ]
+        if not raster:
+            return
+
+        descriptor_kind = candidates[0].descriptor_kind
+        if descriptor_kind == "width":
+            for candidate, image in raster:
+                if image.width is not None and (
+                    image.width + 1e-9 < candidate.descriptor_value
+                ):
+                    raise BuildError(
+                        "计算结果 srcset 的实际像素宽度小于其 w 描述符："
+                        f"{source}"
+                    )
+            available_width = max(
+                min(float(image.width), candidate.descriptor_value)
+                for candidate, image in raster
+                if image.width is not None
+            )
+        else:
+            if logical_width is not None:
+                for candidate, image in raster:
+                    required_width = logical_width * candidate.descriptor_value
+                    if image.width is not None and (
+                        image.width + 1e-9 < required_width
+                    ):
+                        raise BuildError(
+                            "计算结果 srcset 的实际像素宽度小于其 x 描述符："
+                            f"{source}"
+                        )
+            else:
+                logical_fallback = (
+                    self.minimum_raster_width / self.minimum_pixel_ratio
+                )
+                for candidate, image in raster:
+                    required_width = (
+                        logical_fallback * candidate.descriptor_value
+                    )
+                    if image.width is not None and (
+                        image.width + 1e-9 < required_width
+                    ):
+                        raise BuildError(
+                            "计算结果 srcset 的位图候选低于无逻辑宽度"
+                            f"图片的质量下限：{source}"
+                        )
+            available_width = max(
+                float(image.width)
+                for _candidate, image in raster
+                if image.width is not None
+            )
+        highest_descriptor = max(
+            candidate.descriptor_value for candidate in candidates
+        )
+        if any(
+            image.vector
+            and candidate.descriptor_value == highest_descriptor
+            for candidate, image in embedded
+        ):
+            return
+        self._require_raster_quality(
+            available_width,
+            logical_width=logical_width,
+            source=source,
+        )
+
+    def _require_raster_quality(
+        self,
+        available_width: float,
+        *,
+        logical_width: int | None,
+        source: str,
+    ) -> None:
+        if logical_width is not None:
+            actual_ratio = available_width / logical_width
+            if actual_ratio + 1e-9 >= self.minimum_pixel_ratio:
+                return
+            raise BuildError(
+                f"计算结果位图像素倍率仅 {actual_ratio:.2f}x，"
+                f"未达到配置要求的 {self.minimum_pixel_ratio:g}x：{source}；"
+                "请优先输出 SVG，或以更高分辨率重新生成 PNG/JPEG"
+            )
+        if available_width + 1e-9 < self.minimum_raster_width:
+            raise BuildError(
+                f"计算结果位图宽度仅 {available_width:g}px，"
+                "未达到无逻辑宽度图片的配置要求 "
+                f"{self.minimum_raster_width}px：{source}；"
+                "请优先输出 SVG，或以更高分辨率重新生成 PNG/JPEG"
+            )
 
     @staticmethod
-    def _srcset_targets(value: str) -> tuple[str, ...]:
-        """Parse the URL portion of a conservative, embedded-image srcset."""
+    def _srcset_candidates(value: str) -> tuple[_SrcsetCandidate, ...]:
+        """Parse and validate a conservative embedded-image ``srcset``."""
 
-        targets: list[str] = []
+        candidates: list[_SrcsetCandidate] = []
         position = 0
         length = len(value)
         while position < length:
@@ -884,14 +1185,56 @@ class ComputationImporter:
             else:
                 while position < length and value[position] not in " \t\r\n,":
                     position += 1
-            targets.append(value[start:position])
+            target = value[start:position]
+            descriptor_start = position
             while position < length and value[position] != ",":
                 position += 1
+            descriptor = value[descriptor_start:position].strip()
+            if not descriptor:
+                descriptor_kind = "density"
+                descriptor_value = 1.0
+            elif re.fullmatch(r"[1-9][0-9]*w", descriptor):
+                descriptor_kind = "width"
+                descriptor_value = float(descriptor[:-1])
+            elif re.fullmatch(
+                r"(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)x",
+                descriptor,
+            ):
+                descriptor_kind = "density"
+                descriptor_value = float(descriptor[:-1])
+                if descriptor_value <= 0 or not math.isfinite(descriptor_value):
+                    raise BuildError(f"srcset 描述符无效：{descriptor!r}")
+            else:
+                raise BuildError(f"srcset 描述符无效：{descriptor!r}")
+            candidates.append(
+                _SrcsetCandidate(
+                    target=target,
+                    descriptor_kind=descriptor_kind,
+                    descriptor_value=descriptor_value,
+                )
+            )
             if position < length:
                 position += 1
-        if not targets:
+        if not candidates:
             raise BuildError("计算结果包含空 srcset")
-        return tuple(targets)
+        descriptor_kinds = {
+            candidate.descriptor_kind for candidate in candidates
+        }
+        if len(descriptor_kinds) != 1:
+            raise BuildError("srcset 不能混用 x 与 w 描述符")
+        descriptor_values = [
+            candidate.descriptor_value for candidate in candidates
+        ]
+        if len(set(descriptor_values)) != len(descriptor_values):
+            raise BuildError("srcset 不能包含重复描述符")
+        return tuple(candidates)
+
+    @staticmethod
+    def _srcset_targets(value: str) -> tuple[str, ...]:
+        return tuple(
+            candidate.target
+            for candidate in ComputationImporter._srcset_candidates(value)
+        )
 
     @staticmethod
     def _render(node: _Node) -> Markup:
