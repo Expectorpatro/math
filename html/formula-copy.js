@@ -6,7 +6,7 @@
     return new TextDecoder().decode(bytes);
   }
 
-  function legacyCopyText(text) {
+  function fallbackCopyText(text) {
     const activeElement = document.activeElement;
     const selection = document.getSelection();
     const ranges = selection
@@ -62,7 +62,7 @@
         // Permission can be denied even in a secure context; try the local fallback.
       }
     }
-    legacyCopyText(text);
+    fallbackCopyText(text);
   }
 
   function initializeFormula(wrapper) {

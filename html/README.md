@@ -26,18 +26,7 @@ python3 html/build.py --serve
 
 不要直接双击 `site/index.html` 预览：浏览器在 `file://` 模式下会阻止Quarto 读取 `search.json`，站内搜索因此无法工作。GitHub Pages 等 HTTP部署不受此限制。
 
-## 自动测试
-
-每次修改构建器、资源发布逻辑、HTML 后处理或页面交互代码后，应先在项目根目录运行：
-
-```bash
-python3 -m unittest discover -s html/tests -v
-node --test html/tests/test_frontend_modules.js
-```
-
-测试只使用 Python 和 Node.js 自带的测试工具，不需要 Quarto、LaTeX、第三方测试框架或网络访问，临时文件只会写入被忽略的 `html/.build/tests/`。当前测试覆盖集中配置的合法性、发布目录保护与迁移、站点链接校验、图片与图题的 HTML 后处理、favicon 的统一引用、计算实验安全导入、主题切换，以及“只展开当前一级目录的二级目录”等关键行为。
-
-通过自动测试后，再执行 `python3 html/build.py` 进行完整构建。失效链接、失效资源和重复 ID 默认就会阻止发布；如需进一步把未定义术语或未解析引用也视为失败，请使用：
+失效链接、失效资源和重复 ID 默认就会阻止发布；如需进一步把未定义术语或未解析引用也视为失败，请使用：
 
 ```bash
 python3 html/build.py --strict
@@ -161,8 +150,6 @@ python3 html/build.py
 
 项目使用 `.github/workflows/pages.yml` 发布已经在本地生成的`html/site/`。GitHub Actions 不会重新运行 Quarto，因此每次修改 `.tex`文件后，应先在本地构建，再提交和推送。
 
-完整构建会在站点根目录写入只包含摘要值的 `.source-fingerprint`。Pages 工作流会在上传前核对它，避免构建输入已经变化却误发布旧的 `html/site/`；该文件不包含源码路径、图片尺寸或构建诊断。构建日期和“最近提交”属于构建时展示信息，不参与源码指纹；由于站点文件与源码在同一次提交中入库，包含本次站点更新的提交会在下一次构建时出现在提交列表中。
-
 需要提交到 GitHub 的内容包括：
 
 - 原始 LaTeX 文件和正文引用的图片、代码等资源；
@@ -244,12 +231,10 @@ python3 html/build.py --strict
 ## 目录
 
 - `build.py`：稳定的命令行入口与构建阶段编排。
-- `check_site_freshness.py`：发布前核对已生成站点与当前构建输入。
 - `build-config.toml`：工具、路径、布局、图像质量和资源清单的集中配置。
 - `site_builder/`：LaTeX 暂存、Pandoc AST、页面规划、QMD、计算结果、资源、Quarto、后处理、校验与发布模块。
 - `styles/`：按基础视觉、页面骨架、内容组件、计算实验、首页、暗色、公式、交互图、响应式和项目页拆分的 CSS 源文件；构建时按配置合并为站点的 `style.css`。
 - `../figure_settings/`：Python 计算实验共用的确定性 SVG/高 DPI 配置。
-- `tests/`：使用 Python/Node.js 内置测试工具的构建与前端回归测试。
 - `textbook-theme.js`：明暗主题状态、持久化与切换按钮。
 - `textbook-toc.js`：右侧目录滚动高亮，以及当前一级目录分支的展开规则。
 - `textbook-ui.js`：证明折叠、阅读位置、交叉引用提示与页面反馈入口。

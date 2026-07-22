@@ -51,35 +51,6 @@ def prepare_empty_directory(path: Path, *, managed: Iterable[Path]) -> None:
     resolved.mkdir(parents=True, exist_ok=True)
 
 
-def _looks_like_legacy_generated_site(path: Path) -> bool:
-    """Recognize the project's pre-marker publication layout.
-
-    Older versions of the builder published directly to ``html/site`` without
-    an ownership marker.  The fingerprint deliberately requires several
-    generated-site files so an arbitrary directory is still protected from
-    replacement.
-    """
-
-    required_entries = (
-        ".nojekyll",
-        "index.html",
-        "chapters",
-        "search.json",
-        "sitemap.xml",
-    )
-    return all((path / entry).exists() for entry in required_entries)
-
-
-def _is_replaceable_publication_directory(path: Path) -> bool:
-    """Return whether *path* is a current or recognized legacy site output."""
-
-    return (
-        (path / ".generated-site").is_file()
-        or (path / ".textbook-generated-site").is_file()
-        or _looks_like_legacy_generated_site(path)
-    )
-
-
 def atomic_publish_directory(
     source: Path,
     destination: Path,
@@ -117,7 +88,7 @@ def atomic_publish_directory(
             )
 
     if destination.exists() and any(destination.iterdir()):
-        if not _is_replaceable_publication_directory(destination):
+        if not (destination / ".generated-site").is_file():
             raise BuildError(
                 f"拒绝覆盖非构建系统管理的非空目录：{destination}"
             )

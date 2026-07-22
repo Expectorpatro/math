@@ -12,7 +12,6 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 from functools import partial
-import json
 import sys
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -30,7 +29,6 @@ try:
         atomic_publish_directory,
         prepare_empty_directory,
     )
-    from site_builder.freshness import write_site_fingerprint
     from site_builder.latex_sources import (
         load_glossary,
         parse_theorem_specs,
@@ -54,10 +52,7 @@ try:
         sanitize_quarto_identifiers,
         split_quarto_pages,
     )
-    from site_builder.postprocess import (
-        PostprocessReport,
-        RenderedSitePostprocessor,
-    )
+    from site_builder.postprocess import RenderedSitePostprocessor
     from site_builder.qmd_writer import write_qmd_page
     from site_builder.site_content import write_quarto_config
     from site_builder.validation import validate_site as validate_rendered_site
@@ -128,7 +123,7 @@ def write_quarto_site(
     site_metadata: dict[str, str],
     chapter_progress: dict[str, int | None],
     notation_catalog: dict[str, Any],
-) -> tuple[Path, PostprocessReport]:
+) -> Path:
     if not QUARTO.exists():
         fail(
             "找不到 Quarto。可通过环境变量 QUARTO 指定可执行文件，"
@@ -234,65 +229,9 @@ def write_quarto_site(
     )
 
     rendered_site = QUARTO_PROJECT_DIR / "_site"
-    postprocess_report = SITE_POSTPROCESSOR.process(
-        rendered_site, site_metadata
-    )
+    SITE_POSTPROCESSOR.process(rendered_site, site_metadata)
     (rendered_site / ".nojekyll").write_text("", encoding="utf-8")
-    return rendered_site, postprocess_report
-
-
-def validate_site(output_dir: Path) -> dict[str, Any]:
-    """Validate links, fragments, and deployable resources in the site."""
-
-    return validate_rendered_site(output_dir).as_dict()
-
-
-def write_build_diagnostics(
-    report_path: Path,
-    validation: dict[str, Any],
-    transformer: BookTransformer,
-    glossary_warnings: list[str],
-    postprocess_report: PostprocessReport,
-) -> None:
-    report = {
-        "schema_version": 1,
-        **validation,
-        "used_terms": len(transformer.used_terms),
-        "glossary_entries": transformer.glossary_entry_count,
-        "glossary_keys": transformer.glossary_key_count,
-        "missing_terms": sorted(transformer.missing_terms),
-        "unresolved_references": sorted(transformer.unresolved_references),
-        "glossary_warnings": glossary_warnings,
-        "postprocess": postprocess_report.as_dict(),
-        "toolchain": {
-            "python": sys.version.split()[0],
-            "pandoc": RUNNER.version(CONFIG.tools.pandoc),
-            "quarto": RUNNER.version(str(QUARTO)),
-            "xelatex": RUNNER.version(CONFIG.tools.xelatex),
-            "dvisvgm": RUNNER.version(CONFIG.tools.dvisvgm),
-        },
-    }
-    report_path.parent.mkdir(parents=True, exist_ok=True)
-    report_path.write_text(
-        json.dumps(report, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-
-
-def mark_generated_site(
-    rendered_site: Path,
-    publication_dir: Path,
-) -> None:
-    """Mark a rendered site using the planned publication path as context."""
-
-    (rendered_site / ".generated-site").write_text(
-        "site-build-v1\n", encoding="utf-8"
-    )
-    write_site_fingerprint(
-        PROJECT_ROOT,
-        rendered_site,
-        output_dir=publication_dir,
-    )
+    return rendered_site
 
 
 def serve_site(output_dir: Path, port: int) -> None:
@@ -358,7 +297,7 @@ def build(arguments: argparse.Namespace) -> int:
     document = transformer.transform(document)
 
     log("使用 Quarto Book 生成多页面 HTML")
-    rendered_site, postprocess_report = write_quarto_site(
+    rendered_site = write_quarto_site(
         document,
         transformer,
         computation_orders,
@@ -366,15 +305,10 @@ def build(arguments: argparse.Namespace) -> int:
         chapter_progress,
         notation_catalog,
     )
-    validation = validate_site(rendered_site)
-    write_build_diagnostics(
-        CONFIG.paths.build_dir / "diagnostics.json",
-        validation,
-        transformer,
-        glossary_warnings,
-        postprocess_report,
+    validation = validate_rendered_site(rendered_site)
+    (rendered_site / ".generated-site").write_text(
+        "site-build-v1\n", encoding="utf-8"
     )
-    mark_generated_site(rendered_site, output_dir)
 
     if transformer.missing_terms:
         print(
@@ -389,26 +323,19 @@ def build(arguments: argparse.Namespace) -> int:
             file=sys.stderr,
         )
 
-    validation_errors = bool(
-        validation["broken_links"]
-        or validation["broken_resources"]
-        or validation["duplicate_ids"]
-        or validation["duplicate_resource_ids"]
-    )
-    if validation_errors and CONFIG.policy.strict_broken_resources:
+    if validation.has_errors:
         fail(
             "站点发布校验失败："
-            f"失效链接 {len(validation['broken_links'])} 个，"
-            f"失效资源 {len(validation['broken_resources'])} 个，"
-            f"含重复内容 ID 的页面 {len(validation['duplicate_ids'])} 个；"
+            f"失效链接 {len(validation.broken_links)} 个，"
+            f"失效资源 {len(validation.broken_resources)} 个，"
+            f"含重复内容 ID 的页面 {len(validation.duplicate_ids)} 个；"
             "含重复资源 ID 的页面 "
-            f"{len(validation['duplicate_resource_ids'])} 个；"
+            f"{len(validation.duplicate_resource_ids)} 个；"
             "旧站点未被替换"
         )
     if arguments.strict and (
         transformer.missing_terms
         or transformer.unresolved_references
-        or validation_errors
     ):
         log("严格校验未通过；旧站点未被替换")
         return 2
@@ -423,10 +350,10 @@ def build(arguments: argparse.Namespace) -> int:
         RUNNER.warning(warning)
     log(
         f"完成：{output_dir.relative_to(PROJECT_ROOT)} "
-        f"（{validation['html_pages']} 个页面，"
+        f"（{validation.html_pages} 个页面，"
         f"使用术语 {len(transformer.used_terms)} 个，"
         f"术语表 {transformer.glossary_entry_count} 条，"
-        f"失效链接 {len(validation['broken_links'])} 个）"
+        f"失效链接 {len(validation.broken_links)} 个）"
     )
     if arguments.serve:
         serve_site(output_dir, arguments.port)

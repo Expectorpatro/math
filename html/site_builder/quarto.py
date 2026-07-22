@@ -147,6 +147,3 @@ class QuartoProjectWriter:
         destination = self.config.paths.quarto_project_dir / "sidebar.css"
         destination.write_text("\n".join(rules) + "\n", encoding="utf-8")
         return destination
-
-
-__all__ = ["QuartoProjectWriter", "build_chapter_navigation"]

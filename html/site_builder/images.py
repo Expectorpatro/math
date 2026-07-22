@@ -13,7 +13,6 @@ import re
 import shutil
 import struct
 import tempfile
-from typing import Any
 from xml.etree import ElementTree
 
 from .commands import CommandRunner
@@ -29,29 +28,11 @@ class ImageDimensions:
     width: int
     height: int
 
-    @property
-    def aspect_ratio(self) -> float:
-        return self.width / self.height
-
 
 @dataclass(frozen=True, slots=True)
 class GeneratedImageInfo:
-    source: str
-    format: str
-    width: int | None
-    height: int | None
+    width: int
     vector: bool
-    byte_size: int
-
-    def as_dict(self) -> dict[str, Any]:
-        return {
-            "source": self.source,
-            "format": self.format,
-            "width": self.width,
-            "height": self.height,
-            "vector": self.vector,
-            "byte_size": self.byte_size,
-        }
 
 
 def png_dimensions(data: bytes) -> ImageDimensions | None:
@@ -462,10 +443,6 @@ def inspect_data_image(mime: str, encoded: str, source: str) -> GeneratedImageIn
     if dimensions is None:
         raise BuildError(f"嵌入图片内容与格式不匹配或尺寸无效：{source}")
     return GeneratedImageInfo(
-        source=source,
-        format=normalized,
-        width=dimensions.width if dimensions else None,
-        height=dimensions.height if dimensions else None,
+        width=dimensions.width,
         vector=vector,
-        byte_size=len(data),
     )

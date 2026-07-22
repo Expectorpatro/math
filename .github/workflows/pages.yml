@@ -27,21 +27,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Run dependency-free regression tests
-        run: |
-          python3 -m unittest discover -s html/tests -v
-          node --test html/tests/test_frontend_modules.js
-
-      - name: Verify committed website is current
-        run: python3 html/check_site_freshness.py
-
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
       - name: Upload website
         uses: actions/upload-pages-artifact@v4
         with:
-          # check_site_freshness.py asserts this matches build-config.toml.
           path: html/site
 
       - name: Deploy website

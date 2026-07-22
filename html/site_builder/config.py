@@ -152,7 +152,6 @@ class BuildPaths:
             "site_builder",
             "styles",
             "templates",
-            "tests",
         }
         if relative.parts[0] in protected_names or candidate.suffix:
             raise BuildError(f"输出目录与 HTML 源代码重叠：{relative}")
@@ -195,8 +194,6 @@ class ImageQuality:
     tikz_border_points: float
     tikz_svg_precision: int
     tikz_text_as_paths: bool
-    computation_preferred_format: str
-    computation_raster_dpi: int
     computation_min_raster_width: int
     computation_min_pixel_ratio: float
 
@@ -209,11 +206,6 @@ class RenderConfig:
     body_width_px: int
     margin_width_px: int
     gutter_rem: float
-
-
-@dataclass(frozen=True, slots=True)
-class BuildPolicy:
-    strict_broken_resources: bool
 
 
 @dataclass(frozen=True, slots=True)
@@ -234,7 +226,6 @@ class BuildConfig:
     tools: ToolConfig
     images: ImageQuality
     render: RenderConfig
-    policy: BuildPolicy
     assets: AssetConfig
 
     @classmethod
@@ -272,7 +263,6 @@ class BuildConfig:
                     "staged_source_directory",
                     "quarto_project_directory",
                     "cache_directory",
-                    "strict_broken_resources",
                 },
             ),
             "tools": (
@@ -407,6 +397,10 @@ class BuildConfig:
             raise BuildError(
                 "images.computation_preferred_format 只支持 svg 或 png"
             )
+        _positive_int(
+            images["computation_raster_dpi"],
+            "images.computation_raster_dpi",
+        )
 
         copied_assets = _string_tuple(assets["copy"], "assets.copy")
         quarto_resources = _string_tuple(
@@ -477,11 +471,6 @@ class BuildConfig:
                 tikz_text_as_paths=_boolean(
                     images["tikz_text_as_paths"], "images.tikz_text_as_paths"
                 ),
-                computation_preferred_format=preferred,
-                computation_raster_dpi=_positive_int(
-                    images["computation_raster_dpi"],
-                    "images.computation_raster_dpi",
-                ),
                 computation_min_raster_width=_positive_int(
                     images["computation_min_raster_width"],
                     "images.computation_min_raster_width",
@@ -506,12 +495,6 @@ class BuildConfig:
                 gutter_rem=_positive_float(
                     render["gutter_rem"], "render.gutter_rem"
                 ),
-            ),
-            policy=BuildPolicy(
-                strict_broken_resources=_boolean(
-                    build["strict_broken_resources"],
-                    "build.strict_broken_resources",
-                )
             ),
             assets=AssetConfig(
                 copy=copied_assets,

@@ -935,22 +935,6 @@ def patch_algorithm_environments(
     return algorithm_pattern.sub(replacement, text)
 
 
-def render_tikz_image(
-    tikz_source: str,
-    source: Path,
-    picture_index: int,
-    *,
-    renderer: TikzRenderer,
-) -> Path:
-    """Render one generated TikZ picture through the shared quality policy."""
-
-    # The index remains in the compatibility signature, but content-addressed
-    # caching no longer depends on source order. Inserting a preceding figure
-    # therefore does not invalidate every subsequent cached asset.
-    del picture_index
-    return renderer.render(tikz_source, source)
-
-
 def patch_density_plots(
     text: str,
     source: Path,
@@ -989,18 +973,9 @@ def patch_tikz_pictures(
         r"^[ \t]*\\end\s*\{tikzpicture\})",
         flags=re.DOTALL | re.MULTILINE,
     )
-    picture_index = 0
-
     def replacement(match: re.Match[str]) -> str:
-        nonlocal picture_index
-        picture_index += 1
         rendered_counter[0] += 1
-        target = render_tikz_image(
-            match.group("picture"),
-            source,
-            picture_index,
-            renderer=renderer,
-        )
+        target = renderer.render(match.group("picture"), source)
         return (
             match.group("indent")
             + rf"\includegraphics[width=0.92\linewidth]"

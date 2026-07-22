@@ -305,7 +305,12 @@ class _CaseCollector(HTMLParser):
             identifier = values.get("id")
             if identifier and identifier.startswith("computation-case-"):
                 self._case_id = identifier
-        elif tag.lower() == "h3" and self._case_id:
+        elif (
+            tag.lower() == "h3"
+            and self._case_id
+            and "computation-case-title"
+            in (values.get("class") or "").split()
+        ):
             self._in_heading = True
             self._heading_parts = []
 
@@ -344,30 +349,6 @@ class ComputationImporter:
         self.minimum_raster_width = minimum_raster_width
         self.minimum_pixel_ratio = minimum_pixel_ratio
         self.logger = logger
-
-    def prefix_identifiers(
-        self,
-        fragment: str,
-        prefix: str,
-        *,
-        source: str = "计算结果片段",
-    ) -> str:
-        """Namespace every ID and in-fragment reference in ``fragment``."""
-
-        if not _VALID_PREFIX.fullmatch(prefix):
-            raise BuildError(f"计算结果 ID 前缀无效：{prefix!r}")
-        root = self._parse(fragment, source)
-        identifiers = self._collect_identifiers(root.children, source)
-        rewritten = self._rewrite_nodes(
-            root.children,
-            identifiers=identifiers,
-            prefix=prefix,
-            source=source,
-            shift_headings=False,
-            image_alt_prefix="计算结果图",
-            image_counter=[0],
-        )
-        return str(join(self._render(node) for node in rewritten))
 
     def extract_fragment(
         self,
@@ -607,7 +588,11 @@ class ComputationImporter:
                     ],
                     attributes={"class": "computation-case-index"},
                 ),
-                element("h3", text(group.title)),
+                element(
+                    "h3",
+                    text(group.title),
+                    attributes={"class": "computation-case-title"},
+                ),
                 join(results),
             ],
             attributes={
@@ -937,7 +922,6 @@ class ComputationImporter:
             if (
                 enforce_raster_quality
                 and not image.vector
-                and image.width is not None
             ):
                 self._require_raster_quality(
                     image.width,
@@ -1045,7 +1029,7 @@ class ComputationImporter:
         if src is None or src not in known_images:
             return known_images
         image = known_images[src]
-        if image.vector or image.width is None:
+        if image.vector:
             return known_images
         self._require_raster_quality(
             image.width,
@@ -1072,7 +1056,7 @@ class ComputationImporter:
         raster = [
             (candidate, image)
             for candidate, image in embedded
-            if image.width is not None
+            if not image.vector
         ]
         if not raster:
             return
@@ -1080,9 +1064,7 @@ class ComputationImporter:
         descriptor_kind = candidates[0].descriptor_kind
         if descriptor_kind == "width":
             for candidate, image in raster:
-                if image.width is not None and (
-                    image.width + 1e-9 < candidate.descriptor_value
-                ):
+                if image.width + 1e-9 < candidate.descriptor_value:
                     raise BuildError(
                         "计算结果 srcset 的实际像素宽度小于其 w 描述符："
                         f"{source}"
@@ -1090,15 +1072,12 @@ class ComputationImporter:
             available_width = max(
                 min(float(image.width), candidate.descriptor_value)
                 for candidate, image in raster
-                if image.width is not None
             )
         else:
             if logical_width is not None:
                 for candidate, image in raster:
                     required_width = logical_width * candidate.descriptor_value
-                    if image.width is not None and (
-                        image.width + 1e-9 < required_width
-                    ):
+                    if image.width + 1e-9 < required_width:
                         raise BuildError(
                             "计算结果 srcset 的实际像素宽度小于其 x 描述符："
                             f"{source}"
@@ -1111,9 +1090,7 @@ class ComputationImporter:
                     required_width = (
                         logical_fallback * candidate.descriptor_value
                     )
-                    if image.width is not None and (
-                        image.width + 1e-9 < required_width
-                    ):
+                    if image.width + 1e-9 < required_width:
                         raise BuildError(
                             "计算结果 srcset 的位图候选低于无逻辑宽度"
                             f"图片的质量下限：{source}"
@@ -1121,7 +1098,6 @@ class ComputationImporter:
             available_width = max(
                 float(image.width)
                 for _candidate, image in raster
-                if image.width is not None
             )
         highest_descriptor = max(
             candidate.descriptor_value for candidate in candidates

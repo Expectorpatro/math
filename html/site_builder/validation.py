@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import Any
 from urllib.parse import unquote, urlsplit
 
 
@@ -289,16 +288,6 @@ class ValidationReport:
             or self.duplicate_ids
             or self.duplicate_resource_ids
         )
-
-    def as_dict(self) -> dict[str, Any]:
-        return {
-            "html_pages": self.html_pages,
-            "broken_links": self.broken_links,
-            "broken_resources": self.broken_resources,
-            "duplicate_ids": self.duplicate_ids,
-            "duplicate_resource_ids": self.duplicate_resource_ids,
-        }
-
 
 def _append_issue(
     report: ValidationReport,
