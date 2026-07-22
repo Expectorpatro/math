@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 from pathlib import Path
 import tempfile
 import unittest
@@ -105,6 +106,32 @@ class ConfigTests(unittest.TestCase):
 
 
 class ValidationTests(unittest.TestCase):
+    def test_favicon_uses_one_shared_file_with_content_hash_query(self) -> None:
+        with ProjectTemporaryDirectory() as temporary:
+            site = Path(temporary) / "site"
+            site.mkdir()
+            (site / "chapters").mkdir()
+            favicon = (
+                '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>'
+            )
+            (site / "favicon.svg").write_text(favicon, encoding="utf-8")
+            (site / "index.html").write_text(
+                '<link href="./favicon.svg?old" rel="icon">', encoding="utf-8"
+            )
+            chapter = site / "chapters" / "appendix.html"
+            chapter.write_text(
+                '<link href="../favicon.svg" rel="icon">', encoding="utf-8"
+            )
+            changed = RenderedSitePostprocessor._cache_bust_favicon(site)
+            version = hashlib.sha256(favicon.encode()).hexdigest()[:12]
+            self.assertEqual(changed, 2)
+            self.assertFalse(any(site.glob("favicon-*.svg")))
+            self.assertIn(
+                f"./favicon.svg?v={version}",
+                (site / "index.html").read_text(),
+            )
+            self.assertIn(f"../favicon.svg?v={version}", chapter.read_text())
+
     def test_srcset_parser_ignores_data_uri_commas(self) -> None:
         value = (
             "small.png 1x, data:image/svg+xml;base64,PHN2Zy8+ 2x, "

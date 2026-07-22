@@ -26,6 +26,22 @@ python3 html/build.py --serve
 
 不要直接双击 `site/index.html` 预览：浏览器在 `file://` 模式下会阻止Quarto 读取 `search.json`，站内搜索因此无法工作。GitHub Pages 等 HTTP部署不受此限制。
 
+## 自动测试
+
+每次修改构建器、资源发布逻辑、HTML 后处理或页面交互代码后，应先在项目根目录运行：
+
+```bash
+python3 -m unittest discover -s html/tests -v
+```
+
+测试不需要 Quarto、LaTeX 或网络访问，临时文件只会写入被忽略的 `html/.build/tests/`。当前测试覆盖集中配置的合法性、发布目录保护与迁移、站点链接校验、图片与图题的 HTML 后处理、favicon 的统一引用、计算实验插入，以及章节导航等关键行为。
+
+通过自动测试后，再执行 `python3 html/build.py` 进行完整构建。完整构建会检查最终页面和资源链接；如需把未定义术语、未解析引用或站点校验问题视为失败，请使用：
+
+```bash
+python3 html/build.py --strict
+```
+
 ## 计算实验
 
 网页构建不会执行分析代码，只读取已经渲染好的、自包含的 `result.html`，并按照章节旁边 `computations.order` 中规定的顺序追加到对应 chapter 的末尾。

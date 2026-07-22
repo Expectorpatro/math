@@ -322,19 +322,10 @@
     const root = toc?.querySelector(":scope > ul");
     if (!toc || !root || toc.dataset.contextReady === "true") return;
     toc.dataset.contextReady = "true";
-
-    const applyVisibility = (active) => {
-      const activeItem = active?.closest("li");
-      let activeBranch = activeItem;
-      while (activeBranch && activeBranch.parentElement !== root) {
-        activeBranch = activeBranch.parentElement?.closest("li");
-      }
-      root.querySelectorAll(":scope > li > ul").forEach((list) => {
-        const show = list.parentElement === activeBranch;
-        list.classList.toggle("textbook-toc-branch-open", show);
-        list.hidden = !show;
-      });
-    };
+    root.querySelectorAll(":scope > li > ul").forEach((list) => {
+      list.hidden = false;
+      list.classList.add("textbook-toc-branch-open");
+    });
 
     const links = Array.from(toc.querySelectorAll("a.nav-link"))
       .map((link) => ({
@@ -349,7 +340,6 @@
         item.classList.remove("active");
       });
       if (link) link.classList.add("active");
-      applyVisibility(link);
     };
     const refresh = () => {
       const marker = window.scrollY + Math.min(window.innerHeight * 0.22, 180);
@@ -379,14 +369,6 @@
     );
     window.addEventListener("resize", refresh);
     refresh();
-    const observer = new MutationObserver(() => {
-      applyVisibility(toc.querySelector("a.nav-link.active"));
-    });
-    observer.observe(toc, {
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["class"],
-    });
   };
 
   const mountChapterProgressDock = () => {
