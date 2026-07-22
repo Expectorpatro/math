@@ -1,0 +1,601 @@
+\section{不等式}
+
+\subsection{Cauchy–Schwarz不等式}
+\subsubsection{实数域形式}
+\begin{theorem}
+	若$\{a_i\}_{i=1}^{n},\{b_i\}_{i=1}^{n}\subseteq\mathbb{R}$，则有如下不等式：
+	\begin{inequality*}\label{ineq:cauchy-ineq-R}
+		\left(\sum_{i=1}^na_ib_i\right)^2\leqslant\sum_{i=1}^na_i^2\cdot\sum_{i=1}^nb_i^2
+	\end{inequality*}
+	上式取等当且仅当$a=(\seq{a}{n})^\top$与$b=(\seq{b}{n})^\top$线性相关。
+\end{theorem}
+\begin{proof}
+	对任意的$c\in\mathbb{R}^{}\setminus\mathbb{R}^{-}$，关于$\lambda\in\mathbb{R}^{}$的一元二次方程：
+	\begin{equation*}
+		\sum_{i=1}^n\left(a_i+\lambda b_i\right)^2=\lambda^2\sum_{i=1}^nb_i^2+2\lambda\sum_{i=1}^na_ib_i+\sum_{i=1}^na_i^2=c
+	\end{equation*}
+	都有根。由判别式即可得：
+	\begin{equation*}
+		4\left(\sum_{i=1}^na_ib_i\right)^2\leqslant4\sum_{i=1}^na_i^2\cdot\sum_{i=1}^nb_i^2
+	\end{equation*}
+	上式取等当且仅当$c=0$，即$\sum\limits_{i=1}^n\left(a_i+\lambda b_i\right)^2=0$，$a=(\seq{a}{n})^\top$与$b=(\seq{b}{n})^\top$线性相关。
+\end{proof}
+\subsubsection{复数域形式}
+\begin{theorem}
+	若$a_i,b_i\in\mathbb{C},i=1,2,\dots,n$，则有如下不等式：
+	\begin{inequality*}\label{ineq:cauchy-ineq-C}
+		\left(\sum_{i=1}^n|a_ib_i|\right)^2\leqslant\sum_{i=1}^n|a_i|^2\cdot\sum_{i=1}^n|b_i|^2
+	\end{inequality*}
+\end{theorem}
+\begin{proof}
+	由复数模的性质可得到
+	\begin{equation*}
+		|a_ib_i|=|a_i||b_i|
+	\end{equation*}
+	然后使用实数域上的Cauchy不等式即可立即得到结果。
+\end{proof}
+\subsubsection{内积形式}
+\begin{theorem}
+	设$X$是一个实或复内积空间，$x,y\in X$，则有如下不等式：
+	\begin{inequality*}\label{ineq:cauchy-schiwarz-inner-product}
+		|(x,y)|^2\leqslant(x,x)(y,y)
+	\end{inequality*}
+\end{theorem}
+下给出复数域内的证明，实数域的证明显然类似。
+\begin{proof}
+	设$x,y\in X$。对任意的$\lambda\in\mathbb{C}$，有：
+	\begin{equation*}
+		(x+\lambda y,x+\lambda y)\geqslant 0
+	\end{equation*}
+	即：
+	\begin{equation*}
+		(x,x)+\overline{\lambda}(x,y)+\lambda(y,x)+|\lambda|^2(y,y)\geqslant 0
+	\end{equation*}
+	令$\lambda=-\frac{(x,y)}{(y,y)}$，得到：
+	\begin{gather*}
+		(x,x)-2\frac{|(x,y)|^2}{(y,y)}+\frac{|(x,y)|^2}{(y,y)^2}(y,y)\geqslant0 \\
+		|(x,y)|^2\leqslant(x,x)(y,y)\qedhere
+	\end{gather*}
+\end{proof}
+\subsubsection{期望形式}
+\begin{theorem}
+	设$\operatorname{E}(X^2)<+\infty,\;\operatorname{E}(Y^2)<+\infty$，则有：
+	\begin{inequality*}\label{ineq:cauchy-schiwarz-expectations}
+		|\operatorname{E}(XY)|\leqslant\sqrt{\operatorname{E}(X^2)\operatorname{E}(Y^2)}
+	\end{inequality*}
+	等号成立的充要条件为存在不全为$0$的常数$a,b$使得$aX+bY=0\;$a.s.成立。
+\end{theorem}
+\begin{proof}
+	对任意的常数$a,b$，由\cref{prop:NonnegativeMeasurableIntegral}(2)(10)可知二次型：
+	\begin{equation*}
+		\operatorname{E}[(aX+bY)^2]=a^2\operatorname{E}(X^2)+2ab\operatorname{E}(XY)+b^2\operatorname{E}(Y^2)=(a,b)\Sigma(a,b)^{\top}\geqslant0
+	\end{equation*}
+	其中：
+	\begin{equation*}
+		\Sigma=
+		\begin{pmatrix}
+			\operatorname{E}(X^2) & \operatorname{E}(XY) \\
+			\operatorname{E}(XY) & \operatorname{E}(Y^2)
+		\end{pmatrix}
+	\end{equation*}
+	\info{行列式这里有问题}所以$\Sigma$是一个半正定矩阵，由\cref{theo:PositiveSemidefinite}第三条的(6)可知$|\Sigma|\geqslant0$，即$|\operatorname{E}(XY)|\leqslant\sqrt{\operatorname{E}(X^2)\operatorname{E}(Y^2)}$。等号成立当且仅当$\Sigma$退化，当且仅当有不全为$0$的常数$a,b$使得$\operatorname{E}[(aX+bY)^2]=0$（$\Sigma$退化时列向量线性相关，存在不全为$0$的$a,b$使得$\Sigma(a,b)^{\top}=\mathbf{0}$，即$(a,b)\Sigma(a,b)^{\top}=0$；当存在不全为$0$的$a,b$使得$\operatorname{E}[(aX+bY)^2]=0$时，$(a,b)\Sigma(a,b)^{\top}=0$，\info{需要证明此时一定退化}），由\cref{prop:NonnegativeMeasurableIntegral}(9)可知此时当且仅当有不全为$0$的常数$a,b$使得$aX+bY=0\;$a.s.。
+\end{proof}
+\subsubsection{Rayleigh商形式}
+\begin{theorem}
+	设$A$为$n\times n$实正定矩阵，$a\in\mathbb{R}^n$，则有：
+	\begin{inequality*}\label{ineq:cauchy-schiwarz-rayleigh}
+		\sup_{b\ne\mathbf{0}}\frac{(a^{\top}b)^2}{b^{\top}Ab}=a^{\top}A^{-1}a
+	\end{inequality*}
+\end{theorem}
+\begin{proof}
+	由于$A$是正定矩阵，所以存在可逆的$A^{1/2}$。令$x = A^{1/2}b$，即$b = A^{-1/2}x$，则：
+	\begin{align*}
+		\frac{(a^{\top}b)^2}{b^{\top}Ab} &= \frac{(a^{\top} A^{-1/2} x)^2}{x^{\top} x}=\frac{[(A^{-1/2} a)^{\top} x]^2}{\|x\|^2}
+	\end{align*}
+	记$u = A^{-1/2}a$，由\cref{ineq:cauchy-schiwarz-inner-product}有：
+	\begin{equation*}
+		|(u,x)|^2 \leqslant \|u\|^2 \cdot \|x\|^2
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\frac{[(A^{-1/2} a)^{\top} x]^2}{\|x\|^2} \leqslant \|A^{-1/2}a\|^2 = (A^{-1/2}a)^{\top} (A^{-1/2}a) = a^{\top} A^{-1} a
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\sup_{b\ne\mathbf{0}}\frac{(a^{\top}b)^2}{b^{\top}Ab}=a^{\top}A^{-1}a \qedhere
+	\end{equation*}
+\end{proof}
+
+\subsection{Young's不等式}
+\begin{theorem}
+	设$a,b\in\mathbb{R}$且$a,b>0$，$p,q\in\mathbb{R}$且$p,q>1$，满足$\frac{1}{p}+\frac{1}{q}=1$，则有如下不等式：
+	\begin{inequality*}\label{ineq:young-ineq-Simple}
+		ab\leqslant\frac{a^p}{p}+\frac{b^q}{q}
+	\end{inequality*}
+	等号成立当且仅当$a^p=b^q$。
+\end{theorem}
+\begin{proof}
+	$f(x)=e^x$是一个凸函数，因此对任意的$t\in(0,1)$：
+	\begin{equation*}
+		e^{tx+(1-t)y}\leqslant te^x+(1-t)e^y
+	\end{equation*}
+	等号成立当且仅当$x=y$。令$\frac{1}{p}=t$，利用上式则有：
+	\begin{equation*}
+		ab=e^{\ln(a)+\ln(b)}=e^{\frac{\ln(a^p)}{p}+\frac{\ln(b^q)}{q}}\leqslant\frac{1}{p}e^{\ln(a^p)}+\frac{1}{q}e^{\ln(b^q)}=\frac{a^p}{p}+\frac{b^q}{q}\qedhere
+	\end{equation*}
+	因为对数函数单调增，所以等号成立当且仅当$a^p=b^q$。
+\end{proof}
+
+\subsection{Holder不等式}
+\subsubsection{离散形式}
+\begin{theorem}
+	设$\xi_i,\eta_i,i=1,2,\dots,n$同为实数或复数，$1<p,q<+\infty$，满足$\frac{1}{p}+\frac{1}{q}=1$，则有如下不等式：
+	\begin{inequality*}\label{ineq:holder-ineq-finite-series}
+		\sum_{i=1}^n|\xi_i\eta_i|\leqslant\left(\sum_{i=1}^n|\xi_i|^p\right)^\frac{1}{p}\cdot\left(\sum_{i=1}^n|\eta_i|^q\right)^\frac{1}{q}
+	\end{inequality*}
+\end{theorem}
+\begin{proof}
+	在Young's不等式（即\cref{ineq:young-ineq-Simple}）中取：
+	\begin{equation*}
+		a=\frac{|\xi_i|}{\left(\sum\limits_{i=1}^n|\xi_i|^p\right)^\frac{1}{p}},\quad
+		b=\frac{|\eta_i|}{\left(\sum\limits_{i=1}^n|\eta_i|^q\right)^\frac{1}{q}}
+	\end{equation*}
+	即有：
+	\begin{gather*}
+		\frac{|\xi_i||\eta_i|}{\left(\sum\limits_{i=1}^n|\xi_i|^p\right)^\frac{1}{p}\cdot\left(\sum\limits_{i=1}^n|\eta_i|^q\right)^\frac{1}{q}}
+		\leqslant\frac{|\xi_i|^p}{p\left(\sum\limits_{i=1}^n|\xi_i|^p\right)}+\frac{|\eta_i|^q}{q\left(\sum\limits_{i=1}^n|\eta_i|^q\right)} \\
+		\frac{\sum\limits_{i=1}^n|\xi_i\eta_i|}{\left(\sum\limits_{i=1}^n|\xi_i|^p\right)^\frac{1}{p}\cdot\left(\sum\limits_{i=1}^n|\eta_i|^q\right)^\frac{1}{q}}
+		\leqslant\frac{\sum\limits_{i=1}^n|\xi_i|^p}{p\left(\sum\limits_{i=1}^n|\xi_i|^p\right)}+\frac{\sum\limits_{i=1}^n|\eta_i|^q}{q\left(\sum\limits_{i=1}^n|\eta_i|^q\right)}\leqslant\frac{1}{p}+\frac{1}{q}=1\qedhere
+	\end{gather*}
+\end{proof}
+\begin{theorem}
+	设$\xi_i,\eta_i,i\in\mathbb{N}^+$同为实数或复数，$1<p,q<+\infty$，满足$\frac{1}{p}+\frac{1}{q}=1$，则有如下不等式：
+	\begin{inequality*}\label{ineq:holder-ineq-infty-series}
+		\sum_{i=1}^{+\infty}|\xi_i\eta_i|\leqslant\left(\sum_{i=1}^{+\infty}|\xi_i|^p\right)^\frac{1}{p}\cdot\left(\sum_{i=1}^{+\infty}|\eta_i|^q\right)^\frac{1}{q}
+	\end{inequality*}
+\end{theorem}
+\begin{proof}
+	证明过程与有穷级数几乎一样，只是把求和中的$n$改为$+\infty$的区别。
+\end{proof}
+\subsubsection{积分形式}
+\begin{theorem}
+	设	$(X,\mathscr{F},\mu)$是一个测度空间，$E\in\mathscr{F}$，$1<p,q<+\infty$，满足$\frac{1}{p}+\frac{1}{q}=1$，$f\in L_p(E),\;g\in L_q(E)$，则有如下不等式：
+	\begin{inequality*}\label{ineq:holder-ineq-Lebesgue}
+		\int_{E}^{}|f(x)g(x)|\dif \mu\leqslant\left[\int_{E}^{}|f(x)|^p\dif\mu\right]^{\frac{1}{p}}\left[\int_{E}^{}|g(x)|^q\dif\mu\right]^{\frac{1}{q}}
+	\end{inequality*}
+	等号成立当且仅当存在不全为$0$的$\alpha,\beta\geqslant0$使得：
+	\begin{equation*}
+		\alpha|f|^p=\beta|g|^q\;\text{a.e.于$E$}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	\textbf{(1)$\;f(x)=0$和$g(x)=0\;$都不a.e.于$E$：}在Young's不等式（即\cref{ineq:young-ineq-Simple}）中取：
+	\begin{equation*}
+		a=\frac{|f(x)|}{\left[\int_{E}^{}|f(x)|^p\dif\mu\right]^\frac{1}{p}},\quad
+		b=\frac{|g(x)|}{\left[\int_{E}^{}|g(x)|^q\dif\mu\right]^\frac{1}{q}}
+	\end{equation*}
+	即有：
+	\begin{equation*}
+		\frac{|f(x)||g(x)|}{\left[\int_{E}^{}|f(x)|^p\dif\mu\right]^\frac{1}{p}\cdot\left[\int_{E}^{}|g(x)|^q\dif\mu\right]^\frac{1}{q}}
+		\leqslant\frac{|f(x)|^p}{p\left[\int_{E}^{}|f(x)|^p\dif\mu\right]}+\frac{|g(x)|^q}{q\left[\int_{E}^{}|g(x)|^q\dif\mu\right]}
+	\end{equation*}
+	两边进行积分可得：
+	\begin{gather*}
+		\int_{E}\frac{|f(x)g(x)|}{\left[\int_{E}^{}|f(x)|^p\dif\mu\right]^\frac{1}{p}\cdot\left[\int_{E}^{}|g(x)|^q\dif\mu\right]^\frac{1}{q}}\dif\mu\leqslant\frac{1}{p}+\frac{1}{q} \\
+		\int_{E}|f(x)g(x)|\dif\mu\leqslant\left(\frac{1}{p}+\frac{1}{q}\right)\left[\int_{E}^{}|f(x)|^p\dif\mu\right]^\frac{1}{p}\cdot\left[\int_{E}^{}|g(x)|^q\dif\mu\right]^\frac{1}{q} \\
+		\int_{E}|f(x)g(x)|\dif\mu\leqslant\left[\int_{E}^{}|f(x)|^p\dif\mu\right]^\frac{1}{p}\cdot\left[\int_{E}^{}|g(x)|^q\dif\mu\right]^\frac{1}{q}
+	\end{gather*}
+	由Young's不等式可知等号成立当且仅当：
+	\begin{gather*}
+		\frac{|f(x)|^p}{\int_{E}^{}|f(x)|^p\dif\mu}=\frac{|g(x)|^q}{\int_{E}^{}|g(x)|^q\dif\mu} \\
+		|f(x)|^p\int_{E}^{}|g(x)|^q\dif\mu=|g(x)|^q\int_{E}^{}|f(x)|^p\dif\mu
+	\end{gather*}
+	但使用Young's不等式接下来的是积分的操作，我们只需要积分保持不等号即可，所以由\cref{prop:NonnegativeMeasurableIntegral}(6)可知Young's不等式得到的那个不等式只要a.e.成立即可，即上式只要a.e.成立即可。\par
+	\textbf{(2)$\;f(x)=0$或$g(x)=0\;$a.e.于$E$：}$|f(x)g(x)|=0\;$a.e.于$E$，由\cref{prop:NonnegativeMeasurableIntegral}(9)可得$\int_{E}|f(x)g(x)|\dif\mu=0$，再根据\cref{prop:NonnegativeMeasurableIntegral}(2)可得$\int_{A}|f(x)|^p\dif\mu,\int_{E}|g(x)|^q\dif\mu\geqslant0$，于是不等式成立。\par
+	以上两种情况都可以推导出存在不全为$0$的$\alpha,\beta\geqslant0$使得：
+	\begin{equation*}
+		\alpha|f|^p=\beta|g|^q\;\text{a.e.于$E$}
+	\end{equation*}
+	即等号成立时上式也成立，下面证明反过来也对。当上不等式成立时，进行分类讨论。\par
+	\textbf{(1)$\;f(x)=0$或$g(x)=0\;$a.e.于$E$：}仅对$|f(x)|=0\;$a.e.于$E$的情况进行证明，$g(x)=0\;$a.e.于$E$的情况可对称得到。此时$|f(x)|^p=0$和$|f(x)g(x)|$都a.e.于$E$，于是由\cref{prop:NonnegativeMeasurableIntegral}(9)可得：
+	\begin{equation*}
+		\int_{E}|f(x)g(x)|\dif\mu=0,\;\int_{E}|f(x)|^p\dif\mu=0
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\int_{E}^{}|f(x)g(x)|\dif \mu=\left[\int_{E}^{}|f(x)|^p\dif\mu\right]^{\frac{1}{p}}\left[\int_{E}^{}|g(x)|^q\dif\mu\right]^{\frac{1}{q}}=0
+	\end{equation*}\par
+	\textbf{(2)$\;f(x)=0$和$g(x)=0\;$都不a.e.于$E$：}设$\alpha\ne0$，对$\beta\ne0$的情况可对称得到。此时有：
+	\begin{equation*}
+		|f|^p=\frac{\beta}{\alpha}|g|^q\;\text{a.e.于$E$}
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		|f(x)g(x)|=|f(x)||g(x)|=\left(\frac{\beta}{\alpha}\right)^{-p}|g(x)|^{\frac{q}{p}+1}
+	\end{equation*}
+	因为$\dfrac{1}{p}+\dfrac{1}{q}=1$，所以$\dfrac{q}{p}+1=q$，于是由\cref{prop:NonnegativeMeasurableIntegral}(10)可得：
+	\begin{equation*}
+		\int_{E}|f(x)g(x)|\dif\mu=\int_{E}\left(\frac{\beta}{\alpha}\right)^{-p}|g(x)|^{q}\dif\mu=\left(\frac{\beta}{\alpha}\right)^{-p}\int_{E}|g(x)|^q\dif\mu
+	\end{equation*}
+	对$\alpha|f|^p=\beta|g|^q$两边积分，由\cref{prop:NonnegativeMeasurableIntegral}(7)(10)可得：
+	\begin{gather*}
+		\int_{E}\alpha|f(x)|^p\dif\mu=\int_{E}\beta |g(x)|^q\dif\mu \\
+		\alpha\int_{E}|f(x)|^p\dif\mu=\beta\int_{E}|g(x)|^q\dif\mu \\
+		\frac{\int_{E}|f(x)|^p\dif\mu}{\int_{E}|g(x)|^q\dif\mu}=\frac{\beta}{\alpha} \\
+		\left[\frac{\int_{E}|f(x)|^p\dif\mu}{\int_{E}|g(x)|^q\dif\mu}\right]^{-p}=\left(\frac{\beta}{\alpha}\right)^{-p}
+	\end{gather*}
+	将其代入到之前的式子可得：
+	\begin{align*}
+		\int_{E}|f(x)g(x)|\dif\mu&=\left(\frac{\beta}{\alpha}\right)^{-p}\int_{E}|g(x)|^q\dif\mu \\
+		&=\left[\frac{\int_{E}|f(x)|^p\dif\mu}{\int_{E}|g(x)|^q\dif\mu}\right]^{-p}\int_{E}|g(x)|^q\dif\mu \\
+		&=\left[\int_{E}|f(x)|^p\dif\mu\right]^{\frac{1}{p}}\left[\int_{E}|g(x)|^q\dif\mu\right]^{\frac{1}{q}}\qedhere
+	\end{align*}
+\end{proof}
+\begin{theorem}
+	设	$(X,\mathscr{F},\mu)$是一个测度空间，$E\in\mathscr{F}$，$1<p,q<+\infty$，满足$\frac{1}{p}+\frac{1}{q}=1$。对任意的$f\in L_p(E),\;g\in L_q(E),\;h\in L_1(E)$，在$L_1(E),L_p(E)$和$L_q(E)$中引入范数：
+	\begin{equation*}
+		||f||_p=\left[\int_{E}^{}|f(x)|^p\dif\mu\right]^\frac{1}{p},\;||g||_q=\left[\int_{E}|g(x)|^q\dif\mu\right]^{\frac{1}{q}},\;||h||_1=\int_{E}|h(x)|\dif\mu
+	\end{equation*}
+	则积分形式的Holder不等式可写为：
+	\begin{inequality*}\label{ineq:holder-ineq-norm}
+		||fg||_1\leqslant||f||_p\;||g||_q
+	\end{inequality*}
+	其中$fg\in L_1(E)$由$f\in L_p(E),g\in L_q(E)$以及积分形式的Holder不等式保证。
+\end{theorem}
+\begin{note}
+	范数是对于空间内的元素定义的，所以写范数的时候首先要保证元素在这个空间内，这里做的其实是一个假设并验证的过程，假设在空间内，然后计算，由结果发现确实是在空间内的。
+\end{note}
+\begin{theorem}
+	设	$(X,\mathscr{F},\mu)$是一个测度空间，$E\in\mathscr{F}$。对任意的$f\in L_1(E),\;g\in L_{\infty}(E)$，在$L_{\infty}(E)$和$L_1(E)$中分别定义范数为元素的无穷范数和：
+	\begin{equation*}
+		||f||_1=\int_{E}|f(x)|\dif\mu
+	\end{equation*}
+	则有：
+	\begin{inequality*}\label{ineq:holder-ineq-norm+infty}
+		||fg||_1\leqslant||f||_1\;||g||_{\infty}
+	\end{inequality*}
+\end{theorem}
+\begin{proof}
+	由\cref{prop:NonnegativeMeasurableIntegral}(7)(10)和无穷范数的定义可得：
+	\begin{equation*}
+		||fg||_1=\int_{E}|f(x)g(x)|\dif\mu\leqslant\int_{E}|f(x)|\;||g||_{\infty}\dif\mu=||g||_{\infty}\int_{E}|f(x)|\dif\mu=||f||_1\;||g||_{\infty}\qedhere
+	\end{equation*}
+	其中$fg\in L_1(E)$由$f\in L_1(E),g\in L_{\infty}(E)$以及上式保证。
+\end{proof}
+
+\subsection{Minkowski不等式}
+\subsubsection{离散形式}
+\begin{theorem}
+	设$\xi_i,\eta_i,i=1,2,\dots,n$同为实数或复数，$1\geqslant p<+\infty$，则有如下不等式：
+	\begin{inequality*}\label{ineq:minkowski-ineq-finite-series}
+		\left(\sum_{i=1}^n|\xi_i+\eta_i|^p\right)^\frac{1}{p}\leqslant\left(\sum_{i=1}^n|\xi_i|^p\right)^\frac{1}{p}+\left(\sum_{i=1}^n|\eta_i|^p\right)^\frac{1}{p}
+	\end{inequality*}
+\end{theorem}
+\begin{proof}
+	当$p=1$时结论显然成立。当$p>1$时，取$p,q\in\mathbb{R}$且$p,q>1$，满足$\frac{1}{p}+\frac{1}{q}=1$，由Holder不等式（即\cref{ineq:holder-ineq-finite-series}）：
+	\begin{gather*}
+		\sum_{i=1}^n|\xi_i||\xi_i+\eta_i|^\frac{p}{q}\leqslant\left(\sum_{i=1}^n|\xi_i|^p\right)^\frac{1}{p}\cdot\left(\sum_{i=1}^n|\xi_i+\eta_i|^p\right)^\frac{1}{q} \\
+		\sum_{i=1}^n|\eta_i||\xi_i+\eta_i|^\frac{p}{q}\leqslant\left(\sum_{i=1}^n|\eta_i|^p\right)^\frac{1}{p}\cdot\left(\sum_{i=1}^n|\xi_i+\eta_i|^p\right)^\frac{1}{q} 
+	\end{gather*}
+	因此：
+	\begin{align*}
+		\sum_{i=1}^n|\xi_i+\eta_i|^p&=\sum_{i=1}^n\left[|\xi_i+\eta_i|\;|\xi_i+\eta_i|^{p-1}\right] \\
+		&\leqslant\sum_{i=1}^n\left[(|\xi_i|+|\eta_i|)|\xi_i+\eta_i|^\frac{p}{q}\right] \\
+		&=\sum_{i=1}^n|\xi_i||\xi_i+\eta_i|^\frac{p}{q}+\sum_{i=1}^n|\eta_i||\xi_i+\eta_i|^\frac{p}{q} \\
+		&\leqslant\left[\left(\sum_{i=1}^n|\xi_i|^p\right)^\frac{1}{p}+\left(\sum_{i=1}^n|\eta_i|^p\right)^\frac{1}{p}\right]\cdot\left(\sum_{i=1}^n|\xi_i+\eta_i|^p\right)^\frac{1}{q} 
+	\end{align*}
+	上式第一行到第二行需要注意到$p-1=\frac{p}{q}$。两边同除$\left(\sum\limits_{i=1}^n|\xi_i+\eta_i|^p\right)^\frac{1}{q}$（若其为$0$则结论显然也成立）即有：
+	\begin{equation*}
+		\left(\sum_{i=1}^n|\xi_i+\eta_i|^p\right)^\frac{1}{p}\leqslant\left(\sum_{i=1}^n|\xi_i|^p\right)^\frac{1}{p}+\left(\sum_{i=1}^n|\eta_i|^p\right)^\frac{1}{p}\qedhere
+	\end{equation*}
+\end{proof}
+设$\xi_i,\eta_i,i=1,2,\dots,n$同为实数或复数，$1\geqslant p<+\infty$，则有如下不等式：
+\begin{inequality*}\label{ineq:minkowski-ineq-infty-series}
+	\left(\sum_{i=1}^{+\infty}|\xi_i+\eta_i|^p\right)^\frac{1}{p}\leqslant\left(\sum_{i=1}^{+\infty}|\xi_i|^p\right)^\frac{1}{p}+\left(\sum_{i=1}^{+\infty}|\eta_i|^p\right)^\frac{1}{p}
+\end{inequality*}
+\begin{proof}
+	证明过程与有穷级数几乎一样，只是把求和中的$n$改为$+\infty$的区别。
+\end{proof}
+\subsubsection{积分形式}
+\begin{theorem}
+	设	$(X,\mathscr{F},\mu)$是一个测度空间，$1\leqslant p<+\infty$，$E\in\mathscr{F}$，$f,g\in L_p(E)$，则有如下不等式：
+	\begin{inequality*}\label{ineq:minkowski-ineq-Lebesgue}
+		\left[\int_{E}^{}|f(x)+g(x)|^p\dif\mu\right]^\frac{1}{p}\leqslant\left[\int_{E}^{}|f(x)|^p\dif\mu\right]^\frac{1}{p}+\left[\int_{E}^{}|g(x)|^p\dif\mu\right]^\frac{1}{p}
+	\end{inequality*}
+	且：
+	\begin{enumerate}
+		\item $p=1$时等号成立当且仅当$fg\geqslant0\;$a.e.于$E$；
+		\item $p>1$时等号成立当且仅当存在不全为$0$的$\alpha,\beta\geqslant0$使得$\alpha f=\beta g$。
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	\textbf{(1)$\;p=1$：}由绝对值的三角不等式以及\cref{prop:NonnegativeMeasurableIntegral}(10)直接可得。等号成立当且仅当$f(x)g(x)\geqslant0$，考虑到\cref{prop:NonnegativeMeasurableIntegral}(7)，只要$f(x)g(x)\geqslant0\;$a.e.于$E$即可。\par
+	\textbf{(2)$\;p>1$：}当$|f(x)+g(x)|=0\;$a.e.于$E$时，由\cref{prop:NonnegativeMeasurableIntegral}(9)可知$\left[\int_{E}^{}|f(x)+g(x)|^p\dif\mu\right]^\frac{1}{p}=0$，根据\cref{prop:NonnegativeMeasurableIntegral}(2)可得结论成立。此时由\cref{prop:NonnegativeMeasurableIntegral}(2)(9)可知等号成立当且仅当$f=0\;$a.e.于$E$且$g=0\;$a.e.于$E$，该条件可推出存在不全为$0$的$\alpha,\beta\geqslant0$使得$\alpha f=\beta g\;$a.e.于$E$。\par
+	当$|f(x)+g(x)|=0\;$不a.e.于$E$时，取$q\in\mathbb{R}$且$q>1$，满足$\frac{1}{p}+\frac{1}{q}=1$，由Holder不等式（即\cref{ineq:holder-ineq-Lebesgue}）：
+	\begin{gather*}
+		\int_{E}^{}|f(x)|\;|f(x)+g(x)|^\frac{p}{q}\dif\mu\leqslant\left[\int_{E}^{}|f(x)|^p\dif\mu\right]^\frac{1}{p}\left[\int_{E}^{}|f(x)+g(x)|^p\dif\mu\right]^\frac{1}{q} \\
+		\int_{E}^{}|g(x)|\;|f(x)+g(x)|^\frac{p}{q}\dif\mu\leqslant\left[\int_{E}^{}|g(x)|^p\dif\mu\right]^\frac{1}{p}\left[\int_{E}^{}|f(x)+g(x)|^p\dif\mu\right]^\frac{1}{q}
+	\end{gather*}
+	注意到$p+q=pq$，所以$q(p-1)=qp-q=p$，因此由绝对值的三角不等式以及\cref{prop:NonnegativeMeasurableIntegral}(10)可得：
+	\begin{align*}
+		\int_{E}^{}|f(x)+g(x)|^p\dif\mu
+		&=\int_{E}^{}|f(x)+g(x)|\;|f(x)+g(x)|^{p-1}\dif\mu \\
+		&\leqslant\int_{E}^{}\Bigl[|f(x)|+|g(x)|\Bigr]\;|f(x)+g(x)|^{p-1}\dif\mu \\
+		&=\int_{E}^{}|f(x)|\;|f(x)+g(x)|^{p-1}\dif\mu+\int_{E}^{}|g(x)|\;|f(x)+g(x)|^{p-1}\dif\mu \\
+		&\leqslant\left\{\left[\int_{E}^{}|f(x)|^p\dif\mu\right]^\frac{1}{p}+\left[\int_{E}^{}|g(x)|^p\dif\mu\right]^\frac{1}{p}\right\}\left[\int_{E}^{}|f(x)+g(x)|^p\dif\mu\right]^\frac{1}{q}
+	\end{align*}
+	两边同除$\left[\int_{E}^{}|f(x)+g(x)|^p\dif\mu\right]^\frac{1}{q}$即有：
+	\begin{equation*}
+		\left[\int_{E}^{}|f(x)+g(x)|^p\dif\mu\right]^\frac{1}{p}\leqslant\left[\int_{E}^{}|f(x)|^p\dif\mu\right]^\frac{1}{p}+\left[\int_{E}^{}|g(x)|^p\dif\mu\right]^\frac{1}{p}
+	\end{equation*}
+	由放缩的过程注意到等号成立当且仅当Holder不等式取等且$f(x)g(x)\geqslant0\;$a.e.于$E$，而Holder不等式取等当且仅当存在不全为$0$的$\alpha,\beta\geqslant0$和不全为$0$的$\gamma,\delta\geqslant0$使得：
+	\begin{equation*}
+		\alpha|f|^p=\beta|f+g|^p,\;\gamma|g|^p=\delta|f+g|^p\;\text{a.e.于$E$}
+	\end{equation*}
+	因为此时$f(x),g(x)$同号a.e.于$E$，所以也即存在不全为$0$的$\alpha,\beta\geqslant0$和不全为$0$的$\gamma,\delta\geqslant0$使得：
+	\begin{equation*}
+		\alpha f=\beta (f+g),\;\gamma g=\delta(f+g)\;\text{a.e.于$E$}
+	\end{equation*}
+	该条件可推出存在不全为$0$的$\alpha,\beta\geqslant0$使得$\alpha f=\beta g\;$a.e.于$E$。\par
+	接下来证明存在不全为$0$的$\alpha,\beta\geqslant0$使得$\alpha f=\beta g\;$a.e.于$E$也可推出等式成立。仅对$\alpha\ne0$的情况进行证明，$\beta\ne0$的情况可对称得到。\par
+	\textbf{(1)$\;|f(x)+g(x)|=0\;$a.e.于$E$：}此时可得到$g=0\;$a.e.于$E$，进而得到$f=0\;$a.e.成立。由\cref{prop:NonnegativeMeasurableIntegral}(9)可得：
+	\begin{equation*}
+		\left[\int_{E}^{}|f(x)+g(x)|^p\dif\mu\right]^\frac{1}{p}=\left[\int_{E}^{}|f(x)|^p\dif\mu\right]^\frac{1}{p}+\left[\int_{E}^{}|g(x)|^p\dif\mu\right]^\frac{1}{p}=0
+	\end{equation*}\par
+	\textbf{(2)$\;|f(x)+g(x)|=0$不a.e.于$E$：}此时可得到：
+	\begin{equation*}
+		f=\frac{\beta}{\alpha}g\;\text{a.e.于$E$}
+	\end{equation*}
+	于是由\cref{prop:NonnegativeMeasurableIntegral}(10)(7)可得：
+	\begin{align*}
+		\left[\int_{E}^{}|f(x)+g(x)|^p\dif\mu\right]^{\frac{1}{p}}&=\left[\int_{E}^{}\left|\frac{\beta+\alpha}{\alpha}g(x)\right|^p\dif\mu\right]^\frac{1}{p} \\
+		&=\frac{\beta+\alpha}{\alpha}\left[\int_{E}^{}|g(x)|^p\dif\mu\right]^\frac{1}{p} \\
+		&=\frac{\beta}{\alpha}\left[\int_{E}^{}|g(x)|^p\dif\mu\right]^\frac{1}{p}+\left[\int_{E}^{}|g(x)|^p\dif\mu\right]^\frac{1}{p} \\
+		&=\left[\int_{E}\left|\frac{\beta}{\alpha}g(x)\right|^p\dif\mu\right]^{\frac{1}{p}}+\left[\int_{E}^{}|g(x)|^p\dif\mu\right]^\frac{1}{p} \\
+		&=\left[\int_{E}^{}|f(x)|^p\dif\mu\right]^\frac{1}{p}+\left[\int_{E}^{}|g(x)|^p\dif\mu\right]^\frac{1}{p}\qedhere
+	\end{align*}
+\end{proof}
+\begin{theorem}
+	设	$(X,\mathscr{F},\mu)$是一个测度空间，$1\leqslant p<+\infty$，$E\in\mathscr{F}$。对任意的$f,g\in L_p(E)$，在$L_p(E)$空间中引入范数：
+	\begin{equation*}
+		||f||_p=\left[\int_{E}^{}|f(x)|^p\dif\mu\right]^\frac{1}{p}
+	\end{equation*}
+	则积分形式的Minkowski不等式可写为：
+	\begin{inequality*}\label{ineq:minkowski-ineq-norm}
+		||f+g||_p\leqslant||f||_p+||g||_p
+	\end{inequality*}
+\end{theorem}
+\begin{theorem}
+	设	$(X,\mathscr{F},\mu)$是一个测度空间，$E\in\mathscr{F}$。在$L_{\infty}(E)$中定义范数为元素的无穷范数，则有：
+	\begin{inequality*}\label{ineq:minkowski-ineq-norm+infty}
+		||f+g||_{\infty}\leqslant||f||_{\infty}+||g||_{\infty}
+	\end{inequality*}
+\end{theorem}
+\begin{proof}
+	由绝对值的三角不等式以及上确界的性质：
+	\begin{equation*}
+		\sup_{x\in E\setminus e}|f(x)+g(x)|\leqslant\sup_{x\in E\setminus e}[|f(x)|+|g(x)|]\leqslant\sup_{x\in E\setminus e}|f(x)|+\sup_{x\in E\setminus e}|g(x)|
+	\end{equation*}
+	由下确界的性质即可得：
+	\begin{equation*}
+		||f+g||_{\infty}\leqslant||f||_{\infty}+||g||_{\infty}\qedhere
+	\end{equation*}
+\end{proof}
+\begin{theorem}
+	设$(X,\mathscr{F},\mu)$是一个测度空间，$1\leqslant p\leqslant+\infty$，$E\in\mathscr{F}$。对任意的$f,g\in L_p(E)$，有：
+	\begin{inequality*}\label{ineq:minkowski-ineq-norm-all}
+		||f+g||_p\leqslant||f||_p+||g||_p,\quad
+		\Big|||f||_p-||g||_p\Big|\leqslant||f-g||_p
+	\end{inequality*}
+\end{theorem}
+\begin{proof}
+	第一式由\cref{ineq:minkowski-ineq-norm}和\cref{ineq:holder-ineq-norm+infty}直接推出。第二式只需注意到：
+	\begin{gather*}
+		||f||_p=||f-g+g||_p\leqslant||f-g||_p+||g||_p \\
+		||g||_p=||g-f+f||_p\leqslant||g-f||_p+||f||_p=||f-g||_p+||f||_p\qedhere
+	\end{gather*}
+\end{proof}
+
+\subsection{Something else}
+\begin{theorem}
+	对于所有 $a,b\in\mathbb{R}$ 及 $p\ge 1$，有不等式
+	\begin{inequality*}\label{ineq:else-1}
+		|a+b|^p\leqslant\Bigl(|a|+|b|\Bigr)^p \leqslant 2^{p-1}\Bigl(|a|^p+|b|^p\Bigr).
+	\end{inequality*}
+\end{theorem}
+\begin{proof}
+	第一式显然成立。令 $a,b\in\mathbb{R}$，并设 $x=|a|$ 和 $y=|b|$（显然 $x,y\geqslant0$）。考虑函数
+	\begin{equation*}
+		f(t)=t^p,\quad t\ge 0
+	\end{equation*}
+	由于 $p\geqslant1$，函数 $f(t)$ 是凸函数。根据凸函数的定义，对于任意 $x,y\ge 0$ 和 $\lambda\in[0,1]$ 有
+	\begin{equation*}
+		f\bigl(\lambda x+(1-\lambda)y\bigr)\leqslant\lambda f(x)+(1-\lambda)f(y)
+	\end{equation*}
+	取 $\lambda=\frac{1}{2}$，则上式变为：
+	\begin{equation*}
+		\left(\frac{x+y}{2}\right)^p\leqslant\frac{x^p+y^p}{2}
+	\end{equation*}
+	将上式两边同时乘以 $2^p$，得到
+	\begin{equation*}
+		(x+y)^p\leqslant2^{p-1}\Bigl(x^p+y^p\Bigr)
+	\end{equation*}
+	将 $x=|a|$ 和 $y=|b|$ 代回，即得所需的不等式。
+\end{proof}
+
+\begin{theorem}\label{theo:ExpMinus1Bound}
+	对任意的$x\in\mathbb{R}^{}$有$|e^{ix}-1|\leqslant|x|$。
+\end{theorem}
+\begin{proof}
+	注意到：
+	\begin{equation*}
+		|e^{ix}-1|^2=[\cos(x)-1]^2+\sin^2(x)=2-2\cos(x)=4\sin^2\left(\frac{x}{2}\right)
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		|e^{ix}-1|=2\left|\sin\left(\frac{x}{2}\right)\right|\leqslant x\qedhere
+	\end{equation*}
+\end{proof}
+\subsubsection{Jensen不等式}
+\begin{theorem}
+	设$(X,\mathscr{F},P)$是一个概率空间，$\mathscr{A}\subseteq\mathscr{F}$且是$\sigma$代数，$f$是$(X,\mathscr{F})$上可积的Borel函数，$\varphi$为$(\mathbb{R}^{},\mathcal{B}(\mathbb{R}^{}))$上的Borel函数且是$\mathbb{R}^{}$上的凸函数，$\varphi\circ f$在$(X,\mathscr{F})$上可积，则有\info{补充凹函数版本}：
+	\begin{inequality*}\label{ineq:Jensen}
+		\varphi[\operatorname{E}(f|\mathscr{A})]\leqslant\operatorname{E}(\varphi\circ f|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
+	\end{inequality*}
+	等号成立a.s.于$(X,\mathscr{A},P)$的一个充分条件为$f=\operatorname{E}(f|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$。若$\varphi$是严格凸的，则等号成立a.s.于$(X,\mathscr{A},P)$的充要条件为$f=\operatorname{E}(f|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$。
+\end{theorem}
+\begin{proof}
+	设：
+	\begin{equation*}
+		\mathcal{L}=\{(a,b)\in\mathbb{R}^{2}:ax+b\leqslant\varphi(x),\;\forall\;x\in\mathbb{R}^{}\}
+	\end{equation*}
+	由\cref{prop:ConvexFunction}(4)可知$\mathcal{L}\ne\varnothing$，于是对任意的$(a,b)\in\mathcal{L}$有$af+b\leqslant\varphi\circ f$，根据\cref{prop:MeasurableIntegral}(6)和\cref{prop:NonnegativeMeasurableIntegral}(5)(1)可知可对$af+b$求关于$\mathscr{A}$的条件期望，由\cref{prop:NonnegativeMeasurableIntegral}(5)(1)可知可对$\varphi\circ f$求关于$\mathscr{A}$的条件期望，于是根据\cref{prop:ConditionalExpectation}(4)(5)(1)可知：
+	\begin{equation*}
+		\operatorname{E}(\varphi\circ f\mid\mathscr{A})\geqslant\operatorname{E}(af+b\mid\mathscr{A})=a\operatorname{E}(f\mid\mathscr{A})+b\operatorname{E}(1\mid\mathscr{A})=a\operatorname{E}(f\mid\mathscr{A})+b
+	\end{equation*}
+	a.s.于$(X,\mathscr{A},P)$。由\cref{prop:ConvexFunction}(4)和\info{上确界的不等式性}可知：
+	\begin{equation*}
+		\sup_{a,b\in\mathcal{L}}a\operatorname{E}(f\mid\mathscr{A})+b=\varphi[\operatorname{E}(f\mid\mathscr{A})]\leqslant\operatorname{E}(\varphi\circ f\mid\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
+	\end{equation*}\par
+	当$f=\operatorname{E}(f|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$时，$\varphi\circ f=\varphi[\operatorname{E}(f|\mathscr{A})]\;$a.s.于$(X,\mathscr{A},P)$且$f$可视作$\mathscr{A}$可测的，根据\cref{prop:MeasurableMapping}(2)可知$\varphi\circ f$是$\mathscr{A}$可测的，由\cref{prop:ConditionalExpectation}(1)可知$\operatorname{E}(\varphi\circ f\mid\mathscr{A})=\varphi\circ f\;$a.s.于$(X,\mathscr{A},P)$，根据\cref{prop:Measure}(3)（次有限可加性）和测度的非负性可知：
+	\begin{equation*}
+		\varphi[\operatorname{E}(f|\mathscr{A})]=\operatorname{E}(\varphi\circ f|\mathscr{A})\;\text{a.s.于}(X,\mathscr{A},P)
+	\end{equation*}\par
+	当$\varphi$严格凸且等号成立a.s.于$(X,\mathscr{A},P)$时，由\cref{prop:ConvexFunction}(4)可知对任意$t\in\mathbb{R}$存在$c(t)\in\mathbb{R}$使得对任意$u\in\mathbb{R}$有：
+	\begin{equation*}
+		\varphi(u)\geqslant\varphi(t)+c(t)(u-t)
+	\end{equation*}
+	且上式在$u\neq t$时严格成立，于是：
+	\begin{equation*}
+		\varphi\circ f\geqslant\varphi[\operatorname{E}(f|\mathscr{A})]+c[\operatorname{E}(f|\mathscr{A})][f-\operatorname{E}(f|\mathscr{A})]
+	\end{equation*}
+	并且在；
+	\begin{equation*}
+		\{x\in X:f\ne\operatorname{E}(f|\mathscr{A})\}
+	\end{equation*}
+	上严格成立。记：
+	\begin{equation*}
+		H=\varphi\circ f-\varphi[\operatorname{E}(f|\mathscr{A})]-c[\operatorname{E}(f|\mathscr{A})][f-\operatorname{E}(f|\mathscr{A})]
+	\end{equation*}
+	则$H\geqslant 0$，且：
+	\begin{equation*}
+		H=0\quad\Longleftrightarrow\quad f=\operatorname{E}(f|\mathscr{A})
+	\end{equation*}
+	对$H$取关于$\mathscr{A}$的条件期望（和之前类似说明其存在性），由\cref{prop:MeasurableMapping}(2)、\cref{prop:ConditionalExpectation}(1)(5)、\cref{prop:Measure}(3)（次有限可加性）和测度的非负性可得：
+	\begin{align*}
+		\operatorname{E}(H|\mathscr{A})&=\operatorname{E}(\varphi\circ f|\mathscr{A})-\varphi[\operatorname{E}(f|\mathscr{A})]-c[\operatorname{E}(f|\mathscr{A})]\operatorname{E}[f-\operatorname{E}(f|\mathscr{A})\mid\mathscr{A}] \\
+		&=\operatorname{E}(\varphi\circ f|\mathscr{A})-\varphi[\operatorname{E}(f|\mathscr{A})]=0\;\text{a.s.于}(X,\mathscr{A},P)
+	\end{align*}
+	即$f=\operatorname{E}(f|\mathscr{A})\;$a.s.于$(X,\mathscr{A},P)$。
+\end{proof}
+\subsubsection{Gibbs不等式}
+\begin{theorem}
+	设$\varphi,\mu$是可测空间$(X,\mathscr{F})$上的概率测度，$\varphi\ll\mu$，根据\cref{theo:RadonNikodym}，有：
+	\begin{inequality*}\label{ineq:Gibbs}
+		\int_{X}\ln\frac{\dif\varphi}{\dif\mu}(x)\dif\varphi\geqslant0
+	\end{inequality*}
+	等号成立当且仅当$\dfrac{\dif\varphi}{\dif\mu}=1\;$a.e.于$(X,\mathscr{F},\mu)$。
+\end{theorem}
+\begin{proof}
+	由高中的知识可知：
+	\begin{equation*}
+		x\ln x\geqslant x-1
+	\end{equation*}
+	等号成立当且仅当$x=1$。取$x=\dfrac{\dif\varphi}{\dif\mu}$，由\cref{theo:RadonNikodym}和\cref{prop:MeasurableIntegral}(10)可得$\dfrac{\dif\varphi}{\dif\mu}\geqslant0\;$a.e.于$(X,\mathscr{F},\mu)$。根据\cref{prop:MeasurableIntegral}(7)(6)和\cref{lem:IntChangeOfMeasure}可得：
+	\begin{gather*}
+		\frac{\dif\varphi}{\dif\mu}\ln\frac{\dif\varphi}{\dif\mu}\geqslant\frac{\dif\varphi}{\dif\mu}-1\;\text{a.e.于}(A,\mathscr{F},\mu) \\
+		\int_{X}\frac{\dif\varphi}{\dif\mu}(x)\ln\frac{\dif\varphi}{\dif\mu}(x)\dif\mu\geqslant\int_{X}\left[\frac{\dif\varphi}{\dif\mu}(x)-1\right]\dif\mu \\
+		\int_{X}\ln\frac{\dif\varphi}{\dif\mu}(x)\dif\varphi\geqslant0
+	\end{gather*}
+	根据\cref{prop:MeasurableIntegral}(8)可知等号成立当且仅当$\dfrac{\dif\varphi}{\dif\mu}=1\;$a.e.于$(X,\mathscr{F},\mu)$。
+\end{proof}
+\subsubsection{Markov不等式}
+\begin{theorem}[Markov Inequality]\label{theo:MarkovInequality}
+	设$f$是概率空间$(X,\mathscr{F},P)$上的非负随机变量，$\operatorname{E}(f)<+\infty$，则对任意的$t\in\mathbb{R}^{+}$有：
+	\begin{equation*}
+		P(f\geqslant t)\leqslant\frac{\operatorname{E}(f)}{t}
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由\cref{prop:SimpleFunction}(1)(2.a)、\cref{prop:NonnegativeMeasurableIntegral}(6)(10)、\cref{prop:MeasurableFunction}(1.d)和\cref{prop:NonnegativeSimpleIntegral}(4)
+	\begin{equation*}
+		\operatorname{E}(f)\geqslant\operatorname{E}[tI(x\in\{f\geqslant t\})]=t\operatorname{E}[I(x\in\{f\geqslant t\})]=tP(f\geqslant t)\qedhere
+	\end{equation*}
+\end{proof}
+\begin{note}
+	Markov Inequality有很多变形，比如下面的两个推论，第一个可以视为Chebyshev Inequality的推广，第二个则在高维概率中具有重要意义。
+\end{note}
+\begin{corollary}\label{cor:ChebyshevInequality}
+	设$f$是概率空间$(X,\mathscr{F},P)$上的随机变量，$f$的$n\in\mathbb{N}^+$阶矩存在，则对任意的$t\in\mathbb{R}^{+}$有：
+	\begin{equation*}
+		P\Big(|f-\operatorname{E}(f)|\geqslant t\Big)\leqslant\frac{\operatorname{E}[|f-\operatorname{E}(f)|^n]}{t^n}
+	\end{equation*}
+\end{corollary}
+\begin{proof}
+	因为$f$的$n$阶矩存在，由\cref{prop:Moment}(3)可知$\operatorname{E}(f)\in\mathbb{R}^{}$，根据\cref{prop:MeasurableFunction}(1.b)(1.d)和\cref{prop:SigmaField}(2)可知$|f-\operatorname{E}(f)|$是非负随机变量。由\cref{theo:MarkovInequality}可得：
+	\begin{equation*}
+		P\Big(|f-\operatorname{E}(f)|\geqslant t\Big)=P\Big(|f-\operatorname{E}(f)|^n\geqslant t^n\Big)\leqslant\frac{\operatorname{E}[|f-\operatorname{E}(f)|^n]}{t^n}\qedhere
+	\end{equation*}
+\end{proof}
+\begin{corollary}\label{cor:ChernoffBound}
+	设$f$是概率空间$(X,\mathscr{F},P)$上的随机变量，$\operatorname{E}(f)<+\infty$，$\operatorname{E}(e^{\lambda f})$在$\lambda\in[0,a]$上存在，则对任意的$t\in\mathbb{R}^{}$有：
+	\begin{equation*}
+		\log P\Big((f-\operatorname{E}(f))\geqslant t\Big)\leqslant\inf_{\lambda\in[0,a]}\Big\{\log\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}-\lambda t\Big\}
+	\end{equation*}
+\end{corollary}
+\begin{proof}
+	由\cref{prop:MeasurableFunction}(1.a)(10)、\cref{prop:MeasurableMapping}(2)(4)和\cref{theo:MarkovInequality}可知：
+	\begin{equation*}
+		P\Big((f-\operatorname{E}(f))\geqslant t\Big)\geqslant=P\left(e^{\lambda[f-\operatorname{E}(f)]}\geqslant e^{\lambda t}\right)\leqslant\frac{\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}}{e^{\lambda t}}\qedhere
+	\end{equation*}
+\end{proof}
+\begin{definition}
+	设$f$是概率空间$(X,\mathscr{F},P)$上的随机变量，$\operatorname{E}(f)<+\infty$。如果存在$\sigma>0$使得对任意的$\lambda\in\mathbb{R}^{}$都有：
+	\begin{equation*}
+		\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}\leqslant\exp\left(\frac{\sigma^2\lambda^2}{2}\right)
+	\end{equation*}
+	则称$f$是次高斯的，$\sigma$被称为$f$的次高斯参数。
+\end{definition}
+\begin{property}
+	设$f$是概率空间$(X,\mathscr{F},P)$上次高斯参数为$\sigma$的次高斯随机变量，则：
+	\begin{enumerate}
+		\item $-f$也是次高斯的；
+		\item $f$有如下的上下尾不等式：
+		\begin{equation*}
+			\forall\;t\geqslant0,\;P\Big(f-\operatorname{E}(f)\geqslant t\Big)\leqslant\exp\left(-\frac{t^2}{2\sigma^2}\right),\;P\Big(f-\operatorname{E}(f)\leqslant -t\Big)\leqslant\exp\left(-\frac{t^2}{2\sigma^2}\right)
+		\end{equation*}
+		\item $f$有如下的集中不等式：
+		\begin{equation*}
+			\forall\;t\geqslant0,\;P\Big(|f-\operatorname{E}(f)|\geqslant t\Big)\leqslant2\exp\left(-\frac{t^2}{2\sigma^2}\right)
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由\cref{prop:MeasurableIntegral}(6)即可得到：
+	\begin{equation*}
+		\operatorname{E}\{e^{\lambda[-f-\operatorname{E}(-f)]}\}=\operatorname{E}\{e^{-\lambda[f+\operatorname{E}(-f)]}\}=\operatorname{E}\{e^{-\lambda[f-\operatorname{E}(f)]}\}\leqslant\exp\left(\frac{\sigma^2\lambda^2}{2}\right)
+	\end{equation*}\par
+	(2)因为$f$是次高斯的，所以对任意的$\lambda\in\mathbb{R}^{}$，$\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}$存在，所以由\cref{prop:MeasurableIntegral}(6)可知$\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}$存在。根据\cref{cor:ChernoffBound}可得：
+	\begin{align*}
+		&P\Big(f-\operatorname{E}(f)\geqslant t\Big)\leqslant\inf_{\lambda\in\mathbb{R}^{}}\frac{\operatorname{E}\{e^{\lambda[f-\operatorname{E}(f)]}\}}{e^{\lambda t}}\leqslant\inf_{\lambda\in\mathbb{R}^{}}\exp\left(\frac{\sigma^2\lambda^2}{2}-\lambda t\right) \\
+		=&\exp\left[\frac{\sigma^2}{2}\left(\frac{t}{\sigma^2}\right) ^2-\frac{t^2}{\sigma^2}\right]=\exp\left(\frac{t^2}{2\sigma^2}-\frac{t^2}{\sigma^2}\right)=\exp\left(-\frac{t^2}{2\sigma^2}\right)
+	\end{align*}
+	由(1)、\cref{prop:MeasurableIntegral}(6)和上述上尾不等式可得：
+	\begin{equation*}
+		P\Big(-f-\operatorname{E}(-f)\geqslant t\Big)=P\Big(-f+\operatorname{E}(f)\geqslant t\Big)=P\Big(f-\operatorname{E}(f)\leqslant -t\Big)\leqslant\exp\left(-\frac{t^2}{2\sigma^2}\right)
+	\end{equation*}\par
+	(3)由(2)立即可得。
+\end{proof}
+\begin{theorem}[Hoeffding Bound]\label{theo:HoeffdingBound}
+	设$\seq{f}{n}$是概率空间$(X,\mathscr{F},P)$上相互独立的随机变量，对任意的$i=1,2,\dots,n$有$a_i\leqslant f_i\leqslant b_i\;$a.s.于$(X,\mathscr{F},P)$，则对任意的$t>0$：
+	\begin{gather*}
+		P\left(\sum_{i=1}^{n}[f_i-\operatorname{E}(f_i)]\geqslant t\right)\leqslant\exp\left[-\frac{2t^2}{\sum\limits_{i=1}^{n}(b_i-a_i)^2}\right] \\ P\left(\left|\sum_{i=1}^{n}[f_i-\operatorname{E}(f_i)]\right|\geqslant t\right)\leqslant2\exp\left[-\frac{2t^2}{\sum\limits_{i=1}^{n}(b_i-a_i)^2}\right]
+	\end{gather*}
+	也即：
+	\begin{gather*}
+		P\left(\frac{1}{n}\sum_{i=1}^{n}[f_i-\operatorname{E}(f_i)]\geqslant t\right)\leqslant\exp\left[-\frac{2n^2t^2}{\sum\limits_{i=1}^{n}(b_i-a_i)^2}\right] \\ P\left(\left|\frac{1}{n}\sum_{i=1}^{n}[f_i-\operatorname{E}(f_i)]\right|\geqslant t\right)\leqslant2\exp\left[-\frac{2n^2t^2}{\sum\limits_{i=1}^{n}(b_i-a_i)^2}\right]
+	\end{gather*}
+\end{theorem}
+\begin{proof}
+	证明涉及到很长且无聊的代数计算，所以略去。
+\end{proof}

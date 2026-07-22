@@ -1192,6 +1192,7 @@ def render_tikz_image(
                     r"decorations.pathreplacing}"
                 ),
                 r"\usepackage{pgfplots}",
+                r"\usepgfplotslibrary{groupplots}",
                 r"\pgfplotsset{compat=1.18}",
                 r"\begin{document}",
                 tikz_source.strip(),
@@ -1323,7 +1324,23 @@ def patch_tikz_pictures(
             + rf"{{{target.as_posix()}}}"
         )
 
-    return pattern.sub(replacement, text)
+    patched = pattern.sub(replacement, text)
+    # Pandoc recognizes a direct \includegraphics command, but drops an image
+    # whose only purpose is hidden inside a LaTeX \makebox.  Unwrap only the
+    # makeboxes that contain exactly one generated TikZ image.
+    tikz_makebox_pattern = re.compile(
+        r"\\makebox\s*(?:\[[^\]\r\n]*\]\s*){0,2}"
+        r"\{\s*%?\s*"
+        r"(?P<image>\\includegraphics\s*"
+        r"(?:\[[^\]\r\n]*\]\s*)?"
+        r"\{_tikz/[^{}\r\n]+\})"
+        r"\s*%?\s*\}",
+        flags=re.DOTALL,
+    )
+    return tikz_makebox_pattern.sub(
+        lambda match: match.group("image"),
+        patched,
+    )
 
 
 def patch_main_for_full_book(text: str) -> str:
@@ -1852,6 +1869,7 @@ class BookTransformer:
         self.equation = 0
         self.inequality = 0
         self.algorithm = 0
+        self.figure = 0
 
         self.counter_values: dict[str, int] = {
             spec.counter: 0 for spec in theorem_specs.values()
@@ -1899,6 +1917,7 @@ class BookTransformer:
             self.section = self.subsection = self.subsubsection = 0
             self.equation = 0
             self.algorithm = 0
+            self.figure = 0
             self.reset_counters_for_parent("chapter")
             return f"第 {self.chapter} 章", "章", str(self.chapter)
         if level == self.section_level:
@@ -2410,6 +2429,20 @@ class BookTransformer:
                     )
                     continue
                 result.append(self.process_equations_in_block(block))
+                continue
+            if block_type == "Figure":
+                self.figure += 1
+                identifier = node_identifier(block)
+                if identifier:
+                    number = (
+                        f"{self.chapter}.{self.figure}"
+                        if self.chapter
+                        else str(self.figure)
+                    )
+                    self.labels[identifier] = ("图", number)
+                self.content_counts["figure"] += 1
+                block["c"] = self.process_child_block_lists(block.get("c"))
+                result.append(block)
                 continue
             block["c"] = self.process_child_block_lists(block.get("c"))
             result.append(block)
