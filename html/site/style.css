@@ -70,6 +70,11 @@ a:hover {
   text-decoration-color: currentColor;
 }
 
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--book-primary-glow);
+  outline-offset: 2px;
+}
+
 p,
 li {
   text-wrap: pretty;
@@ -209,7 +214,6 @@ h5 {
   color: var(--book-ink-soft);
   font-size: 0.9rem;
 }
-
 /* Top application bar */
 #quarto-header .quarto-secondary-nav {
   border-bottom: 1px solid rgb(226 229 238 / 80%);
@@ -1381,11 +1385,12 @@ img.tikz-image {
 
 .computation-result-body img {
   display: block;
-  width: 100%;
+  width: auto;
   max-width: 100%;
   height: auto;
   margin: 1rem auto;
   border-radius: var(--book-radius-sm);
+  image-rendering: auto;
 }
 
 .computation-result-body table,
@@ -1457,7 +1462,18 @@ img.tikz-image {
   max-height: 34rem;
   overflow: auto;
 }
+figure.textbook-figure {
+  scroll-margin-top: 5rem;
+}
 
+figure.textbook-figure > figcaption {
+  color: var(--book-ink-soft) !important;
+}
+
+figure.textbook-figure > figcaption .figure-number {
+  color: var(--book-ink) !important;
+  font-weight: 700;
+}
 /* Restrained editorial home page */
 body:has(.textbook-home) main.content,
 body.textbook-home-page main.content {
@@ -2150,7 +2166,6 @@ body.quarto-dark {
 .display-math-copy-button:focus-visible {
   border-color: var(--book-primary);
   color: var(--book-primary-deep);
-  outline: none;
 }
 
 .display-math-copy-button--success {
@@ -2191,7 +2206,6 @@ body.quarto-dark {
     white-space: nowrap;
   }
 }
-
 /* Interactive probability density plots */
 .density-plot {
   --density-curve: #405f9d;
@@ -2278,7 +2292,6 @@ body.quarto-dark {
 .density-plot__mode:focus-visible {
   border-color: var(--book-primary);
   color: var(--book-primary-deep);
-  outline: none;
 }
 
 .density-plot__action[aria-pressed="true"] {
@@ -2592,7 +2605,6 @@ body.quarto-dark {
 .quarto-dark .density-plot__status--error {
   color: #ff9b8f;
 }
-
 /* Responsive behavior */
 @media (max-width: 1199.98px) {
   main.content {
@@ -2752,6 +2764,15 @@ body.quarto-dark {
     grid-template-columns: 1fr;
   }
 
+  .density-plot__control {
+    grid-template-columns: 2rem minmax(0, 1fr) 4.7rem;
+    gap: 0.45rem;
+  }
+
+  .density-plot__interval-controls input {
+    width: min(6.25rem, 42vw);
+  }
+
   .density-plot__chart svg {
     min-height: 14rem;
   }
@@ -2809,7 +2830,6 @@ body.quarto-dark {
     display: none !important;
   }
 }
-
 /* Project identity, status pages, and reading interactions */
 .textbook-home {
   gap: 1.15rem;

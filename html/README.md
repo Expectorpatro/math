@@ -30,7 +30,7 @@ python3 html/build.py --serve
 
 网页构建不会执行分析代码，只读取已经渲染好的、自包含的 `result.html`，并按照章节旁边 `computations.order` 中规定的顺序追加到对应 chapter 的末尾。
 
-当前所有 R 计算实验共用**整个 textbook 的一个 `renv` 项目**，不再为每个实验单独建立 `renv`。实际项目根是 textbook 根目录：根目录的 `.Rprofile` 会激活`renv/activate.R`，而根目录的 `renv.lock` 是全书 R 包版本的唯一锁文件。`environment/r/` 保留环境说明；这样 `renv::snapshot()` 才能扫描全书章节与计算实验，而不会遗漏该目录以外使用的包。
+当前所有 R 计算实验共用**整个项目的一个 `renv` 环境**，不再为每个实验单独建立 `renv`。项目根目录的 `.Rprofile` 会激活`renv/activate.R`，根目录的 `renv.lock` 是全书 R 包版本的唯一锁文件。`environment/r/` 保留环境说明；这样 `renv::snapshot()` 才能扫描全书章节与计算实验，而不会遗漏该目录以外使用的包。
 
 完整的恢复与依赖更新流程分别见 `environment/r/README.md` 和`environment/python/README.md`；不要只复制某个章节中的包安装命令。
 
@@ -39,7 +39,7 @@ python3 html/build.py --serve
 例如线性模型模块可以保持下列目录布局：
 
 ```text
-textbook/
+<项目根目录>/
 ├── .Rprofile                   # 提交：自动激活根目录的 renv
 ├── .renvignore                  # 提交：仅排除本机环境与生成输出
 ├── renv.lock                   # 提交：全书 R 依赖的唯一锁文件
@@ -94,8 +94,8 @@ textbook/
 
 ```bash
 QUARTO_BIN="${QUARTO:-/Applications/Positron.app/Contents/Resources/app/quarto/bin/quarto}"
-TEXTBOOK_ROOT="$PWD" R_PROFILE_USER="$PWD/.Rprofile" \
-"$QUARTO_BIN" render statistics/Linear-model/computations/01-linear-regression/r/result.qmd \
+BOOK_PROJECT_ROOT="$PWD" R_PROFILE_USER="$PWD/.Rprofile" \
+"$QUARTO_BIN" render statistics/Linear-model/computations/01-linear-regression/r/analysis.qmd \
   --to html --output result.html -M embed-resources:true
 ```
 
@@ -110,7 +110,7 @@ Python 计算实验分两步处理：UV 锁定的 Jupyter 只负责执行 Notebo
 首先在 UV 锁定环境中执行 Notebook，并把新的单元格输出保存回 `.ipynb`：
 
 ```bash
-uv run --project environment/python --locked jupyter nbconvert \
+PYTHONPATH="$PWD" uv run --project environment/python --locked jupyter nbconvert \
   --to notebook --execute --inplace \
   statistics/multivariate/computations/01-kmeans/python/analysis.ipynb
 ```
@@ -124,6 +124,8 @@ pandoc statistics/multivariate/computations/01-kmeans/python/analysis.ipynb \
 ```
 
 将两条命令中的路径同时替换为实际实验路径。`--embed-resources` 会将 Notebook 输出的图片等资源嵌入 HTML；若 Notebook 还会读取数据文件，该数据文件仍需按项目约定提交。
+
+所有 Python Notebook 都应调用根目录 `figure_settings.configure_matplotlib()`；R/Quarto 实验应在隐藏的 setup 块中加载 `figure_settings/figures.R` 并调用 `configure_knitr_figures()`。两者都从 `html/build-config.toml` 读取统一图像策略，默认输出 SVG；Python SVG 还会移除运行时间元数据。不要在单个实验中重新覆盖这些公共参数。
 
 ### 插入教材网页
 
@@ -152,7 +154,7 @@ python3 html/build.py
 需要提交到 GitHub 的内容包括：
 
 - 原始 LaTeX 文件和正文引用的图片、代码等资源；
-- `html/build.py`、`html/home.md`、`html/style.css`、`html/textbook-ui.js`与 `html/favicon.svg`；
+- `html/build.py`、`html/build-config.toml`、`html/site_builder/`、`html/styles/`、`html/home.md`、`html/textbook-ui.js` 与 `html/favicon.svg`；
 - `html/site-meta.json`、`html/chapter-progress.json` 与`html/notation-catalog.json`；
 - 完整的 `html/site/`，包括 `index.html`、`chapters/`、`site_libs/`、`search.json` 和样式文件；
 - `.github/workflows/pages.yml`。
@@ -173,7 +175,7 @@ git push origin main
 
 提交前检查 `git status`，其中应能看到 `html/site/index.html` 和`html/site/chapters/` 下的网页文件；如果看不到，不要提交，先检查`.gitignore`。
 
-随后打开 GitHub 仓库的 `Settings` → `Pages`，在`Build and deployment` 中将 `Source` 设置为 `GitHub Actions`。推送到`main` 后，可以在仓库的 `Actions` 页面查看部署进度，也可以在该页面手动运行 `Deploy textbook to GitHub Pages` 工作流。
+随后打开 GitHub 仓库的 `Settings` → `Pages`，在`Build and deployment` 中将 `Source` 设置为 `GitHub Actions`。推送到`main` 后，可以在仓库的 `Actions` 页面查看部署进度，也可以在该页面手动运行 `Deploy book to GitHub Pages` 工作流。
 
 当前仓库的网页地址预计为：
 
@@ -221,7 +223,7 @@ git push origin main
 - 每个正文页提供“在 GitHub 上报告本页问题”入口；首页和项目状态页提供源代码、错误报告、内容建议与提交记录入口。
 - 项目状态页自动汇总章节进度、定理类环境、证明、算法、行间公式、交互图和术语数量，不需要手工维护统计数字。
 
-构建时使用 `--strict`，可以让未定义术语或未解析引用导致构建失败：
+构建时使用 `--strict`，可以让未定义术语、未解析引用或站点发布校验错误导致构建失败：
 
 ```bash
 python3 html/build.py --strict
@@ -229,14 +231,17 @@ python3 html/build.py --strict
 
 ## 目录
 
-- `build.py`：唯一构建入口。
-- `style.css`：网页样式。
+- `build.py`：稳定的命令行入口与构建阶段编排。
+- `build-config.toml`：工具、路径、布局、图像质量和资源清单的集中配置。
+- `site_builder/`：LaTeX 暂存、Pandoc AST、页面规划、QMD、计算结果、资源、Quarto、后处理、校验与发布模块。
+- `styles/`：按基础视觉、页面骨架、内容组件、计算实验、首页、暗色、公式、交互图、响应式和项目页拆分的 CSS 源文件；构建时按配置合并为站点的 `style.css`。
+- `../figure_settings/`：Python 计算实验共用的确定性 SVG/高 DPI 配置。
+- `tests/`：只使用 Python 标准库的构建服务回归测试。
 - `textbook-ui.js`：主题、证明折叠、阅读位置、交叉引用提示与页面反馈入口。
 - `site-meta.json`：发布日期、内容更新日期和 GitHub 仓库。
 - `chapter-progress.json`：19 个正文章节的完成百分比。
 - `.build/`：Pandoc AST、临时 `.qmd` 和 Quarto 工程，每次构建时更新。
 - `site/`：最终静态网站，可发布到 GitHub Pages。
-- `site/build-report.json`：未定义术语、未解析引用和失效链接报告。
 - `computations.order`：某一数学章节的计算实验标题与结果显示顺序。
 - `.github/workflows/pages.yml`：从项目根目录发布 `html/site/` 的 GitHubPages 工作流。
 

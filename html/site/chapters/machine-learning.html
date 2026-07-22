@@ -43,13 +43,13 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles-default">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles-alternate">
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap-default" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap-alternate" data-mode="dark">
 <link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
@@ -82,6 +82,8 @@ ul.task-list li input[type="checkbox"] {
 <script>
 (() => {
   "use strict";
+
+  document.documentElement.classList.add("js");
   try {
     const theme = window.localStorage.getItem("textbook-color-scheme");
     if (theme === "dark" || theme === "light") {
@@ -91,7 +93,7 @@ ul.task-list li input[type="checkbox"] {
       );
     }
   } catch (_error) {
-    // Storage can be unavailable; Quarto's default theme still works.
+    // Storage is optional; Quarto's configured default remains usable.
   }
 
   const mathJax = window.MathJax || {};
@@ -104,34 +106,47 @@ ul.task-list li input[type="checkbox"] {
   };
   window.MathJax = mathJax;
 
-  const loadUserInterface = () => {
-    if (document.querySelector('script[data-textbook-ui]')) return;
+  const assetBase = () => {
+    const offset = document.querySelector('meta[name="quarto:offset"]');
+    if (offset?.content) return new URL(offset.content, document.baseURI);
     const stylesheet = Array.from(
       document.querySelectorAll('link[rel="stylesheet"]')
     ).find((link) =>
       /(?:^|\/)style\.css(?:[?#]|$)/.test(link.getAttribute("href") || "")
     );
-    const base = stylesheet
-      ? new URL(stylesheet.href)
-      : new URL(window.location.href);
+    return stylesheet ? new URL(".", stylesheet.href) : new URL(".", document.baseURI);
+  };
+
+  const loadScript = (name, version, marker) => {
+    if (document.querySelector(`script[data-textbook-asset="${marker}"]`)) {
+      return;
+    }
+    const url = new URL(name, assetBase());
+    url.searchParams.set("v", version);
     const script = document.createElement("script");
-    script.dataset.textbookUi = "true";
-    const interfaceUrl = new URL("textbook-ui.js", base);
-    interfaceUrl.searchParams.set("v", "5e5306b2f80d");
-    script.src = interfaceUrl.href;
+    script.src = url.href;
     script.async = false;
+    script.dataset.textbookAsset = marker;
+    script.addEventListener("error", () => {
+      console.error(`[textbook] 无法加载前端资源：${name}`);
+    });
     document.head.appendChild(script);
   };
 
-  // Quarto emits this include before the page-specific stylesheet links.
-  // Waiting for the parsed document makes the same loader work at the site
-  // root and in nested chapter routes, including GitHub Pages subpaths.
+  const bootstrap = () => {
+    loadScript("textbook-ui.js", "5959463a9705", "ui");
+    if (document.querySelector(".display-math-copy-marker")) {
+      loadScript("formula-copy.js", "6eba2a5b3270", "formula-copy");
+    }
+    if (document.querySelector(".density-plot[data-distribution]")) {
+      loadScript("density-loader.js", "604b9c6c2cb3", "density");
+    }
+  };
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", loadUserInterface, {
-      once: true,
-    });
+    document.addEventListener("DOMContentLoaded", bootstrap, { once: true });
   } else {
-    loadUserInterface();
+    bootstrap();
   }
 })();
 </script>
@@ -170,15 +185,15 @@ window.Quarto = {
 <link rel="stylesheet" href="../sidebar.css">
 <meta property="og:title" content="第 17 章 机器学习 – 你永远不知道一个强迫症能干出什么事情">
 <meta property="og:description" content="持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，强调逻辑自洽、证明完整与持续维护。">
-<meta property="og:image" content="https://expectorpatro.github.io/math/_tikz/tikz-1ac9f70b119c1383.png">
+<meta property="og:image" content="https://expectorpatro.github.io/math/_tikz/tikz-73123a053abe91e68e5c.png">
 <meta property="og:site_name" content="你永远不知道一个强迫症能干出什么事情">
-<meta property="og:image:height" content="487">
-<meta property="og:image:width" content="554">
+<meta property="og:image:height" content="1691">
+<meta property="og:image:width" content="1921">
 <meta name="twitter:title" content="第 17 章 机器学习 – 你永远不知道一个强迫症能干出什么事情">
 <meta name="twitter:description" content="持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，强调逻辑自洽、证明完整与持续维护。">
-<meta name="twitter:image" content="https://expectorpatro.github.io/math/_tikz/tikz-1ac9f70b119c1383.png">
-<meta name="twitter:image-height" content="487">
-<meta name="twitter:image-width" content="554">
+<meta name="twitter:image" content="https://expectorpatro.github.io/math/_tikz/tikz-73123a053abe91e68e5c.png">
+<meta name="twitter:image-height" content="1691">
+<meta name="twitter:image-width" content="1921">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="textbook-repository" content="Expectorpatro/math">
 </head>
@@ -852,10 +867,10 @@ window.Quarto = {
 </div>
 <div id="note-17-4" class="note theorem-block env-note">
 <p><strong>note 17.4</strong>. ROC曲线反映了阈值变化对<span class="math inline">\(\operatorname{TPR}\)</span>与<span class="math inline">\(\operatorname{FPR}\)</span>的权衡。<span class="math inline">\(\operatorname{AUROC}\)</span>独立于具体阈值，是比较不同模型总体区分能力的常用指标，取值范围通常在<span class="math inline">\([0.5,1]\)</span>，<span class="math inline">\(0.5\)</span>表示随机猜测（对任意的<span class="math inline">\(t\in[0,1]\)</span>有<span class="math inline">\(\operatorname{FPR}(t)=\operatorname{TPR}(t)\)</span>，模型判断正类为正类的概率和模型判断负类为正类的概率一致），<span class="math inline">\(1\)</span>表示完美分类。</p>
-<figure data-latex-placement="H" class="figure">
-<img src="../_tikz/tikz-1ac9f70b119c1383.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-17-1" class="textbook-figure figure" data-latex-placement="H">
+<img src="../_tikz/tikz-73123a053abe91e68e5c.png" class="tikz-image figure-img" style="width:92.0%" width="1921" height="1691" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-ROC曲线示意
+<span class="figure-number">图 17.1</span> ROC曲线示意
 </figcaption>
 </figure>
 </div>
@@ -864,10 +879,10 @@ ROC曲线示意
 </div>
 <div id="note-17-5" class="note theorem-block env-note">
 <p><strong>note 17.5</strong>. 相比<span class="math inline">\(\operatorname{AUROC}\)</span>，<span class="math inline">\(\operatorname{AUPRC}\)</span>更关注正类的表现，因而在正负样本严重不平衡时更加敏感。较高的<span class="math inline">\(\operatorname{AUPRC}\)</span>表明模型性能较好。</p>
-<figure data-latex-placement="H" class="figure">
-<img src="../_tikz/tikz-0ef0260724d2db6a.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-17-2" class="textbook-figure figure" data-latex-placement="H">
+<img src="../_tikz/tikz-3cc5453f3504f9b2b947.png" class="tikz-image figure-img" style="width:92.0%" width="1921" height="1557" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-PR曲线示意
+<span class="figure-number">图 17.2</span> PR曲线示意
 </figcaption>
 </figure>
 </div>
@@ -909,10 +924,10 @@ PR曲线示意
 \mathcal{R}(\theta)\coloneq\operatorname{E}\{L[Y,f_\theta(X)]\}
 \end{equation*}\]</span></p>
 <p>有时持续降低<span class="math inline">\(\widehat{\mathcal{R}}_{\mathrm{train}}\)</span>未必会同时降低<span class="math inline">\(\mathcal{R}\)</span>：模型可能不是在提取能够推广到新样本的稳定规律，而是利用训练数据中的偶然噪声、异常点甚至样本的细微特征，对有限训练集作近似记忆。此时训练损失较低，而新样本上的损失较高，这种现象称为<a href="../chapters/glossary-o.html#term-Overfitting" class="term" title="overfitting">过拟合<span class="term-english">（overfitting）</span></a>。</p>
-<figure id="fig-overfitting-three-points-350c89ce" data-latex-placement="htbp" class="figure">
-<img src="../_tikz/tikz-8fd3bd654090b292.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-overfitting-three-points-350c89ce" class="textbook-figure figure" data-latex-placement="htbp">
+<img src="../_tikz/tikz-205c773f2b06f27b65ac.png" class="tikz-image figure-img" style="width:92.0%" width="1921" height="808" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-取自<span class="math inline"><em>y</em> = <em>x</em></span>的三个样本可由不同的模型进行解释。
+<span class="figure-number">图 17.3</span> 取自<span class="math inline"><em>y</em> = <em>x</em></span>的三个样本可由不同的模型进行解释。
 </figcaption>
 </figure>
 <p>从<a href="#fig-overfitting-three-points-350c89ce" class="textbook-cross-reference" data-reference-key="fig:overfitting-three-points" data-reference-kind="ref+label" data-reference-title="图 17.3">图 17.3</a>可以看出，三条复杂程度不同的曲线都完美地拟合了由三个观测点构成的训练数据集，因此它们在该训练集上取得了相同且最小的经验风险<span class="math inline">\(\widehat{\mathcal{R}}_{\mathrm{train}}(\theta)\)</span>。然而，在训练样本之外，若新的观测仍来自真实关系<span class="math inline">\(y=x\)</span>，这些模型会产生较大的预测误差，即它们存在过拟合的现象。由此可见，仅凭训练数据上的经验风险无法判断模型的真实预测能力；即使多个模型具有相同的训练误差，它们的总体风险<span class="math inline">\(\mathcal{R}(\theta)\)</span>也可能存在显著差异。</p>
@@ -1010,10 +1025,10 @@ H(f)&amp;=\operatorname{E}[I(f)]=-\sum_{i=1}^{n}P(f=x_i)\log[P(f=x_i)]=\sum_{i=1
 <p>上式取等当且仅当<span class="math inline">\(\dfrac{1}{P(f=x_i)}\)</span>为常数，即<span class="math inline">\(P(f=x_1)=P(f=x_2)=\cdots=P(f=x_n)\)</span>。&nbsp;◻</p>
 </div>
 <p>对于二分类样本，记第一类样本比例为<span class="math inline">\(p\)</span>，第二类比例为<span class="math inline">\(1-p\)</span>，则信息熵为<span class="math inline">\(H(p)=-p\log_2p-(1-p)\log_2(1-p)\)</span>。如下图所示，只含一个类别时熵为<span class="math inline">\(0\)</span>；两类各占一半时不确定性最大。</p>
-<figure data-latex-placement="H" class="figure">
-<img src="../_tikz/tikz-cd41d38b300e65e1.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-17-4" class="textbook-figure figure" data-latex-placement="H">
+<img src="../_tikz/tikz-9ae67f8f5361444db88c.png" class="tikz-image figure-img" style="width:92.0%" width="1921" height="1091" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-二分类样本的信息熵。<span class="math inline"><em>p</em> = 0.5</span>时两类样本数量相同，信息熵达到最大值。
+<span class="figure-number">图 17.4</span> 二分类样本的信息熵。<span class="math inline"><em>p</em> = 0.5</span>时两类样本数量相同，信息熵达到最大值。
 </figcaption>
 </figure>
 </section>
@@ -1049,10 +1064,10 @@ H(f)&amp;=\operatorname{E}[I(f)]=-\sum_{i=1}^{n}P(f=x_i)\log[P(f=x_i)]=\sum_{i=1
 <p><strong>note 17.10</strong>. 由<a href="#prop-GiniIndex-ed5a1cb5" class="textbook-cross-reference" data-reference-key="prop:GiniIndex" data-reference-kind="ref+label" data-reference-title="性质 17.2.2" data-reference-items="1|2" data-reference-hint="请查看第 1、2 项">性质 17.2.2(1)(2)</a>可以看出Gini指数可以用来刻画样本类别分布的不纯度。当所有样本属于同一类别时<span class="math inline">\(\operatorname{Gini}(\mathcal{D})=0\)</span>，表示完全纯净；当类别分布均匀时<span class="math inline">\(\operatorname{Gini}(\mathcal{D})\)</span>达到最大值，表示类别混杂程度最高。</p>
 </div>
 <p>对于二分类样本，Gini指数可写为<span class="math inline">\(G(p)=1-p^2-(1-p)^2=2p(1-p)\)</span>。它与信息熵具有相同的对称性，但计算形式更简单。</p>
-<figure data-latex-placement="H" class="figure">
-<img src="../_tikz/tikz-aaa7875e640766ac.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-17-5" class="textbook-figure figure" data-latex-placement="H">
+<img src="../_tikz/tikz-bdd92e231c2eb4b1f580.png" class="tikz-image figure-img" style="width:92.0%" width="1923" height="1072" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-二分类样本的Gini指数。节点越接近单一类别，Gini指数越接近<span class="math inline">0</span>。
+<span class="figure-number">图 17.5</span> 二分类样本的Gini指数。节点越接近单一类别，Gini指数越接近<span class="math inline">0</span>。
 </figcaption>
 </figure>
 </section>
@@ -1091,10 +1106,10 @@ H(p,q)\geqslant-\sum_{i=1}^np_i\log p_i=H(p,p)
 <p><strong>note 17.11</strong>. 由<a href="#prop-CrossEntropy-6f68975a" class="textbook-cross-reference" data-reference-key="prop:CrossEntropy" data-reference-kind="ref+label" data-reference-title="性质 17.2.3">性质 17.2.3</a>可知，交叉熵在所有概率分布<span class="math inline">\(q\)</span>中以<span class="math inline">\(q=p\)</span>为唯一最小值。因而最小化经验交叉熵等价于逼近真实分布<span class="math inline">\(p\)</span>，这正是对数损失函数的理论基础。</p>
 </div>
 <p>交叉熵需要区分真实概率<span class="math inline">\(p\)</span>和预测概率<span class="math inline">\(q\)</span>。固定真实概率<span class="math inline">\(p=0.25\)</span>后，预测概率<span class="math inline">\(q\)</span>与<span class="math inline">\(p\)</span>一致时交叉熵最小；预测越偏离真实概率，交叉熵越大。</p>
-<figure data-latex-placement="H" class="figure">
-<img src="../_tikz/tikz-57bb4a29165ba493.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-17-6" class="textbook-figure figure" data-latex-placement="H">
+<img src="../_tikz/tikz-515bd8d9c3060347f008.png" class="tikz-image figure-img" style="width:92.0%" width="1920" height="1124" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-真实概率固定为<span class="math inline"><em>p</em> = 0.25</span>时的二分类交叉熵。横轴<span class="math inline"><em>q</em></span>为模型预测第一类的概率。
+<span class="figure-number">图 17.6</span> 真实概率固定为<span class="math inline"><em>p</em> = 0.25</span>时的二分类交叉熵。横轴<span class="math inline"><em>q</em></span>为模型预测第一类的概率。
 </figcaption>
 </figure>
 </section>
@@ -1102,10 +1117,10 @@ H(p,q)\geqslant-\sum_{i=1}^np_i\log p_i=H(p,p)
 <section id="id--642df3fd" class="level3">
 <h3 class="anchored" data-anchor-id="id--642df3fd"><span class="header-section-number">17.2.2</span> 决策树</h3>
 <p>决策树从根节点开始，根据某个条件将样本递归地分到不同子节点。内部节点保存判断规则，叶节点保存最终预测。下图以判断今天是否适合户外活动为例；方括号中的两个数字依次表示适合和不适合的历史样本数。对一个新样本，只需从根节点开始依次判断，直至到达叶节点。</p>
-<figure id="fig-decision-tree-example-30f2ff9c" data-latex-placement="H" class="figure">
-<img src="../_tikz/tikz-da59ff99ee27fcd7.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-decision-tree-example-30f2ff9c" class="textbook-figure figure" data-latex-placement="H">
+<img src="../_tikz/tikz-3e79f250e66d261aff9b.png" class="tikz-image figure-img" style="width:92.0%" width="2331" height="1197" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-二分类决策树示意图。每次判断都把当前节点中的样本分到两个子节点，叶节点以占比最高的类别作为预测。
+<span class="figure-number">图 17.7</span> 二分类决策树示意图。每次判断都把当前节点中的样本分到两个子节点，叶节点以占比最高的类别作为预测。
 </figcaption>
 </figure>
 <div id="algorithm-17-1" class="algorithm-block">
@@ -1705,10 +1720,10 @@ w_{jb}\gets-\frac{G_{jb}}{H_{jb}+\lambda}
 <section id="k-84fe4a86" class="level2">
 <h2 class="anchored" data-anchor-id="k-84fe4a86"><span class="header-section-number">17.3</span> K近邻模型</h2>
 <p>下图展示了KNN分类的基本思想：以待预测点为中心，逐渐扩大邻域，直到包含<span class="math inline">\(k\)</span>个训练样本，再由这些邻居的类别决定预测结果。图中取<span class="math inline">\(k=5\)</span>，邻域内有<span class="math inline">\(3\)</span>个A类样本和<span class="math inline">\(2\)</span>个B类样本，因此查询点被预测为A类。</p>
-<figure id="fig-knn-neighborhood-2427c0be" data-latex-placement="H" class="figure">
-<img src="../_tikz/tikz-ca52f4cde524528a.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-knn-neighborhood-2427c0be" class="textbook-figure figure" data-latex-placement="H">
+<img src="../_tikz/tikz-1ca02cc0349e2bed18f6.png" class="tikz-image figure-img" style="width:92.0%" width="1980" height="1395" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-KNN分类示意图。虚线圆仅用于表示包含第<span class="math inline">5</span>个最近邻的最小邻域；实际算法只需比较距离，不必显式构造圆形边界。
+<span class="figure-number">图 17.8</span> KNN分类示意图。虚线圆仅用于表示包含第<span class="math inline">5</span>个最近邻的最小邻域；实际算法只需比较距离，不必显式构造圆形边界。
 </figcaption>
 </figure>
 <div id="definition-17-18" class="definition theorem-block env-definition">
@@ -1852,7 +1867,7 @@ f=f_1+f_2,\quad f_1\in Y_n,\;f_2\in Y_n^{\perp}
 <div class="center">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="../_tikz/tikz-69962cfe66dec504.png" class="tikz-image img-fluid figure-img" style="width:92.0%" loading="lazy" decoding="async"></p>
+<p><img src="../_tikz/tikz-8f3219f58df185487601.png" class="tikz-image img-fluid figure-img" style="width:92.0%" width="1921" height="1375" alt="TikZ 数学图示" loading="lazy" decoding="async"></p>
 <figcaption>image</figcaption>
 </figure>
 </div>
@@ -1890,10 +1905,10 @@ f_\theta(x)=\phi^{(L)}\!\circ \phi^{(L-1)} \circ \cdots \circ \phi^{(1)}(x)
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/glossary-s.html#term-SigmoidFunction" class="term" title="sigmoid function">sigmoid函数<span class="term-english">（sigmoid function）</span></a>。</p>
 </div>
-<figure data-latex-placement="H" class="figure">
-<img src="../_tikz/tikz-c58bfdf4593d996a.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-17-9" class="textbook-figure figure" data-latex-placement="H">
+<img src="../_tikz/tikz-d9bf560f3e558e0e62fe.png" class="tikz-image figure-img" style="width:92.0%" width="1921" height="1521" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-Sigmoid 激活函数<span class="math inline"><span class="math inline">\(\sigma(x)=\dfrac{1}{1+e^{-x}}\)</span></span>
+<span class="figure-number">图 17.9</span> Sigmoid 激活函数<span class="math inline"><span class="math inline">\(\sigma(x)=\dfrac{1}{1+e^{-x}}\)</span></span>
 </figcaption>
 </figure>
 <div id="definition-17-27" class="definition theorem-block env-definition">
@@ -1903,10 +1918,10 @@ Sigmoid 激活函数<span class="math inline"><span class="math inline">\(\sigma
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/glossary-t.html#term-TanhFunction" class="term" title="tanh function">双曲正切函数<span class="term-english">（tanh function）</span></a>。</p>
 </div>
-<figure data-latex-placement="H" class="figure">
-<img src="../_tikz/tikz-5c65c7c7fb8eb098.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-17-10" class="textbook-figure figure" data-latex-placement="H">
+<img src="../_tikz/tikz-695784a7343e00dcf1ef.png" class="tikz-image figure-img" style="width:92.0%" width="1921" height="1397" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-Tanh 激活函数 <span class="math inline">tanh (<em>x</em>)</span>
+<span class="figure-number">图 17.10</span> Tanh 激活函数 <span class="math inline">tanh (<em>x</em>)</span>
 </figcaption>
 </figure>
 <div id="definition-17-28" class="definition theorem-block env-definition">
@@ -1916,10 +1931,10 @@ Tanh 激活函数 <span class="math inline">tanh (<em>x</em>)</span>
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/glossary-r.html#term-ReLU" class="term" title="rectified linear unit">整流线型单元<span class="term-english">（rectified linear unit）</span></a>。</p>
 </div>
-<figure data-latex-placement="H" class="figure">
-<img src="../_tikz/tikz-159b1076cd14ac56.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-17-11" class="textbook-figure figure" data-latex-placement="H">
+<img src="../_tikz/tikz-3f4c1cee68aeeae29c28.png" class="tikz-image figure-img" style="width:92.0%" width="1921" height="1436" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-ReLU 激活函数 <span class="math inline"><em>σ</em>(<em>x</em>) = max (0, <em>x</em>)</span>
+<span class="figure-number">图 17.11</span> ReLU 激活函数 <span class="math inline"><em>σ</em>(<em>x</em>) = max (0, <em>x</em>)</span>
 </figcaption>
 </figure>
 <div id="definition-17-29" class="definition theorem-block env-definition">
@@ -1934,10 +1949,10 @@ x,&amp; x&gt;0 \\
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/glossary-l.html#term-LeakyRectifiedLinearUnit" class="term" title="leaky ReLU">泄漏整流线性单元<span class="term-english">（leaky ReLU）</span></a>。</p>
 </div>
-<figure data-latex-placement="H" class="figure">
-<img src="../_tikz/tikz-962f5fd8c34d6587.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-17-12" class="textbook-figure figure" data-latex-placement="H">
+<img src="../_tikz/tikz-d358292d34f7e7d4b0f7.png" class="tikz-image figure-img" style="width:92.0%" width="1921" height="1431" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-Leaky ReLU 激活函数（<span class="math inline"><em>α</em> = 0.1</span>）
+<span class="figure-number">图 17.12</span> Leaky ReLU 激活函数（<span class="math inline"><em>α</em> = 0.1</span>）
 </figcaption>
 </figure>
 <div id="definition-17-30" class="definition theorem-block env-definition">
@@ -1951,10 +1966,10 @@ x, &amp; x&gt;0 \\
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/glossary-e.html#term-ELU" class="term" title="Exponential Linear Unit">指数线性单元<span class="term-english">（Exponential Linear Unit）</span></a>。</p>
 </div>
-<figure data-latex-placement="H" class="figure">
-<img src="../_tikz/tikz-e2a921361b286aaa.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-17-13" class="textbook-figure figure" data-latex-placement="H">
+<img src="../_tikz/tikz-86615145ae9d92d184f8.png" class="tikz-image figure-img" style="width:92.0%" width="1921" height="1510" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-ELU 激活函数（<span class="math inline"><em>α</em> = 1</span>）
+<span class="figure-number">图 17.13</span> ELU 激活函数（<span class="math inline"><em>α</em> = 1</span>）
 </figcaption>
 </figure>
 <div id="definition-17-31" class="definition theorem-block env-definition">
@@ -2104,16 +2119,16 @@ g_t = \frac{1}{B} \sum_{(x_i,y_i)\in \mathcal{B}_t}
 <h3 class="anchored" data-anchor-id="id--00412c7d"><span class="header-section-number">17.5.2</span> 序列网络</h3>
 <section id="recurrent-neural-network-rnn-b2b3accd" class="level4">
 <h4 class="anchored" data-anchor-id="recurrent-neural-network-rnn-b2b3accd"><span class="header-section-number">17.5.2.1</span> 循环神经网络（Recurrent Neural Network, RNN）</h4>
-<figure data-latex-placement="H" class="figure">
-<img src="../_tikz/tikz-8f99bed870a48b03.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-17-14" class="textbook-figure figure" data-latex-placement="H">
+<img src="../_tikz/tikz-bd64804a313261426aba.png" class="tikz-image figure-img" style="width:92.0%" width="1923" height="1022" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-单个时间步的RNN单元计算结构
+<span class="figure-number">图 17.14</span> 单个时间步的RNN单元计算结构
 </figcaption>
 </figure>
-<figure data-latex-placement="H" class="figure">
-<img src="../_tikz/tikz-3ca1c12a948c3fea.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-17-15" class="textbook-figure figure" data-latex-placement="H">
+<img src="../_tikz/tikz-23fb936f4563a0577b90.png" class="tikz-image figure-img" style="width:92.0%" width="2740" height="1116" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-循环神经网络结构示意图
+<span class="figure-number">图 17.15</span> 循环神经网络结构示意图
 </figcaption>
 </figure>
 <div id="source-alg-stacked_rnn_forward-b405f43f" class="algorithm-block">
@@ -2377,10 +2392,10 @@ S_{i,j}=\sum_{u=1}^h\sum_{v=1}^wK_{u,v}X_{i+u-1,j+v-1}
 <div id="definition-17-38" class="definition theorem-block env-definition">
 <p><strong>Definition 17.38</strong>. 称矩阵<span class="math inline">\(K=(K_{u,v})\in M_{h\times w}(\mathbb{R}^{})\)</span>为<a href="../chapters/glossary-c.html#term-ConvolutionKernel" class="term" title="convolution kernel">卷积核<span class="term-english">（convolution kernel）</span></a>。</p>
 </div>
-<figure data-latex-placement="htbp" class="figure">
-<img src="../_tikz/tikz-c4ccfa530852d212.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-17-16" class="textbook-figure figure" data-latex-placement="htbp">
+<img src="../_tikz/tikz-9f8fd9f14269f7eb8765.png" class="tikz-image figure-img" style="width:92.0%" width="2161" height="1534" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-二维离散卷积的滑动窗口与输出位置对应关系示意图
+<span class="figure-number">图 17.16</span> 二维离散卷积的滑动窗口与输出位置对应关系示意图
 </figcaption>
 </figure>
 <div id="note-17-19" class="note theorem-block env-note">
@@ -2415,10 +2430,10 @@ u=1,\dots,h,\; v=1,\dots,w \,\bigr\}
 <p><a href="../chapters/glossary-c.html#term-CNN" class="term" title="convolutional neural network">卷积神经网络<span class="term-english">（convolutional neural network）</span></a>是一类专门用于对网格结构数据进行分类的神经网络模型，在计算机视觉、医学影像分析以及模式识别等领域得到了广泛应用。其核心思想是通过局部连接、权值共享以及层级化特征学习机制，在保持参数规模可控的同时，有效建模输入数据中的空间局部相关性与层级结构信息。</p>
 <p>典型的卷积神经网络由特征提取阶段和分类阶段两部分组成。特征提取阶段由 <span class="math inline">\(L\)</span> 个堆叠的特征提取块构成，每一块通常包含卷积层、非线性激活函数以及池化层，用于逐层从原始输入中提取由低级到高级的层级化表示。卷积层通过局部加权运算提取空间局部模式，激活函数引入非线性变换，而池化层则通过降采样操作增强模型的平移不变性并降低特征分辨率。</p>
 <p>在完成多层特征抽取之后，网络进入分类阶段。该阶段首先将高维特征图展平成一维向量，并通过若干全连接层对特征进行全局整合，最终由Softmax层输出关于各类别的预测概率。</p>
-<figure data-latex-placement="t" class="figure">
-<img src="../_tikz/tikz-f1eae66fca6e3928.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-17-17" class="textbook-figure figure" data-latex-placement="t">
+<img src="../_tikz/tikz-986ee0027690fef95a99.png" class="tikz-image figure-img" style="width:92.0%" width="2625" height="2796" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-卷积神经网络结构示意图
+<span class="figure-number">图 17.17</span> 卷积神经网络结构示意图
 </figcaption>
 </figure>
 
@@ -2428,25 +2443,6 @@ u=1,\dots,h,\; v=1,\dots,w \,\bigr\}
 </section>
 
 </main> <!-- /main -->
-<script>
-(() => {
-  if (!document.querySelector(".density-plot[data-distribution]")) return;
-  const stylesheet = document.querySelector('link[rel="stylesheet"][href$="style.css"]');
-  if (!stylesheet) return;
-  const script = document.createElement("script");
-  script.src = new URL("density-loader.js", stylesheet.href).href;
-  document.head.appendChild(script);
-})();
-</script>
-<script>
-(() => {
-  const stylesheet = document.querySelector('link[rel="stylesheet"][href$="style.css"]');
-  if (!stylesheet) return;
-  const script = document.createElement("script");
-  script.src = new URL("formula-copy.js", stylesheet.href).href;
-  document.head.appendChild(script);
-})();
-</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

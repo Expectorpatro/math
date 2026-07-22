@@ -1,9 +1,9 @@
 # 全书 R 环境说明
 
-本目录只存放全书 R 环境的使用说明；实际的 `renv` 项目位于 **textbook 根目录**：
+本目录只存放全书 R 环境的使用说明；实际的 `renv` 项目位于**项目根目录**：
 
 ```text
-textbook/
+<项目根目录>/
 ├── .Rprofile
 ├── renv.lock
 └── renv/
@@ -18,7 +18,7 @@ textbook/
 ## 首次恢复
 
 1. 安装与 `renv.lock` 中记录版本兼容的 R；当前基线为 R 4.5.2。
-2. 克隆仓库后，进入 **textbook 根目录**，不要进入某个章节目录。
+2. 克隆仓库后，进入**项目根目录**，不要进入某个章节目录。
 3. 启动 R，并运行：
 
 ```r
@@ -34,7 +34,7 @@ renv::status()
 renv::project()
 ```
 
-输出应是 `.../textbook` 的绝对路径，而不是 `.../textbook/environment/r` 或某个章节目录。从子目录启动 R 时，先切换到教材根目录，或设置 `TEXTBOOK_ROOT` 为教材根目录后再加载根目录 `.Rprofile`。
+输出应是仓库根目录的绝对路径，而不是 `environment/r` 或某个章节目录。从子目录启动 R 时，先切换到项目根目录，或设置 `BOOK_PROJECT_ROOT` 为项目根目录后再加载根目录 `.Rprofile`。
 
 ## 修改 R 依赖
 

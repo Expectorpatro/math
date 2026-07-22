@@ -43,13 +43,13 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles-default">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles-alternate">
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap-default" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap-alternate" data-mode="dark">
 <link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
@@ -82,6 +82,8 @@ ul.task-list li input[type="checkbox"] {
 <script>
 (() => {
   "use strict";
+
+  document.documentElement.classList.add("js");
   try {
     const theme = window.localStorage.getItem("textbook-color-scheme");
     if (theme === "dark" || theme === "light") {
@@ -91,7 +93,7 @@ ul.task-list li input[type="checkbox"] {
       );
     }
   } catch (_error) {
-    // Storage can be unavailable; Quarto's default theme still works.
+    // Storage is optional; Quarto's configured default remains usable.
   }
 
   const mathJax = window.MathJax || {};
@@ -104,34 +106,47 @@ ul.task-list li input[type="checkbox"] {
   };
   window.MathJax = mathJax;
 
-  const loadUserInterface = () => {
-    if (document.querySelector('script[data-textbook-ui]')) return;
+  const assetBase = () => {
+    const offset = document.querySelector('meta[name="quarto:offset"]');
+    if (offset?.content) return new URL(offset.content, document.baseURI);
     const stylesheet = Array.from(
       document.querySelectorAll('link[rel="stylesheet"]')
     ).find((link) =>
       /(?:^|\/)style\.css(?:[?#]|$)/.test(link.getAttribute("href") || "")
     );
-    const base = stylesheet
-      ? new URL(stylesheet.href)
-      : new URL(window.location.href);
+    return stylesheet ? new URL(".", stylesheet.href) : new URL(".", document.baseURI);
+  };
+
+  const loadScript = (name, version, marker) => {
+    if (document.querySelector(`script[data-textbook-asset="${marker}"]`)) {
+      return;
+    }
+    const url = new URL(name, assetBase());
+    url.searchParams.set("v", version);
     const script = document.createElement("script");
-    script.dataset.textbookUi = "true";
-    const interfaceUrl = new URL("textbook-ui.js", base);
-    interfaceUrl.searchParams.set("v", "5e5306b2f80d");
-    script.src = interfaceUrl.href;
+    script.src = url.href;
     script.async = false;
+    script.dataset.textbookAsset = marker;
+    script.addEventListener("error", () => {
+      console.error(`[textbook] 无法加载前端资源：${name}`);
+    });
     document.head.appendChild(script);
   };
 
-  // Quarto emits this include before the page-specific stylesheet links.
-  // Waiting for the parsed document makes the same loader work at the site
-  // root and in nested chapter routes, including GitHub Pages subpaths.
+  const bootstrap = () => {
+    loadScript("textbook-ui.js", "5959463a9705", "ui");
+    if (document.querySelector(".display-math-copy-marker")) {
+      loadScript("formula-copy.js", "6eba2a5b3270", "formula-copy");
+    }
+    if (document.querySelector(".density-plot[data-distribution]")) {
+      loadScript("density-loader.js", "604b9c6c2cb3", "density");
+    }
+  };
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", loadUserInterface, {
-      once: true,
-    });
+    document.addEventListener("DOMContentLoaded", bootstrap, { once: true });
   } else {
-    loadUserInterface();
+    bootstrap();
   }
 })();
 </script>
@@ -170,15 +185,15 @@ window.Quarto = {
 <link rel="stylesheet" href="../sidebar.css">
 <meta property="og:title" content="附录 – 你永远不知道一个强迫症能干出什么事情">
 <meta property="og:description" content="持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，强调逻辑自洽、证明完整与持续维护。">
-<meta property="og:image" content="https://expectorpatro.github.io/math/_tikz/tikz-6d44d1153a6e8598.png">
+<meta property="og:image" content="https://expectorpatro.github.io/math/_tikz/tikz-9fa8cf418744e14d71bf.png">
 <meta property="og:site_name" content="你永远不知道一个强迫症能干出什么事情">
-<meta property="og:image:height" content="782">
-<meta property="og:image:width" content="802">
+<meta property="og:image:height" content="1873">
+<meta property="og:image:width" content="1920">
 <meta name="twitter:title" content="附录 – 你永远不知道一个强迫症能干出什么事情">
 <meta name="twitter:description" content="持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，强调逻辑自洽、证明完整与持续维护。">
-<meta name="twitter:image" content="https://expectorpatro.github.io/math/_tikz/tikz-6d44d1153a6e8598.png">
-<meta name="twitter:image-height" content="782">
-<meta name="twitter:image-width" content="802">
+<meta name="twitter:image" content="https://expectorpatro.github.io/math/_tikz/tikz-9fa8cf418744e14d71bf.png">
+<meta name="twitter:image-height" content="1873">
+<meta name="twitter:image-width" content="1920">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="textbook-repository" content="Expectorpatro/math">
 </head>
@@ -1834,10 +1849,10 @@ A=\underset{n=1}{\overset{+\infty}{\cup}}A_n
 \end{align*}\]</span></p>
 <p>即可枚举完<span class="math inline">\(A\)</span>。&nbsp;◻</p>
 </div>
-<figure data-latex-placement="h" class="figure">
-<img src="../_tikz/tikz-6d44d1153a6e8598.png" class="tikz-image figure-img" style="width:92.0%" loading="lazy" decoding="async">
+<figure id="fig-18-1" class="textbook-figure figure" data-latex-placement="h">
+<img src="../_tikz/tikz-9fa8cf418744e14d71bf.png" class="tikz-image figure-img" style="width:92.0%" width="1920" height="1873" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
-对角线枚举 <span class="math inline">ℕ × ℕ</span>：可列个可列是可列
+<span class="figure-number">图 18.1</span> 对角线枚举 <span class="math inline">ℕ × ℕ</span>：可列个可列是可列
 </figcaption>
 </figure>
 <div id="cor-QCountable-8a938451" class="corollary theorem-block env-corollary theorem">
@@ -1853,25 +1868,6 @@ A=\underset{n=1}{\overset{+\infty}{\cup}}A_n
 </section>
 
 </main> <!-- /main -->
-<script>
-(() => {
-  if (!document.querySelector(".density-plot[data-distribution]")) return;
-  const stylesheet = document.querySelector('link[rel="stylesheet"][href$="style.css"]');
-  if (!stylesheet) return;
-  const script = document.createElement("script");
-  script.src = new URL("density-loader.js", stylesheet.href).href;
-  document.head.appendChild(script);
-})();
-</script>
-<script>
-(() => {
-  const stylesheet = document.querySelector('link[rel="stylesheet"][href$="style.css"]');
-  if (!stylesheet) return;
-  const script = document.createElement("script");
-  script.src = new URL("formula-copy.js", stylesheet.href).href;
-  document.head.appendChild(script);
-})();
-</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

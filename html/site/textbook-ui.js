@@ -74,17 +74,31 @@
     button.setAttribute("aria-pressed", String(isDark));
   };
 
-  const applyTheme = (theme, button) => {
+  const setQuartoColorScheme = (theme) => {
     const wantsDark = theme === "dark";
-    const isDark = currentTheme() === "dark";
-    if (wantsDark !== isDark && typeof window.quartoToggleColorScheme === "function") {
-      writeStorage(
-        window.localStorage,
-        KEYS.quartoTheme,
-        wantsDark ? "default" : "alternate"
-      );
-      window.quartoToggleColorScheme();
-    }
+    const alternateSheets = document.querySelectorAll(
+      "link.quarto-color-scheme.quarto-color-alternate"
+    );
+    const primarySheets = document.querySelectorAll(
+      "link.quarto-color-scheme:not(.quarto-color-alternate)"
+    );
+
+    alternateSheets.forEach((sheet) => {
+      sheet.rel = wantsDark ? "stylesheet" : "disabled-stylesheet";
+    });
+    primarySheets.forEach((sheet) => {
+      sheet.rel = "stylesheet";
+    });
+    document.body.classList.toggle("quarto-dark", wantsDark);
+    document.body.classList.toggle("quarto-light", !wantsDark);
+    document.querySelectorAll(".quarto-color-scheme-toggle").forEach((toggle) => {
+      toggle.classList.toggle("alternate", wantsDark);
+    });
+    window.dispatchEvent(new Event("resize"));
+  };
+
+  const applyTheme = (theme, button) => {
+    setQuartoColorScheme(theme);
     writeTheme(theme);
     updateThemeButton(button);
   };
@@ -170,6 +184,21 @@
     window.addEventListener("resize", requestUpdate);
     backToTop.addEventListener("click", () => {
       window.scrollTo({ top: 0, behavior: reduceMotion.matches ? "auto" : "smooth" });
+      const focusTarget = main.querySelector("h1") || main;
+      const hadTabIndex = focusTarget.hasAttribute("tabindex");
+      if (!hadTabIndex) focusTarget.tabIndex = -1;
+      try {
+        focusTarget.focus({ preventScroll: true });
+      } catch (_error) {
+        focusTarget.focus();
+      }
+      if (!hadTabIndex) {
+        focusTarget.addEventListener(
+          "blur",
+          () => focusTarget.removeAttribute("tabindex"),
+          { once: true },
+        );
+      }
     });
     update();
   };
@@ -188,42 +217,92 @@
       sidebarTitle.insertBefore(mark, titleLink);
     }
 
+    const scrollRegions = new Map();
+    const registerScrollRegion = (region, label) => {
+      if (scrollRegions.has(region)) return;
+      scrollRegions.set(region, {
+        label,
+        role: region.getAttribute("role"),
+        ariaLabel: region.getAttribute("aria-label"),
+        tabIndex: region.getAttribute("tabindex"),
+      });
+    };
+
     document.querySelectorAll("main.content table").forEach((table) => {
       if (table.classList.contains("dataframe")) polishDataframe(table);
       const notationWrapper = table.closest(".notation-table-wrap");
       if (notationWrapper) {
-        notationWrapper.setAttribute("role", "region");
-        notationWrapper.setAttribute("aria-label", "可横向滚动的符号说明表");
-        notationWrapper.tabIndex = 0;
+        registerScrollRegion(notationWrapper, "可横向滚动的符号说明表");
         return;
       }
       if (table.classList.contains("notation-table")) {
         const wrapper = document.createElement("div");
         wrapper.className = "notation-table-wrap";
-        wrapper.setAttribute("role", "region");
-        wrapper.setAttribute("aria-label", "可横向滚动的符号说明表");
-        wrapper.tabIndex = 0;
         table.parentNode.insertBefore(wrapper, table);
         wrapper.appendChild(table);
+        registerScrollRegion(wrapper, "可横向滚动的符号说明表");
         return;
       }
-      if (table.parentElement?.classList.contains("textbook-table-scroll")) return;
-      const wrapper = document.createElement("div");
-      wrapper.className = "textbook-table-scroll";
-      if (table.classList.contains("textbook-dataframe")) {
-        wrapper.classList.add("textbook-dataframe-scroll");
+      let wrapper = table.parentElement?.classList.contains("textbook-table-scroll")
+        ? table.parentElement
+        : null;
+      if (!wrapper) {
+        wrapper = document.createElement("div");
+        wrapper.className = "textbook-table-scroll";
+        if (table.classList.contains("textbook-dataframe")) {
+          wrapper.classList.add("textbook-dataframe-scroll");
+        }
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
       }
-      wrapper.setAttribute("role", "region");
-      wrapper.setAttribute(
-        "aria-label",
+      registerScrollRegion(
+        wrapper,
         table.classList.contains("textbook-dataframe")
           ? "可横向滚动的 Python 数据表格"
-          : "可横向滚动的数据表格"
+          : "可横向滚动的数据表格",
       );
-      wrapper.tabIndex = 0;
-      table.parentNode.insertBefore(wrapper, table);
-      wrapper.appendChild(table);
     });
+
+    let scrollRegionFrame = 0;
+    const restoreAttribute = (element, name, value) => {
+      if (value === null) element.removeAttribute(name);
+      else element.setAttribute(name, value);
+    };
+    const updateScrollRegions = () => {
+      scrollRegionFrame = 0;
+      scrollRegions.forEach((original, region) => {
+        const isScrollable = region.scrollWidth > region.clientWidth + 1;
+        if (isScrollable) {
+          region.setAttribute("role", "region");
+          region.setAttribute("aria-label", original.label);
+          region.tabIndex = 0;
+        } else {
+          restoreAttribute(region, "role", original.role);
+          restoreAttribute(region, "aria-label", original.ariaLabel);
+          restoreAttribute(region, "tabindex", original.tabIndex);
+        }
+      });
+    };
+    const scheduleScrollRegionUpdate = () => {
+      if (scrollRegionFrame) return;
+      scrollRegionFrame = window.requestAnimationFrame(updateScrollRegions);
+    };
+    if (scrollRegions.size) {
+      if ("ResizeObserver" in window) {
+        const observer = new ResizeObserver(scheduleScrollRegionUpdate);
+        scrollRegions.forEach((_original, region) => {
+          observer.observe(region);
+          if (region.firstElementChild) observer.observe(region.firstElementChild);
+        });
+      } else {
+        window.addEventListener("resize", scheduleScrollRegionUpdate, { passive: true });
+      }
+      const mathReady = window.MathJax?.startup?.promise;
+      if (mathReady && typeof mathReady.then === "function") {
+        mathReady.then(scheduleScrollRegionUpdate, scheduleScrollRegionUpdate);
+      }
+      scheduleScrollRegionUpdate();
+    }
 
     const searchInput = document.querySelector("#quarto-sidebar .aa-Input");
     if (searchInput && !searchInput.getAttribute("placeholder")) {
@@ -396,34 +475,44 @@
   const mountProofFolding = () => {
     const originals = Array.from(document.querySelectorAll("main.content .proof-block"));
     if (!originals.length) return;
-    const states = readJSON(window.sessionStorage, proofStorageKey(), {});
+    const storedStates = readJSON(window.sessionStorage, proofStorageKey(), {});
+    const states = storedStates && typeof storedStates === "object" ? storedStates : {};
     const proofs = originals.map((original, index) => {
-      if (original instanceof HTMLDetailsElement) return original;
-      const details = document.createElement("details");
-      Array.from(original.attributes).forEach((attribute) => {
-        details.setAttribute(attribute.name, attribute.value);
-      });
+      let details = original;
+      if (!(original instanceof HTMLDetailsElement)) {
+        details = document.createElement("details");
+        Array.from(original.attributes).forEach((attribute) => {
+          details.setAttribute(attribute.name, attribute.value);
+        });
+
+        const summary = document.createElement("summary");
+        summary.className = "proof-summary";
+        summary.innerHTML =
+          '<span><i class="bi bi-chevron-right" aria-hidden="true"></i>证明</span>' +
+          '<small>点击折叠</small>';
+        const content = document.createElement("div");
+        content.className = "proof-content";
+        while (original.firstChild) content.appendChild(original.firstChild);
+        details.append(summary, content);
+        details.open = true;
+        original.replaceWith(details);
+      }
       details.classList.add("proof-block", "proof-collapsible");
       if (!details.id) details.id = `proof-client-${index + 1}`;
-
-      const summary = document.createElement("summary");
-      summary.className = "proof-summary";
-      summary.innerHTML =
-        '<span><i class="bi bi-chevron-right" aria-hidden="true"></i>证明</span>' +
-        '<small>点击折叠</small>';
-      const content = document.createElement("div");
-      content.className = "proof-content";
-      while (original.firstChild) content.appendChild(original.firstChild);
-      details.append(summary, content);
-      details.open = states[details.id] !== false;
-      summary.querySelector("small").textContent = details.open ? "点击折叠" : "点击展开";
+      const summary = details.querySelector(":scope > summary");
+      const hint = summary?.querySelector("small");
+      if (Object.prototype.hasOwnProperty.call(states, details.id)) {
+        details.open = Boolean(states[details.id]);
+      }
+      if (hint) hint.textContent = details.open ? "点击折叠" : "点击展开";
       details.addEventListener("toggle", () => {
-        const latest = readJSON(window.sessionStorage, proofStorageKey(), {});
+        const storedLatest = readJSON(window.sessionStorage, proofStorageKey(), {});
+        const latest =
+          storedLatest && typeof storedLatest === "object" ? storedLatest : {};
         latest[details.id] = details.open;
         writeStorage(window.sessionStorage, proofStorageKey(), JSON.stringify(latest));
-        summary.querySelector("small").textContent = details.open ? "点击折叠" : "点击展开";
+        if (hint) hint.textContent = details.open ? "点击折叠" : "点击展开";
       });
-      original.replaceWith(details);
       return details;
     });
 
@@ -676,45 +765,75 @@
     const main = document.querySelector("main.content");
     if (!main) return;
 
-    let frame = 0;
-    const resetManagedFormula = (formula) => {
-      formula.classList.remove("math-inline-overflow");
-      formula.style.removeProperty("--math-inline-available-width");
-      if (formula.dataset.mathOverflowManaged === "true") {
-        formula.removeAttribute("tabindex");
-        formula.removeAttribute("aria-label");
-        delete formula.dataset.mathOverflowManaged;
-      }
+    const hintIdentifier = "textbook-math-overflow-hint";
+    if (!document.getElementById(hintIdentifier)) {
+      const hint = document.createElement("span");
+      hint.id = hintIdentifier;
+      hint.hidden = true;
+      hint.textContent = "此公式可横向滚动以查看完整内容。";
+      main.appendChild(hint);
+    }
+    const addDescription = (formula) => {
+      const identifiers = new Set(
+        (formula.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean),
+      );
+      identifiers.add(hintIdentifier);
+      formula.setAttribute("aria-describedby", Array.from(identifiers).join(" "));
     };
+    const removeDescription = (formula) => {
+      const identifiers = (formula.getAttribute("aria-describedby") || "")
+        .split(/\s+/)
+        .filter((identifier) => identifier && identifier !== hintIdentifier);
+      if (identifiers.length) formula.setAttribute("aria-describedby", identifiers.join(" "));
+      else formula.removeAttribute("aria-describedby");
+    };
+    let frame = 0;
     const measure = () => {
+      frame = 0;
       const formulas = [...main.querySelectorAll("span.math.inline")];
-      formulas.forEach(resetManagedFormula);
-      window.requestAnimationFrame(() => {
-        formulas.forEach((formula) => {
-          const container =
-            formula.closest("p, li, dd, dt, figcaption, .theorem-block, .proof-block") ||
-            main;
-          const formulaRect = formula.getBoundingClientRect();
-          const containerRect = container.getBoundingClientRect();
-          const containerStyle = window.getComputedStyle(container);
-          const paddingRight = Number.parseFloat(containerStyle.paddingRight) || 0;
-          const contentRight = containerRect.right - paddingRight;
-          const availableWidth = Math.max(contentRight - formulaRect.left, 96);
-          if (
-            formulaRect.width <= availableWidth + 1 &&
-            formulaRect.right <= contentRight + 1
-          ) {
-            return;
-          }
+      const measurements = formulas.map((formula) => {
+        const container =
+          formula.closest("p, li, dd, dt, figcaption, .theorem-block, .proof-block") ||
+          main;
+        const formulaRect = formula.getBoundingClientRect();
+        const mathRect = formula.querySelector("mjx-container")?.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const containerStyle = window.getComputedStyle(container);
+        const paddingRight = Number.parseFloat(containerStyle.paddingRight) || 0;
+        const contentRight = containerRect.right - paddingRight;
+        const availableWidth = Math.max(contentRight - formulaRect.left, 96);
+        const intrinsicWidth = Math.max(
+          formulaRect.width,
+          mathRect?.width || 0,
+          formula.scrollWidth || 0,
+        );
+        return {
+          formula,
+          availableWidth,
+          overflows: intrinsicWidth > availableWidth + 1,
+        };
+      });
+      measurements.forEach(({ formula, availableWidth, overflows }) => {
+        if (overflows) {
           formula.classList.add("math-inline-overflow");
           formula.style.setProperty(
             "--math-inline-available-width",
             `${Math.floor(availableWidth)}px`
           );
-          formula.tabIndex = 0;
-          formula.setAttribute("aria-label", "横向滚动查看完整公式");
-          formula.dataset.mathOverflowManaged = "true";
-        });
+          if (!formula.hasAttribute("tabindex")) {
+            formula.tabIndex = 0;
+            formula.dataset.mathOverflowTabindex = "true";
+          }
+          addDescription(formula);
+          return;
+        }
+        formula.classList.remove("math-inline-overflow");
+        formula.style.removeProperty("--math-inline-available-width");
+        if (formula.dataset.mathOverflowTabindex === "true") {
+          formula.removeAttribute("tabindex");
+          delete formula.dataset.mathOverflowTabindex;
+        }
+        removeDescription(formula);
       });
     };
     const schedule = () => {
@@ -726,18 +845,24 @@
     if (mathReady && typeof mathReady.then === "function") {
       mathReady.then(schedule, schedule);
     } else {
-      let attempts = 0;
-      const waitForMath = () => {
-        attempts += 1;
-        if (main.querySelector("span.math.inline mjx-container") || attempts >= 20) {
-          schedule();
-          return;
-        }
-        window.setTimeout(waitForMath, 100);
-      };
-      waitForMath();
+      const observer = new MutationObserver(() => {
+        if (!main.querySelector("span.math.inline mjx-container")) return;
+        observer.disconnect();
+        schedule();
+      });
+      observer.observe(main, { childList: true, subtree: true });
+      window.setTimeout(() => {
+        observer.disconnect();
+        schedule();
+      }, 2000);
     }
-    window.addEventListener("resize", schedule, { passive: true });
+    if ("ResizeObserver" in window) {
+      const observer = new ResizeObserver(schedule);
+      observer.observe(main);
+    } else {
+      window.addEventListener("resize", schedule, { passive: true });
+    }
+    if (document.fonts?.ready) document.fonts.ready.then(schedule, schedule);
   };
 
   const mountIssueLink = () => {
@@ -827,16 +952,25 @@
   };
 
   const mount = () => {
-    polishDocument();
-    mountThemeToggle();
-    mountChapterProgressDock();
-    mountTocContext();
-    mountReadingTools();
-    mountProofFolding();
-    mountReferenceInteractions();
-    mountMathOverflow();
-    mountIssueLink();
-    mountRecentCommits();
+    const initializers = [
+      ["页面排版", polishDocument],
+      ["主题切换", mountThemeToggle],
+      ["章节进度", mountChapterProgressDock],
+      ["页内目录", mountTocContext],
+      ["阅读工具", mountReadingTools],
+      ["证明折叠", mountProofFolding],
+      ["交叉引用", mountReferenceInteractions],
+      ["公式溢出", mountMathOverflow],
+      ["问题反馈", mountIssueLink],
+      ["最近提交", mountRecentCommits],
+    ];
+    initializers.forEach(([name, initialize]) => {
+      try {
+        initialize();
+      } catch (error) {
+        console.error(`[textbook] ${name}初始化失败`, error);
+      }
+    });
 
     window.addEventListener("pagehide", saveReadingPosition);
     document.addEventListener("visibilitychange", () => {

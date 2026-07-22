@@ -1,6 +1,6 @@
 # 全书 Python 环境
 
-本目录使用 UV 管理整个 textbook 的 Python 环境。只维护三份项目文件：
+本目录使用 UV 管理整个项目的 Python 环境。只维护三份项目文件：
 
 - `.python-version`：固定 Python 解释器版本为 3.12.13；
 - `pyproject.toml`：人手维护的直接依赖；
@@ -22,7 +22,7 @@ uv sync --project environment/python --locked
 
 renv 通过 R 启动时读取 `.Rprofile` 改写 R 的包库路径；UV 则不默认激活 shell，而是在每次 `uv run` 时自动定位、检查并使用本项目的 `.venv`。因此，对脚本、Jupyter 和渲染命令，优先使用 `uv run --project environment/python --locked ...`。`--project`指定全书 Python 项目，同时保留教材根目录为当前工作目录，使计算实验中的相对路径仍从教材根目录解析。
 
-如果确实希望进入 textbook 目录时把 `.venv` 自动放到 shell 的 `PATH`，可自行安装direnv，并在教材根目录创建 `.envrc`：
+如果确实希望进入项目根目录时把 `.venv` 自动放到 shell 的 `PATH`，可自行安装direnv，并在教材根目录创建 `.envrc`：
 
 ```bash
 export VIRTUAL_ENV="$PWD/environment/python/.venv"

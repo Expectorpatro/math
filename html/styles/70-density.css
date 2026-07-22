@@ -1,0 +1,399 @@
+/* Interactive probability density plots */
+.density-plot {
+  --density-curve: #405f9d;
+  --density-area: rgb(64 95 157 / 9%);
+  --density-grid: #e8ebf0;
+  --density-axis: #596274;
+  margin: 1.8rem 0 2.2rem;
+  padding: 1.15rem;
+  border: 1px solid var(--book-border-strong);
+  border-left: 3px solid var(--book-primary);
+  border-radius: var(--book-radius);
+  background: var(--book-surface);
+}
+
+.density-plot:not([data-density-ready="true"]) {
+  min-height: 8rem;
+}
+
+.density-plot:not([data-density-ready="true"])::before {
+  display: grid;
+  min-height: 5.5rem;
+  place-items: center;
+  color: var(--book-muted);
+  content: "交互图将在滚动到附近时加载";
+  font-size: 0.85rem;
+}
+
+.density-plot--load-error {
+  color: #b42318;
+}
+
+.density-plot__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+  color: var(--book-ink);
+}
+
+.density-plot__heading strong {
+  font-family: var(--book-serif);
+  font-size: 1.08rem;
+  letter-spacing: 0;
+}
+
+.density-plot__heading-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.density-plot__fixed-scale {
+  padding: 0.18rem 0.5rem;
+  border: 1px solid #d9dfeb;
+  border-radius: 999px;
+  background: #f2f5fa;
+  color: var(--book-primary-deep);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+}
+
+.density-plot__action,
+.density-plot__reset,
+.density-plot__mode {
+  padding: 0.42rem 0.72rem;
+  border: 1px solid var(--book-border-strong);
+  border-radius: var(--book-radius-sm);
+  background: var(--book-surface);
+  color: var(--book-ink-soft);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.density-plot__action:hover,
+.density-plot__action:focus-visible,
+.density-plot__reset:hover,
+.density-plot__reset:focus-visible,
+.density-plot__mode:hover,
+.density-plot__mode:focus-visible {
+  border-color: var(--book-primary);
+  color: var(--book-primary-deep);
+}
+
+.density-plot__action[aria-pressed="true"] {
+  border-color: var(--book-primary);
+  background: var(--book-primary-soft);
+  color: var(--book-primary-deep);
+}
+
+.density-plot__action:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+
+.density-plot__controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.8rem 1.2rem;
+  margin-bottom: 1rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--book-border);
+  border-radius: var(--book-radius-sm);
+  background: #f8f9fb;
+}
+
+.density-plot__control {
+  display: grid;
+  grid-template-columns: 2.3rem minmax(7rem, 1fr) 5.2rem;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.density-plot__control label {
+  margin: 0;
+  color: var(--book-ink);
+  font-family: "Times New Roman", serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.density-plot__control input[type="range"] {
+  width: 100%;
+  accent-color: var(--book-primary);
+}
+
+.density-plot__control input[type="number"] {
+  width: 100%;
+  min-width: 0;
+  padding: 0.34rem 0.4rem;
+  border: 1px solid var(--book-border-strong);
+  border-radius: 0.45rem;
+  background: var(--book-surface);
+  color: var(--book-ink);
+  font: inherit;
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.density-plot__control input:focus-visible {
+  outline: 2px solid var(--book-primary-glow);
+  outline-offset: 2px;
+}
+
+.density-plot__interval-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: -0.25rem 0 0.9rem;
+  color: var(--book-ink-soft);
+  font-size: 0.86rem;
+}
+
+.density-plot__interval-controls>span:first-child {
+  margin-right: 0.15rem;
+  color: var(--book-ink);
+  font-weight: 700;
+}
+
+.density-plot__interval-controls input {
+  width: 6.25rem;
+  padding: 0.34rem 0.45rem;
+  border: 1px solid var(--book-border-strong);
+  border-radius: 0.45rem;
+  background: var(--book-surface);
+  color: var(--book-ink);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.density-plot__interval-controls input:focus-visible {
+  border-color: var(--book-primary);
+  outline: 2px solid var(--book-primary-glow);
+  outline-offset: 1px;
+}
+
+.density-plot__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.7rem;
+}
+
+.density-plot__summary span {
+  padding: 0.22rem 0.52rem;
+  border: 1px solid var(--book-border);
+  border-radius: 999px;
+  background: var(--book-surface-soft);
+  color: var(--book-ink-soft);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.density-plot__summary strong {
+  margin-right: 0.3rem;
+  color: var(--book-ink);
+}
+
+.density-plot__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.8rem;
+  min-height: 1.3rem;
+  margin-bottom: 0.5rem;
+  color: var(--book-muted);
+  font-size: 0.75rem;
+}
+
+.density-plot__legend-item::before {
+  display: inline-block;
+  width: 1.25rem;
+  margin-right: 0.35rem;
+  border-top: 2px solid var(--density-curve);
+  content: "";
+  vertical-align: middle;
+}
+
+.density-plot__legend-item--1::before {
+  border-color: #c26b4a;
+}
+
+.density-plot__legend-item--2::before {
+  border-color: #65945f;
+}
+
+.density-plot__legend-item--3::before {
+  border-color: #8c65ad;
+}
+
+.density-plot__chart {
+  overflow: hidden;
+  border: 1px solid #dfe3e9;
+  border-radius: var(--book-radius-sm);
+  background: #fff;
+}
+
+.density-plot__chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 17rem;
+  max-height: 27rem;
+  cursor: crosshair;
+}
+
+.density-plot__grid line {
+  stroke: var(--density-grid);
+  stroke-dasharray: 3 4;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.density-plot__grid text,
+.density-plot__axes text {
+  fill: var(--book-muted);
+  font-family: var(--book-mono);
+  font-size: 12px;
+}
+
+.density-plot__axes line {
+  stroke: var(--density-axis);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+
+.density-plot__area {
+  fill: var(--density-area);
+}
+
+.density-plot__interval-band {
+  fill: rgb(206 159 65 / 7%);
+}
+
+.density-plot__interval-area {
+  fill: rgb(206 159 65 / 28%);
+}
+
+.density-plot__interval-boundary {
+  stroke: #b48228;
+  stroke-dasharray: 5 4;
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.density-plot__curve {
+  fill: none;
+  stroke: var(--density-curve);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.6;
+  vector-effect: non-scaling-stroke;
+}
+
+.density-plot__curve--comparison {
+  stroke: var(--comparison-color);
+  stroke-dasharray: 7 4;
+  stroke-width: 2.1;
+}
+
+.density-plot__probe {
+  pointer-events: none;
+}
+
+.density-plot__probe-line {
+  stroke: var(--book-muted);
+  stroke-dasharray: 3 3;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.density-plot__probe-point {
+  fill: var(--book-surface);
+  stroke: var(--density-curve);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.density-plot__probe-label-bg {
+  fill: rgb(255 255 255 / 94%);
+  stroke: var(--book-border-strong);
+  stroke-width: 1;
+}
+
+.density-plot__probe-label {
+  fill: var(--book-ink);
+  font-family: var(--book-mono);
+  font-size: 11px;
+}
+
+.density-plot__status {
+  margin-top: 0.7rem;
+  color: var(--book-ink);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.density-plot__status--error {
+  color: #b42318;
+}
+
+.density-plot__note {
+  min-height: 1.25rem;
+  margin-top: 0.2rem;
+  color: var(--book-muted);
+  font-size: 0.8rem;
+}
+
+.quarto-dark .density-plot {
+  --density-curve: #9bafe7;
+  --density-area: rgb(155 175 231 / 12%);
+  --density-grid: #3a4050;
+  --density-axis: #aab2c2;
+  background: var(--book-surface);
+}
+
+.quarto-dark .density-plot__controls,
+.quarto-dark .density-plot__fixed-scale,
+.quarto-dark .density-plot__summary span {
+  border-color: var(--book-border);
+  background: var(--book-surface-soft);
+}
+
+.quarto-dark .density-plot__action,
+.quarto-dark .density-plot__reset,
+.quarto-dark .density-plot__mode,
+.quarto-dark .density-plot__interval-controls input {
+  background: var(--book-surface-soft);
+}
+
+.quarto-dark .density-plot__interval-band {
+  fill: rgb(231 183 87 / 9%);
+}
+
+.quarto-dark .density-plot__interval-area {
+  fill: rgb(231 183 87 / 25%);
+}
+
+.quarto-dark .density-plot__fixed-scale {
+  color: #b8c7ed;
+}
+
+.quarto-dark .density-plot__chart {
+  border-color: var(--book-border);
+  background: #171a21;
+}
+
+.quarto-dark .density-plot__probe-label-bg {
+  fill: rgb(23 26 33 / 95%);
+}
+
+.quarto-dark .density-plot__status--error {
+  color: #ff9b8f;
+}

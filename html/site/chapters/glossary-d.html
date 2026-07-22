@@ -43,13 +43,13 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles-default">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles-alternate">
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap-default" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-1b3b3409dac8b15266d113397a463096.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap-alternate" data-mode="dark">
 <link href="../site_libs/bootstrap/bootstrap-8528b9edbf764372803be2dc67fc20f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
@@ -82,6 +82,8 @@ ul.task-list li input[type="checkbox"] {
 <script>
 (() => {
   "use strict";
+
+  document.documentElement.classList.add("js");
   try {
     const theme = window.localStorage.getItem("textbook-color-scheme");
     if (theme === "dark" || theme === "light") {
@@ -91,7 +93,7 @@ ul.task-list li input[type="checkbox"] {
       );
     }
   } catch (_error) {
-    // Storage can be unavailable; Quarto's default theme still works.
+    // Storage is optional; Quarto's configured default remains usable.
   }
 
   const mathJax = window.MathJax || {};
@@ -104,34 +106,47 @@ ul.task-list li input[type="checkbox"] {
   };
   window.MathJax = mathJax;
 
-  const loadUserInterface = () => {
-    if (document.querySelector('script[data-textbook-ui]')) return;
+  const assetBase = () => {
+    const offset = document.querySelector('meta[name="quarto:offset"]');
+    if (offset?.content) return new URL(offset.content, document.baseURI);
     const stylesheet = Array.from(
       document.querySelectorAll('link[rel="stylesheet"]')
     ).find((link) =>
       /(?:^|\/)style\.css(?:[?#]|$)/.test(link.getAttribute("href") || "")
     );
-    const base = stylesheet
-      ? new URL(stylesheet.href)
-      : new URL(window.location.href);
+    return stylesheet ? new URL(".", stylesheet.href) : new URL(".", document.baseURI);
+  };
+
+  const loadScript = (name, version, marker) => {
+    if (document.querySelector(`script[data-textbook-asset="${marker}"]`)) {
+      return;
+    }
+    const url = new URL(name, assetBase());
+    url.searchParams.set("v", version);
     const script = document.createElement("script");
-    script.dataset.textbookUi = "true";
-    const interfaceUrl = new URL("textbook-ui.js", base);
-    interfaceUrl.searchParams.set("v", "5e5306b2f80d");
-    script.src = interfaceUrl.href;
+    script.src = url.href;
     script.async = false;
+    script.dataset.textbookAsset = marker;
+    script.addEventListener("error", () => {
+      console.error(`[textbook] 无法加载前端资源：${name}`);
+    });
     document.head.appendChild(script);
   };
 
-  // Quarto emits this include before the page-specific stylesheet links.
-  // Waiting for the parsed document makes the same loader work at the site
-  // root and in nested chapter routes, including GitHub Pages subpaths.
+  const bootstrap = () => {
+    loadScript("textbook-ui.js", "5959463a9705", "ui");
+    if (document.querySelector(".display-math-copy-marker")) {
+      loadScript("formula-copy.js", "6eba2a5b3270", "formula-copy");
+    }
+    if (document.querySelector(".density-plot[data-distribution]")) {
+      loadScript("density-loader.js", "604b9c6c2cb3", "density");
+    }
+  };
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", loadUserInterface, {
-      once: true,
-    });
+    document.addEventListener("DOMContentLoaded", bootstrap, { once: true });
   } else {
-    loadUserInterface();
+    bootstrap();
   }
 })();
 </script>
@@ -928,25 +943,6 @@ ul.task-list li input[type="checkbox"] {
 
 
 </main> <!-- /main -->
-<script>
-(() => {
-  if (!document.querySelector(".density-plot[data-distribution]")) return;
-  const stylesheet = document.querySelector('link[rel="stylesheet"][href$="style.css"]');
-  if (!stylesheet) return;
-  const script = document.createElement("script");
-  script.src = new URL("density-loader.js", stylesheet.href).href;
-  document.head.appendChild(script);
-})();
-</script>
-<script>
-(() => {
-  const stylesheet = document.querySelector('link[rel="stylesheet"][href$="style.css"]');
-  if (!stylesheet) return;
-  const script = document.createElement("script");
-  script.src = new URL("formula-copy.js", stylesheet.href).href;
-  document.head.appendChild(script);
-})();
-</script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

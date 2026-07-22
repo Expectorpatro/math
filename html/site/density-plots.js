@@ -2,6 +2,11 @@
   "use strict";
 
   const SVG_NS = "http://www.w3.org/2000/svg";
+  const densityMath = globalThis.TextbookDensityMath;
+  if (!densityMath) {
+    console.error("[textbook] 密度图依赖 TextbookDensityMath 未加载");
+    return;
+  }
   const {
     SQRT_TWO_PI,
     clampProbability,
@@ -13,7 +18,7 @@
     normalCDF,
     regularizedBeta,
     regularizedGammaP,
-  } = globalThis.TextbookDensityMath;
+  } = densityMath;
   let chartCounter = 0;
 
   const distributions = {
@@ -239,6 +244,10 @@
     return Number(value.toFixed(4)).toString();
   }
 
+  function updateText(element, value) {
+    if (element.textContent !== value) element.textContent = value;
+  }
+
   function svgElement(name, attributes = {}, text = "") {
     const element = document.createElementNS(SVG_NS, name);
     for (const [key, value] of Object.entries(attributes)) {
@@ -251,9 +260,22 @@
   function valuesFromInputs(inputs) {
     const values = {};
     for (const [key, input] of inputs.entries()) {
-      values[key] = Number(input.value);
+      values[key] = input.value.trim() === "" ? Number.NaN : Number(input.value);
     }
     return values;
+  }
+
+  function clampParameter(value, parameter) {
+    return Math.min(Math.max(value, parameter.min), parameter.max);
+  }
+
+  function syncParameterInputs(parameter, number, range, commit = false) {
+    if (number.value === "") return;
+    const value = Number(number.value);
+    if (!Number.isFinite(value)) return;
+    const clamped = clampParameter(value, parameter);
+    if (commit && clamped !== value) number.value = String(clamped);
+    range.value = String(clamped);
   }
 
   function curvePath(points) {
@@ -266,9 +288,13 @@
   }
 
   function drawCurve(svg, specification, parameters, options) {
-    const width = 760;
-    const height = 420;
-    const margin = { top: 24, right: 24, bottom: 58, left: 72 };
+    const viewportWidth = Number(options.viewportWidth) || 760;
+    const compact = viewportWidth < 560;
+    const width = compact ? Math.max(420, Math.round(viewportWidth)) : 760;
+    const height = compact ? Math.max(340, Math.round(width * 0.72)) : 420;
+    const margin = compact
+      ? { top: 20, right: 14, bottom: 54, left: 56 }
+      : { top: 24, right: 24, bottom: 58, left: 72 };
     const plotWidth = width - margin.left - margin.right;
     const plotHeight = height - margin.top - margin.bottom;
     const allParameterSets = [
@@ -321,16 +347,45 @@
       yMaximum = Math.max(...finiteValues) * 1.08;
       if (!Number.isFinite(yMaximum) || yMaximum <= 0) yMaximum = 1;
     }
-    const clipped = points.some(
+    const allPoints = [
+      ...sampledComparisons.flatMap((item) => item.points),
+      ...points,
+    ];
+    const intervalMinimum = Math.min(options.interval[0], options.interval[1]);
+    const intervalMaximum = Math.max(options.interval[0], options.interval[1]);
+    const clipped = allPoints.some(
       ({ y }) => !Number.isFinite(y) || y < yMinimum || y > yMaximum,
+    ) || (
+      options.mode === "density" &&
+      (intervalMinimum < xMinimum || intervalMaximum > xMaximum)
     );
 
     svg.replaceChildren();
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    const renderedScale = Math.min(viewportWidth / width, 1);
+    svg.style.minHeight = compact
+      ? `${Math.max(220, Math.round(height * renderedScale))}px`
+      : "";
     const modeLabel = options.mode === "cdf" ? "分布函数" : "密度函数";
-    svg.appendChild(svgElement("title", {}, `${specification.title}${modeLabel}曲线`));
+    const titleIdentifier = `density-plot-title-${options.chartIdentifier}`;
+    const descriptionIdentifier = `density-plot-description-${options.chartIdentifier}`;
+    svg.setAttribute("aria-labelledby", `${titleIdentifier} ${descriptionIdentifier}`);
+    svg.append(
+      svgElement(
+        "title",
+        { id: titleIdentifier },
+        `${specification.title}${modeLabel}曲线`,
+      ),
+      svgElement(
+        "desc",
+        { id: descriptionIdentifier },
+        `横轴从 ${formatValue(xMinimum)} 到 ${formatValue(xMaximum)}，` +
+          `纵轴从 ${formatValue(yMinimum)} 到 ${formatValue(yMaximum)}` +
+          (clipped ? "；观察窗外的曲线或概率区间已裁切。" : "。"),
+      ),
+    );
 
-    const clipIdentifier = `density-plot-clip-${chartCounter}`;
+    const clipIdentifier = `density-plot-clip-${options.chartIdentifier}`;
     const definitions = svgElement("defs");
     const clipPath = svgElement("clipPath", { id: clipIdentifier });
     clipPath.appendChild(
@@ -353,8 +408,9 @@
         plotHeight;
 
     const grid = svgElement("g", { class: "density-plot__grid" });
-    for (let tick = 0; tick <= 5; tick += 1) {
-      const x = margin.left + (tick / 5) * plotWidth;
+    const xTickCount = compact ? 4 : 5;
+    for (let tick = 0; tick <= xTickCount; tick += 1) {
+      const x = margin.left + (tick / xTickCount) * plotWidth;
       grid.appendChild(
         svgElement("line", {
           x1: x,
@@ -367,7 +423,7 @@
         svgElement(
           "text",
           { x, y: margin.top + plotHeight + 25, "text-anchor": "middle" },
-          formatValue(xMinimum + (tick / 5) * span),
+          formatValue(xMinimum + (tick / xTickCount) * span),
         ),
       );
     }
@@ -430,8 +486,6 @@
     svg.appendChild(axes);
 
     const curves = svgElement("g", { "clip-path": `url(#${clipIdentifier})` });
-    const intervalMinimum = Math.min(options.interval[0], options.interval[1]);
-    const intervalMaximum = Math.max(options.interval[0], options.interval[1]);
     if (options.mode === "density") {
       const visibleIntervalMinimum = Math.max(xMinimum, intervalMinimum);
       const visibleIntervalMaximum = Math.min(xMaximum, intervalMaximum);
@@ -516,12 +570,20 @@
       });
     }
     svg.appendChild(curves);
-    globalThis.TextbookDensityProbe.install(svg, {
-      evaluate: (x) => evaluator(x, parameters),
-      mode: options.mode,
-      x: [xMinimum, xMaximum],
-      y: [yMinimum, yMaximum],
-    });
+    svg.onpointermove = null;
+    svg.onpointerleave = null;
+    if (!compact && typeof globalThis.TextbookDensityProbe?.install === "function") {
+      try {
+        globalThis.TextbookDensityProbe.install(svg, {
+          evaluate: (x) => evaluator(x, parameters),
+          mode: options.mode,
+          x: [xMinimum, xMaximum],
+          y: [yMinimum, yMaximum],
+        });
+      } catch (error) {
+        console.error("[textbook] 密度图探针初始化失败", error);
+      }
+    }
 
     return {
       clipped,
@@ -548,12 +610,14 @@
   function initializePlot(container) {
     const name = container.dataset.distribution;
     const specification = distributions[name];
-    if (!specification) return;
-    chartCounter += 1;
+    if (!specification || container.dataset.densityInitialized === "true") return;
+    container.dataset.densityInitialized = "true";
+    const chartIdentifier = ++chartCounter;
 
     const heading = document.createElement("div");
     heading.className = "density-plot__heading";
     const title = document.createElement("strong");
+    title.id = `density-plot-heading-${chartIdentifier}`;
     const headingActions = document.createElement("div");
     headingActions.className = "density-plot__heading-actions";
     const mode = document.createElement("select");
@@ -577,17 +641,19 @@
     for (const parameter of specification.parameters) {
       const group = document.createElement("div");
       group.className = "density-plot__control";
-      const identifier = `density-${name}-${chartCounter}-${parameter.key}`;
+      const identifier = `density-${name}-${chartIdentifier}-${parameter.key}`;
       const label = document.createElement("label");
+      label.id = `${identifier}-label`;
       label.htmlFor = identifier;
       label.textContent = parameter.label;
       const range = document.createElement("input");
       range.type = "range";
+      range.id = `${identifier}-range`;
       range.min = parameter.min;
       range.max = parameter.max;
       range.step = parameter.step;
       range.value = parameter.defaultValue;
-      range.setAttribute("aria-label", `${parameter.label} 滑块`);
+      range.setAttribute("aria-labelledby", label.id);
       const number = document.createElement("input");
       number.type = "number";
       number.id = identifier;
@@ -596,7 +662,17 @@
       number.step = parameter.step;
       number.value = parameter.defaultValue;
       number.inputMode = "decimal";
-      group.append(label, range, number);
+      const hint = document.createElement("span");
+      hint.id = `${identifier}-hint`;
+      hint.className = "visually-hidden";
+      hint.textContent =
+        `允许范围 ${formatValue(parameter.min)} 至 ${formatValue(parameter.max)}` +
+        `，步长 ${formatValue(parameter.step)}。`;
+      range.setAttribute("aria-describedby", hint.id);
+      number.setAttribute("aria-describedby", hint.id);
+      group.setAttribute("role", "group");
+      group.setAttribute("aria-labelledby", label.id);
+      group.append(label, range, number, hint);
       controls.appendChild(group);
       inputs.set(parameter.key, number);
       ranges.set(parameter.key, range);
@@ -605,6 +681,7 @@
     const interval = document.createElement("div");
     interval.className = "density-plot__interval-controls";
     const intervalTitle = document.createElement("span");
+    intervalTitle.id = `density-plot-interval-${chartIdentifier}`;
     intervalTitle.textContent = "概率区间";
     const intervalMinimum = document.createElement("input");
     const intervalMaximum = document.createElement("input");
@@ -622,13 +699,17 @@
     intervalMinimum.value = formatValue(defaultMinimum);
     intervalMaximum.value = formatValue(defaultMaximum);
     const separator = document.createElement("span");
+    separator.setAttribute("aria-hidden", "true");
     separator.textContent = "≤ X ≤";
     interval.append(intervalTitle, intervalMinimum, separator, intervalMaximum);
+    interval.setAttribute("role", "group");
+    interval.setAttribute("aria-labelledby", intervalTitle.id);
 
     const summary = document.createElement("div");
     summary.className = "density-plot__summary";
     const legend = document.createElement("div");
     legend.className = "density-plot__legend";
+    legend.setAttribute("role", "list");
     legend.setAttribute("aria-label", "曲线图例");
     const chart = document.createElement("div");
     chart.className = "density-plot__chart";
@@ -638,10 +719,15 @@
     });
     chart.appendChild(svg);
     const status = document.createElement("div");
+    status.id = `density-plot-status-${chartIdentifier}`;
     status.className = "density-plot__status";
+    status.setAttribute("role", "status");
     status.setAttribute("aria-live", "polite");
+    status.setAttribute("aria-atomic", "true");
     const note = document.createElement("div");
+    note.id = `density-plot-note-${chartIdentifier}`;
     note.className = "density-plot__note";
+    svg.setAttribute("aria-describedby", `${status.id} ${note.id}`);
 
     container.replaceChildren(
       heading,
@@ -654,7 +740,7 @@
       note,
     );
     container.setAttribute("role", "group");
-    container.setAttribute("aria-label", `${specification.title}交互曲线`);
+    container.setAttribute("aria-labelledby", title.id);
 
     let frame = 0;
     let adaptive = false;
@@ -664,11 +750,13 @@
       legend.replaceChildren();
       const current = document.createElement("span");
       current.className = "density-plot__legend-item density-plot__legend-item--current";
+      current.setAttribute("role", "listitem");
       current.textContent = "当前曲线";
       legend.appendChild(current);
       comparisons.forEach((item, index) => {
         const entry = document.createElement("span");
         entry.className = `density-plot__legend-item density-plot__legend-item--${index + 1}`;
+        entry.setAttribute("role", "listitem");
         entry.textContent = item.label;
         legend.appendChild(entry);
       });
@@ -678,54 +766,91 @@
     const render = () => {
       frame = 0;
       const parameters = valuesFromInputs(inputs);
-      const intervalValues = [Number(intervalMinimum.value), Number(intervalMaximum.value)];
-      if (
-        Object.values(parameters).some((value) => !Number.isFinite(value)) ||
-        (mode.value === "density" &&
-          intervalValues.some((value) => !Number.isFinite(value)))
-      ) {
-        status.textContent = "请输入有效的参数与概率区间。";
+      const intervalValues = [intervalMinimum, intervalMaximum].map((input) =>
+        input.value.trim() === "" ? Number.NaN : Number(input.value),
+      );
+      const invalidParameters = specification.parameters.filter((parameter) => {
+        const value = parameters[parameter.key];
+        return (
+          !Number.isFinite(value) ||
+          value < parameter.min ||
+          value > parameter.max ||
+          (parameter.integer && !Number.isInteger(value))
+        );
+      });
+      specification.parameters.forEach((parameter) => {
+        const invalid = invalidParameters.includes(parameter);
+        inputs.get(parameter.key).setAttribute("aria-invalid", String(invalid));
+        ranges.get(parameter.key).setAttribute("aria-invalid", String(invalid));
+      });
+      const invalidInterval =
+        mode.value === "density" &&
+        intervalValues.some((value) => !Number.isFinite(value));
+      intervalMinimum.setAttribute("aria-invalid", String(invalidInterval));
+      intervalMaximum.setAttribute("aria-invalid", String(invalidInterval));
+      if (invalidParameters.length || invalidInterval) {
+        const parameter = invalidParameters[0];
+        const message = parameter
+          ? parameter.integer && Number.isFinite(parameters[parameter.key])
+            ? `${parameter.label} 必须是整数。`
+            : `${parameter.label} 需要在 ${formatValue(parameter.min)} 至 ` +
+              `${formatValue(parameter.max)} 之间。`
+          : "请输入有效的参数与概率区间。";
+        updateText(status, message);
         status.classList.add("density-plot__status--error");
-        note.textContent = "";
+        updateText(note, "");
         svg.replaceChildren();
+        svg.setAttribute("aria-hidden", "true");
         return;
       }
       const validationMessage = specification.validate(parameters);
       if (validationMessage) {
-        status.textContent = validationMessage;
+        specification.parameters.forEach((parameter) => {
+          inputs.get(parameter.key).setAttribute("aria-invalid", "true");
+          ranges.get(parameter.key).setAttribute("aria-invalid", "true");
+        });
+        updateText(status, validationMessage);
         status.classList.add("density-plot__status--error");
-        note.textContent = "";
+        updateText(note, "");
         svg.replaceChildren();
+        svg.setAttribute("aria-hidden", "true");
         return;
       }
       status.classList.remove("density-plot__status--error");
       try {
         const result = drawCurve(svg, specification, parameters, {
           adaptive,
+          chartIdentifier,
           comparisons,
           interval: intervalValues,
           mode: mode.value,
+          viewportWidth: chart.getBoundingClientRect().width,
         });
+        svg.removeAttribute("aria-hidden");
         const functionName = mode.value === "cdf" ? "分布函数" : "密度函数";
         title.textContent = `${specification.title}${functionName}`;
-        svg.setAttribute("aria-label", `${specification.title}${functionName}曲线`);
         if (mode.value === "density") {
           const lower = Math.min(...intervalValues);
           const upper = Math.max(...intervalValues);
-          status.textContent =
+          updateText(
+            status,
             `当前参数：${specification.notation(parameters)}；` +
             `P(${formatValue(lower)} ≤ X ≤ ${formatValue(upper)}) = ` +
-            formatValue(result.probability);
+            formatValue(result.probability),
+          );
         } else {
-          status.textContent = `当前参数：${specification.notation(parameters)}`;
+          updateText(status, `当前参数：${specification.notation(parameters)}`);
         }
 
         summary.replaceChildren();
         for (const [label, value] of specification.moments(parameters)) {
           const item = document.createElement("span");
-          item.innerHTML = `<strong>${label}</strong> ${
-            typeof value === "number" ? formatValue(value) : value
-          }`;
+          const itemLabel = document.createElement("strong");
+          itemLabel.textContent = label;
+          item.append(
+            itemLabel,
+            ` ${typeof value === "number" ? formatValue(value) : value}`,
+          );
           summary.appendChild(item);
         }
 
@@ -734,14 +859,21 @@
           `${coordinateMode}：x ∈ [${formatValue(result.x[0])}, ${formatValue(result.x[1])}]，` +
           `${mode.value === "cdf" ? "F" : "p"}(x) ∈ ` +
           `[${formatValue(result.y[0])}, ${formatValue(result.y[1])}]。`;
-        note.textContent = result.clipped
-          ? `${windowDescription} 曲线超出观察窗的部分已裁切。`
-          : windowDescription;
+        updateText(
+          note,
+          result.clipped
+            ? `${windowDescription} 曲线或概率区间超出观察窗的部分已裁切。`
+            : windowDescription,
+        );
       } catch (error) {
-        status.textContent = error instanceof Error ? error.message : "曲线计算失败。";
+        updateText(
+          status,
+          error instanceof Error ? error.message : "曲线计算失败。",
+        );
         status.classList.add("density-plot__status--error");
-        note.textContent = "";
+        updateText(note, "");
         svg.replaceChildren();
+        svg.setAttribute("aria-hidden", "true");
       }
     };
     const scheduleRender = () => {
@@ -756,9 +888,11 @@
         scheduleRender();
       });
       number.addEventListener("input", () => {
-        if (number.value !== "" && Number.isFinite(Number(number.value))) {
-          range.value = number.value;
-        }
+        syncParameterInputs(parameter, number, range);
+        scheduleRender();
+      });
+      number.addEventListener("change", () => {
+        syncParameterInputs(parameter, number, range, true);
         scheduleRender();
       });
     }
@@ -777,8 +911,17 @@
     freeze.addEventListener("click", () => {
       const parameters = valuesFromInputs(inputs);
       const validationMessage = specification.validate(parameters);
-      if (validationMessage || Object.values(parameters).some((value) => !Number.isFinite(value))) {
-        status.textContent = validationMessage || "请输入有效的参数。";
+      const hasInvalidParameter = specification.parameters.some((parameter) => {
+        const value = parameters[parameter.key];
+        return (
+          !Number.isFinite(value) ||
+          value < parameter.min ||
+          value > parameter.max ||
+          (parameter.integer && !Number.isInteger(value))
+        );
+      });
+      if (validationMessage || hasInvalidParameter) {
+        updateText(status, validationMessage || "请输入有效的参数。");
         status.classList.add("density-plot__status--error");
         return;
       }
@@ -810,6 +953,18 @@
       updateLegend();
       scheduleRender();
     });
+    if ("ResizeObserver" in window) {
+      let previousWidth = 0;
+      const observer = new ResizeObserver(([entry]) => {
+        const width = Math.round(entry.contentRect.width);
+        if (!width || Math.abs(width - previousWidth) < 4) return;
+        previousWidth = width;
+        scheduleRender();
+      });
+      observer.observe(chart);
+    } else {
+      window.addEventListener("resize", scheduleRender, { passive: true });
+    }
     updateLegend();
     render();
   }

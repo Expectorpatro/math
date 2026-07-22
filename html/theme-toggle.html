@@ -1,6 +1,8 @@
 <script>
 (() => {
   "use strict";
+
+  document.documentElement.classList.add("js");
   try {
     const theme = window.localStorage.getItem("textbook-color-scheme");
     if (theme === "dark" || theme === "light") {
@@ -10,7 +12,7 @@
       );
     }
   } catch (_error) {
-    // Storage can be unavailable; Quarto's default theme still works.
+    // Storage is optional; Quarto's configured default remains usable.
   }
 
   const mathJax = window.MathJax || {};
@@ -23,34 +25,47 @@
   };
   window.MathJax = mathJax;
 
-  const loadUserInterface = () => {
-    if (document.querySelector('script[data-textbook-ui]')) return;
+  const assetBase = () => {
+    const offset = document.querySelector('meta[name="quarto:offset"]');
+    if (offset?.content) return new URL(offset.content, document.baseURI);
     const stylesheet = Array.from(
       document.querySelectorAll('link[rel="stylesheet"]')
     ).find((link) =>
       /(?:^|\/)style\.css(?:[?#]|$)/.test(link.getAttribute("href") || "")
     );
-    const base = stylesheet
-      ? new URL(stylesheet.href)
-      : new URL(window.location.href);
+    return stylesheet ? new URL(".", stylesheet.href) : new URL(".", document.baseURI);
+  };
+
+  const loadScript = (name, version, marker) => {
+    if (document.querySelector(`script[data-textbook-asset="${marker}"]`)) {
+      return;
+    }
+    const url = new URL(name, assetBase());
+    url.searchParams.set("v", version);
     const script = document.createElement("script");
-    script.dataset.textbookUi = "true";
-    const interfaceUrl = new URL("textbook-ui.js", base);
-    interfaceUrl.searchParams.set("v", "__TEXTBOOK_UI_VERSION__");
-    script.src = interfaceUrl.href;
+    script.src = url.href;
     script.async = false;
+    script.dataset.textbookAsset = marker;
+    script.addEventListener("error", () => {
+      console.error(`[textbook] 无法加载前端资源：${name}`);
+    });
     document.head.appendChild(script);
   };
 
-  // Quarto emits this include before the page-specific stylesheet links.
-  // Waiting for the parsed document makes the same loader work at the site
-  // root and in nested chapter routes, including GitHub Pages subpaths.
+  const bootstrap = () => {
+    loadScript("textbook-ui.js", "__TEXTBOOK_UI_VERSION__", "ui");
+    if (document.querySelector(".display-math-copy-marker")) {
+      loadScript("formula-copy.js", "__FORMULA_COPY_VERSION__", "formula-copy");
+    }
+    if (document.querySelector(".density-plot[data-distribution]")) {
+      loadScript("density-loader.js", "__DENSITY_LOADER_VERSION__", "density");
+    }
+  };
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", loadUserInterface, {
-      once: true,
-    });
+    document.addEventListener("DOMContentLoaded", bootstrap, { once: true });
   } else {
-    loadUserInterface();
+    bootstrap();
   }
 })();
 </script>

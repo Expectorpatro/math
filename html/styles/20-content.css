@@ -1,0 +1,487 @@
+/* Rich textbook components */
+span.math.inline {
+  margin-inline: 0.12em;
+}
+
+span.math.inline.math-inline-overflow {
+  display: inline-flex;
+  max-width: var(--math-inline-available-width, 100%);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  vertical-align: baseline;
+}
+
+span.math.inline.math-inline-overflow::-webkit-scrollbar {
+  display: none;
+}
+
+span.math.display {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+main.content :where(p, li, dd, .theorem-block, .proof-block) {
+  min-width: 0;
+}
+
+.todo-note {
+  padding: 0.08em 0.42em 0.12em;
+  border: 1px solid var(--book-border-strong);
+  border-radius: 0.38rem;
+  background: var(--book-surface-soft);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  color: var(--book-ink-soft);
+  font-size: 0.88em;
+  line-height: 1.65;
+}
+
+.todo-note::before {
+  margin-right: 0.38em;
+  font-size: 0.72em;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.todo-info {
+  border-color: color-mix(in srgb, var(--book-teal) 38%, transparent);
+  background: var(--book-teal-soft);
+}
+
+.todo-info::before {
+  color: var(--book-teal);
+  content: "INFO";
+}
+
+.todo-unsure {
+  border-color: color-mix(in srgb, var(--book-rose) 38%, transparent);
+  background: var(--book-rose-soft);
+}
+
+.todo-unsure::before {
+  color: var(--book-rose);
+  content: "存疑";
+}
+
+.todo-change {
+  border-color: color-mix(in srgb, var(--book-primary) 38%, transparent);
+  background: var(--book-primary-soft);
+}
+
+.todo-change::before {
+  color: var(--book-primary-deep);
+  content: "修改";
+}
+
+.todo-improvement {
+  border-color: color-mix(in srgb, var(--book-amber) 42%, transparent);
+  background: var(--book-amber-soft);
+}
+
+.todo-improvement::before {
+  color: var(--book-amber);
+  content: "改进";
+}
+
+.theorem-block,
+.proof-block {
+  position: relative;
+  margin: 1.8rem 0;
+  padding: 1.18rem 1.35rem 1.18rem 1.5rem;
+  border: 1px solid #dce1eb;
+  border-radius: var(--book-radius);
+  background: #f6f7fa;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.theorem-block::before,
+.proof-block::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--book-primary);
+  content: "";
+}
+
+.theorem-block.env-definition {
+  border-color: #d5e6e2;
+  background: #f3f8f7;
+}
+
+.theorem-block.env-definition::before {
+  background: var(--book-teal);
+}
+
+.theorem-block.env-note,
+.theorem-block.env-remark,
+.theorem-block.env-method,
+.theorem-block.env-derivation {
+  border-color: #f0dfbd;
+  background: #fffaf0;
+}
+
+.theorem-block.env-note::before,
+.theorem-block.env-remark::before,
+.theorem-block.env-method::before,
+.theorem-block.env-derivation::before {
+  background: var(--book-amber);
+}
+
+.theorem-block>p:first-child,
+.proof-block>p:first-child {
+  margin-top: 0;
+}
+
+.theorem-block> :last-child,
+.proof-block> :last-child {
+  margin-bottom: 0;
+}
+
+.theorem-block>p:first-child>strong:first-child,
+.proof-block>p:first-child>strong:first-child {
+  color: var(--book-ink);
+}
+
+.proof-block {
+  border-color: var(--book-border);
+  background: #fafafa;
+  box-shadow: none;
+}
+
+.proof-block::before {
+  width: 3px;
+  background: #a8b0c0;
+}
+
+.algorithm-block {
+  margin: 2rem 0;
+  border: 1px solid var(--book-border-strong);
+  border-radius: var(--book-radius);
+  background: var(--book-surface);
+  box-shadow: var(--book-shadow-sm);
+  overflow: hidden;
+}
+
+.algorithm-caption {
+  padding: 0.92rem 1.1rem;
+  border-bottom: 1px solid var(--book-border);
+  background: #f4f5f8;
+}
+
+.algorithm-caption>p {
+  margin: 0;
+}
+
+.algorithm-number {
+  display: inline-block;
+  margin-right: 0.42rem;
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  background: #e7eaf2;
+  color: var(--book-primary-deep);
+  font-size: 0.74rem;
+  font-weight: 760;
+  letter-spacing: 0.035em;
+}
+
+.algorithm-title {
+  color: var(--book-ink);
+  font-weight: 700;
+}
+
+.algorithm-body {
+  padding: 0.7rem 0;
+  overflow-x: auto;
+}
+
+.algorithm-line {
+  position: relative;
+  min-width: 34rem;
+  padding: 0.26rem 1rem 0.26rem 4rem;
+  border-left: 3px solid transparent;
+}
+
+.algorithm-line:nth-child(even) {
+  background: rgb(244 245 250 / 65%);
+}
+
+.algorithm-line[data-line]::before {
+  position: absolute;
+  top: 0.33rem;
+  left: 0.9rem;
+  width: 2rem;
+  color: var(--book-faint);
+  content: attr(data-line);
+  font-family: var(--book-mono);
+  font-size: 0.72rem;
+  line-height: 1.8;
+  text-align: right;
+}
+
+.algorithm-line> :first-child {
+  margin-top: 0;
+}
+
+.algorithm-line> :last-child {
+  margin-bottom: 0;
+}
+
+.algorithm-require,
+.algorithm-ensure {
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  border-left-color: var(--book-primary);
+  background: #f7f6ff;
+}
+
+.algorithm-statex,
+.algorithm-comment {
+  color: var(--book-muted);
+  font-size: 0.92em;
+}
+
+.algorithm-depth-1 {
+  padding-left: 5.4rem;
+}
+
+.algorithm-depth-2 {
+  padding-left: 6.8rem;
+}
+
+.algorithm-depth-3 {
+  padding-left: 8.2rem;
+}
+
+.algorithm-depth-4 {
+  padding-left: 9.6rem;
+}
+
+.algorithm-depth-5,
+.algorithm-depth-6 {
+  padding-left: 11rem;
+}
+
+.equation-block {
+  margin-block: 1.35rem;
+  padding-block: 0.3rem;
+  overflow-x: auto;
+  scroll-margin-top: 5rem;
+}
+
+.equation-anchor {
+  display: block;
+  height: 0;
+  scroll-margin-top: 6rem;
+}
+
+.term {
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 0.09em;
+  text-underline-offset: 0.2em;
+}
+
+.term:hover {
+  text-decoration-style: solid;
+}
+
+.term-english {
+  color: var(--book-muted);
+  font-size: 0.92em;
+}
+
+.term-missing,
+.reference-missing {
+  color: var(--book-missing);
+}
+
+.term-missing {
+  text-decoration: underline wavy;
+}
+
+.reference-missing {
+  padding: 0.06em 0.26em;
+  border-radius: 0.25rem;
+  background: var(--book-rose-soft);
+  font-size: 0.9em;
+}
+
+pre,
+code {
+  font-family: var(--book-mono);
+}
+
+:not(pre)>code {
+  padding: 0.12em 0.36em;
+  border: 1px solid var(--book-border);
+  border-radius: 0.36rem;
+  background: var(--book-code);
+  color: #a13658;
+  font-size: 0.88em;
+}
+
+div.sourceCode,
+pre {
+  border: 1px solid var(--book-border) !important;
+  border-radius: var(--book-radius) !important;
+  background: var(--book-code) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 75%);
+}
+
+.code-copy-button {
+  margin: 0.45rem;
+  border: 1px solid var(--book-border) !important;
+  border-radius: 0.5rem !important;
+  background: rgb(255 255 255 / 76%) !important;
+}
+
+.textbook-table-scroll {
+  max-width: 100%;
+  margin: 1.6rem 0;
+  border: 1px solid var(--book-border);
+  border-radius: var(--book-radius);
+  box-shadow: var(--book-shadow-sm);
+  overflow-x: auto;
+}
+
+.textbook-table-scroll table {
+  width: 100%;
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.textbook-latex-table {
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.textbook-latex-table caption {
+  padding: 0.8rem 1rem 0.65rem;
+  color: var(--book-ink-soft);
+  font-weight: 700;
+  text-align: center;
+}
+
+.textbook-latex-table :is(th, td) {
+  min-width: 4.5rem;
+  vertical-align: middle;
+}
+
+.textbook-latex-table .latex-table-align-left {
+  text-align: left;
+}
+
+.textbook-latex-table .latex-table-align-center {
+  text-align: center;
+}
+
+.textbook-latex-table .latex-table-align-right {
+  text-align: right;
+}
+
+.textbook-latex-table .latex-table-vrule-right {
+  border-right: 1.5px solid var(--book-border-strong) !important;
+}
+
+.textbook-latex-table tr.latex-table-rule-above > * {
+  border-top: 1.5px solid var(--book-border-strong) !important;
+}
+
+.textbook-latex-table tr.latex-table-rule-below > * {
+  border-bottom: 1.5px solid var(--book-border-strong) !important;
+}
+
+.latex-table-diagbox {
+  position: relative;
+  display: block;
+  min-width: 7rem;
+  min-height: 3.4rem;
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 0.75px),
+    var(--book-border-strong) 50%,
+    transparent calc(50% + 0.75px)
+  );
+}
+
+.latex-table-diagbox-upper,
+.latex-table-diagbox-lower {
+  position: absolute;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.latex-table-diagbox-upper {
+  top: 0.15rem;
+  right: 0.2rem;
+}
+
+.latex-table-diagbox-lower {
+  bottom: 0.15rem;
+  left: 0.2rem;
+}
+
+table th,
+table td {
+  padding: 0.72rem 0.85rem !important;
+  border-color: var(--book-border) !important;
+}
+
+thead {
+  background: #f1f2f8;
+  color: var(--book-ink);
+}
+
+tbody tr:nth-child(even) {
+  background: rgb(246 247 250 / 65%);
+}
+
+blockquote {
+  margin: 1.6rem 0;
+  padding: 1rem 1.25rem;
+  border-left: 4px solid var(--book-primary);
+  border-radius: 0 var(--book-radius) var(--book-radius) 0;
+  background: var(--book-primary-soft);
+  color: var(--book-ink-soft);
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+img.tikz-image {
+  box-sizing: border-box;
+  display: block;
+  margin: 1.6rem auto;
+  padding: 1.15rem;
+  border: 1px solid var(--book-border);
+  border-radius: var(--book-radius);
+  background: #fff;
+  box-shadow: var(--book-shadow-sm);
+}
+
+.page-navigation .nav-page {
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--book-border);
+  border-radius: var(--book-radius);
+  background: #fff;
+  color: var(--book-ink-soft);
+  box-shadow: var(--book-shadow-sm);
+  text-decoration: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.page-navigation .nav-page:hover {
+  border-color: rgb(82 100 154 / 32%);
+  box-shadow: var(--book-shadow-sm);
+  transform: translateY(-1px);
+}
+
