@@ -4,7 +4,9 @@
   // Keep only the active top-level section's child entries visible in the page TOC.
 
   const targetIdFromHref = (href) => {
-    const fragment = String(href || "").replace(/^#/, "");
+    const value = String(href || "");
+    const hashIndex = value.indexOf("#");
+    const fragment = hashIndex >= 0 ? value.slice(hashIndex + 1) : "";
     if (!fragment) return null;
     try {
       return decodeURIComponent(fragment);
@@ -55,9 +57,15 @@
     );
     lists.forEach((list, index) => {
       list.hidden = !visibility[index];
-      list.classList.toggle("show", visibility[index]);
       list.classList.toggle("textbook-toc-branch-open", visibility[index]);
     });
+  };
+
+  const updateCurrentEntry = (toc, entry) => {
+    toc.querySelectorAll(".textbook-toc-current").forEach((link) => {
+      link.classList.remove("textbook-toc-current");
+    });
+    entry?.link?.classList.add("textbook-toc-current");
   };
 
   const mountTocContext = (doc = document, win = window) => {
@@ -66,45 +74,81 @@
     if (!toc || !root || toc.dataset.contextReady === "true") return;
     toc.dataset.contextReady = "true";
 
-    const topLevelItems = directChildren(root, "li");
-    const topLevelEntries = topLevelItems
-      .map((item) => {
-        const link = directLink(item);
+    const entries = Array.from(toc.querySelectorAll("a.nav-link"))
+      .map((link) => {
         const identifier = targetIdFromHref(link?.getAttribute("href"));
         return {
           link,
           target: identifier ? doc.getElementById(identifier) : null,
-          topLevelItem: item,
+          topLevelItem: findTopLevelItem(link, root),
         };
       })
-      .filter((entry) => entry.link && entry.target);
+      .filter((entry) => entry.target && entry.topLevelItem);
 
-    const setActive = (link) => {
-      toc.querySelectorAll("a.nav-link.active").forEach((item) => {
-        item.classList.remove("active");
-      });
-      if (link) link.classList.add("active");
-      updateSecondaryEntries(root, findTopLevelItem(link, root));
-    };
+    let pendingTopLevelItem = null;
+    let navigationTimer = 0;
+    let ticking = false;
 
     const refresh = () => {
+      if (pendingTopLevelItem) {
+        updateSecondaryEntries(root, pendingTopLevelItem);
+        return;
+      }
       const marker = win.scrollY + Math.min(win.innerHeight * 0.22, 180);
       const context = selectTocContext(
-        topLevelEntries,
+        entries,
         marker,
-        (entry) => entry.target.getBoundingClientRect().top + win.scrollY
+        (entry) => {
+          const computationLead = entry.topLevelItem.classList.contains(
+            "computation-toc-item"
+          )
+            ? Math.min(win.innerHeight * 0.28, 200)
+            : 0;
+          return (
+            entry.target.getBoundingClientRect().top +
+            win.scrollY -
+            computationLead
+          );
+        }
       );
-      setActive(context.activeEntry?.link || null);
+      updateSecondaryEntries(root, context.activeTopLevelItem);
+      updateCurrentEntry(toc, context.activeEntry);
+    };
+
+    const finishNavigation = () => {
+      if (!pendingTopLevelItem) return;
+      pendingTopLevelItem = null;
+      win.clearTimeout(navigationTimer);
+      navigationTimer = 0;
+      refresh();
+    };
+
+    const deferNavigationFinish = (delay) => {
+      win.clearTimeout(navigationTimer);
+      navigationTimer = win.setTimeout(finishNavigation, delay);
     };
 
     toc.querySelectorAll("a.nav-link").forEach((link) => {
-      link.addEventListener("click", () => win.setTimeout(() => setActive(link), 0));
+      link.addEventListener("click", () => {
+        const topLevelItem = findTopLevelItem(link, root);
+        if (!topLevelItem) return;
+        pendingTopLevelItem = topLevelItem;
+        updateSecondaryEntries(root, topLevelItem);
+        updateCurrentEntry(
+          toc,
+          entries.find((entry) => entry.link === link) || null
+        );
+        deferNavigationFinish(900);
+      });
     });
 
-    let ticking = false;
     win.addEventListener(
       "scroll",
       () => {
+        if (pendingTopLevelItem) {
+          deferNavigationFinish(180);
+          return;
+        }
         if (ticking) return;
         ticking = true;
         win.requestAnimationFrame(() => {
@@ -115,17 +159,10 @@
       { passive: true }
     );
     win.addEventListener("resize", refresh);
+    if ("onscrollend" in win) {
+      win.addEventListener("scrollend", finishNavigation, { passive: true });
+    }
     refresh();
-
-    const observer = new win.MutationObserver(() => {
-      const active = toc.querySelector("a.nav-link.active");
-      updateSecondaryEntries(root, findTopLevelItem(active, root));
-    });
-    observer.observe(toc, {
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["class"],
-    });
   };
 
   const api = Object.freeze({
@@ -134,6 +171,7 @@
     selectTocContext,
     branchVisibility,
     updateSecondaryEntries,
+    updateCurrentEntry,
     mountTocContext,
   });
 
