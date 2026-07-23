@@ -28,6 +28,7 @@ try:
     from site_builder.filesystem import (
         atomic_publish_directory,
         prepare_empty_directory,
+        remove_managed_directory,
     )
     from site_builder.latex_sources import (
         load_glossary,
@@ -71,7 +72,7 @@ MAIN_TEX = CONFIG.paths.main_tex
 SETTINGS_TEX = CONFIG.paths.settings_tex
 QUARTO = CONFIG.tools.quarto_path()
 QUARTO_PROJECT_DIR = CONFIG.paths.quarto_project_dir
-ASSET_MANAGER = AssetManager(CONFIG, RUNNER)
+ASSET_MANAGER = AssetManager(CONFIG)
 COMPUTATION_IMPORTER = ComputationImporter(
     project_root=PROJECT_ROOT,
     quarto_project_dir=QUARTO_PROJECT_DIR,
@@ -80,6 +81,11 @@ COMPUTATION_IMPORTER = ComputationImporter(
     logger=RUNNER.log,
 )
 SITE_POSTPROCESSOR = RenderedSitePostprocessor(RUNNER.warning)
+TEMPORARY_DIRECTORIES = (
+    CONFIG.paths.build_dir,
+    HTML_DIR / "__pycache__",
+    HTML_DIR / "site_builder" / "__pycache__",
+)
 
 
 def log(message: str) -> None:
@@ -105,15 +111,19 @@ def run(
     )
 
 
-def ensure_tool(name: str) -> None:
-    RUNNER.require(name)
+def ensure_tools() -> None:
+    """Check that the required converters are available without pinning versions."""
+
+    RUNNER.require(CONFIG.tools.pandoc, "解析 LaTeX")
+    RUNNER.require(CONFIG.tools.xelatex, "编译 TikZ")
+    RUNNER.require(CONFIG.tools.ghostscript, "转换 TikZ 图片")
 
 
 def copy_quarto_resources(document: dict[str, Any]) -> None:
     """Build and copy the validated resource manifest for Quarto."""
 
-    manifest = ASSET_MANAGER.prepare(document)
-    log(f"已准备 {len(manifest)} 个网页资源")
+    prepared = ASSET_MANAGER.prepare(document)
+    log(f"已准备 {prepared} 个网页资源")
 
 
 def write_quarto_site(
@@ -159,7 +169,7 @@ def write_quarto_site(
         if unknown:
             details.append("未知：" + "、".join(unknown))
         fail(
-            f"chapter-progress.json 必须与正文 {len(expected_progress_keys)} 章"
+            f"data/chapter-progress.json 必须与正文 {len(expected_progress_keys)} 章"
             "完全一致（" + "；".join(details) + "）"
         )
     labels_to_pages: dict[str, Path] = {}
@@ -247,8 +257,22 @@ def serve_site(output_dir: Path, port: int) -> None:
         server.server_close()
 
 
+def cleanup_build_artifacts() -> None:
+    """Delete all staging files and caches created by this build."""
+
+    removed = False
+    for directory in TEMPORARY_DIRECTORIES:
+        if remove_managed_directory(
+            directory,
+            managed=TEMPORARY_DIRECTORIES,
+        ):
+            removed = True
+    if removed:
+        log("已清理临时构建文件和 Python 缓存")
+
+
 def build(arguments: argparse.Namespace) -> int:
-    ensure_tool(CONFIG.tools.pandoc)
+    ensure_tools()
     if not MAIN_TEX.exists() or not SETTINGS_TEX.exists():
         fail("必须从项目根目录运行，且项目根目录需要 main.tex/settings.tex")
 
@@ -355,8 +379,6 @@ def build(arguments: argparse.Namespace) -> int:
         f"术语表 {transformer.glossary_entry_count} 条，"
         f"失效链接 {len(validation.broken_links)} 个）"
     )
-    if arguments.serve:
-        serve_site(output_dir, arguments.port)
     return 0
 
 
@@ -375,7 +397,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--strict",
         action="store_true",
-        help="存在未定义术语、未解析引用或发布校验错误时返回失败",
+        help="存在未定义术语或未解析引用时返回失败",
     )
     parser.add_argument(
         "--serve",
@@ -392,11 +414,27 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def main() -> int:
+    arguments = parse_arguments()
+    cleanup_failed = False
     try:
-        return build(parse_arguments())
+        result = build(arguments)
     except BuildError as error:
         print(f"[web] 错误：{error}", file=sys.stderr)
+        result = 1
+    finally:
+        try:
+            cleanup_build_artifacts()
+        except BuildError as error:
+            RUNNER.warning(str(error))
+            cleanup_failed = True
+    if cleanup_failed and result == 0:
         return 1
+    if result == 0 and arguments.serve:
+        serve_site(
+            CONFIG.paths.resolve_output(arguments.output),
+            arguments.port,
+        )
+    return result
 
 
 if __name__ == "__main__":

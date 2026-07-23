@@ -65,7 +65,7 @@ def quarto_date(value: str) -> str:
 
 
 def load_site_metadata(paths: BuildPaths) -> dict[str, str]:
-    site_meta = paths.html_dir / "site-meta.json"
+    site_meta = paths.site_metadata_file
     metadata = _read_json(
         site_meta,
         description="站点元数据",
@@ -95,7 +95,7 @@ def load_site_metadata(paths: BuildPaths) -> dict[str, str]:
 
 
 def load_chapter_progress(paths: BuildPaths) -> dict[str, int | None]:
-    chapter_progress = paths.html_dir / "chapter-progress.json"
+    chapter_progress = paths.chapter_progress_file
     progress = _read_json(
         chapter_progress,
         description="章节进度文件",
@@ -118,7 +118,7 @@ def load_chapter_progress(paths: BuildPaths) -> dict[str, int | None]:
 
 
 def load_notation_catalog(paths: BuildPaths) -> dict[str, Any]:
-    notation_catalog = paths.html_dir / "notation-catalog.json"
+    notation_catalog = paths.notation_catalog_file
     catalog = _read_json(
         notation_catalog,
         description="notation 规范",
@@ -183,11 +183,13 @@ def load_notation_catalog(paths: BuildPaths) -> dict[str, Any]:
 
 def recent_git_commits(
     project_root: Path,
+    *,
+    executable: Path,
     limit: int = 3,
 ) -> list[dict[str, str]]:
     result = subprocess.run(
         [
-            "git",
+            executable,
             "log",
             f"-{limit}",
             "--date=short",

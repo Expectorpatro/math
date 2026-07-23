@@ -84,18 +84,6 @@ ul.task-list li input[type="checkbox"] {
   "use strict";
 
   document.documentElement.classList.add("js");
-  try {
-    const theme = window.localStorage.getItem("textbook-color-scheme");
-    if (theme === "dark" || theme === "light") {
-      window.localStorage.setItem(
-        "quarto-color-scheme",
-        theme === "dark" ? "alternate" : "default"
-      );
-    }
-  } catch (_error) {
-    // Storage is optional; Quarto's configured default remains usable.
-  }
-
   const mathJax = window.MathJax || {};
   mathJax.tex = mathJax.tex || {};
   mathJax.tex.macros = {
@@ -103,6 +91,8 @@ ul.task-list li input[type="checkbox"] {
     dif: "\\mathop{}\\!\\mathrm{d}",
     seq: ["#1_1,#1_2,\\dots,#1_{#2}", 2],
     varLambda: "\\mathit{\\Lambda}",
+    coloneq: "\\mathrel{:=}",
+    coloneqq: "\\mathrel{:=}",
   };
   window.MathJax = mathJax;
 
@@ -117,12 +107,15 @@ ul.task-list li input[type="checkbox"] {
     return stylesheet ? new URL(".", stylesheet.href) : new URL(".", document.baseURI);
   };
 
-  const loadScript = (name, version, marker) => {
+  const assetVersions = {"density-distributions.js": "81f4104295be", "density-loader.js": "cc128004fcbd", "density-math.js": "44cb999c8084", "density-plots.js": "dc6abfbf5a85", "density-probe.js": "e100dfbcbe1b", "density-renderer.js": "44d6cf2025c4", "favicon.svg": "e16632460c39", "formula-copy.js": "1223f1197fd7", "textbook-content-ui.js": "8296a83a0ecc", "textbook-page-ui.js": "6679a76c8e90", "textbook-reading.js": "95efd72caeda", "textbook-theme.js": "b5921270fe41", "textbook-toc.js": "9459345b72b8", "textbook-ui.js": "9339e068a088"};
+  window.TextbookAssetVersions = Object.freeze(assetVersions);
+
+  const loadScript = (name, marker) => {
     if (document.querySelector(`script[data-textbook-asset="${marker}"]`)) {
       return;
     }
     const url = new URL(name, assetBase());
-    url.searchParams.set("v", version);
+    url.searchParams.set("v", assetVersions[name]);
     const script = document.createElement("script");
     script.src = url.href;
     script.async = false;
@@ -134,22 +127,14 @@ ul.task-list li input[type="checkbox"] {
   };
 
   const bootstrap = () => {
-    loadScript(
-      "textbook-theme.js",
-      "cb49857cf598",
-      "theme"
-    );
-    loadScript(
-      "textbook-toc.js",
-      "a8cc5f276568",
-      "toc"
-    );
-    loadScript("textbook-ui.js", "44da0b9086e1", "ui");
+    loadScript("textbook-theme.js", "theme");
+    loadScript("textbook-toc.js", "toc");
+    loadScript("textbook-ui.js", "ui");
     if (document.querySelector(".display-math-copy-marker")) {
-      loadScript("formula-copy.js", "1223f1197fd7", "formula-copy");
+      loadScript("formula-copy.js", "formula-copy");
     }
     if (document.querySelector(".density-plot[data-distribution]")) {
-      loadScript("density-loader.js", "604b9c6c2cb3", "density");
+      loadScript("density-loader.js", "density");
     }
   };
 
@@ -191,7 +176,7 @@ window.Quarto = {
 };
 </script>
 
-<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../style.css?v=4fc528baf0dc">
 <link rel="stylesheet" href="../sidebar.css">
 <meta property="og:title" content="第 5 章 概率测度 – 你永远不知道一个强迫症能干出什么事情">
 <meta property="og:description" content="持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，强调逻辑自洽、证明完整与持续维护。">
@@ -3502,7 +3487,7 @@ g_n\circ f(x)=g_n[f(x)]=\sum_{i=1}^{j_n}a_{ni}I[f(x)\in A_{ni}]=\sum_{i=1}^{j_n}
 <section id="l_p" class="level3">
 <h3 class="anchored" data-anchor-id="l_p"><span class="header-section-number">5.5.1</span> <span class="math inline">\(L_p\)</span></h3>
 <div id="definition-5-41" class="definition theorem-block env-definition">
-<p><strong>Definition 5.41</strong>. 设<span class="math inline">\((X,\mathscr{F},\mu)\)</span>是一个测度空间，<span class="math inline">\(p\geqslant1\)</span>，<span class="math inline">\(E\in\mathscr{F}\)</span>，<span class="math inline">\(f,g\)</span>是<span class="math inline">\(E\)</span>上的可测函数。定义等价关系<span class="math inline">\(\sim\)</span>：<span class="math inline">\(f\sim g\Leftrightarrow f=g\;\)</span>a.e.于<span class="math inline">\(E\)</span>，将商空间： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbGVmdFx7ZjpcaW50X3tFfXxmKHgpfF5wXG1hdGhvcHt9XCFcbWF0aHJte2R9XG11PCtcaW5mdHlccmlnaHRcfS9cc2ltClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><strong>Definition 5.41</strong>. 设<span class="math inline">\((X,\mathscr{F},\mu)\)</span>是一个测度空间，<span class="math inline">\(p\geqslant1\)</span>，<span class="math inline">\(E\in\mathscr{F}\)</span>，<span class="math inline">\(f,g\)</span>是<span class="math inline">\((E,E\cap\mathscr{F},\mu)\)</span>上的可测函数（<a href="#prop-SigmaField-4168a9ce" class="textbook-cross-reference" data-reference-key="prop:SigmaField" data-reference-kind="ref+label" data-reference-title="性质 5.1.6" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 5.1.6(6)</a>）。定义等价关系<span class="math inline">\(\sim\)</span>：<span class="math inline">\(f\sim g\Leftrightarrow f=g\;\)</span>a.e.于<span class="math inline">\(E\)</span>，将商空间： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbGVmdFx7ZjpcaW50X3tFfXxmKHgpfF5wXG1hdGhvcHt9XCFcbWF0aHJte2R9XG11PCtcaW5mdHlccmlnaHRcfS9cc2ltClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \left\{f:\int_{E}|f(x)|^p\mathop{}\!\mathrm{d}\mu&lt;+\infty\right\}/\sim
 \end{equation*}\]</span></p>

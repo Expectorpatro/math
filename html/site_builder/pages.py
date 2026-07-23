@@ -10,7 +10,8 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from .models import QuartoPage
-from .pandoc_transform import BookTransformer, ast_plain_text, attr_parts, node_identifier
+from .pandoc_ast import attr_parts, node_identifier
+from .pandoc_transform import BookTransformer, ast_plain_text
 
 
 PAGE_SLUGS = {

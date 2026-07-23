@@ -30,6 +30,12 @@
   const branchVisibility = (topLevelItems, activeTopLevelItem) =>
     topLevelItems.map((item) => item === activeTopLevelItem);
 
+  const directChildren = (element, selector) =>
+    Array.from(element?.children || []).filter((child) => child.matches(selector));
+
+  const directLink = (item) =>
+    directChildren(item, "a.nav-link")[0] || null;
+
   const findTopLevelItem = (link, root) => {
     let item = link?.closest("li") || null;
     while (item && item.parentElement !== root) {
@@ -39,33 +45,39 @@
   };
 
   const updateSecondaryEntries = (root, activeTopLevelItem) => {
-    const lists = Array.from(root.querySelectorAll(":scope > li > ul"));
+    const topLevelItems = directChildren(root, "li");
+    const lists = topLevelItems
+      .map((item) => directChildren(item, "ul")[0] || null)
+      .filter(Boolean);
     const visibility = branchVisibility(
       lists.map((list) => list.parentElement),
       activeTopLevelItem
     );
     lists.forEach((list, index) => {
       list.hidden = !visibility[index];
+      list.classList.toggle("show", visibility[index]);
       list.classList.toggle("textbook-toc-branch-open", visibility[index]);
     });
   };
 
   const mountTocContext = (doc = document, win = window) => {
     const toc = doc.querySelector("#TOC");
-    const root = toc?.querySelector(":scope > ul");
+    const root = directChildren(toc, "ul")[0] || null;
     if (!toc || !root || toc.dataset.contextReady === "true") return;
     toc.dataset.contextReady = "true";
 
-    const links = Array.from(toc.querySelectorAll("a.nav-link"))
-      .map((link) => {
-        const identifier = targetIdFromHref(link.getAttribute("href"));
+    const topLevelItems = directChildren(root, "li");
+    const topLevelEntries = topLevelItems
+      .map((item) => {
+        const link = directLink(item);
+        const identifier = targetIdFromHref(link?.getAttribute("href"));
         return {
           link,
           target: identifier ? doc.getElementById(identifier) : null,
-          topLevelItem: findTopLevelItem(link, root),
+          topLevelItem: item,
         };
       })
-      .filter((entry) => entry.target);
+      .filter((entry) => entry.link && entry.target);
 
     const setActive = (link) => {
       toc.querySelectorAll("a.nav-link.active").forEach((item) => {
@@ -78,14 +90,14 @@
     const refresh = () => {
       const marker = win.scrollY + Math.min(win.innerHeight * 0.22, 180);
       const context = selectTocContext(
-        links,
+        topLevelEntries,
         marker,
         (entry) => entry.target.getBoundingClientRect().top + win.scrollY
       );
       setActive(context.activeEntry?.link || null);
     };
 
-    links.forEach(({ link }) => {
+    toc.querySelectorAll("a.nav-link").forEach((link) => {
       link.addEventListener("click", () => win.setTimeout(() => setActive(link), 0));
     });
 
@@ -118,6 +130,7 @@
 
   const api = Object.freeze({
     targetIdFromHref,
+    directChildren,
     selectTocContext,
     branchVisibility,
     updateSecondaryEntries,

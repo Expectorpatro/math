@@ -9,7 +9,7 @@ from .config import BuildPaths
 from .errors import BuildError
 from .latex_sources import strip_tex_comments
 from .models import ComputationGroup
-from .pandoc_transform import latex_to_plain
+from .pandoc_tables import latex_to_plain
 
 
 def fail(message: str) -> None:

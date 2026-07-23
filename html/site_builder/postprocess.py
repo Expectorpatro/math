@@ -51,16 +51,49 @@ class RenderedSitePostprocessor:
     def process(
         self, output_dir: Path, site_metadata: dict[str, str]
     ) -> None:
-        self._process_index(output_dir)
-        self._process_reference_pages(output_dir)
-        self._process_site_markup(output_dir, site_metadata)
-        self._cache_bust_favicon(output_dir)
-
-    def _process_index(self, output_dir: Path) -> None:
         index = output_dir / "index.html"
         if not index.is_file():
             raise BuildError("Quarto 未生成首页 index.html")
-        markup = index.read_text(encoding="utf-8")
+        references_page = output_dir / "references.html"
+        relative_reference = (
+            references_page.relative_to(output_dir).as_posix()
+            if references_page.is_file()
+            else None
+        )
+        favicon = output_dir / "favicon.svg"
+        favicon_version = (
+            hashlib.sha256(favicon.read_bytes()).hexdigest()[:12]
+            if favicon.is_file()
+            else None
+        )
+        stylesheet = output_dir / "style.css"
+        stylesheet_version = (
+            hashlib.sha256(stylesheet.read_bytes()).hexdigest()[:12]
+            if stylesheet.is_file()
+            else None
+        )
+        repository_meta = (
+            '<meta name="textbook-repository" content="'
+            + html.escape(site_metadata["repository"], quote=True)
+            + '">\n'
+        )
+        for path in sorted(output_dir.rglob("*.html")):
+            markup = path.read_text(encoding="utf-8")
+            updated = self._process_page(
+                markup,
+                path=path,
+                output_dir=output_dir,
+                index=index,
+                references_page=references_page if relative_reference else None,
+                relative_reference=relative_reference,
+                repository_meta=repository_meta,
+                favicon_version=favicon_version,
+                stylesheet_version=stylesheet_version,
+            )
+            if updated != markup:
+                path.write_text(updated, encoding="utf-8")
+
+    def _process_index_markup(self, markup: str) -> str:
         updated = re.sub(
             r'<nav class="page-navigation">.*?</nav>',
             "",
@@ -89,34 +122,7 @@ class RenderedSitePostprocessor:
             updated = updated.replace(source, destination)
         if updated == markup and self.warning:
             self.warning("首页未匹配任何预期的 Quarto 后处理标记")
-        if updated != markup:
-            index.write_text(updated, encoding="utf-8")
-
-    @staticmethod
-    def _process_reference_pages(output_dir: Path) -> None:
-        references_page = output_dir / "references.html"
-        if not references_page.exists():
-            return
-        relative_reference = references_page.relative_to(output_dir).as_posix()
-        for path in sorted(output_dir.rglob("*.html")):
-            markup = path.read_text(encoding="utf-8")
-            if path.resolve() == references_page.resolve():
-                updated = markup
-            else:
-                current = path.parent.relative_to(output_dir).as_posix()
-                if current == ".":
-                    current = ""
-                target = posixpath.relpath(
-                    relative_reference, start=current or "."
-                )
-                updated = re.sub(
-                    r'href="#(ref-[^"]+)"',
-                    rf'href="{target}#\1"',
-                    markup,
-                )
-                updated = remove_div_by_id(updated, "refs")
-            if updated != markup:
-                path.write_text(updated, encoding="utf-8")
+        return updated
 
     @staticmethod
     def _image_source(tag: str) -> str | None:
@@ -323,47 +329,56 @@ class RenderedSitePostprocessor:
             markup = pattern.sub(replace, markup)
         return markup
 
-    @classmethod
-    def _process_site_markup(
-        cls, output_dir: Path, site_metadata: dict[str, str]
-    ) -> None:
-        repository_meta = (
-            '<meta name="textbook-repository" content="'
-            + html.escape(site_metadata["repository"], quote=True)
-            + '">\n'
-        )
-        for path in sorted(output_dir.rglob("*.html")):
-            markup = path.read_text(encoding="utf-8")
-            updated = markup
-            if 'name="textbook-repository"' not in updated:
-                updated = updated.replace("</head>", repository_meta + "</head>", 1)
-            updated = cls._deduplicate_quarto_resource_ids(updated)
-            updated = re.sub(
-                r"<img\b[^>]*>",
-                lambda match: cls._optimize_image(
-                    match,
-                    page=path,
-                    output_dir=output_dir,
-                ),
-                updated,
-                flags=re.IGNORECASE,
+    def _process_page(
+        self,
+        markup: str,
+        *,
+        path: Path,
+        output_dir: Path,
+        index: Path,
+        references_page: Path | None,
+        relative_reference: str | None,
+        repository_meta: str,
+        favicon_version: str | None,
+        stylesheet_version: str | None,
+    ) -> str:
+        updated = self._process_index_markup(markup) if path == index else markup
+        if references_page is not None and path != references_page:
+            current = path.parent.relative_to(output_dir).as_posix()
+            target = posixpath.relpath(
+                relative_reference or "references.html",
+                start="." if current == "." else current,
             )
-            if updated != markup:
-                path.write_text(updated, encoding="utf-8")
-
-    @staticmethod
-    def _cache_bust_favicon(output_dir: Path) -> None:
-        favicon = output_dir / "favicon.svg"
-        if not favicon.is_file():
-            return
-        version = hashlib.sha256(favicon.read_bytes()).hexdigest()[:12]
-        icon_link = re.compile(
-            r'(<link\b(?=[^>]*\brel=["\']icon["\'])[^>]*\bhref=["\'])'
-            r'([^"\']*favicon\.svg)(?:\?[^"\']*)?(["\'])',
+            updated = re.sub(
+                r'href="#(ref-[^"]+)"',
+                rf'href="{target}#\1"',
+                updated,
+            )
+            updated = remove_div_by_id(updated, "refs")
+        if 'name="textbook-repository"' not in updated:
+            updated = updated.replace("</head>", repository_meta + "</head>", 1)
+        updated = self._deduplicate_quarto_resource_ids(updated)
+        updated = re.sub(
+            r"<img\b[^>]*>",
+            lambda match: self._optimize_image(
+                match,
+                page=path,
+                output_dir=output_dir,
+            ),
+            updated,
             flags=re.IGNORECASE,
         )
-        for path in sorted(output_dir.rglob("*.html")):
-            markup = path.read_text(encoding="utf-8")
-            updated = icon_link.sub(rf"\1\2?v={version}\3", markup)
-            if updated != markup:
-                path.write_text(updated, encoding="utf-8")
+        versioned_assets = (
+            ("favicon.svg", favicon_version, r'\brel=["\']icon["\']'),
+            ("style.css", stylesheet_version, r'\brel=["\']stylesheet["\']'),
+        )
+        for filename, version, relation_pattern in versioned_assets:
+            if version is None:
+                continue
+            asset_link = re.compile(
+                rf'(<link\b(?=[^>]*{relation_pattern})[^>]*\bhref=["\'])'
+                rf'([^"\']*{re.escape(filename)})(?:\?[^"\']*)?(["\'])',
+                flags=re.IGNORECASE,
+            )
+            updated = asset_link.sub(rf"\1\2?v={version}\3", updated)
+        return updated

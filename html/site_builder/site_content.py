@@ -11,11 +11,12 @@ from urllib.parse import urlencode
 
 from .config import BuildConfig
 from .errors import BuildError
-from .markup import Markup, element, join, text
+from .markup import Markup, element, join, raw, text
 from .metadata import book_contact_email, quarto_date, recent_git_commits, yaml_quote
 from .models import QuartoPage
 from .pages import page_title
-from .pandoc_transform import BookTransformer, ast_plain_text, node_identifier
+from .pandoc_ast import node_identifier
+from .pandoc_transform import BookTransformer, ast_plain_text
 from .quarto import QuartoProjectWriter
 
 
@@ -433,27 +434,72 @@ def write_notation_page(catalog: dict[str, Any], destination_dir: Path) -> None:
     )
     sections: list[str] = []
     for category in categories:
-        rows: list[str] = []
+        rows: list[Markup] = []
         for entry in entries:
             if entry["category"] != category:
                 continue
             source = raw_html_text(entry["symbol"])
             rendered = raw_html_text(entry.get("render_tex", entry["symbol"]))
             rows.append(
-                f'<tr id="notation-{html.escape(entry["id"], quote=True)}">'
-                f'<td class="notation-rendered">&#92;({rendered}&#92;)</td>'
-                f'<td class="notation-source"><code>{source}</code></td>'
-                f'<td class="notation-meaning"><strong>{raw_html_text(entry["name"])}</strong>'
-                f'<p>{raw_html_text(entry["meaning"])}</p></td>'
-                f'<td class="notation-scope">{raw_html_text("、".join(entry["scope"]))}</td>'
-                '</tr>'
+                element(
+                    "tr",
+                    [
+                        element(
+                            "td",
+                            raw(f"&#92;({rendered}&#92;)"),
+                            attributes={"class": "notation-rendered"},
+                        ),
+                        element(
+                            "td",
+                            element("code", raw(source)),
+                            attributes={"class": "notation-source"},
+                        ),
+                        element(
+                            "td",
+                            [
+                                element(
+                                    "strong",
+                                    raw(raw_html_text(entry["name"])),
+                                ),
+                                element(
+                                    "p",
+                                    raw(raw_html_text(entry["meaning"])),
+                                ),
+                            ],
+                            attributes={"class": "notation-meaning"},
+                        ),
+                        element(
+                            "td",
+                            raw(raw_html_text("、".join(entry["scope"]))),
+                            attributes={"class": "notation-scope"},
+                        ),
+                    ],
+                    attributes={"id": f'notation-{entry["id"]}'},
+                )
             )
         if rows:
+            table = element(
+                "table",
+                [
+                    element(
+                        "thead",
+                        element(
+                            "tr",
+                            [
+                                element("th", text("数学记号")),
+                                element("th", text("LaTeX")),
+                                element("th", text("含义")),
+                                element("th", text("适用范围")),
+                            ],
+                        ),
+                    ),
+                    element("tbody", join(rows)),
+                ],
+                attributes={"class": "notation-table"},
+            )
             sections.append(
                 f'## {category} {{.notation-section-title}}\n\n'
-                '<table class="notation-table">'
-                '<thead><tr><th>数学记号</th><th>LaTeX</th><th>含义</th><th>适用范围</th></tr></thead>'
-                f'<tbody>{"".join(rows)}</tbody></table>\n'
+                f"{table}\n"
             )
     content = "\n".join(
         [
@@ -487,7 +533,10 @@ def write_quarto_config(
     date = quarto_date(raw_date)
     email = book_contact_email(config.paths)
     title = title or "数学教材"
-    commits = recent_git_commits(config.paths.project_root)
+    commits = recent_git_commits(
+        config.paths.project_root,
+        executable=config.tools.git,
+    )
     statistics = project_statistics(transformer, pages)
     write_project_status_page(
         metadata=site_metadata,
@@ -554,7 +603,7 @@ def write_quarto_config(
     index.append(
         f"date-modified: {yaml_quote(calendar_date.today().isoformat())}"
     )
-    home_content_path = config.paths.html_dir / "home.md"
+    home_content_path = config.paths.home_source
     home_content = (
         home_content_path.read_text(encoding="utf-8").strip()
         if home_content_path.exists()

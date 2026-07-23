@@ -113,12 +113,12 @@ class QuartoProjectWriter:
             "project": {
                 "type": "book",
                 "output-dir": "_site",
-                "resources": list(self.config.assets.quarto_resources),
+                "resources": list(self.config.assets.public_files),
             },
             "lang": self.config.render.language,
             "date-format": "long",
             "bibliography": bibliography,
-            "csl": "textbook.csl",
+            "csl": self.config.assets.citation_style,
             "book": book,
             "format": {"html": html_format},
         }

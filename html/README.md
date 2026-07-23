@@ -10,11 +10,11 @@ python3 html/build.py
 
 网页生成在 `html/site/`，每个 `chapter` 对应一个 Quarto Book 页面，左侧是整本书的章节索引，页面右侧是当前章目录。
 
-首页正文写在 `html/home.md`，可直接使用 Markdown 修改或补充。标题、作者、邮箱和日期读取自 `settings.tex` 中的 `title/author/date`。
+首页正文写在 `html/content/home.md`，可直接使用 Markdown 修改或补充。标题、作者、邮箱和日期读取自 `settings.tex` 中的 `title/author/date`。
 
-站点的首次发布日期、最近内容更新日期和 GitHub 仓库写在`html/site-meta.json`；网站构建日期由构建当天自动生成。19 个正文章节的完成度集中写在 `html/chapter-progress.json`：填写 `0`–`100` 的整数即可，`null`表示尚未填写。构建会严格检查章节键，避免拼写错误被静默忽略。
+站点的首次发布日期、最近内容更新日期和 GitHub 仓库写在`html/data/site-meta.json`；网站构建日期由构建当天自动生成。19 个正文章节的完成度集中写在 `html/data/chapter-progress.json`：填写 `0`–`100` 的整数即可，`null`表示尚未填写。构建会严格检查章节键，避免拼写错误被静默忽略。
 
-网页“符号与记号说明”页的构建数据位于 `html/notation-catalog.json`。该文件是网站源码的一部分，构建会据此生成页面。
+网页“符号与记号说明”页的构建数据位于 `html/data/notation-catalog.json`。该文件是网站源码的一部分，构建会据此生成页面。
 
 构建并启动本地预览：
 
@@ -31,6 +31,23 @@ python3 html/build.py --serve
 ```bash
 python3 html/build.py --strict
 ```
+
+## HTML 工具链与版本
+
+下面是当前维护者完成整站构建时使用的版本，供复现和排查问题时参考；它们不是强制锁定，`build.py` 不会因为补丁版本或安装路径不同而拒绝构建。
+
+| 工具 | 当前使用版本 |
+| --- | --- |
+| Python（只运行 HTML 构建器） | 3.13.2 |
+| Quarto | 1.9.38 |
+| Pandoc | 3.10 |
+| XeLaTeX / XeTeX | 3.141592653-2.6-0.999997（TeX Live 2025） |
+| Ghostscript | 10.04.0 |
+| Git | 2.50.1（Apple Git-155） |
+
+`Pandoc`、`XeLaTeX`、`Ghostscript` 和 `Git` 默认按 `html/build-config.toml` 中的命令名从 `PATH` 查找。Quarto 优先使用 `QUARTO` 环境变量指定的程序，其次查找 `PATH`，最后使用配置中的 Positron 本地备用路径。因此其他机器不必复刻维护者的绝对安装路径，只要提供兼容工具即可。缺少实际参与转换的工具时构建会明确报错。
+
+这里列出的 Python 只运行 HTML 构建器。TeX Live 宏包由本机 TeX Live 管理，并没有在仓库中逐个保存宏包快照；不同机器或更新后的工具链可能产生细微输出差异，遇到问题时应先对照上表。Python Notebook 和 R 计算实验使用各自的环境：它们分别由 `environment/python/.python-version`、`uv.lock` 和根目录 `renv.lock` 管理，网页构建只导入已经生成的 `analysis.html`。
 
 ## 计算实验
 
@@ -122,7 +139,7 @@ pandoc statistics/multivariate/computations/01-kmeans/python/analysis.ipynb \
 
 将两条命令中的路径同时替换为实际实验路径。`--embed-resources` 会将 Notebook 输出的图片等资源嵌入 HTML；若 Notebook 还会读取数据文件，该数据文件仍需按项目约定提交。
 
-所有需要绘图的 Python Notebook 都应调用根目录 `figure_settings.configure_matplotlib()`；需要绘图的 R/Quarto 实验应在隐藏的 setup 块中加载 `figure_settings/figures.R` 并调用 `configure_knitr_figures()`。两者都从 `html/build-config.toml` 读取统一图像策略，默认优先输出 SVG；Python SVG 还会移除运行时间元数据。R 的内置 SVG 设备依赖 Cairo/X11，在 macOS 的无界面渲染环境中不够稳定，因此公共配置会直接改用不依赖 XQuartz 的 Quartz 2× 高分辨率 PNG；其他系统在 Cairo 不可用时也会回退到高分辨率 PNG。不要在单个实验中重新覆盖这些公共参数。
+所有需要绘图的 Python Notebook 都应调用根目录 `figure_settings.configure_matplotlib()`；需要绘图的 R/Quarto 实验应在隐藏的 setup 块中加载 `figure_settings/figures.R` 并调用 `configure_knitr_figures()`。Python 固定输出 SVG，并移除运行时间元数据；R 固定使用不依赖 XQuartz 的 macOS Quartz 2× 高分辨率 PNG。教材正文中的 TikZ 固定由 XeLaTeX 和 Ghostscript 转为高分辨率 PNG，不再探测或切换其他转换后端。不要在单个实验中重新覆盖这些公共参数。
 
 ### 插入教材网页
 
@@ -141,6 +158,7 @@ python3 html/build.py
 - 在 Quarto 渲染完成后插入最终 chapter HTML，保留原始公式、表格和图片；
 - 为 Python/Jupyter 和 R/Quarto 增加统一的语言标签和教材样式；
 - 在结果缺失或仍引用外部图片时给出明确错误并停止构建。
+- 发布或报错后自动删除 `html/.build/` 中的暂存文件与工具缓存，以及构建脚本产生的 `__pycache__/`；最终站点仅保留在 `html/site/`。
 
 程序生成的 SVG 直接按矢量图导入；位图若声明了逻辑宽度，构建会校验其实际像素是否满足高分辨率屏幕所需的倍率，未声明逻辑宽度时才采用集中配置的绝对宽度下限。检查只决定构建是否通过，不会把图片尺寸或检查信息写入发布页面。直接由教材引用的外部图片仍按原文件复制，不会被重采样或重新编码。
 
@@ -153,8 +171,8 @@ python3 html/build.py
 需要提交到 GitHub 的内容包括：
 
 - 原始 LaTeX 文件和正文引用的图片、代码等资源；
-- `html/build.py`、`html/build-config.toml`、`html/site_builder/`、`html/styles/`、`html/home.md`、`html/textbook-theme.js`、`html/textbook-toc.js`、`html/textbook-ui.js` 与 `html/favicon.svg`；
-- `html/site-meta.json`、`html/chapter-progress.json` 与`html/notation-catalog.json`；
+- `html/build.py`、`html/build-config.toml`、`html/site_builder/`、`html/styles/`、`html/content/`、`html/scripts/`、`html/assets/` 与 `html/templates/`；
+- `html/data/` 中的站点元数据、章节进度与符号目录；
 - 完整的 `html/site/`，包括 `index.html`、`chapters/`、`site_libs/`、`search.json` 和样式文件；
 - `.github/workflows/pages.yml`。
 
@@ -218,7 +236,7 @@ git push origin main
 - `densityplot` 环境在 PDF 中保留固定参数的 TikZ/PGFPlots 图，在网页中替换为可调整参数的 SVG 密度曲线；支持 PDF/CDF 切换、PDF 区间概率、坐标缩放和曲线对比。鼠标移入曲线区域时会显示当前位置与函数值；图表滚动到视口附近才加载数值计算、探针和绘图脚本。相关逻辑按加载器、数学计算、鼠标探针与图表界面拆分，脚本随静态站点一同发布，不依赖外部服务。
 - 每个行间公式会保留转换前的原始 LaTeX；网页在公式右上角提供复制按钮，复制结果不会包含网页构建时生成的编号标签。
 - 与章节同目录的 `computations.order` 控制 Jupyter/Quarto 结果的顺序，构建时自动编号并追加到相应 chapter 末尾。
-- 右侧当前章目录会随正文滚动自动高亮，并保持当前条目可见。
+- 右侧当前章目录会随正文滚动自动高亮，并且只展开当前一级标题下的二级标题，不会同时铺开其他一级标题的分支。
 - 每个正文页提供“在 GitHub 上报告本页问题”入口；首页和项目状态页提供源代码、错误报告、内容建议与提交记录入口。
 - 项目状态页自动汇总章节进度、定理类环境、证明、算法、行间公式、交互图和术语数量，不需要手工维护统计数字。
 
@@ -231,27 +249,24 @@ python3 html/build.py --strict
 ## 目录
 
 - `build.py`：稳定的命令行入口与构建阶段编排。
-- `build-config.toml`：工具、路径、布局、图像质量和资源清单的集中配置。
+- `build-config.toml`：工具命令与备用路径、生成路径、布局、图像质量和资源清单的集中配置。
 - `site_builder/`：LaTeX 暂存、Pandoc AST、页面规划、QMD、计算结果、资源、Quarto、后处理、校验与发布模块。
-- `styles/`：按基础视觉、页面骨架、内容组件、计算实验、首页、暗色、公式、交互图、响应式和项目页拆分的 CSS 源文件；构建时按配置合并为站点的 `style.css`。
+- `styles/`：使用含义明确、无数字前缀的文件名，按基础视觉、页面骨架、内容组件、计算实验、首页、暗色、公式、交互图、响应式和项目页拆分 CSS；构建时按配置顺序合并为站点的 `style.css`。
+- `scripts/`：主题、右侧目录、阅读交互、公式复制和密度图等浏览器脚本。
+- `assets/`：网站图标与引用样式等静态资源。
+- `templates/`：Quarto 注入页面头部的模板。
+- `content/`：网站手写内容，目前包含首页正文。
+- `data/`：站点元数据、章节进度和符号目录。
 - `../figure_settings/`：Python 计算实验共用的确定性 SVG/高 DPI 配置。
-- `textbook-theme.js`：明暗主题状态、持久化与切换按钮。
-- `textbook-toc.js`：右侧目录滚动高亮，以及当前一级目录分支的展开规则。
-- `textbook-ui.js`：证明折叠、阅读位置、交叉引用提示与页面反馈入口。
-- `site-meta.json`：发布日期、内容更新日期和 GitHub 仓库。
-- `chapter-progress.json`：19 个正文章节的完成百分比。
-- `.build/`：Pandoc AST、临时 `.qmd` 和 Quarto 工程，每次构建时更新。
+- `scripts/textbook-theme.js`：明暗主题状态、持久化与切换按钮。
+- `scripts/textbook-toc.js`：右侧目录滚动高亮，以及当前一级目录分支的展开规则。
+- `scripts/textbook-ui.js`：阅读交互模块的轻量加载入口。
+- `data/site-meta.json`：发布日期、内容更新日期和 GitHub 仓库。
+- `data/chapter-progress.json`：19 个正文章节的完成百分比。
+- `.build/`：本次构建使用的 Pandoc、TikZ 与 Quarto 临时文件；成功或失败后自动删除。
 - `site/`：最终静态网站，可发布到 GitHub Pages。
 - `computations.order`：某一数学章节的计算实验标题与结果显示顺序。
 - `.github/workflows/pages.yml`：从项目根目录发布 `html/site/` 的 GitHubPages 工作流。
-
-默认调用 Positron 内置的 Quarto：
-
-```text
-/Applications/Positron.app/Contents/Resources/app/quarto/bin/quarto
-```
-
-如需使用其他版本，可以设置 `QUARTO` 环境变量。
 
 ## GitHub 语言统计
 

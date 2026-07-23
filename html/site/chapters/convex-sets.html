@@ -84,18 +84,6 @@ ul.task-list li input[type="checkbox"] {
   "use strict";
 
   document.documentElement.classList.add("js");
-  try {
-    const theme = window.localStorage.getItem("textbook-color-scheme");
-    if (theme === "dark" || theme === "light") {
-      window.localStorage.setItem(
-        "quarto-color-scheme",
-        theme === "dark" ? "alternate" : "default"
-      );
-    }
-  } catch (_error) {
-    // Storage is optional; Quarto's configured default remains usable.
-  }
-
   const mathJax = window.MathJax || {};
   mathJax.tex = mathJax.tex || {};
   mathJax.tex.macros = {
@@ -103,6 +91,8 @@ ul.task-list li input[type="checkbox"] {
     dif: "\\mathop{}\\!\\mathrm{d}",
     seq: ["#1_1,#1_2,\\dots,#1_{#2}", 2],
     varLambda: "\\mathit{\\Lambda}",
+    coloneq: "\\mathrel{:=}",
+    coloneqq: "\\mathrel{:=}",
   };
   window.MathJax = mathJax;
 
@@ -117,12 +107,15 @@ ul.task-list li input[type="checkbox"] {
     return stylesheet ? new URL(".", stylesheet.href) : new URL(".", document.baseURI);
   };
 
-  const loadScript = (name, version, marker) => {
+  const assetVersions = {"density-distributions.js": "81f4104295be", "density-loader.js": "cc128004fcbd", "density-math.js": "44cb999c8084", "density-plots.js": "dc6abfbf5a85", "density-probe.js": "e100dfbcbe1b", "density-renderer.js": "44d6cf2025c4", "favicon.svg": "e16632460c39", "formula-copy.js": "1223f1197fd7", "textbook-content-ui.js": "8296a83a0ecc", "textbook-page-ui.js": "6679a76c8e90", "textbook-reading.js": "95efd72caeda", "textbook-theme.js": "b5921270fe41", "textbook-toc.js": "9459345b72b8", "textbook-ui.js": "9339e068a088"};
+  window.TextbookAssetVersions = Object.freeze(assetVersions);
+
+  const loadScript = (name, marker) => {
     if (document.querySelector(`script[data-textbook-asset="${marker}"]`)) {
       return;
     }
     const url = new URL(name, assetBase());
-    url.searchParams.set("v", version);
+    url.searchParams.set("v", assetVersions[name]);
     const script = document.createElement("script");
     script.src = url.href;
     script.async = false;
@@ -134,22 +127,14 @@ ul.task-list li input[type="checkbox"] {
   };
 
   const bootstrap = () => {
-    loadScript(
-      "textbook-theme.js",
-      "cb49857cf598",
-      "theme"
-    );
-    loadScript(
-      "textbook-toc.js",
-      "a8cc5f276568",
-      "toc"
-    );
-    loadScript("textbook-ui.js", "44da0b9086e1", "ui");
+    loadScript("textbook-theme.js", "theme");
+    loadScript("textbook-toc.js", "toc");
+    loadScript("textbook-ui.js", "ui");
     if (document.querySelector(".display-math-copy-marker")) {
-      loadScript("formula-copy.js", "1223f1197fd7", "formula-copy");
+      loadScript("formula-copy.js", "formula-copy");
     }
     if (document.querySelector(".density-plot[data-distribution]")) {
-      loadScript("density-loader.js", "604b9c6c2cb3", "density");
+      loadScript("density-loader.js", "density");
     }
   };
 
@@ -191,17 +176,17 @@ window.Quarto = {
 };
 </script>
 
-<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../style.css?v=4fc528baf0dc">
 <link rel="stylesheet" href="../sidebar.css">
 <meta property="og:title" content="第 8 章 凸集 – 你永远不知道一个强迫症能干出什么事情">
 <meta property="og:description" content="持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，强调逻辑自洽、证明完整与持续维护。">
-<meta property="og:image" content="https://expectorpatro.github.io/math/_tikz/tikz-31274e7212b00049b877.png">
+<meta property="og:image" content="https://expectorpatro.github.io/math/_tikz/tikz-04695eb2087ef4a1002c.png">
 <meta property="og:site_name" content="你永远不知道一个强迫症能干出什么事情">
 <meta property="og:image:height" content="644">
 <meta property="og:image:width" content="2766">
 <meta name="twitter:title" content="第 8 章 凸集 – 你永远不知道一个强迫症能干出什么事情">
 <meta name="twitter:description" content="持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，强调逻辑自洽、证明完整与持续维护。">
-<meta name="twitter:image" content="https://expectorpatro.github.io/math/_tikz/tikz-31274e7212b00049b877.png">
+<meta name="twitter:image" content="https://expectorpatro.github.io/math/_tikz/tikz-04695eb2087ef4a1002c.png">
 <meta name="twitter:image-height" content="644">
 <meta name="twitter:image-width" content="2766">
 <meta name="twitter:card" content="summary_large_image">
@@ -826,7 +811,7 @@ y=x_2+\theta(x_1-x_2)
 <p>为<span class="math inline">\(E\)</span>的<a href="../chapters/glossary-c.html#term-ConvexHull" class="term" title="convex hull">凸包<span class="term-english">（convex hull）</span></a>，记作<span class="math inline">\(\operatorname{Conv}(E)\)</span>。</p>
 </div>
 <figure id="fig-8-1" class="textbook-figure figure" data-latex-placement="H">
-<img src="../_tikz/tikz-31274e7212b00049b877.png" class="tikz-image figure-img" style="width:92.0%" width="2766" height="644" alt="TikZ 数学图示" loading="lazy" decoding="async">
+<img src="../_tikz/tikz-04695eb2087ef4a1002c.png" class="tikz-image figure-img" style="width:92.0%" width="2766" height="644" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
 <span class="figure-number">图 8.1</span> 凸集、非凸集与凸包的二维几何结构。
 </figcaption>
@@ -884,7 +869,7 @@ y=\sum_{i=1}^{n-1}\frac{\theta_i}{\sum\limits_{j=1}^{n-1}\theta_j}x_i
 <p>为<span class="math inline">\(E\)</span>的<a href="../chapters/glossary-a.html#term-AffineHull" class="term" title="affine hull">仿射包<span class="term-english">（affine hull）</span></a>，记作<span class="math inline">\(\operatorname{Aff}(E)\)</span>。</p>
 </div>
 <figure id="fig-8-2" class="textbook-figure figure" data-latex-placement="H">
-<img src="../_tikz/tikz-5fe281f959821a3e2afe.png" class="tikz-image figure-img" style="width:92.0%" width="2202" height="842" alt="TikZ 数学图示" loading="lazy" decoding="async">
+<img src="../_tikz/tikz-7f00ad536dd76533cf3e.png" class="tikz-image figure-img" style="width:92.0%" width="2202" height="842" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
 <span class="figure-number">图 8.2</span> 仿射集是子空间的平移。它不必经过原点，并且沿方向子空间<span class="math inline"><em>V</em></span>的正、负方向无限延伸。
 </figcaption>
@@ -936,7 +921,7 @@ y=\sum_{i=1}^{n-1}\frac{\theta_i}{\sum\limits_{j=1}^{n-1}\theta_j}x_i
 <p>为<span class="math inline">\(E\)</span>的<a href="../chapters/glossary-c.html#term-ConicHull" class="term" title="conic hull">锥包<span class="term-english">（conic hull）</span></a>，记作<span class="math inline">\(\operatorname{Cone}(E)\)</span>。</p>
 </div>
 <figure id="fig-8-3" class="textbook-figure figure" data-latex-placement="H">
-<img src="../_tikz/tikz-2188496c5efce6135ad8.png" class="tikz-image figure-img" style="width:92.0%" width="2438" height="859" alt="TikZ 数学图示" loading="lazy" decoding="async">
+<img src="../_tikz/tikz-7a6c55e3a199db64d1c4.png" class="tikz-image figure-img" style="width:92.0%" width="2438" height="859" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
 <span class="figure-number">图 8.3</span> 锥只要求沿每条射线对非负缩放封闭；凸锥还要求对加法封闭，因此包含两条射线之间的全部非负线性组合。
 </figcaption>
@@ -1202,7 +1187,7 @@ f(y)\geqslant f(x)+g^T(y-x)
 <p>在迭代优化算法中，一次迭代通常包含两个基本问题：首先确定一个搜索方向，其次确定沿该方向移动的步长。如果步长过小，则每次迭代的推进幅度有限，算法收敛速度可能很慢；如果步长过大，则损失函数值不但不能下降，反而可能上升。因此，步长选择需要在”保证下降”和”保持足够推进”之间取得平衡。</p>
 <p>线搜索法正是为了解决这一问题而引入的。所谓线搜索法，是指在当前点<span class="math inline">\(x_n\)</span>和搜索方向<span class="math inline">\(d_n\)</span>确定之后，沿着射线<span class="math inline">\(\{x_n+\alpha d_n:\alpha&gt;0\}\)</span>寻找一个合适的步长<span class="math inline">\(\alpha_n\)</span>，并用它更新迭代点。</p>
 <figure id="fig-8-4" class="textbook-figure figure" data-latex-placement="H">
-<img src="../_tikz/tikz-5dde70490236b0f9e37e.png" class="tikz-image figure-img" style="width:92.0%" width="1982" height="1136" alt="TikZ 数学图示" loading="lazy" decoding="async">
+<img src="../_tikz/tikz-0658d3c8c70620db0f03.png" class="tikz-image figure-img" style="width:92.0%" width="1982" height="1136" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
 <span class="figure-number">图 8.4</span> 沿固定下降方向的一维函数。步长过小会使每次下降有限；步长过大可能越过低点，甚至使函数值高于当前点。
 </figcaption>

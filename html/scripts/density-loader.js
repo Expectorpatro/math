@@ -7,12 +7,20 @@
   if (!containers.length) return;
 
   const base = new URL(".", document.currentScript.src);
+  const versions = window.TextbookAssetVersions || {};
   let bundlePromise;
 
   function loadScript(name) {
     return new Promise((resolve, reject) => {
+      if (document.querySelector(`script[data-density-module="${name}"]`)) {
+        resolve();
+        return;
+      }
+      const url = new URL(name, base);
+      if (versions[name]) url.searchParams.set("v", versions[name]);
       const script = document.createElement("script");
-      script.src = new URL(name, base).href;
+      script.src = url.href;
+      script.dataset.densityModule = name;
       script.onload = resolve;
       script.onerror = () => reject(new Error(`无法加载 ${name}`));
       document.head.appendChild(script);
@@ -22,7 +30,9 @@
   function loadBundle() {
     if (!bundlePromise) {
       bundlePromise = loadScript("density-math.js")
+        .then(() => loadScript("density-distributions.js"))
         .then(() => loadScript("density-probe.js"))
+        .then(() => loadScript("density-renderer.js"))
         .then(() => loadScript("density-plots.js"));
     }
     return bundlePromise;

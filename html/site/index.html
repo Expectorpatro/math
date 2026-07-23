@@ -84,18 +84,6 @@ ul.task-list li input[type="checkbox"] {
   "use strict";
 
   document.documentElement.classList.add("js");
-  try {
-    const theme = window.localStorage.getItem("textbook-color-scheme");
-    if (theme === "dark" || theme === "light") {
-      window.localStorage.setItem(
-        "quarto-color-scheme",
-        theme === "dark" ? "alternate" : "default"
-      );
-    }
-  } catch (_error) {
-    // Storage is optional; Quarto's configured default remains usable.
-  }
-
   const mathJax = window.MathJax || {};
   mathJax.tex = mathJax.tex || {};
   mathJax.tex.macros = {
@@ -103,6 +91,8 @@ ul.task-list li input[type="checkbox"] {
     dif: "\\mathop{}\\!\\mathrm{d}",
     seq: ["#1_1,#1_2,\\dots,#1_{#2}", 2],
     varLambda: "\\mathit{\\Lambda}",
+    coloneq: "\\mathrel{:=}",
+    coloneqq: "\\mathrel{:=}",
   };
   window.MathJax = mathJax;
 
@@ -117,12 +107,15 @@ ul.task-list li input[type="checkbox"] {
     return stylesheet ? new URL(".", stylesheet.href) : new URL(".", document.baseURI);
   };
 
-  const loadScript = (name, version, marker) => {
+  const assetVersions = {"density-distributions.js": "81f4104295be", "density-loader.js": "cc128004fcbd", "density-math.js": "44cb999c8084", "density-plots.js": "dc6abfbf5a85", "density-probe.js": "e100dfbcbe1b", "density-renderer.js": "44d6cf2025c4", "favicon.svg": "e16632460c39", "formula-copy.js": "1223f1197fd7", "textbook-content-ui.js": "8296a83a0ecc", "textbook-page-ui.js": "6679a76c8e90", "textbook-reading.js": "95efd72caeda", "textbook-theme.js": "b5921270fe41", "textbook-toc.js": "9459345b72b8", "textbook-ui.js": "9339e068a088"};
+  window.TextbookAssetVersions = Object.freeze(assetVersions);
+
+  const loadScript = (name, marker) => {
     if (document.querySelector(`script[data-textbook-asset="${marker}"]`)) {
       return;
     }
     const url = new URL(name, assetBase());
-    url.searchParams.set("v", version);
+    url.searchParams.set("v", assetVersions[name]);
     const script = document.createElement("script");
     script.src = url.href;
     script.async = false;
@@ -134,22 +127,14 @@ ul.task-list li input[type="checkbox"] {
   };
 
   const bootstrap = () => {
-    loadScript(
-      "textbook-theme.js",
-      "cb49857cf598",
-      "theme"
-    );
-    loadScript(
-      "textbook-toc.js",
-      "a8cc5f276568",
-      "toc"
-    );
-    loadScript("textbook-ui.js", "44da0b9086e1", "ui");
+    loadScript("textbook-theme.js", "theme");
+    loadScript("textbook-toc.js", "toc");
+    loadScript("textbook-ui.js", "ui");
     if (document.querySelector(".display-math-copy-marker")) {
-      loadScript("formula-copy.js", "1223f1197fd7", "formula-copy");
+      loadScript("formula-copy.js", "formula-copy");
     }
     if (document.querySelector(".density-plot[data-distribution]")) {
-      loadScript("density-loader.js", "604b9c6c2cb3", "density");
+      loadScript("density-loader.js", "density");
     }
   };
 
@@ -162,7 +147,7 @@ ul.task-list li input[type="checkbox"] {
 </script>
 
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=4fc528baf0dc">
 <link rel="stylesheet" href="sidebar.css">
 <meta property="og:title" content="你永远不知道一个强迫症能干出什么事情">
 <meta property="og:description" content="持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，强调逻辑自洽、证明完整与持续维护。">
@@ -746,7 +731,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">编译于</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">2026年7月22日</p>
+      <p class="date-modified">2026年7月23日</p>
     </div>
   </div>
     
@@ -857,7 +842,7 @@ MAINTENANCE
 网站构建
 </dt>
 <dd>
-<time datetime="2026-07-22">2026-07-22</time>
+<time datetime="2026-07-23">2026-07-23</time>
 </dd>
 </div>
 </dl>
@@ -876,13 +861,13 @@ CHANGELOG
 </div>
 <ol class="home-commits">
 <li>
+<a href="https://github.com/Expectorpatro/math/commit/86627eb08597dee4f1ef4a21fd4ea621d8e3c48c"><code>86627eb</code><span>2026.7.22, html test 4</span><time datetime="2026-07-22">2026-07-22</time></a>
+</li>
+<li>
 <a href="https://github.com/Expectorpatro/math/commit/c36f0ffc9fc5891f87b497e8aa6ed7c6d7ca269c"><code>c36f0ff</code><span>2026.7.22, html test 3</span><time datetime="2026-07-22">2026-07-22</time></a>
 </li>
 <li>
 <a href="https://github.com/Expectorpatro/math/commit/1514c292e6026943213ab0e827f62f14e36b2f13"><code>1514c29</code><span>2026.7.22, html test 2</span><time datetime="2026-07-22">2026-07-22</time></a>
-</li>
-<li>
-<a href="https://github.com/Expectorpatro/math/commit/5afbade4334fc02e90751fdcb167746430af0478"><code>5afbade</code><span>2026.7.22, html test</span><time datetime="2026-07-22">2026-07-22</time></a>
 </li>
 </ol>
 </article>
@@ -930,7 +915,7 @@ OPEN SOURCE
 </section>
 <footer class="home-footer">
 <p>
-正文由 LaTeX 源文件持续生成 · 支持全文搜索、深色模式与移动端阅读 · 构建于 2026-07-22
+正文由 LaTeX 源文件持续生成 · 支持全文搜索、深色模式与移动端阅读 · 构建于 2026-07-23
 </p>
 <a class="home-contact" href="mailto:nxcexpect@163.com"><i class="bi bi-envelope" aria-hidden="true"></i><span>联系作者</span></a>
 </footer>

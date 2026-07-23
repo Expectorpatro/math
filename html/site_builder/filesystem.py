@@ -51,6 +51,19 @@ def prepare_empty_directory(path: Path, *, managed: Iterable[Path]) -> None:
     resolved.mkdir(parents=True, exist_ok=True)
 
 
+def remove_managed_directory(path: Path, *, managed: Iterable[Path]) -> bool:
+    """Remove one registered generated directory if it exists."""
+
+    resolved = _ensure_managed(path, managed)
+    if not resolved.exists():
+        return False
+    try:
+        shutil.rmtree(resolved)
+    except OSError as error:
+        raise BuildError(f"无法清理生成目录 {resolved}：{error}") from error
+    return True
+
+
 def atomic_publish_directory(
     source: Path,
     destination: Path,

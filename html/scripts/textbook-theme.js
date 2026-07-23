@@ -3,7 +3,6 @@
 
   // Theme persistence, Quarto stylesheet synchronization, and toggle placement.
 
-  const THEME_STORAGE_KEY = "textbook-color-scheme";
   const QUARTO_THEME_STORAGE_KEY = "quarto-color-scheme";
 
   const normalizeTheme = (value) =>
@@ -13,14 +12,6 @@
 
   const quartoThemePreference = (theme) =>
     theme === "dark" ? "alternate" : "default";
-
-  const readStorage = (storage, key) => {
-    try {
-      return storage.getItem(key);
-    } catch (_error) {
-      return null;
-    }
-  };
 
   const writeStorage = (storage, key, value) => {
     try {
@@ -41,11 +32,7 @@
   const currentTheme = (doc) =>
     doc.body.classList.contains("quarto-dark") ? "dark" : "light";
 
-  const readStoredTheme = (storage) =>
-    normalizeTheme(readStorage(storage, THEME_STORAGE_KEY));
-
   const writeTheme = (storage, theme) => {
-    writeStorage(storage, THEME_STORAGE_KEY, theme);
     writeStorage(storage, QUARTO_THEME_STORAGE_KEY, quartoThemePreference(theme));
   };
 
@@ -121,12 +108,7 @@
     };
 
     const restoreTheme = () => {
-      applyTheme(
-        readStoredTheme(localStorageFor(win)) || currentTheme(doc),
-        button,
-        doc,
-        win
-      );
+      updateThemeButton(button, currentTheme(doc));
     };
 
     place();
@@ -139,7 +121,6 @@
   };
 
   const api = Object.freeze({
-    THEME_STORAGE_KEY,
     QUARTO_THEME_STORAGE_KEY,
     normalizeTheme,
     nextTheme,

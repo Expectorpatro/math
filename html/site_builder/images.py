@@ -6,11 +6,8 @@ import base64
 import binascii
 from dataclasses import dataclass
 import hashlib
-import json
-import os
 from pathlib import Path
 import re
-import shutil
 import struct
 import tempfile
 from xml.etree import ElementTree
@@ -18,9 +15,6 @@ from xml.etree import ElementTree
 from .commands import CommandRunner
 from .config import BuildConfig
 from .errors import BuildError
-
-
-TIKZ_RENDERER_SCHEMA = "tikz-renderer-v4"
 
 
 @dataclass(frozen=True, slots=True)
@@ -105,151 +99,52 @@ def svg_dimensions(text: str) -> tuple[float, float] | None:
 
 
 class TikzRenderer:
-    """Compile TikZ to SVG, with an explicit high-DPI PNG fallback."""
+    """Compile TikZ with XeLaTeX and render it as high-resolution PNG."""
 
     def __init__(self, config: BuildConfig, runner: CommandRunner) -> None:
         self.config = config
         self.runner = runner
-        self._pdf_svg_support: bool | None = None
-        self._reported_raster_fallback = False
 
     def render(self, tikz_source: str, source: Path) -> Path:
         paths = self.config.paths
-        relative_source = source.resolve().relative_to(paths.project_root).as_posix()
-        xelatex = self.runner.require(
-            self.config.tools.xelatex, "编译 TikZ"
+        relative_source = (
+            source.resolve().relative_to(paths.project_root).as_posix()
         )
-        requested_format = self.config.images.tikz_format
-        dvisvgm = shutil.which(self.config.tools.dvisvgm)
-        ghostscript = shutil.which(self.config.tools.ghostscript)
-        svg_available = bool(dvisvgm and self._supports_pdf_svg(dvisvgm))
-        actual_format = (
-            "svg"
-            if requested_format in {"auto", "svg"} and svg_available
-            else "png"
+        xelatex = self.runner.require(self.config.tools.xelatex, "编译 TikZ")
+        ghostscript = self.runner.require(
+            self.config.tools.ghostscript, "生成 TikZ PNG"
         )
-        if (
-            requested_format == "svg"
-            and not svg_available
-            and not self.config.images.tikz_png_fallback
-        ):
-            raise BuildError(
-                "当前 dvisvgm 未启用 PDF/PS 后端，无法安全保留 TikZ 几何图元"
+        wrapper_source = self._wrapper(tikz_source)
+        output_identity = "\0".join(
+            (
+                relative_source,
+                wrapper_source,
+                str(self.config.images.tikz_raster_dpi),
+                str(self.config.images.tikz_min_raster_width),
+                str(self.config.images.tikz_max_raster_dpi),
             )
-        if (
-            requested_format in {"auto", "svg"}
-            and not svg_available
-            and not self._reported_raster_fallback
-        ):
-            self.runner.warning(
-                "当前 dvisvgm 未启用 PDF/PS 后端；TikZ 将使用高分辨率 PNG"
-            )
-            self._reported_raster_fallback = True
-        renderer_versions = {
-            "xelatex": self.runner.version(xelatex),
-            "dvisvgm": self.runner.version(dvisvgm) if dvisvgm else None,
-            "ghostscript": self.runner.version(ghostscript) if ghostscript else None,
-        }
-        cache_material = {
-            "schema": TIKZ_RENDERER_SCHEMA,
-            "source": relative_source,
-            "tikz": tikz_source.strip(),
-            "format": requested_format,
-            "actual_format": actual_format,
-            "quality": {
-                "border_points": self.config.images.tikz_border_points,
-                "raster_dpi": self.config.images.tikz_raster_dpi,
-                "min_raster_width": self.config.images.tikz_min_raster_width,
-                "max_raster_dpi": self.config.images.tikz_max_raster_dpi,
-                "svg_precision": self.config.images.tikz_svg_precision,
-                "text_as_paths": self.config.images.tikz_text_as_paths,
-            },
-            "versions": renderer_versions,
-            "wrapper": self._wrapper(tikz_source),
-        }
+        )
         digest = hashlib.sha256(
-            json.dumps(
-                cache_material,
-                ensure_ascii=False,
-                sort_keys=True,
-                separators=(",", ":"),
-            ).encode("utf-8")
+            output_identity.encode("utf-8")
         ).hexdigest()[:20]
 
-        if actual_format == "svg":
-            extension = ".svg"
-        else:
-            extension = ".png"
-        if extension == ".png" and not ghostscript:
-            raise BuildError("TikZ PNG 输出需要 Ghostscript（gs）")
-
-        filename = f"tikz-{digest}{extension}"
-        cached = paths.tikz_cache_dir / filename
+        filename = f"tikz-{digest}.png"
         destination = paths.staged_source_dir / "_tikz" / filename
         destination.parent.mkdir(parents=True, exist_ok=True)
-        cache_candidates = [cached]
-        if actual_format == "svg" and self.config.images.tikz_png_fallback:
-            # A source-specific SVG conversion can fail even when dvisvgm has
-            # PDF support.  The fallback shares the complete cache key (source,
-            # settings, wrapper, and tool versions) and differs only by suffix.
-            # Checking it here avoids recompiling the same known fallback on
-            # every build.
-            cache_candidates.append(
-                paths.tikz_cache_dir / f"tikz-{digest}.png"
-            )
-        reusable = next(
-            (
-                candidate
-                for candidate in cache_candidates
-                if candidate.is_file() and self._valid_cache(candidate)
-            ),
-            None,
-        )
-        if reusable is not None:
-            cached = reusable
-            filename = cached.name
-            destination = paths.staged_source_dir / "_tikz" / filename
-            shutil.copy2(cached, destination)
-            return Path("_tikz") / filename
-
-        paths.tikz_cache_dir.mkdir(parents=True, exist_ok=True)
         paths.tikz_work_dir.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(
             prefix=f"tikz-{digest}-", dir=paths.tikz_work_dir
         ) as temporary:
             work_dir = Path(temporary)
             wrapper = work_dir / "picture.tex"
-            wrapper.write_text(self._wrapper(tikz_source), encoding="utf-8")
-            rendered = work_dir / filename
-            if extension == ".svg":
-                self._compile_xelatex(xelatex, wrapper, work_dir)
-                pdf = work_dir / "picture.pdf"
-                try:
-                    self._render_svg(dvisvgm or "", pdf, rendered, work_dir)
-                except BuildError:
-                    if not self.config.images.tikz_png_fallback or not ghostscript:
-                        raise
-                    self.runner.warning(
-                        f"SVG 转换失败，改用 {self.config.images.tikz_raster_dpi} DPI PNG："
-                        f"{relative_source}"
-                    )
-                    extension = ".png"
-                    filename = f"tikz-{digest}{extension}"
-                    cached = paths.tikz_cache_dir / filename
-                    destination = paths.staged_source_dir / "_tikz" / filename
-                    rendered = work_dir / filename
-                    self._render_png(ghostscript, pdf, rendered, work_dir)
-            else:
-                self._compile_xelatex(xelatex, wrapper, work_dir)
-                pdf = work_dir / "picture.pdf"
-                self._render_png(ghostscript or "", pdf, rendered, work_dir)
-
-            if not self._valid_cache(rendered):
-                raise BuildError(f"TikZ 转换产物无效：{relative_source}")
-            cache_temporary = cached.with_name(cached.name + ".incoming")
-            shutil.copy2(rendered, cache_temporary)
-            os.replace(cache_temporary, cached)
-            shutil.copy2(cached, destination)
+            wrapper.write_text(wrapper_source, encoding="utf-8")
+            self._compile_xelatex(xelatex, wrapper, work_dir)
+            self._render_png(
+                ghostscript,
+                work_dir / "picture.pdf",
+                destination,
+                work_dir,
+            )
         return Path("_tikz") / filename
 
     def _wrapper(self, tikz_source: str) -> str:
@@ -275,27 +170,6 @@ class TikzRenderer:
             ]
         )
 
-    def _render_svg(
-        self, executable: str, pdf: Path, output: Path, cwd: Path
-    ) -> None:
-        command = [
-            executable,
-            "--pdf",
-            "--page=1",
-            # The standalone PDF already has a tightly cropped page plus the
-            # configured safety border.  Keeping its page box prevents arrow
-            # heads and line caps from touching the SVG edge.
-            "--bbox=papersize",
-            f"--precision={self.config.images.tikz_svg_precision}",
-            "--embed-bitmaps",
-            "--optimize=all",
-            f"--output={output}",
-        ]
-        if self.config.images.tikz_text_as_paths:
-            command.append("--no-fonts")
-        command.append(str(pdf))
-        self.runner.run(command, cwd=cwd, quiet=True)
-
     def _compile_xelatex(
         self,
         executable: str,
@@ -313,21 +187,6 @@ class TikzRenderer:
         expected = cwd / "picture.pdf"
         if not expected.is_file():
             raise BuildError(f"XeLaTeX 未生成预期文件：{expected.name}")
-
-    def _supports_pdf_svg(self, executable: str) -> bool:
-        """Detect whether dvisvgm can preserve PDF/PS drawing operations."""
-
-        if self._pdf_svg_support is None:
-            try:
-                details = self.runner.run(
-                    [executable, "--version=yes"],
-                    cwd=self.config.paths.html_dir,
-                    quiet=True,
-                ).lower()
-            except BuildError:
-                details = ""
-            self._pdf_svg_support = "mupdf:" in details or "ghostscript:" in details
-        return self._pdf_svg_support
 
     def _render_png(
         self, executable: str, pdf: Path, output: Path, cwd: Path
@@ -367,58 +226,6 @@ class TikzRenderer:
                     f"TikZ PNG 宽度仅 {dimensions.width}px，未达到 {minimum}px"
                 )
             dpi = next_dpi
-
-    @staticmethod
-    def _valid_cache(path: Path) -> bool:
-        try:
-            data = path.read_bytes()
-        except OSError:
-            return False
-        if path.suffix == ".png":
-            return png_dimensions(data) is not None
-        if path.suffix == ".svg":
-            return TikzRenderer._valid_svg(data.decode("utf-8", errors="replace"))
-        return False
-
-    @staticmethod
-    def _valid_svg(source: str) -> bool:
-        if svg_dimensions(source) is None:
-            return False
-        try:
-            root = ElementTree.fromstring(source)
-        except ElementTree.ParseError:
-            return False
-        if root.tag.rsplit("}", 1)[-1].lower() != "svg":
-            return False
-        forbidden = {"script", "foreignObject"}
-        drawable = {
-            "path",
-            "rect",
-            "circle",
-            "ellipse",
-            "line",
-            "polyline",
-            "polygon",
-            "text",
-            "image",
-            "use",
-        }
-        has_drawable = False
-        for node in root.iter():
-            local_name = node.tag.rsplit("}", 1)[-1]
-            if local_name in forbidden:
-                return False
-            if local_name in drawable:
-                has_drawable = True
-            for key, value in node.attrib.items():
-                if (
-                    key.rsplit("}", 1)[-1] == "href"
-                    and value
-                    and not value.startswith(("#", "data:"))
-                ):
-                    return False
-        return has_drawable
-
 
 def inspect_data_image(mime: str, encoded: str, source: str) -> GeneratedImageInfo:
     """Inspect one Base64 data image embedded in a computation result."""

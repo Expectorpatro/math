@@ -2,56 +2,58 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import hashlib
+import json
 from pathlib import Path, PurePosixPath
 import shutil
 from typing import Any
 from urllib.parse import unquote, urlsplit
 
-from .commands import CommandRunner
 from .config import BuildConfig
 from .errors import BuildError
 from .filesystem import ensure_within
 
 
-@dataclass(frozen=True, slots=True)
-class AssetManifestEntry:
-    source: Path
-    destination: Path
-    digest: str
-    generated: bool = False
-
-
 class AssetManager:
     """Copy author assets unchanged and materialize generated web assets."""
 
-    def __init__(self, config: BuildConfig, runner: CommandRunner) -> None:
+    def __init__(self, config: BuildConfig) -> None:
         self.config = config
-        self.runner = runner
 
-    def prepare(self, document: dict[str, Any]) -> list[AssetManifestEntry]:
-        manifest: list[AssetManifestEntry] = []
+    def prepare(self, document: dict[str, Any]) -> int:
+        prepared = 0
         for target in sorted(self._pandoc_image_targets(document)):
-            manifest.append(self._copy_content_image(target))
-        manifest.append(self._build_style_bundle())
+            self._copy_content_image(target)
+            prepared += 1
+        self._build_style_bundle()
+        prepared += 1
         versions: dict[str, str] = {}
-        for name in self.config.assets.copy:
-            source = self.config.paths.html_asset(name)
-            if not source.is_file():
-                raise BuildError(f"缺少网页资源：{source}")
-            destination = self.config.paths.quarto_project_dir / name
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(source, destination)
-            digest = hashlib.sha256(source.read_bytes()).hexdigest()[:12]
-            versions[name] = digest
-            manifest.append(
-                AssetManifestEntry(source, destination, digest, generated=False)
-            )
-        manifest.append(self._render_header(versions))
-        return manifest
+        public_sources = self.config.assets.public_sources
+        public_files = self.config.assets.public_files
+        citation_source = self.config.assets.citation_style_source
+        citation_style = self.config.assets.citation_style
+        if citation_style in public_files:
+            raise BuildError("引用样式不得同时出现在 assets.public_sources 中")
+        if len(set(public_files)) != len(public_files):
+            raise BuildError("公开网页资源的文件名不得重复")
+        for source_name, public_name in zip(public_sources, public_files):
+            versions[public_name] = self._copy_asset(source_name, public_name)
+            prepared += 1
+        self._copy_asset(citation_source, citation_style)
+        prepared += 1
+        self._render_header(versions)
+        return prepared + 1
 
-    def _build_style_bundle(self) -> AssetManifestEntry:
+    def _copy_asset(self, source_name: str, public_name: str) -> str:
+        source = self.config.paths.html_asset(source_name)
+        if not source.is_file():
+            raise BuildError(f"缺少网页资源：{source}")
+        destination = self.config.paths.quarto_project_dir / public_name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+        return hashlib.sha256(source.read_bytes()).hexdigest()[:12]
+
+    def _build_style_bundle(self) -> None:
         """Assemble ordered CSS modules into Quarto's single theme asset.
 
         Keeping the cascade order in configuration makes the source stylesheet
@@ -61,13 +63,11 @@ class AssetManager:
         configured_sources = self.config.assets.style_sources
         if not configured_sources:
             raise BuildError("assets.style_sources 不得为空")
-        sources: list[Path] = []
         parts: list[str] = []
         for name in configured_sources:
             source = self.config.paths.html_asset(name)
             if not source.is_file():
                 raise BuildError(f"缺少 CSS 模块：{source}")
-            sources.append(source)
             parts.append(source.read_text(encoding="utf-8"))
         bundle = "".join(parts)
         destination = ensure_within(
@@ -77,15 +77,8 @@ class AssetManager:
         )
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(bundle, encoding="utf-8")
-        digest = hashlib.sha256(bundle.encode("utf-8")).hexdigest()[:12]
-        return AssetManifestEntry(
-            source=sources[0].parent,
-            destination=destination,
-            digest=digest,
-            generated=True,
-        )
 
-    def _copy_content_image(self, target: str) -> AssetManifestEntry:
+    def _copy_content_image(self, target: str) -> None:
         """Copy one referenced image without decoding or resampling it."""
 
         paths = self.config.paths
@@ -122,34 +115,24 @@ class AssetManager:
         )
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
-        digest = hashlib.sha256(source.read_bytes()).hexdigest()[:12]
-        return AssetManifestEntry(
-            source=source,
-            destination=destination,
-            digest=digest,
-            generated="_tikz" in relative.parts,
-        )
 
-    def _render_header(self, versions: dict[str, str]) -> AssetManifestEntry:
+    def _render_header(self, versions: dict[str, str]) -> None:
         source = self.config.paths.html_asset(
-            self.config.assets.header_template
+            self.config.assets.header_template_source
         )
         template = source.read_text(encoding="utf-8")
-        replacements = {
-            placeholder: versions[asset_name]
-            for placeholder, asset_name in self.config.assets.version_placeholders
-        }
-        for placeholder, value in replacements.items():
-            count = template.count(placeholder)
-            if count != 1:
-                raise BuildError(
-                    f"{source.name} 中 {placeholder} 应恰好出现一次，实际 {count} 次"
-                )
-            template = template.replace(placeholder, value)
+        placeholder = "__TEXTBOOK_ASSET_VERSIONS__"
+        count = template.count(placeholder)
+        if count != 1:
+            raise BuildError(
+                f"{source.name} 中 {placeholder} 应恰好出现一次，实际 {count} 次"
+            )
+        template = template.replace(
+            placeholder,
+            json.dumps(versions, ensure_ascii=False, sort_keys=True),
+        )
         destination = self.config.paths.quarto_project_dir / source.name
         destination.write_text(template, encoding="utf-8")
-        digest = hashlib.sha256(template.encode("utf-8")).hexdigest()[:12]
-        return AssetManifestEntry(source, destination, digest, generated=True)
 
     @staticmethod
     def _pandoc_image_targets(document: dict[str, Any]) -> set[str]:

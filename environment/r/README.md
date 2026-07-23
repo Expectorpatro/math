@@ -38,7 +38,7 @@ renv::project()
 
 ## macOS 绘图设备
 
-计算实验默认优先生成 SVG。macOS 上 R 的内置 SVG 设备依赖 Cairo/X11，在 Quarto 的无界面 R 进程中可能错误报告为可用，因此 `figure_settings/figures.R` 在 macOS 会直接使用原生 Quartz 设备生成 2× 高分辨率 PNG，不需要为了渲染实验额外安装 XQuartz。若仍出现图形设备错误，先确认实验的隐藏 setup 块调用了 `configure_knitr_figures()`，不要在单个 QMD 中直接设置 `dev = "svg"`。
+计算实验固定由 `figure_settings/figures.R` 使用 macOS 原生 Quartz 设备生成 2× 高分辨率 PNG。若出现图形设备错误，先确认实验的隐藏 setup 块调用了 `configure_knitr_figures()`，不要在单个 QMD 中覆盖图形设备。
 
 ## 修改 R 依赖
 

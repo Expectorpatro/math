@@ -1,8 +1,8 @@
 """Typed, centralized configuration for the HTML build.
 
 All paths are derived from the checked-in ``build-config.toml`` and the
-location of the ``html`` directory.  Callers never need to duplicate cache
-names, image resolution settings, or tool fallbacks.
+location of the ``html`` directory. Callers never need to duplicate temporary
+directory names, image resolution settings, or tool fallbacks.
 """
 
 from __future__ import annotations
@@ -37,12 +37,6 @@ def _positive_float(value: Any, name: str) -> float:
     if not math.isfinite(result):
         raise BuildError(f"build-config.toml 的 {name} 必须是有限正数")
     return result
-
-
-def _boolean(value: Any, name: str) -> bool:
-    if not isinstance(value, bool):
-        raise BuildError(f"build-config.toml 的 {name} 必须是布尔值")
-    return value
 
 
 def _nonempty_string(value: Any, name: str) -> str:
@@ -101,7 +95,6 @@ class BuildPaths:
     staged_source_dir: Path
     quarto_project_dir: Path
     cache_dir: Path
-    tikz_cache_dir: Path
     tikz_work_dir: Path
     quarto_cache_dir: Path
     deno_cache_dir: Path
@@ -117,6 +110,22 @@ class BuildPaths:
     @property
     def settings_tex(self) -> Path:
         return self.project_root / "settings.tex"
+
+    @property
+    def home_source(self) -> Path:
+        return self.html_dir / "content" / "home.md"
+
+    @property
+    def site_metadata_file(self) -> Path:
+        return self.html_dir / "data" / "site-meta.json"
+
+    @property
+    def chapter_progress_file(self) -> Path:
+        return self.html_dir / "data" / "chapter-progress.json"
+
+    @property
+    def notation_catalog_file(self) -> Path:
+        return self.html_dir / "data" / "notation-catalog.json"
 
     def html_asset(self, name: str) -> Path:
         """Return a checked-in asset path inside ``html/``."""
@@ -149,6 +158,10 @@ class BuildPaths:
         if _paths_overlap(candidate, self.build_dir):
             raise BuildError("输出目录不能与 HTML 构建工作目录重叠")
         protected_names = {
+            "assets",
+            "content",
+            "data",
+            "scripts",
             "site_builder",
             "styles",
             "templates",
@@ -160,13 +173,13 @@ class BuildPaths:
 
 @dataclass(frozen=True, slots=True)
 class ToolConfig:
-    """Names and fallbacks for external executables."""
+    """Command names and the local Quarto fallback used by the build."""
 
     quarto_fallback: Path
     pandoc: str
     xelatex: str
-    dvisvgm: str
     ghostscript: str
+    git: str
 
     def quarto_path(self) -> Path:
         configured = os.environ.get("QUARTO")
@@ -186,14 +199,10 @@ class ImageQuality:
     policy: the build copies them byte-for-byte and never resamples them.
     """
 
-    tikz_format: str
-    tikz_png_fallback: bool
     tikz_raster_dpi: int
     tikz_min_raster_width: int
     tikz_max_raster_dpi: int
     tikz_border_points: float
-    tikz_svg_precision: int
-    tikz_text_as_paths: bool
     computation_min_raster_width: int
     computation_min_pixel_ratio: float
 
@@ -210,12 +219,23 @@ class RenderConfig:
 
 @dataclass(frozen=True, slots=True)
 class AssetConfig:
-    copy: tuple[str, ...]
-    quarto_resources: tuple[str, ...]
+    public_sources: tuple[str, ...]
+    citation_style_source: str
     style_bundle: str
     style_sources: tuple[str, ...]
-    header_template: str
-    version_placeholders: tuple[tuple[str, str], ...]
+    header_template_source: str
+
+    @property
+    def public_files(self) -> tuple[str, ...]:
+        return tuple(Path(source).name for source in self.public_sources)
+
+    @property
+    def citation_style(self) -> str:
+        return Path(self.citation_style_source).name
+
+    @property
+    def header_template(self) -> str:
+        return Path(self.header_template_source).name
 
 
 @dataclass(frozen=True, slots=True)
@@ -267,21 +287,15 @@ class BuildConfig:
             ),
             "tools": (
                 tools,
-                {"quarto_fallback", "pandoc", "xelatex", "dvisvgm", "ghostscript"},
+                {"quarto_fallback", "pandoc", "xelatex", "ghostscript", "git"},
             ),
             "images": (
                 images,
                 {
-                    "tikz_format",
-                    "tikz_png_fallback",
                     "tikz_raster_dpi",
                     "tikz_min_raster_width",
                     "tikz_max_raster_dpi",
                     "tikz_border_points",
-                    "tikz_svg_precision",
-                    "tikz_text_as_paths",
-                    "computation_preferred_format",
-                    "computation_raster_dpi",
                     "computation_min_raster_width",
                     "computation_min_pixel_ratio",
                 },
@@ -300,12 +314,11 @@ class BuildConfig:
             "assets": (
                 assets,
                 {
-                    "copy",
-                    "quarto_resources",
+                    "public_sources",
+                    "citation_style_source",
                     "style_bundle",
                     "style_sources",
-                    "header_template",
-                    "version_placeholders",
+                    "header_template_source",
                 },
             ),
         }
@@ -374,7 +387,6 @@ class BuildConfig:
             staged_source_dir=staged_source_dir,
             quarto_project_dir=quarto_project_dir,
             cache_dir=cache_dir,
-            tikz_cache_dir=cache_dir / "tikz",
             tikz_work_dir=tikz_work_dir,
             quarto_cache_dir=cache_dir / "quarto",
             deno_cache_dir=cache_dir / "deno",
@@ -384,53 +396,6 @@ class BuildConfig:
             default_output_dir=default_output_dir,
         )
 
-        tikz_format = _nonempty_string(
-            images["tikz_format"], "images.tikz_format"
-        ).lower()
-        if tikz_format not in {"auto", "svg", "png"}:
-            raise BuildError("images.tikz_format 只支持 auto、svg 或 png")
-        preferred = _nonempty_string(
-            images["computation_preferred_format"],
-            "images.computation_preferred_format",
-        ).lower()
-        if preferred not in {"svg", "png"}:
-            raise BuildError(
-                "images.computation_preferred_format 只支持 svg 或 png"
-            )
-        _positive_int(
-            images["computation_raster_dpi"],
-            "images.computation_raster_dpi",
-        )
-
-        copied_assets = _string_tuple(assets["copy"], "assets.copy")
-        quarto_resources = _string_tuple(
-            assets["quarto_resources"], "assets.quarto_resources"
-        )
-        missing_resources = sorted(set(quarto_resources).difference(copied_assets))
-        if missing_resources:
-            raise BuildError(
-                "assets.quarto_resources 中存在未复制的资源："
-                + "、".join(missing_resources)
-            )
-        placeholder_mapping = _mapping(
-            assets["version_placeholders"], "assets.version_placeholders"
-        )
-        version_placeholders: list[tuple[str, str]] = []
-        for placeholder, asset_name in placeholder_mapping.items():
-            placeholder_name = _nonempty_string(
-                placeholder, "assets.version_placeholders 的键"
-            )
-            versioned_asset = _nonempty_string(
-                asset_name,
-                f"assets.version_placeholders.{placeholder_name}",
-            )
-            if versioned_asset not in copied_assets:
-                raise BuildError(
-                    f"版本占位符 {placeholder_name} 引用了未复制资源 "
-                    f"{versioned_asset}"
-                )
-            version_placeholders.append((placeholder_name, versioned_asset))
-
         return cls(
             paths=paths,
             tools=ToolConfig(
@@ -438,19 +403,15 @@ class BuildConfig:
                     _nonempty_string(
                         tools["quarto_fallback"], "tools.quarto_fallback"
                     )
-                ),
+                ).expanduser(),
                 pandoc=_nonempty_string(tools["pandoc"], "tools.pandoc"),
                 xelatex=_nonempty_string(tools["xelatex"], "tools.xelatex"),
-                dvisvgm=_nonempty_string(tools["dvisvgm"], "tools.dvisvgm"),
                 ghostscript=_nonempty_string(
                     tools["ghostscript"], "tools.ghostscript"
                 ),
+                git=_nonempty_string(tools["git"], "tools.git"),
             ),
             images=ImageQuality(
-                tikz_format=tikz_format,
-                tikz_png_fallback=_boolean(
-                    images["tikz_png_fallback"], "images.tikz_png_fallback"
-                ),
                 tikz_raster_dpi=_positive_int(
                     images["tikz_raster_dpi"], "images.tikz_raster_dpi"
                 ),
@@ -464,12 +425,6 @@ class BuildConfig:
                 ),
                 tikz_border_points=_positive_float(
                     images["tikz_border_points"], "images.tikz_border_points"
-                ),
-                tikz_svg_precision=_positive_int(
-                    images["tikz_svg_precision"], "images.tikz_svg_precision"
-                ),
-                tikz_text_as_paths=_boolean(
-                    images["tikz_text_as_paths"], "images.tikz_text_as_paths"
                 ),
                 computation_min_raster_width=_positive_int(
                     images["computation_min_raster_width"],
@@ -497,17 +452,22 @@ class BuildConfig:
                 ),
             ),
             assets=AssetConfig(
-                copy=copied_assets,
-                quarto_resources=quarto_resources,
+                public_sources=_string_tuple(
+                    assets["public_sources"], "assets.public_sources"
+                ),
+                citation_style_source=_nonempty_string(
+                    assets["citation_style_source"],
+                    "assets.citation_style_source",
+                ),
                 style_bundle=_nonempty_string(
                     assets["style_bundle"], "assets.style_bundle"
                 ),
                 style_sources=_string_tuple(
                     assets["style_sources"], "assets.style_sources"
                 ),
-                header_template=_nonempty_string(
-                    assets["header_template"], "assets.header_template"
+                header_template_source=_nonempty_string(
+                    assets["header_template_source"],
+                    "assets.header_template_source",
                 ),
-                version_placeholders=tuple(version_placeholders),
             ),
         )

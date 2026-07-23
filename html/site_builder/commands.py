@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 import os
 from pathlib import Path
 import shlex
@@ -18,7 +18,6 @@ class CommandRunner:
     """Run project tools without mutating the user's process environment."""
 
     prefix: str = "[web]"
-    _versions: dict[str, str] = field(default_factory=dict, init=False)
 
     def log(self, message: str) -> None:
         print(f"{self.prefix} {message}")
@@ -26,11 +25,14 @@ class CommandRunner:
     def warning(self, message: str) -> None:
         print(f"{self.prefix} 警告：{message}", file=os.sys.stderr)
 
-    def require(self, executable: str, purpose: str | None = None) -> str:
-        found = shutil.which(executable)
+    def require(
+        self, executable: str | Path, purpose: str | None = None
+    ) -> str:
+        configured = str(executable)
+        found = shutil.which(configured)
         if found is None:
             suffix = f"（用于{purpose}）" if purpose else ""
-            raise BuildError(f"找不到所需工具 {executable}{suffix}")
+            raise BuildError(f"找不到所需工具 {configured}{suffix}")
         return found
 
     def run(
@@ -67,16 +69,3 @@ class CommandRunner:
                 message += f"\n{details}"
             raise BuildError(message)
         return result.stdout
-
-    def version(self, executable: str) -> str:
-        """Return a stable first-line version string for cache keys."""
-
-        if executable not in self._versions:
-            try:
-                output = self.run(
-                    [executable, "--version"], cwd=Path.cwd(), quiet=True
-                )
-            except BuildError:
-                output = "unknown"
-            self._versions[executable] = output.splitlines()[0] if output else "unknown"
-        return self._versions[executable]
