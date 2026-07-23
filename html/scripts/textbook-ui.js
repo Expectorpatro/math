@@ -3,6 +3,9 @@
 
   const modules = [
     "textbook-content-ui.js",
+    ...(document.querySelector(".computation-appendix")
+      ? ["computation-copy.js"]
+      : []),
     "textbook-reading.js",
     "textbook-page-ui.js",
   ];
