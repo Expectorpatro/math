@@ -104,8 +104,8 @@
 \begin{property}\label{prop:ContinuousLinearOperator}
 	设$X$和$Y$是数域$K$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是映射。
 	\begin{enumerate}
-		\item 若$K=\mathbb{R}^{}$，$T$是连续可加算子，则$T$是连续线性算子；
-		\item 若$K=\mathbb{C}^{}$，$T$是连续可加算子且$T(ix)=iTx$，则$T$是连续线性算子。
+		\item 若$K=\mathbb{R}$，$T$是连续可加算子，则$T$是连续线性算子；
+		\item 若$K=\mathbb{C}$，$T$是连续可加算子且$T(ix)=iTx$，则$T$是连续线性算子。
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -145,7 +145,7 @@
 	设$X$和$Y$是数域$K$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是映射。若$T$将$E$中的任一有界集映成$Y$中的有界集，则称$T$是\gls{BoundedLinearOperator}。如果存在$E$中的有界集$A$，使得$TA$是$Y$中的无界集，则称$T$是\gls{UnboundedLinearOperator}。
 \end{definition}
 \begin{property}\label{prop:BoundedLinearOperator}
-	设$X$和$Y$是$\mathbb{R}^{}$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是映射。$T$有界的充分必要条件为：
+	设$X$和$Y$是$\mathbb{R}$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是映射。$T$有界的充分必要条件为：
 	\begin{equation*}
 		\exists\;M>0,\;\forall\;x\in E,\;||Tx||_Y\leqslant M||x||_X
 	\end{equation*}
@@ -180,7 +180,7 @@
 \end{proof}
 \subsubsection{线性算子有界与连续的关系}
 \begin{theorem}\label{theo:LinearOperatorBoundedContinuous}
-	设$X$和$Y$是$\mathbb{R}^{}$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是映射，则以下陈述等价：
+	设$X$和$Y$是$\mathbb{R}$上的赋范线性空间，$E\subseteq X$，$T:E\to Y$是映射，则以下陈述等价：
 	\begin{enumerate}
 		\item $T$在$E$上连续。
 		\item $T$在$E$中某给定点$x_0$连续。
@@ -252,7 +252,7 @@
 	映射$T$保持线性运算是显然的。\par
 	综上，$X$和$\mathbb{R}^{n}$作为线性空间是同构的。\par
 	下证映射$T$是连续映射。\par
-	由\cref{ineq:cauchy-ineq-R}可得：
+	由\cref{ineq:CauchySchiwarz}可得：
 	\begin{align*}
 		||T\xi-T\eta||_X
 		&=\left\|\sum_{i=1}^n(\xi_i-\eta_i)e_i\right\|_X\leqslant\sum_{i=1}^n|\xi_i-\eta_i|\;||e_i||_X \\
@@ -317,7 +317,7 @@
 下证这个定义满足范数的定义：
 \begin{proof}
 	(1)非负性和(2)数乘可分别由内积的定义(3)和(1)立刻得出。\par
-	(3)三角不等式：由\cref{ineq:cauchy-schiwarz-inner-product}可得：
+	(3)三角不等式：由\cref{ineq:CauchySchiwarz}可得：
 	\begin{align*}
 		&||x+y||^2=(x+y,x+y)=(x,x+y)+(y,x+y) \\
 		=&(x,x)+(x,y)+(y,x)+(y,y)\leqslant||x||^2+2||x|||\;|y||+||y||^2=(||x||+||y||)^2
@@ -327,6 +327,7 @@
 \begin{property}\label{prop:InnerProduct}
 	设$X$是内积空间，则：
 	\begin{enumerate}
+		\item 对任意的$x\in X$有$(x,0)=0$；
 		\item 内积是连续函数；
 		\item(Polarization Identity) 对任意的$x,y\in X$，当$X$是实内积空间时有$(x,y)=\frac{1}{4}(||x+y||^2-||x-y||^2)$，当$X$是复内积空间时有$(x,y)=\frac{1}{4}(||x+y||^2-||x-y||^2+i||x+iy||^2-i||x-iy||^2)$；
 		\item(Parallelogram Law) 对任意的$x,y\in X$，由$X$的内积导出的范数$||\cdot||$满足：
@@ -337,7 +338,12 @@
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)设$\{x_n\},\{y_n\}$是内积空间$X$中的点列，且分别依范数收敛于$x,y\in X$，由\cref{ineq:cauchy-schiwarz-inner-product}可得：
+	(1)仅证明复内积空间的结论，实内积空间类似可得。注意到：
+	\begin{equation*}
+		(x,0)=(x,0+0)=\overline{(0+0,x)}=\overline{(0,x)+(0,x)}=(x,0)+(x,0)
+	\end{equation*}
+	所以$(x,0)=0$。\par
+	(2)设$\{x_n\},\{y_n\}$是内积空间$X$中的点列，且分别依范数收敛于$x,y\in X$，由\cref{ineq:CauchySchiwarz}可得：
 	\begin{align*}
 		|(x_n,y_n)-(x,y)|&=|(x_n,y_n)-(x_n,y)+(x_n,y)-(x,y)| \\
 		&=|(x_n,y_n-y)+(x_n-x,y)| \\
@@ -345,7 +351,7 @@
 		&\leqslant||x_n||\;||y_n-y||+||x_n-x||\;||y|| 
 	\end{align*}
 	根据\cref{prop:ConvergentSeqOfPoints}(3)可知$\{x_n\}$有界，所以$||x_n||$有界。由\cref{prop:RSeq}(8.b)(8.c)可知上式极限为$0$，即内积是连续函数。\par
-	(2)当$X$是实内积空间时有：
+	(3)当$X$是实内积空间时有：
 	\begin{align*}
 		&\frac{1}{4}(||x+y||^2-||x-y||^2)=\frac{1}{4}[(x+y,x+y)-(x-y,x-y)] \\
 		=&\frac{1}{4}[(x,x)+(x,y)+(y,x)+(y,y)-(x,x)-(x,-y)-(-y,x)-(-y,-y)] \\
@@ -360,13 +366,13 @@
 		&=\frac{1}{4}[2(x,y)+2(y,x)+2i(x,iy)+2i(iy,x)] \\
 		&=\frac{1}{4}[2(x,y)+2(y,x)+2(x,y)-2(y,x)=(x,y)
 	\end{align*}\par
-	(3)对于第一个结论，注意到：
+	(4)对于第一个结论，注意到：
 	\begin{align*}
 		&||x+y||^2+||x-y||^2=(x+y,x+y)+(x-y,x-y) \\
 		=&(x,x)+(x,y)+(y,x)+(y,y)+(x,x)-(x,y)-(y,x)+(y,y) \\
 		=&2(x,x)+2(y,y)=2||x||^2+2||y||^2
 	\end{align*}
-	第二个结论利用(2)来定义内积再代回验证即可。
+	第二个结论利用(3)来定义内积再代回验证即可。
 \end{proof}
 \subsubsection{Hilbert空间中的正交系}
 \begin{definition}
@@ -401,7 +407,7 @@
 		=\sum_{i=1}^{n}(x_i,x_i)
 		=\sum_{i=1}^{n}||x_i||^2
 	\end{equation*}\par
-	(2)根据\cref{prop:InnerProduct}(1)和\cref{prop:RSeq}(5)可得：
+	(2)根据\cref{prop:InnerProduct}(2)和\cref{prop:RSeq}(5)可得：
 	\begin{equation*}
 		(x,y)=\left(x,\lim_{n\to\infty}y_n\right)=\lim_{n\to\infty}(x,y_n)=0
 	\end{equation*}\par
@@ -429,7 +435,7 @@
 	\begin{equation*}
 		\lim_{n\to+\infty}||x-y_n||=a
 	\end{equation*}
-	下证$\{y_n\}$是Cauchy点列。令$n>m$，由\cref{prop:InnerProduct}(3)可得到：
+	下证$\{y_n\}$是Cauchy点列。令$n>m$，由\cref{prop:InnerProduct}(4)可得到：
 	\begin{align*}
 		&||y_n-y_m||^2=||y_n-x+x-y_m||^2 \\
 		=&2||y_n-x||^2+2||x-y_m||^2-||2x-y_m-y_n||^2 \\
@@ -453,7 +459,7 @@
 		||x-y||=\left\|x-\lim_{n\to+\infty}y_n\right\|=\lim_{n\to+\infty}||x-y_n||=a
 	\end{equation*}
 	所以$y$是$x$在$E$中的最佳逼近元。\par
-	\textbf{(2)唯一性：}假设$x$在$E$中存在另一最佳逼近元$y'$，由\cref{prop:InnerProduct}(3)可得：
+	\textbf{(2)唯一性：}假设$x$在$E$中存在另一最佳逼近元$y'$，由\cref{prop:InnerProduct}(4)可得：
 	\begin{align*}
 		&||y-y'||^2=||y-x+x-y'||^2 \\
 		=&2||y-x||^2+2||x-y'||^2-4\left\|x-\frac{y+y'}{2}\right\|^2\leqslant0
@@ -539,7 +545,7 @@
 		||x_m-x_n||^2=\left\|\sum_{i=n+1}^{m}c_ie_i\right\|^2=\left(\sum_{i=n+1}^{m}c_ie_i,\sum_{i=n+1}^{m}c_ie_i\right)=\sum_{i=n+1}^{m}|c_i|^2(e_i,e_i)=\sum_{i=n+1}^{m}|c_i|^2
 	\end{equation*}
 	因为数列$\{c_n\}\in l^2$，所以$\sum\limits_{i=1}^{+\infty}|c_i|^2$收敛，由\cref{prop:Series}(3)可得$||x_m-x_n||^2\to0$，因此$\{x_n\}$是$X$中的Cauchy点列。又因为$X$完备，所以$\{x_n\}\to x\in X$。\par
-	由\cref{prop:InnerProduct}(1)可知，对任意的$i\in\mathbb{N}^+$，有：
+	由\cref{prop:InnerProduct}(2)可知，对任意的$i\in\mathbb{N}^+$，有：
 	\begin{equation*}
 		(x,e_{i})=\left(\lim_{n\to+\infty}x_n,e_{i}\right)=\lim_{n\to+\infty}(x_n,e_{i})
 	\end{equation*}
@@ -607,7 +613,7 @@
 		&(x_n,y_n)=\left(\sum_{i=1}^{n}(x,e_i)e_i,\sum_{i=1}^{n}(y,e_i)e_i\right)=\sum_{i=1}^{n}(x,e_i)\left(e_i,\sum_{j=1}^{n}(y,e_j)e_j\right) \\
 		=&\sum_{i=1}^{n}(x,e_i)\sum_{j=1}^{n}\overline{(y,e_j)}(e_i,e_j) =\sum_{i=1}^{n}(x,e_i)\overline{(y,e_i)}
 	\end{align*}
-	由\cref{prop:InnerProduct}(1)可得：
+	由\cref{prop:InnerProduct}(2)可得：
 	\begin{equation*}
 		(x,y)=\lim_{n\to+\infty}(x_n,y_n)=\lim_{n\to+\infty}\left[\sum_{i=1}^{n}(x,e_i)\overline{(y,e_i)}\right]=\sum_{n=1}^{+\infty}(x,e_n)\overline{(y,e_n)}
 	\end{equation*}
@@ -615,7 +621,7 @@
 	\begin{equation*}
 		\sum_{n=1}^{N}|(x,e_n)|^2\leqslant||x||^2,\quad\sum_{n=1}^{N}|(y,e_n)|^2\leqslant||y||^2
 	\end{equation*}
-	根据\cref{ineq:cauchy-ineq-R}可得：
+	根据\cref{ineq:CauchySchiwarz}可得：
 	\begin{equation*}
 		\sum_{n=1}^{N}|(x,e_n)\overline{(y,e_n)}|=\sum_{n=1}^{N}|(x,e_n)(y,e_n)|\leqslant\left(\sum_{n=1}^{N}|(x,e_n)|^2\right)^{\frac{1}{2}}\left(\sum_{n=1}^{N}|(y,e_n)|^2\right)^{\frac{1}{2}}\leqslant||x||\;||y||
 	\end{equation*}
