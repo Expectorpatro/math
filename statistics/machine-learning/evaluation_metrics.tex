@@ -3,8 +3,8 @@
 在监督学习中，模型评价是衡量模型预测能力、比较不同模型并指导模型选择的重要环节。
 
 \subsection{分类任务}
-
-设真实标签$y\in\{1,\dots,r\}$，模型预测为$\hat{y}\in\{1,\dots,r\}$，对二分类问题可分别记为$0,1$，$0$对应负类，$1$对应正类。
+\subsubsection{二分类}
+设真实标签$y\in\{0,1\}$，模型预测为$\hat{y}\in\{0,1\}$，$0$对应负类，$1$对应正类。
 \begin{definition}
 	\gls{ConfusionMatrix}按真实标签与预测标签的组合统计样本个数，其每个元素含义如下：
 	\begin{itemize}
@@ -17,22 +17,24 @@
 \begin{definition}
   \gls{Accuracy}度量模型预测正确的比例：
   \begin{equation*}
-    \operatorname{Accuracy}=\frac{\operatorname{TP}+\operatorname{TN}}{\operatorname{TP}+\operatorname{TN}+\operatorname{FP}+\operatorname{FN}}.
+    \operatorname{Accuracy}=\frac{\operatorname{TP}+\operatorname{TN}}{\operatorname{TP}+\operatorname{TN}+\operatorname{FP}+\operatorname{FN}}
   \end{equation*}
 \end{definition}
+Accuracy 将正类和负类的正确预测汇总为一个整体比例，因而默认两类样本具有相同的重要性，并且不同类型的分类错误具有相同的代价。然而在许多实际问题中，假正类和假负类造成的损失并不相同，我们也可能更关注模型在某一特定类别上的预测表现。\par
+例如，在贷款违约预测中，若将违约客户定义为正类，则将实际违约的客户预测为不违约会使银行承担贷款损失，而将实际不违约的客户预测为违约主要意味着失去一次潜在的放贷机会。这两类错误的经济代价并不相同。因此，即使两个模型具有相同的 Accuracy，它们识别违约客户的能力也可能存在显著差异。为了考察模型针对特定类别的表现，需要进一步引入别的指标。
 \begin{definition}
   \gls{Precision}度量被预测为正类的样本中有多少是真正的正类：
   \begin{equation*}
-    \operatorname{Precision}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FP}}.
+    \operatorname{Precision}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FP}}
   \end{equation*}
 \end{definition}
 \begin{note}
-  精确率关心正类预测结果的\emph{准确性}，在系统对错误正类具有高成本的任务（如垃圾邮件过滤或癌症筛查）中尤为重要。较高的精确率意味着模型产生的误报较少。
+  精确率关心正类预测结果的准确性，在系统对错误正类具有高成本的任务（如垃圾邮件过滤）中尤为重要。较高的精确率意味着模型产生的误报较少。
 \end{note}
 \begin{definition}
   \gls{Recall}又称\gls{Sensitivity}，衡量真实正类中有多少被模型成功识别，定义为：
   \begin{equation*}
-    \operatorname{Recall}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FN}}.
+    \operatorname{Recall}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FN}}
   \end{equation*}
 \end{definition}
 \begin{note}
@@ -41,13 +43,15 @@
 \begin{definition}
   \gls{F1Score}是精确率与召回率的调和平均，用于在二者之间取得平衡：
   \begin{equation*}
-    \operatorname{F1}=2\times\frac{\operatorname{Precision}\times\operatorname{Recall}}{\operatorname{Precision}+\operatorname{Recall}}.
+    \operatorname{F1}=2\times\frac{\operatorname{Precision}\times\operatorname{Recall}}{\operatorname{Precision}+\operatorname{Recall}}
   \end{equation*}
 \end{definition}
 \begin{note}
   调和平均的性质使$\operatorname{F1}$得分对低值敏感——当精确率或召回率其中之一很低时，$\operatorname{F1}$会显著下降，因此它常用作综合评价指标，适用于精确率和召回率同等重要的情形。
 \end{note}
-许多分类器输出的是连续得分或概率，样本得分或概率大于某一阈值即判断该样本为正类。通过调整阈值可以得到不同的预测结果。因此，可以考察阈值变化下的性能曲线，并使用曲线下的面积作为评价指标。
+许多分类器并不直接输出类别，而是为每个样本输出一个连续得分或属于正类的概率，并在给定阈值后将其转化为分类结果。然而，分类阈值并不存在适用于所有任务的固定选择，即使模型输出的是概率，也不能机械地将$0.5$作为阈值。阈值的选择取决于正类的基础发生率、假正类与假负类的相对代价以及模型所服务的具体决策目标。\par
+以罕见病筛查为例，假设某种疾病在人群中的患病率仅为$0.1\%$。若模型预测某位受检者的患病概率为$10\%$，那么其患病风险已经达到普通人群的$100$ 倍，显然应当被识别为高风险个体并接受进一步检查。然而，$10\%$仍然低于$50\%$；若机械地将$0.5$作为分类阈值，该受检者就会被判定为阴性。类似地，在身份认证或银行人脸识别中，系统可能更重视防止冒用身份，因此会采用更加严格的判定阈值，以降低错误接受非本人的概率。\par
+由此可见，同一个模型在不同应用场景中可能需要采用完全不同的阈值，而模型在某一个固定阈值下的表现不能完整反映其分类能力。为了减少评价结果对特定阈值选择的依赖，可以考察阈值连续变化时模型性能的变化，并将其表示为性能曲线。我们希望一个模型在较广的阈值范围内均能保持较好的正负类区分能力，因此可以进一步使用曲线下面积评价模型的综合表现。
 \begin{definition}
 	称：
 	 \begin{equation*}
@@ -57,12 +61,12 @@
 	分别为\gls{TPR}与\gls{FPR}。
 \end{definition}
 \begin{definition}
-  \gls{ROC}为在$[0,1]$内连续变化判别阈值$t$，对每个$t$计算对应的：
+  设分类器将得分不低于阈值$t$的样本预测为正类。\gls{ROC}为在阈值取值范围内连续变化$t$，对每个$t$计算对应的：
 	\begin{equation*}
 		\operatorname{TPR}(t)=\frac{\operatorname{TP}(t)}{\operatorname{TP}(t)+\operatorname{FN}(t)},\quad
 		\operatorname{FPR}(t)=	\frac{\operatorname{FP}(t)}{\operatorname{FP}(t)+\operatorname{TN}(t)}
 	\end{equation*}
-	然后以$\mathrm{FPR}(t)$为横轴、$\mathrm{TPR}(t)$为纵轴作图得到的曲线。\gls{AUROC}定义为ROC曲线与$\mathrm{FPR}(t)$轴和$\mathrm{FPR}(t)=1$围成区域的面积。
+	然后以$\mathrm{FPR}$为横轴、$\mathrm{TPR}$为纵轴作图得到的曲线。\gls{AUROC}定义为ROC曲线与$\mathrm{FPR}$轴和$\mathrm{FPR}=1$围成区域的面积。
 \end{definition}
 \begin{note}
   ROC曲线反映了阈值变化对$\operatorname{TPR}$与$\operatorname{FPR}$的权衡。$\operatorname{AUROC}$独立于具体阈值，是比较不同模型总体区分能力的常用指标，取值范围通常在$[0.5,1]$，$0.5$表示随机猜测（对任意的$t\in[0,1]$有$\operatorname{FPR}(t)=\operatorname{TPR}(t)$，模型判断正类为正类的概率和模型判断负类为正类的概率一致），$1$表示完美分类。
@@ -83,10 +87,10 @@
   \end{figure}
 \end{note}
 \begin{definition}
-  \gls{PRC}为在$[0,1]$内连续变化判别阈值$t$（$t$从$1$取向$0$），对每个$t$计算对应的$\operatorname{Precision}(t)$和$\operatorname{Recall}(t)$，然后以$\mathrm{Precision}(t)$为横轴、$\mathrm{Recall}(t)$为纵轴作图得到的曲线。\gls{AUPRC}定义为PRC与$\operatorname{Recall}(t)$轴和$\operatorname{Precision}(t)$轴围成区域的面积。
+ 	设模型将得分不低于阈值 $t$ 的样本预测为正类。\gls{PRC}为在阈值取值范围内内连续变化$t$，对每个$t$计算对应的$\operatorname{Precision}(t)$和$\operatorname{Recall}(t)$，然后以$\mathrm{Recall}$为横轴、$\mathrm{Precision}$为纵轴作图得到的曲线。\gls{AUPRC}定义为PRC曲线与$\operatorname{Recall}$轴之间区域的面积。
 \end{definition}
 \begin{note}
-  相比$\operatorname{AUROC}$，$\operatorname{AUPRC}$更关注正类的表现，因而在正负样本严重不平衡时更加敏感。较高的$\operatorname{AUPRC}$表明模型性能较好。
+  相比$\operatorname{AUROC}$，$\operatorname{AUPRC}$更关注正类的表现。较高的$\operatorname{AUPRC}$表明模型性能较好。
   \begin{figure}[H]
   	\centering
   	\begin{tikzpicture}[scale=3]
@@ -100,6 +104,42 @@
   	\end{tikzpicture}
   	\caption{PR曲线示意}
   \end{figure}
+\end{note}
+\subsubsection{多分类}
+设真实标签$y\in\{1,2,\dots,K\}$，模型预测为$\hat{y}\in\{1,2,\dots,K\}$，其中$K\geqslant3$为类别总数。与二分类问题不同，多分类问题中不存在唯一的正类与负类，因此通常需要先分别考察模型在每个类别上的表现，再通过适当的平均方式得到整体评价指标。\par
+对于任意类别$k\in{1,2,\dots,K}$，可将类别$k$视为正类，将其余类别合并为负类，并按照二分类问题中的定义计算$\operatorname{TP}_k$、$\operatorname{FP}_k$、$\operatorname{FN}_k$和$\operatorname{TN}_k$，进而得到该类别的$\operatorname{Precision}_k$、$\operatorname{Recall}_k$和$\operatorname{F1}_k$。这种处理方式称为one-versus-rest。\par
+分别报告每个类别的评价指标能够完整反映模型在各类别上的表现，但当类别数量较多或需要使用单一数值比较模型时，需要进一步对各类别的指标进行汇总。常用的汇总方式包括Macro平均、Weighted平均和Micro平均。\par
+\begin{definition}
+	设$m_k$表示类别$k$的某个评价指标，该指标的Macro平均定义为：
+	\begin{equation*}
+		m_{\mathrm{macro}}=\frac{1}{K}\sum_{k=1}^{K}m_k
+	\end{equation*}
+\end{definition}
+\begin{definition}
+	设$m_k$表示类别$k$的某个评价指标，类别$k$的真实样本数为$n_k$，该指标的Weighted平均定义为：
+	\begin{equation*}
+		m_{\mathrm{weighted}}=\sum_{k=1}^{K}\frac{n_k}{n}m_k
+	\end{equation*}
+\end{definition}
+\begin{definition}
+	Micro平均定义为：
+	\begin{gather*}
+		\operatorname{Precision}_{\mathrm{micro}}=\frac{\sum\limits_{k=1}^{K}\operatorname{TP}_k}{\sum\limits_{k=1}^{K}(\operatorname{TP}_k+\operatorname{FP}_k)} \\
+		\operatorname{Recall}_{\mathrm{micro}}=\frac{\sum\limits_{k=1}^{K}\operatorname{TP}_k}{\sum\limits_{k=1}^{K}(\operatorname{TP}_k+\operatorname{FN}_k)} \\
+		\operatorname{F1}_{\mathrm{micro}}=2\times\frac{\operatorname{Precision}_{\mathrm{micro}}\operatorname{Recall}_{\mathrm{micro}}}{\operatorname{Precision}_{\mathrm{micro}}+\operatorname{Recall}_{\mathrm{micro}}}
+	\end{gather*}
+\end{definition}
+\begin{note}
+	在每个样本只有一个真实标签且模型只预测一个类别的单标签多分类问题中，每个预测正确的样本产生一个真阳性，而每个预测错误的样本同时产生一个假阳性和一个假阴性。因此：
+	\begin{equation*}
+		\sum_{k=1}^{K}\operatorname{FP}_k=\sum_{k=1}^{K}\operatorname{FN}_k=n-\sum_{k=1}^{K}\operatorname{TP}_k
+	\end{equation*}
+	从而：
+	\begin{equation*}
+		\operatorname{Precision}_{\mathrm{micro}}=\operatorname{Recall}_{\mathrm{micro}}=\operatorname{F1}_{\mathrm{micro}}=\operatorname{Accuracy}
+	\end{equation*}
+	所以在多分类问题中，同时报告Accuracy和Micro通常不会提供额外信息。\par
+	若希望所有类别具有相同的重要性，应重点考察Macro平均；若希望评价结果反映实际类别分布，可以使用Weighted平均；若希望从所有样本层面汇总分类结果，则可以使用Micro平均。
 \end{note}
 
 \subsection{回归任务}

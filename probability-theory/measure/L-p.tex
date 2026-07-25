@@ -2,19 +2,39 @@
 
 \subsection{$L_p$}
 \begin{definition}
-	设$(X,\mathscr{F},\mu)$是一个测度空间，$1\leqslant p<+\infty$，$E\in\mathscr{F}$，$f,g$是$(E,E\cap\mathscr{F},\mu)$上的可测函数（\cref{prop:SigmaField}(6)(2)）。定义等价关系$\sim$：$f\sim g\Leftrightarrow f=g\;$a.e.于$E$，将商空间：
+	设$(X,\mathscr{F},\mu)$是一个测度空间，$1\leqslant p<+\infty$，$E\in\mathscr{F}$，$f,g$是$(E,E\cap\mathscr{F},\mu)$上的可测函数。定义等价关系$\sim$：$f\sim g\Leftrightarrow f=g\;$a.e.于$E$，将商空间：
 	\begin{equation*}
 		\left\{f:\int_{E}|f(x)|^p\dif\mu<+\infty\right\}/\sim
 	\end{equation*}
-	称之为$E$上的$L_p(X,\mathscr{F},\mu)$空间，简记为$L_p(E)$。
+	称之为$L_p(E,E\cap\mathscr{F},\mu)$空间，简记为$L_p(E)$。
 \end{definition}
+\begin{note}
+	引入该等价关系是因为在积分理论中，仅在零测集上取值不同的函数通常不加以区分。由\cref{prop:MeasurableIntegral}(8)可知，若$f=g;$a.e.于$E$，则在相应积分存在时，$f$与$g$具有相同的积分。后续定义线性运算、距离、范数以及内积时，原则上均需验证其取值不依赖于等价类代表元的选取，即这些定义在商空间上是良定义的；由于相应验证均可由几乎处处相等关系对代数运算和积分的不变性直接得到，故此后不逐一说明。
+\end{note}
 \begin{property}\label{prop:Lp}
-	设$(X,\mathscr{F},\mu)$是一个测度空间，$1\leqslant p<+\infty$，$E\in\mathscr{F}$，则$L_p(E)$是$\mathbb{R}(\mathbb{C})$上的线性空间。
+	设$(X,\mathscr{F},\mu)$是一个测度空间，$E\in\mathscr{F}$，则：
+	\begin{enumerate}
+		\item $L_p(E)$对于$1\leqslant p<+\infty$是$\mathbb{R}(\mathbb{C})$上的线性空间；
+		\item 若$(X,\mathscr{F},\mu)$是一个概率空间，则对任意的$1\leqslant s<t<+\infty$和$E\in\mathscr{F}$，有$L_t(E)\subseteq L_s(E)$。
+	\end{enumerate}
 \end{property}
 \begin{proof}
-	由模的三角不等式、\cref{ineq:else1}和\cref{prop:MeasurableIntegral}(6)即可得出结论。
+	(1)由模的三角不等式、\cref{ineq:else1}和\cref{prop:MeasurableIntegral}(6)即可得出结论。\par
+	(2)任取可测函数$f\in L_t(E)$。对于共轭数：
+	\begin{equation*}
+		p=\frac{t}{s},\quad q=\frac{t}{t-s}
+	\end{equation*}
+	和函数$|f|^s,1$，根据\cref{ineq:Holder}和\cref{prop:NonnegativeMeasurableIntegral}(10)可知：
+	\begin{gather*}
+		\int_{E}|f(x)|^s1\dif\mu\leqslant\left\{\int_{E}[|f(x)|^s]^{\frac{t}{s}}\dif\mu\right\}^{\frac{s}{t}}\left(\int_{E}1^{\frac{t}{t-s}}\dif\mu\right)^{\frac{t-s}{t}} \\
+		\int_{E}|f(x)|^s\dif\mu\leqslant\left[\int_{E}|f(x)|^t\dif\mu\right]^{\frac{s}{t}}
+	\end{gather*}
+	因为$f\in L_t(E)$，所以：
+	\begin{equation*}
+		\left[\int_{E}|f(x)|^s\dif\mu\right]^{\frac{1}{s}}\leqslant\left[\int_{E}|f(x)|^t\dif\mu\right]^{\frac{1}{t}}<+\infty
+	\end{equation*}
+	即$f\in L_s(E)$。
 \end{proof}
-\subsubsection{$L_p(X,\mathscr{F},\mu)$上的距离}
 \begin{definition}
 	设$(X,\mathscr{F},\mu)$是一个测度空间，$1\leqslant p<+\infty$，$E\in\mathscr{F}$。在$L_p(E)$中定义元素$x=x(t)$和元素$y=y(t)$之间的距离为：
 	\begin{equation*}
@@ -22,91 +42,66 @@
 	\end{equation*}
 	则$(L_p(E),\rho)$是一个度量空间。
 \end{definition}
-下证明上式定义的距离满足距离公理：
 \begin{proof}
-	(1)$\;\rho\in R$：由\cref{ineq:else1}可得：
+	(1)由\cref{ineq:else1}可得：
 	\begin{equation*}
 		|x(t)-y(t)|^p\leqslant\Bigl[|x(t)|+|y(t)|\Bigr]^p\leqslant2^{p-1}\Bigl[|x(t)|^p+|y(t)|^p\Bigr]
 	\end{equation*}
 	于是由\cref{prop:NonnegativeMeasurableIntegral}(6)(10)可得：
 	\begin{equation*}
-		\rho(x,y)\leqslant\left[2^{p-1}\int_{E}|x(t)|^p\dif\mu+2^{p-1}\int_{E}|y(t)|^p\dif\mu\right]^{\frac{1}{p}}
-	\end{equation*}
-	由$L_p(X,\mathscr{F},\mu)$空间定义，$\rho\in\mathbb{R}$。
-	(2)非负性由\cref{prop:NonnegativeMeasurableIntegral}(2)(9)直接可得；(3)对称性直接可得；
-	(4)三角不等式：设$x(t),y(t),z(t)\in L_p(E)$。$p=1$时可由绝对值的三角不等式立即得到，$1<p<+\infty$时，由\cref{ineq:Minkowski}可得：
-	\begin{equation*}
-		\left[\int_{E}|x(t)-z(t)|^p\dif\mu\right]^{\frac{1}{p}} \leqslant \left[\int_{E}|x(t)-y(t)|^p\dif\mu\right]^{\frac{1}{p}} + \left[\int_{E}|y(t)-z(t)|^p\dif\mu\right]^{\frac{1}{p}}
-	\end{equation*}
-	即：
-	\begin{equation*}
-		\rho(x,z)\leqslant\rho(x,y)+\rho(y,z)\qedhere
-	\end{equation*}
+		\rho(x,y)\leqslant\left[2^{p-1}\int_{E}|x(t)|^p\dif\mu+2^{p-1}\int_{E}|y(t)|^p\dif\mu\right]^{\frac{1}{p}}\in\mathbb{R}
+	\end{equation*}\par
+	(2)非负性由\cref{prop:NonnegativeMeasurableIntegral}(2)(9)直接可得。\par
+	(3)对称性直接可得。\par
+	(4)三角不等式由\cref{ineq:Minkowski}直接可得。
 \end{proof}
-\subsubsection{$L_p(X,\mathscr{F},\mu)$上的范数}
 \begin{definition}
 	设$(X,\mathscr{F},\mu)$是一个测度空间，$1\leqslant p<+\infty$，$E\in\mathscr{F}$。在$L_p(E)$中定义元素$x=x(t)$的范数为：
 	\begin{equation*}
-		||x||_p=\left[\int_{E}|x(t)|^p\dif t\right]^\frac{1}{p}
+		||x||_p=\left[\int_{E}|x(t)|^p\dif\mu\right]^\frac{1}{p}
 	\end{equation*}
 	则$L_p(E)$成为一个$\mathbb{R}(\mathbb{C})$上的赋范线性空间。
 \end{definition}
 \begin{proof}
-	(1)由$L_p(X,\mathscr{F},\mu)$的定义即可得到$||x||_p\in\mathbb{R}$。(2)非负性由\cref{prop:NonnegativeMeasurableIntegral}(2)(9)直接得到。(3)数乘由\cref{prop:NonnegativeMeasurableIntegral}(6)直接得到，(4)三角不等式的证明可由\cref{ineq:Minkowski}。再结合\cref{prop:Lp}即可得出结论。
+	由\cref{prop:Lp}(1)可知$L_p(E)$是线性空间。\par
+	(1)由$L_p(X,\mathscr{F},\mu)$的定义即可得到$||x||_p\in\mathbb{R}$。\par
+	(2)非负性由\cref{prop:NonnegativeMeasurableIntegral}(2)(9)直接得到。\par
+	(3)数乘由\cref{prop:NonnegativeMeasurableIntegral}(10)直接得到。\par
+	(4)三角不等式由\cref{ineq:Minkowski}直接得到。
 \end{proof}
-
-\begin{theorem}\label{theo:LtLs}
-	设$(X,\mathscr{F},\mu)$是一个概率空间，则对任意的$1\leqslant s<t<+\infty$，有$L_t(X)\subseteq L_s(X)$。
-\end{theorem}
+\begin{definition}
+	设$(X,\mathscr{F},\mu)$是一个测度空间，$E\in\mathscr{F}$。在$L_2(E)$中定义元素$x=x(t)$和元素$y=y(t)$之间的内积为：
+	\begin{equation*}
+		(x,y)=\int_{E}x(t)\overline{y(t)}\dif\mu
+	\end{equation*}
+	其中当数域为$\mathbb{R}$时有$\overline{y(t)}=y(t)$，则$L_2(E)$是一个$\mathbb{R}(\mathbb{C})$上的内积空间。
+\end{definition}
 \begin{proof}
-	任取Borel函数$f\in L_t(X)$。对于共轭数：
+	只证明实数域上的情况。\par
+	(1)任取$x,y\in L_2(E)$，根据\cref{ineq:Holder}可知：
 	\begin{equation*}
-		p=\frac{t}{s},\quad q=\frac{t}{t-s}
+		\int_{E}|x(t)y(t)|\dif\mu\leqslant\left[\int_{E}|x(t)|^2\dif\mu\right]^{\frac{1}{2}}\left[\int_{E}|y(t)|^2\dif\mu\right]^{\frac{1}{2}}<+\infty
 	\end{equation*}
-	和函数$|f|^s,1$，根据\cref{ineq:Holder}和\cref{prop:NonnegativeMeasurableIntegral}(10)可知：
-	\begin{gather*}
-		\int_{X}|f(x)|^s1\dif\mu\leqslant\left\{\int_{X}[|f(x)|^s]^{\frac{t}{s}}\dif\mu\right\}^{\frac{s}{t}}\left(\int_{X}1^{\frac{t}{t-s}}\dif\mu\right)^{\frac{t-s}{t}} \\
-		\int_{X}|f(x)|^s\dif\mu\leqslant\left[\int_{X}|f(x)|^t\dif\mu\right]^{\frac{s}{t}}
-	\end{gather*}
-	因为$f\in L_t(X)$，所以：
-	\begin{equation*}
-		\left[\int_{X}|f(x)|^s\dif\mu\right]^{\frac{1}{s}}\leqslant\left[\int_{X}|f(x)|^t\dif\mu\right]^{\frac{1}{t}}<+\infty
-	\end{equation*}
-	即$f\in L_s(X)$。
+	由\cref{prop:MeasurableIntegral}(2)可知$(x,y)\in\mathbb{R}$。\par
+	(2)线性性由\cref{prop:MeasurableIntegral}(6)立即可得。\par
+	(3)对称性立即可得。\par
+	(4)非负性由\cref{prop:NonnegativeMeasurableIntegral}(2)(9)立即可得。
 \end{proof}
 
 \subsection{$L_{\infty}$}
 \begin{definition}
-	设$(X,\mathscr{F},\mu)$是一个测度空间，$f$是$\mathscr{F}$上的一个可测函数，根据\cref{prop:MeasurableFunction}(5)(1)，可令：
-	\begin{equation*}
-		G(f)=\Bigl\{c>0:\mu(\{|f(x)|>c\})=0\Bigr\}
-	\end{equation*}
-	称：
-	\begin{equation*}
-		||f||_{\infty}=
-		\begin{cases}
-			\inf G(f),&G(f)\ne\varnothing \\
-			+\infty,&G(f)=\varnothing
-		\end{cases}
-	\end{equation*}
-	为$f$的无穷范数，也称其为$f$的\gls{EssenSup}。
-\end{definition}
-\begin{theorem}
-	无穷范数具有如下等价定义：
+	设$f$是测度空间$(X,\mathscr{F},\mu)$上的可测函数，称：
 	\begin{equation*}
 		||f||_\infty=\inf_{\mu(e)=0}\sup_{x\in E\setminus e}|f(x)|
 	\end{equation*}
-\end{theorem}
-\begin{proof}
-	等价性由定义可直接证得，略去。
-\end{proof}
+	为$f$的无穷范数，也称其为$f$的\gls{EssenSup}。
+\end{definition}
 \begin{definition}
-	设$(X,\mathscr{F},\mu)$是一个测度空间，$E\in\mathscr{F}$，$f,g$是$E$上的可测函数。定义等价关系$\sim$：$f\sim g\Leftrightarrow f=g\;$a.e.于$E$，称商空间$\{f:||f||_\infty<+\infty\}/\sim$为$E$上的$L_{\infty}$空间，简记为$L_{\infty}(E)$。
+	设$(X,\mathscr{F},\mu)$是一个测度空间，$E\in\mathscr{F}$，$f,g$是$(E,E\cap\mathscr{F},\mu)$上的可测函数。定义等价关系$\sim$：$f\sim g\Leftrightarrow f=g\;$a.e.于$E$，称商空间$\{f:||f||_\infty<+\infty\}/\sim$为$E$上的$L_{\infty}(E,E\cap\mathscr{F},\mu)$空间，简记为$L_{\infty}(E)$。
 \end{definition}
 \begin{property}\label{prop:Linfty}
 	设$(X,\mathscr{F},\mu)$是一个测度空间，$E\in\mathscr{F}$，则$L_{\infty}(E)$是$\mathbb{R}(\mathbb{C})$上的线性空间。
 \end{property}
-\subsubsection{$L_{\infty}$上的距离}
 \begin{definition}
 	设$(X,\mathscr{F},\mu)$是一个测度空间，$E\in\mathscr{F}$。在$L_{\infty}(E)$中定义元素$x=x(t)$和元素$y=y(t)$之间的距离为：
 	\begin{equation*}
@@ -114,36 +109,12 @@
 	\end{equation*}
 	则$(L_{\infty}(E),\rho)$是一个度量空间。
 \end{definition}
-下证明上式定义的距离满足距离公理：
 \begin{proof}
-	(1)$\;\rho\in R$： 由\cref{prop:Linfty}可得$x-y\in L_{\infty}(E)$，由定义可得$||x-y||_{\infty}\in\mathbb{R}$。\par
-	(2)非负性：由无穷范数的定义：
-	\begin{equation*}
-		\|x-y\|_\infty \geqslant 0.
-	\end{equation*}
-	且有 \(\|x-y\|_\infty=0\) 当且仅当有 \(|x(t)-y(t)|=0\;\)a.e.于$E$，即 \(x=y\)。\par
-	(3)对称性显然。\par
-	(4)三角不等式：
-	取任意 \(x,y,z\in L_{\infty}(E)\)。由无穷范数等价定义以及下确界定义，对任意的$\varepsilon>0$，存在$E_1,E_2\subset E,\;\mu(E_1)=\mu(E_2)=0$，使得：
-	\begin{equation*}
-		\sup_{t\in E\setminus E_1}|x(t)-z(t)|\leqslant \rho(x,z)+\frac{\varepsilon}{2},
-		\quad
-		\sup_{t\in E\setminus E_2}|z(t)-y(t)|\leqslant \rho(z,y)+\frac{\varepsilon}{2}
-	\end{equation*}
-	由\cref{prop:Measure}(3)（次有限可加性），$\mu(E_1\cup E_2)\leqslant\mu(E_1)+\mu(E_2)=0$，所以：
-	\begin{align*}
-		\rho(x,y)
-		&\leqslant\sup_{t\in E\setminus(E_1\cup E_2)}|x(t)-y(t)| \\
-		&\leqslant\sup_{t\in E\setminus(E_1\cup E_2)}|x(t)-z(t)|+\sup_{t\in E\setminus(E_1\cup E_2)}|z(t)-y(t)| \\
-		&\leqslant\sup_{t\in E\setminus E_1}|x(t)-z(t)|+\sup_{t\in E\setminus E_2}|z(t)-y(t)| \\
-		&\leqslant\rho(x,z)+\rho(z,y)+\varepsilon
-	\end{align*}
-	由$\varepsilon$的任意性可得到：
-	\begin{equation*}
-		\rho(x,y)\leqslant\rho(x,z)+\rho(z,y)\qedhere
-	\end{equation*}
+	(1)由\cref{prop:Linfty}立即可得$\rho(x,y)\in\mathbb{R}$。\par
+	(2)非负性由无穷范数的定义直接得到。\par
+	(3)对称性立即可得。\par
+	(4)三角不等式由\cref{ineq:Minkowski}直接得到。
 \end{proof}
-\subsubsection{$L_{\infty}$上的范数}
 \begin{definition}
 	设$(X,\mathscr{F},\mu)$是一个测度空间，$E\in\mathscr{F}$。在$L_{\infty}(E)$中定义元素$x=x(t)$的范数为：
 	\begin{equation*}
@@ -151,34 +122,141 @@
 	\end{equation*}
 	则$L_{\infty}(E)$成为一个$\mathbb{R}(\mathbb{C})$上的赋范线性空间。
 \end{definition}
-下证明上式定义的范数满足范数定义：
 \begin{proof}
-	(1)$\;||x||\in\mathbb{R}$由$L_{\infty}(E)$空间的定义直接可得。(2)非负性和(3)数乘由无穷范数的定义是显然的。\par
-	(4)三角不等式：由本性上确界定义可得：
-	\begin{equation*}
-		|x(t)|\leqslant||x||_\infty,\;|y(t)|\leqslant||y||_\infty
-	\end{equation*}
-	a.e.于$E$，所以：
-	\begin{equation*}
-		|x(t)+y(t)|\leqslant|x(t)|+|y(t)|\leqslant||x||_\infty+||y||_\infty
-	\end{equation*}
-	a.e.于$E$。于是$||x(t)||_\infty+||y(t)||_\infty\in G(x+y)$，所以：
-	\begin{equation*}
-		||x+y||_\infty=\inf G(x+y)\leqslant||x||_\infty+||y||_\infty
-	\end{equation*}
-	再结合\cref{prop:Linfty}即可得出结论。
+	(1)由$L_{\infty}(E)$空间的定义直接可得$||x||\in\mathbb{R}$。\par
+	(2)非负性由无穷范数的定义直接可得。\par
+	(3)数乘由\info{上下确界的线性性质}直接可得。\par
+	(4)三角不等式由\cref{ineq:Minkowski}直接得到。
 \end{proof}
 
 \subsection{收敛性}
 \begin{theorem}\label{theo:LpBanach}
-	设$(X,\mathscr{F},\mu)$是一个测度空间，$E\in\mathscr{F}$，$1\leqslant p\leqslant+\infty$。若$\{f_n\}\subset L_p(E)$且：
-	\begin{equation*}
-		m>n,\;\lim_{n\to+\infty}||f_m-f_n||_p=0
-	\end{equation*}
-	则存在$f\in L_p(E)$使得$\{f_n\}$依范数收敛于$f$，即在$L_p(E)$中引入范数导出的距离时，$L_p(E)$是一个Banach空间。
+	设$(X,\mathscr{F},\mu)$是一个测度空间，$E\in\mathscr{F}$，$1\leqslant p\leqslant+\infty$，则$L_p(E)$是一个Banach空间。
 \end{theorem}
 \begin{proof}
-	
+	\textbf{$1\leqslant p<+\infty$：}任取$L_p(E)$中的Cauchy序列$\{x_n\}$。因为$\{x_n\}$是Cauchy序列，所以可以从中选取子列$\{x_{n_k}\}$使得：
+	\begin{equation*}
+		\forall\;k\in\mathbb{N},\;||x_{n_{k+1}}-x_{n_k}||_p<2^{-k}
+	\end{equation*}
+	对于任意的$k\in\mathbb{N}$定义：
+	\begin{equation*}
+		u_k(t)=|x_{n_{k+1}}(t)-x_{n_k}(t)|
+	\end{equation*}
+	并对于任意的$m\in\mathbb{N}$定义：
+	\begin{equation*}
+		S_m(t)=\sum_{k=1}^{m}u_k(t)
+	\end{equation*}
+	由\cref{prop:MeasurableFunction}(5.a)(5.d)可知$u_k(t)$和$S_m(t)$为非负可测函数。根据\cref{prop:Lp}(1)可知：
+	\begin{equation*}
+		||S_m||_p\leqslant\sum_{k=1}^{m}||u_k||_p=\sum_{k=1}^{m}\left\||x_{n_{k+1}}-x_{n_k}|\right\|_p=\sum_{k=1}^{m}\left\|x_{n_{k+1}}-x_{n_k}\right\|_p<\sum_{k=1}^{m}2^{-k}<1
+	\end{equation*}
+	因此：
+	\begin{equation*}
+		\int_{E}|S_m(t)|^p\dif\mu<1
+	\end{equation*}
+	因为$\{S_m\}$是非负单调递增函数列，令：
+	\begin{equation*}
+		S(t)=\lim_{m\to+\infty}S_m(t)=\sum_{k=1}^{\infty}u_k(t)
+	\end{equation*}
+	根据\cref{prop:MeasurableFunction}(6)和\cref{theo:LeviTheorem}可知：
+	\begin{equation*}
+		\int_{E}[S(t)]^p\dif\mu=\lim_{m\to+\infty}\int_{E}[S_m(t)]^p\dif\mu\leqslant1
+	\end{equation*}
+	于是$S\in L_p(E)$。由\cref{prop:NonnegativeMeasurableIntegral}(8)可得$S<+\infty\;$a.e.于$(E,E\cap\mathscr{F},\mu)$，于是：
+	\begin{equation*}
+		\sum_{k=1}^{\infty}\left[x_{n_{k+1}}(t)-x_{n_k}(t)\right]
+	\end{equation*}
+	在$E$上几乎处处绝对收敛。定义：
+	\begin{equation*}
+		x(t)=x_{n_1}(t)+\sum_{k=1}^{\infty}\left[x_{n_{k+1}}(t)-x_{n_k}(t)\right]
+	\end{equation*}
+	于上述级数收敛的点，并在其余零测集上令$x(t)=0$。由\cref{prop:MeasurableIntegral}(5.a)(6)(9)可知$x$是可测函数。\par
+	根据绝对值的三角不等式可知：
+	\begin{equation*}
+		|x(t)|\leqslant|x_{n_1}(t)|+S(t)\quad\text{a.e.于$(E,E\cap\mathscr{F},\mu)$}
+	\end{equation*}
+	由\cref{prop:NonnegativeMeasurableIntegral}(6)可得：
+	\begin{equation*}
+		||x||_p\leqslant||x_{n_1}||_p+||S||_p<+\infty
+	\end{equation*}
+	所以$x\in L_p(E)$。\par
+	对于任意的$m\in\mathbb{N}$，定义：
+	\begin{equation*}
+		R_m(t)=\sum_{k=m}^{\infty}u_k(t)
+	\end{equation*}
+	由\cref{theo:LeviTheorem}和\cref{prop:RSeq}(6)可知：
+	\begin{equation*}
+		||R_m||_p=\lim_{r\to+\infty}\left\|\sum_{k=m}^{r}u_k\right\|_p\leqslant\sum_{k=m}^{\infty}||u_k||_p<\sum_{k=m}^{\infty}2^{-k}=2^{1-m}
+	\end{equation*}
+	注意到：
+	\begin{align*}
+		&x(t)=x_{n_1}(t)+\sum_{k=1}^{\infty}\left[x_{n_{k+1}}(t)-x_{n_k}(t)\right] \\
+		=&x_{n_1}(t)+\sum_{k=1}^{m-1}\left[x_{n_{k+1}}(t)-x_{n_k}(t)\right]+\sum_{k=m}^{\infty}\left[x_{n_{k+1}}(t)-x_{n_k}(t)\right] \\
+		=&x_{n_m}(t)+\sum_{k=m}^{\infty}\left[x_{n_{k+1}}(t)-x_{n_k}(t)\right]\;\text{a.e.于$(E,E\cap\mathscr{F},\mu)$}
+	\end{align*}
+	即：
+	\begin{equation*}
+		x(t)-x_{n_m}(t)=\sum_{k=m}^{\infty}\left[x_{n_{k+1}}(t)-x_{n_k}(t)\right]\;\text{a.e.于$(E,E\cap\mathscr{F},\mu)$}
+	\end{equation*}
+	由绝对值的三角不等式可得：
+	\begin{equation*}
+		|x(t)-x_{n_m}(t)|\leqslant R_m(t)\;\text{a.e.于$(E,E\cap\mathscr{F},\mu)$}
+	\end{equation*}
+	根据\cref{prop:NonnegativeMeasurableIntegral}(6)可得：
+	\begin{equation*}
+		||x-x_{n_m}||_p\leqslant||R_m||_p<2^{1-m}
+	\end{equation*}
+	即$\{x_{n_m}\}\to x$。\par
+	任取$\varepsilon>0$，由于$\{x_n\}$是Cauchy序列，所以存在$N\in\mathbb{N}$，使得对任意的$r,s>N$均有：
+	\begin{equation*}
+		||x_r-x_s||_p<\frac{\varepsilon}{2}
+	\end{equation*}
+	又因为$x_{n_m}\to x$，所以可以选取充分大的$m$，使得$n_m>N$且：
+	\begin{equation*}
+		||x_{n_m}-x||_p<\frac{\varepsilon}{2}
+	\end{equation*}
+	于是对于任意的$n>N$有：
+	\begin{equation*}
+		||x_n-x||_p\leqslant||x_n-x_{n_m}||_p+||x_{n_m}-x||_p<\varepsilon
+	\end{equation*}
+	因此$x_n\to x$。由$\{x_n\}$的任意性可知$L_p(E)$在$1\leqslant p<+\infty$时是完备的。\par
+	\textbf{$p=+\infty$：}任取$L_\infty(E)$中的Cauchy序列$\{x_n\}$并选取子列$\{x_{n_k}\}$，使得：
+	\begin{equation*}
+		\forall\;k\in\mathbb{N},\;||x_{n_{k+1}}-x_{n_k}||_\infty<2^{-k}
+	\end{equation*}
+	由无穷范数的定义，对于每个$k\in\mathbb{N}$，存在零测集$N_k\subseteq E$，使得：
+	\begin{equation*}
+		\forall\;t\in E\setminus N_k,\;|x_{n_{k+1}}(t)-x_{n_k}(t)|\leqslant2^{-k}
+	\end{equation*}
+	令：
+	\begin{equation*}
+		N=\underset{k=1}{\overset{+\infty}{\cup}}N_k
+	\end{equation*}
+	由\cref{prop:Measure}(3)（次可列可加性）可知$\mu(N)=0$。对于任意的$t\in E\setminus N$有：
+	\begin{equation*}
+		\sum_{k=r}^{s}|x_{n_{k+1}}(t)-x_{n_k}(t)|\leqslant\sum_{k=r}^{s}2^{-k}\leqslant\sum_{k=r}^{+\infty}2^{-k}=2^{1-r}\to0
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\sum_{k=1}^{\infty}\left[x_{n_{k+1}}(t)-x_{n_k}(t)\right]
+	\end{equation*}
+	在$E\setminus N$上一致绝对收敛。定义：
+	\begin{equation*}
+		x(t)=x_{n_1}(t)+\sum_{k=1}^{\infty}[x_{n_{k+1}}(t)-x_{n_k}(t)]
+	\end{equation*}
+	于$E\setminus N$，在$N$上令$x(t)=0$。由\cref{prop:MeasurableMapping}(5.a)(6)(9)可知$x$是可测函数。\par
+	由于$x_{n_1}\in L_\infty(E)$，所以存在$M<+\infty$和零测集$N_0\subseteq E$使得：
+	\begin{equation*}
+		\forall\;t\in E\setminus N_0,\;|x_{n_1}(t)|\leqslant M
+	\end{equation*}
+	于是对于任意的$t\in E\setminus(N\cup N_0)$，根据绝对值的三角不等式可得：
+	\begin{align*}
+		&|x(t)|\leqslant|x_{n_1}(t)|+\left|\sum_{k=1}^{\infty}[x_{n_{k+1}}(t)-x_{n_k}(t)]\right| \\
+		\leqslant&|x_{n_1}(t)|+\sum_{k=1}^{+\infty}|x_{n_{k+1}}(t)-x_{n_k}(t)| \\
+		\leqslant&|x_{n_1}(t)|+\sum_{k=1}^{\infty}2^{-k}\leqslant M+1
+	\end{align*}
+	由\cref{prop:Measure}(3)（次有限可加性）可知$\mu(N\cup N_0)=0$，所以$x\in L_\infty(E)$。\par
+	与有限$p$情形相同可得$\{x_n\}\to x$，由$\{x_n\}$的任意性可知$L_\infty(E)$是完备的。
 \end{proof}
 \begin{definition}
 	设$(X,\mathscr{F},\mu)$是一个测度空间，$E\in\mathscr{F}$，$1\leqslant p\leqslant+\infty$，$\{f_n\}\subseteq L_p(E),\;f\in L_p(E)$。若：

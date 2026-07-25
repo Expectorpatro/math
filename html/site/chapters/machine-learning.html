@@ -176,7 +176,7 @@ window.Quarto = {
 };
 </script>
 
-<link rel="stylesheet" href="../style.css?v=89f6584543da">
+<link rel="stylesheet" href="../style.css?v=0f289c70dedb">
 <link rel="stylesheet" href="../sidebar.css">
 <meta property="og:title" content="第 17 章 机器学习 – 你永远不知道一个强迫症能干出什么事情">
 <meta property="og:description" content="持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，强调逻辑自洽、证明完整与持续维护。">
@@ -800,7 +800,9 @@ window.Quarto = {
 <p>在监督学习中，模型评价是衡量模型预测能力、比较不同模型并指导模型选择的重要环节。</p>
 <section id="id--2cc4d48c" class="level3">
 <h3 class="anchored" data-anchor-id="id--2cc4d48c"><span class="header-section-number">17.1.1</span> 分类任务</h3>
-<p>设真实标签<span class="math inline">\(y\in\{1,\dots,r\}\)</span>，模型预测为<span class="math inline">\(\hat{y}\in\{1,\dots,r\}\)</span>，对二分类问题可分别记为<span class="math inline">\(0,1\)</span>，<span class="math inline">\(0\)</span>对应负类，<span class="math inline">\(1\)</span>对应正类。</p>
+<section id="id--267ea328" class="level4">
+<h4 class="anchored" data-anchor-id="id--267ea328"><span class="header-section-number">17.1.1.1</span> 二分类</h4>
+<p>设真实标签<span class="math inline">\(y\in\{0,1\}\)</span>，模型预测为<span class="math inline">\(\hat{y}\in\{0,1\}\)</span>，<span class="math inline">\(0\)</span>对应负类，<span class="math inline">\(1\)</span>对应正类。</p>
 <div id="definition-17-1" class="definition theorem-block env-definition">
 <p><strong>Definition 17.1</strong>. <a href="../chapters/glossary-c.html#term-ConfusionMatrix" class="term" title="confusion matrix">混淆矩阵<span class="term-english">（confusion matrix）</span></a>按真实标签与预测标签的组合统计样本个数，其每个元素含义如下：</p>
 <ul>
@@ -811,39 +813,43 @@ window.Quarto = {
 </ul>
 </div>
 <div id="definition-17-2" class="definition theorem-block env-definition">
-<p><strong>Definition 17.2</strong>. <a href="../chapters/glossary-a.html#term-Accuracy" class="term" title="accuracy">准确率<span class="term-english">（accuracy）</span></a>度量模型预测正确的比例： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KICAgIFxvcGVyYXRvcm5hbWV7QWNjdXJhY3l9PVxmcmFje1xvcGVyYXRvcm5hbWV7VFB9K1xvcGVyYXRvcm5hbWV7VE59fXtcb3BlcmF0b3JuYW1le1RQfStcb3BlcmF0b3JuYW1le1ROfStcb3BlcmF0b3JuYW1le0ZQfStcb3BlcmF0b3JuYW1le0ZOfX0uClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><strong>Definition 17.2</strong>. <a href="../chapters/glossary-a.html#term-Accuracy" class="term" title="accuracy">准确率<span class="term-english">（accuracy）</span></a>度量模型预测正确的比例： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KICAgIFxvcGVyYXRvcm5hbWV7QWNjdXJhY3l9PVxmcmFje1xvcGVyYXRvcm5hbWV7VFB9K1xvcGVyYXRvcm5hbWV7VE59fXtcb3BlcmF0b3JuYW1le1RQfStcb3BlcmF0b3JuYW1le1ROfStcb3BlcmF0b3JuYW1le0ZQfStcb3BlcmF0b3JuYW1le0ZOfX0KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
-\operatorname{Accuracy}=\frac{\operatorname{TP}+\operatorname{TN}}{\operatorname{TP}+\operatorname{TN}+\operatorname{FP}+\operatorname{FN}}.
+\operatorname{Accuracy}=\frac{\operatorname{TP}+\operatorname{TN}}{\operatorname{TP}+\operatorname{TN}+\operatorname{FP}+\operatorname{FN}}
 \end{equation*}\]</span></p>
 </div>
+<p>Accuracy 将正类和负类的正确预测汇总为一个整体比例，因而默认两类样本具有相同的重要性，并且不同类型的分类错误具有相同的代价。然而在许多实际问题中，假正类和假负类造成的损失并不相同，我们也可能更关注模型在某一特定类别上的预测表现。</p>
+<p>例如，在贷款违约预测中，若将违约客户定义为正类，则将实际违约的客户预测为不违约会使银行承担贷款损失，而将实际不违约的客户预测为违约主要意味着失去一次潜在的放贷机会。这两类错误的经济代价并不相同。因此，即使两个模型具有相同的 Accuracy，它们识别违约客户的能力也可能存在显著差异。为了考察模型针对特定类别的表现，需要进一步引入别的指标。</p>
 <div id="definition-17-3" class="definition theorem-block env-definition">
-<p><strong>Definition 17.3</strong>. <a href="../chapters/glossary-p.html#term-Precision" class="term" title="precision">精确率<span class="term-english">（precision）</span></a>度量被预测为正类的样本中有多少是真正的正类： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KICAgIFxvcGVyYXRvcm5hbWV7UHJlY2lzaW9ufT1cZnJhY3tcb3BlcmF0b3JuYW1le1RQfX17XG9wZXJhdG9ybmFtZXtUUH0rXG9wZXJhdG9ybmFtZXtGUH19LgpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><strong>Definition 17.3</strong>. <a href="../chapters/glossary-p.html#term-Precision" class="term" title="precision">精确率<span class="term-english">（precision）</span></a>度量被预测为正类的样本中有多少是真正的正类： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KICAgIFxvcGVyYXRvcm5hbWV7UHJlY2lzaW9ufT1cZnJhY3tcb3BlcmF0b3JuYW1le1RQfX17XG9wZXJhdG9ybmFtZXtUUH0rXG9wZXJhdG9ybmFtZXtGUH19ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
-\operatorname{Precision}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FP}}.
+\operatorname{Precision}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FP}}
 \end{equation*}\]</span></p>
 </div>
 <div id="note-17-1" class="note theorem-block env-note">
-<p><strong>note 17.1</strong>. 精确率关心正类预测结果的准确性，在系统对错误正类具有高成本的任务（如垃圾邮件过滤或癌症筛查）中尤为重要。较高的精确率意味着模型产生的误报较少。</p>
+<p><strong>note 17.1</strong>. 精确率关心正类预测结果的准确性，在系统对错误正类具有高成本的任务（如垃圾邮件过滤）中尤为重要。较高的精确率意味着模型产生的误报较少。</p>
 </div>
 <div id="definition-17-4" class="definition theorem-block env-definition">
-<p><strong>Definition 17.4</strong>. <a href="../chapters/glossary-r.html#term-Recall" class="term" title="recall">召回率<span class="term-english">（recall）</span></a>又称<a href="../chapters/glossary-s.html#term-Sensitivity" class="term" title="sensitivity">灵敏度<span class="term-english">（sensitivity）</span></a>，衡量真实正类中有多少被模型成功识别，定义为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KICAgIFxvcGVyYXRvcm5hbWV7UmVjYWxsfT1cZnJhY3tcb3BlcmF0b3JuYW1le1RQfX17XG9wZXJhdG9ybmFtZXtUUH0rXG9wZXJhdG9ybmFtZXtGTn19LgpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><strong>Definition 17.4</strong>. <a href="../chapters/glossary-r.html#term-Recall" class="term" title="recall">召回率<span class="term-english">（recall）</span></a>又称<a href="../chapters/glossary-s.html#term-Sensitivity" class="term" title="sensitivity">灵敏度<span class="term-english">（sensitivity）</span></a>，衡量真实正类中有多少被模型成功识别，定义为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KICAgIFxvcGVyYXRvcm5hbWV7UmVjYWxsfT1cZnJhY3tcb3BlcmF0b3JuYW1le1RQfX17XG9wZXJhdG9ybmFtZXtUUH0rXG9wZXJhdG9ybmFtZXtGTn19ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
-\operatorname{Recall}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FN}}.
+\operatorname{Recall}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FN}}
 \end{equation*}\]</span></p>
 </div>
 <div id="note-17-2" class="note theorem-block env-note">
 <p><strong>note 17.2</strong>. 召回率关注对正类的漏判率，适用于需要尽可能检出正类的场景（如疾病筛查或欺诈检测）。高召回率意味着漏报较少，但可能伴随较多假阳性，需要结合精确率来进行分析。</p>
 </div>
 <div id="definition-17-5" class="definition theorem-block env-definition">
-<p><strong>Definition 17.5</strong>. <a href="../chapters/glossary-f.html#term-F1Score" class="term" title="f1 score">f1分数<span class="term-english">（f1 score）</span></a>是精确率与召回率的调和平均，用于在二者之间取得平衡： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KICAgIFxvcGVyYXRvcm5hbWV7RjF9PTJcdGltZXNcZnJhY3tcb3BlcmF0b3JuYW1le1ByZWNpc2lvbn1cdGltZXNcb3BlcmF0b3JuYW1le1JlY2FsbH19e1xvcGVyYXRvcm5hbWV7UHJlY2lzaW9ufStcb3BlcmF0b3JuYW1le1JlY2FsbH19LgpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><strong>Definition 17.5</strong>. <a href="../chapters/glossary-f.html#term-F1Score" class="term" title="f1 score">f1分数<span class="term-english">（f1 score）</span></a>是精确率与召回率的调和平均，用于在二者之间取得平衡： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KICAgIFxvcGVyYXRvcm5hbWV7RjF9PTJcdGltZXNcZnJhY3tcb3BlcmF0b3JuYW1le1ByZWNpc2lvbn1cdGltZXNcb3BlcmF0b3JuYW1le1JlY2FsbH19e1xvcGVyYXRvcm5hbWV7UHJlY2lzaW9ufStcb3BlcmF0b3JuYW1le1JlY2FsbH19ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
-\operatorname{F1}=2\times\frac{\operatorname{Precision}\times\operatorname{Recall}}{\operatorname{Precision}+\operatorname{Recall}}.
+\operatorname{F1}=2\times\frac{\operatorname{Precision}\times\operatorname{Recall}}{\operatorname{Precision}+\operatorname{Recall}}
 \end{equation*}\]</span></p>
 </div>
 <div id="note-17-3" class="note theorem-block env-note">
 <p><strong>note 17.3</strong>. 调和平均的性质使<span class="math inline">\(\operatorname{F1}\)</span>得分对低值敏感——当精确率或召回率其中之一很低时，<span class="math inline">\(\operatorname{F1}\)</span>会显著下降，因此它常用作综合评价指标，适用于精确率和召回率同等重要的情形。</p>
 </div>
-<p>许多分类器输出的是连续得分或概率，样本得分或概率大于某一阈值即判断该样本为正类。通过调整阈值可以得到不同的预测结果。因此，可以考察阈值变化下的性能曲线，并使用曲线下的面积作为评价指标。</p>
+<p>许多分类器并不直接输出类别，而是为每个样本输出一个连续得分或属于正类的概率，并在给定阈值后将其转化为分类结果。然而，分类阈值并不存在适用于所有任务的固定选择，即使模型输出的是概率，也不能机械地将<span class="math inline">\(0.5\)</span>作为阈值。阈值的选择取决于正类的基础发生率、假正类与假负类的相对代价以及模型所服务的具体决策目标。</p>
+<p>以罕见病筛查为例，假设某种疾病在人群中的患病率仅为<span class="math inline">\(0.1\%\)</span>。若模型预测某位受检者的患病概率为<span class="math inline">\(10\%\)</span>，那么其患病风险已经达到普通人群的<span class="math inline">\(100\)</span> 倍，显然应当被识别为高风险个体并接受进一步检查。然而，<span class="math inline">\(10\%\)</span>仍然低于<span class="math inline">\(50\%\)</span>；若机械地将<span class="math inline">\(0.5\)</span>作为分类阈值，该受检者就会被判定为阴性。类似地，在身份认证或银行人脸识别中，系统可能更重视防止冒用身份，因此会采用更加严格的判定阈值，以降低错误接受非本人的概率。</p>
+<p>由此可见，同一个模型在不同应用场景中可能需要采用完全不同的阈值，而模型在某一个固定阈值下的表现不能完整反映其分类能力。为了减少评价结果对特定阈值选择的依赖，可以考察阈值连续变化时模型性能的变化，并将其表示为性能曲线。我们希望一个模型在较广的阈值范围内均能保持较好的正负类区分能力，因此可以进一步使用曲线下面积评价模型的综合表现。</p>
 <div id="definition-17-6" class="definition theorem-block env-definition">
 <p><strong>Definition 17.6</strong>. 称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1RQUn09XGZyYWN7XG9wZXJhdG9ybmFtZXtUUH19e1xvcGVyYXRvcm5hbWV7VFB9K1xvcGVyYXRvcm5hbWV7Rk59fSxccXVhZAoJCVxvcGVyYXRvcm5hbWV7RlBSfT1cZnJhY3tcb3BlcmF0b3JuYW1le0ZQfX17XG9wZXJhdG9ybmFtZXtGUH0rXG9wZXJhdG9ybmFtZXtUTn19ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
@@ -853,12 +859,12 @@ window.Quarto = {
 <p>分别为<a href="../chapters/glossary-t.html#term-TPR" class="term" title="true positive rate">真阳率<span class="term-english">（true positive rate）</span></a>与<a href="../chapters/glossary-f.html#term-FPR" class="term" title="false positive rate">假阳率<span class="term-english">（false positive rate）</span></a>。</p>
 </div>
 <div id="definition-17-7" class="definition theorem-block env-definition">
-<p><strong>Definition 17.7</strong>. <a href="../chapters/glossary-r.html#term-ROC" class="term" title="receiver operating characteristic curve">受试者工作特征曲线<span class="term-english">（receiver operating characteristic curve）</span></a>为在<span class="math inline">\([0,1]\)</span>内连续变化判别阈值<span class="math inline">\(t\)</span>，对每个<span class="math inline">\(t\)</span>计算对应的： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1RQUn0odCk9XGZyYWN7XG9wZXJhdG9ybmFtZXtUUH0odCl9e1xvcGVyYXRvcm5hbWV7VFB9KHQpK1xvcGVyYXRvcm5hbWV7Rk59KHQpfSxccXVhZAoJCVxvcGVyYXRvcm5hbWV7RlBSfSh0KT0JXGZyYWN7XG9wZXJhdG9ybmFtZXtGUH0odCl9e1xvcGVyYXRvcm5hbWV7RlB9KHQpK1xvcGVyYXRvcm5hbWV7VE59KHQpfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><strong>Definition 17.7</strong>. 设分类器将得分不低于阈值<span class="math inline">\(t\)</span>的样本预测为正类。<a href="../chapters/glossary-r.html#term-ROC" class="term" title="receiver operating characteristic curve">受试者工作特征曲线<span class="term-english">（receiver operating characteristic curve）</span></a>为在阈值取值范围内连续变化<span class="math inline">\(t\)</span>，对每个<span class="math inline">\(t\)</span>计算对应的： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1RQUn0odCk9XGZyYWN7XG9wZXJhdG9ybmFtZXtUUH0odCl9e1xvcGVyYXRvcm5hbWV7VFB9KHQpK1xvcGVyYXRvcm5hbWV7Rk59KHQpfSxccXVhZAoJCVxvcGVyYXRvcm5hbWV7RlBSfSh0KT0JXGZyYWN7XG9wZXJhdG9ybmFtZXtGUH0odCl9e1xvcGVyYXRvcm5hbWV7RlB9KHQpK1xvcGVyYXRvcm5hbWV7VE59KHQpfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{TPR}(t)=\frac{\operatorname{TP}(t)}{\operatorname{TP}(t)+\operatorname{FN}(t)},\quad
 \operatorname{FPR}(t)=  \frac{\operatorname{FP}(t)}{\operatorname{FP}(t)+\operatorname{TN}(t)}
 \end{equation*}\]</span></p>
-<p>然后以<span class="math inline">\(\mathrm{FPR}(t)\)</span>为横轴、<span class="math inline">\(\mathrm{TPR}(t)\)</span>为纵轴作图得到的曲线。<a href="../chapters/glossary-a.html#term-AUROC" class="term" title="area under ROC">受试者工作特征曲线下面积<span class="term-english">（area under ROC）</span></a>定义为ROC曲线与<span class="math inline">\(\mathrm{FPR}(t)\)</span>轴和<span class="math inline">\(\mathrm{FPR}(t)=1\)</span>围成区域的面积。</p>
+<p>然后以<span class="math inline">\(\mathrm{FPR}\)</span>为横轴、<span class="math inline">\(\mathrm{TPR}\)</span>为纵轴作图得到的曲线。<a href="../chapters/glossary-a.html#term-AUROC" class="term" title="area under ROC">受试者工作特征曲线下面积<span class="term-english">（area under ROC）</span></a>定义为ROC曲线与<span class="math inline">\(\mathrm{FPR}\)</span>轴和<span class="math inline">\(\mathrm{FPR}=1\)</span>围成区域的面积。</p>
 </div>
 <div id="note-17-4" class="note theorem-block env-note">
 <p><strong>note 17.4</strong>. ROC曲线反映了阈值变化对<span class="math inline">\(\operatorname{TPR}\)</span>与<span class="math inline">\(\operatorname{FPR}\)</span>的权衡。<span class="math inline">\(\operatorname{AUROC}\)</span>独立于具体阈值，是比较不同模型总体区分能力的常用指标，取值范围通常在<span class="math inline">\([0.5,1]\)</span>，<span class="math inline">\(0.5\)</span>表示随机猜测（对任意的<span class="math inline">\(t\in[0,1]\)</span>有<span class="math inline">\(\operatorname{FPR}(t)=\operatorname{TPR}(t)\)</span>，模型判断正类为正类的概率和模型判断负类为正类的概率一致），<span class="math inline">\(1\)</span>表示完美分类。</p>
@@ -870,10 +876,10 @@ window.Quarto = {
 </figure>
 </div>
 <div id="definition-17-8" class="definition theorem-block env-definition">
-<p><strong>Definition 17.8</strong>. <a href="../chapters/glossary-p.html#term-PRC" class="term" title="precision-recall curve">精确率-召回率曲线<span class="term-english">（precision-recall curve）</span></a>为在<span class="math inline">\([0,1]\)</span>内连续变化判别阈值<span class="math inline">\(t\)</span>（<span class="math inline">\(t\)</span>从<span class="math inline">\(1\)</span>取向<span class="math inline">\(0\)</span>），对每个<span class="math inline">\(t\)</span>计算对应的<span class="math inline">\(\operatorname{Precision}(t)\)</span>和<span class="math inline">\(\operatorname{Recall}(t)\)</span>，然后以<span class="math inline">\(\mathrm{Precision}(t)\)</span>为横轴、<span class="math inline">\(\mathrm{Recall}(t)\)</span>为纵轴作图得到的曲线。<a href="../chapters/glossary-a.html#term-AUPRC" class="term" title="area under precision-recall curve">精确率-召回率曲线下面积<span class="term-english">（area under precision-recall curve）</span></a>定义为PRC与<span class="math inline">\(\operatorname{Recall}(t)\)</span>轴和<span class="math inline">\(\operatorname{Precision}(t)\)</span>轴围成区域的面积。</p>
+<p><strong>Definition 17.8</strong>. 设模型将得分不低于阈值 <span class="math inline">\(t\)</span> 的样本预测为正类。<a href="../chapters/glossary-p.html#term-PRC" class="term" title="precision-recall curve">精确率-召回率曲线<span class="term-english">（precision-recall curve）</span></a>为在阈值取值范围内内连续变化<span class="math inline">\(t\)</span>，对每个<span class="math inline">\(t\)</span>计算对应的<span class="math inline">\(\operatorname{Precision}(t)\)</span>和<span class="math inline">\(\operatorname{Recall}(t)\)</span>，然后以<span class="math inline">\(\mathrm{Recall}\)</span>为横轴、<span class="math inline">\(\mathrm{Precision}\)</span>为纵轴作图得到的曲线。<a href="../chapters/glossary-a.html#term-AUPRC" class="term" title="area under precision-recall curve">精确率-召回率曲线下面积<span class="term-english">（area under precision-recall curve）</span></a>定义为PRC曲线与<span class="math inline">\(\operatorname{Recall}\)</span>轴之间区域的面积。</p>
 </div>
 <div id="note-17-5" class="note theorem-block env-note">
-<p><strong>note 17.5</strong>. 相比<span class="math inline">\(\operatorname{AUROC}\)</span>，<span class="math inline">\(\operatorname{AUPRC}\)</span>更关注正类的表现，因而在正负样本严重不平衡时更加敏感。较高的<span class="math inline">\(\operatorname{AUPRC}\)</span>表明模型性能较好。</p>
+<p><strong>note 17.5</strong>. 相比<span class="math inline">\(\operatorname{AUROC}\)</span>，<span class="math inline">\(\operatorname{AUPRC}\)</span>更关注正类的表现。较高的<span class="math inline">\(\operatorname{AUPRC}\)</span>表明模型性能较好。</p>
 <figure id="fig-17-2" class="textbook-figure figure" data-latex-placement="H">
 <img src="../_tikz/tikz-d597f4f2bb39fed7b712.png" class="tikz-image figure-img" style="width:92.0%" width="1921" height="1557" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
@@ -882,28 +888,67 @@ window.Quarto = {
 </figure>
 </div>
 </section>
+<section id="id--39181e26" class="level4">
+<h4 class="anchored" data-anchor-id="id--39181e26"><span class="header-section-number">17.1.1.2</span> 多分类</h4>
+<p>设真实标签<span class="math inline">\(y\in\{1,2,\dots,K\}\)</span>，模型预测为<span class="math inline">\(\hat{y}\in\{1,2,\dots,K\}\)</span>，其中<span class="math inline">\(K\geqslant3\)</span>为类别总数。与二分类问题不同，多分类问题中不存在唯一的正类与负类，因此通常需要先分别考察模型在每个类别上的表现，再通过适当的平均方式得到整体评价指标。</p>
+<p>对于任意类别<span class="math inline">\(k\in{1,2,\dots,K}\)</span>，可将类别<span class="math inline">\(k\)</span>视为正类，将其余类别合并为负类，并按照二分类问题中的定义计算<span class="math inline">\(\operatorname{TP}_k\)</span>、<span class="math inline">\(\operatorname{FP}_k\)</span>、<span class="math inline">\(\operatorname{FN}_k\)</span>和<span class="math inline">\(\operatorname{TN}_k\)</span>，进而得到该类别的<span class="math inline">\(\operatorname{Precision}_k\)</span>、<span class="math inline">\(\operatorname{Recall}_k\)</span>和<span class="math inline">\(\operatorname{F1}_k\)</span>。这种处理方式称为one-versus-rest。</p>
+<p>分别报告每个类别的评价指标能够完整反映模型在各类别上的表现，但当类别数量较多或需要使用单一数值比较模型时，需要进一步对各类别的指标进行汇总。常用的汇总方式包括Macro平均、Weighted平均和Micro平均。</p>
+<div id="definition-17-9" class="definition theorem-block env-definition">
+<p><strong>Definition 17.9</strong>. 设<span class="math inline">\(m_k\)</span>表示类别<span class="math inline">\(k\)</span>的某个评价指标，该指标的Macro平均定义为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQltX3tcbWF0aHJte21hY3JvfX09XGZyYWN7MX17S31cc3VtX3trPTF9XntLfW1fawpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+m_{\mathrm{macro}}=\frac{1}{K}\sum_{k=1}^{K}m_k
+\end{equation*}\]</span></p>
+</div>
+<div id="definition-17-10" class="definition theorem-block env-definition">
+<p><strong>Definition 17.10</strong>. 设<span class="math inline">\(m_k\)</span>表示类别<span class="math inline">\(k\)</span>的某个评价指标，类别<span class="math inline">\(k\)</span>的真实样本数为<span class="math inline">\(n_k\)</span>，该指标的Weighted平均定义为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQltX3tcbWF0aHJte3dlaWdodGVkfX09XHN1bV97az0xfV57S31cZnJhY3tuX2t9e259bV9rClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+m_{\mathrm{weighted}}=\sum_{k=1}^{K}\frac{n_k}{n}m_k
+\end{equation*}\]</span></p>
+</div>
+<div id="definition-17-11" class="definition theorem-block env-definition">
+<p><strong>Definition 17.11</strong>. Micro平均定义为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2dhdGhlcip9CgkJXG9wZXJhdG9ybmFtZXtQcmVjaXNpb259X3tcbWF0aHJte21pY3JvfX09XGZyYWN7XHN1bVxsaW1pdHNfe2s9MX1ee0t9XG9wZXJhdG9ybmFtZXtUUH1fa317XHN1bVxsaW1pdHNfe2s9MX1ee0t9KFxvcGVyYXRvcm5hbWV7VFB9X2srXG9wZXJhdG9ybmFtZXtGUH1fayl9IFxcCgkJXG9wZXJhdG9ybmFtZXtSZWNhbGx9X3tcbWF0aHJte21pY3JvfX09XGZyYWN7XHN1bVxsaW1pdHNfe2s9MX1ee0t9XG9wZXJhdG9ybmFtZXtUUH1fa317XHN1bVxsaW1pdHNfe2s9MX1ee0t9KFxvcGVyYXRvcm5hbWV7VFB9X2srXG9wZXJhdG9ybmFtZXtGTn1fayl9IFxcCgkJXG9wZXJhdG9ybmFtZXtGMX1fe1xtYXRocm17bWljcm99fT0yXHRpbWVzXGZyYWN7XG9wZXJhdG9ybmFtZXtQcmVjaXNpb259X3tcbWF0aHJte21pY3JvfX1cb3BlcmF0b3JuYW1le1JlY2FsbH1fe1xtYXRocm17bWljcm99fX17XG9wZXJhdG9ybmFtZXtQcmVjaXNpb259X3tcbWF0aHJte21pY3JvfX0rXG9wZXJhdG9ybmFtZXtSZWNhbGx9X3tcbWF0aHJte21pY3JvfX19ClxlbmR7Z2F0aGVyKn0="></span></p>
+<p><span class="math display">\[\begin{gather*}
+\operatorname{Precision}_{\mathrm{micro}}=\frac{\sum\limits_{k=1}^{K}\operatorname{TP}_k}{\sum\limits_{k=1}^{K}(\operatorname{TP}_k+\operatorname{FP}_k)} \\
+\operatorname{Recall}_{\mathrm{micro}}=\frac{\sum\limits_{k=1}^{K}\operatorname{TP}_k}{\sum\limits_{k=1}^{K}(\operatorname{TP}_k+\operatorname{FN}_k)} \\
+\operatorname{F1}_{\mathrm{micro}}=2\times\frac{\operatorname{Precision}_{\mathrm{micro}}\operatorname{Recall}_{\mathrm{micro}}}{\operatorname{Precision}_{\mathrm{micro}}+\operatorname{Recall}_{\mathrm{micro}}}
+\end{gather*}\]</span></p>
+</div>
+<div id="note-17-6" class="note theorem-block env-note">
+<p><strong>note 17.6</strong>. 在每个样本只有一个真实标签且模型只预测一个类别的单标签多分类问题中，每个预测正确的样本产生一个真阳性，而每个预测错误的样本同时产生一个假阳性和一个假阴性。因此： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc3VtX3trPTF9XntLfVxvcGVyYXRvcm5hbWV7RlB9X2s9XHN1bV97az0xfV57S31cb3BlcmF0b3JuYW1le0ZOfV9rPW4tXHN1bV97az0xfV57S31cb3BlcmF0b3JuYW1le1RQfV9rClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\sum_{k=1}^{K}\operatorname{FP}_k=\sum_{k=1}^{K}\operatorname{FN}_k=n-\sum_{k=1}^{K}\operatorname{TP}_k
+\end{equation*}\]</span></p>
+<p>从而： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1ByZWNpc2lvbn1fe1xtYXRocm17bWljcm99fT1cb3BlcmF0b3JuYW1le1JlY2FsbH1fe1xtYXRocm17bWljcm99fT1cb3BlcmF0b3JuYW1le0YxfV97XG1hdGhybXttaWNyb319PVxvcGVyYXRvcm5hbWV7QWNjdXJhY3l9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\operatorname{Precision}_{\mathrm{micro}}=\operatorname{Recall}_{\mathrm{micro}}=\operatorname{F1}_{\mathrm{micro}}=\operatorname{Accuracy}
+\end{equation*}\]</span></p>
+<p>所以在多分类问题中，同时报告Accuracy和Micro通常不会提供额外信息。</p>
+<p>若希望所有类别具有相同的重要性，应重点考察Macro平均；若希望评价结果反映实际类别分布，可以使用Weighted平均；若希望从所有样本层面汇总分类结果，则可以使用Micro平均。</p>
+</div>
+</section>
+</section>
 <section id="id--e700b9f8" class="level3">
 <h3 class="anchored" data-anchor-id="id--e700b9f8"><span class="header-section-number">17.1.2</span> 回归任务</h3>
 <p>设真实值为<span class="math inline">\(\{y_i\}_{i=1}^{n}\)</span>，预测值为<span class="math inline">\(\{\hat{y}_i\}_{i=1}^{n}\)</span>。</p>
-<div id="definition-17-9" class="definition theorem-block env-definition">
-<p><strong>Definition 17.9</strong>. 称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KICAgIFxvcGVyYXRvcm5hbWV7TUFFfT1cZnJhY3sxfXtufVxzdW1fe2k9MX1ebnx5X2ktXGhhdHt5fV9pfApcZW5ke2VxdWF0aW9uKn0="></span></p>
+<div id="definition-17-12" class="definition theorem-block env-definition">
+<p><strong>Definition 17.12</strong>. 称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KICAgIFxvcGVyYXRvcm5hbWV7TUFFfT1cZnJhY3sxfXtufVxzdW1fe2k9MX1ebnx5X2ktXGhhdHt5fV9pfApcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{MAE}=\frac{1}{n}\sum_{i=1}^n|y_i-\hat{y}_i|
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/glossary-m.html#term-MAE" class="term" title="mean absolute error">平均绝对误差<span class="term-english">（mean absolute error）</span></a>。</p>
 </div>
-<div id="note-17-6" class="note theorem-block env-note">
-<p><strong>note 17.6</strong>. MAE计算预测误差的绝对值并取平均，因而对所有误差赋予相同的线性权重。它具有易于解释、与原数据同量纲等优点，并对单个异常值不敏感。</p>
+<div id="note-17-7" class="note theorem-block env-note">
+<p><strong>note 17.7</strong>. MAE计算预测误差的绝对值并取平均，因而对所有误差赋予相同的线性权重。它具有易于解释、与原数据同量纲等优点，并对单个异常值不敏感。</p>
 </div>
-<div id="definition-17-10" class="definition theorem-block env-definition">
-<p><strong>Definition 17.10</strong>. 称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KICAgIFxvcGVyYXRvcm5hbWV7TUFQRX09XGZyYWN7MX17bn1cc3VtX3tpPTF9Xm5cbGVmdHxcZnJhY3t5X2ktXGhhdHt5fV9pfXt5X2l9XHJpZ2h0fApcZW5ke2VxdWF0aW9uKn0="></span></p>
+<div id="definition-17-13" class="definition theorem-block env-definition">
+<p><strong>Definition 17.13</strong>. 称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KICAgIFxvcGVyYXRvcm5hbWV7TUFQRX09XGZyYWN7MX17bn1cc3VtX3tpPTF9Xm5cbGVmdHxcZnJhY3t5X2ktXGhhdHt5fV9pfXt5X2l9XHJpZ2h0fApcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{MAPE}=\frac{1}{n}\sum_{i=1}^n\left|\frac{y_i-\hat{y}_i}{y_i}\right|
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/glossary-m.html#term-MAPE" class="term" title="mean absolute percentage error">平均绝对百分比误差<span class="term-english">（mean absolute percentage error）</span></a>。</p>
 </div>
-<div id="note-17-7" class="note theorem-block env-note">
-<p><strong>note 17.7</strong>. MAPE 将误差按照真实值比例归一化，适合对预测误差的相对大小进行衡量。</p>
+<div id="note-17-8" class="note theorem-block env-note">
+<p><strong>note 17.8</strong>. MAPE 将误差按照真实值比例归一化，适合对预测误差的相对大小进行衡量。</p>
 </div>
 </section>
 <section id="id--70a460cc" class="level3">
@@ -960,8 +1005,8 @@ window.Quarto = {
 \inf_{f\in\mathcal{F}_1}\widehat{\mathcal{R}}_{\mathrm{train}}(f).
 \end{equation*}\]</span></p>
 <p>也就是说，扩大模型空间不会使最优训练风险变大，因为新增的模型为拟合训练数据提供了更多选择；但总体风险并不具有相同的单调性。模型空间越大，训练过程越容易从大量候选模型中找到一个恰好迎合当前样本偶然性的模型，因而经验风险虽然可以很低，经验风险与总体风险之间的偏差却更难控制。极端情况下，一个足够复杂的模型可以记住每个训练样本，使训练风险接近<span class="math inline">\(0\)</span>；但训练样本之外的函数取值仍可能几乎不受约束，这正是过拟合产生的原因。</p>
-<div id="definition-17-11" class="definition theorem-block env-definition">
-<p><strong>Definition 17.11</strong>. 设<span class="math inline">\(\Omega:\mathcal{F}\to[0,+\infty]\)</span>为模型复杂度函数，<span class="math inline">\(\Omega(f)\)</span>越大表示模型<span class="math inline">\(f\)</span>越复杂。对<span class="math inline">\(c\geqslant0\)</span>，定义受限模型空间： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbWF0aGNhbHtGfV9jXGNvbG9uZXFce2ZcaW5cbWF0aGNhbHtGfTpcT21lZ2EoZilcbGVxc2xhbnQgY1x9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="definition-17-14" class="definition theorem-block env-definition">
+<p><strong>Definition 17.14</strong>. 设<span class="math inline">\(\Omega:\mathcal{F}\to[0,+\infty]\)</span>为模型复杂度函数，<span class="math inline">\(\Omega(f)\)</span>越大表示模型<span class="math inline">\(f\)</span>越复杂。对<span class="math inline">\(c\geqslant0\)</span>，定义受限模型空间： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbWF0aGNhbHtGfV9jXGNvbG9uZXFce2ZcaW5cbWF0aGNhbHtGfTpcT21lZ2EoZilcbGVxc2xhbnQgY1x9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{F}_c\coloneq\{f\in\mathcal{F}:\Omega(f)\leqslant c\}
 \end{equation*}\]</span></p>
@@ -976,8 +1021,8 @@ window.Quarto = {
 \hat{f}_\lambda\in\mathop{\arg\min}_{f\in\mathcal{F}}\left\{\widehat{\mathcal{R}}_{\mathrm{train}}(f)+\lambda\Omega(f)\right\},\;\lambda\geqslant0
 \end{equation*}\]</span></p>
 <p>其中，<span class="math inline">\(\widehat{\mathcal{R}}_{\mathrm{train}}(f)+\lambda\Omega(f)\)</span>称为正则化目标函数，<span class="math inline">\(\lambda\)</span>称为<a href="../chapters/glossary-r.html#term-RegularizationStrength" class="term" title="regularization strength">正则化强度<span class="term-english">（regularization strength）</span></a>。当<span class="math inline">\(\lambda=0\)</span>时，该问题退化为原来的经验风险最小化；<span class="math inline">\(\lambda\)</span>越大，模型复杂度在目标函数中付出的代价越大，训练过程便越倾向于选择简单模型。</p>
-<div id="note-17-8" class="note theorem-block env-note">
-<p><strong>note 17.8</strong>. 限制模型空间的本质是在拟合训练数据与控制模型复杂度避免过拟合之间取得平衡：模型空间过小会导致模型无法很好的拟合训练数据，也即<a href="../chapters/glossary-u.html#term-Underfitting" class="term" title="underfitting">欠拟合<span class="term-english">（underfitting）</span></a>，模型空间过大会导致过拟合。</p>
+<div id="note-17-9" class="note theorem-block env-note">
+<p><strong>note 17.9</strong>. 限制模型空间的本质是在拟合训练数据与控制模型复杂度避免过拟合之间取得平衡：模型空间过小会导致模型无法很好的拟合训练数据，也即<a href="../chapters/glossary-u.html#term-Underfitting" class="term" title="underfitting">欠拟合<span class="term-english">（underfitting）</span></a>，模型空间过大会导致过拟合。</p>
 </div>
 </section>
 </section>
@@ -988,11 +1033,11 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="id--9f71c77f"><span class="header-section-number">17.2.1</span> 信息度量与分裂准则</h3>
 <section id="id--9274531b" class="level4">
 <h4 class="anchored" data-anchor-id="id--9274531b"><span class="header-section-number">17.2.1.1</span> 信息量</h4>
-<div id="definition-17-12" class="definition theorem-block env-definition">
-<p><strong>Definition 17.12</strong>. 设<span class="math inline">\((X,\mathscr{A},P)\)</span>为概率空间，<span class="math inline">\(f\)</span>是<span class="math inline">\(X\)</span>上的离散型随机变量，<span class="math inline">\(f\)</span>的取值集合为<span class="math inline">\(\{x_n\}\)</span>。称<span class="math inline">\(-\log[P(f=x_n)]\)</span>为事件<span class="math inline">\(\{f=x_n\}\)</span>的<a href="../chapters/glossary-i.html#term-InformationQuantity" class="term" title="information quantity">信息量<span class="term-english">（information quantity）</span></a>，记作<span class="math inline">\(I(f=x_n)\)</span>。</p>
+<div id="definition-17-15" class="definition theorem-block env-definition">
+<p><strong>Definition 17.15</strong>. 设<span class="math inline">\((X,\mathscr{A},P)\)</span>为概率空间，<span class="math inline">\(f\)</span>是<span class="math inline">\(X\)</span>上的离散型随机变量，<span class="math inline">\(f\)</span>的取值集合为<span class="math inline">\(\{x_n\}\)</span>。称<span class="math inline">\(-\log[P(f=x_n)]\)</span>为事件<span class="math inline">\(\{f=x_n\}\)</span>的<a href="../chapters/glossary-i.html#term-InformationQuantity" class="term" title="information quantity">信息量<span class="term-english">（information quantity）</span></a>，记作<span class="math inline">\(I(f=x_n)\)</span>。</p>
 </div>
-<div id="note-17-9" class="note theorem-block env-note">
-<p><strong>note 17.9</strong>. 信息量定义中对数底的选择是任意的，但在信息论中普遍使用<span class="math inline">\(2\)</span>作为对数的底。</p>
+<div id="note-17-10" class="note theorem-block env-note">
+<p><strong>note 17.10</strong>. 信息量定义中对数底的选择是任意的，但在信息论中普遍使用<span class="math inline">\(2\)</span>作为对数的底。</p>
 <p>为什么信息量这么定义呢？信息量应该具有如下两个性质：</p>
 <ol type="1">
 <li><p>一件事发生的概率越小，那么这件事发生后产生的信息量越大；</p></li>
@@ -1000,8 +1045,8 @@ window.Quarto = {
 </ol>
 <p>由(1)，<span class="math inline">\(I(f=x_n)\)</span>需要与<span class="math inline">\(P(f=x_n)\)</span>呈反比；由(2)，<span class="math inline">\(I(f=x_n)\)</span>应具有对数的形式。</p>
 </div>
-<div id="definition-17-13" class="definition theorem-block env-definition">
-<p><strong>Definition 17.13</strong>. 设<span class="math inline">\((X,\mathscr{A},P)\)</span>为概率空间，<span class="math inline">\(f\)</span>是<span class="math inline">\(X\)</span>上的离散型随机变量，<span class="math inline">\(f\)</span>的取值集合为<span class="math inline">\(\{x_n\}\)</span>。称<span class="math inline">\(H(f)=\operatorname{E}[I(f)]\)</span>为<span class="math inline">\(f\)</span>的<a href="../chapters/glossary-i.html#term-InformationEntropy" class="term" title="information entropy">信息熵<span class="term-english">（information entropy）</span></a>，由样本计算得到的信息熵被称为<a href="../chapters/glossary-e.html#term-EmpiricalEntropy" class="term" title="empirical entropy">经验熵<span class="term-english">（empirical entropy）</span></a>，给定某一条件下的信息熵被称为<a href="../chapters/glossary-c.html#term-ConditionalEntropy" class="term" title="conditional entropy">条件熵<span class="term-english">（conditional entropy）</span></a>。</p>
+<div id="definition-17-16" class="definition theorem-block env-definition">
+<p><strong>Definition 17.16</strong>. 设<span class="math inline">\((X,\mathscr{A},P)\)</span>为概率空间，<span class="math inline">\(f\)</span>是<span class="math inline">\(X\)</span>上的离散型随机变量，<span class="math inline">\(f\)</span>的取值集合为<span class="math inline">\(\{x_n\}\)</span>。称<span class="math inline">\(H(f)=\operatorname{E}[I(f)]\)</span>为<span class="math inline">\(f\)</span>的<a href="../chapters/glossary-i.html#term-InformationEntropy" class="term" title="information entropy">信息熵<span class="term-english">（information entropy）</span></a>，由样本计算得到的信息熵被称为<a href="../chapters/glossary-e.html#term-EmpiricalEntropy" class="term" title="empirical entropy">经验熵<span class="term-english">（empirical entropy）</span></a>，给定某一条件下的信息熵被称为<a href="../chapters/glossary-c.html#term-ConditionalEntropy" class="term" title="conditional entropy">条件熵<span class="term-english">（conditional entropy）</span></a>。</p>
 </div>
 <div id="prop-InformationEntropy-e296738e" class="property theorem-block env-property">
 <p><strong>Property 17.2.1</strong>. 设<span class="math inline">\((X,\mathscr{A},P)\)</span>为概率空间，<span class="math inline">\(f\)</span>是<span class="math inline">\(X\)</span>上的离散型随机变量，<span class="math inline">\(f\)</span>的取值集合为<span class="math inline">\(\{x_n\}\)</span>。信息熵具有如下性质：</p>
@@ -1012,7 +1057,7 @@ window.Quarto = {
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>(1)由信息熵的定义立即可得。</p>
-<p>(2)由于<span class="math inline">\(\log(\cdot)\)</span>在<span class="math inline">\((0,+\infty)\)</span>上为凹函数<span class="todo-note todo-info" role="note">补充判断理由</span>，根据<a href="../chapters/appendix.html#ineq-Jensen-4973d767" class="textbook-cross-reference" data-reference-key="ineq:Jensen" data-reference-kind="ref+label" data-reference-title="不等式 10">不等式 10</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlIKGYpJj1cb3BlcmF0b3JuYW1le0V9W0koZildPS1cc3VtX3tpPTF9XntufVAoZj14X2kpXGxvZ1tQKGY9eF9pKV09XHN1bV97aT0xfV57bn1QKGY9eF9pKVxsb2dcbGVmdFtcZnJhY3sxfXtQKGY9eF9pKX1ccmlnaHRdIFxcCgkJJlxsZXFzbGFudFxsb2dcbGVmdFtcc3VtX3tpPTF9XntufVAoZj14X2kpXGZyYWN7MX17UChmPXhfaSl9XHJpZ2h0XT1cbG9nKG4pClxlbmR7YWxpZ24qfQ=="></span></p>
+<p>(2)由于<span class="math inline">\(\log(x)\)</span>在<span class="math inline">\((0,+\infty)\)</span>上为凹函数<span class="todo-note todo-info" role="note">补充判断理由</span>，根据<a href="../chapters/appendix.html#ineq-Jensen-4973d767" class="textbook-cross-reference" data-reference-key="ineq:Jensen" data-reference-kind="ref+label" data-reference-title="不等式 10">不等式 10</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlIKGYpJj1cb3BlcmF0b3JuYW1le0V9W0koZildPS1cc3VtX3tpPTF9XntufVAoZj14X2kpXGxvZ1tQKGY9eF9pKV09XHN1bV97aT0xfV57bn1QKGY9eF9pKVxsb2dcbGVmdFtcZnJhY3sxfXtQKGY9eF9pKX1ccmlnaHRdIFxcCgkJJlxsZXFzbGFudFxsb2dcbGVmdFtcc3VtX3tpPTF9XntufVAoZj14X2kpXGZyYWN7MX17UChmPXhfaSl9XHJpZ2h0XT1cbG9nKG4pClxlbmR7YWxpZ24qfQ=="></span></p>
 <p><span class="math display">\[\begin{align*}
 H(f)&amp;=\operatorname{E}[I(f)]=-\sum_{i=1}^{n}P(f=x_i)\log[P(f=x_i)]=\sum_{i=1}^{n}P(f=x_i)\log\left[\frac{1}{P(f=x_i)}\right] \\
 &amp;\leqslant\log\left[\sum_{i=1}^{n}P(f=x_i)\frac{1}{P(f=x_i)}\right]=\log(n)
@@ -1029,8 +1074,8 @@ H(f)&amp;=\operatorname{E}[I(f)]=-\sum_{i=1}^{n}P(f=x_i)\log[P(f=x_i)]=\sum_{i=1
 </section>
 <section id="gini-0fa0870b" class="level4">
 <h4 class="anchored" data-anchor-id="gini-0fa0870b"><span class="header-section-number">17.2.1.2</span> Gini系数</h4>
-<div id="definition-17-14" class="definition theorem-block env-definition">
-<p><strong>Definition 17.14</strong>. 设分类问题的类别空间为<span class="math inline">\(\mathcal{Y}=\{1,\dots,m\}\)</span>，<span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n\)</span>为观测样本集，其中<span class="math inline">\(y_i\in\mathcal{Y}\)</span>表示第<span class="math inline">\(i\)</span>个样本的真实类别，记<span class="math inline">\(p_i\)</span>为第<span class="math inline">\(i\)</span>类样本在<span class="math inline">\(\mathcal{D}\)</span>中所占比例。称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0dpbml9KFxtYXRoY2Fse0R9KT0xLVxzdW1fe2k9MX1ebXBfaV4yClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="definition-17-17" class="definition theorem-block env-definition">
+<p><strong>Definition 17.17</strong>. 设分类问题的类别空间为<span class="math inline">\(\mathcal{Y}=\{1,\dots,m\}\)</span>，<span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n\)</span>为观测样本集，其中<span class="math inline">\(y_i\in\mathcal{Y}\)</span>表示第<span class="math inline">\(i\)</span>个样本的真实类别，记<span class="math inline">\(p_i\)</span>为第<span class="math inline">\(i\)</span>类样本在<span class="math inline">\(\mathcal{D}\)</span>中所占比例。称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0dpbml9KFxtYXRoY2Fse0R9KT0xLVxzdW1fe2k9MX1ebXBfaV4yClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Gini}(\mathcal{D})=1-\sum_{i=1}^mp_i^2
 \end{equation*}\]</span></p>
@@ -1055,8 +1100,8 @@ H(f)&amp;=\operatorname{E}[I(f)]=-\sum_{i=1}^{n}P(f=x_i)\log[P(f=x_i)]=\sum_{i=1
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
-<div id="note-17-10" class="note theorem-block env-note">
-<p><strong>note 17.10</strong>. 由<a href="#prop-GiniIndex-ed5a1cb5" class="textbook-cross-reference" data-reference-key="prop:GiniIndex" data-reference-kind="ref+label" data-reference-title="性质 17.2.2" data-reference-items="1|2" data-reference-hint="请查看第 1、2 项">性质 17.2.2(1)(2)</a>可以看出Gini指数可以用来刻画样本类别分布的不纯度。当所有样本属于同一类别时<span class="math inline">\(\operatorname{Gini}(\mathcal{D})=0\)</span>，表示完全纯净；当类别分布均匀时<span class="math inline">\(\operatorname{Gini}(\mathcal{D})\)</span>达到最大值，表示类别混杂程度最高。</p>
+<div id="note-17-11" class="note theorem-block env-note">
+<p><strong>note 17.11</strong>. 由<a href="#prop-GiniIndex-ed5a1cb5" class="textbook-cross-reference" data-reference-key="prop:GiniIndex" data-reference-kind="ref+label" data-reference-title="性质 17.2.2" data-reference-items="1|2" data-reference-hint="请查看第 1、2 项">性质 17.2.2(1)(2)</a>可以看出Gini指数可以用来刻画样本类别分布的不纯度。当所有样本属于同一类别时<span class="math inline">\(\operatorname{Gini}(\mathcal{D})=0\)</span>，表示完全纯净；当类别分布均匀时<span class="math inline">\(\operatorname{Gini}(\mathcal{D})\)</span>达到最大值，表示类别混杂程度最高。</p>
 </div>
 <p>对于二分类样本，Gini指数可写为<span class="math inline">\(G(p)=1-p^2-(1-p)^2=2p(1-p)\)</span>。它与信息熵具有相同的对称性，但计算形式更简单。</p>
 <figure id="fig-17-5" class="textbook-figure figure" data-latex-placement="H">
@@ -1068,8 +1113,8 @@ H(f)&amp;=\operatorname{E}[I(f)]=-\sum_{i=1}^{n}P(f=x_i)\log[P(f=x_i)]=\sum_{i=1
 </section>
 <section id="id--a93ea801" class="level4">
 <h4 class="anchored" data-anchor-id="id--a93ea801"><span class="header-section-number">17.2.1.3</span> 交叉熵</h4>
-<div id="definition-17-15" class="definition theorem-block env-definition">
-<p><strong>Definition 17.15</strong>. 设 <span class="math inline">\((X,\mathscr{A},P)\)</span> 为概率空间，<span class="math inline">\(f\)</span>为<span class="math inline">\(X\)</span>上取值于有限集合 <span class="math inline">\(\{x_1,\dots,x_n\}\)</span> 的离散型随机变量，其真实分布为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlwX2k9UChmPXhfaSksXHF1YWQgaT0xLFxkb3RzLG4KXGVuZHtlcXVhdGlvbip9"></span></p>
+<div id="definition-17-18" class="definition theorem-block env-definition">
+<p><strong>Definition 17.18</strong>. 设 <span class="math inline">\((X,\mathscr{A},P)\)</span> 为概率空间，<span class="math inline">\(f\)</span>为<span class="math inline">\(X\)</span>上取值于有限集合 <span class="math inline">\(\{x_1,\dots,x_n\}\)</span> 的离散型随机变量，其真实分布为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlwX2k9UChmPXhfaSksXHF1YWQgaT0xLFxkb3RzLG4KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 p_i=P(f=x_i),\quad i=1,\dots,n
 \end{equation*}\]</span></p>
@@ -1087,7 +1132,7 @@ H(p,q)=-\sum_{i=1}^np_i\log q_i
 <p><span class="math display">\[\begin{equation*}
 H(p,q)=-\sum_{i=1}^np_i\log q_i=-\sum_{i=1}^np_i\log\frac{q_i}{p_i}-\sum_{i=1}^np_i\log p_i
 \end{equation*}\]</span></p>
-<p>并且<span class="math inline">\(\log(\cdot)\)</span>在<span class="math inline">\((0,+\infty)\)</span>上为凹函数<span class="todo-note todo-info" role="note">补充判断理由</span>，由<a href="../chapters/appendix.html#ineq-Jensen-4973d767" class="textbook-cross-reference" data-reference-key="ineq:Jensen" data-reference-kind="ref+label" data-reference-title="不等式 10">不等式 10</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc3VtX3tpPTF9Xm5wX2lcbG9nXGZyYWN7cV9pfXtwX2l9XGxlcXNsYW50XGxvZ1xsZWZ0W1xzdW1fe2k9MX1ee259cF9pXGZyYWN7cV9pfXtwX2l9XHJpZ2h0XT0wClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p>并且<span class="math inline">\(\log(x)\)</span>在<span class="math inline">\((0,+\infty)\)</span>上为凹函数<span class="todo-note todo-info" role="note">补充判断理由</span>，由<a href="../chapters/appendix.html#ineq-Jensen-4973d767" class="textbook-cross-reference" data-reference-key="ineq:Jensen" data-reference-kind="ref+label" data-reference-title="不等式 10">不等式 10</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc3VtX3tpPTF9Xm5wX2lcbG9nXGZyYWN7cV9pfXtwX2l9XGxlcXNsYW50XGxvZ1xsZWZ0W1xzdW1fe2k9MX1ee259cF9pXGZyYWN7cV9pfXtwX2l9XHJpZ2h0XT0wClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=1}^np_i\log\frac{q_i}{p_i}\leqslant\log\left[\sum_{i=1}^{n}p_i\frac{q_i}{p_i}\right]=0
 \end{equation*}\]</span></p>
@@ -1097,8 +1142,8 @@ H(p,q)\geqslant-\sum_{i=1}^np_i\log p_i=H(p,p)
 \end{equation*}\]</span></p>
 <p>且当且仅当<span class="math inline">\(q=p\)</span>时取等。&nbsp;◻</p>
 </div>
-<div id="note-17-11" class="note theorem-block env-note">
-<p><strong>note 17.11</strong>. 由<a href="#prop-CrossEntropy-6f68975a" class="textbook-cross-reference" data-reference-key="prop:CrossEntropy" data-reference-kind="ref+label" data-reference-title="性质 17.2.3">性质 17.2.3</a>可知，交叉熵在所有概率分布<span class="math inline">\(q\)</span>中以<span class="math inline">\(q=p\)</span>为唯一最小值。因而最小化经验交叉熵等价于逼近真实分布<span class="math inline">\(p\)</span>，这正是对数损失函数的理论基础。</p>
+<div id="note-17-12" class="note theorem-block env-note">
+<p><strong>note 17.12</strong>. 由<a href="#prop-CrossEntropy-6f68975a" class="textbook-cross-reference" data-reference-key="prop:CrossEntropy" data-reference-kind="ref+label" data-reference-title="性质 17.2.3">性质 17.2.3</a>可知，交叉熵在所有概率分布<span class="math inline">\(q\)</span>中以<span class="math inline">\(q=p\)</span>为唯一最小值。因而最小化经验交叉熵等价于逼近真实分布<span class="math inline">\(p\)</span>，这正是对数损失函数的理论基础。</p>
 </div>
 <p>交叉熵需要区分真实概率<span class="math inline">\(p\)</span>和预测概率<span class="math inline">\(q\)</span>。固定真实概率<span class="math inline">\(p=0.25\)</span>后，预测概率<span class="math inline">\(q\)</span>与<span class="math inline">\(p\)</span>一致时交叉熵最小；预测越偏离真实概率，交叉熵越大。</p>
 <figure id="fig-17-6" class="textbook-figure figure" data-latex-placement="H">
@@ -1343,8 +1388,8 @@ I_{\text{split}}=\frac{|\mathcal{D}_L|}{|\mathcal{D}|}I(\mathcal{D}_L)+\frac{|\m
 </section>
 <section id="bagging-79cdf299" class="level3">
 <h3 class="anchored" data-anchor-id="bagging-79cdf299"><span class="header-section-number">17.2.3</span> Bagging模型</h3>
-<div id="definition-17-16" class="definition theorem-block env-definition">
-<p><strong>Definition 17.16</strong>. 设<span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n\)</span>为观测样本集，其中<span class="math inline">\(x_i\)</span>为第<span class="math inline">\(i\)</span>个样本的特征向量，<span class="math inline">\(y_i\)</span>是第<span class="math inline">\(i\)</span>个样本的标签或值，<span class="math inline">\(\mathcal{D}^{(1)},\mathcal{D}^{(2)},\dots,\mathcal{D}^{(B)}\)</span>是从<span class="math inline">\(\mathcal{D}\)</span>通过自助采样独立重复抽取的规模为<span class="math inline">\(n\)</span>的训练子集，在每个子集<span class="math inline">\(\mathcal{D}^{(b)}\)</span>上训练一个<a href="../chapters/glossary-b.html#term-BaseLearner" class="term" title="base learner">基学习器<span class="term-english">（base learner）</span></a><span class="math inline">\(f^{(b)}\)</span>。<a href="../chapters/glossary-b.html#term-BaggingEnsembleModel" class="term" title="bagging ensemble model">袋装集成模型<span class="term-english">（bagging ensemble model）</span></a>定义为各基学习器输出的聚合函数。对于回归问题，集成预测函数定义为简单平均；对于分类问题，集成预测函数定义为多数投票。</p>
+<div id="definition-17-19" class="definition theorem-block env-definition">
+<p><strong>Definition 17.19</strong>. 设<span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n\)</span>为观测样本集，其中<span class="math inline">\(x_i\)</span>为第<span class="math inline">\(i\)</span>个样本的特征向量，<span class="math inline">\(y_i\)</span>是第<span class="math inline">\(i\)</span>个样本的标签或值，<span class="math inline">\(\mathcal{D}^{(1)},\mathcal{D}^{(2)},\dots,\mathcal{D}^{(B)}\)</span>是从<span class="math inline">\(\mathcal{D}\)</span>通过自助采样独立重复抽取的规模为<span class="math inline">\(n\)</span>的训练子集，在每个子集<span class="math inline">\(\mathcal{D}^{(b)}\)</span>上训练一个<a href="../chapters/glossary-b.html#term-BaseLearner" class="term" title="base learner">基学习器<span class="term-english">（base learner）</span></a><span class="math inline">\(f^{(b)}\)</span>。<a href="../chapters/glossary-b.html#term-BaggingEnsembleModel" class="term" title="bagging ensemble model">袋装集成模型<span class="term-english">（bagging ensemble model）</span></a>定义为各基学习器输出的聚合函数。对于回归问题，集成预测函数定义为简单平均；对于分类问题，集成预测函数定义为多数投票。</p>
 </div>
 <div id="prop-Bagging-d9a7968c" class="property theorem-block env-property">
 <p><strong>Property 17.2.4</strong>. 设在固定样本点<span class="math inline">\(x\)</span>处，Bagging模型各个基学习器的预测为随机变量<span class="math inline">\(\{f^{(b)}(x)\}_{b=1}^B\)</span>。Bagging模型具有如下性质：</p>
@@ -1391,8 +1436,8 @@ P\left(S_B&gt;\frac{B}{2}\right)&amp;=P\left(\frac{S_B-Bp}{\sqrt{B^2\rho p(1-p)}
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
-<div id="note-17-12" class="note theorem-block env-note">
-<p><strong>note 17.12</strong>. 根据<a href="#prop-Bagging-d9a7968c" class="textbook-cross-reference" data-reference-key="prop:Bagging" data-reference-kind="ref+label" data-reference-title="性质 17.2.4" data-reference-items="1|2" data-reference-hint="请查看第 1、2 项">性质 17.2.4(1)(2)</a>，集成学习的有效性依赖于基学习器之间同时具备较高预测精度与足够的异质性（方差的第二项可由基学习器个数<span class="math inline">\(B\)</span>来控制降低）。若所有基学习器高度相关，简单平均或投票并不能显著改善模型性能。</p>
+<div id="note-17-13" class="note theorem-block env-note">
+<p><strong>note 17.13</strong>. 根据<a href="#prop-Bagging-d9a7968c" class="textbook-cross-reference" data-reference-key="prop:Bagging" data-reference-kind="ref+label" data-reference-title="性质 17.2.4" data-reference-items="1|2" data-reference-hint="请查看第 1、2 项">性质 17.2.4(1)(2)</a>，集成学习的有效性依赖于基学习器之间同时具备较高预测精度与足够的异质性（方差的第二项可由基学习器个数<span class="math inline">\(B\)</span>来控制降低）。若所有基学习器高度相关，简单平均或投票并不能显著改善模型性能。</p>
 <p>在 Bagging 框架中，异质性主要通过随机化机制引入：</p>
 <ol type="1">
 <li><p><strong>样本层面的异质性</strong>：通过自助采样生成不同训练子集，使各基学习器在不同样本扰动下进行训练；</p></li>
@@ -1403,8 +1448,8 @@ P\left(S_B&gt;\frac{B}{2}\right)&amp;=P\left(\frac{S_B-Bp}{\sqrt{B^2\rho p(1-p)}
 </section>
 <section id="boosting-19406e53" class="level3">
 <h3 class="anchored" data-anchor-id="boosting-19406e53"><span class="header-section-number">17.2.4</span> Boosting模型</h3>
-<div id="definition-17-17" class="definition theorem-block env-definition">
-<p><strong>Definition 17.17</strong>. 设<span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n\)</span>为观测样本集，其中<span class="math inline">\(x_i\)</span>为第<span class="math inline">\(i\)</span>个样本的特征向量，<span class="math inline">\(y_i\)</span>是第<span class="math inline">\(i\)</span>个样本的标签或值。Boosting通过顺序生成基学习器<span class="math inline">\(f^{(1)},f^{(2)},\dots,f^{(B)}\)</span>来构造集成模型，其中每一步训练都基于前一步的拟合结果，对先前被错误预测的样本赋予更高关注，或对当前残差进行进一步拟合。<a href="../chapters/glossary-b.html#term-BoostingEnsembleModel" class="term" title="boosting ensemble model">提升集成模型<span class="term-english">（boosting ensemble model）</span></a>定义为各基学习器输出的加权聚合函数。对于回归问题，集成预测函数通常定义为加权求和；对于分类问题，集成预测函数通常定义为加权投票。</p>
+<div id="definition-17-20" class="definition theorem-block env-definition">
+<p><strong>Definition 17.20</strong>. 设<span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n\)</span>为观测样本集，其中<span class="math inline">\(x_i\)</span>为第<span class="math inline">\(i\)</span>个样本的特征向量，<span class="math inline">\(y_i\)</span>是第<span class="math inline">\(i\)</span>个样本的标签或值。Boosting通过顺序生成基学习器<span class="math inline">\(f^{(1)},f^{(2)},\dots,f^{(B)}\)</span>来构造集成模型，其中每一步训练都基于前一步的拟合结果，对先前被错误预测的样本赋予更高关注，或对当前残差进行进一步拟合。<a href="../chapters/glossary-b.html#term-BoostingEnsembleModel" class="term" title="boosting ensemble model">提升集成模型<span class="term-english">（boosting ensemble model）</span></a>定义为各基学习器输出的加权聚合函数。对于回归问题，集成预测函数通常定义为加权求和；对于分类问题，集成预测函数通常定义为加权投票。</p>
 </div>
 <section id="gbdt" class="level4">
 <h4 class="anchored" data-anchor-id="gbdt"><span class="header-section-number">17.2.4.1</span> GBDT</h4>
@@ -1721,8 +1766,8 @@ w_{jb}\gets-\frac{G_{jb}}{H_{jb}+\lambda}
 <span class="figure-number">图 17.8</span> KNN分类示意图。虚线圆仅用于表示包含第<span class="math inline">5</span>个最近邻的最小邻域；实际算法只需比较距离，不必显式构造圆形边界。
 </figcaption>
 </figure>
-<div id="definition-17-18" class="definition theorem-block env-definition">
-<p><strong>Definition 17.18</strong>. 设<span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^{n}\)</span>为观测样本集，其中<span class="math inline">\(x_i\)</span>为第<span class="math inline">\(i\)</span>个样本的特征向量，<span class="math inline">\(y_i\)</span>是第<span class="math inline">\(i\)</span>个样本的标签或值。给定距离度量<span class="math inline">\(\rho\)</span>以及整数<span class="math inline">\(k\geqslant1\)</span>，对任意样本<span class="math inline">\(x\)</span>，记其<span class="math inline">\(k\)</span>个最近邻样本索引集合为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbWF0aGNhbHtOfV9rKHgpPVx1bmRlcnNldHtTXHN1YnNldFx7MSxcZG90cyxuXH0sfFN8PWt9e1xhcmdcbWlufVxzdW1fe2lcaW4gU31ccmhvKHgseF9pKQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<div id="definition-17-21" class="definition theorem-block env-definition">
+<p><strong>Definition 17.21</strong>. 设<span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^{n}\)</span>为观测样本集，其中<span class="math inline">\(x_i\)</span>为第<span class="math inline">\(i\)</span>个样本的特征向量，<span class="math inline">\(y_i\)</span>是第<span class="math inline">\(i\)</span>个样本的标签或值。给定距离度量<span class="math inline">\(\rho\)</span>以及整数<span class="math inline">\(k\geqslant1\)</span>，对任意样本<span class="math inline">\(x\)</span>，记其<span class="math inline">\(k\)</span>个最近邻样本索引集合为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbWF0aGNhbHtOfV9rKHgpPVx1bmRlcnNldHtTXHN1YnNldFx7MSxcZG90cyxuXH0sfFN8PWt9e1xhcmdcbWlufVxzdW1fe2lcaW4gU31ccmhvKHgseF9pKQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \mathcal{N}_k(x)=\underset{S\subset\{1,\dots,n\},|S|=k}{\arg\min}\sum_{i\in S}\rho(x,x_i)
 \end{equation*}\]</span></p>
@@ -1747,8 +1792,8 @@ w_{jb}\gets-\frac{G_{jb}}{H_{jb}+\lambda}
 </section>
 <section id="id--bd3f6adc" class="level2">
 <h2 class="anchored" data-anchor-id="id--bd3f6adc"><span class="header-section-number">17.4</span> 核方法</h2>
-<div id="definition-17-19" class="definition theorem-block env-definition">
-<p><strong>Definition 17.19</strong>. 设<span class="math inline">\(X\)</span>是空间，<span class="math inline">\(k:X\times X\to\mathbb{R}\)</span>被称为<a href="../chapters/glossary-k.html#term-KernelFunction" class="term" title="kernel function">核函数<span class="term-english">（kernel function）</span></a>。</p>
+<div id="definition-17-22" class="definition theorem-block env-definition">
+<p><strong>Definition 17.22</strong>. 设<span class="math inline">\(X\)</span>是空间，<span class="math inline">\(k:X\times X\to\mathbb{R}\)</span>被称为<a href="../chapters/glossary-k.html#term-KernelFunction" class="term" title="kernel function">核函数<span class="term-english">（kernel function）</span></a>。</p>
 <ol type="1">
 <li><p>若对任意的<span class="math inline">\(x_1,x_2\in X\)</span>有<span class="math inline">\(k(x_1,x_2)=k(x_2,x_1)\)</span>，则称<span class="math inline">\(k\)</span>是<strong>对称核</strong>；</p></li>
 <li><p>若对任意的<span class="math inline">\(x_1, x_2, \dots, x_{n}\in X\)</span>和任意的<span class="math inline">\(a_1, a_2, \dots, a_{n}\in\mathbb{R}\)</span>有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkJXHN1bV97aT0xfV57bn1cc3VtX3tqPTF9XntufWFfaWFfamsoeF9pLHhfailcZ2Vxc2xhbnQwClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
@@ -1758,11 +1803,11 @@ w_{jb}\gets-\frac{G_{jb}}{H_{jb}+\lambda}
 <p>则称<span class="math inline">\(k\)</span>为<strong>半正定核</strong>。</p></li>
 </ol>
 </div>
-<div id="definition-17-20" class="definition theorem-block env-definition">
-<p><strong>Definition 17.20</strong>. 设<span class="math inline">\(X\)</span>是空间，<span class="math inline">\(k:X\times X\to\mathbb{R}\)</span>。对任意的<span class="math inline">\(x_1, x_2, \dots, x_{n}\in X\)</span>，称<span class="math inline">\(K=\Big(k(x_i,x_j)\Big)\in M_{n\times n}(\mathbb{R})\)</span>为<span class="math inline">\(n\)</span>维<strong>核矩阵</strong>或<strong>Gram矩阵</strong>。</p>
+<div id="definition-17-23" class="definition theorem-block env-definition">
+<p><strong>Definition 17.23</strong>. 设<span class="math inline">\(X\)</span>是空间，<span class="math inline">\(k:X\times X\to\mathbb{R}\)</span>。对任意的<span class="math inline">\(x_1, x_2, \dots, x_{n}\in X\)</span>，称<span class="math inline">\(K=\Big(k(x_i,x_j)\Big)\in M_{n\times n}(\mathbb{R})\)</span>为<span class="math inline">\(n\)</span>维<strong>核矩阵</strong>或<strong>Gram矩阵</strong>。</p>
 </div>
-<div id="definition-17-21" class="definition theorem-block env-definition">
-<p><strong>Definition 17.21</strong>. 设<span class="math inline">\(X\)</span>是空间，<span class="math inline">\(k:X\times X\to\mathbb{R}\)</span>，<span class="math inline">\(Y\)</span>是Hilbert空间。若存在<span class="math inline">\(\varphi:X\to Y\)</span>使得对任意的<span class="math inline">\(x_1,x_2\in X\)</span>有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlrKHhfMSx4XzIpPVxCaWcoXHZhcnBoaSh4XzEpLFx2YXJwaGkoeF8yKVxCaWcpClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="definition-17-24" class="definition theorem-block env-definition">
+<p><strong>Definition 17.24</strong>. 设<span class="math inline">\(X\)</span>是空间，<span class="math inline">\(k:X\times X\to\mathbb{R}\)</span>，<span class="math inline">\(Y\)</span>是Hilbert空间。若存在<span class="math inline">\(\varphi:X\to Y\)</span>使得对任意的<span class="math inline">\(x_1,x_2\in X\)</span>有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlrKHhfMSx4XzIpPVxCaWcoXHZhcnBoaSh4XzEpLFx2YXJwaGkoeF8yKVxCaWcpClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 k(x_1,x_2)=\Big(\varphi(x_1),\varphi(x_2)\Big)
 \end{equation*}\]</span></p>
@@ -1779,11 +1824,11 @@ k(x_1,x_2)=\Big(\varphi(x_1),\varphi(x_2)\Big)
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
-<div id="definition-17-22" class="definition theorem-block env-definition">
-<p><strong>Definition 17.22</strong>. 若Hilbert空间<span class="math inline">\(Y\)</span>是定义在<span class="math inline">\(X\)</span>上的实值函数空间，则称<span class="math inline">\(Y\)</span>为<span class="math inline">\(X\)</span>上的<strong>Hilbert函数空间</strong>。</p>
+<div id="definition-17-25" class="definition theorem-block env-definition">
+<p><strong>Definition 17.25</strong>. 若Hilbert空间<span class="math inline">\(Y\)</span>是定义在<span class="math inline">\(X\)</span>上的实值函数空间，则称<span class="math inline">\(Y\)</span>为<span class="math inline">\(X\)</span>上的<strong>Hilbert函数空间</strong>。</p>
 </div>
-<div id="definition-17-23" class="definition theorem-block env-definition">
-<p><strong>Definition 17.23</strong>. 设<span class="math inline">\(Y\)</span>是<span class="math inline">\(X\)</span>上的实Hilbert函数空间。若对任意的<span class="math inline">\(x\in X\)</span>，泛函： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlMX3g6WVx0b1xtYXRoYmJ7Un0sXHF1YWRcZm9yYWxsXDtmXGluIFksXDtMX3goZik9Zih4KQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<div id="definition-17-26" class="definition theorem-block env-definition">
+<p><strong>Definition 17.26</strong>. 设<span class="math inline">\(Y\)</span>是<span class="math inline">\(X\)</span>上的实Hilbert函数空间。若对任意的<span class="math inline">\(x\in X\)</span>，泛函： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlMX3g6WVx0b1xtYXRoYmJ7Un0sXHF1YWRcZm9yYWxsXDtmXGluIFksXDtMX3goZik9Zih4KQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 L_x:Y\to\mathbb{R},\quad\forall\;f\in Y,\;L_x(f)=f(x)
 \end{equation*}\]</span></p>
@@ -1799,11 +1844,11 @@ L_x:Y\to\mathbb{R},\quad\forall\;f\in Y,\;L_x(f)=f(x)
 \end{equation*}\]</span></p>
 <p>都是有界线性泛函。由<a href="../chapters/metric-space.html#theo-LinearOperatorBoundedContinuous-ad64c73f" class="textbook-cross-reference" data-reference-key="theo:LinearOperatorBoundedContinuous" data-reference-kind="ref+label" data-reference-title="定理 3.26" data-reference-items="1" data-reference-hint="请查看第 1 项">定理 3.26(1)</a>可知<span class="math inline">\(L_x\)</span>是连续泛函，根据<a href="../chapters/metric-space.html#theo-RieszRepresentation-1c3b1560" class="textbook-cross-reference" data-reference-key="theo:RieszRepresentation" data-reference-kind="ref+label" data-reference-title="定理 3.33">定理 3.33</a>可知存在唯一的<span class="math inline">\(k_x\in Y\)</span>使得对任意的<span class="math inline">\(f\in Y\)</span>有<span class="math inline">\(L_x(f)=f(x)=(f,k_x)\)</span>。&nbsp;◻</p>
 </div>
-<div id="definition-17-24" class="definition theorem-block env-definition">
-<p><strong>Definition 17.24</strong>. 设<span class="math inline">\(Y\)</span>是<span class="math inline">\(X\)</span>上的RKHS，<span class="math inline">\(x\in X\)</span>。称满足对于任意的<span class="math inline">\(f\in Y\)</span>有<span class="math inline">\(f(x)=(f,k_x)\)</span>的<span class="math inline">\(k_x\in Y\)</span>为<span class="math inline">\(x\)</span>关于<span class="math inline">\(Y\)</span>的<a href="../chapters/glossary-r.html#term-ReproducingKernel" class="term" title="reproducing kernel">再生核<span class="term-english">（reproducing kernel）</span></a>。</p>
+<div id="definition-17-27" class="definition theorem-block env-definition">
+<p><strong>Definition 17.27</strong>. 设<span class="math inline">\(Y\)</span>是<span class="math inline">\(X\)</span>上的RKHS，<span class="math inline">\(x\in X\)</span>。称满足对于任意的<span class="math inline">\(f\in Y\)</span>有<span class="math inline">\(f(x)=(f,k_x)\)</span>的<span class="math inline">\(k_x\in Y\)</span>为<span class="math inline">\(x\)</span>关于<span class="math inline">\(Y\)</span>的<a href="../chapters/glossary-r.html#term-ReproducingKernel" class="term" title="reproducing kernel">再生核<span class="term-english">（reproducing kernel）</span></a>。</p>
 </div>
-<div id="note-17-13" class="note theorem-block env-note">
-<p><strong>note 17.13</strong>. 再生核族<span class="math inline">\(\{k_x:x\in X\}\)</span>可导出核函数<span class="math inline">\(k(x_1,x_2)=k_{x_1}(x_2)\)</span>。</p>
+<div id="note-17-14" class="note theorem-block env-note">
+<p><strong>note 17.14</strong>. 再生核族<span class="math inline">\(\{k_x:x\in X\}\)</span>可导出核函数<span class="math inline">\(k(x_1,x_2)=k_{x_1}(x_2)\)</span>。</p>
 </div>
 <div id="prop-ReproducingKernel-853e650d" class="property theorem-block env-property">
 <p><strong>Property 17.4.1</strong>. 设<span class="math inline">\(Y\)</span>是<span class="math inline">\(X\)</span>上的RKHS，<span class="math inline">\(k\)</span>是<span class="math inline">\(Y\)</span>上的再生核族<span class="math inline">\(\{k_x:x\in X\}\)</span>导出的核函数，则：</p>
@@ -1867,8 +1912,8 @@ f=f_1+f_2,\quad f_1\in Y_n,\;f_2\in Y_n^{\perp}
 </figure>
 </div>
 </div>
-<div id="definition-17-25" class="definition theorem-block env-definition">
-<p><strong>Definition 17.25</strong>. 若映射<span class="math inline">\(f_\theta:\mathbb{R}^m\rightarrow\mathbb{R}^n\)</span>可以表示为若干线性变换与逐元素非线性映射的复合： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlmX1x0aGV0YSh4KT1ccGhpXnsoTCl9XCFcY2lyYyBccGhpXnsoTC0xKX0gXGNpcmMgXGNkb3RzIFxjaXJjIFxwaGleeygxKX0oeCkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<div id="definition-17-28" class="definition theorem-block env-definition">
+<p><strong>Definition 17.28</strong>. 若映射<span class="math inline">\(f_\theta:\mathbb{R}^m\rightarrow\mathbb{R}^n\)</span>可以表示为若干线性变换与逐元素非线性映射的复合： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlmX1x0aGV0YSh4KT1ccGhpXnsoTCl9XCFcY2lyYyBccGhpXnsoTC0xKX0gXGNpcmMgXGNkb3RzIFxjaXJjIFxwaGleeygxKX0oeCkKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 f_\theta(x)=\phi^{(L)}\!\circ \phi^{(L-1)} \circ \cdots \circ \phi^{(1)}(x)
 \end{equation*}\]</span></p>
@@ -1885,16 +1930,16 @@ f_\theta(x)=\phi^{(L)}\!\circ \phi^{(L-1)} \circ \cdots \circ \phi^{(1)}(x)
 </ul>
 <p>则称<span class="math inline">\(f_\theta\)</span>为<a href="../chapters/glossary-n.html#term-NN" class="term" title="neural network">神经网络<span class="term-english">（neural network）</span></a>，非线性映射<span class="math inline">\(\sigma^{(l)}\)</span>被称之为<a href="../chapters/glossary-a.html#term-ActivationFunction" class="term" title="activation function">激活函数<span class="term-english">（activation function）</span></a>。当<span class="math inline">\(L&gt;2\)</span> 时，位于输入层与输出层之间的各层称为<a href="../chapters/glossary-h.html#term-HiddenLayer" class="term" title="hidden layer">隐藏层<span class="term-english">（hidden layer）</span></a>。</p>
 </div>
-<div id="note-17-14" class="note theorem-block env-note">
-<p><strong>note 17.14</strong>. 引入激活函数的原因有两点：</p>
+<div id="note-17-15" class="note theorem-block env-note">
+<p><strong>note 17.15</strong>. 引入激活函数的原因有两点：</p>
 <ol type="1">
 <li><p>如果网络中所有层都是线性函数，则整个网络表示的是线性模型，增加深度不会提升表达能力（无论增加多少层，总能以一个线性映射来等价表示，即多层神经网络等价于一层）。</p></li>
 <li><p>引入非线性函数可以使得模型有能力拟合非线性函数，</p></li>
 </ol>
 </div>
 <p>下面给出一些常见的激活函数。</p>
-<div id="definition-17-26" class="definition theorem-block env-definition">
-<p><strong>Definition 17.26</strong>. 称函数： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc2lnbWEoeCkgPSBcZnJhY3sxfXsxK1xleHAoLXgpfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<div id="definition-17-29" class="definition theorem-block env-definition">
+<p><strong>Definition 17.29</strong>. 称函数： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc2lnbWEoeCkgPSBcZnJhY3sxfXsxK1xleHAoLXgpfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \sigma(x) = \frac{1}{1+\exp(-x)}
 \end{equation*}\]</span></p>
@@ -1906,8 +1951,8 @@ f_\theta(x)=\phi^{(L)}\!\circ \phi^{(L-1)} \circ \cdots \circ \phi^{(1)}(x)
 <span class="figure-number">图 17.9</span> Sigmoid 激活函数<span class="math inline"><span class="math inline">\(\sigma(x)=\dfrac{1}{1+e^{-x}}\)</span></span>
 </figcaption>
 </figure>
-<div id="definition-17-27" class="definition theorem-block env-definition">
-<p><strong>Definition 17.27</strong>. 称函数： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcdGFuaCh4KT1cZnJhY3tlXnggLSBlXnsteH19e2VeeCArIGVeey14fX0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<div id="definition-17-30" class="definition theorem-block env-definition">
+<p><strong>Definition 17.30</strong>. 称函数： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcdGFuaCh4KT1cZnJhY3tlXnggLSBlXnsteH19e2VeeCArIGVeey14fX0KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 \tanh(x)=\frac{e^x - e^{-x}}{e^x + e^{-x}}
 \end{equation*}\]</span></p>
@@ -1919,8 +1964,8 @@ f_\theta(x)=\phi^{(L)}\!\circ \phi^{(L-1)} \circ \cdots \circ \phi^{(1)}(x)
 <span class="figure-number">图 17.10</span> Tanh 激活函数 <span class="math inline">tanh (<em>x</em>)</span>
 </figcaption>
 </figure>
-<div id="definition-17-28" class="definition theorem-block env-definition">
-<p><strong>Definition 17.28</strong>. 称函数： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc2lnbWEoeCk9XG1heCgwLHgpClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="definition-17-31" class="definition theorem-block env-definition">
+<p><strong>Definition 17.31</strong>. 称函数： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc2lnbWEoeCk9XG1heCgwLHgpClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \sigma(x)=\max(0,x)
 \end{equation*}\]</span></p>
@@ -1932,8 +1977,8 @@ f_\theta(x)=\phi^{(L)}\!\circ \phi^{(L-1)} \circ \cdots \circ \phi^{(1)}(x)
 <span class="figure-number">图 17.11</span> ReLU 激活函数 <span class="math inline"><em>σ</em>(<em>x</em>) = max (0, <em>x</em>)</span>
 </figcaption>
 </figure>
-<div id="definition-17-29" class="definition theorem-block env-definition">
-<p><strong>Definition 17.29</strong>. 称函数： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc2lnbWEoeCk9CgkJXGJlZ2lue2Nhc2VzfQoJCQl4LCYgeD4wIFxcCgkJCVxhbHBoYSB4LCAmIHhcbGVxc2xhbnQgMAoJCVxlbmR7Y2FzZXN9CgkJXHF1YWQgKFxhbHBoYT4wIFx0ZXh0e+S4uui+g+Wwj+W4uOaVsH0pClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="definition-17-32" class="definition theorem-block env-definition">
+<p><strong>Definition 17.32</strong>. 称函数： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc2lnbWEoeCk9CgkJXGJlZ2lue2Nhc2VzfQoJCQl4LCYgeD4wIFxcCgkJCVxhbHBoYSB4LCAmIHhcbGVxc2xhbnQgMAoJCVxlbmR7Y2FzZXN9CgkJXHF1YWQgKFxhbHBoYT4wIFx0ZXh0e+S4uui+g+Wwj+W4uOaVsH0pClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \sigma(x)=
 \begin{cases}
@@ -1950,8 +1995,8 @@ x,&amp; x&gt;0 \\
 <span class="figure-number">图 17.12</span> Leaky ReLU 激活函数（<span class="math inline"><em>α</em> = 0.1</span>）
 </figcaption>
 </figure>
-<div id="definition-17-30" class="definition theorem-block env-definition">
-<p><strong>Definition 17.30</strong>. 称函数： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc2lnbWEoeCk9CgkJXGJlZ2lue2Nhc2VzfQoJCQl4LCAmIHg+MCBcXAoJCQlcYWxwaGEoZV54LTEpLCAmIHhcbGVxc2xhbnQgMAoJCVxlbmR7Y2FzZXN9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="definition-17-33" class="definition theorem-block env-definition">
+<p><strong>Definition 17.33</strong>. 称函数： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc2lnbWEoeCk9CgkJXGJlZ2lue2Nhc2VzfQoJCQl4LCAmIHg+MCBcXAoJCQlcYWxwaGEoZV54LTEpLCAmIHhcbGVxc2xhbnQgMAoJCVxlbmR7Y2FzZXN9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \sigma(x)=
 \begin{cases}
@@ -1967,8 +2012,8 @@ x, &amp; x&gt;0 \\
 <span class="figure-number">图 17.13</span> ELU 激活函数（<span class="math inline"><em>α</em> = 1</span>）
 </figcaption>
 </figure>
-<div id="definition-17-31" class="definition theorem-block env-definition">
-<p><strong>Definition 17.31</strong>. 设输入向量<span class="math inline">\(z=(x_1, x_2, \dots, x_{n})^\top\)</span>，称映射： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc2lnbWEoeClfaT1cZnJhY3tlXnt4X2l9fXtcc3VtXGxpbWl0c197aj0xfV5uZV57eF9qfX0sIFxxdWFkIGk9MSxcZG90cyxuClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="definition-17-34" class="definition theorem-block env-definition">
+<p><strong>Definition 17.34</strong>. 设输入向量<span class="math inline">\(z=(x_1, x_2, \dots, x_{n})^\top\)</span>，称映射： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc2lnbWEoeClfaT1cZnJhY3tlXnt4X2l9fXtcc3VtXGxpbWl0c197aj0xfV5uZV57eF9qfX0sIFxxdWFkIGk9MSxcZG90cyxuClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \sigma(x)_i=\frac{e^{x_i}}{\sum\limits_{j=1}^ne^{x_j}}, \quad i=1,\dots,n
 \end{equation*}\]</span></p>
@@ -1978,8 +2023,8 @@ x, &amp; x&gt;0 \\
 <h3 class="anchored" data-anchor-id="id--f33eee8e"><span class="header-section-number">17.5.1</span> 模型学习</h3>
 <section id="id--cbc2d3d2" class="level4">
 <h4 class="anchored" data-anchor-id="id--cbc2d3d2"><span class="header-section-number">17.5.1.1</span> 损失函数</h4>
-<div id="definition-17-32" class="definition theorem-block env-definition">
-<p><strong>Definition 17.32</strong>. 设观测样本集为<span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n\)</span>，模型为函数<span class="math inline">\(f_\theta\)</span>，记<span class="math inline">\(\hat{y}_i=f_\theta(x_i)\)</span>。若函数<span class="math inline">\(L(y,\hat{y})\)</span>用于衡量模型预测值与真实值之间差异，则称<span class="math inline">\(L\)</span>为<a href="../chapters/glossary-l.html#term-LossFunction" class="term" title="loss function">损失函数<span class="term-english">（loss function）</span></a>。称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcd2lkZWhhdHtcbWF0aGNhbHtSfX0oXHRoZXRhKT1cZnJhY3sxfXtufVxzdW1fe2k9MX1ee259TFt5X2ksZl9cdGhldGEoeF9pKV0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<div id="definition-17-35" class="definition theorem-block env-definition">
+<p><strong>Definition 17.35</strong>. 设观测样本集为<span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n\)</span>，模型为函数<span class="math inline">\(f_\theta\)</span>，记<span class="math inline">\(\hat{y}_i=f_\theta(x_i)\)</span>。若函数<span class="math inline">\(L(y,\hat{y})\)</span>用于衡量模型预测值与真实值之间差异，则称<span class="math inline">\(L\)</span>为<a href="../chapters/glossary-l.html#term-LossFunction" class="term" title="loss function">损失函数<span class="term-english">（loss function）</span></a>。称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcd2lkZWhhdHtcbWF0aGNhbHtSfX0oXHRoZXRhKT1cZnJhY3sxfXtufVxzdW1fe2k9MX1ee259TFt5X2ksZl9cdGhldGEoeF9pKV0KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 \widehat{\mathcal{R}}(\theta)=\frac{1}{n}\sum_{i=1}^{n}L[y_i,f_\theta(x_i)]
 \end{equation*}\]</span></p>
@@ -1988,25 +2033,25 @@ x, &amp; x&gt;0 \\
 </section>
 <section id="id--c66ad796" class="level4">
 <h4 class="anchored" data-anchor-id="id--c66ad796"><span class="header-section-number">17.5.1.2</span> 梯度下降</h4>
-<div id="definition-17-33" class="definition theorem-block env-definition">
-<p><strong>Definition 17.33</strong>. <a href="../chapters/glossary-g.html#term-GradientDescent" class="term" title="gradient descent">梯度下降<span class="term-english">（gradient descent）</span></a>指的是：在最小化目标函数<span class="math inline">\(f\)</span>的优化问题中，每次迭代过程为在当前点<span class="math inline">\(x_t\)</span>处沿负梯度方向<span class="math inline">\(-\operatorname{D}f(x_t)\)</span>移动一小步。</p>
+<div id="definition-17-36" class="definition theorem-block env-definition">
+<p><strong>Definition 17.36</strong>. <a href="../chapters/glossary-g.html#term-GradientDescent" class="term" title="gradient descent">梯度下降<span class="term-english">（gradient descent）</span></a>指的是：在最小化目标函数<span class="math inline">\(f\)</span>的优化问题中，每次迭代过程为在当前点<span class="math inline">\(x_t\)</span>处沿负梯度方向<span class="math inline">\(-\operatorname{D}f(x_t)\)</span>移动一小步。</p>
 </div>
-<div id="definition-17-34" class="definition theorem-block env-definition">
-<p><strong>Definition 17.34</strong>. 称正数<span class="math inline">\(\eta&gt;0\)</span>为<a href="../chapters/glossary-l.html#term-LR" class="term" title="LearningRate">学习率<span class="term-english">（LearningRate）</span></a>。</p>
+<div id="definition-17-37" class="definition theorem-block env-definition">
+<p><strong>Definition 17.37</strong>. 称正数<span class="math inline">\(\eta&gt;0\)</span>为<a href="../chapters/glossary-l.html#term-LR" class="term" title="LearningRate">学习率<span class="term-english">（LearningRate）</span></a>。</p>
 </div>
-<div id="note-17-15" class="note theorem-block env-note">
-<p><strong>note 17.15</strong>. 在第<span class="math inline">\(t\)</span>次迭代中，参数更新通常写为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcdGhldGFfe3QrMX09XHRoZXRhX3QtXGV0YSBnX3QKXGVuZHtlcXVhdGlvbip9"></span></p>
+<div id="note-17-16" class="note theorem-block env-note">
+<p><strong>note 17.16</strong>. 在第<span class="math inline">\(t\)</span>次迭代中，参数更新通常写为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcdGhldGFfe3QrMX09XHRoZXRhX3QtXGV0YSBnX3QKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 \theta_{t+1}=\theta_t-\eta g_t
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(g_t\)</span>为当前点处目标函数关于参数<span class="math inline">\(\theta\)</span>的梯度估计。</p>
 <p>学习率决定了参数更新的幅度：<span class="math inline">\(\eta\)</span>过大会导致算法发散或震荡，<span class="math inline">\(\eta\)</span>过小则会使收敛速度显著变慢。</p>
 </div>
-<div id="definition-17-35" class="definition theorem-block env-definition">
-<p><strong>Definition 17.35</strong>. 设训练集为<span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n\)</span>。称<span class="math inline">\(\mathcal{B}\subseteq\mathcal{D}\)</span>为一个<a href="../chapters/glossary-b.html#term-Batch" class="term" title="batch">批<span class="term-english">（batch）</span></a>，<span class="math inline">\(|\mathcal{B}|\)</span>被称作<a href="../chapters/glossary-b.html#term-BatchSize" class="term" title="batch size">批大小<span class="term-english">（batch size）</span></a>。</p>
+<div id="definition-17-38" class="definition theorem-block env-definition">
+<p><strong>Definition 17.38</strong>. 设训练集为<span class="math inline">\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n\)</span>。称<span class="math inline">\(\mathcal{B}\subseteq\mathcal{D}\)</span>为一个<a href="../chapters/glossary-b.html#term-Batch" class="term" title="batch">批<span class="term-english">（batch）</span></a>，<span class="math inline">\(|\mathcal{B}|\)</span>被称作<a href="../chapters/glossary-b.html#term-BatchSize" class="term" title="batch size">批大小<span class="term-english">（batch size）</span></a>。</p>
 </div>
-<div id="definition-17-36" class="definition theorem-block env-definition">
-<p><strong>Definition 17.36</strong>. 称对整个训练集<span class="math inline">\(\mathcal{D}\)</span>完整遍历一次的过程为一<a href="../chapters/glossary-e.html#term-Epoch" class="term" title="epoch">轮<span class="term-english">（epoch）</span></a>。</p>
+<div id="definition-17-39" class="definition theorem-block env-definition">
+<p><strong>Definition 17.39</strong>. 称对整个训练集<span class="math inline">\(\mathcal{D}\)</span>完整遍历一次的过程为一<a href="../chapters/glossary-e.html#term-Epoch" class="term" title="epoch">轮<span class="term-english">（epoch）</span></a>。</p>
 </div>
 <div id="algorithm-17-6" class="algorithm-block">
 <div class="algorithm-caption">
@@ -2177,8 +2222,8 @@ W_h^{(l)} h_{t-1}^{(l)}
 </div>
 </div>
 </div>
-<div id="note-17-16" class="note theorem-block env-note">
-<p><strong>note 17.16</strong>. 由于隐藏状态不断累积先前信息，RNN 能够捕捉序列中的依赖关系。</p>
+<div id="note-17-17" class="note theorem-block env-note">
+<p><strong>note 17.17</strong>. 由于隐藏状态不断累积先前信息，RNN 能够捕捉序列中的依赖关系。</p>
 </div>
 </section>
 <section id="long-short-term-memory-lstm-41eaa6e2" class="level4">
@@ -2265,8 +2310,8 @@ h_t^{(l)} \gets o_t^{(l)}\odot \tanh(c_t^{(l)})
 </div>
 </div>
 </div>
-<div id="note-17-17" class="note theorem-block env-note">
-<p><strong>note 17.17</strong>. 在LSTM中，由于sigmoid函数的值域为<span class="math inline">\((-1,1)\)</span>，遗忘门、输入门、输出门分别给出了要对过往信息遗忘的比例、输入信息以往的比例、当前记忆输出的比例。而候选记忆与输出阶段采用 <span class="math inline">\(\tanh\)</span>，则是为了将内部状态压缩到有界且零中心的区间 <span class="math inline">\((-1,1)\)</span>，使得无论时间步有多长，内部状态都在一定范围之内，既保证了数值稳定性，又维持良好的梯度传播性质。</p>
+<div id="note-17-18" class="note theorem-block env-note">
+<p><strong>note 17.18</strong>. 在LSTM中，由于sigmoid函数的值域为<span class="math inline">\((-1,1)\)</span>，遗忘门、输入门、输出门分别给出了要对过往信息遗忘的比例、输入信息以往的比例、当前记忆输出的比例。而候选记忆与输出阶段采用 <span class="math inline">\(\tanh\)</span>，则是为了将内部状态压缩到有界且零中心的区间 <span class="math inline">\((-1,1)\)</span>，使得无论时间步有多长，内部状态都在一定范围之内，既保证了数值稳定性，又维持良好的梯度传播性质。</p>
 <p>这种”线性记忆通道 + 门控比例调节 + 有界非线性输出”的结构，使得 LSTM 能够在长时间尺度上同时实现稳定记忆存储与灵活信息选择，是其优于普通RNN的核心原因。</p>
 </div>
 </section>
@@ -2342,8 +2387,8 @@ h_t^{(l)} \gets (1-z_t^{(l)})\odot h_{t-1}^{(l)} + z_t^{(l)}\odot \tilde h_t^{(l
 </div>
 </div>
 </div>
-<div id="note-17-18" class="note theorem-block env-note">
-<p><strong>note 17.18</strong>. 与LSTM不同，GRU通过将细胞状态与隐藏状态合并为单一状态 <span class="math inline">\(h_t\)</span>，并仅引入更新门与重置门对信息流进行控制，从而在保持长期依赖建模能力的同时，显著简化了模型结构与参数规模，但在表达能力与长期记忆精细控制方面略逊于LSTM。</p>
+<div id="note-17-19" class="note theorem-block env-note">
+<p><strong>note 17.19</strong>. 与LSTM不同，GRU通过将细胞状态与隐藏状态合并为单一状态 <span class="math inline">\(h_t\)</span>，并仅引入更新门与重置门对信息流进行控制，从而在保持长期依赖建模能力的同时，显著简化了模型结构与参数规模，但在表达能力与长期记忆精细控制方面略逊于LSTM。</p>
 </div>
 </section>
 </section>
@@ -2373,8 +2418,8 @@ I^{(R)},I^{(G)},I^{(B)}\in\mathbb{R}^{H\times W}
 <p>换言之，像素刻画<strong>空间位置</strong>，灰度强度刻画<strong>亮度大小</strong>，通道刻画<strong>颜色分量</strong>。</p>
 <section id="id--255a6582" class="level4">
 <h4 class="anchored" data-anchor-id="id--255a6582"><span class="header-section-number">17.5.3.1</span> 卷积</h4>
-<div id="definition-17-37" class="definition theorem-block env-definition">
-<p><strong>Definition 17.37</strong>. 设输入图像为<span class="math inline">\(X\in M_{H\times W}(\mathbb{R})\)</span>。在图像的每一个空间位置<span class="math inline">\((i,j)\)</span>，取其邻域窗口： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlceyhpK3UtMSxcOyBqK3YtMSkgOiB1PTEsXGRvdHMsaCxcOyB2PTEsXGRvdHMsd1x9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="definition-17-40" class="definition theorem-block env-definition">
+<p><strong>Definition 17.40</strong>. 设输入图像为<span class="math inline">\(X\in M_{H\times W}(\mathbb{R})\)</span>。在图像的每一个空间位置<span class="math inline">\((i,j)\)</span>，取其邻域窗口： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlceyhpK3UtMSxcOyBqK3YtMSkgOiB1PTEsXGRvdHMsaCxcOyB2PTEsXGRvdHMsd1x9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \{(i+u-1,\; j+v-1) : u=1,\dots,h,\; v=1,\dots,w\}
 \end{equation*}\]</span></p>
@@ -2384,8 +2429,8 @@ S_{i,j}=\sum_{u=1}^h\sum_{v=1}^wK_{u,v}X_{i+u-1,j+v-1}
 \end{equation*}\]</span></p>
 <p>由此在整个空间网格上得到的二维数组<span class="math inline">\(S=(S_{i,j})\)</span>称为由该局部加权算子产生的<a href="../chapters/glossary-f.html#term-FeatureMap" class="term" title="feature map">特征图<span class="term-english">（feature map）</span></a>。</p>
 </div>
-<div id="definition-17-38" class="definition theorem-block env-definition">
-<p><strong>Definition 17.38</strong>. 称矩阵<span class="math inline">\(K=(K_{u,v})\in M_{h\times w}(\mathbb{R})\)</span>为<a href="../chapters/glossary-c.html#term-ConvolutionKernel" class="term" title="convolution kernel">卷积核<span class="term-english">（convolution kernel）</span></a>。</p>
+<div id="definition-17-41" class="definition theorem-block env-definition">
+<p><strong>Definition 17.41</strong>. 称矩阵<span class="math inline">\(K=(K_{u,v})\in M_{h\times w}(\mathbb{R})\)</span>为<a href="../chapters/glossary-c.html#term-ConvolutionKernel" class="term" title="convolution kernel">卷积核<span class="term-english">（convolution kernel）</span></a>。</p>
 </div>
 <figure id="fig-17-16" class="textbook-figure figure" data-latex-placement="htbp">
 <img src="../_tikz/tikz-64e37bf1e5fc8cc917a2.png" class="tikz-image figure-img" style="width:92.0%" width="2161" height="1534" alt="TikZ 数学图示" loading="lazy" decoding="async">
@@ -2393,22 +2438,22 @@ S_{i,j}=\sum_{u=1}^h\sum_{v=1}^wK_{u,v}X_{i+u-1,j+v-1}
 <span class="figure-number">图 17.16</span> 二维离散卷积的滑动窗口与输出位置对应关系示意图
 </figcaption>
 </figure>
-<div id="note-17-19" class="note theorem-block env-note">
-<p><strong>note 17.19</strong>. 特征图可以理解为：由原始图像通过某种局部加权求和得到的新的二维图像，其每个像素表示某种”特征”的强弱。</p>
+<div id="note-17-20" class="note theorem-block env-note">
+<p><strong>note 17.20</strong>. 特征图可以理解为：由原始图像通过某种局部加权求和得到的新的二维图像，其每个像素表示某种”特征”的强弱。</p>
 </div>
 </section>
 <section id="id--a660ade6" class="level4">
 <h4 class="anchored" data-anchor-id="id--a660ade6"><span class="header-section-number">17.5.3.2</span> 池化</h4>
-<div id="definition-17-39" class="definition theorem-block env-definition">
-<p><strong>Definition 17.39</strong>. 设输入特征图为<span class="math inline">\(X \in M_{H \times W}(\mathbb{R})\)</span>。给定窗口尺寸<span class="math inline">\((h,w)\)</span>以及步幅<span class="math inline">\((s_h, s_w)\)</span>。在输出位置<span class="math inline">\((i,j)\)</span>处，取像素空间位置邻域窗口： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlXX3tpLGp9PVxiaWdsXHtcLCAoXCwgKGktMSlzX2ggKyB1LFw7IChqLTEpc193ICsgdiBcLCkgOgoJCXU9MSxcZG90cyxoLFw7IHY9MSxcZG90cyx3IFwsXGJpZ3JcfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<div id="definition-17-42" class="definition theorem-block env-definition">
+<p><strong>Definition 17.42</strong>. 设输入特征图为<span class="math inline">\(X \in M_{H \times W}(\mathbb{R})\)</span>。给定窗口尺寸<span class="math inline">\((h,w)\)</span>以及步幅<span class="math inline">\((s_h, s_w)\)</span>。在输出位置<span class="math inline">\((i,j)\)</span>处，取像素空间位置邻域窗口： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlXX3tpLGp9PVxiaWdsXHtcLCAoXCwgKGktMSlzX2ggKyB1LFw7IChqLTEpc193ICsgdiBcLCkgOgoJCXU9MSxcZG90cyxoLFw7IHY9MSxcZG90cyx3IFwsXGJpZ3JcfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 W_{i,j}=\bigl\{\, (\, (i-1)s_h + u,\; (j-1)s_w + v \,) :
 u=1,\dots,h,\; v=1,\dots,w \,\bigr\}
 \end{equation*}\]</span></p>
 <p>并在该邻域内对像素值施加一个映射<span class="math inline">\(P:\mathbb{R}^{h\times w}\to \mathbb{R}\)</span>，称<span class="math inline">\(P\)</span>为<a href="../chapters/glossary-p.html#term-PoolingOperator" class="term" title="pooling operator">池化算子<span class="term-english">（pooling operator）</span></a>，该操作称为<a href="../chapters/glossary-p.html#term-Pooling" class="term" title="pooling">池化<span class="term-english">（pooling）</span></a>。</p>
 </div>
-<div id="note-17-20" class="note theorem-block env-note">
-<p><strong>note 17.20</strong>. 卷积只能是局部加权，其主要作用为特征提取与线性滤波，通过可学习权重检测局部模式，而池化则对应着一般的函数，功能为空间降采样。</p>
+<div id="note-17-21" class="note theorem-block env-note">
+<p><strong>note 17.21</strong>. 卷积只能是局部加权，其主要作用为特征提取与线性滤波，通过可学习权重检测局部模式，而池化则对应着一般的函数，功能为空间降采样。</p>
 <p>常见池化函数有：</p>
 <ol type="1">
 <li><p><strong>最大池化</strong>：在窗口内取最大值。</p></li>
