@@ -645,6 +645,7 @@
 \end{proof}
 \subsubsection{Schmidt正交化}
 \begin{theorem}[Schmidt正交化]
+	\label{theo:Schmidt}
 	设$E=\{x_n\}$是内积空间$X$中的一个可列子集，则由$E$必可作出一个规范正交系$\{e_n\}$，使得$E$张成的子空间与$\{e_n\}$张成的子空间相同。
 \end{theorem}
 \begin{proof}
@@ -685,6 +686,34 @@
 	接下来证明$E$张成的子空间$L$与$\{e_n\}$张成的子空间$L'$相同。\par
 	从$e_n$的取法可以看出，$e_n$可以由$E$中的元素线性表出，于是$L'\subseteq L$。反之，$E$中的元素$x$要么与某个$y_n$线性相关，此时$y_n$可以由$\{e_n\}$线性表出，所以$x$可以由$\{e_n\}$线性表出，要么与取过的所有$y_n$线性无关，此时$x$必然会进入规范正交系的构造过程，依旧可以由$\{e_n\}$线性表出，于是$L\subseteq L'$。综上，$L=L'$。
 \end{proof}
+\begin{definition}
+	设$X$是$n$维内积空间。若$X$的一组基$\seq{e}{n}$是$X$中的规范正交系，则称$\seq{e}{n}$为$X$的一组标准正交基。
+\end{definition}
+\begin{note}
+	由\cref{theo:ExistenceOfBasis}和\cref{theo:Schmidt}可知有限维内积空间总存在一组标准正交基。
+\end{note}
+\begin{theorem}\label{theo:OrthogonalComplementDirectSum}
+	设$X$是数域$K$上的$n$维内积空间，$E$是$X$的子空间，则$X=E\oplus E^\perp$。
+\end{theorem}
+\begin{proof}
+	设$\dim E=m$。取$E$的一组标准正交基$\seq{e}{m}$。由\cref{prop:nDimensionalLinearSpace}(5)和\cref{theo:Schmidt}可知可以将$\seq{e}{r}$扩充为$X$的一组标准正交基$\seq{e}{n}$。记：
+	\begin{equation*}
+		N=\operatorname{span}\{e_{r+1},e_{r+2},\dots,e_n\}
+	\end{equation*}
+	由\cref{theo:Schmidt}和\cref{theo:DirectSum}(5)可知$X=E\oplus N$，下面只需证明证$N=E^\perp$。\par
+	任取$x\in N$，则存在$a_{r+1},a_{r+2},\dots,a_n\in K$使得$x=\sum\limits_{j=r+1}^{n}a_je_j$
+	。对于任意的$y\in E$，存在$b_1,b_2,\dots,b_r\in K$使得$y=\sum\limits_{i=1}^{r}b_ie_i$。因为$\seq{e}{n}$是标准正交系，所以：
+	\begin{align*}
+		(x,y)=\left(\sum_{j=r+1}^{n}a_je_j,\sum_{i=1}^{r}b_ie_i\right)
+	\end{align*}
+	于是$x\in E^\perp$，由$x$的任意性可得$N\subseteq E^\perp$。\par
+	任取$x\in E^\perp$，则存在$a_1,\ldots,a_n\in K$使得$x=\sum_{i=1}^{n}a_ie_i$。对于任意的$k\in\{1,2,\dots,r\}$，由于$e_k\in E$且$x\in E^\perp$，所以有：
+	\begin{equation*}
+		0=(x,e_k)=\left(\sum_{i=1}^{n}a_ie_i,e_k\right)=a_k
+	\end{equation*}
+	于是$a_1=\cdots=a_r=0$，$x\in N$。由$x$的任意性可得$E^\perp\subseteq N$。\par
+	综上，$E^{\perp}=N$，结论成立。
+\end{proof}
 \subsubsection{Riesz表示定理}
 \begin{theorem}\label{theo:RieszRepresentation}
 	设$f$是从Hilbert空间$X$到$X$的标量域$K$上的连续线性映射，则存在唯一的$y\in X$使得：
@@ -693,7 +722,7 @@
 	\end{equation*}
 \end{theorem}
 \begin{proof}
-	\textbf{(1)存在性：}当$E=\{x\in X:f(x)=0\}\ne X$时（反之取$y=\mathbf{0}$即可\info{任何向量与0的内积都是0}），因为$f$是连续线性映射，由\cref{theo:Subspace}和\cref{theo:ContinousMapO2OC2C}(2)可知$E$是$X$的闭线性子空间，由\cref{theo:OrthogonalProjection}可知存在$x_0\in X$满足$x_0\perp E$且$||x_0||=1$，$X$中的任意元素$x$可以分解为：
+	\textbf{(1)存在性：}当$E=\{x\in X:f(x)=0\}\ne X$时（反之由\cref{prop:InnerProduct}(1)可知取$y=\mathbf{0}$即可），因为$f$是连续线性映射，由\cref{theo:Subspace}和\cref{theo:ContinousMapO2OC2C}(2)可知$E$是$X$的闭线性子空间，由\cref{theo:OrthogonalProjection}可知存在$x_0\in X$满足$x_0\perp E$且$||x_0||=1$，$X$中的任意元素$x$可以分解为：
 	\begin{equation*}
 		x=\alpha x_0+y
 	\end{equation*}
