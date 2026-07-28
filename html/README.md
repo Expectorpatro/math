@@ -126,15 +126,15 @@ Python 计算实验分两步处理：UV 锁定的 Jupyter 只负责执行 Notebo
 ```bash
 PYTHONPATH="$PWD" uv run --project environment/python --locked jupyter nbconvert \
   --to notebook --execute --inplace \
-  statistics/multivariate/computations/01-kmeans/python/analysis.ipynb
+statistics/multivariate/computations/02-kmeans/python/analysis.ipynb
 ```
 
 再使用 Pandoc 生成最终 `analysis.html`：
 
 ```bash
-pandoc statistics/multivariate/computations/01-kmeans/python/analysis.ipynb \
+pandoc statistics/multivariate/computations/02-kmeans/python/analysis.ipynb \
   --from ipynb --to html --standalone --embed-resources \
-  --output statistics/multivariate/computations/01-kmeans/python/analysis.html
+  --output statistics/multivariate/computations/02-kmeans/python/analysis.html
 ```
 
 将两条命令中的路径同时替换为实际实验路径。`--embed-resources` 会将 Notebook 输出的图片等资源嵌入 HTML；若 Notebook 还会读取数据文件，该数据文件仍需按项目约定提交。

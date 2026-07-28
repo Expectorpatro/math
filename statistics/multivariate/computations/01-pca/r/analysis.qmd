@@ -1,0 +1,389 @@
+---
+title: "主成分分析"
+format:
+  html:
+    embed-resources: true
+    toc: false
+    code-copy: true
+execute:
+  echo: true
+  warning: false
+  message: false
+  fig-align: center
+  fig-width: 8
+  fig-height: 5
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+book_project_root <- Sys.getenv("BOOK_PROJECT_ROOT", unset = "../../../../..")
+source(file.path(book_project_root, "figure_settings", "figures.R"))
+configure_knitr_figures(book_project_root)
+
+options(width = 100, digits = 5, scipen = 6)
+
+colour_main <- "#355c8a"
+colour_smooth <- "#c45a3c"
+colour_accent <- "#4f8a5b"
+region_colours <- c(
+  Northeast = "#355c8a",
+  South = "#c45a3c",
+  `North Central` = "#4f8a5b",
+  West = "#8a62a6"
+)
+```
+
+本实验使用R自带的`USArrests`数据完成一次主成分分析（PCA），重点回答四个问题：
+
+1. 变量量纲为何会影响基于协方差矩阵的PCA；
+2. PCA与协方差矩阵特征值分解之间有何关系；
+3. 如何根据累计方差贡献率选择主成分个数；
+4. 降维后保留的信息量与重构误差如何变化。
+
+`USArrests`记录了美国50个州在1973年的四项指标。`Murder`、`Assault`和`Rape`分别是每10万居民中的案件数，`UrbanPop`是城市人口所占百分比。州所属地区只用于给得分图着色，不参与PCA拟合。
+
+## 数据概况与变量尺度
+
+先查看样本量以及各变量的均值、标准差和取值范围。
+
+```{r}
+#| label: arrests-data
+
+arrests <- datasets::USArrests
+
+dim(arrests)
+data.frame(
+  Variable = names(arrests),
+  Mean = vapply(arrests, mean, numeric(1)),
+  StandardDeviation = vapply(arrests, sd, numeric(1)),
+  Minimum = vapply(arrests, min, numeric(1)),
+  Maximum = vapply(arrests, max, numeric(1)),
+  row.names = NULL
+)
+```
+
+`Assault`的标准差远大于其他变量。若直接对原始数据的协方差矩阵进行特征值分解，大尺度变量会对总方差产生更大的影响。
+
+## 比较标准化前后的方差贡献率
+
+分别对原始数据和标准化数据拟合PCA。标准化将每个变量变换为均值为0、样本方差为1的变量，此时PCA等价于对原变量的样本相关矩阵进行特征值分解。
+
+```{r}
+#| label: pca-scale-comparison
+
+variance_ratio <- function(model) {
+  model$sdev^2 / sum(model$sdev^2)
+}
+
+components_for_threshold <- function(model, threshold = 0.85) {
+  which(cumsum(variance_ratio(model)) >= threshold)[1]
+}
+
+pca_raw <- prcomp(arrests, center = TRUE, scale. = FALSE)
+pca_standardized <- prcomp(arrests, center = TRUE, scale. = TRUE)
+
+raw_ratio <- variance_ratio(pca_raw)
+standardized_ratio <- variance_ratio(pca_standardized)
+
+data.frame(
+  Data = c("Raw", "Standardized"),
+  PC1VarianceRatio = c(raw_ratio[1], standardized_ratio[1]),
+  FirstTwoPCs = c(sum(raw_ratio[1:2]), sum(standardized_ratio[1:2])),
+  PCsNeededFor85Percent = c(
+    components_for_threshold(pca_raw),
+    components_for_threshold(pca_standardized)
+  ),
+  row.names = NULL
+)
+```
+
+```{r}
+#| label: pca-scale-comparison-plot
+#| fig-width: 11
+#| fig-height: 4.5
+
+old_par <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+
+barplot(
+  raw_ratio,
+  names.arg = paste0("PC", seq_along(raw_ratio)),
+  col = colour_smooth,
+  border = NA,
+  ylim = c(0, 1),
+  main = "Raw Data",
+  xlab = "Principal Component",
+  ylab = "Variance Ratio"
+)
+barplot(
+  standardized_ratio,
+  names.arg = paste0("PC", seq_along(standardized_ratio)),
+  col = colour_main,
+  border = NA,
+  ylim = c(0, 1),
+  main = "Standardized Data",
+  xlab = "Principal Component",
+  ylab = "Variance Ratio"
+)
+
+par(old_par)
+```
+
+原始数据的第一主成分吸收了绝大部分方差，这主要反映`Assault`的尺度较大，而不是其余变量都没有信息。标准化后，方差贡献率分散到多个主成分；这正是变量量纲不同且需要等权比较时使用相关矩阵PCA的原因。
+
+## 用特征值分解核对PCA
+
+对样本相关矩阵进行特征值分解，并按特征值从大到小排列。每个单位特征向量给出一个主成分方向，对应特征值就是该主成分的样本方差。
+
+```{r}
+#| label: pca-eigendecomposition
+
+arrests_correlation <- cor(arrests)
+correlation_eigendecomposition <- eigen(
+  arrests_correlation,
+  symmetric = TRUE
+)
+
+direction_alignment <- abs(diag(crossprod(
+  correlation_eigendecomposition$vectors,
+  pca_standardized$rotation
+)))
+
+data.frame(
+  Component = paste0("PC", seq_along(correlation_eigendecomposition$values)),
+  CorrelationEigenvalue = correlation_eigendecomposition$values,
+  PCAExplainedVariance = pca_standardized$sdev^2,
+  AbsoluteDirectionAlignment = direction_alignment,
+  row.names = NULL
+)
+```
+
+两种算法得到相同的特征值，方向的绝对内积为1。这里取绝对值是因为特征向量乘以$-1$后仍代表同一条主成分轴，因而主成分方向的正负号本身没有统计含义。
+
+## 根据累计方差贡献率选择维数
+
+下面列出各主成分的方差贡献率，并选择使累计方差贡献率首次达到85%的最小主成分个数。
+
+```{r}
+#| label: pca-variance-table
+
+standardized_cumulative_ratio <- cumsum(standardized_ratio)
+selected_k <- components_for_threshold(pca_standardized, threshold = 0.85)
+
+variance_table <- data.frame(
+  Component = paste0("PC", seq_along(standardized_ratio)),
+  Eigenvalue = pca_standardized$sdev^2,
+  VarianceRatio = standardized_ratio,
+  CumulativeRatio = standardized_cumulative_ratio,
+  row.names = NULL
+)
+
+variance_table
+```
+
+```{r}
+#| label: pca-scree-plot
+#| fig-width: 8
+#| fig-height: 5.5
+
+bar_positions <- barplot(
+  standardized_ratio,
+  names.arg = variance_table$Component,
+  col = colour_main,
+  border = NA,
+  ylim = c(0, 1),
+  main = "Scree Plot and Cumulative Variance Ratio",
+  xlab = "Principal Component",
+  ylab = "Variance Ratio"
+)
+lines(
+  bar_positions,
+  standardized_cumulative_ratio,
+  type = "b",
+  pch = 19,
+  lwd = 2,
+  col = colour_smooth
+)
+abline(h = 0.85, lty = 2, col = "grey25")
+points(
+  bar_positions[selected_k],
+  standardized_cumulative_ratio[selected_k],
+  pch = 21,
+  cex = 1.5,
+  bg = "grey15",
+  col = "white"
+)
+text(
+  bar_positions[selected_k],
+  standardized_cumulative_ratio[selected_k],
+  labels = paste0("K = ", selected_k),
+  pos = 4,
+  offset = 0.7
+)
+legend(
+  "bottomright",
+  legend = c("Individual Ratio", "Cumulative Ratio", "85% Threshold"),
+  fill = c(colour_main, NA, NA),
+  border = c(NA, NA, NA),
+  lty = c(NA, 1, 2),
+  lwd = c(NA, 2, 1),
+  pch = c(15, 19, NA),
+  col = c(colour_main, colour_smooth, "grey25"),
+  bty = "n"
+)
+
+cat(
+  sprintf(
+    "\nThe first %d principal components explain %.1f%% of the standardized variance.\n",
+    selected_k,
+    100 * standardized_cumulative_ratio[selected_k]
+  )
+)
+```
+
+本例中，前`r selected_k`个主成分的累计方差贡献率为`r sprintf("%.1f\\%%", 100 * standardized_cumulative_ratio[selected_k])`，首次超过85%的阈值。
+
+## 查看主成分得分与因子负荷
+
+主成分得分是标准化样本在主成分方向上的坐标。因子负荷定义为主成分与原变量的相关系数；其绝对值越大，表示该变量与相应主成分的线性关系越强。
+
+```{r}
+#| label: pca-scores-loadings
+#| fig-width: 12
+#| fig-height: 5.5
+
+standardized_arrests <- scale(arrests, center = TRUE, scale = TRUE)
+pca_scores <- pca_standardized$x
+factor_loadings <- cor(standardized_arrests, pca_scores)
+
+state_regions <- state.region[match(rownames(arrests), state.name)]
+displayed_loadings <- factor_loadings[
+  nrow(factor_loadings):1,
+  1:2,
+  drop = FALSE
+]
+loading_palette <- colorRampPalette(c("#b2182b", "#f7f7f7", "#2166ac"))(201)
+
+old_par <- par(mfrow = c(1, 2), mar = c(5, 5, 3, 1))
+
+plot(
+  pca_scores[, 1],
+  pca_scores[, 2],
+  pch = 19,
+  col = unname(region_colours[state_regions]),
+  xlab = sprintf("PC1 (%.1f%%)", 100 * standardized_ratio[1]),
+  ylab = sprintf("PC2 (%.1f%%)", 100 * standardized_ratio[2]),
+  main = "Scores on the First Two Components"
+)
+abline(h = 0, v = 0, lty = 3, col = "grey55")
+legend(
+  "topright",
+  legend = names(region_colours),
+  col = region_colours,
+  pch = 19,
+  bty = "n",
+  cex = 0.8
+)
+
+image(
+  x = 1:2,
+  y = seq_len(nrow(displayed_loadings)),
+  z = t(displayed_loadings),
+  col = loading_palette,
+  zlim = c(-1, 1),
+  axes = FALSE,
+  xlab = "",
+  ylab = "",
+  main = "Factor Loadings"
+)
+axis(1, at = 1:2, labels = c("PC1", "PC2"), tick = FALSE)
+axis(
+  2,
+  at = seq_len(nrow(displayed_loadings)),
+  labels = rownames(displayed_loadings),
+  las = 2,
+  tick = FALSE
+)
+for (row in seq_len(nrow(displayed_loadings))) {
+  for (column in 1:2) {
+    value <- displayed_loadings[row, column]
+    text(
+      column,
+      row,
+      labels = sprintf("%.2f", value),
+      col = ifelse(abs(value) >= 0.55, "white", "grey15"),
+      cex = 0.9
+    )
+  }
+}
+box()
+
+par(old_par)
+
+round(factor_loadings[, 1:2, drop = FALSE], 3)
+```
+
+前两个主成分的得分图已经呈现出州际差异的主要结构，但地区标签只是用于解释图形的辅助信息。PCA本身没有使用这些标签，因此仍然是无监督的线性降维方法。
+
+## 观察维数与重构误差的关系
+
+保留前$K$个主成分后，可以把得分投影回原来的四维标准化空间。随着$K$增加，被舍弃的主成分越来越少，平均重构误差应单调下降。
+
+```{r}
+#| label: pca-reconstruction
+
+component_numbers <- seq_len(ncol(standardized_arrests))
+reconstruction_mse <- vapply(
+  component_numbers,
+  function(k) {
+    reconstructed <- pca_scores[, seq_len(k), drop = FALSE] %*%
+      t(pca_standardized$rotation[, seq_len(k), drop = FALSE])
+    mean((standardized_arrests - reconstructed)^2)
+  },
+  numeric(1)
+)
+
+plot(
+  component_numbers,
+  reconstruction_mse,
+  type = "b",
+  pch = 19,
+  lwd = 2,
+  col = colour_accent,
+  xaxt = "n",
+  xlab = "Number of Retained Components",
+  ylab = "Mean Squared Reconstruction Error",
+  main = "Reconstruction Error after Dimensionality Reduction"
+)
+axis(1, at = component_numbers)
+points(
+  selected_k,
+  reconstruction_mse[selected_k],
+  pch = 21,
+  cex = 1.5,
+  bg = "grey15",
+  col = "white"
+)
+text(
+  selected_k,
+  reconstruction_mse[selected_k],
+  labels = paste0("85% threshold: K = ", selected_k),
+  pos = 4,
+  offset = 0.7
+)
+
+data.frame(
+  RetainedComponents = component_numbers,
+  CumulativeVarianceRatio = standardized_cumulative_ratio,
+  ReconstructionMSE = reconstruction_mse,
+  row.names = NULL
+)
+```
+
+## 观察
+
+- 当变量量纲差异明显时，直接使用协方差矩阵会让大尺度变量主导结果；是否标准化必须结合变量含义判断。
+- 标准化数据的PCA与样本相关矩阵的特征值分解给出相同结果，主成分方向的正负号可以同时翻转。
+- 本例在85%的累计方差贡献率下保留`r selected_k`个主成分；保留的主成分越多，累计方差贡献率越高，重构误差越低。
+- PCA降维是在简化表示与信息损失之间作取舍。得分图适合展示样本结构，因子负荷则帮助解释每个主成分与原变量之间的关系。

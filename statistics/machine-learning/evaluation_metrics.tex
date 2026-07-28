@@ -107,7 +107,7 @@ Accuracy 将正类和负类的正确预测汇总为一个整体比例，因而�
 \end{note}
 \subsubsection{多分类}
 设真实标签$y\in\{1,2,\dots,K\}$，模型预测为$\hat{y}\in\{1,2,\dots,K\}$，其中$K\geqslant3$为类别总数。与二分类问题不同，多分类问题中不存在唯一的正类与负类，因此通常需要先分别考察模型在每个类别上的表现，再通过适当的平均方式得到整体评价指标。\par
-对于任意类别$k\in{1,2,\dots,K}$，可将类别$k$视为正类，将其余类别合并为负类，并按照二分类问题中的定义计算$\operatorname{TP}_k$、$\operatorname{FP}_k$、$\operatorname{FN}_k$和$\operatorname{TN}_k$，进而得到该类别的$\operatorname{Precision}_k$、$\operatorname{Recall}_k$和$\operatorname{F1}_k$。这种处理方式称为one-versus-rest。\par
+对于任意类别$k\in\{1,2,\dots,K\}$，可将类别$k$视为正类，将其余类别合并为负类，并按照二分类问题中的定义计算$\operatorname{TP}_k$、$\operatorname{FP}_k$、$\operatorname{FN}_k$和$\operatorname{TN}_k$，进而得到该类别的$\operatorname{Precision}_k$、$\operatorname{Recall}_k$和$\operatorname{F1}_k$。这种处理方式称为one-versus-rest。\par
 分别报告每个类别的评价指标能够完整反映模型在各类别上的表现，但当类别数量较多或需要使用单一数值比较模型时，需要进一步对各类别的指标进行汇总。常用的汇总方式包括Macro平均、Weighted平均和Micro平均。\par
 \begin{definition}
 	设$m_k$表示类别$k$的某个评价指标，该指标的Macro平均定义为：
@@ -336,9 +336,7 @@ Accuracy 将正类和负类的正确预测汇总为一个整体比例，因而�
 对$f=f_\theta\in\mathcal{F}$，记$\widehat{\mathcal{R}}_{\mathrm{train}}(f)\coloneq\widehat{\mathcal{R}}_{\mathrm{train}}(\theta)$及$\mathcal{R}(f)\coloneq\mathcal{R}(\theta)$。\par
 若$\mathcal{F}_1\subseteq\mathcal{F}_2$，则：
 \begin{equation*}
-	\inf_{f\in\mathcal{F}_2}\widehat{\mathcal{R}}_{\mathrm{train}}(f)
-	\leqslant
-	\inf_{f\in\mathcal{F}_1}\widehat{\mathcal{R}}_{\mathrm{train}}(f).
+	\inf_{f\in\mathcal{F}_2}\widehat{\mathcal{R}}_{\mathrm{train}}(f)\leqslant\inf_{f\in\mathcal{F}_1}\widehat{\mathcal{R}}_{\mathrm{train}}(f)
 \end{equation*}
 也就是说，扩大模型空间不会使最优训练风险变大，因为新增的模型为拟合训练数据提供了更多选择；但总体风险并不具有相同的单调性。模型空间越大，训练过程越容易从大量候选模型中找到一个恰好迎合当前样本偶然性的模型，因而经验风险虽然可以很低，经验风险与总体风险之间的偏差却更难控制。极端情况下，一个足够复杂的模型可以记住每个训练样本，使训练风险接近$0$；但训练样本之外的函数取值仍可能几乎不受约束，这正是过拟合产生的原因。
 \begin{definition}
