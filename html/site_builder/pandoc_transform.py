@@ -802,6 +802,10 @@ class BookTransformer(GlossaryAppenderMixin):
         self.used_terms.add(key)
         chinese = latex_to_html_fragment(term.chinese)
         english = latex_to_html_fragment(term.english)
+        title = latex_to_plain(term.english)
+        if term.term_type == "default":
+            english += ", " + term.acronym
+            title += ", " + term.acronym
         visible = (
             chinese
             + '<span class="term-english">（'
@@ -813,7 +817,7 @@ class BookTransformer(GlossaryAppenderMixin):
             "c": [
                 make_attr(classes=["term"]),
                 [{"t": "RawInline", "c": ["html", visible]}],
-                [f"#term-{key}", latex_to_plain(term.english)],
+                [f"#term-{key}", title],
             ],
         }
 

@@ -227,7 +227,9 @@ git push origin main
 - 所有 `english.tex` 中的 `NewTerm` 都会进入术语表；总览提供 A–Z 导航，每个字母独立成页并按英文名称排序。
 - 每条术语都建立独立搜索记录，搜索结果可直接跳到对应条目；重复索引键的不同定义会分别保留并显示来源。
 - 左侧目录只显示“中英术语表”；A–Z 字母页通过总览卡片、前后导航和搜索访问，不占用侧栏长度。
-- `gls{Key}` 按“中文（English）”显示，并链接到中英术语表。
+- `gls{Key}` 会区分 `NewTerm` 类型：`no acronym` 按“中文（English）”
+  显示，`default` 按“中文（English, Key）”显示，并链接到中英术语表；
+  术语表中的 `default` 条目也会在英文全称后显示缩写键。
 - `qedhere` 交由网页证明块统一显示结尾方块，不再传给 MathJax。
 - `\info/\unsure/\change/\improvement` 四类 `todonotes` 项目批注会保留为带颜色的网页内联提示，不再在转换时丢失内容。
 - `algorithm` 与 `algpseudocode` 会转换为带标题、章内编号、行号和缩进的算法块；支持 `Require/Ensure/State/Statex`、条件、循环、函数、注释、`Call/Return` 以及 `label/cref` 算法引用。

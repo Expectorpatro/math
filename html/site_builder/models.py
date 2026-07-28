@@ -23,6 +23,8 @@ class Term:
     """One bilingual glossary entry discovered in a LaTeX source."""
 
     key: str
+    acronym: str
+    term_type: str
     english: str
     chinese: str
     source: str

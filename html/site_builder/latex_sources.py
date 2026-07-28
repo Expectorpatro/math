@@ -420,9 +420,13 @@ def parse_new_terms(
         if start < 0:
             break
         position = skip_space(text, start + len(command))
+        term_type = "default"
         try:
             if position < len(text) and text[position] == "[":
-                _, position = read_balanced(text, position, "[", "]")
+                term_type, position = read_balanced(
+                    text, position, "[", "]"
+                )
+                term_type = re.sub(r"\s+", " ", term_type.strip())
                 position = skip_space(text, position)
             values: list[str] = []
             for _ in range(3):
@@ -437,6 +441,8 @@ def parse_new_terms(
             terms.append(
                 Term(
                     key=key,
+                    acronym=key,
+                    term_type=term_type,
                     english=english_name,
                     chinese=chinese_name,
                     source=str(source.relative_to(project_root)),
@@ -471,7 +477,9 @@ def load_glossary(paths: BuildPaths) -> tuple[
             terms_by_directory.setdefault(path.parent, {})[term.key] = term
             previous = glossary.get(term.key)
             if previous and (
-                previous.english != term.english or previous.chinese != term.chinese
+                previous.term_type != term.term_type
+                or previous.english != term.english
+                or previous.chinese != term.chinese
             ):
                 conflicting_keys.add(term.key)
                 warnings.append(
@@ -574,6 +582,8 @@ def patch_scoped_glossary_terms(
                 synthetic_key = scoped_term_key(directory, key, project_root)
                 glossary[synthetic_key] = Term(
                     key=synthetic_key,
+                    acronym=local_term.acronym,
+                    term_type=local_term.term_type,
                     english=local_term.english,
                     chinese=local_term.chinese,
                     source=local_term.source,

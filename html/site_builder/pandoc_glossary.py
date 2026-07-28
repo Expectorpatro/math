@@ -376,6 +376,11 @@ class GlossaryAppenderMixin:
                         latex_to_html_fragment(term.english),
                     ],
                 }
+                english_inlines = [english]
+                if term.term_type == "default":
+                    english_inlines.append(
+                        str_inline(f", {term.acronym}")
+                    )
                 chinese = {
                     "t": "RawInline",
                     "c": [
@@ -391,6 +396,10 @@ class GlossaryAppenderMixin:
                                 classes=["glossary-entry"],
                                 attributes=[
                                     ("data-term-key", term.key),
+                                    (
+                                        "data-term-type",
+                                        term.term_type,
+                                    ),
                                     ("data-term-source", term.source),
                                 ],
                             ),
@@ -417,7 +426,7 @@ class GlossaryAppenderMixin:
                                                     ),
                                                     [
                                                         *alias_inlines,
-                                                        english,
+                                                        *english_inlines,
                                                         space_inline(),
                                                         {
                                                             "t": "Span",
