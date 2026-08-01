@@ -66,6 +66,7 @@ class LatexTableRow:
 @dataclass(frozen=True, slots=True)
 class LatexTable:
     caption: str
+    label: str
     alignments: tuple[str, ...]
     vertical_rules: frozenset[int]
     rows: tuple[LatexTableRow, ...]

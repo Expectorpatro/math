@@ -121,23 +121,24 @@
 	\end{equation*}
 	令$\hat{\sigma}_i^2=\sigma_{ii}-\hat{h}_i^2$，继续上面的迭代过程以得到稳定的近似解。
 \end{method}
-\begin{algorithm}
+\begin{algorithm}[H]
 	\caption{主因子法求解因子分析}
+	\label{alg:PrincipalFactorMethod}
 	\begin{algorithmic}[1]
-		\State \textbf{Input:} 协方差矩阵 $\Sigma$，初始特殊方差估计 $\hat{\sigma}^2_1, \ldots, \hat{\sigma}^2_m$，目标因子数 $n$
-		\State \textbf{Output:} 因子载荷矩阵估计 $\hat{A}$，特殊方差估计 $\hat{\sigma}_i^2$
+		\Require 协方差矩阵$\Sigma$，初始特殊方差估计$\hat{\sigma}^2_1,\dots,\hat{\sigma}^2_m$，目标因子数$n$
+		\Ensure 因子载荷矩阵估计$\hat{A}$，特殊方差估计$\hat{\sigma}_i^2$
 		
-		\State 初始化 $\hat{\sigma}_i^2$ 为合理值
+		\State 初始化$\hat{\sigma}_i^2$为合理值
 		\Repeat
-		\State 构造矩阵 $\widehat{AA^{\top}} = \Sigma - \operatorname{diag}(\hat{\sigma}_1^2, \ldots, \hat{\sigma}_m^2)$
-		\State 对 $\widehat{AA^{\top}}$ 做特征值分解，得到部分特征值 $\hat{\lambda}_1 \geqslant \cdots \geqslant \hat{\lambda}_n$，及对应单位正交特征向量 $\hat{l}_1, \ldots, \hat{l}_n$
-		\State 构造因子载荷矩阵估计：
-		$
-		\hat{A}=(\hat{a}_{ij}) = \begin{pmatrix}
-			\sqrt{\hat{\lambda}_1} \hat{l}_1 & \cdots & \sqrt{\hat{\lambda}_n} \hat{l}_n
-		\end{pmatrix}
-		$
-		\State 令 $\hat{h}_i^2 = \sum\limits_{j=1}^n \hat{a}_{ij}^2$，更新 $\hat{\sigma}_i^2 = \sigma_{ii} - \hat{h}_i^2,\;i=1,2,\dots,m$
+			\State 构造矩阵$\widehat{AA^{\top}}=\Sigma-\operatorname{diag}(\hat{\sigma}_1^2,\dots,\hat{\sigma}_m^2)$
+			\State 对$\widehat{AA^{\top}}$做特征值分解，得到部分特征值$\hat{\lambda}_1\geqslant\cdots\geqslant\hat{\lambda}_n$及对应单位正交特征向量$\hat{l}_1,\dots,\hat{l}_n$
+			\State 构造因子载荷矩阵估计：
+			$
+			\hat{A}=(\hat{a}_{ij})=\begin{pmatrix}
+				\sqrt{\hat{\lambda}_1}\hat{l}_1 & \cdots & \sqrt{\hat{\lambda}_n}\hat{l}_n
+			\end{pmatrix}
+			$
+			\State 令$\hat{h}_i^2=\sum\limits_{j=1}^n\hat{a}_{ij}^2$，更新$\hat{\sigma}_i^2=\sigma_{ii}-\hat{h}_i^2,\;i=1,2,\dots,m$
 		\Until{特殊方差估计 $\hat{\sigma}_i^2$ 收敛或达到最大迭代次数}
 	\end{algorithmic}
 \end{algorithm}

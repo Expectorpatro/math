@@ -64,15 +64,24 @@ def latex_to_table_html_fragment(text: str) -> str:
     return "".join(pieces)
 
 
-def render_latex_table(table: LatexTable) -> str:
+def render_latex_table(table: LatexTable, number: str) -> str:
+    identifier = (
+        f' id="{html.escape(table.label, quote=True)}"'
+        if table.label
+        else ""
+    )
     parts = [
-        '<div class="textbook-table-scroll textbook-latex-table-scroll" '
+        f'<div{identifier} '
+        'class="textbook-table-scroll textbook-latex-table-scroll" '
         'role="region" tabindex="0">',
         '<table class="textbook-latex-table">',
     ]
     if table.caption:
+        prefix = f"表 {number} " if number else ""
         parts.append(
-            "<caption>" + html.escape(latex_to_plain(table.caption)) + "</caption>"
+            "<caption>"
+            + html.escape(prefix + latex_to_plain(table.caption))
+            + "</caption>"
         )
     for row_index, row in enumerate(table.rows):
         if row_index == 0:

@@ -1,20 +1,37 @@
 \section{一般线性模型}
 \begin{definition}\label{model:LinearModel}
-	称以下模型为\gls{LinearModel}：
+	设$(\Omega,\mathscr{F},P)$为概率空间，$X\in\mathbb{R}^{n\times p}$为给定的非随机矩阵，参数空间$\Theta=\mathbb{R}^p\times(0,+\infty)$。对于参数$(\beta,\sigma^2)\in\Theta$，若随机向量$Y:\Omega\to\mathbb{R}^n$满足：
 	\begin{equation*}
 		\begin{cases}
-			y=X\beta+\varepsilon \\
+			Y=X\beta+\varepsilon \\
 			\operatorname{E}(\varepsilon)=\mathbf{0} \\
 			\operatorname{Cov}(\varepsilon)=\sigma^2I_n
 		\end{cases}
 	\end{equation*}
-	其中$y$为$n\times 1$\gls{ObservationVector}，$X$为$n\times p$\gls{DesignMatrix}，$\beta$为$p\times 1$未知参数向量，$\varepsilon$为随机误差，$\sigma^2$为误差方差。
+	其中$\varepsilon:\Omega\to\mathbb{R}^n$为随机误差向量，则称上述模型为\gls{LinearModel}。称$X$为\gls{DesignMatrix}，随机向量$Y$的一次观测记为$y\in\mathbb{R}^n$，称$y$为\gls{ObservationVector}。
+\end{definition}
+在实际问题中，设计矩阵$X$和观测向量$y$是已知的，而参数向量$\beta$是未知的。线性模型认为$Y$的均值具有线性结构：
+\begin{equation*}
+	\operatorname{E}(Y)=X\beta
+\end{equation*}
+因而我们希望根据观测数据$y$寻找一个参数向量，使得相应的拟合值$X\beta$能够尽可能接近$y$。\par
+由于随机误差的存在，观测向量$y$一般并不恰好属于$X$的象$\operatorname{Im}(X)$，因此方程$X\beta=y$通常没有解。为此，我们不再要求拟合值$X\beta$与观测向量$y$完全相等，而是要求二者之间的差值$y-X\beta$尽可能接近$\mathbf{0}$。最常用的度量方式是标准范数的平方，由此得到最小二乘法。
+\begin{definition}
+	对于给定的设计矩阵$X\in\mathbb{R}^{n\times p}$和观测向量$y\in\mathbb{R}^n$，定义：
+	\begin{equation*}
+		Q(b)=||y-Xb||^2=\sum_{i=1}^n\left(y_i-x_i^{\top}b\right)^2,\; b\in\mathbb{R}^p
+	\end{equation*}
+	其中$x_i^{\top}$为$X$的第$i$行。称优化问题：
+	\begin{equation*}
+		\min_{b\in\mathbb{R}^p}Q(b)
+	\end{equation*}
+	为最小二乘问题，称其任意一个最小值点$\hat{\beta}$为$\beta$的\gls{LSE}。
 \end{definition}
 \begin{definition}
 	称方程$X^{\top}X\beta=X^{\top}y$为\gls{NormalEquation}。
 \end{definition}
 \begin{theorem}\label{theo:LSELinearModel}
-	对于\cref{model:LinearModel}，$\hat{\beta}=(X^{\top}X)^-X^{\top}y$是其唯一的最小二乘解。
+	对于\cref{model:LinearModel}，$\hat{\beta}=(X^{\top}X)^-X^{\top}y$是$\beta$的最小二乘估计，其中$(X^{\top}X)^-$是$X^{\top}X$的任意一个广义逆。
 \end{theorem}
 \begin{proof}
 	注意到：
@@ -43,7 +60,7 @@
 	\begin{equation*}
 		X^{\top}(y-X\beta)=\mathbf{0}
 	\end{equation*}
-	于是：
+	于是由\cref{prop:Transpose}(4)可得：
 	\begin{equation*}
 		2(y-X\hat{\beta})^{\top}X(\hat{\beta}-\beta)=2[X^{\top}(y-X\hat{\beta})]^{\top}(\hat{\beta}-\beta)=0
 	\end{equation*}
@@ -51,89 +68,222 @@
 	\begin{equation*}
 		Q(\beta)=||y-X\hat{\beta}||^2+||X(\hat{\beta}-\beta)||^2
 	\end{equation*}
-	上第二项总是非负的，由范数的定义可知其为$0$当且仅当$X\hat{\beta}=X\beta$，即当且仅当$X^{\top}X\beta=X^{\top}X\hat{\beta}=X^{\top}y$，所以使$Q(\beta)$达到最小值的$\beta$必为正则方程的解$\hat{\beta}=(X^{\top}X)^-X^{\top}y$。
+	当$\beta=\hat{\beta}$时上式最小，所以$\hat{\beta}$是一个最小二乘解。
 \end{proof}
 \begin{derivation}
-	若$\operatorname{rank}(X)=p$，则$X$的列向量组线性无关。考虑二次型$y^{\top}X^{\top}Xy$，$y^{\top}X^{\top}Xy=0\Leftrightarrow||Xy||=0\Leftrightarrow Xy=\mathbf{0}$，而$X$的列向量是线性无关的，所以不存在非零向量的$y$使得$Xy=\mathbf{0}$，于是$y^{\top}X^{\top}Xy$是一个正定二次型，$X^{\top}X$是一个正定矩阵。由\cref{theo:PositiveDefinite}(6)可得$X^{\top}X$可逆。此时$\hat{\beta}=(X^{\top}X)^{-1}X^{\top}y$，称$\hat{\beta}$为$\beta$的\gls{LSE}。
+	由于对任意$b\in\mathbb{R}^p$，向量$Xb$都属于$X$的列空间$\operatorname{Im}(X)$，故所有可能的拟合值为集合：
+	\begin{equation*}
+		\{Xb:b\in\mathbb{R}^p\}=\operatorname{Im}(X)
+	\end{equation*}
+	因此，最小二乘问题等价于在子空间$\operatorname{Im}(X)$（\cref{prop:LinearMapping}(6)）中寻找与$y$距离最近的向量，即：
+	\begin{equation*}
+		\min_{z\in\operatorname{Im}(X)}||y-z||^2
+	\end{equation*}
+	若$\hat{\beta}$是最小二乘解，并记$\hat{y}=X\hat{\beta}$，则$\hat{y}\in\operatorname{Im}(X)$且满足：
+	\begin{equation*}
+		||y-\hat{y}||=\min_{z\in\operatorname{Im}(X)}||y-z||
+	\end{equation*}
+	由正则方程：
+	\begin{equation*}
+		X^{\top}X\hat{\beta}=X^{\top}y
+	\end{equation*}
+	可得：
+	\begin{equation*}
+		X^{\top}(y-X\hat{\beta})=\mathbf{0}
+	\end{equation*}
+	这表明$y-\hat{y}$与$X$的每一列都正交，从而与整个子空间$\operatorname{Im}(X)$正交。故$\hat{y}=X\hat{\beta}$正是$y$在$\operatorname{Im}(X)$上的正交投影。
 \end{derivation}
+\begin{figure}[htbp]
+	\centering
+	\begin{tikzpicture}[
+		x=1cm,
+		y=1cm,
+		>=Latex,
+		line cap=round,
+		line join=round,
+		plane/.style={
+			draw=black!75,
+			fill=black!4,
+			line width=0.8pt
+		},
+		basis vector/.style={
+			->,
+			draw=black!55,
+			line width=0.8pt
+		},
+		main vector/.style={
+			->,
+			draw=black,
+			line width=1.2pt
+		},
+		residual vector/.style={
+			->,
+			draw=black,
+			densely dashed,
+			line width=1.2pt
+		}
+		]
+		
+		\coordinate (A) at (-4.35,-1.20);
+		\coordinate (B) at ( 4.35,-1.20);
+		\coordinate (C) at ( 3.15, 0.80);
+		\coordinate (D) at (-3.15, 0.80);
+		
+		\path[plane] (A)--(B)--(C)--(D)--cycle;
+		
+		\coordinate (O)    at (-0.45,-0.15);
+		\coordinate (Yhat) at ( 1.45,-0.15);
+		\coordinate (Y)    at ( 1.45, 2.65);
+		
+		\coordinate (Xone) at (-2.85,-0.82);
+		\coordinate (Xtwo) at ( 3.00,-0.72);
+		
+		\draw[basis vector] (O)--(Xone)
+		node[below left=1pt] {$x_1$};
+		
+		\draw[basis vector] (O)--(Xtwo)
+		node[below right=1pt] {$x_2$};
+		
+		\draw[main vector] (O)--(Yhat);
+		
+		\draw[main vector] (O)--(Y)
+		node[above=3pt] {$y$};
+		
+		\draw[residual vector] (Yhat)--(Y)
+		node[
+		pos=0.56,
+		right=5pt,
+		fill=white,
+		inner sep=1.5pt
+		] {$y-\hat y$};
+		
+		\fill (O) circle (1.5pt);
+		\fill (Yhat) circle (1.7pt);
+		
+		\node[above left=2pt] at (O) {$\mathbf{0}$};
+		\node[below=6pt] at (Yhat) {$\hat y=X\hat\beta$};
+	
+		\pic[
+		draw,
+		line width=0.8pt,
+		angle radius=8pt
+		] {right angle=O--Yhat--Y};
+		
+		\node[below right=3pt] at (B)
+		{$\operatorname{Im}(X)$};
+		
+	\end{tikzpicture}
+	\caption{$\hat{y}=X\hat{\beta}$是$y$在$\operatorname{Im}(X)$上的正交投影}
+\end{figure}
 \begin{note}
 	接下来我们将涉及到非常多的公式，初学会觉得非常难记，但如果从投影的角度去理解的话，很多公式都是直观上非常显然的，也就更好记忆了。
 \end{note}
 \subsection{参数估计}
 \subsubsection{回归系数}
 \begin{definition}
-	若存在$n\times 1$向量$\alpha$使得$\operatorname{E}(\alpha^{\top}y)=c^{\top}\beta$对一切的$\beta$成立，则称$c^{\top}\beta$为\gls{EstimableFunction}。
+	设非随机向量$c\in\mathbb{R}^{p}$。若存在非随机向量$\alpha\in\mathbb{R}^{n}$使得$\operatorname{E}(\alpha^{\top}Y)=c^{\top}\beta$对任意的$\beta\in\mathbb{R}^{p}$成立，则称$c^{\top}\beta$为\gls{EstimableFunction}。
 \end{definition}
+\begin{note}
+	由\cref{theo:LSELinearModel}可知$\beta$的最小二乘估计一般并不唯一，因此不能直接讨论$\beta$本身的估计。由于线性模型通过$\operatorname{E}(Y)=X\beta$刻画参数与观测变量之间的线性关系，我们转而关注$\beta$的线性函数$c^{\top}\beta$。由于实际能够观测到的只有$Y$，自然要考察是否存在$\alpha\in\mathbb{R}^{n}$使得$\alpha^{\top}Y$是$c^{\top}\beta$的线性无偏估计量。
+\end{note}
 \begin{property}\label{prop:EstimableFunction}
-	对于\cref{model:LinearModel}，$c^{\top}\beta$和$d^{\top}\beta$是可估函数，$\hat{\beta}$是正则方程的解，则：
+	对于\cref{model:LinearModel}，设$c^{\top}\beta$和$d^{\top}\beta$是可估函数，$\hat{\beta}$是$\beta$的最小二乘估计，则：
 	\begin{enumerate}
 		\item 使$c^{\top}\beta$成为可估函数的全体向量$c$构成$\mathcal{M}(X^{\top})$；
-		\item 可估函数的全体构成一个$\operatorname{rank}(X)$维线性空间；
+		\item 可估函数的全体构成一个$\mathbb{R}$上的$\operatorname{rank}(X)$维线性空间；
 		\item $c^{\top}\hat{\beta}$与$(X^{\top}X)^-$的选择无关；
 		\item $c^{\top}\hat{\beta}$为$c^{\top}\beta$的无偏估计；
-		\item  $\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})=\sigma^2c^{\top}(X^{\top}X)^-d$，且与$(X^{\top}X)^-$的选择无关；
-		\item (Gauss-Markov)$\;c^{\top}\hat{\beta}$是$c^{\top}\beta$唯一的BLUE；
-		\item 设$\varphi_i=c_i^{\top}\beta,\;i=1,2,\dots,k$都是可估函数，$\seq{\alpha}{k}\in\mathbb{R}$，则$\varphi=\sum\limits_{i=1}^{k}\alpha_i\varphi_i$也是可估的，且$\hat{\varphi}=\sum\limits_{i=1}^{k}\alpha_ic_i^{\top}\hat{\beta}$是$\varphi$的BLUE。
+		\item  $\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})=\sigma^2c^{\top}(X^{\top}X)^-d$且与$(X^{\top}X)^-$的选择无关；
+		\item (Gauss-Markov)当$\sigma^2>0$时，在方差最小的意义下$c^{\top}\hat{\beta}$是$c^{\top}\beta$唯一的BLUE；
+		\item 设$\varphi_i=c_i^{\top}\beta,\;i=1,2,\dots,k$都是可估函数，$\seq{\alpha}{k}\in\mathbb{R}$，则$\varphi=\sum\limits_{i=1}^{k}\alpha_i\varphi_i$也是可估的，$\hat{\varphi}=\sum\limits_{i=1}^{k}\alpha_ic_i^{\top}\hat{\beta}$是$\varphi$的无偏估计。当当$\sigma^2>0$时，在方差最小的意义下$\hat{\varphi}$时$\varphi$唯一的BLUE。
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)$\;c^{\top}\beta$是可估函数$\Leftrightarrow$存在$n\times1$向量$\alpha$使得$\operatorname{E}(\alpha^{\top}y)=\alpha^{\top}\operatorname{E}(y)=\alpha^{\top}X\beta=c^{\top}\beta$对一切的$\beta$成立$\Leftrightarrow c=X^{\top}\alpha$。\par
-	(2)由(1)可得可估函数对加法和数乘封闭，根据\cref{theo:Subspace}可知所有可估函数构成一个线性空间。注意到可估函数$c_1^{\top}\beta$和$c_2^{\top}\beta$线性相关当且仅当$c_1$和$c_2$线性相关，由\cref{prop:SpanSubspace}(3)和\cref{prop:MatrixRank}(7)可得可估函数空间的秩为$\operatorname{rank}(X)$。\par
-	(3)因为$c^{\top}\beta$可估，由(1)可知存在$n\times 1$向量$\alpha$使得$c=X^{\top}\alpha$，于是由\cref{prop:Transpose}(4)可得：
+	(1)由\cref{prop:MeasurableIntegral}(6)和\cref{prop:Transpose}(4)可知$c^{\top}\beta$是可估函数$\Leftrightarrow$存在$\alpha\in\mathbb{R}^{n}$使得$\operatorname{E}(\alpha^{\top}Y)=\alpha^{\top}\operatorname{E}(Y)=\alpha^{\top}X\beta=c^{\top}\beta$对任意的$\beta$成立$\Leftrightarrow c=X^{\top}\alpha$。\par
+	(2)记函数族：
+	\begin{equation*}
+		\mathcal{F}=\left\{f_c:f_c(\beta)=c^{\top}\beta,\;c\in\mathcal{M}(X^{\top})\right\}
+	\end{equation*}
+	对任意$f_{c_1},f_{c_2}\in\mathcal{F}$和
+	$a\in\mathbb{R}$，在$\mathcal{F}$上定义加法与数乘为：
+	\begin{gather*}
+		(f_{c_1}+f_{c_2})(\beta)=f_{c_1}(\beta)+f_{c_2}(\beta) \\
+		(af_{c_1})(\beta)=af_{c_1}(\beta)
+	\end{gather*}
+	可以验证$\mathcal{F}$是$\mathbb{R}$上的线性空间。\par	
+	定义映射：
+	\begin{equation*}
+		\pi:\mathcal{M}(X^{\top})\to\mathcal{F},\quad\pi(c)=f_c
+	\end{equation*}
+	由\cref{prop:LinearMapping}(6)和$\mathcal{F}$的定义可知$\pi$是$\mathcal{M}(X^{\top})$到$\mathcal{F}$的一个同构映射，根据\cref{prop:IsomorphicOfLinearSpace}(6)、\cref{prop:SpanSubspace}(3)和\cref{prop:MatrixRank}(7)可得：
+	\begin{equation*}
+		\dim(\mathcal{F})=\dim\mathcal{M}(X^{\top})=\operatorname{rank}(X^{\top})=\operatorname{rank}(X)
+	\end{equation*}
+	因此，可估函数的全体构成一个$\mathbb{R}$上的$\operatorname{rank}(X)$维线性空间。\par
+	(3)因为$c^{\top}\beta$可估，由(1)可知存在$\alpha\in\mathbb{R}^{n}$使得$c=X^{\top}\alpha$，于是由\cref{prop:Transpose}(4)和\cref{theo:LSELinearModel}可得：
 	\begin{equation*}
 		c^{\top}\hat{\beta}=\alpha^{\top}X(X^{\top}X)^-X^{\top}y
 	\end{equation*}
 	由\cref{prop:A-}(4)即可得出结论。\par
-	(4)因为$c^{\top}\beta$可估，由(1)可知存在$n\times 1$向量$\alpha$使得$c=X^{\top}\alpha$，根据\cref{prop:A-}(7)可得：
+	(4)因为$c^{\top}\beta$可估，由(1)可知存在$\alpha\in\mathbb{R}^{n}$使得$c=X^{\top}\alpha$，根据\cref{theo:LSELinearModel}、\cref{prop:MeasurableIntegral}(6)和\cref{prop:A-}(7)可得：
 	\begin{equation*}
-		\operatorname{E}(c^{\top}\hat{\beta})=\operatorname{E}[c^{\top}(X^{\top}X)^-X^{\top}y]=c^{\top}(X^{\top}X)^-X^{\top}X\beta=c^{\top}\beta
+		\operatorname{E}(c^{\top}\hat{\beta})=\operatorname{E}[c^{\top}(X^{\top}X)^-X^{\top}Y]=c^{\top}(X^{\top}X)^-X^{\top}X\beta=c^{\top}\beta
 	\end{equation*}\par
-	(5)因为$c^{\top}\beta,d^{\top}\beta$是可估函数，由(1)可知存在$\alpha,\gamma$使得$c=X^{\top}\alpha,d=X^{\top}\gamma$。由\cref{prop:CovMat}(3)、\cref{prop:Transpose}(4)和\cref{prop:A-}(5)(7)可知：
+	(5)因为$c^{\top}\beta,d^{\top}\beta$是可估函数，由(1)可知存在$\alpha,\gamma\in\mathbb{R}^{n}$使得$c=X^{\top}\alpha,d=X^{\top}\gamma$。根据\cref{theo:LSELinearModel}、\cref{prop:CovMat}(3)、\cref{prop:Transpose}(4)和\cref{prop:A-}(7)(5)(4)可得：
 	\begin{align*}
-		\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})
-		&=\operatorname{Cov}[c^{\top}(X^{\top}X)^-X^{\top}y,d^{\top}(X^{\top}X)^-X^{\top}y] \\
-		&=c^{\top}(X^{\top}X)^-X^{\top}\operatorname{Cov}(y)X[(X^{\top}X)^-]^{\top}d \\
-		&=c^{\top}(X^{\top}X)^-X^{\top}\sigma^2I_nX(X^{\top}X)^-d \\
-		&=\sigma^2\alpha^{\top}X(X^{\top}X)^-X^{\top}X(X^{\top}X)^-X^{\top}\gamma \\
-		&=\sigma^2c^{\top}(X^{\top}X)^-d=\sigma^2\alpha^{\top}X(X^{\top}X)^-X^{\top}\gamma
+		&\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})=\operatorname{Cov}[c^{\top}(X^{\top}X)^-X^{\top}Y,d^{\top}(X^{\top}X)^-X^{\top}Y] \\
+		=&c^{\top}(X^{\top}X)^-X^{\top}\operatorname{Cov}(Y)X[(X^{\top}X)^-]^{\top}d =c^{\top}(X^{\top}X)^-X^{\top}\sigma^2I_nX[(X^{\top}X)^-]^{\top}d \\
+		=&\sigma^2c^{\top}(X^{\top}X)^-X^{\top}X[(X^{\top}X)^-]^{\top}d=\sigma^2c^{\top}[(X^{\top}X)^-]^{\top}d=\sigma^2\alpha^{\top}X[(X^{\top}X)^-]^{\top}X^{\top}\gamma \\
+		=&\sigma^2\alpha^{\top}X(X^{\top}X)^-X^{\top}\gamma=\sigma^2c^{\top}(X^{\top}X)^-d
 	\end{align*}
-	由\cref{prop:A-}(4)即可知$\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})$与$(X^{\top}X)^-$的选择无关。\par
-	(6)无偏性由(4)可得，线性性由正则方程可知，下证方差最小。
-	设$a^{\top}y$为$c^{\top}\beta$的任一无偏估计，由(1)的过程可知$c=X^{\top}a$。根据\cref{prop:A-}(5)和(5)可得：
-	\begin{align*}
-		\operatorname{Var}(a^{\top}y)-\operatorname{Var}(c^{\top}\hat{\beta})&=\sigma^2[a^{\top}a-c^{\top}(X^{\top}X)^-c] \\
-		&=\sigma^2[a^{\top}-c^{\top}(X^{\top}X)^-X^{\top}][a-X(X^{\top}X)^-c] \\
-		&=\sigma^2||a-X(X^{\top}X)^-c||^2\geqslant0
-	\end{align*}
-	上式第一行到第二行是由于\cref{prop:A-}(7)和\cref{prop:Transpose}(4)：
+	根据\cref{prop:Transpose}(4)和\cref{theo:VectorSpaceAAAT}可知$c^{\top}=\alpha^{\top}X\in\mathcal{M}(X^{\top})=\mathcal{M}(X^{\top}X),d=X^{\top}\gamma\in\mathcal{M}(X^{\top})=\mathcal{M}(X^{\top}X)$，由\cref{prop:A-}(3)可得$\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})$与$(X^{\top}X)^-$的选择无关。\par
+	(6)无偏性由(4)可得，线性性由\cref{theo:LSELinearModel}可知，下证方差最小。\par
+	设$a^{\top}Y$为$c^{\top}\beta$的任一无偏估计，由(1)的过程可知$c=X^{\top}a$。根据\cref{prop:CovMat}(3)和(5)可得：
+	\begin{equation*}
+		\operatorname{Var}(a^{\top}Y)-\operatorname{Var}(c^{\top}\hat{\beta})=\sigma^2[a^{\top}a-c^{\top}(X^{\top}X)^-c]
+	\end{equation*}
+	由\cref{prop:Transpose}(4)和\cref{prop:A-}(7)可得：
 	\begin{align*}
 		&[a^{\top}-c^{\top}(X^{\top}X)^-X^{\top}][a-X(X^{\top}X)^-c] \\
 		=&a^{\top}a-a^{\top}X(X^{\top}X)^-c-c^{\top}(X^{\top}X)^-X^{\top}a+c^{\top}(X^{\top}X)^-X^{\top}X(X^{\top}X)^-c \\
 		=&a^{\top}a-c^{\top}(X^{\top}X)^-c-c^{\top}(X^{\top}X)^-c+c^{\top}(X^{\top}X)^-c \\
 		=&a^{\top}a-c^{\top}(X^{\top}X)^-c
 	\end{align*}
-	由范数的性质可知$\operatorname{Var}(a^{\top}y)=\operatorname{Var}(c^{\top}\hat{\beta})$当且仅当$a=X(X^{\top}X)^-c$，由\cref{prop:A+}(3)可知$a=X(X^{\top}X)^-c\Leftrightarrow a^{\top}=c^{\top}(X^{\top}X)^-X^{\top}\Leftrightarrow a^{\top}y=c^{\top}(X^{\top}X)^-X^{\top}y=c^{\top}\hat{\beta}$。\par
+	所以：
+	\begin{equation*}
+		\operatorname{Var}(a^{\top}Y)=\sigma^2[a^{\top}-c^{\top}(X^{\top}X)^-X^{\top}][a-X(X^{\top}X)^-c]
+	\end{equation*}
+	根据\cref{prop:Transpose}(4)和\cref{prop:A-}(5)(4)可得：
+	\begin{align*}
+		[c^{\top}(X^{\top}X)^-X^{\top}]^{\top}&=X[(X^{\top}X)^-]^{\top}c=X[(X^{\top}X)^-]^{\top}X^{\top}a \\
+		&=X(X^{\top}X)^-X^{\top}a=X(X^{\top}X)^-c
+	\end{align*}
+	于是：
+	\begin{equation*}
+		\operatorname{Var}(a^{\top}Y)-\operatorname{Var}(c^{\top}\hat{\beta})=\sigma^2||a-X(X^{\top}X)^-c||^2\geqslant0
+	\end{equation*}
+	所以$\operatorname{Var}(a^{\top}Y)=\operatorname{Var}(c^{\top}\hat{\beta})$当且仅当$a=X(X^{\top}X)^-c$，由\cref{theo:LSELinearModel}可知$a=X(X^{\top}X)^-c\Leftrightarrow a^{\top}=c^{\top}(X^{\top}X)^-X^{\top}\Leftrightarrow a^{\top}y=c^{\top}(X^{\top}X)^-X^{\top}y=c^{\top}\hat{\beta}$。\par
 	(7)由(2)可知$\varphi$是可估的。\par
-	由(4)可得$c_i^{\top}\hat{\beta}$是$c_i^{\top}\beta$的无偏估计，所以：
+	由(4)可得$c_i^{\top}\hat{\beta}$是$c_i^{\top}\beta$的无偏估计，根据\cref{prop:MeasurableIntegral}(6)可得：
 	\begin{equation*}
 		\operatorname{E}(\hat{\varphi})=\operatorname{E}\left(\sum_{i=1}^{k}\alpha_ic_i^{\top}\hat{\beta}\right)=\sum_{i=1}^{k}\alpha_i\operatorname{E}(c_i^{\top}\hat{\beta})=\sum_{i=1}^{k}\alpha_ic_i^{\top}\beta=\varphi
 	\end{equation*}
 	即$\hat{\varphi}$是一个无偏估计。\par
-	令$c=\sum\limits_{i=1}^{k}\alpha_ic_i$，则$\varphi=c^{\top}\beta$。设$\gamma^{\top}y$是$\varphi$的一个无偏估计，于是由(6)可得：
+	令$c=\sum\limits_{i=1}^{k}\alpha_ic_i$，则$\varphi=c^{\top}\beta$。设$\gamma^{\top}Y$是$\varphi$的一个无偏估计，于是由(6)可得：
 	\begin{equation*}
-		\operatorname{Var}(\gamma^{\top}y)-\operatorname{Var}(c^{\top}\hat{\beta})=\sigma^2||\gamma-X(X^{\top}X)^-c||^2
+		\operatorname{Var}(\gamma^{\top}Y)-\operatorname{Var}(c^{\top}\hat{\beta})=\sigma^2||\gamma-X(X^{\top}X)^-c||^2
 	\end{equation*}
 	上式等于$0\Leftrightarrow \gamma^{\top}y=c^{\top}\hat{\beta}=\hat{\varphi}$，即$\hat{\varphi}$是唯一的BLUE。
 \end{proof}
 \begin{definition}
-	对于\cref{model:LinearModel}，若$c^{\top}\beta$是可估函数，称$c^{\top}\hat{\beta}$为$c^{\top}\beta$的LSE，其中$\hat{\beta}$为正则方程的解。
+	对于\cref{model:LinearModel}，若$c^{\top}\beta$是可估函数，称$c^{\top}\hat{\beta}$为$c^{\top}\beta$的LSE，其中$\hat{\beta}$为$\beta$的最小二乘估计。
 \end{definition}
 \subsubsection{残差}
 \begin{definition}
-	记$\hat{y}=X\hat{\beta}$，称$\hat{e}=y-\hat{y}$为\gls{ResidualVector}，称$\hat{e}^{\top}\hat{e}$为\gls{SSE}，记为$\operatorname{SSE}$。
+	对于\cref{model:LinearModel}，记$\hat{y}=X\hat{\beta}$，其中$\hat{\beta}$是$\beta$的最小二乘估计。称$\hat{e}=Y-\hat{y}$为\gls{ResidualVector}，称$\hat{e}^{\top}\hat{e}$为\gls{SSE}。
 \end{definition}
 \begin{property}\label{prop:ehat}
-	对于\cref{model:LinearModel}，$\hat{\beta}$为正则方程的解，则残差向量$\hat{e}$满足：
+	对于\cref{model:LinearModel}，$\hat{\beta}$为$\beta$的最小二乘估计，则残差向量$\hat{e}$满足：
 	\begin{enumerate}
 		\item $\operatorname{E}(\hat{e})=0,\;\operatorname{Cov}(\hat{e})=\sigma^2(I_n-P_X)$；
 		\item $\operatorname{SSE}=y^{\top}(I_n-P_X)y$；

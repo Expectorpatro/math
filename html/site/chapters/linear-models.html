@@ -107,7 +107,7 @@ ul.task-list li input[type="checkbox"] {
     return stylesheet ? new URL(".", stylesheet.href) : new URL(".", document.baseURI);
   };
 
-  const assetVersions = {"computation-copy.js": "db40d5f0d065", "density-distributions.js": "81f4104295be", "density-loader.js": "cc128004fcbd", "density-math.js": "44cb999c8084", "density-plots.js": "dc6abfbf5a85", "density-probe.js": "e100dfbcbe1b", "density-renderer.js": "44d6cf2025c4", "favicon.svg": "e16632460c39", "formula-copy.js": "1223f1197fd7", "textbook-content-ui.js": "8296a83a0ecc", "textbook-page-ui.js": "6679a76c8e90", "textbook-reading.js": "95efd72caeda", "textbook-theme.js": "b5921270fe41", "textbook-toc.js": "ea80e64e0667", "textbook-ui.js": "eef62d6193f2"};
+  const assetVersions = {"computation-copy.js": "db40d5f0d065", "density-distributions.js": "81f4104295be", "density-loader.js": "cc128004fcbd", "density-math.js": "44cb999c8084", "density-plots.js": "dc6abfbf5a85", "density-probe.js": "e100dfbcbe1b", "density-renderer.js": "44d6cf2025c4", "favicon.svg": "e16632460c39", "formula-copy.js": "1223f1197fd7", "textbook-content-ui.js": "8296a83a0ecc", "textbook-page-ui.js": "6679a76c8e90", "textbook-reading.js": "95efd72caeda", "textbook-theme.js": "456ebeecae4a", "textbook-toc.js": "ea80e64e0667", "textbook-ui.js": "eef62d6193f2"};
   window.TextbookAssetVersions = Object.freeze(assetVersions);
 
   const loadScript = (name, marker) => {
@@ -176,14 +176,20 @@ window.Quarto = {
 };
 </script>
 
-<link rel="stylesheet" href="../style.css?v=0f289c70dedb">
+<link rel="stylesheet" href="../style.css?v=dd56c4fde617">
 <link rel="stylesheet" href="../sidebar.css">
 <meta property="og:title" content="第 14 章 线性模型 – 你永远不知道一个强迫症能干出什么事情">
 <meta property="og:description" content="持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，强调逻辑自洽、证明完整与持续维护。">
+<meta property="og:image" content="https://expectorpatro.github.io/math/_tikz/tikz-51de1ebc3f656bead3b8.png">
 <meta property="og:site_name" content="你永远不知道一个强迫症能干出什么事情">
+<meta property="og:image:height" content="1054">
+<meta property="og:image:width" content="1990">
 <meta name="twitter:title" content="第 14 章 线性模型 – 你永远不知道一个强迫症能干出什么事情">
 <meta name="twitter:description" content="持续整理的在线数学教材，涵盖代数、分析、概率、优化与统计，强调逻辑自洽、证明完整与持续维护。">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://expectorpatro.github.io/math/_tikz/tikz-51de1ebc3f656bead3b8.png">
+<meta name="twitter:image-height" content="1054">
+<meta name="twitter:image-width" content="1990">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="textbook-repository" content="Expectorpatro/math">
 </head>
 
@@ -806,21 +812,38 @@ window.Quarto = {
 <section id="id--9bf6a06f" class="level2">
 <h2 class="anchored" data-anchor-id="id--9bf6a06f"><span class="header-section-number">14.1</span> 一般线性模型</h2>
 <div id="model-LinearModel-3218843c" class="definition theorem-block env-definition">
-<p><strong>Definition 14.1</strong>. 称以下模型为<a href="../chapters/glossary-l.html#term-LinearModel" class="term" title="linear model">线性模型<span class="term-english">（linear model）</span></a>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYmVnaW57Y2FzZXN9CgkJCXk9WFxiZXRhK1x2YXJlcHNpbG9uIFxcCgkJCVxvcGVyYXRvcm5hbWV7RX0oXHZhcmVwc2lsb24pPVxtYXRoYmZ7MH0gXFwKCQkJXG9wZXJhdG9ybmFtZXtDb3Z9KFx2YXJlcHNpbG9uKT1cc2lnbWFeMklfbgoJCVxlbmR7Y2FzZXN9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><strong>Definition 14.1</strong>. 设<span class="math inline">\((\Omega,\mathscr{F},P)\)</span>为概率空间，<span class="math inline">\(X\in\mathbb{R}^{n\times p}\)</span>为给定的非随机矩阵，参数空间<span class="math inline">\(\Theta=\mathbb{R}^p\times(0,+\infty)\)</span>。对于参数<span class="math inline">\((\beta,\sigma^2)\in\Theta\)</span>，若随机向量<span class="math inline">\(Y:\Omega\to\mathbb{R}^n\)</span>满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYmVnaW57Y2FzZXN9CgkJCVk9WFxiZXRhK1x2YXJlcHNpbG9uIFxcCgkJCVxvcGVyYXRvcm5hbWV7RX0oXHZhcmVwc2lsb24pPVxtYXRoYmZ7MH0gXFwKCQkJXG9wZXJhdG9ybmFtZXtDb3Z9KFx2YXJlcHNpbG9uKT1cc2lnbWFeMklfbgoJCVxlbmR7Y2FzZXN9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \begin{cases}
-y=X\beta+\varepsilon \\
+Y=X\beta+\varepsilon \\
 \operatorname{E}(\varepsilon)=\mathbf{0} \\
 \operatorname{Cov}(\varepsilon)=\sigma^2I_n
 \end{cases}
 \end{equation*}\]</span></p>
-<p>其中<span class="math inline">\(y\)</span>为<span class="math inline">\(n\times 1\)</span><a href="../chapters/glossary-o.html#term-ObservationVector" class="term" title="observation vector">观测向量<span class="term-english">（observation vector）</span></a>，<span class="math inline">\(X\)</span>为<span class="math inline">\(n\times p\)</span><a href="../chapters/glossary-d.html#term-DesignMatrix" class="term" title="design matrix">设计矩阵<span class="term-english">（design matrix）</span></a>，<span class="math inline">\(\beta\)</span>为<span class="math inline">\(p\times 1\)</span>未知参数向量，<span class="math inline">\(\varepsilon\)</span>为随机误差，<span class="math inline">\(\sigma^2\)</span>为误差方差。</p>
+<p>其中<span class="math inline">\(\varepsilon:\Omega\to\mathbb{R}^n\)</span>为随机误差向量，则称上述模型为<a href="../chapters/glossary-l.html#term-LinearModel" class="term" title="linear model">线性模型<span class="term-english">（linear model）</span></a>。称<span class="math inline">\(X\)</span>为<a href="../chapters/glossary-d.html#term-DesignMatrix" class="term" title="design matrix">设计矩阵<span class="term-english">（design matrix）</span></a>，随机向量<span class="math inline">\(Y\)</span>的一次观测记为<span class="math inline">\(y\in\mathbb{R}^n\)</span>，称<span class="math inline">\(y\)</span>为<a href="../chapters/glossary-o.html#term-ObservationVector" class="term" title="observation vector">观测向量<span class="term-english">（observation vector）</span></a>。</p>
 </div>
+<p>在实际问题中，设计矩阵<span class="math inline">\(X\)</span>和观测向量<span class="math inline">\(y\)</span>是已知的，而参数向量<span class="math inline">\(\beta\)</span>是未知的。线性模型认为<span class="math inline">\(Y\)</span>的均值具有线性结构： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxvcGVyYXRvcm5hbWV7RX0oWSk9WFxiZXRhClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\operatorname{E}(Y)=X\beta
+\end{equation*}\]</span></p>
+<p>因而我们希望根据观测数据<span class="math inline">\(y\)</span>寻找一个参数向量，使得相应的拟合值<span class="math inline">\(X\beta\)</span>能够尽可能接近<span class="math inline">\(y\)</span>。</p>
+<p>由于随机误差的存在，观测向量<span class="math inline">\(y\)</span>一般并不恰好属于<span class="math inline">\(X\)</span>的象<span class="math inline">\(\operatorname{Im}(X)\)</span>，因此方程<span class="math inline">\(X\beta=y\)</span>通常没有解。为此，我们不再要求拟合值<span class="math inline">\(X\beta\)</span>与观测向量<span class="math inline">\(y\)</span>完全相等，而是要求二者之间的差值<span class="math inline">\(y-X\beta\)</span>尽可能接近<span class="math inline">\(\mathbf{0}\)</span>。最常用的度量方式是标准范数的平方，由此得到最小二乘法。</p>
 <div id="definition-14-2" class="definition theorem-block env-definition">
-<p><strong>Definition 14.2</strong>. 称方程<span class="math inline">\(X^{\top}X\beta=X^{\top}y\)</span>为<a href="../chapters/glossary-n.html#term-NormalEquation" class="term" title="normal equation">正则方程<span class="term-english">（normal equation）</span></a>。</p>
+<p><strong>Definition 14.2</strong>. 对于给定的设计矩阵<span class="math inline">\(X\in\mathbb{R}^{n\times p}\)</span>和观测向量<span class="math inline">\(y\in\mathbb{R}^n\)</span>，定义： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlRKGIpPXx8eS1YYnx8XjI9XHN1bV97aT0xfV5uXGxlZnQoeV9pLXhfaV57XHRvcH1iXHJpZ2h0KV4yLFw7IGJcaW5cbWF0aGJie1J9XnAKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+Q(b)=||y-Xb||^2=\sum_{i=1}^n\left(y_i-x_i^{\top}b\right)^2,\; b\in\mathbb{R}^p
+\end{equation*}\]</span></p>
+<p>其中<span class="math inline">\(x_i^{\top}\)</span>为<span class="math inline">\(X\)</span>的第<span class="math inline">\(i\)</span>行。称优化问题： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbWluX3tiXGluXG1hdGhiYntSfV5wfVEoYikKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\min_{b\in\mathbb{R}^p}Q(b)
+\end{equation*}\]</span></p>
+<p>为最小二乘问题，称其任意一个最小值点<span class="math inline">\(\hat{\beta}\)</span>为<span class="math inline">\(\beta\)</span>的<a href="../chapters/glossary-l.html#term-LSE" class="term" title="least squares estimate, LSE">最小二乘估计<span class="term-english">（least squares estimate, LSE）</span></a>。</p>
+</div>
+<div id="definition-14-3" class="definition theorem-block env-definition">
+<p><strong>Definition 14.3</strong>. 称方程<span class="math inline">\(X^{\top}X\beta=X^{\top}y\)</span>为<a href="../chapters/glossary-n.html#term-NormalEquation" class="term" title="normal equation">正则方程<span class="term-english">（normal equation）</span></a>。</p>
 </div>
 <div id="theo-LSELinearModel-635d45cc" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 14.1</strong>. 对于<a href="#model-LinearModel-3218843c" class="textbook-cross-reference" data-reference-key="model:LinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.1">定义 14.1</a>，<span class="math inline">\(\hat{\beta}=(X^{\top}X)^-X^{\top}y\)</span>是其唯一的最小二乘解。</p>
+<p><strong>Theorem 14.1</strong>. 对于<a href="#model-LinearModel-3218843c" class="textbook-cross-reference" data-reference-key="model:LinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.1">定义 14.1</a>，<span class="math inline">\(\hat{\beta}=(X^{\top}X)^-X^{\top}y\)</span>是<span class="math inline">\(\beta\)</span>的最小二乘估计，其中<span class="math inline">\((X^{\top}X)^-\)</span>是<span class="math inline">\(X^{\top}X\)</span>的任意一个广义逆。</p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>注意到： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2dhdGhlcip9CgkJXGJlZ2lue2FsaWduZWR9CgkJCVEoXGJldGEpJj18fHktWFxiZXRhfHxeMj0oeS1YXGJldGEpXntcdG9wfSh5LVhcYmV0YSkgXFwKCQkJJj15XntcdG9wfXkteV57XHRvcH1YXGJldGEtXGJldGFee1x0b3B9WF57XHRvcH15K1xiZXRhXntcdG9wfVhee1x0b3B9WFxiZXRhIFxcCgkJCSY9eV57XHRvcH15LTJ5XntcdG9wfVhcYmV0YStcYmV0YV57XHRvcH1YXntcdG9wfVhcYmV0YQoJCVxlbmR7YWxpZ25lZH1cXAoJCVxmcmFje1xwYXJ0aWFsIHlee1x0b3B9WFxiZXRhfXtccGFydGlhbFxiZXRhfT1YXntcdG9wfXksXHF1YWQKCQlcZnJhY3tccGFydGlhbCBcYmV0YV57XHRvcH1YXntcdG9wfVhcYmV0YX17XHBhcnRpYWxcYmV0YX09Mlhee1x0b3B9WFxiZXRhIFxcCgkJXGZyYWN7XHBhcnRpYWwgUShcYmV0YSl9e1xwYXJ0aWFsXGJldGF9PS0yWF57XHRvcH15KzJYXntcdG9wfVhcYmV0YT0wIFxcCgkJWF57XHRvcH1YXGJldGE9WF57XHRvcH15ClxlbmR7Z2F0aGVyKn0="></span></p>
@@ -849,7 +872,7 @@ Q(\beta)&amp;=||y-X\beta||^2=||y-X\hat{\beta}+X\hat{\beta}-X\beta||^2=||y-X\hat{
 <p><span class="math display">\[\begin{equation*}
 X^{\top}(y-X\beta)=\mathbf{0}
 \end{equation*}\]</span></p>
-<p>于是： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkyKHktWFxoYXR7XGJldGF9KV57XHRvcH1YKFxoYXR7XGJldGF9LVxiZXRhKT0yW1hee1x0b3B9KHktWFxoYXR7XGJldGF9KV1ee1x0b3B9KFxoYXR7XGJldGF9LVxiZXRhKT0wClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p>于是由<a href="../chapters/matrix.html#prop-Transpose-559e1e5a" class="textbook-cross-reference" data-reference-key="prop:Transpose" data-reference-kind="ref+label" data-reference-title="性质 2.1.2" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 2.1.2(4)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkyKHktWFxoYXR7XGJldGF9KV57XHRvcH1YKFxoYXR7XGJldGF9LVxiZXRhKT0yW1hee1x0b3B9KHktWFxoYXR7XGJldGF9KV1ee1x0b3B9KFxoYXR7XGJldGF9LVxiZXRhKT0wClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 2(y-X\hat{\beta})^{\top}X(\hat{\beta}-\beta)=2[X^{\top}(y-X\hat{\beta})]^{\top}(\hat{\beta}-\beta)=0
 \end{equation*}\]</span></p>
@@ -857,11 +880,37 @@ X^{\top}(y-X\beta)=\mathbf{0}
 <p><span class="math display">\[\begin{equation*}
 Q(\beta)=||y-X\hat{\beta}||^2+||X(\hat{\beta}-\beta)||^2
 \end{equation*}\]</span></p>
-<p>上第二项总是非负的，由范数的定义可知其为<span class="math inline">\(0\)</span>当且仅当<span class="math inline">\(X\hat{\beta}=X\beta\)</span>，即当且仅当<span class="math inline">\(X^{\top}X\beta=X^{\top}X\hat{\beta}=X^{\top}y\)</span>，所以使<span class="math inline">\(Q(\beta)\)</span>达到最小值的<span class="math inline">\(\beta\)</span>必为正则方程的解<span class="math inline">\(\hat{\beta}=(X^{\top}X)^-X^{\top}y\)</span>。&nbsp;◻</p>
+<p>当<span class="math inline">\(\beta=\hat{\beta}\)</span>时上式最小，所以<span class="math inline">\(\hat{\beta}\)</span>是一个最小二乘解。&nbsp;◻</p>
 </div>
 <div id="derivation-14-1" class="derivation theorem-block env-derivation">
-<p><strong>Derivation 14.1</strong>. 若<span class="math inline">\(\operatorname{rank}(X)=p\)</span>，则<span class="math inline">\(X\)</span>的列向量组线性无关。考虑二次型<span class="math inline">\(y^{\top}X^{\top}Xy\)</span>，<span class="math inline">\(y^{\top}X^{\top}Xy=0\Leftrightarrow||Xy||=0\Leftrightarrow Xy=\mathbf{0}\)</span>，而<span class="math inline">\(X\)</span>的列向量是线性无关的，所以不存在非零向量的<span class="math inline">\(y\)</span>使得<span class="math inline">\(Xy=\mathbf{0}\)</span>，于是<span class="math inline">\(y^{\top}X^{\top}Xy\)</span>是一个正定二次型，<span class="math inline">\(X^{\top}X\)</span>是一个正定矩阵。由<a href="../chapters/matrix.html#theo-PositiveDefinite-bcd1811a" class="textbook-cross-reference" data-reference-key="theo:PositiveDefinite" data-reference-kind="ref+label" data-reference-title="定理 2.17" data-reference-items="6" data-reference-hint="请查看第 6 项">定理 2.17(6)</a>可得<span class="math inline">\(X^{\top}X\)</span>可逆。此时<span class="math inline">\(\hat{\beta}=(X^{\top}X)^{-1}X^{\top}y\)</span>，称<span class="math inline">\(\hat{\beta}\)</span>为<span class="math inline">\(\beta\)</span>的<a href="../chapters/glossary-l.html#term-LSE" class="term" title="least squares estimate, LSE">最小二乘估计<span class="term-english">（least squares estimate, LSE）</span></a>。</p>
+<p><strong>Derivation 14.1</strong>. 由于对任意<span class="math inline">\(b\in\mathbb{R}^p\)</span>，向量<span class="math inline">\(Xb\)</span>都属于<span class="math inline">\(X\)</span>的列空间<span class="math inline">\(\operatorname{Im}(X)\)</span>，故所有可能的拟合值为集合： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlce1hiOmJcaW5cbWF0aGJie1J9XnBcfT1cb3BlcmF0b3JuYW1le0ltfShYKQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\{Xb:b\in\mathbb{R}^p\}=\operatorname{Im}(X)
+\end{equation*}\]</span></p>
+<p>因此，最小二乘问题等价于在子空间<span class="math inline">\(\operatorname{Im}(X)\)</span>（<a href="../chapters/linear-space.html#prop-LinearMapping-e3beabe4" class="textbook-cross-reference" data-reference-key="prop:LinearMapping" data-reference-kind="ref+label" data-reference-title="性质 1.3.1" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 1.3.1(6)</a>）中寻找与<span class="math inline">\(y\)</span>距离最近的向量，即： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbWluX3t6XGluXG9wZXJhdG9ybmFtZXtJbX0oWCl9fHx5LXp8fF4yClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\min_{z\in\operatorname{Im}(X)}||y-z||^2
+\end{equation*}\]</span></p>
+<p>若<span class="math inline">\(\hat{\beta}\)</span>是最小二乘解，并记<span class="math inline">\(\hat{y}=X\hat{\beta}\)</span>，则<span class="math inline">\(\hat{y}\in\operatorname{Im}(X)\)</span>且满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl8fHktXGhhdHt5fXx8PVxtaW5fe3pcaW5cb3BlcmF0b3JuYW1le0ltfShYKX18fHktenx8ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+||y-\hat{y}||=\min_{z\in\operatorname{Im}(X)}||y-z||
+\end{equation*}\]</span></p>
+<p>由正则方程： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlYXntcdG9wfVhcaGF0e1xiZXRhfT1YXntcdG9wfXkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+X^{\top}X\hat{\beta}=X^{\top}y
+\end{equation*}\]</span></p>
+<p>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlYXntcdG9wfSh5LVhcaGF0e1xiZXRhfSk9XG1hdGhiZnswfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+X^{\top}(y-X\hat{\beta})=\mathbf{0}
+\end{equation*}\]</span></p>
+<p>这表明<span class="math inline">\(y-\hat{y}\)</span>与<span class="math inline">\(X\)</span>的每一列都正交，从而与整个子空间<span class="math inline">\(\operatorname{Im}(X)\)</span>正交。故<span class="math inline">\(\hat{y}=X\hat{\beta}\)</span>正是<span class="math inline">\(y\)</span>在<span class="math inline">\(\operatorname{Im}(X)\)</span>上的正交投影。</p>
 </div>
+<figure id="fig-14-1" class="textbook-figure figure" data-latex-placement="htbp">
+<img src="../_tikz/tikz-51de1ebc3f656bead3b8.png" class="tikz-image figure-img" style="width:92.0%" width="1990" height="1054" alt="TikZ 数学图示" loading="lazy" decoding="async">
+<figcaption>
+<span class="figure-number">图 14.1</span> <span class="math inline"><em>ŷ</em> = <em>X</em><em>β̂</em></span>是<span class="math inline"><em>y</em></span>在<span class="math inline">Im (<em>X</em>)</span>上的正交投影
+</figcaption>
+</figure>
 <div id="note-14-1" class="note theorem-block env-note">
 <p><strong>note 14.1</strong>. 接下来我们将涉及到非常多的公式，初学会觉得非常难记，但如果从投影的角度去理解的话，很多公式都是直观上非常显然的，也就更好记忆了。</p>
 </div>
@@ -869,80 +918,111 @@ Q(\beta)=||y-X\hat{\beta}||^2+||X(\hat{\beta}-\beta)||^2
 <h3 class="anchored" data-anchor-id="id--7d53cf39"><span class="header-section-number">14.1.1</span> 参数估计</h3>
 <section id="id--85905d9a" class="level4">
 <h4 class="anchored" data-anchor-id="id--85905d9a"><span class="header-section-number">14.1.1.1</span> 回归系数</h4>
-<div id="definition-14-3" class="definition theorem-block env-definition">
-<p><strong>Definition 14.3</strong>. 若存在<span class="math inline">\(n\times 1\)</span>向量<span class="math inline">\(\alpha\)</span>使得<span class="math inline">\(\operatorname{E}(\alpha^{\top}y)=c^{\top}\beta\)</span>对一切的<span class="math inline">\(\beta\)</span>成立，则称<span class="math inline">\(c^{\top}\beta\)</span>为<a href="../chapters/glossary-e.html#term-EstimableFunction" class="term" title="estimable function">可估函数<span class="term-english">（estimable function）</span></a>。</p>
+<div id="definition-14-4" class="definition theorem-block env-definition">
+<p><strong>Definition 14.4</strong>. 设非随机向量<span class="math inline">\(c\in\mathbb{R}^{p}\)</span>。若存在非随机向量<span class="math inline">\(\alpha\in\mathbb{R}^{n}\)</span>使得<span class="math inline">\(\operatorname{E}(\alpha^{\top}Y)=c^{\top}\beta\)</span>对任意的<span class="math inline">\(\beta\in\mathbb{R}^{p}\)</span>成立，则称<span class="math inline">\(c^{\top}\beta\)</span>为<a href="../chapters/glossary-e.html#term-EstimableFunction" class="term" title="estimable function">可估函数<span class="term-english">（estimable function）</span></a>。</p>
+</div>
+<div id="note-14-2" class="note theorem-block env-note">
+<p><strong>note 14.2</strong>. 由<a href="#theo-LSELinearModel-635d45cc" class="textbook-cross-reference" data-reference-key="theo:LSELinearModel" data-reference-kind="ref+label" data-reference-title="定理 14.1">定理 14.1</a>可知<span class="math inline">\(\beta\)</span>的最小二乘估计一般并不唯一，因此不能直接讨论<span class="math inline">\(\beta\)</span>本身的估计。由于线性模型通过<span class="math inline">\(\operatorname{E}(Y)=X\beta\)</span>刻画参数与观测变量之间的线性关系，我们转而关注<span class="math inline">\(\beta\)</span>的线性函数<span class="math inline">\(c^{\top}\beta\)</span>。由于实际能够观测到的只有<span class="math inline">\(Y\)</span>，自然要考察是否存在<span class="math inline">\(\alpha\in\mathbb{R}^{n}\)</span>使得<span class="math inline">\(\alpha^{\top}Y\)</span>是<span class="math inline">\(c^{\top}\beta\)</span>的线性无偏估计量。</p>
 </div>
 <div id="prop-EstimableFunction-31d7362e" class="property theorem-block env-property">
-<p><strong>Property 14.1.1</strong>. 对于<a href="#model-LinearModel-3218843c" class="textbook-cross-reference" data-reference-key="model:LinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.1">定义 14.1</a>，<span class="math inline">\(c^{\top}\beta\)</span>和<span class="math inline">\(d^{\top}\beta\)</span>是可估函数，<span class="math inline">\(\hat{\beta}\)</span>是正则方程的解，则：</p>
+<p><strong>Property 14.1.1</strong>. 对于<a href="#model-LinearModel-3218843c" class="textbook-cross-reference" data-reference-key="model:LinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.1">定义 14.1</a>，设<span class="math inline">\(c^{\top}\beta\)</span>和<span class="math inline">\(d^{\top}\beta\)</span>是可估函数，<span class="math inline">\(\hat{\beta}\)</span>是<span class="math inline">\(\beta\)</span>的最小二乘估计，则：</p>
 <ol type="1">
 <li><p>使<span class="math inline">\(c^{\top}\beta\)</span>成为可估函数的全体向量<span class="math inline">\(c\)</span>构成<span class="math inline">\(\mathcal{M}(X^{\top})\)</span>；</p></li>
-<li><p>可估函数的全体构成一个<span class="math inline">\(\operatorname{rank}(X)\)</span>维线性空间；</p></li>
+<li><p>可估函数的全体构成一个<span class="math inline">\(\mathbb{R}\)</span>上的<span class="math inline">\(\operatorname{rank}(X)\)</span>维线性空间；</p></li>
 <li><p><span class="math inline">\(c^{\top}\hat{\beta}\)</span>与<span class="math inline">\((X^{\top}X)^-\)</span>的选择无关；</p></li>
 <li><p><span class="math inline">\(c^{\top}\hat{\beta}\)</span>为<span class="math inline">\(c^{\top}\beta\)</span>的无偏估计；</p></li>
-<li><p><span class="math inline">\(\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})=\sigma^2c^{\top}(X^{\top}X)^-d\)</span>，且与<span class="math inline">\((X^{\top}X)^-\)</span>的选择无关；</p></li>
-<li><p>(Gauss-Markov)<span class="math inline">\(\;c^{\top}\hat{\beta}\)</span>是<span class="math inline">\(c^{\top}\beta\)</span>唯一的BLUE；</p></li>
-<li><p>设<span class="math inline">\(\varphi_i=c_i^{\top}\beta,\;i=1,2,\dots,k\)</span>都是可估函数，<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{k}\in\mathbb{R}\)</span>，则<span class="math inline">\(\varphi=\sum\limits_{i=1}^{k}\alpha_i\varphi_i\)</span>也是可估的，且<span class="math inline">\(\hat{\varphi}=\sum\limits_{i=1}^{k}\alpha_ic_i^{\top}\hat{\beta}\)</span>是<span class="math inline">\(\varphi\)</span>的BLUE。</p></li>
+<li><p><span class="math inline">\(\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})=\sigma^2c^{\top}(X^{\top}X)^-d\)</span>且与<span class="math inline">\((X^{\top}X)^-\)</span>的选择无关；</p></li>
+<li><p>(Gauss-Markov)当<span class="math inline">\(\sigma^2&gt;0\)</span>时，在方差最小的意义下<span class="math inline">\(c^{\top}\hat{\beta}\)</span>是<span class="math inline">\(c^{\top}\beta\)</span>唯一的BLUE；</p></li>
+<li><p>设<span class="math inline">\(\varphi_i=c_i^{\top}\beta,\;i=1,2,\dots,k\)</span>都是可估函数，<span class="math inline">\(\alpha_1, \alpha_2, \dots, \alpha_{k}\in\mathbb{R}\)</span>，则<span class="math inline">\(\varphi=\sum\limits_{i=1}^{k}\alpha_i\varphi_i\)</span>也是可估的，<span class="math inline">\(\hat{\varphi}=\sum\limits_{i=1}^{k}\alpha_ic_i^{\top}\hat{\beta}\)</span>是<span class="math inline">\(\varphi\)</span>的无偏估计。当当<span class="math inline">\(\sigma^2&gt;0\)</span>时，在方差最小的意义下<span class="math inline">\(\hat{\varphi}\)</span>时<span class="math inline">\(\varphi\)</span>唯一的BLUE。</p></li>
 </ol>
 </div>
 <div class="proof-block proof">
-<p><span class="proof-title"><em>证明</em>. </span>(1)<span class="math inline">\(\;c^{\top}\beta\)</span>是可估函数<span class="math inline">\(\Leftrightarrow\)</span>存在<span class="math inline">\(n\times1\)</span>向量<span class="math inline">\(\alpha\)</span>使得<span class="math inline">\(\operatorname{E}(\alpha^{\top}y)=\alpha^{\top}\operatorname{E}(y)=\alpha^{\top}X\beta=c^{\top}\beta\)</span>对一切的<span class="math inline">\(\beta\)</span>成立<span class="math inline">\(\Leftrightarrow c=X^{\top}\alpha\)</span>。</p>
-<p>(2)由(1)可得可估函数对加法和数乘封闭，根据<a href="../chapters/linear-space.html#theo-Subspace-e4ba2d14" class="textbook-cross-reference" data-reference-key="theo:Subspace" data-reference-kind="ref+label" data-reference-title="定理 1.5">定理 1.5</a>可知所有可估函数构成一个线性空间。注意到可估函数<span class="math inline">\(c_1^{\top}\beta\)</span>和<span class="math inline">\(c_2^{\top}\beta\)</span>线性相关当且仅当<span class="math inline">\(c_1\)</span>和<span class="math inline">\(c_2\)</span>线性相关，由<a href="../chapters/linear-space.html#prop-SpanSubspace-5b082085" class="textbook-cross-reference" data-reference-key="prop:SpanSubspace" data-reference-kind="ref+label" data-reference-title="性质 1.1.5" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 1.1.5(3)</a>和<a href="../chapters/matrix.html#prop-MatrixRank-c1c6a843" class="textbook-cross-reference" data-reference-key="prop:MatrixRank" data-reference-kind="ref+label" data-reference-title="性质 2.1.8" data-reference-items="7" data-reference-hint="请查看第 7 项">性质 2.1.8(7)</a>可得可估函数空间的秩为<span class="math inline">\(\operatorname{rank}(X)\)</span>。</p>
-<p>(3)因为<span class="math inline">\(c^{\top}\beta\)</span>可估，由(1)可知存在<span class="math inline">\(n\times 1\)</span>向量<span class="math inline">\(\alpha\)</span>使得<span class="math inline">\(c=X^{\top}\alpha\)</span>，于是由<a href="../chapters/matrix.html#prop-Transpose-559e1e5a" class="textbook-cross-reference" data-reference-key="prop:Transpose" data-reference-kind="ref+label" data-reference-title="性质 2.1.2" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 2.1.2(4)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQljXntcdG9wfVxoYXR7XGJldGF9PVxhbHBoYV57XHRvcH1YKFhee1x0b3B9WCleLVhee1x0b3B9eQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="proof-title"><em>证明</em>. </span>(1)由<a href="../chapters/probability-measure.html#prop-MeasurableIntegral-c2153bd8" class="textbook-cross-reference" data-reference-key="prop:MeasurableIntegral" data-reference-kind="ref+label" data-reference-title="性质 5.4.3" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 5.4.3(6)</a>和<a href="../chapters/matrix.html#prop-Transpose-559e1e5a" class="textbook-cross-reference" data-reference-key="prop:Transpose" data-reference-kind="ref+label" data-reference-title="性质 2.1.2" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 2.1.2(4)</a>可知<span class="math inline">\(c^{\top}\beta\)</span>是可估函数<span class="math inline">\(\Leftrightarrow\)</span>存在<span class="math inline">\(\alpha\in\mathbb{R}^{n}\)</span>使得<span class="math inline">\(\operatorname{E}(\alpha^{\top}Y)=\alpha^{\top}\operatorname{E}(Y)=\alpha^{\top}X\beta=c^{\top}\beta\)</span>对任意的<span class="math inline">\(\beta\)</span>成立<span class="math inline">\(\Leftrightarrow c=X^{\top}\alpha\)</span>。</p>
+<p>(2)记函数族： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbWF0aGNhbHtGfT1cbGVmdFx7Zl9jOmZfYyhcYmV0YSk9Y157XHRvcH1cYmV0YSxcO2NcaW5cbWF0aGNhbHtNfShYXntcdG9wfSlccmlnaHRcfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\mathcal{F}=\left\{f_c:f_c(\beta)=c^{\top}\beta,\;c\in\mathcal{M}(X^{\top})\right\}
+\end{equation*}\]</span></p>
+<p>对任意<span class="math inline">\(f_{c_1},f_{c_2}\in\mathcal{F}\)</span>和 <span class="math inline">\(a\in\mathbb{R}\)</span>，在<span class="math inline">\(\mathcal{F}\)</span>上定义加法与数乘为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2dhdGhlcip9CgkJKGZfe2NfMX0rZl97Y18yfSkoXGJldGEpPWZfe2NfMX0oXGJldGEpK2Zfe2NfMn0oXGJldGEpIFxcCgkJKGFmX3tjXzF9KShcYmV0YSk9YWZfe2NfMX0oXGJldGEpClxlbmR7Z2F0aGVyKn0="></span></p>
+<p><span class="math display">\[\begin{gather*}
+(f_{c_1}+f_{c_2})(\beta)=f_{c_1}(\beta)+f_{c_2}(\beta) \\
+(af_{c_1})(\beta)=af_{c_1}(\beta)
+\end{gather*}\]</span></p>
+<p>可以验证<span class="math inline">\(\mathcal{F}\)</span>是<span class="math inline">\(\mathbb{R}\)</span>上的线性空间。</p>
+<p>定义映射： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlccGk6XG1hdGhjYWx7TX0oWF57XHRvcH0pXHRvXG1hdGhjYWx7Rn0sXHF1YWRccGkoYyk9Zl9jClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\pi:\mathcal{M}(X^{\top})\to\mathcal{F},\quad\pi(c)=f_c
+\end{equation*}\]</span></p>
+<p>由<a href="../chapters/linear-space.html#prop-LinearMapping-e3beabe4" class="textbook-cross-reference" data-reference-key="prop:LinearMapping" data-reference-kind="ref+label" data-reference-title="性质 1.3.1" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 1.3.1(6)</a>和<span class="math inline">\(\mathcal{F}\)</span>的定义可知<span class="math inline">\(\pi\)</span>是<span class="math inline">\(\mathcal{M}(X^{\top})\)</span>到<span class="math inline">\(\mathcal{F}\)</span>的一个同构映射，根据<a href="../chapters/linear-space.html#prop-IsomorphicOfLinearSpace-86b98faf" class="textbook-cross-reference" data-reference-key="prop:IsomorphicOfLinearSpace" data-reference-kind="ref+label" data-reference-title="性质 1.1.7" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 1.1.7(6)</a>、<a href="../chapters/linear-space.html#prop-SpanSubspace-5b082085" class="textbook-cross-reference" data-reference-key="prop:SpanSubspace" data-reference-kind="ref+label" data-reference-title="性质 1.1.5" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 1.1.5(3)</a>和<a href="../chapters/matrix.html#prop-MatrixRank-c1c6a843" class="textbook-cross-reference" data-reference-key="prop:MatrixRank" data-reference-kind="ref+label" data-reference-title="性质 2.1.8" data-reference-items="7" data-reference-hint="请查看第 7 项">性质 2.1.8(7)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcZGltKFxtYXRoY2Fse0Z9KT1cZGltXG1hdGhjYWx7TX0oWF57XHRvcH0pPVxvcGVyYXRvcm5hbWV7cmFua30oWF57XHRvcH0pPVxvcGVyYXRvcm5hbWV7cmFua30oWCkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\dim(\mathcal{F})=\dim\mathcal{M}(X^{\top})=\operatorname{rank}(X^{\top})=\operatorname{rank}(X)
+\end{equation*}\]</span></p>
+<p>因此，可估函数的全体构成一个<span class="math inline">\(\mathbb{R}\)</span>上的<span class="math inline">\(\operatorname{rank}(X)\)</span>维线性空间。</p>
+<p>(3)因为<span class="math inline">\(c^{\top}\beta\)</span>可估，由(1)可知存在<span class="math inline">\(\alpha\in\mathbb{R}^{n}\)</span>使得<span class="math inline">\(c=X^{\top}\alpha\)</span>，于是由<a href="../chapters/matrix.html#prop-Transpose-559e1e5a" class="textbook-cross-reference" data-reference-key="prop:Transpose" data-reference-kind="ref+label" data-reference-title="性质 2.1.2" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 2.1.2(4)</a>和<a href="#theo-LSELinearModel-635d45cc" class="textbook-cross-reference" data-reference-key="theo:LSELinearModel" data-reference-kind="ref+label" data-reference-title="定理 14.1">定理 14.1</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQljXntcdG9wfVxoYXR7XGJldGF9PVxhbHBoYV57XHRvcH1YKFhee1x0b3B9WCleLVhee1x0b3B9eQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 c^{\top}\hat{\beta}=\alpha^{\top}X(X^{\top}X)^-X^{\top}y
 \end{equation*}\]</span></p>
 <p>由<a href="../chapters/matrix.html#prop-A-8b921670" class="textbook-cross-reference" data-reference-key="prop:A-" data-reference-kind="ref+label" data-reference-title="性质 2.5.1" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 2.5.1(4)</a>即可得出结论。</p>
-<p>(4)因为<span class="math inline">\(c^{\top}\beta\)</span>可估，由(1)可知存在<span class="math inline">\(n\times 1\)</span>向量<span class="math inline">\(\alpha\)</span>使得<span class="math inline">\(c=X^{\top}\alpha\)</span>，根据<a href="../chapters/matrix.html#prop-A-8b921670" class="textbook-cross-reference" data-reference-key="prop:A-" data-reference-kind="ref+label" data-reference-title="性质 2.5.1" data-reference-items="7" data-reference-hint="请查看第 7 项">性质 2.5.1(7)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0V9KGNee1x0b3B9XGhhdHtcYmV0YX0pPVxvcGVyYXRvcm5hbWV7RX1bY157XHRvcH0oWF57XHRvcH1YKV4tWF57XHRvcH15XT1jXntcdG9wfShYXntcdG9wfVgpXi1YXntcdG9wfVhcYmV0YT1jXntcdG9wfVxiZXRhClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p>(4)因为<span class="math inline">\(c^{\top}\beta\)</span>可估，由(1)可知存在<span class="math inline">\(\alpha\in\mathbb{R}^{n}\)</span>使得<span class="math inline">\(c=X^{\top}\alpha\)</span>，根据<a href="#theo-LSELinearModel-635d45cc" class="textbook-cross-reference" data-reference-key="theo:LSELinearModel" data-reference-kind="ref+label" data-reference-title="定理 14.1">定理 14.1</a>、<a href="../chapters/probability-measure.html#prop-MeasurableIntegral-c2153bd8" class="textbook-cross-reference" data-reference-key="prop:MeasurableIntegral" data-reference-kind="ref+label" data-reference-title="性质 5.4.3" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 5.4.3(6)</a>和<a href="../chapters/matrix.html#prop-A-8b921670" class="textbook-cross-reference" data-reference-key="prop:A-" data-reference-kind="ref+label" data-reference-title="性质 2.5.1" data-reference-items="7" data-reference-hint="请查看第 7 项">性质 2.5.1(7)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0V9KGNee1x0b3B9XGhhdHtcYmV0YX0pPVxvcGVyYXRvcm5hbWV7RX1bY157XHRvcH0oWF57XHRvcH1YKV4tWF57XHRvcH1ZXT1jXntcdG9wfShYXntcdG9wfVgpXi1YXntcdG9wfVhcYmV0YT1jXntcdG9wfVxiZXRhClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
-\operatorname{E}(c^{\top}\hat{\beta})=\operatorname{E}[c^{\top}(X^{\top}X)^-X^{\top}y]=c^{\top}(X^{\top}X)^-X^{\top}X\beta=c^{\top}\beta
+\operatorname{E}(c^{\top}\hat{\beta})=\operatorname{E}[c^{\top}(X^{\top}X)^-X^{\top}Y]=c^{\top}(X^{\top}X)^-X^{\top}X\beta=c^{\top}\beta
 \end{equation*}\]</span></p>
-<p>(5)因为<span class="math inline">\(c^{\top}\beta,d^{\top}\beta\)</span>是可估函数，由(1)可知存在<span class="math inline">\(\alpha,\gamma\)</span>使得<span class="math inline">\(c=X^{\top}\alpha,d=X^{\top}\gamma\)</span>。由<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.4" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 6.3.4(3)</a>、<a href="../chapters/matrix.html#prop-Transpose-559e1e5a" class="textbook-cross-reference" data-reference-key="prop:Transpose" data-reference-kind="ref+label" data-reference-title="性质 2.1.2" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 2.1.2(4)</a>和<a href="../chapters/matrix.html#prop-A-8b921670" class="textbook-cross-reference" data-reference-key="prop:A-" data-reference-kind="ref+label" data-reference-title="性质 2.5.1" data-reference-items="5|7" data-reference-hint="请查看第 5、7 项">性质 2.5.1(5)(7)</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlcb3BlcmF0b3JuYW1le0Nvdn0oY157XHRvcH1caGF0e1xiZXRhfSxkXntcdG9wfVxoYXR7XGJldGF9KQoJCSY9XG9wZXJhdG9ybmFtZXtDb3Z9W2Nee1x0b3B9KFhee1x0b3B9WCleLVhee1x0b3B9eSxkXntcdG9wfShYXntcdG9wfVgpXi1YXntcdG9wfXldIFxcCgkJJj1jXntcdG9wfShYXntcdG9wfVgpXi1YXntcdG9wfVxvcGVyYXRvcm5hbWV7Q292fSh5KVhbKFhee1x0b3B9WCleLV1ee1x0b3B9ZCBcXAoJCSY9Y157XHRvcH0oWF57XHRvcH1YKV4tWF57XHRvcH1cc2lnbWFeMklfblgoWF57XHRvcH1YKV4tZCBcXAoJCSY9XHNpZ21hXjJcYWxwaGFee1x0b3B9WChYXntcdG9wfVgpXi1YXntcdG9wfVgoWF57XHRvcH1YKV4tWF57XHRvcH1cZ2FtbWEgXFwKCQkmPVxzaWdtYV4yY157XHRvcH0oWF57XHRvcH1YKV4tZD1cc2lnbWFeMlxhbHBoYV57XHRvcH1YKFhee1x0b3B9WCleLVhee1x0b3B9XGdhbW1hClxlbmR7YWxpZ24qfQ=="></span></p>
+<p>(5)因为<span class="math inline">\(c^{\top}\beta,d^{\top}\beta\)</span>是可估函数，由(1)可知存在<span class="math inline">\(\alpha,\gamma\in\mathbb{R}^{n}\)</span>使得<span class="math inline">\(c=X^{\top}\alpha,d=X^{\top}\gamma\)</span>。根据<a href="#theo-LSELinearModel-635d45cc" class="textbook-cross-reference" data-reference-key="theo:LSELinearModel" data-reference-kind="ref+label" data-reference-title="定理 14.1">定理 14.1</a>、<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.4" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 6.3.4(3)</a>、<a href="../chapters/matrix.html#prop-Transpose-559e1e5a" class="textbook-cross-reference" data-reference-key="prop:Transpose" data-reference-kind="ref+label" data-reference-title="性质 2.1.2" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 2.1.2(4)</a>和<a href="../chapters/matrix.html#prop-A-8b921670" class="textbook-cross-reference" data-reference-key="prop:A-" data-reference-kind="ref+label" data-reference-title="性质 2.5.1" data-reference-items="7|5|4" data-reference-hint="请查看第 7、5、4 项">性质 2.5.1(7)(5)(4)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQkmXG9wZXJhdG9ybmFtZXtDb3Z9KGNee1x0b3B9XGhhdHtcYmV0YX0sZF57XHRvcH1caGF0e1xiZXRhfSk9XG9wZXJhdG9ybmFtZXtDb3Z9W2Nee1x0b3B9KFhee1x0b3B9WCleLVhee1x0b3B9WSxkXntcdG9wfShYXntcdG9wfVgpXi1YXntcdG9wfVldIFxcCgkJPSZjXntcdG9wfShYXntcdG9wfVgpXi1YXntcdG9wfVxvcGVyYXRvcm5hbWV7Q292fShZKVhbKFhee1x0b3B9WCleLV1ee1x0b3B9ZCA9Y157XHRvcH0oWF57XHRvcH1YKV4tWF57XHRvcH1cc2lnbWFeMklfblhbKFhee1x0b3B9WCleLV1ee1x0b3B9ZCBcXAoJCT0mXHNpZ21hXjJjXntcdG9wfShYXntcdG9wfVgpXi1YXntcdG9wfVhbKFhee1x0b3B9WCleLV1ee1x0b3B9ZD1cc2lnbWFeMmNee1x0b3B9WyhYXntcdG9wfVgpXi1dXntcdG9wfWQ9XHNpZ21hXjJcYWxwaGFee1x0b3B9WFsoWF57XHRvcH1YKV4tXV57XHRvcH1YXntcdG9wfVxnYW1tYSBcXAoJCT0mXHNpZ21hXjJcYWxwaGFee1x0b3B9WChYXntcdG9wfVgpXi1YXntcdG9wfVxnYW1tYT1cc2lnbWFeMmNee1x0b3B9KFhee1x0b3B9WCleLWQKXGVuZHthbGlnbip9"></span></p>
 <p><span class="math display">\[\begin{align*}
-\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})
-&amp;=\operatorname{Cov}[c^{\top}(X^{\top}X)^-X^{\top}y,d^{\top}(X^{\top}X)^-X^{\top}y] \\
-&amp;=c^{\top}(X^{\top}X)^-X^{\top}\operatorname{Cov}(y)X[(X^{\top}X)^-]^{\top}d \\
-&amp;=c^{\top}(X^{\top}X)^-X^{\top}\sigma^2I_nX(X^{\top}X)^-d \\
-&amp;=\sigma^2\alpha^{\top}X(X^{\top}X)^-X^{\top}X(X^{\top}X)^-X^{\top}\gamma \\
-&amp;=\sigma^2c^{\top}(X^{\top}X)^-d=\sigma^2\alpha^{\top}X(X^{\top}X)^-X^{\top}\gamma
+&amp;\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})=\operatorname{Cov}[c^{\top}(X^{\top}X)^-X^{\top}Y,d^{\top}(X^{\top}X)^-X^{\top}Y] \\
+=&amp;c^{\top}(X^{\top}X)^-X^{\top}\operatorname{Cov}(Y)X[(X^{\top}X)^-]^{\top}d =c^{\top}(X^{\top}X)^-X^{\top}\sigma^2I_nX[(X^{\top}X)^-]^{\top}d \\
+=&amp;\sigma^2c^{\top}(X^{\top}X)^-X^{\top}X[(X^{\top}X)^-]^{\top}d=\sigma^2c^{\top}[(X^{\top}X)^-]^{\top}d=\sigma^2\alpha^{\top}X[(X^{\top}X)^-]^{\top}X^{\top}\gamma \\
+=&amp;\sigma^2\alpha^{\top}X(X^{\top}X)^-X^{\top}\gamma=\sigma^2c^{\top}(X^{\top}X)^-d
 \end{align*}\]</span></p>
-<p>由<a href="../chapters/matrix.html#prop-A-8b921670" class="textbook-cross-reference" data-reference-key="prop:A-" data-reference-kind="ref+label" data-reference-title="性质 2.5.1" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 2.5.1(4)</a>即可知<span class="math inline">\(\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})\)</span>与<span class="math inline">\((X^{\top}X)^-\)</span>的选择无关。</p>
-<p>(6)无偏性由(4)可得，线性性由正则方程可知，下证方差最小。 设<span class="math inline">\(a^{\top}y\)</span>为<span class="math inline">\(c^{\top}\beta\)</span>的任一无偏估计，由(1)的过程可知<span class="math inline">\(c=X^{\top}a\)</span>。根据<a href="../chapters/matrix.html#prop-A-8b921670" class="textbook-cross-reference" data-reference-key="prop:A-" data-reference-kind="ref+label" data-reference-title="性质 2.5.1" data-reference-items="5" data-reference-hint="请查看第 5 项">性质 2.5.1(5)</a>和(5)可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlcb3BlcmF0b3JuYW1le1Zhcn0oYV57XHRvcH15KS1cb3BlcmF0b3JuYW1le1Zhcn0oY157XHRvcH1caGF0e1xiZXRhfSkmPVxzaWdtYV4yW2Fee1x0b3B9YS1jXntcdG9wfShYXntcdG9wfVgpXi1jXSBcXAoJCSY9XHNpZ21hXjJbYV57XHRvcH0tY157XHRvcH0oWF57XHRvcH1YKV4tWF57XHRvcH1dW2EtWChYXntcdG9wfVgpXi1jXSBcXAoJCSY9XHNpZ21hXjJ8fGEtWChYXntcdG9wfVgpXi1jfHxeMlxnZXFzbGFudDAKXGVuZHthbGlnbip9"></span></p>
-<p><span class="math display">\[\begin{align*}
-\operatorname{Var}(a^{\top}y)-\operatorname{Var}(c^{\top}\hat{\beta})&amp;=\sigma^2[a^{\top}a-c^{\top}(X^{\top}X)^-c] \\
-&amp;=\sigma^2[a^{\top}-c^{\top}(X^{\top}X)^-X^{\top}][a-X(X^{\top}X)^-c] \\
-&amp;=\sigma^2||a-X(X^{\top}X)^-c||^2\geqslant0
-\end{align*}\]</span></p>
-<p>上式第一行到第二行是由于<a href="../chapters/matrix.html#prop-A-8b921670" class="textbook-cross-reference" data-reference-key="prop:A-" data-reference-kind="ref+label" data-reference-title="性质 2.5.1" data-reference-items="7" data-reference-hint="请查看第 7 项">性质 2.5.1(7)</a>和<a href="../chapters/matrix.html#prop-Transpose-559e1e5a" class="textbook-cross-reference" data-reference-key="prop:Transpose" data-reference-kind="ref+label" data-reference-title="性质 2.1.2" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 2.1.2(4)</a>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQkmW2Fee1x0b3B9LWNee1x0b3B9KFhee1x0b3B9WCleLVhee1x0b3B9XVthLVgoWF57XHRvcH1YKV4tY10gXFwKCQk9JmFee1x0b3B9YS1hXntcdG9wfVgoWF57XHRvcH1YKV4tYy1jXntcdG9wfShYXntcdG9wfVgpXi1YXntcdG9wfWErY157XHRvcH0oWF57XHRvcH1YKV4tWF57XHRvcH1YKFhee1x0b3B9WCleLWMgXFwKCQk9JmFee1x0b3B9YS1jXntcdG9wfShYXntcdG9wfVgpXi1jLWNee1x0b3B9KFhee1x0b3B9WCleLWMrY157XHRvcH0oWF57XHRvcH1YKV4tYyBcXAoJCT0mYV57XHRvcH1hLWNee1x0b3B9KFhee1x0b3B9WCleLWMKXGVuZHthbGlnbip9"></span></p>
+<p>根据<a href="../chapters/matrix.html#prop-Transpose-559e1e5a" class="textbook-cross-reference" data-reference-key="prop:Transpose" data-reference-kind="ref+label" data-reference-title="性质 2.1.2" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 2.1.2(4)</a>和<a href="../chapters/matrix.html#theo-VectorSpaceAAAT-db57977d" class="textbook-cross-reference" data-reference-key="theo:VectorSpaceAAAT" data-reference-kind="ref+label" data-reference-title="定理 2.2">定理 2.2</a>可知<span class="math inline">\(c^{\top}=\alpha^{\top}X\in\mathcal{M}(X^{\top})=\mathcal{M}(X^{\top}X),d=X^{\top}\gamma\in\mathcal{M}(X^{\top})=\mathcal{M}(X^{\top}X)\)</span>，由<a href="../chapters/matrix.html#prop-A-8b921670" class="textbook-cross-reference" data-reference-key="prop:A-" data-reference-kind="ref+label" data-reference-title="性质 2.5.1" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 2.5.1(3)</a>可得<span class="math inline">\(\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})\)</span>与<span class="math inline">\((X^{\top}X)^-\)</span>的选择无关。</p>
+<p>(6)无偏性由(4)可得，线性性由<a href="#theo-LSELinearModel-635d45cc" class="textbook-cross-reference" data-reference-key="theo:LSELinearModel" data-reference-kind="ref+label" data-reference-title="定理 14.1">定理 14.1</a>可知，下证方差最小。</p>
+<p>设<span class="math inline">\(a^{\top}Y\)</span>为<span class="math inline">\(c^{\top}\beta\)</span>的任一无偏估计，由(1)的过程可知<span class="math inline">\(c=X^{\top}a\)</span>。根据<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.4" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 6.3.4(3)</a>和(5)可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1Zhcn0oYV57XHRvcH1ZKS1cb3BlcmF0b3JuYW1le1Zhcn0oY157XHRvcH1caGF0e1xiZXRhfSk9XHNpZ21hXjJbYV57XHRvcH1hLWNee1x0b3B9KFhee1x0b3B9WCleLWNdClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\operatorname{Var}(a^{\top}Y)-\operatorname{Var}(c^{\top}\hat{\beta})=\sigma^2[a^{\top}a-c^{\top}(X^{\top}X)^-c]
+\end{equation*}\]</span></p>
+<p>由<a href="../chapters/matrix.html#prop-Transpose-559e1e5a" class="textbook-cross-reference" data-reference-key="prop:Transpose" data-reference-kind="ref+label" data-reference-title="性质 2.1.2" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 2.1.2(4)</a>和<a href="../chapters/matrix.html#prop-A-8b921670" class="textbook-cross-reference" data-reference-key="prop:A-" data-reference-kind="ref+label" data-reference-title="性质 2.5.1" data-reference-items="7" data-reference-hint="请查看第 7 项">性质 2.5.1(7)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQkmW2Fee1x0b3B9LWNee1x0b3B9KFhee1x0b3B9WCleLVhee1x0b3B9XVthLVgoWF57XHRvcH1YKV4tY10gXFwKCQk9JmFee1x0b3B9YS1hXntcdG9wfVgoWF57XHRvcH1YKV4tYy1jXntcdG9wfShYXntcdG9wfVgpXi1YXntcdG9wfWErY157XHRvcH0oWF57XHRvcH1YKV4tWF57XHRvcH1YKFhee1x0b3B9WCleLWMgXFwKCQk9JmFee1x0b3B9YS1jXntcdG9wfShYXntcdG9wfVgpXi1jLWNee1x0b3B9KFhee1x0b3B9WCleLWMrY157XHRvcH0oWF57XHRvcH1YKV4tYyBcXAoJCT0mYV57XHRvcH1hLWNee1x0b3B9KFhee1x0b3B9WCleLWMKXGVuZHthbGlnbip9"></span></p>
 <p><span class="math display">\[\begin{align*}
 &amp;[a^{\top}-c^{\top}(X^{\top}X)^-X^{\top}][a-X(X^{\top}X)^-c] \\
 =&amp;a^{\top}a-a^{\top}X(X^{\top}X)^-c-c^{\top}(X^{\top}X)^-X^{\top}a+c^{\top}(X^{\top}X)^-X^{\top}X(X^{\top}X)^-c \\
 =&amp;a^{\top}a-c^{\top}(X^{\top}X)^-c-c^{\top}(X^{\top}X)^-c+c^{\top}(X^{\top}X)^-c \\
 =&amp;a^{\top}a-c^{\top}(X^{\top}X)^-c
 \end{align*}\]</span></p>
-<p>由范数的性质可知<span class="math inline">\(\operatorname{Var}(a^{\top}y)=\operatorname{Var}(c^{\top}\hat{\beta})\)</span>当且仅当<span class="math inline">\(a=X(X^{\top}X)^-c\)</span>，由<a href="../chapters/matrix.html#prop-A-01affd30" class="textbook-cross-reference" data-reference-key="prop:A+" data-reference-kind="ref+label" data-reference-title="性质 2.5.2" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 2.5.2(3)</a>可知<span class="math inline">\(a=X(X^{\top}X)^-c\Leftrightarrow a^{\top}=c^{\top}(X^{\top}X)^-X^{\top}\Leftrightarrow a^{\top}y=c^{\top}(X^{\top}X)^-X^{\top}y=c^{\top}\hat{\beta}\)</span>。</p>
+<p>所以： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1Zhcn0oYV57XHRvcH1ZKT1cc2lnbWFeMlthXntcdG9wfS1jXntcdG9wfShYXntcdG9wfVgpXi1YXntcdG9wfV1bYS1YKFhee1x0b3B9WCleLWNdClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\operatorname{Var}(a^{\top}Y)=\sigma^2[a^{\top}-c^{\top}(X^{\top}X)^-X^{\top}][a-X(X^{\top}X)^-c]
+\end{equation*}\]</span></p>
+<p>根据<a href="../chapters/matrix.html#prop-Transpose-559e1e5a" class="textbook-cross-reference" data-reference-key="prop:Transpose" data-reference-kind="ref+label" data-reference-title="性质 2.1.2" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 2.1.2(4)</a>和<a href="../chapters/matrix.html#prop-A-8b921670" class="textbook-cross-reference" data-reference-key="prop:A-" data-reference-kind="ref+label" data-reference-title="性质 2.5.1" data-reference-items="5|4" data-reference-hint="请查看第 5、4 项">性质 2.5.1(5)(4)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlbY157XHRvcH0oWF57XHRvcH1YKV4tWF57XHRvcH1dXntcdG9wfSY9WFsoWF57XHRvcH1YKV4tXV57XHRvcH1jPVhbKFhee1x0b3B9WCleLV1ee1x0b3B9WF57XHRvcH1hIFxcCgkJJj1YKFhee1x0b3B9WCleLVhee1x0b3B9YT1YKFhee1x0b3B9WCleLWMKXGVuZHthbGlnbip9"></span></p>
+<p><span class="math display">\[\begin{align*}
+[c^{\top}(X^{\top}X)^-X^{\top}]^{\top}&amp;=X[(X^{\top}X)^-]^{\top}c=X[(X^{\top}X)^-]^{\top}X^{\top}a \\
+&amp;=X(X^{\top}X)^-X^{\top}a=X(X^{\top}X)^-c
+\end{align*}\]</span></p>
+<p>于是： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1Zhcn0oYV57XHRvcH1ZKS1cb3BlcmF0b3JuYW1le1Zhcn0oY157XHRvcH1caGF0e1xiZXRhfSk9XHNpZ21hXjJ8fGEtWChYXntcdG9wfVgpXi1jfHxeMlxnZXFzbGFudDAKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\operatorname{Var}(a^{\top}Y)-\operatorname{Var}(c^{\top}\hat{\beta})=\sigma^2||a-X(X^{\top}X)^-c||^2\geqslant0
+\end{equation*}\]</span></p>
+<p>所以<span class="math inline">\(\operatorname{Var}(a^{\top}Y)=\operatorname{Var}(c^{\top}\hat{\beta})\)</span>当且仅当<span class="math inline">\(a=X(X^{\top}X)^-c\)</span>，由<a href="#theo-LSELinearModel-635d45cc" class="textbook-cross-reference" data-reference-key="theo:LSELinearModel" data-reference-kind="ref+label" data-reference-title="定理 14.1">定理 14.1</a>可知<span class="math inline">\(a=X(X^{\top}X)^-c\Leftrightarrow a^{\top}=c^{\top}(X^{\top}X)^-X^{\top}\Leftrightarrow a^{\top}y=c^{\top}(X^{\top}X)^-X^{\top}y=c^{\top}\hat{\beta}\)</span>。</p>
 <p>(7)由(2)可知<span class="math inline">\(\varphi\)</span>是可估的。</p>
-<p>由(4)可得<span class="math inline">\(c_i^{\top}\hat{\beta}\)</span>是<span class="math inline">\(c_i^{\top}\beta\)</span>的无偏估计，所以： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0V9KFxoYXR7XHZhcnBoaX0pPVxvcGVyYXRvcm5hbWV7RX1cbGVmdChcc3VtX3tpPTF9XntrfVxhbHBoYV9pY19pXntcdG9wfVxoYXR7XGJldGF9XHJpZ2h0KT1cc3VtX3tpPTF9XntrfVxhbHBoYV9pXG9wZXJhdG9ybmFtZXtFfShjX2lee1x0b3B9XGhhdHtcYmV0YX0pPVxzdW1fe2k9MX1ee2t9XGFscGhhX2ljX2lee1x0b3B9XGJldGE9XHZhcnBoaQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p>由(4)可得<span class="math inline">\(c_i^{\top}\hat{\beta}\)</span>是<span class="math inline">\(c_i^{\top}\beta\)</span>的无偏估计，根据<a href="../chapters/probability-measure.html#prop-MeasurableIntegral-c2153bd8" class="textbook-cross-reference" data-reference-key="prop:MeasurableIntegral" data-reference-kind="ref+label" data-reference-title="性质 5.4.3" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 5.4.3(6)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0V9KFxoYXR7XHZhcnBoaX0pPVxvcGVyYXRvcm5hbWV7RX1cbGVmdChcc3VtX3tpPTF9XntrfVxhbHBoYV9pY19pXntcdG9wfVxoYXR7XGJldGF9XHJpZ2h0KT1cc3VtX3tpPTF9XntrfVxhbHBoYV9pXG9wZXJhdG9ybmFtZXtFfShjX2lee1x0b3B9XGhhdHtcYmV0YX0pPVxzdW1fe2k9MX1ee2t9XGFscGhhX2ljX2lee1x0b3B9XGJldGE9XHZhcnBoaQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}(\hat{\varphi})=\operatorname{E}\left(\sum_{i=1}^{k}\alpha_ic_i^{\top}\hat{\beta}\right)=\sum_{i=1}^{k}\alpha_i\operatorname{E}(c_i^{\top}\hat{\beta})=\sum_{i=1}^{k}\alpha_ic_i^{\top}\beta=\varphi
 \end{equation*}\]</span></p>
 <p>即<span class="math inline">\(\hat{\varphi}\)</span>是一个无偏估计。</p>
-<p>令<span class="math inline">\(c=\sum\limits_{i=1}^{k}\alpha_ic_i\)</span>，则<span class="math inline">\(\varphi=c^{\top}\beta\)</span>。设<span class="math inline">\(\gamma^{\top}y\)</span>是<span class="math inline">\(\varphi\)</span>的一个无偏估计，于是由(6)可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1Zhcn0oXGdhbW1hXntcdG9wfXkpLVxvcGVyYXRvcm5hbWV7VmFyfShjXntcdG9wfVxoYXR7XGJldGF9KT1cc2lnbWFeMnx8XGdhbW1hLVgoWF57XHRvcH1YKV4tY3x8XjIKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p>令<span class="math inline">\(c=\sum\limits_{i=1}^{k}\alpha_ic_i\)</span>，则<span class="math inline">\(\varphi=c^{\top}\beta\)</span>。设<span class="math inline">\(\gamma^{\top}Y\)</span>是<span class="math inline">\(\varphi\)</span>的一个无偏估计，于是由(6)可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1Zhcn0oXGdhbW1hXntcdG9wfVkpLVxvcGVyYXRvcm5hbWV7VmFyfShjXntcdG9wfVxoYXR7XGJldGF9KT1cc2lnbWFeMnx8XGdhbW1hLVgoWF57XHRvcH1YKV4tY3x8XjIKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
-\operatorname{Var}(\gamma^{\top}y)-\operatorname{Var}(c^{\top}\hat{\beta})=\sigma^2||\gamma-X(X^{\top}X)^-c||^2
+\operatorname{Var}(\gamma^{\top}Y)-\operatorname{Var}(c^{\top}\hat{\beta})=\sigma^2||\gamma-X(X^{\top}X)^-c||^2
 \end{equation*}\]</span></p>
 <p>上式等于<span class="math inline">\(0\Leftrightarrow \gamma^{\top}y=c^{\top}\hat{\beta}=\hat{\varphi}\)</span>，即<span class="math inline">\(\hat{\varphi}\)</span>是唯一的BLUE。&nbsp;◻</p>
 </div>
-<div id="definition-14-4" class="definition theorem-block env-definition">
-<p><strong>Definition 14.4</strong>. 对于<a href="#model-LinearModel-3218843c" class="textbook-cross-reference" data-reference-key="model:LinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.1">定义 14.1</a>，若<span class="math inline">\(c^{\top}\beta\)</span>是可估函数，称<span class="math inline">\(c^{\top}\hat{\beta}\)</span>为<span class="math inline">\(c^{\top}\beta\)</span>的LSE，其中<span class="math inline">\(\hat{\beta}\)</span>为正则方程的解。</p>
+<div id="definition-14-5" class="definition theorem-block env-definition">
+<p><strong>Definition 14.5</strong>. 对于<a href="#model-LinearModel-3218843c" class="textbook-cross-reference" data-reference-key="model:LinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.1">定义 14.1</a>，若<span class="math inline">\(c^{\top}\beta\)</span>是可估函数，称<span class="math inline">\(c^{\top}\hat{\beta}\)</span>为<span class="math inline">\(c^{\top}\beta\)</span>的LSE，其中<span class="math inline">\(\hat{\beta}\)</span>为<span class="math inline">\(\beta\)</span>的最小二乘估计。</p>
 </div>
 </section>
 <section id="id--4b3a9d44" class="level4">
 <h4 class="anchored" data-anchor-id="id--4b3a9d44"><span class="header-section-number">14.1.1.2</span> 残差</h4>
-<div id="definition-14-5" class="definition theorem-block env-definition">
-<p><strong>Definition 14.5</strong>. 记<span class="math inline">\(\hat{y}=X\hat{\beta}\)</span>，称<span class="math inline">\(\hat{e}=y-\hat{y}\)</span>为<a href="../chapters/glossary-r.html#term-ResidualVector" class="term" title="residual vector">残差向量<span class="term-english">（residual vector）</span></a>，称<span class="math inline">\(\hat{e}^{\top}\hat{e}\)</span>为<a href="../chapters/glossary-s.html#term-SSE" class="term" title="sum of squared residuals, SSE">残差平方和<span class="term-english">（sum of squared residuals, SSE）</span></a>，记为<span class="math inline">\(\operatorname{SSE}\)</span>。</p>
+<div id="definition-14-6" class="definition theorem-block env-definition">
+<p><strong>Definition 14.6</strong>. 对于<a href="#model-LinearModel-3218843c" class="textbook-cross-reference" data-reference-key="model:LinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.1">定义 14.1</a>，记<span class="math inline">\(\hat{y}=X\hat{\beta}\)</span>，其中<span class="math inline">\(\hat{\beta}\)</span>是<span class="math inline">\(\beta\)</span>的最小二乘估计。称<span class="math inline">\(\hat{e}=Y-\hat{y}\)</span>为<a href="../chapters/glossary-r.html#term-ResidualVector" class="term" title="residual vector">残差向量<span class="term-english">（residual vector）</span></a>，称<span class="math inline">\(\hat{e}^{\top}\hat{e}\)</span>为<a href="../chapters/glossary-s.html#term-SSE" class="term" title="sum of squared residuals, SSE">残差平方和<span class="term-english">（sum of squared residuals, SSE）</span></a>。</p>
 </div>
 <div id="prop-ehat-d0724140" class="property theorem-block env-property">
-<p><strong>Property 14.1.2</strong>. 对于<a href="#model-LinearModel-3218843c" class="textbook-cross-reference" data-reference-key="model:LinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.1">定义 14.1</a>，<span class="math inline">\(\hat{\beta}\)</span>为正则方程的解，则残差向量<span class="math inline">\(\hat{e}\)</span>满足：</p>
+<p><strong>Property 14.1.2</strong>. 对于<a href="#model-LinearModel-3218843c" class="textbook-cross-reference" data-reference-key="model:LinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.1">定义 14.1</a>，<span class="math inline">\(\hat{\beta}\)</span>为<span class="math inline">\(\beta\)</span>的最小二乘估计，则残差向量<span class="math inline">\(\hat{e}\)</span>满足：</p>
 <ol type="1">
 <li><p><span class="math inline">\(\operatorname{E}(\hat{e})=0,\;\operatorname{Cov}(\hat{e})=\sigma^2(I_n-P_X)\)</span>；</p></li>
 <li><p><span class="math inline">\(\operatorname{SSE}=y^{\top}(I_n-P_X)y\)</span>；</p></li>
@@ -1004,8 +1084,8 @@ c^{\top}\hat{\beta}=\alpha^{\top}X(X^{\top}X)^-X^{\top}y
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
-<div id="definition-14-6" class="definition theorem-block env-definition">
-<p><strong>Definition 14.6</strong>. 称<span class="math inline">\(\hat{\sigma}^2\)</span>为<span class="math inline">\(\sigma^2\)</span>的LSE。</p>
+<div id="definition-14-7" class="definition theorem-block env-definition">
+<p><strong>Definition 14.7</strong>. 称<span class="math inline">\(\hat{\sigma}^2\)</span>为<span class="math inline">\(\sigma^2\)</span>的LSE。</p>
 </div>
 </section>
 </section>
@@ -1191,8 +1271,8 @@ A\hat{\beta}_A=\mathbf{0}
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
-<div id="definition-14-7" class="definition theorem-block env-definition">
-<p><strong>Definition 14.7</strong>. 称<span class="math inline">\(\hat{\beta}^{\top}X^{\top}y=y^{\top}P_Xy\)</span>为<a href="../chapters/glossary-r.html#term-RSS" class="term" title="regression sum of suqares, RSS">回归平方和<span class="term-english">（regression sum of suqares, RSS）</span></a>，记为<span class="math inline">\(\operatorname{RSS}(\beta)\)</span>。称<span class="math inline">\(\hat{\beta}_A^{\top}X^{\top}y\)</span>为约束条件<span class="math inline">\(A\beta=\mathbf{0}\)</span>下的回归平方和，记为<span class="math inline">\(\operatorname{RSS}_A(\beta)\)</span>。称<span class="math inline">\(y^{\top}y\)</span>为总平方和，记作<span class="math inline">\(\operatorname{RSS}_{\text{总}}\)</span>。称<span class="math inline">\(\sqrt{\dfrac{\operatorname{RSS}(\beta)}{\operatorname{RSS}_{\text{总}}}}\)</span>为<span class="math inline">\(y\)</span>与<span class="math inline">\(X_1, X_2, \dots, X_{p}\)</span>之间的复相关系数，记作<span class="math inline">\(\operatorname{R}\)</span>。</p>
+<div id="definition-14-8" class="definition theorem-block env-definition">
+<p><strong>Definition 14.8</strong>. 称<span class="math inline">\(\hat{\beta}^{\top}X^{\top}y=y^{\top}P_Xy\)</span>为<a href="../chapters/glossary-r.html#term-RSS" class="term" title="regression sum of suqares, RSS">回归平方和<span class="term-english">（regression sum of suqares, RSS）</span></a>，记为<span class="math inline">\(\operatorname{RSS}(\beta)\)</span>。称<span class="math inline">\(\hat{\beta}_A^{\top}X^{\top}y\)</span>为约束条件<span class="math inline">\(A\beta=\mathbf{0}\)</span>下的回归平方和，记为<span class="math inline">\(\operatorname{RSS}_A(\beta)\)</span>。称<span class="math inline">\(y^{\top}y\)</span>为总平方和，记作<span class="math inline">\(\operatorname{RSS}_{\text{总}}\)</span>。称<span class="math inline">\(\sqrt{\dfrac{\operatorname{RSS}(\beta)}{\operatorname{RSS}_{\text{总}}}}\)</span>为<span class="math inline">\(y\)</span>与<span class="math inline">\(X_1, X_2, \dots, X_{p}\)</span>之间的复相关系数，记作<span class="math inline">\(\operatorname{R}\)</span>。</p>
 </div>
 <div id="prop-RSS-RSSbeta-SSE-338504c3" class="property theorem-block env-property">
 <p><strong>Property 14.1.3</strong>. <span class="math inline">\(\operatorname{RSS}_{\text{总}}=\operatorname{RSS}(\beta)+\operatorname{SSE}\)</span>。</p>
@@ -1200,8 +1280,8 @@ A\hat{\beta}_A=\mathbf{0}
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>由<a href="#prop-ehat-d0724140" class="textbook-cross-reference" data-reference-key="prop:ehat" data-reference-kind="ref+label" data-reference-title="性质 14.1.2" data-reference-items="2" data-reference-hint="请查看第 2 项">性质 14.1.2(2)</a>可得<span class="math inline">\(\operatorname{RSS}(\beta)+\operatorname{SSE}=y^{\top}P_Xy+y^{\top}(I_n-P_X)y=y^{\top}y=\operatorname{RSS}_{\text{总}}\)</span>。&nbsp;◻</p>
 </div>
-<div id="note-14-2" class="note theorem-block env-note">
-<p><strong>note 14.2</strong>. 回归平方和表示了数据平方和<span class="math inline">\(y^{\top}y\)</span>中能够由因变量<span class="math inline">\(y\)</span>与自变量<span class="math inline">\(X_1, X_2, \dots, X_{p}\)</span>的线性关系解释的部分，因为它是<span class="math inline">\(y\)</span>在<span class="math inline">\(&lt;X_1, X_2, \dots, X_{p}&gt;\)</span>上投影长度的平方。由此可以看出<span class="math inline">\(\operatorname{R}^2\leqslant1\)</span>。我们用<span class="math inline">\(\operatorname{R}^2\)</span>来度量<span class="math inline">\(X_1, X_2, \dots, X_{p}\)</span>对<span class="math inline">\(y\)</span>线性拟合程度的好坏，越接近<span class="math inline">\(1\)</span>越好。</p>
+<div id="note-14-3" class="note theorem-block env-note">
+<p><strong>note 14.3</strong>. 回归平方和表示了数据平方和<span class="math inline">\(y^{\top}y\)</span>中能够由因变量<span class="math inline">\(y\)</span>与自变量<span class="math inline">\(X_1, X_2, \dots, X_{p}\)</span>的线性关系解释的部分，因为它是<span class="math inline">\(y\)</span>在<span class="math inline">\(&lt;X_1, X_2, \dots, X_{p}&gt;\)</span>上投影长度的平方。由此可以看出<span class="math inline">\(\operatorname{R}^2\leqslant1\)</span>。我们用<span class="math inline">\(\operatorname{R}^2\)</span>来度量<span class="math inline">\(X_1, X_2, \dots, X_{p}\)</span>对<span class="math inline">\(y\)</span>线性拟合程度的好坏，越接近<span class="math inline">\(1\)</span>越好。</p>
 </div>
 </section>
 <section id="def-LinearModelForcast-6fdaf60a" class="level3">
@@ -1252,8 +1332,8 @@ V &amp; I_m
 \end{pmatrix}
 \end{equation*}\]</span></p>
 </div>
-<div id="definition-14-8" class="definition theorem-block env-definition">
-<p><strong>Definition 14.8</strong>. 记<span class="math inline">\(\hat{y}=Cy\)</span>是<span class="math inline">\(y\)</span>的一个线性无偏估计，称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1BNU0V9KFxoYXR7eX0pPVxvcGVyYXRvcm5hbWV7RX1bKFxoYXR7eX0teSlee1x0b3B9QShcaGF0e3l9LXkpXQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<div id="definition-14-9" class="definition theorem-block env-definition">
+<p><strong>Definition 14.9</strong>. 记<span class="math inline">\(\hat{y}=Cy\)</span>是<span class="math inline">\(y\)</span>的一个线性无偏估计，称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1BNU0V9KFxoYXR7eX0pPVxvcGVyYXRvcm5hbWV7RX1bKFxoYXR7eX0teSlee1x0b3B9QShcaGF0e3l9LXkpXQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{PMSE}(\hat{y})=\operatorname{E}[(\hat{y}-y)^{\top}A(\hat{y}-y)]
 \end{equation*}\]</span></p>
@@ -1332,7 +1412,7 @@ C&amp;=V+A^{-1}A(X_0-VX)(X^{\top}X)^-X^{\top}=V+(X_0-VX)(X^{\top}X)^-X^{\top} \\
 <section id="id-1-33f4ed05" class="level3">
 <h3 class="anchored" data-anchor-id="id-1-33f4ed05"><span class="header-section-number">14.2.1</span> 参数估计</h3>
 <div id="model-NormalLinearModel-a2ec5d16" class="definition theorem-block env-definition">
-<p><strong>Definition 14.9</strong>. 称以下模型为<a href="../chapters/glossary-n.html#term-NormalLinearModel" class="term" title="normal linear model">正态线性模型<span class="term-english">（normal linear model）</span></a>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYmVnaW57Y2FzZXN9CgkJCXk9WFxiZXRhK1x2YXJlcHNpbG9uIFxcCgkJCVx2YXJlcHNpbG9uXHNpbVxvcGVyYXRvcm5hbWV7Tn1fbihcbWF0aGJmezB9LFxzaWdtYV4ySV9uKQoJCVxlbmR7Y2FzZXN9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><strong>Definition 14.10</strong>. 称以下模型为<a href="../chapters/glossary-n.html#term-NormalLinearModel" class="term" title="normal linear model">正态线性模型<span class="term-english">（normal linear model）</span></a>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYmVnaW57Y2FzZXN9CgkJCXk9WFxiZXRhK1x2YXJlcHNpbG9uIFxcCgkJCVx2YXJlcHNpbG9uXHNpbVxvcGVyYXRvcm5hbWV7Tn1fbihcbWF0aGJmezB9LFxzaWdtYV4ySV9uKQoJCVxlbmR7Y2FzZXN9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \begin{cases}
 y=X\beta+\varepsilon \\
@@ -1342,7 +1422,7 @@ y=X\beta+\varepsilon \\
 <p>其中<span class="math inline">\(y\)</span>为<span class="math inline">\(n\times 1\)</span>观测向量，<span class="math inline">\(X\)</span>为<span class="math inline">\(n\times p\)</span>设计矩阵，<span class="math inline">\(\beta\)</span>为<span class="math inline">\(p\times 1\)</span>未知参数向量，<span class="math inline">\(\varepsilon\)</span>为随机误差，<span class="math inline">\(\sigma^2\)</span>为误差方差。</p>
 </div>
 <div id="prop-NormalLinearModel-6e0f5257" class="property theorem-block env-property">
-<p><strong>Property 14.2.1</strong>. 对于<a href="#model-NormalLinearModel-a2ec5d16" class="textbook-cross-reference" data-reference-key="model:NormalLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.9">定义 14.9</a>，设<span class="math inline">\(c^{\top}\beta\)</span>为可估函数，则：</p>
+<p><strong>Property 14.2.1</strong>. 对于<a href="#model-NormalLinearModel-a2ec5d16" class="textbook-cross-reference" data-reference-key="model:NormalLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.10">定义 14.10</a>，设<span class="math inline">\(c^{\top}\beta\)</span>为可估函数，则：</p>
 <ol type="1">
 <li><p>LS估计<span class="math inline">\(c^{\top}\hat{\beta}\)</span>是<span class="math inline">\(c^{\top}\beta\)</span>的MLE，<span class="math inline">\(\tilde{\sigma}^2=\dfrac{n-r}{n}\hat{\sigma}^2\)</span>是<span class="math inline">\(\sigma^2\)</span>的MLE。若模型在<a href="#theo-ConstraintLinearModel-ec6990c4" class="textbook-cross-reference" data-reference-key="theo:ConstraintLinearModel" data-reference-kind="ref+label" data-reference-title="定理 14.3">定理 14.3</a>的约束下，则LS估计<span class="math inline">\(c^{\top}\hat{\beta}_A\)</span>是<span class="math inline">\(c^{\top}\beta\)</span>的MLE，<span class="math inline">\(\tilde{\sigma}_A^2=\dfrac{n-r+k}{n}\hat{\sigma}_A^2\)</span>是<span class="math inline">\(\sigma^2\)</span>的MLE；</p></li>
 <li><p><span class="math inline">\(c^{\top}\hat{\beta}\sim N[c^{\top}\beta,\sigma^2c^{\top}(X^{\top}X)^-c]\)</span>，<span class="math inline">\(\dfrac{(n-r)\hat{\sigma}^2}{\sigma^2}=\dfrac{\operatorname{SSE}}{\sigma^2}\sim\chi_{n-r}^2\)</span>；</p></li>
@@ -1353,7 +1433,7 @@ y=X\beta+\varepsilon \\
 </ol>
 </div>
 <div class="proof-block proof">
-<p><span class="proof-title"><em>证明</em>. </span>(1)对于<a href="#model-NormalLinearModel-a2ec5d16" class="textbook-cross-reference" data-reference-key="model:NormalLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.9">定义 14.9</a>，其似然函数为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlMKFxiZXRhLFxzaWdtYV4yKT1cZnJhY3sxfXsoMlxwaSlee1xmcmFje259ezJ9fShcc2lnbWFeMileXGZyYWN7bn17Mn19XGV4cFxsZWZ0KC1cZnJhY3sxfXsyXHNpZ21hXjJ9fHx5LVhcYmV0YXx8XjJccmlnaHQpClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="proof-title"><em>证明</em>. </span>(1)对于<a href="#model-NormalLinearModel-a2ec5d16" class="textbook-cross-reference" data-reference-key="model:NormalLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.10">定义 14.10</a>，其似然函数为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlMKFxiZXRhLFxzaWdtYV4yKT1cZnJhY3sxfXsoMlxwaSlee1xmcmFje259ezJ9fShcc2lnbWFeMileXGZyYWN7bn17Mn19XGV4cFxsZWZ0KC1cZnJhY3sxfXsyXHNpZ21hXjJ9fHx5LVhcYmV0YXx8XjJccmlnaHQpClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 L(\beta,\sigma^2)=\frac{1}{(2\pi)^{\frac{n}{2}}(\sigma^2)^\frac{n}{2}}\exp\left(-\frac{1}{2\sigma^2}||y-X\beta||^2\right)
 \end{equation*}\]</span></p>
@@ -1436,7 +1516,7 @@ c^{\top}(X^{\top}X)^-X^{\top}\operatorname{Cov}(y)\frac{I_n-P_X}{n-r}&amp;=\frac
 <section id="id--d13c825d" class="level3">
 <h3 class="anchored" data-anchor-id="id--d13c825d"><span class="header-section-number">14.2.2</span> 假设检验</h3>
 <div id="theo-NormalLinearModelHypothesisTesting-645780c8" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 14.7</strong>. 对于<a href="#model-NormalLinearModel-a2ec5d16" class="textbook-cross-reference" data-reference-key="model:NormalLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.9">定义 14.9</a>，假设： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlBXGJldGE9YixccXVhZCBBXGluIE1fe2tcdGltZXMgcH0oSyksXHF1YWRcb3BlcmF0b3JuYW1le3Jhbmt9KEEpPWssXHF1YWRcbWF0aGNhbHtNfShBXntcdG9wfSlcc3Vic2V0ZXFcbWF0aGNhbHtNfShYXntcdG9wfSkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><strong>Theorem 14.7</strong>. 对于<a href="#model-NormalLinearModel-a2ec5d16" class="textbook-cross-reference" data-reference-key="model:NormalLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.10">定义 14.10</a>，假设： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlBXGJldGE9YixccXVhZCBBXGluIE1fe2tcdGltZXMgcH0oSyksXHF1YWRcb3BlcmF0b3JuYW1le3Jhbmt9KEEpPWssXHF1YWRcbWF0aGNhbHtNfShBXntcdG9wfSlcc3Vic2V0ZXFcbWF0aGNhbHtNfShYXntcdG9wfSkKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 A\beta=b,\quad A\in M_{k\times p}(K),\quad\operatorname{rank}(A)=k,\quad\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top})
 \end{equation*}\]</span></p>
@@ -1544,7 +1624,7 @@ A\hat{\beta}-b\sim\operatorname{N}_k[A\beta-b,\sigma^2A(X^{\top}X)^-A^{\top}]
 <section id="id--b89f6754" class="level4">
 <h4 class="anchored" data-anchor-id="id--b89f6754"><span class="header-section-number">14.2.3.1</span> 置信椭球</h4>
 <div id="theo-NormalLinearModelConfidenceEllipsoid-93704881" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 14.8</strong>. 对于<a href="#model-NormalLinearModel-a2ec5d16" class="textbook-cross-reference" data-reference-key="model:NormalLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.9">定义 14.9</a>，若不能接受假设<span class="math inline">\(A\beta=\mathbf{0}\)</span>，则<span class="math inline">\(A\beta\)</span>置信水平为<span class="math inline">\(1-\alpha\)</span>的置信椭球为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlce0FcYmV0YTooQVxiZXRhLUFcaGF0e1xiZXRhfSlee1x0b3B9W0EoWF57XHRvcH1YKV4tQV57XHRvcH1dXnstMX0oQVxiZXRhLUFcaGF0e1xiZXRhfSlcbGVxc2xhbnQga1xoYXR7XHNpZ21hfV4yRl97ayxuLXJ9KDEtXGFscGhhKVx9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><strong>Theorem 14.8</strong>. 对于<a href="#model-NormalLinearModel-a2ec5d16" class="textbook-cross-reference" data-reference-key="model:NormalLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.10">定义 14.10</a>，若不能接受假设<span class="math inline">\(A\beta=\mathbf{0}\)</span>，则<span class="math inline">\(A\beta\)</span>置信水平为<span class="math inline">\(1-\alpha\)</span>的置信椭球为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlce0FcYmV0YTooQVxiZXRhLUFcaGF0e1xiZXRhfSlee1x0b3B9W0EoWF57XHRvcH1YKV4tQV57XHRvcH1dXnstMX0oQVxiZXRhLUFcaGF0e1xiZXRhfSlcbGVxc2xhbnQga1xoYXR7XHNpZ21hfV4yRl97ayxuLXJ9KDEtXGFscGhhKVx9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \{A\beta:(A\beta-A\hat{\beta})^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\beta-A\hat{\beta})\leqslant k\hat{\sigma}^2F_{k,n-r}(1-\alpha)\}
 \end{equation*}\]</span></p>
@@ -1581,14 +1661,14 @@ P\left[\frac{(A\hat{\beta}-A\beta)^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\be
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
-<div id="note-14-3" class="note theorem-block env-note">
-<p><strong>note 14.3</strong>. 这里其实是一个未知方差构造<span class="math inline">\(F\)</span>分布的思想。</p>
+<div id="note-14-4" class="note theorem-block env-note">
+<p><strong>note 14.4</strong>. 这里其实是一个未知方差构造<span class="math inline">\(F\)</span>分布的思想。</p>
 </div>
 </section>
 <section id="scheffe-9e1fd27c" class="level4">
 <h4 class="anchored" data-anchor-id="scheffe-9e1fd27c"><span class="header-section-number">14.2.3.2</span> Scheffe置信区间</h4>
 <div id="theo-ScheffeCI-f1e1b61e" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 14.9</strong>. 对于<a href="#model-NormalLinearModel-a2ec5d16" class="textbook-cross-reference" data-reference-key="model:NormalLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.9">定义 14.9</a>，对任何可估函数<span class="math inline">\(l^{\top}\beta\)</span>，其中<span class="math inline">\(l\in\mathcal{M}(A^{\top})\)</span>且<span class="math inline">\(l\ne\mathbf{0}\)</span>，其置信水平为<span class="math inline">\(1-\alpha\)</span>的同时置信区间为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlsXntcdG9wfVxoYXR7XGJldGF9XHBtW2tcaGF0e1xzaWdtYX1eMkZfe2ssbi1yfSgxLVxhbHBoYSlsXntcdG9wfShYXntcdG9wfVgpXi1sXV57XGZyYWN7MX17Mn19ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><strong>Theorem 14.9</strong>. 对于<a href="#model-NormalLinearModel-a2ec5d16" class="textbook-cross-reference" data-reference-key="model:NormalLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.10">定义 14.10</a>，对任何可估函数<span class="math inline">\(l^{\top}\beta\)</span>，其中<span class="math inline">\(l\in\mathcal{M}(A^{\top})\)</span>且<span class="math inline">\(l\ne\mathbf{0}\)</span>，其置信水平为<span class="math inline">\(1-\alpha\)</span>的同时置信区间为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlsXntcdG9wfVxoYXR7XGJldGF9XHBtW2tcaGF0e1xzaWdtYX1eMkZfe2ssbi1yfSgxLVxhbHBoYSlsXntcdG9wfShYXntcdG9wfVgpXi1sXV57XGZyYWN7MX17Mn19ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 l^{\top}\hat{\beta}\pm[k\hat{\sigma}^2F_{k,n-r}(1-\alpha)l^{\top}(X^{\top}X)^-l]^{\frac{1}{2}}
 \end{equation*}\]</span></p>
@@ -1612,7 +1692,7 @@ l^{\top}\hat{\beta}\pm[k\hat{\sigma}^2F_{k,n-r}(1-\alpha)l^{\top}(X^{\top}X)^-l]
 <section id="bonferroni-cf8143ce" class="level4">
 <h4 class="anchored" data-anchor-id="bonferroni-cf8143ce"><span class="header-section-number">14.2.3.3</span> Bonferroni置信区间</h4>
 <div id="theo-BonferroniCI-ba8db453" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 14.10</strong>. 对于<a href="#model-NormalLinearModel-a2ec5d16" class="textbook-cross-reference" data-reference-key="model:NormalLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.9">定义 14.9</a>，记<span class="math inline">\(A\)</span>的行分别为<span class="math inline">\(a^{\top}_1, a^{\top}_2, \dots, a^{\top}_{k}\)</span>，则<span class="math inline">\(a_
+<p><strong>Theorem 14.10</strong>. 对于<a href="#model-NormalLinearModel-a2ec5d16" class="textbook-cross-reference" data-reference-key="model:NormalLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.10">定义 14.10</a>，记<span class="math inline">\(A\)</span>的行分别为<span class="math inline">\(a^{\top}_1, a^{\top}_2, \dots, a^{\top}_{k}\)</span>，则<span class="math inline">\(a_
 i^{\top}\beta\)</span>置信水平为<span class="math inline">\(1-\alpha\)</span>的Bonferroni置信区间为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlhX2lee1x0b3B9XGhhdHtcYmV0YX1ccG0gdF97bi1yfVxsZWZ0KDEtXGZyYWN7XGFscGhhfXsya31ccmlnaHQpW1xoYXR7XHNpZ21hfV4yYV9pXntcdG9wfShYXntcdG9wfVgpXi1hX2ldXntcZnJhY3sxfXsyfX0KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 a_i^{\top}\hat{\beta}\pm t_{n-r}\left(1-\frac{\alpha}{2k}\right)[\hat{\sigma}^2a_i^{\top}(X^{\top}X)^-a_i]^{\frac{1}{2}}
@@ -1738,7 +1818,7 @@ y_0
 <section id="id--dafd83f3" class="level3">
 <h3 class="anchored" data-anchor-id="id--dafd83f3"><span class="header-section-number">14.3.1</span> 广义最小二乘估计</h3>
 <div id="model-GeneralizedLinearModel-fa9659a4" class="definition theorem-block env-definition">
-<p><strong>Definition 14.10</strong>. 称以下模型为<a href="../chapters/glossary-g.html#term-GeneralizedLinearModel" class="term" title="generalized linear model">广义线性模型<span class="term-english">（generalized linear model）</span></a>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYmVnaW57Y2FzZXN9CgkJCXk9WFxiZXRhK1x2YXJlcHNpbG9uIFxcCgkJCVxvcGVyYXRvcm5hbWV7RX0oXHZhcmVwc2lsb24pPVxtYXRoYmZ7MH0gXFwKCQkJXG9wZXJhdG9ybmFtZXtDb3Z9KFx2YXJlcHNpbG9uKT1cc2lnbWFeMlxTaWdtYQoJCVxlbmR7Y2FzZXN9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><strong>Definition 14.11</strong>. 称以下模型为<a href="../chapters/glossary-g.html#term-GeneralizedLinearModel" class="term" title="generalized linear model">广义线性模型<span class="term-english">（generalized linear model）</span></a>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYmVnaW57Y2FzZXN9CgkJCXk9WFxiZXRhK1x2YXJlcHNpbG9uIFxcCgkJCVxvcGVyYXRvcm5hbWV7RX0oXHZhcmVwc2lsb24pPVxtYXRoYmZ7MH0gXFwKCQkJXG9wZXJhdG9ybmFtZXtDb3Z9KFx2YXJlcHNpbG9uKT1cc2lnbWFeMlxTaWdtYQoJCVxlbmR7Y2FzZXN9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \begin{cases}
 y=X\beta+\varepsilon \\
@@ -1753,7 +1833,7 @@ y=X\beta+\varepsilon \\
 <p><span class="math display">\[\begin{equation*}
 y^{\star}=\Sigma^{-\frac{1}{2}}y,\quad X^{\star}=\Sigma^{-\frac{1}{2}}X,\quad\varepsilon^{\star}=\Sigma^{-\frac{1}{2}}\varepsilon
 \end{equation*}\]</span></p>
-<p>由<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.4" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 6.3.4(3)</a>可知<a href="#model-GeneralizedLinearModel-fa9659a4" class="textbook-cross-reference" data-reference-key="model:GeneralizedLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.10">定义 14.10</a>可化作： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYmVnaW57Y2FzZXN9CgkJCXlee1xzdGFyfT1YXntcc3Rhcn1cYmV0YStcdmFyZXBzaWxvbl57XHN0YXJ9IFxcCgkJCVxvcGVyYXRvcm5hbWV7RX0oXHZhcmVwc2lsb25ee1xzdGFyfSk9XG1hdGhiZnswfSBcXAoJCQlcb3BlcmF0b3JuYW1le0Nvdn0oXHZhcmVwc2lsb25ee1xzdGFyfSk9XHNpZ21hXjJJX24KCQlcZW5ke2Nhc2VzfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p>由<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.4" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 6.3.4(3)</a>可知<a href="#model-GeneralizedLinearModel-fa9659a4" class="textbook-cross-reference" data-reference-key="model:GeneralizedLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.11">定义 14.11</a>可化作： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYmVnaW57Y2FzZXN9CgkJCXlee1xzdGFyfT1YXntcc3Rhcn1cYmV0YStcdmFyZXBzaWxvbl57XHN0YXJ9IFxcCgkJCVxvcGVyYXRvcm5hbWV7RX0oXHZhcmVwc2lsb25ee1xzdGFyfSk9XG1hdGhiZnswfSBcXAoJCQlcb3BlcmF0b3JuYW1le0Nvdn0oXHZhcmVwc2lsb25ee1xzdGFyfSk9XHNpZ21hXjJJX24KCQlcZW5ke2Nhc2VzfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \begin{cases}
 y^{\star}=X^{\star}\beta+\varepsilon^{\star} \\
@@ -1813,8 +1893,8 @@ R_1 &amp; R_2 \\
 \end{pmatrix}
 \end{equation*}\]</span></p>
 <p>这样的形式，其中<span class="math inline">\(R_1\in M_{n-\operatorname{rank}(X)}(\mathbb{R})\)</span>是上三角矩阵，只需对此时的<span class="math inline">\(Q\)</span>矩阵也进行分块就可以将问题转化为可逆时的情况。我们得想办法让<span class="math inline">\(R\)</span>矩阵呈现出上面的样子，由<a href="../chapters/matrix.html#theo-Householder-b97318f4" class="textbook-cross-reference" data-reference-key="theo:Householder" data-reference-kind="ref+label" data-reference-title="定理 2.20">定理 2.20</a>和<a href="../chapters/matrix.html#theo-QR-13c10f58" class="textbook-cross-reference" data-reference-key="theo:QR" data-reference-kind="ref+label" data-reference-title="定理 2.24">定理 2.24</a>中的内容，只需通过矩阵<span class="math inline">\(P\)</span>作变换<span class="math inline">\(XP\)</span>（<span class="math inline">\(P\)</span>调换<span class="math inline">\(X\)</span>中列向量之间的顺序）使得<span class="math inline">\(XP\)</span>的第一列为<span class="math inline">\(X\)</span>的列范数最大的列、<span class="math inline">\(XP\)</span>的第二列为<span class="math inline">\(X\)</span>去掉第一行后列范数最大的列……即可，这是由于我们选取的Householder变换让向量变为第一个元素为该向量的范数其它分量都为<span class="math inline">\(0\)</span>的列向量，且Householder变换不改变后面向量的长度，这样一来就可以使得<span class="math inline">\(XP\)</span>进行<span class="math inline">\(QR\)</span>分解后得到的<span class="math inline">\(R\)</span>的主对角元依次减小，主对角线为<span class="math inline">\(0\)</span>的列对应的参数也无需再进行估计。</p>
-<div id="note-14-4" class="note theorem-block env-note">
-<p><strong>note 14.4</strong>. 其实在实际情况中<span class="math inline">\(X\)</span>都是不可逆的，<span class="math inline">\(n\)</span>总是大于<span class="math inline">\(p\)</span>的。</p>
+<div id="note-14-5" class="note theorem-block env-note">
+<p><strong>note 14.5</strong>. 其实在实际情况中<span class="math inline">\(X\)</span>都是不可逆的，<span class="math inline">\(n\)</span>总是大于<span class="math inline">\(p\)</span>的。</p>
 </div>
 </section>
 <section id="svd--1-eebf7e34" class="level3">
@@ -1824,7 +1904,7 @@ R_1 &amp; R_2 \\
 <section id="id--cf215845" class="level2">
 <h2 class="anchored" data-anchor-id="id--cf215845"><span class="header-section-number">14.5</span> 线性回归模型</h2>
 <div id="model-LinearRegressionModel-8a993caf" class="definition theorem-block env-definition">
-<p><strong>Definition 14.11</strong>. 设因变量<span class="math inline">\(Y\)</span>和自变量<span class="math inline">\(X_1, X_2, \dots, X_{p-1}\)</span>满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlZPVxiZXRhXzArXGJldGFfMVhfMStcYmV0YV8yWF8yK1xjZG90cytcYmV0YV97cC0xfVhfe3AtMX0rZQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><strong>Definition 14.12</strong>. 设因变量<span class="math inline">\(Y\)</span>和自变量<span class="math inline">\(X_1, X_2, \dots, X_{p-1}\)</span>满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlZPVxiZXRhXzArXGJldGFfMVhfMStcYmV0YV8yWF8yK1xjZG90cytcYmV0YV97cC0xfVhfe3AtMX0rZQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 Y=\beta_0+\beta_1X_1+\beta_2X_2+\cdots+\beta_{p-1}X_{p-1}+e
 \end{equation*}\]</span></p>
@@ -1873,12 +1953,12 @@ y=\beta_0\mathbf{1}_n+\tilde{X}\beta_I+\varepsilon,\quad\operatorname{E}(\vareps
 \end{equation*}\]</span></p>
 </div>
 <div id="model-NormalLinearRegressionModel-8d51a88e" class="definition theorem-block env-definition">
-<p><strong>Definition 14.12</strong>. 对于<a href="#model-LinearRegressionModel-8a993caf" class="textbook-cross-reference" data-reference-key="model:LinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.11">定义 14.11</a>，若<span class="math inline">\(\varepsilon\sim\operatorname{N}_n(\mathbf{0},\sigma^2I_n)\)</span>，则称此时的线性回归模型为<a href="../chapters/glossary-n.html#term-NormalLinearRegressionModel" class="term" title="normal linear regression model">正态线性回归模型<span class="term-english">（normal linear regression model）</span></a>。</p>
+<p><strong>Definition 14.13</strong>. 对于<a href="#model-LinearRegressionModel-8a993caf" class="textbook-cross-reference" data-reference-key="model:LinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.12">定义 14.12</a>，若<span class="math inline">\(\varepsilon\sim\operatorname{N}_n(\mathbf{0},\sigma^2I_n)\)</span>，则称此时的线性回归模型为<a href="../chapters/glossary-n.html#term-NormalLinearRegressionModel" class="term" title="normal linear regression model">正态线性回归模型<span class="term-english">（normal linear regression model）</span></a>。</p>
 </div>
 <section id="id--0bc98e58" class="level4">
 <h4 class="anchored" data-anchor-id="id--0bc98e58"><span class="header-section-number">14.5.0.1</span> 中心化与标准化处理</h4>
 <div id="model-CentralizedStandardizedLinearModel-cec82ac6" class="definition theorem-block env-definition">
-<p><strong>Definition 14.13</strong>. 对于<a href="#model-LinearRegressionModel-8a993caf" class="textbook-cross-reference" data-reference-key="model:LinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.11">定义 14.11</a>，记： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3ZlcmxpbmV7eH1faj1cZnJhY3sxfXtufVxzdW1fe2k9MX1ee259eF97aWp9LFxxdWFkIHNfal4yPVxzdW1fe2k9MX1ee259KHhfe2lqfS1cb3ZlcmxpbmV7eH1faileMgpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><strong>Definition 14.14</strong>. 对于<a href="#model-LinearRegressionModel-8a993caf" class="textbook-cross-reference" data-reference-key="model:LinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.12">定义 14.12</a>，记： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3ZlcmxpbmV7eH1faj1cZnJhY3sxfXtufVxzdW1fe2k9MX1ee259eF97aWp9LFxxdWFkIHNfal4yPVxzdW1fe2k9MX1ee259KHhfe2lqfS1cb3ZlcmxpbmV7eH1faileMgpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \overline{x}_j=\frac{1}{n}\sum_{i=1}^{n}x_{ij},\quad s_j^2=\sum_{i=1}^{n}(x_{ij}-\overline{x}_j)^2
 \end{equation*}\]</span></p>
@@ -2060,16 +2140,16 @@ n &amp; \mathbf{1}_{n}^{\top}\tilde{X} \\
 \end{align*}\]</span></p>
 <p>(6)由<a href="#prop-EstimableFunction-31d7362e" class="textbook-cross-reference" data-reference-key="prop:EstimableFunction" data-reference-kind="ref+label" data-reference-title="性质 14.1.1" data-reference-items="5" data-reference-hint="请查看第 5 项">性质 14.1.1(5)</a>和<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.4" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 6.3.4(3)</a>可知<span class="math inline">\(I_p\operatorname{Cov}(\hat{\beta})I_p=\sigma^2(X^{\top}X)^{-1}\)</span>，即<span class="math inline">\(\operatorname{Cov}(\hat{\beta})=\sigma^2(X^{\top}X)^{-1}\)</span>。第二式由(3)第二式即可得到。后两式由对应的正则方程和<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.4" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 6.3.4(3)</a>即可得到。&nbsp;◻</p>
 </div>
-<div id="note-14-5" class="note theorem-block env-note">
-<p><strong>note 14.5</strong>. 由上述定理第三条又可以看出中心化和标准化能够使得常数项与回归系数的估计被分开，常数项的估计值直接就等于<span class="math inline">\(y\)</span>的均值，并且由上述定理第六条可知对于中心化或标准化模型，常数项与回归系数的估计是不相关的，于是在理论分析中我们可以只关注回归系数的估计。标准化模型的另一个优势是可以消除变量量纲的影响，使得回归系数的估计可直接反应各自变量对因变量预测的重要程度。</p>
+<div id="note-14-6" class="note theorem-block env-note">
+<p><strong>note 14.6</strong>. 由上述定理第三条又可以看出中心化和标准化能够使得常数项与回归系数的估计被分开，常数项的估计值直接就等于<span class="math inline">\(y\)</span>的均值，并且由上述定理第六条可知对于中心化或标准化模型，常数项与回归系数的估计是不相关的，于是在理论分析中我们可以只关注回归系数的估计。标准化模型的另一个优势是可以消除变量量纲的影响，使得回归系数的估计可直接反应各自变量对因变量预测的重要程度。</p>
 </div>
 </section>
 <section id="id--d5be7a5c" class="level3">
 <h3 class="anchored" data-anchor-id="id--d5be7a5c"><span class="header-section-number">14.5.1</span> 显著性检验与复相关系数</h3>
 <section id="id--82410e2a" class="level4">
 <h4 class="anchored" data-anchor-id="id--82410e2a"><span class="header-section-number">14.5.1.1</span> 显著性检验</h4>
-<div id="definition-14-14" class="definition theorem-block env-definition">
-<p><strong>Definition 14.14</strong>. 对于<a href="#model-NormalLinearRegressionModel-8d51a88e" class="textbook-cross-reference" data-reference-key="model:NormalLinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.12">定义 14.12</a>，称假设检验： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlIXzA6XGJldGFfMT1cYmV0YV8yPVxjZG90cz1cYmV0YV97cC0xfT0wLFxxdWFkIEhfMTpcdGV4dHvoh7PlsJHmnInkuIDkuKrlm57lvZLns7vmlbDkuI3kuLp9MApcZW5ke2VxdWF0aW9uKn0="></span></p>
+<div id="definition-14-15" class="definition theorem-block env-definition">
+<p><strong>Definition 14.15</strong>. 对于<a href="#model-NormalLinearRegressionModel-8d51a88e" class="textbook-cross-reference" data-reference-key="model:NormalLinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.13">定义 14.13</a>，称假设检验： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlIXzA6XGJldGFfMT1cYmV0YV8yPVxjZG90cz1cYmV0YV97cC0xfT0wLFxxdWFkIEhfMTpcdGV4dHvoh7PlsJHmnInkuIDkuKrlm57lvZLns7vmlbDkuI3kuLp9MApcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 H_0:\beta_1=\beta_2=\cdots=\beta_{p-1}=0,\quad H_1:\text{至少有一个回归系数不为}0
 \end{equation*}\]</span></p>
@@ -2080,7 +2160,7 @@ H_0:\beta_i=0,\quad H_1:\beta_i\ne0
 <p>为<strong>回归系数<span class="math inline">\(\beta_i\)</span>的显著性检验</strong>。</p>
 </div>
 <div id="theo-LinearRegressionModelTSH-a8048f5a" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 14.13</strong>. 对于<a href="#model-NormalLinearRegressionModel-8d51a88e" class="textbook-cross-reference" data-reference-key="model:NormalLinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.12">定义 14.12</a>，回归方程的显著性检验的统计量和拒绝域为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2dhdGhlcip9CgkJRj1cZnJhY3tcaGF0e1xiZXRhfV9JXntcdG9wfVx0aWxkZXtYfV57XHRvcH1cbGVmdChJX24tXGZyYWN7MX17bn1cbWF0aGJmezF9X25cbWF0aGJmezF9X25ee1x0b3B9XHJpZ2h0KXkvKHAtMSl9e1xvcGVyYXRvcm5hbWV7U1NFfS8obi1wKX0sXHF1YWQgXHtGOkY+XG9wZXJhdG9ybmFtZXtGfV97cC0xLG4tcH0oMS1cYWxwaGEpXH0gXFwKCQlGPVxmcmFje1xoYXR7XGFscGhhfV9JXntcdG9wfVx0aWxkZXtYfV9jXntcdG9wfXkvKHAtMSl9e1xvcGVyYXRvcm5hbWV7U1NFfV9jLyhuLXApfSxccXVhZCBce0Y6Rj5cb3BlcmF0b3JuYW1le0Z9X3twLTEsbi1wfSgxLVxhbHBoYSlcfSBcXAoJCUY9XGZyYWN7XGhhdHtcZ2FtbWF9X0lee1x0b3B9XHRpbGRle1h9X3Nee1x0b3B9eS8ocC0xKX17XG9wZXJhdG9ybmFtZXtTU0V9X3MvKG4tcCl9LFxxdWFkIFx7RjpGPlxvcGVyYXRvcm5hbWV7Rn1fe3AtMSxuLXB9KDEtXGFscGhhKVx9ClxlbmR7Z2F0aGVyKn0="></span></p>
+<p><strong>Theorem 14.13</strong>. 对于<a href="#model-NormalLinearRegressionModel-8d51a88e" class="textbook-cross-reference" data-reference-key="model:NormalLinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.13">定义 14.13</a>，回归方程的显著性检验的统计量和拒绝域为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2dhdGhlcip9CgkJRj1cZnJhY3tcaGF0e1xiZXRhfV9JXntcdG9wfVx0aWxkZXtYfV57XHRvcH1cbGVmdChJX24tXGZyYWN7MX17bn1cbWF0aGJmezF9X25cbWF0aGJmezF9X25ee1x0b3B9XHJpZ2h0KXkvKHAtMSl9e1xvcGVyYXRvcm5hbWV7U1NFfS8obi1wKX0sXHF1YWQgXHtGOkY+XG9wZXJhdG9ybmFtZXtGfV97cC0xLG4tcH0oMS1cYWxwaGEpXH0gXFwKCQlGPVxmcmFje1xoYXR7XGFscGhhfV9JXntcdG9wfVx0aWxkZXtYfV9jXntcdG9wfXkvKHAtMSl9e1xvcGVyYXRvcm5hbWV7U1NFfV9jLyhuLXApfSxccXVhZCBce0Y6Rj5cb3BlcmF0b3JuYW1le0Z9X3twLTEsbi1wfSgxLVxhbHBoYSlcfSBcXAoJCUY9XGZyYWN7XGhhdHtcZ2FtbWF9X0lee1x0b3B9XHRpbGRle1h9X3Nee1x0b3B9eS8ocC0xKX17XG9wZXJhdG9ybmFtZXtTU0V9X3MvKG4tcCl9LFxxdWFkIFx7RjpGPlxvcGVyYXRvcm5hbWV7Rn1fe3AtMSxuLXB9KDEtXGFscGhhKVx9ClxlbmR7Z2F0aGVyKn0="></span></p>
 <p><span class="math display">\[\begin{gather*}
 F=\frac{\hat{\beta}_I^{\top}\tilde{X}^{\top}\left(I_n-\frac{1}{n}\mathbf{1}_n\mathbf{1}_n^{\top}\right)y/(p-1)}{\operatorname{SSE}/(n-p)},\quad \{F:F&gt;\operatorname{F}_{p-1,n-p}(1-\alpha)\} \\
 F=\frac{\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y/(p-1)}{\operatorname{SSE}_c/(n-p)},\quad \{F:F&gt;\operatorname{F}_{p-1,n-p}(1-\alpha)\} \\
@@ -2131,8 +2211,8 @@ y_i=\alpha_0+\varepsilon_i,\quad i=1,2,\dots,n
 </section>
 <section id="id--227f065d" class="level4">
 <h4 class="anchored" data-anchor-id="id--227f065d"><span class="header-section-number">14.5.1.2</span> 复相关系数</h4>
-<div id="note-14-6" class="note theorem-block env-note">
-<p><strong>note 14.6</strong>. 复相关系数度量的是回归自变量和因变量之间的最大相关系数<span class="todo-note todo-info" role="note">以后给出证明并联系多元统计中的典型相关分析，修改前述复相关系数的叙述与此处的叙述</span>，由前述，当选用中心化模型或者标准化模型后我们可以把常数项剥离出去，这样就可以只剩下因变量与回归自变量了。由<a href="../chapters/matrix.html#prop-Trace-e3d6427f" class="textbook-cross-reference" data-reference-key="prop:Trace" data-reference-kind="ref+label" data-reference-title="性质 2.1.5" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 2.1.5(4)</a>和<a href="#theo-LinearRegressionModel-91fc5d84" class="textbook-cross-reference" data-reference-key="theo:LinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定理 14.12" data-reference-items="3" data-reference-hint="请查看第 3 项">定理 14.12(3)</a>可知此时的回归平方和应该修改为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1JTU30oXGJldGEpPVxoYXR7XGJldGF9X0lee1x0b3B9XHRpbGRle1h9XntcdG9wfSh5LVxvdmVybGluZXt5fSk9XGhhdHtcYmV0YX1fSV57XHRvcH1cdGlsZGV7WH1ee1x0b3B9XGxlZnQoSV9uLVxmcmFjezF9e259XG1hdGhiZnsxfV9uXG1hdGhiZnsxfV9uXntcdG9wfVxyaWdodCl5PVxoYXR7XGFscGhhfV9JXntcdG9wfVx0aWxkZXtYfV9jXntcdG9wfXk9XGhhdHtcZ2FtbWF9X0lee1x0b3B9XHRpbGRle1h9X3Nee1x0b3B9eQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<div id="note-14-7" class="note theorem-block env-note">
+<p><strong>note 14.7</strong>. 复相关系数度量的是回归自变量和因变量之间的最大相关系数<span class="todo-note todo-info" role="note">以后给出证明并联系多元统计中的典型相关分析，修改前述复相关系数的叙述与此处的叙述</span>，由前述，当选用中心化模型或者标准化模型后我们可以把常数项剥离出去，这样就可以只剩下因变量与回归自变量了。由<a href="../chapters/matrix.html#prop-Trace-e3d6427f" class="textbook-cross-reference" data-reference-key="prop:Trace" data-reference-kind="ref+label" data-reference-title="性质 2.1.5" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 2.1.5(4)</a>和<a href="#theo-LinearRegressionModel-91fc5d84" class="textbook-cross-reference" data-reference-key="theo:LinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定理 14.12" data-reference-items="3" data-reference-hint="请查看第 3 项">定理 14.12(3)</a>可知此时的回归平方和应该修改为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1JTU30oXGJldGEpPVxoYXR7XGJldGF9X0lee1x0b3B9XHRpbGRle1h9XntcdG9wfSh5LVxvdmVybGluZXt5fSk9XGhhdHtcYmV0YX1fSV57XHRvcH1cdGlsZGV7WH1ee1x0b3B9XGxlZnQoSV9uLVxmcmFjezF9e259XG1hdGhiZnsxfV9uXG1hdGhiZnsxfV9uXntcdG9wfVxyaWdodCl5PVxoYXR7XGFscGhhfV9JXntcdG9wfVx0aWxkZXtYfV9jXntcdG9wfXk9XGhhdHtcZ2FtbWF9X0lee1x0b3B9XHRpbGRle1h9X3Nee1x0b3B9eQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{RSS}(\beta)=\hat{\beta}_I^{\top}\tilde{X}^{\top}(y-\overline{y})=\hat{\beta}_I^{\top}\tilde{X}^{\top}\left(I_n-\frac{1}{n}\mathbf{1}_n\mathbf{1}_n^{\top}\right)y=\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y=\hat{\gamma}_I^{\top}\tilde{X}_s^{\top}y
 \end{equation*}\]</span></p>
@@ -2147,7 +2227,7 @@ R^2=\frac{\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y}{(y-\overline{y})^{\top}(y-\o
 <p><span class="todo-note todo-info" role="note">补充调整后<span class="math inline">\(R^2\)</span></span></p>
 </div>
 <div id="theo-LinearRegressionModelFR2-4ea581a6" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 14.14</strong>. 对于<a href="#model-CentralizedStandardizedLinearModel-cec82ac6" class="textbook-cross-reference" data-reference-key="model:CentralizedStandardizedLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.13">定义 14.13</a>，回归方程的显著性检验的统计量<span class="math inline">\(F\)</span>与复相关系数<span class="math inline">\(R^2\)</span>有如下关系： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlGPVxmcmFje1JeMn17MS1SXjJ9XGZyYWN7bi1wfXtwLTF9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><strong>Theorem 14.14</strong>. 对于<a href="#model-CentralizedStandardizedLinearModel-cec82ac6" class="textbook-cross-reference" data-reference-key="model:CentralizedStandardizedLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.14">定义 14.14</a>，回归方程的显著性检验的统计量<span class="math inline">\(F\)</span>与复相关系数<span class="math inline">\(R^2\)</span>有如下关系： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlGPVxmcmFje1JeMn17MS1SXjJ9XGZyYWN7bi1wfXtwLTF9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 F=\frac{R^2}{1-R^2}\frac{n-p}{p-1}
 \end{equation*}\]</span></p>
@@ -2204,24 +2284,24 @@ F&amp;=\frac{\hat{\alpha}_I^{\top}\tilde{X}_c^{\top}y/(p-1)}{\operatorname{SSE}_
 <h3 class="anchored" data-anchor-id="id--1651481a"><span class="header-section-number">14.5.3</span> 回归诊断</h3>
 <section id="id--485c534c" class="level4">
 <h4 class="anchored" data-anchor-id="id--485c534c"><span class="header-section-number">14.5.3.1</span> 残差分析</h4>
-<div id="definition-14-15" class="definition theorem-block env-definition">
-<p><strong>Definition 14.15</strong>. 称以某种残差为纵坐标、其它量为横坐标的散点图为<a href="../chapters/glossary-r.html#term-ResidualPlot" class="term" title="residual plot">残差图<span class="term-english">（residual plot）</span></a>。</p>
-</div>
 <div id="definition-14-16" class="definition theorem-block env-definition">
-<p><strong>Definition 14.16</strong>. 当模型为<a href="#model-NormalLinearRegressionModel-8d51a88e" class="textbook-cross-reference" data-reference-key="model:NormalLinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.12">定义 14.12</a>时，将： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlyX2k9XGZyYWN7XGhhdHtcdmFyZXBzaWxvbn1faX17XHNxcnR7XGhhdHtcc2lnbWF9XjIoMS1wX3tpaX0pfX0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><strong>Definition 14.16</strong>. 称以某种残差为纵坐标、其它量为横坐标的散点图为<a href="../chapters/glossary-r.html#term-ResidualPlot" class="term" title="residual plot">残差图<span class="term-english">（residual plot）</span></a>。</p>
+</div>
+<div id="definition-14-17" class="definition theorem-block env-definition">
+<p><strong>Definition 14.17</strong>. 当模型为<a href="#model-NormalLinearRegressionModel-8d51a88e" class="textbook-cross-reference" data-reference-key="model:NormalLinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.13">定义 14.13</a>时，将： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlyX2k9XGZyYWN7XGhhdHtcdmFyZXBzaWxvbn1faX17XHNxcnR7XGhhdHtcc2lnbWF9XjIoMS1wX3tpaX0pfX0KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 r_i=\frac{\hat{\varepsilon}_i}{\sqrt{\hat{\sigma}^2(1-p_{ii})}}
 \end{equation*}\]</span></p>
 <p>称为<a href="../chapters/glossary-s.html#term-StudentizedResidual" class="term" title="studentized residual">学生化残差<span class="term-english">（studentized residual）</span></a>。由<a href="#prop-ehat-d0724140" class="textbook-cross-reference" data-reference-key="prop:ehat" data-reference-kind="ref+label" data-reference-title="性质 14.1.2" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 14.1.2(1)</a>可知它相当于是对<span class="math inline">\(\hat{\varepsilon}\)</span>进行标准化然后用<span class="math inline">\(\sigma^2\)</span>的估计<span class="math inline">\(\hat{\sigma}^2\)</span>进行替换后得到的值。</p>
 </div>
-<div id="note-14-7" class="note theorem-block env-note">
-<p><strong>note 14.7</strong>. 应用上可以近似地认为<span class="math inline">\(r_i\)</span>相互独立且服从<span class="math inline">\(\operatorname{N}(0,1)\)</span>。若将<span class="math inline">\(\hat{\varepsilon}\)</span>与<span class="math inline">\(\hat{y}\)</span>画作二维散点图，以<span class="math inline">\(\hat{y}\)</span>为横坐标、<span class="math inline">\(r_i\)</span>为纵坐标，点的纵坐标应大致分布于<span class="math inline">\([-2,2]\)</span>，且由<a href="#prop-ehat-d0724140" class="textbook-cross-reference" data-reference-key="prop:ehat" data-reference-kind="ref+label" data-reference-title="性质 14.1.2" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 14.1.2(3)</a>和<a href="../chapters/probability-basics.html#prop-MultiNormal-b0900be1" class="textbook-cross-reference" data-reference-key="prop:MultiNormal" data-reference-kind="ref+label" data-reference-title="性质 6.4.6" data-reference-items="2|8" data-reference-hint="请查看第 2、8 项">性质 6.4.6(2)(8)</a>可得这些点不应呈现出任何趋势（<span class="math inline">\(\hat{y}\)</span>与<span class="math inline">\(\hat{\varepsilon}_i\)</span>独立）。若不满足上述现象，则此时模型有问题，可能是漏掉了重要的回归自变量，也可能是数据不满足<a href="#model-NormalLinearRegressionModel-8d51a88e" class="textbook-cross-reference" data-reference-key="model:NormalLinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.12">定义 14.12</a>中的假设。在数据不满足<a href="#model-NormalLinearRegressionModel-8d51a88e" class="textbook-cross-reference" data-reference-key="model:NormalLinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.12">定义 14.12</a>中的假设时，一个解决方案是对<span class="math inline">\(y\)</span>实施变换，使得变换后得到的向量与回归自变量之间存在线性相关关系，同时让误差也符合假设，一个在<span class="math inline">\(y\)</span>值全部为正数时使用广泛的变换就是下述的Box-Cox变换。</p>
+<div id="note-14-8" class="note theorem-block env-note">
+<p><strong>note 14.8</strong>. 应用上可以近似地认为<span class="math inline">\(r_i\)</span>相互独立且服从<span class="math inline">\(\operatorname{N}(0,1)\)</span>。若将<span class="math inline">\(\hat{\varepsilon}\)</span>与<span class="math inline">\(\hat{y}\)</span>画作二维散点图，以<span class="math inline">\(\hat{y}\)</span>为横坐标、<span class="math inline">\(r_i\)</span>为纵坐标，点的纵坐标应大致分布于<span class="math inline">\([-2,2]\)</span>，且由<a href="#prop-ehat-d0724140" class="textbook-cross-reference" data-reference-key="prop:ehat" data-reference-kind="ref+label" data-reference-title="性质 14.1.2" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 14.1.2(3)</a>和<a href="../chapters/probability-basics.html#prop-MultiNormal-b0900be1" class="textbook-cross-reference" data-reference-key="prop:MultiNormal" data-reference-kind="ref+label" data-reference-title="性质 6.4.6" data-reference-items="2|8" data-reference-hint="请查看第 2、8 项">性质 6.4.6(2)(8)</a>可得这些点不应呈现出任何趋势（<span class="math inline">\(\hat{y}\)</span>与<span class="math inline">\(\hat{\varepsilon}_i\)</span>独立）。若不满足上述现象，则此时模型有问题，可能是漏掉了重要的回归自变量，也可能是数据不满足<a href="#model-NormalLinearRegressionModel-8d51a88e" class="textbook-cross-reference" data-reference-key="model:NormalLinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.13">定义 14.13</a>中的假设。在数据不满足<a href="#model-NormalLinearRegressionModel-8d51a88e" class="textbook-cross-reference" data-reference-key="model:NormalLinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.13">定义 14.13</a>中的假设时，一个解决方案是对<span class="math inline">\(y\)</span>实施变换，使得变换后得到的向量与回归自变量之间存在线性相关关系，同时让误差也符合假设，一个在<span class="math inline">\(y\)</span>值全部为正数时使用广泛的变换就是下述的Box-Cox变换。</p>
 </div>
 </section>
 <section id="box-cox-e8ea3d19" class="level4">
 <h4 class="anchored" data-anchor-id="box-cox-e8ea3d19"><span class="header-section-number">14.5.3.2</span> Box-Cox变换</h4>
-<div id="definition-14-17" class="definition theorem-block env-definition">
-<p><strong>Definition 14.17</strong>. Box-Cox变换是对各分量都为正数的<span class="math inline">\(y\)</span>进行如下变换： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl5X2leeyhcbGFtYmRhKX09CgkJXGJlZ2lue2Nhc2VzfQoJCQlcZGZyYWN7eV9pXntcbGFtYmRhfS0xfXtcbGFtYmRhfSwmXGxhbWJkYVxuZTAgXFwKCQkJXGxuIHlfaSwmXGxhbWJkYT0wCgkJXGVuZHtjYXNlc30KXGVuZHtlcXVhdGlvbip9"></span></p>
+<div id="definition-14-18" class="definition theorem-block env-definition">
+<p><strong>Definition 14.18</strong>. Box-Cox变换是对各分量都为正数的<span class="math inline">\(y\)</span>进行如下变换： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl5X2leeyhcbGFtYmRhKX09CgkJXGJlZ2lue2Nhc2VzfQoJCQlcZGZyYWN7eV9pXntcbGFtYmRhfS0xfXtcbGFtYmRhfSwmXGxhbWJkYVxuZTAgXFwKCQkJXGxuIHlfaSwmXGxhbWJkYT0wCgkJXGVuZHtjYXNlc30KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 y_i^{(\lambda)}=
 \begin{cases}
@@ -2231,8 +2311,8 @@ y_i^{(\lambda)}=
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(\lambda\)</span>是一个待定的变换参数。</p>
 </div>
-<div id="note-14-8" class="note theorem-block env-note">
-<p><strong>note 14.8</strong>. 可以看出Box-Cox变换是一个变换族，包括了对数变换、平方根变换和倒数变换等。确定<span class="math inline">\(\lambda\)</span>的值的方式为极大似然估计法，选择<span class="math inline">\(\lambda\)</span>值使得<span class="math inline">\(y^{(\lambda)}\sim\operatorname{N}(X\beta,\sigma^2I_n)\)</span>最有可能发生，这一方法的选择是很直观的。实际操作时若<span class="math inline">\(y\)</span>有分量非正，可通过平移将其变换为全部为正值的情况，然后再进行Box-Cox变换。下面解释实际计算。</p>
+<div id="note-14-9" class="note theorem-block env-note">
+<p><strong>note 14.9</strong>. 可以看出Box-Cox变换是一个变换族，包括了对数变换、平方根变换和倒数变换等。确定<span class="math inline">\(\lambda\)</span>的值的方式为极大似然估计法，选择<span class="math inline">\(\lambda\)</span>值使得<span class="math inline">\(y^{(\lambda)}\sim\operatorname{N}(X\beta,\sigma^2I_n)\)</span>最有可能发生，这一方法的选择是很直观的。实际操作时若<span class="math inline">\(y\)</span>有分量非正，可通过平移将其变换为全部为正值的情况，然后再进行Box-Cox变换。下面解释实际计算。</p>
 <p>对于固定的<span class="math inline">\(\lambda\)</span>，<span class="math inline">\(\beta\)</span>和<span class="math inline">\(\sigma^2\)</span>的似然函数为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlMKFxiZXRhLFxzaWdtYV4yLFxsYW1iZGEpPVxmcmFjezF9eygyXHBpKV57XGZyYWN7bn17Mn19KFxzaWdtYV4yKV5cZnJhY3tufXsyfX1cZXhwXGxlZnQoLVxmcmFjezF9ezJcc2lnbWFeMn18fHleeyhcbGFtYmRhKX0tWFxiZXRhfHxeMlxyaWdodCl8XG1hdGhiZntKfXwKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 L(\beta,\sigma^2,\lambda)=\frac{1}{(2\pi)^{\frac{n}{2}}(\sigma^2)^\frac{n}{2}}\exp\left(-\frac{1}{2\sigma^2}||y^{(\lambda)}-X\beta||^2\right)|\mathbf{J}|
@@ -2271,16 +2351,16 @@ z_i^{(\lambda)}=
 I_n-P_X,\quad\sqrt[n]{\prod\limits_{i=1}^{n}y_i}
 \end{equation*}\]</span></p>
 </div>
-<div id="algorithm-14-1" class="algorithm-block">
+<div id="source-alg-BoxCox-a64e1a9f" class="algorithm-block">
 <div class="algorithm-caption">
 <p><span class="algorithm-number">算法 14.1</span> <span class="algorithm-title">Box-Cox 变换的计算机求解</span></p>
 </div>
 <div class="algorithm-body">
 <div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
-<p><strong>输入：</strong> 观测向量 <span class="math inline">\(y = (y_1,\dots,y_n)^{\top}\)</span>，设计矩阵 <span class="math inline">\(X\)</span>，候选参数集合 <span class="math inline">\(\Lambda\)</span></p>
+<p><strong>Input:</strong> 观测向量 <span class="math inline">\(y = (y_1,\dots,y_n)^{\top}\)</span>，设计矩阵 <span class="math inline">\(X\)</span>，候选参数集合 <span class="math inline">\(\Lambda\)</span></p>
 </div>
 <div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
-<p><strong>输出：</strong> 最优参数 <span class="math inline">\(\hat{\lambda}\)</span>和变换后的向量<span class="math inline">\(y^{(\lambda)}\)</span></p>
+<p><strong>Output:</strong> 最优参数 <span class="math inline">\(\hat{\lambda}\)</span>和变换后的向量<span class="math inline">\(y^{(\lambda)}\)</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
 <p><strong>预处理:</strong> 若存在 <span class="math inline">\(y_i \le 0\)</span>，则对 <span class="math inline">\(y\)</span> 作平移: <span class="math inline">\(y \gets y + c\)</span>，其中 <span class="math inline">\(c &gt; -\min(y_i)\)</span></p>
@@ -2342,15 +2422,15 @@ z_i^{(\lambda)}=\dfrac{\ln y_i}{g^{\lambda-1}},\;i=1,2,\dots,n
 <section id="id--97463e95" class="level4">
 <h4 class="anchored" data-anchor-id="id--97463e95"><span class="header-section-number">14.5.3.3</span> 影响分析</h4>
 <p>影响分析即为探查对估计或预测有较大影响的数据。</p>
-<div id="definition-14-18" class="definition theorem-block env-definition">
-<p><strong>Definition 14.18</strong>. 定义第<span class="math inline">\(i\)</span>个样本<strong>Cook统计量</strong>为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlEX2k9XGZyYWN7KFxoYXR7XGJldGF9LVxoYXR7XGJldGF9X3soaSl9KV57XHRvcH1YXntcdG9wfVgoXGhhdHtcYmV0YX0tXGhhdHtcYmV0YX1feyhpKX0pfXtwXGhhdHtcc2lnbWF9XjJ9LFxxdWFkIGk9MSwyLFxkb3RzLG4KXGVuZHtlcXVhdGlvbip9"></span></p>
+<div id="definition-14-19" class="definition theorem-block env-definition">
+<p><strong>Definition 14.19</strong>. 定义第<span class="math inline">\(i\)</span>个样本<strong>Cook统计量</strong>为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlEX2k9XGZyYWN7KFxoYXR7XGJldGF9LVxoYXR7XGJldGF9X3soaSl9KV57XHRvcH1YXntcdG9wfVgoXGhhdHtcYmV0YX0tXGhhdHtcYmV0YX1feyhpKX0pfXtwXGhhdHtcc2lnbWF9XjJ9LFxxdWFkIGk9MSwyLFxkb3RzLG4KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 D_i=\frac{(\hat{\beta}-\hat{\beta}_{(i)})^{\top}X^{\top}X(\hat{\beta}-\hat{\beta}_{(i)})}{p\hat{\sigma}^2},\quad i=1,2,\dots,n
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(\hat{\beta}_{(i)}\)</span>表示删除第<span class="math inline">\(i\)</span>个样本后拟合得到的回归系数。</p>
 </div>
-<div id="note-14-9" class="note theorem-block env-note">
-<p><strong>note 14.9</strong>. 从<a href="#theo-NormalLinearModelConfidenceEllipsoid-93704881" class="textbook-cross-reference" data-reference-key="theo:NormalLinearModelConfidenceEllipsoid" data-reference-kind="ref+label" data-reference-title="定理 14.8">定理 14.8</a>可以看出： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbGVmdFx7XGJldGE6XGZyYWN7KFxoYXR7XGJldGF9LVxiZXRhKVhee1x0b3B9WChcaGF0e1xiZXRhfS1cYmV0YSl9e3BcaGF0e1xzaWdtYX1eMn1cbGVxc2xhbnRcb3BlcmF0b3JuYW1le0Z9X3twLG4tcH0oXGFscGhhKVxyaWdodFx9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="note-14-10" class="note theorem-block env-note">
+<p><strong>note 14.10</strong>. 从<a href="#theo-NormalLinearModelConfidenceEllipsoid-93704881" class="textbook-cross-reference" data-reference-key="theo:NormalLinearModelConfidenceEllipsoid" data-reference-kind="ref+label" data-reference-title="定理 14.8">定理 14.8</a>可以看出： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbGVmdFx7XGJldGE6XGZyYWN7KFxoYXR7XGJldGF9LVxiZXRhKVhee1x0b3B9WChcaGF0e1xiZXRhfS1cYmV0YSl9e3BcaGF0e1xzaWdtYX1eMn1cbGVxc2xhbnRcb3BlcmF0b3JuYW1le0Z9X3twLG4tcH0oXGFscGhhKVxyaWdodFx9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \left\{\beta:\frac{(\hat{\beta}-\beta)X^{\top}X(\hat{\beta}-\beta)}{p\hat{\sigma}^2}\leqslant\operatorname{F}_{p,n-p}(\alpha)\right\}
 \end{equation*}\]</span></p>
@@ -2403,24 +2483,24 @@ D_i=\frac{1}{p}\left(\frac{p_{ii}}{1-p_{ii}}\right)r_i^2,\quad i=1,2,\dots,n
 </section>
 <section id="id--75eb9f6f" class="level4">
 <h4 class="anchored" data-anchor-id="id--75eb9f6f"><span class="header-section-number">14.5.3.4</span> 异常点检测</h4>
-<div id="note-14-10" class="note theorem-block env-note">
-<p><strong>note 14.10</strong>. 异常点检测即检测数据中是否存在某一个点不符合该组数据的模式，直观上来想一个残差值或学生化残差值较大的点是一个异常点，从建模的角度来看，异常点的特征构成不同于其它点，由此我们引入下述的均值漂移线性回归模型。判断一个点是不是异常点应是一个假设检验问题，我们需要找到一种方法来进行这种检验。我们只讨论数据中最多仅有一个异常点的情况，由于异常点会使得回归方程变形，所以多个异常点的识别是一个很复杂的问题。</p>
+<div id="note-14-11" class="note theorem-block env-note">
+<p><strong>note 14.11</strong>. 异常点检测即检测数据中是否存在某一个点不符合该组数据的模式，直观上来想一个残差值或学生化残差值较大的点是一个异常点，从建模的角度来看，异常点的特征构成不同于其它点，由此我们引入下述的均值漂移线性回归模型。判断一个点是不是异常点应是一个假设检验问题，我们需要找到一种方法来进行这种检验。我们只讨论数据中最多仅有一个异常点的情况，由于异常点会使得回归方程变形，所以多个异常点的识别是一个很复杂的问题。</p>
 </div>
 <div id="model-MeanShiftLinearRegressionModel-f01ec0af" class="definition theorem-block env-definition">
-<p><strong>Definition 14.19</strong>. 称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl5PShYLGRfaikoXGJldGFee1x0b3B9LFxldGEpXntcdG9wfSxccXVhZFx2YXJlcHNpbG9uXHNpbVxvcGVyYXRvcm5hbWV7Tn1fbihcbWF0aGJmezB9LFxzaWdtYV4ySV9uKQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><strong>Definition 14.20</strong>. 称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl5PShYLGRfaikoXGJldGFee1x0b3B9LFxldGEpXntcdG9wfSxccXVhZFx2YXJlcHNpbG9uXHNpbVxvcGVyYXRvcm5hbWV7Tn1fbihcbWF0aGJmezB9LFxzaWdtYV4ySV9uKQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 y=(X,d_j)(\beta^{\top},\eta)^{\top},\quad\varepsilon\sim\operatorname{N}_n(\mathbf{0},\sigma^2I_n)
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/glossary-m.html#term-MeanShiftLinearRegressionModel" class="term" title="mean shift linear regression model">均值漂移线性回归模型<span class="term-english">（mean shift linear regression model）</span></a>，其中<span class="math inline">\(d_j\)</span>为第<span class="math inline">\(j\)</span>个分量为<span class="math inline">\(1\)</span>其余分量为<span class="math inline">\(0\)</span>的<span class="math inline">\(n\)</span>维向量，<span class="math inline">\((X,d_j)\)</span>列满秩。</p>
 </div>
 <div id="theo-MeanShiftLinearRegressionModel-53e08206" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 14.17</strong>. 对于<a href="#model-MeanShiftLinearRegressionModel-f01ec0af" class="textbook-cross-reference" data-reference-key="model:MeanShiftLinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.19">定义 14.19</a>，有：</p>
+<p><strong>Theorem 14.17</strong>. 对于<a href="#model-MeanShiftLinearRegressionModel-f01ec0af" class="textbook-cross-reference" data-reference-key="model:MeanShiftLinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.20">定义 14.20</a>，有：</p>
 <ol type="1">
 <li><p><span class="math inline">\(\beta\)</span>的LSE<span class="math inline">\(\beta^{\star}\)</span>和<span class="math inline">\(\eta\)</span>的LSE<span class="math inline">\(\eta^{\star}\)</span>分别为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkJXGJldGFee1xzdGFyfT1caGF0e1xiZXRhfV97KGopfSxccXVhZFxldGFee1xzdGFyfT1cZnJhY3tcaGF0e1x2YXJlcHNpbG9ufV9qfXsxLXBfe2pqfX0KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
                 \beta^{\star}=\hat{\beta}_{(j)},\quad\eta^{\star}=\frac{\hat{\varepsilon}_j}{1-p_{jj}}
     \end{equation*}\]</span></p>
-<p><span class="math inline">\(\hat{\beta}_{(j)}\)</span>为<a href="#model-LinearRegressionModel-8a993caf" class="textbook-cross-reference" data-reference-key="model:LinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.11">定义 14.11</a>去除第<span class="math inline">\(j\)</span>组数据后得到的<span class="math inline">\(\beta\)</span>的LSE，<span class="math inline">\(p_{ii}\)</span>是矩阵<span class="math inline">\(P_X\)</span>的第<span class="math inline">\(i\)</span>个主对角元。；</p></li>
+<p><span class="math inline">\(\hat{\beta}_{(j)}\)</span>为<a href="#model-LinearRegressionModel-8a993caf" class="textbook-cross-reference" data-reference-key="model:LinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定义 14.12">定义 14.12</a>去除第<span class="math inline">\(j\)</span>组数据后得到的<span class="math inline">\(\beta\)</span>的LSE，<span class="math inline">\(p_{ii}\)</span>是矩阵<span class="math inline">\(P_X\)</span>的第<span class="math inline">\(i\)</span>个主对角元。；</p></li>
 <li><p>对于假设检验问题<span class="math inline">\(H_0:\eta=0,\;H_1:\eta\ne0\)</span>，检验统计量和拒绝域为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkJRj1cZnJhY3sobi1wLTEpcl9qXjJ9e24tcC1yX2peMn0sXHF1YWRce0Y7Rj5cb3BlcmF0b3JuYW1le0Z9X3sxLG4tcC0xfSgxLVxhbHBoYSlcfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
                 F=\frac{(n-p-1)r_j^2}{n-p-r_j^2},\quad\{F;F&gt;\operatorname{F}_{1,n-p-1}(1-\alpha)\}
@@ -2515,8 +2595,8 @@ A=
 </section>
 <section id="id--9234d331" class="level3">
 <h3 class="anchored" data-anchor-id="id--9234d331"><span class="header-section-number">14.5.4</span> 复共线性与解决方案</h3>
-<div id="note-14-11" class="note theorem-block env-note">
-<p><strong>note 14.11</strong>. 由<a href="#theo-LinearRegressionModel-91fc5d84" class="textbook-cross-reference" data-reference-key="theo:LinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定理 14.12" data-reference-items="1" data-reference-hint="请查看第 1 项">定理 14.12(1)</a>可知<span class="math inline">\(X^{\top}X\)</span>正定且可逆，于是存在正交矩阵<span class="math inline">\(Q\)</span>和<span class="math inline">\(\lambda_1, \lambda_2, \dots, \lambda_{p}\)</span>使得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlYXntcdG9wfVg9UV57XHRvcH1cb3BlcmF0b3JuYW1le2RpYWd9XHtcbGFtYmRhXzEsIFxsYW1iZGFfMiwgXGRvdHMsIFxsYW1iZGFfe3B9XH1RClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="note-14-12" class="note theorem-block env-note">
+<p><strong>note 14.12</strong>. 由<a href="#theo-LinearRegressionModel-91fc5d84" class="textbook-cross-reference" data-reference-key="theo:LinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定理 14.12" data-reference-items="1" data-reference-hint="请查看第 1 项">定理 14.12(1)</a>可知<span class="math inline">\(X^{\top}X\)</span>正定且可逆，于是存在正交矩阵<span class="math inline">\(Q\)</span>和<span class="math inline">\(\lambda_1, \lambda_2, \dots, \lambda_{p}\)</span>使得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlYXntcdG9wfVg9UV57XHRvcH1cb3BlcmF0b3JuYW1le2RpYWd9XHtcbGFtYmRhXzEsIFxsYW1iZGFfMiwgXGRvdHMsIFxsYW1iZGFfe3B9XH1RClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 X^{\top}X=Q^{\top}\operatorname{diag}\{\lambda_1, \lambda_2, \dots, \lambda_{p}\}Q
 \end{equation*}\]</span></p>
@@ -2550,8 +2630,8 @@ X^{\top}X\alpha=\lambda\alpha\approx\mathbf{0} \\
 </div>
 <section id="id--bc6f1c4f" class="level4">
 <h4 class="anchored" data-anchor-id="id--bc6f1c4f"><span class="header-section-number">14.5.4.1</span> 岭回归</h4>
-<div id="note-14-12" class="note theorem-block env-note">
-<p><strong>note 14.12</strong>. 由前述，复共线性程度严重时会导致<span class="math inline">\(\hat{\beta}\)</span>的平均长度比<span class="math inline">\(\beta\)</span>大很多，为了缓解这一问题，根据<span class="todo-note todo-info" role="note">花书模型空间与正则项</span>，可以将最小二乘法的目标函数<span class="math inline">\(||y-X\beta||^2\)</span>修改为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlRKFxiZXRhKT18fHktWFxiZXRhfHxeMitcbGFtYmRhfHxcYmV0YXx8XjIKXGVuZHtlcXVhdGlvbip9"></span></p>
+<div id="note-14-13" class="note theorem-block env-note">
+<p><strong>note 14.13</strong>. 由前述，复共线性程度严重时会导致<span class="math inline">\(\hat{\beta}\)</span>的平均长度比<span class="math inline">\(\beta\)</span>大很多，为了缓解这一问题，根据<span class="todo-note todo-info" role="note">花书模型空间与正则项</span>，可以将最小二乘法的目标函数<span class="math inline">\(||y-X\beta||^2\)</span>修改为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlRKFxiZXRhKT18fHktWFxiZXRhfHxeMitcbGFtYmRhfHxcYmV0YXx8XjIKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 Q(\beta)=||y-X\beta||^2+\lambda||\beta||^2
 \end{equation*}\]</span></p>
@@ -2562,8 +2642,8 @@ Q(\beta)=||y-X\beta||^2+\lambda||\beta||^2
 <p>显然<span class="math inline">\(X^{\top}X+\lambda I_{p}\)</span>是一个实对称阵，由<span class="todo-note todo-info" role="note">矩阵多项式的特征值</span>和<a href="#theo-LinearRegressionModel-91fc5d84" class="textbook-cross-reference" data-reference-key="theo:LinearRegressionModel" data-reference-kind="ref+label" data-reference-title="定理 14.12" data-reference-items="1" data-reference-hint="请查看第 1 项">定理 14.12(1)</a>可知它还是一个正定阵，根据<a href="../chapters/matrix.html#theo-PositiveDefinite-bcd1811a" class="textbook-cross-reference" data-reference-key="theo:PositiveDefinite" data-reference-kind="ref+label" data-reference-title="定理 2.17" data-reference-items="6" data-reference-hint="请查看第 6 项">定理 2.17(6)</a>可得<span class="math inline">\(X^{\top}X+\lambda I_{p}\)</span>可逆，于是<span class="math inline">\(\beta\)</span>的估计值<span class="math inline">\(\hat{\beta}(\lambda)=(X^{\top}X+\lambda I_{p})^{-1}X^{\top}y\)</span>。</p>
 <p>从这个结果来看，修改后的目标函数将会选择长度更小的估计，同时也增大了<span class="math inline">\(X^{\top}X\)</span>的特征值，从而缓解复共线性问题。显然此时的<span class="math inline">\(\hat{\beta}\)</span>已经不再是<span class="math inline">\(\beta\)</span>的无偏估计，从<a href="../chapters/probability-basics.html#prop-MSE-f485b1be" class="textbook-cross-reference" data-reference-key="prop:MSE" data-reference-kind="ref+label" data-reference-title="性质 6.3.6" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 6.3.6(1)</a>可知，它有可能会选择均方误差更小的估计。</p>
 </div>
-<div id="definition-14-20" class="definition theorem-block env-definition">
-<p><strong>Definition 14.20</strong>. 对于<a href="#model-CentralizedStandardizedLinearModel-cec82ac6" class="textbook-cross-reference" data-reference-key="model:CentralizedStandardizedLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.13">定义 14.13</a>，称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcaGF0e1xiZXRhfShcbGFtYmRhKT0oWF57XHRvcH1YK1xsYW1iZGEgSV9wKV57LTF9WF57XHRvcH15ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="definition-14-21" class="definition theorem-block env-definition">
+<p><strong>Definition 14.21</strong>. 对于<a href="#model-CentralizedStandardizedLinearModel-cec82ac6" class="textbook-cross-reference" data-reference-key="model:CentralizedStandardizedLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.14">定义 14.14</a>，称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcaGF0e1xiZXRhfShcbGFtYmRhKT0oWF57XHRvcH1YK1xsYW1iZGEgSV9wKV57LTF9WF57XHRvcH15ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \hat{\beta}(\lambda)=(X^{\top}X+\lambda I_p)^{-1}X^{\top}y
 \end{equation*}\]</span></p>
@@ -2637,8 +2717,8 @@ Y^{\top}Y=Q\tilde{X}_c^{\top}\tilde{X}_cQ^{\top}=\operatorname{diag}\{\lambda_1,
 \end{gather*}\]</span></p>
 <p>当<span class="math inline">\(\lambda&gt;0\)</span>但较小时，由上式看出此时可以有<span class="math inline">\(\operatorname{MSE}[\hat{\delta}(\lambda)]\)</span>关于<span class="math inline">\(\lambda\)</span>的导数小于<span class="math inline">\(0\)</span>，所以存在<span class="math inline">\(\lambda^{\star}&gt;0\)</span>，当<span class="math inline">\(0&lt;\lambda&lt;\lambda^{\star}\)</span>时<span class="math inline">\(\operatorname{MSE}[\hat{\delta}(\lambda)]\)</span>是<span class="math inline">\(\lambda\)</span>的单调减函数，也就是说在这个区间上<span class="math inline">\(\operatorname{MSE}[\hat{\delta}(\lambda)]&lt;\operatorname{MSE}(\hat{\delta})\)</span>。&nbsp;◻</p>
 </div>
-<div id="note-14-13" class="note theorem-block env-note">
-<p><strong>note 14.13</strong>. 理论说明了存在较小的<span class="math inline">\(\lambda\)</span>使得岭估计优于最小二乘估计，下面给出两个选择参数<span class="math inline">\(\lambda\)</span>的方法。</p>
+<div id="note-14-14" class="note theorem-block env-note">
+<p><strong>note 14.14</strong>. 理论说明了存在较小的<span class="math inline">\(\lambda\)</span>使得岭估计优于最小二乘估计，下面给出两个选择参数<span class="math inline">\(\lambda\)</span>的方法。</p>
 <p><strong>(1)Hoerl-Kennard公式：</strong>由<a href="#prop-RidgeEstimate-32052d95" class="textbook-cross-reference" data-reference-key="prop:RidgeEstimate" data-reference-kind="ref+label" data-reference-title="性质 14.5.1" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 14.5.1(3)</a>，考虑方程： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc3VtX3tpPTF9XntwLTF9KFxsYW1iZGFcZGVsdGFfaV4yLVxzaWdtYV4yKVxmcmFjezJcbGFtYmRhX2l9eyhcbGFtYmRhX2krXGxhbWJkYSleM30KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 \sum_{i=1}^{p-1}(\lambda\delta_i^2-\sigma^2)\frac{2\lambda_i}{(\lambda_i+\lambda)^3}
@@ -2657,12 +2737,12 @@ Y^{\top}Y=Q\tilde{X}_c^{\top}\tilde{X}_cQ^{\top}=\operatorname{diag}\{\lambda_1,
 <p><a href="../chapters/glossary-a.html#term-ANOVA" class="term" title="analysis of variance, ANOVA">方差分析<span class="term-english">（analysis of variance, ANOVA）</span></a>模型是一种特殊的正态线性模型，它的自变量取值只能为<span class="math inline">\(0\)</span>或<span class="math inline">\(1\)</span>。</p>
 <section id="id--7b01b2c8" class="level3">
 <h3 class="anchored" data-anchor-id="id--7b01b2c8"><span class="header-section-number">14.6.1</span> 单因子方差分析</h3>
-<div id="definition-14-21" class="definition theorem-block env-definition">
-<p><strong>Definition 14.21</strong>. 设因子<span class="math inline">\(A\)</span>有<span class="math inline">\(a\)</span>个水平，分别为<span class="math inline">\(A_1, A_2, \dots, A_{a}\)</span>，有数据：</p>
+<div id="definition-14-22" class="definition theorem-block env-definition">
+<p><strong>Definition 14.22</strong>. 设因子<span class="math inline">\(A\)</span>有<span class="math inline">\(a\)</span>个水平，分别为<span class="math inline">\(A_1, A_2, \dots, A_{a}\)</span>，有数据：</p>
 <div class="textbook-table-scroll textbook-latex-table-scroll" role="region" tabindex="0">
 <table class="textbook-latex-table">
 <caption>
-单因子试验数据
+表 14.1 单因子试验数据
 </caption>
 <thead>
 <tr class="latex-table-rule-above">
@@ -2780,8 +2860,8 @@ X=
 </div>
 <section id="id-2-e623a5eb" class="level4">
 <h4 class="anchored" data-anchor-id="id-2-e623a5eb"><span class="header-section-number">14.6.1.1</span> 参数估计</h4>
-<div id="definition-14-22" class="definition theorem-block env-definition">
-<p><strong>Definition 14.22</strong>. 对于<a href="#model-one-way-anova-b6d95f4d" class="textbook-cross-reference" data-reference-key="model:one-way-anova" data-reference-kind="ref+label" data-reference-title="公式 14.1">公式 14.1</a>，称满足条件<span class="math inline">\(\sum\limits_{i=1}^{a}c_i=0\)</span>的函数<span class="math inline">\(\sum\limits_{i=1}^{a}c_i\alpha_i\)</span>为一个<a href="../chapters/glossary-c.html#term-Contrast" class="term" title="contrast">对照<span class="term-english">（contrast）</span></a>。</p>
+<div id="definition-14-23" class="definition theorem-block env-definition">
+<p><strong>Definition 14.23</strong>. 对于<a href="#model-one-way-anova-b6d95f4d" class="textbook-cross-reference" data-reference-key="model:one-way-anova" data-reference-kind="ref+label" data-reference-title="公式 14.1">公式 14.1</a>，称满足条件<span class="math inline">\(\sum\limits_{i=1}^{a}c_i=0\)</span>的函数<span class="math inline">\(\sum\limits_{i=1}^{a}c_i\alpha_i\)</span>为一个<a href="../chapters/glossary-c.html#term-Contrast" class="term" title="contrast">对照<span class="term-english">（contrast）</span></a>。</p>
 </div>
 <div id="theo-one-way-anova-estimate-ac357c80" class="theorem theorem-block env-theorem">
 <p><strong>Theorem 14.18</strong>. 对于<a href="#model-one-way-anova-b6d95f4d" class="textbook-cross-reference" data-reference-key="model:one-way-anova" data-reference-kind="ref+label" data-reference-title="公式 14.1">公式 14.1</a>，记： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl5X3suLn09XHN1bV97aT0xfV5hXHN1bV97aj0xfV57bl9pfXlfe2lqfSxccXVhZFxvdmVybGluZXt5fV97Li59PVxmcmFje3lfey4ufX17bn0sXHF1YWQgeV97aS59PVxzdW1fe2o9MX1ee25faX15X3tpan0sXHF1YWQgXG92ZXJsaW5le3l9X3tpLn09XGZyYWN7eV97aS59fXtuX2l9LFw7aT0xLDIsXGRvdHMsYQpcZW5ke2VxdWF0aW9uKn0="></span></p>
@@ -2857,8 +2937,8 @@ y_{..}=\sum_{i=1}^a\sum_{j=1}^{n_i}y_{ij},\quad\overline{y}_{..}=\frac{y_{..}}{n
 </section>
 <section id="id--20bf3945" class="level4">
 <h4 class="anchored" data-anchor-id="id--20bf3945"><span class="header-section-number">14.6.1.2</span> 模型的假设检验</h4>
-<div id="note-14-14" class="note theorem-block env-note">
-<p><strong>note 14.14</strong>. 对于<a href="#model-one-way-anova-b6d95f4d" class="textbook-cross-reference" data-reference-key="model:one-way-anova" data-reference-kind="ref+label" data-reference-title="公式 14.1">公式 14.1</a>，我们关心的是因子<span class="math inline">\(A\)</span>的<span class="math inline">\(a\)</span>个水平效应是否有显著差异，此时的原假设为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlIXzA6XGFscGhhXzE9XGFscGhhXzI9XGNkb3RzPVxhbHBoYV9hClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="note-14-15" class="note theorem-block env-note">
+<p><strong>note 14.15</strong>. 对于<a href="#model-one-way-anova-b6d95f4d" class="textbook-cross-reference" data-reference-key="model:one-way-anova" data-reference-kind="ref+label" data-reference-title="公式 14.1">公式 14.1</a>，我们关心的是因子<span class="math inline">\(A\)</span>的<span class="math inline">\(a\)</span>个水平效应是否有显著差异，此时的原假设为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlIXzA6XGFscGhhXzE9XGFscGhhXzI9XGNkb3RzPVxhbHBoYV9hClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 H_0:\alpha_1=\alpha_2=\cdots=\alpha_a
 \end{equation*}\]</span></p>
@@ -2898,11 +2978,11 @@ F=\frac{\operatorname{SSE}_H-\operatorname{SSE}}{\operatorname{SSE}/(n-a)},\quad
 <p><span class="proof-title"><em>证明</em>. </span>由<a href="#theo-one-way-anova-estimate-ac357c80" class="textbook-cross-reference" data-reference-key="theo:one-way-anova-estimate" data-reference-kind="ref+label" data-reference-title="定理 14.18" data-reference-items="6" data-reference-hint="请查看第 6 项">定理 14.18(6)</a>和<a href="#theo-AOVHypothesisTesting-57ba0ba0" class="textbook-cross-reference" data-reference-key="theo:AOVHypothesisTesting" data-reference-kind="ref+label" data-reference-title="定理 14.19">定理 14.19</a>立即可得。&nbsp;◻</p>
 </div>
 <p>接下来介绍各水平等重复情形下Duncan多重比较法。</p>
-<div id="note-14-15" class="note theorem-block env-note">
-<p><strong>note 14.15</strong>. 请注意Duncan多重比较法并没有作多重假设检验修正。</p>
+<div id="note-14-16" class="note theorem-block env-note">
+<p><strong>note 14.16</strong>. 请注意Duncan多重比较法并没有作多重假设检验修正。</p>
 </div>
-<div id="definition-14-23" class="definition theorem-block env-definition">
-<p><strong>Definition 14.23</strong>. 将<span class="math inline">\(a\)</span>个水平下观察值的平均值<span class="math inline">\(\overline{y}_{1.},\overline{y}_{2.},\dots,\overline{y}_{a.}\)</span>从小到大排序。如果<span class="math inline">\(\overline{y}_i\)</span>与<span class="math inline">\(\overline{y}_j\)</span>（<span class="math inline">\(\overline{y}_i\leqslant\overline{y}_j\)</span>）在排序后中间有<span class="math inline">\(p-2,\;p\geqslant2\)</span>个数，那么称<span class="math inline">\(\overline{y}_j-\overline{y}_i\)</span>为<span class="math inline">\(p\)</span>级极差，记为<span class="math inline">\(R_p\)</span>。</p>
+<div id="definition-14-24" class="definition theorem-block env-definition">
+<p><strong>Definition 14.24</strong>. 将<span class="math inline">\(a\)</span>个水平下观察值的平均值<span class="math inline">\(\overline{y}_{1.},\overline{y}_{2.},\dots,\overline{y}_{a.}\)</span>从小到大排序。如果<span class="math inline">\(\overline{y}_i\)</span>与<span class="math inline">\(\overline{y}_j\)</span>（<span class="math inline">\(\overline{y}_i\leqslant\overline{y}_j\)</span>）在排序后中间有<span class="math inline">\(p-2,\;p\geqslant2\)</span>个数，那么称<span class="math inline">\(\overline{y}_j-\overline{y}_i\)</span>为<span class="math inline">\(p\)</span>级极差，记为<span class="math inline">\(R_p\)</span>。</p>
 </div>
 <div id="theorem-14-21" class="theorem theorem-block env-theorem">
 <p><strong>Theorem 14.21</strong>. 对于<a href="#model-one-way-anova-b6d95f4d" class="textbook-cross-reference" data-reference-key="model:one-way-anova" data-reference-kind="ref+label" data-reference-title="公式 14.1">公式 14.1</a>，多重假设检验问题： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCUhfMDpcYWxwaGFfaT1cYWxwaGFfaixcO1xmb3JhbGxcO2lcbmUgagpcZW5ke2VxdWF0aW9uKn0="></span></p>
@@ -2938,8 +3018,8 @@ r(p,n-a)=\frac{\dfrac{R_p}{\sigma/\sqrt{m}}}{\sqrt{MSE/\sigma^2}}
 <p>综上，原假设情况下<span class="math inline">\(r(p,n-a)\)</span>与<span class="math inline">\(\mu,\sigma^2\)</span>无关。</p>
 <p>(2)当<span class="math inline">\(\alpha_i=\alpha_j\)</span>不成立时，对应的<span class="math inline">\(R_p\)</span>会较大。因此当<span class="math inline">\(r(p,n-a)\)</span>较大时，有理由怀疑零假设。所以<span class="math inline">\(H_0\)</span>的拒绝域是右向单尾的，置信水平为<span class="math inline">\(1-\alpha\)</span>的拒绝域为<span class="math inline">\(\{r:r&gt;r_{p,f}(\alpha)\}\)</span>。&nbsp;◻</p>
 </div>
-<div id="note-14-16" class="note theorem-block env-note">
-<p><strong>note 14.16</strong>. Duncan多重比较的检验步骤为：将<span class="math inline">\(\overline{y}_{1.},\overline{y}_{2.},\dots,\overline{y}_{a.}\)</span>从小到大排序为<span class="math inline">\(\overline{y}^1,\overline{y}^2,\dots,\overline{y}^a\)</span>。令： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlyX3twLG4tYX0oXGFscGhhKVxzcXJ0e1xmcmFje01TZX17bX19PVJfcF57XHN0YXJ9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="note-14-17" class="note theorem-block env-note">
+<p><strong>note 14.17</strong>. Duncan多重比较的检验步骤为：将<span class="math inline">\(\overline{y}_{1.},\overline{y}_{2.},\dots,\overline{y}_{a.}\)</span>从小到大排序为<span class="math inline">\(\overline{y}^1,\overline{y}^2,\dots,\overline{y}^a\)</span>。令： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlyX3twLG4tYX0oXGFscGhhKVxzcXJ0e1xmcmFje01TZX17bX19PVJfcF57XHN0YXJ9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 r_{p,n-a}(\alpha)\sqrt{\frac{MSe}{m}}=R_p^{\star}
 \end{equation*}\]</span></p>
@@ -2955,49 +3035,49 @@ r_{p,n-a}(\alpha)\sqrt{\frac{MSe}{m}}=R_p^{\star}
 \end{gather*}\]</span></p>
 <p>若前者大于后者，则拒绝原假设，直到全部<span class="math inline">\(\binom{a}{2}\)</span>对水平均值比较完为止。因为<span class="math inline">\(r_{p_n-a}\)</span>的分布不好求解，使用Monte Carlo方法求<span class="math inline">\(r_{p,n-a}(\alpha)\)</span>的近似值。</p>
 </div>
-<div id="algorithm-14-2" class="algorithm-block">
+<div id="source-alg-DuncanMonteCarlo-2d897e74" class="algorithm-block">
 <div class="algorithm-caption">
 <p><span class="algorithm-number">算法 14.2</span> <span class="algorithm-title">Duncan多重比较法统计量分布的蒙特卡洛模拟</span></p>
 </div>
 <div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>Input:</strong> <span class="math inline">\(m\)</span>、<span class="math inline">\(p\)</span>、<span class="math inline">\(n-a\)</span>、<span class="math inline">\(N\)</span> <em>（组内重复次数、极差的级数、SSe的自由度、模拟次数）</em></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>Output:</strong> <span class="math inline">\(r(p,n-a)\)</span>的模拟分布</p>
+</div>
 <div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
-<p><strong>Input:</strong> <span class="math inline">\(m\)</span>, <span class="math inline">\(p\)</span>, <span class="math inline">\(n-a\)</span>, <span class="math inline">\(N\)</span> <em>（组内重复次数、极差的级数、SSe的自由度、模拟次数）</em></p>
-</div>
-<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
-<p><strong>Output:</strong> <span class="math inline">\(r(p,f)\)</span>的模拟分布</p>
-</div>
-<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="3">
 <p>初始化模拟值存储向量：<span class="math inline">\(List\gets\emptyset\)</span></p>
 </div>
-<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="4">
-<p><strong>for</strong> <span class="math inline">\(i \gets 1\)</span> to <span class="math inline">\(N\)</span> <strong>do</strong></p>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>for</strong> <span class="math inline">\(i\gets1\)</span> <strong>to</strong> <span class="math inline">\(N\)</span> <strong>do</strong></p>
 </div>
-<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="5">
-<p>生成<span class="math inline">\(2\)</span>个随机数<span class="math inline">\(x_i\sim N(0,1),\;i=1,2\)</span></p>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="3">
+<p>生成<span class="math inline">\(p\)</span>个随机数<span class="math inline">\(x_j\sim\operatorname{N}(0,1),\;j=1,2,\dots,p\)</span></p>
 </div>
-<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="6">
-<p>计算<span class="math inline">\(\frac{R_p}{\sigma/\sqrt{m}}\)</span>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkJXGZyYWN7Ul9wfXtcc2lnbWEvXHNxcnR7bX19PVxtYXhce3hfaTppPTEsMlx9LVxtaW5ce3hfaTppPTEsMlx9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="4">
+<p>计算<span class="math inline">\(\frac{R_p}{\sigma/\sqrt{m}}\)</span>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkJCVxmcmFje1JfcH17XHNpZ21hL1xzcXJ0e219fT1cbWF4XHt4X2o6aj0xLDIsXGRvdHMscFx9LVxtaW5ce3hfajpqPTEsMixcZG90cyxwXH0KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
-\frac{R_p}{\sigma/\sqrt{m}}=\max\{x_i:i=1,2\}-\min\{x_i:i=1,2\}
+\frac{R_p}{\sigma/\sqrt{m}}=\max\{x_j:j=1,2,\dots,p\}-\min\{x_j:j=1,2,\dots,p\}
 \end{equation*}\]</span></p>
 </div>
-<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="7">
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="5">
 <p>从<span class="math inline">\(\chi^2(n-a)\)</span>中产生一个随机数记为<span class="math inline">\(\chi^2\)</span></p>
 </div>
-<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="8">
-<p>计算<span class="math inline">\(r(p,n-a)\)</span>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkJcihwLG4tYSk9XGZyYWN7XGRmcmFje1JfcH17XHNpZ21hL1xzcXJ0e219fX17XHNxcnR7XGNoaV4yLyhuLWEpfX0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="6">
+<p>计算<span class="math inline">\(r(p,n-a)\)</span>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkJCXIocCxuLWEpPVxmcmFje1xkZnJhY3tSX3B9e1xzaWdtYS9cc3FydHttfX19e1xzcXJ0e1xjaGleMi8obi1hKX19ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 r(p,n-a)=\frac{\dfrac{R_p}{\sigma/\sqrt{m}}}{\sqrt{\chi^2/(n-a)}}
 \end{equation*}\]</span></p>
 </div>
-<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="9">
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="7">
 <p>将<span class="math inline">\(r(p,n-a)\)</span>加入<span class="math inline">\(List\)</span></p>
 </div>
-<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="10">
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="8">
 <p><strong>end for</strong></p>
 </div>
-<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="11">
-<p>返回<span class="math inline">\(List\)</span></p>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="9">
+<p><strong>return</strong> <span class="math inline">\(List\)</span></p>
 </div>
 </div>
 </div>
@@ -3030,11 +3110,11 @@ r(p,n-a)=\frac{\dfrac{R_p}{\sigma/\sqrt{m}}}{\sqrt{\chi^2/(n-a)}}
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
-<div id="definition-14-24" class="definition theorem-block env-definition">
-<p><strong>Definition 14.24</strong>. 对于<a href="#model-one-way-anova-b6d95f4d" class="textbook-cross-reference" data-reference-key="model:one-way-anova" data-reference-kind="ref+label" data-reference-title="公式 14.1">公式 14.1</a>，令<span class="math inline">\(H=(I_{a-1},-\mathbf{1}_{a-1}),\;\alpha=(\alpha_1, \alpha_2, \dots, \alpha_{a})^{\top}\)</span>。记<span class="math inline">\(\operatorname{SSE}_H-\operatorname{SSE}\)</span>为<span class="math inline">\(SSA\)</span>，称其为<strong>因子<span class="math inline">\(A\)</span>的平方和</strong>或<strong>组间平方和</strong>。称<span class="math inline">\(\operatorname{SSE}\)</span>为<strong>组内平方和</strong>。分别称<span class="math inline">\(MSA=SSA/(a-1)\)</span>和<span class="math inline">\(MSE=\operatorname{SSE}/(n-a)\)</span>为因子<span class="math inline">\(A\)</span>和误差的<strong>均方和</strong>。</p>
+<div id="definition-14-25" class="definition theorem-block env-definition">
+<p><strong>Definition 14.25</strong>. 对于<a href="#model-one-way-anova-b6d95f4d" class="textbook-cross-reference" data-reference-key="model:one-way-anova" data-reference-kind="ref+label" data-reference-title="公式 14.1">公式 14.1</a>，令<span class="math inline">\(H=(I_{a-1},-\mathbf{1}_{a-1}),\;\alpha=(\alpha_1, \alpha_2, \dots, \alpha_{a})^{\top}\)</span>。记<span class="math inline">\(\operatorname{SSE}_H-\operatorname{SSE}\)</span>为<span class="math inline">\(SSA\)</span>，称其为<strong>因子<span class="math inline">\(A\)</span>的平方和</strong>或<strong>组间平方和</strong>。称<span class="math inline">\(\operatorname{SSE}\)</span>为<strong>组内平方和</strong>。分别称<span class="math inline">\(MSA=SSA/(a-1)\)</span>和<span class="math inline">\(MSE=\operatorname{SSE}/(n-a)\)</span>为因子<span class="math inline">\(A\)</span>和误差的<strong>均方和</strong>。</p>
 </div>
-<div id="note-14-17" class="note theorem-block env-note">
-<p><strong>note 14.17</strong>. 下给出上述定义的解释。</p>
+<div id="note-14-18" class="note theorem-block env-note">
+<p><strong>note 14.18</strong>. 下给出上述定义的解释。</p>
 <p>记<span class="math inline">\(\overline{\varepsilon}_{i.}=\frac{1}{n_i}\sum\limits_{j=1}^{n_i}\varepsilon_{ij}\)</span>，由<a href="#theo-SSESSEACalculateAOV-7a1a11ac" class="textbook-cross-reference" data-reference-key="theo:SSESSEACalculateAOV" data-reference-kind="ref+label" data-reference-title="定理 14.22">定理 14.22</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1NTRX09XHN1bV97aT0xfV57YX1cc3VtX3tqPTF9XntuX2l9eV97aWp9XjItXHN1bV97aT0xfV57YX1cZnJhY3t5X3tpLn1eMn17bl9pfT1cc3VtX3tpPTF9XnthfVxzdW1fe2o9MX1ee25faX0oeV97aWp9LVxvdmVybGluZXt5fV97aS59KV4yPVxzdW1fe2k9MX1ee2F9XHN1bV97aj0xfV57bl9pfShcdmFyZXBzaWxvbl97aWp9LVxvdmVybGluZXtcdmFyZXBzaWxvbn1fe2kufSleMgpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{SSE}=\sum_{i=1}^{a}\sum_{j=1}^{n_i}y_{ij}^2-\sum_{i=1}^{a}\frac{y_{i.}^2}{n_i}=\sum_{i=1}^{a}\sum_{j=1}^{n_i}(y_{ij}-\overline{y}_{i.})^2=\sum_{i=1}^{a}\sum_{j=1}^{n_i}(\varepsilon_{ij}-\overline{\varepsilon}_{i.})^2
@@ -3049,7 +3129,7 @@ r(p,n-a)=\frac{\dfrac{R_p}{\sigma/\sqrt{m}}}{\sqrt{\chi^2/(n-a)}}
 <div class="textbook-table-scroll textbook-latex-table-scroll" role="region" tabindex="0">
 <table class="textbook-latex-table">
 <caption>
-单因子试验方差分析表
+表 14.2 单因子试验方差分析表
 </caption>
 <thead>
 <tr class="latex-table-rule-above">
@@ -3150,12 +3230,12 @@ SST
 <section id="id--7d5a0d76" class="level3">
 <h3 class="anchored" data-anchor-id="id--7d5a0d76"><span class="header-section-number">14.6.2</span> 可加效应的两因子方差分析</h3>
 <p><span class="todo-note todo-info" role="note">可加的含义与无重复</span></p>
-<div id="definition-14-25" class="definition theorem-block env-definition">
-<p><strong>Definition 14.25</strong>. 设因子<span class="math inline">\(A\)</span>有<span class="math inline">\(a\)</span>个水平，分别为<span class="math inline">\(A_1, A_2, \dots, A_{a}\)</span>，因子<span class="math inline">\(B\)</span>有<span class="math inline">\(b\)</span>个水平，分别为<span class="math inline">\(B_1, B_2, \dots, B_{b}\)</span>，有数据：</p>
+<div id="definition-14-26" class="definition theorem-block env-definition">
+<p><strong>Definition 14.26</strong>. 设因子<span class="math inline">\(A\)</span>有<span class="math inline">\(a\)</span>个水平，分别为<span class="math inline">\(A_1, A_2, \dots, A_{a}\)</span>，因子<span class="math inline">\(B\)</span>有<span class="math inline">\(b\)</span>个水平，分别为<span class="math inline">\(B_1, B_2, \dots, B_{b}\)</span>，有数据：</p>
 <div class="textbook-table-scroll textbook-latex-table-scroll" role="region" tabindex="0">
 <table class="textbook-latex-table">
 <caption>
-无重复两因子试验数据表
+表 14.3 无重复两因子试验数据表
 </caption>
 <thead>
 <tr class="latex-table-rule-above">
@@ -3286,7 +3366,7 @@ X=
 g(\mu_i)=\eta_i=x_i^{\top}\beta
 \end{equation*}\]</span></p>
 <div id="model-GLM-e9617205" class="definition theorem-block env-definition">
-<p><strong>Definition 14.26</strong>. 称以下模型为<strong>广义线性模型</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl5X2lcbWlkIHhfaVxzaW0gRihcbXVfaSxccGhpKSwgXHF1YWQgaT0xLDIsXGRvdHMsbgpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><strong>Definition 14.27</strong>. 称以下模型为<strong>广义线性模型</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl5X2lcbWlkIHhfaVxzaW0gRihcbXVfaSxccGhpKSwgXHF1YWQgaT0xLDIsXGRvdHMsbgpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 y_i\mid x_i\sim F(\mu_i,\phi), \quad i=1,2,\dots,n
 \end{equation*}\]</span></p>
@@ -3311,14 +3391,14 @@ g(\mu_i)=\eta_i=x_i^{\top}\beta
 <section id="logistic-03d54257" class="level3">
 <h3 class="anchored" data-anchor-id="logistic-03d54257"><span class="header-section-number">14.7.1</span> Logistic模型</h3>
 <div id="model-LogisticRegression-0fdc3177" class="definition theorem-block env-definition">
-<p><strong>Definition 14.27</strong>. 称以下模型为<strong>逻辑回归模型</strong>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl5X2lcbWlkIHhfaVxzaW1cb3BlcmF0b3JuYW1le0Jlcm5vdWxsaX0ocF9pKSxccXVhZFxvcGVyYXRvcm5hbWV7RX0oeV9pXG1pZCB4X2kpPXBfaT1cb3BlcmF0b3JuYW1le1B9KHlfaT0xXG1pZCB4X2kpPVxmcmFjezF9ezErXGV4cCgteF9pXntcdG9wfVxiZXRhKX0sXHF1YWQgaT0xLDIsXGRvdHMsbgpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><strong>Definition 14.28</strong>. 称以下模型为<strong>逻辑回归模型</strong>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl5X2lcbWlkIHhfaVxzaW1cb3BlcmF0b3JuYW1le0Jlcm5vdWxsaX0ocF9pKSxccXVhZFxvcGVyYXRvcm5hbWV7RX0oeV9pXG1pZCB4X2kpPXBfaT1cb3BlcmF0b3JuYW1le1B9KHlfaT0xXG1pZCB4X2kpPVxmcmFjezF9ezErXGV4cCgteF9pXntcdG9wfVxiZXRhKX0sXHF1YWQgaT0xLDIsXGRvdHMsbgpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 y_i\mid x_i\sim\operatorname{Bernoulli}(p_i),\quad\operatorname{E}(y_i\mid x_i)=p_i=\operatorname{P}(y_i=1\mid x_i)=\frac{1}{1+\exp(-x_i^{\top}\beta)},\quad i=1,2,\dots,n
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(y_i\)</span>相互独立，<span class="math inline">\(x_i\)</span>为第<span class="math inline">\(i\)</span>个观测的<span class="math inline">\(p\times1\)</span>特征向量，<span class="math inline">\(\beta\)</span>为<span class="math inline">\(p\times1\)</span>的回归系数向量。记<span class="math inline">\(p=(p_1, p_2, \dots, p_{n})^{\top},\;X=(x_1^{\top};x_2^{\top};\cdots;x_n^{\top}),\;y=(y_1, y_2, \dots, y_{n})^{\top}\)</span>。</p>
 </div>
 <div id="prop-LogisticRegression-735d0566" class="property theorem-block env-property">
-<p><strong>Property 14.7.1</strong>. 对于<a href="#model-LogisticRegression-0fdc3177" class="textbook-cross-reference" data-reference-key="model:LogisticRegression" data-reference-kind="ref+label" data-reference-title="定义 14.27">定义 14.27</a>，有如下结论：</p>
+<p><strong>Property 14.7.1</strong>. 对于<a href="#model-LogisticRegression-0fdc3177" class="textbook-cross-reference" data-reference-key="model:LogisticRegression" data-reference-kind="ref+label" data-reference-title="定义 14.28">定义 14.28</a>，有如下结论：</p>
 <ol type="1">
 <li><p>模型的对数似然函数为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkJXGxuIEwoXGJldGEpPVxzdW1fe2k9MX1ee259XGxlZnRbeV9pXGxvZyhwX2kpKygxLXlfaSlcbG9nKDEtcF9pKVxyaWdodF0KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
@@ -3361,7 +3441,7 @@ y_i\mid x_i\sim\operatorname{Bernoulli}(p_i),\quad\operatorname{E}(y_i\mid x_i)=
 <section id="poisson-80ddd596" class="level3">
 <h3 class="anchored" data-anchor-id="poisson-80ddd596"><span class="header-section-number">14.7.2</span> Poisson回归</h3>
 <div id="model-PoissonRegression-105dc12f" class="definition theorem-block env-definition">
-<p><strong>Definition 14.28</strong>. 称以下模型为<strong>Poisson回归模型</strong>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl5X2lcbWlkIHhfaVxzaW1cb3BlcmF0b3JuYW1le1BvaXNzb259KFxsYW1iZGFfaSksXHF1YWRcb3BlcmF0b3JuYW1le0V9KHlfaVxtaWQgeF9pKT1cb3BlcmF0b3JuYW1le1Zhcn0oeV9pXG1pZCB4X2kpPVxsYW1iZGFfaT1cZXhwKHhfaV57XHRvcH1cYmV0YSksXHF1YWQgaT0xLDIsXGRvdHMsbi4KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><strong>Definition 14.29</strong>. 称以下模型为<strong>Poisson回归模型</strong>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl5X2lcbWlkIHhfaVxzaW1cb3BlcmF0b3JuYW1le1BvaXNzb259KFxsYW1iZGFfaSksXHF1YWRcb3BlcmF0b3JuYW1le0V9KHlfaVxtaWQgeF9pKT1cb3BlcmF0b3JuYW1le1Zhcn0oeV9pXG1pZCB4X2kpPVxsYW1iZGFfaT1cZXhwKHhfaV57XHRvcH1cYmV0YSksXHF1YWQgaT0xLDIsXGRvdHMsbi4KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 y_i\mid x_i\sim\operatorname{Poisson}(\lambda_i),\quad\operatorname{E}(y_i\mid x_i)=\operatorname{Var}(y_i\mid x_i)=\lambda_i=\exp(x_i^{\top}\beta),\quad i=1,2,\dots,n.
 \end{equation*}\]</span></p>
@@ -3371,7 +3451,7 @@ y_i\mid x_i\sim\operatorname{Poisson}(\lambda_i),\quad\operatorname{E}(y_i\mid x
 \end{equation*}\]</span></p>
 </div>
 <div id="prop-PoissonRegression-eade0694" class="property theorem-block env-property">
-<p><strong>Property 14.7.2</strong>. 对于<a href="#model-PoissonRegression-105dc12f" class="textbook-cross-reference" data-reference-key="model:PoissonRegression" data-reference-kind="ref+label" data-reference-title="定义 14.28">定义 14.28</a>，有如下结论：</p>
+<p><strong>Property 14.7.2</strong>. 对于<a href="#model-PoissonRegression-105dc12f" class="textbook-cross-reference" data-reference-key="model:PoissonRegression" data-reference-kind="ref+label" data-reference-title="定义 14.29">定义 14.29</a>，有如下结论：</p>
 <ol type="1">
 <li><p>模型的对数似然函数为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkJXGxuIEwoXGJldGEpPVxzdW1fe2k9MX1ee259XGxlZnRbeF9pXlRcYmV0YSB5X2ktXGxuKHlfaSEpLVxsYW1iZGFfaVxyaWdodF0KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
@@ -3410,7 +3490,7 @@ y_i\mid x_i\sim\operatorname{Poisson}(\lambda_i),\quad\operatorname{E}(y_i\mid x
 <p><span class="math display">\[\begin{equation*}
 X^{\top}WXz=X^{\top}(y-\mu)
 \end{equation*}\]</span></p>
-<p>这其实正是<a href="#model-GeneralizedLinearModel-fa9659a4" class="textbook-cross-reference" data-reference-key="model:GeneralizedLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.10">定义 14.10</a>下的正则方程。这类问题的一个重要优点在于，极大似然估计最终可以转化为带权残差意义下的最小化问题，从而在形式上延续了最小二乘法通过最小化残差确定参数的直观思想。</p>
+<p>这其实正是<a href="#model-GeneralizedLinearModel-fa9659a4" class="textbook-cross-reference" data-reference-key="model:GeneralizedLinearModel" data-reference-kind="ref+label" data-reference-title="定义 14.11">定义 14.11</a>下的正则方程。这类问题的一个重要优点在于，极大似然估计最终可以转化为带权残差意义下的最小化问题，从而在形式上延续了最小二乘法通过最小化残差确定参数的直观思想。</p>
 <p>能不能将这类推广的线性模型统一起来，用一个统一的公式去表达？如果可以的话，能不能尽量扩大这个统一形式的表达范围，使得囊括尽可能多的情况？我们需要来分析产生上述线性方程组的原因。</p>
 <p>首先分析<span class="math inline">\(\ln L(\beta)\)</span>关于<span class="math inline">\(\beta\)</span>的梯度。<span class="math inline">\(\beta\)</span>是通过预测均值引入模型的，要求关于<span class="math inline">\(\beta\)</span>的梯度必然需要引入均值进行链式法则计算，而模型与均值的关系一般为均值与模型参数有一个函数关系，于是我们设定模型的参数为<span class="math inline">\(\theta\)</span>，这里的<span class="math inline">\(\theta\)</span>未必是模型原始的参数，而可能是原始参数的一个函数。由<a href="../chapters/calculus.html#prop-FrechetDifferential-9f3018f4" class="textbook-cross-reference" data-reference-key="prop:FrechetDifferential" data-reference-kind="ref+label" data-reference-title="性质 4.1.1" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 4.1.1(6)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCSZcZnJhY3tcbWF0aG9we31cIVxtYXRocm17ZH1cbG4gTChcYmV0YSl9e1xtYXRob3B7fVwhXG1hdGhybXtkfVxiZXRhfT1cbGVmdChcZnJhY3tcbWF0aG9we31cIVxtYXRocm17ZH1cZXRhfXtcbWF0aG9we31cIVxtYXRocm17ZH1cYmV0YX1ccmlnaHQpXntcdG9wfVxmcmFje1xtYXRob3B7fVwhXG1hdGhybXtkfVxsbiBMKFxiZXRhKX17XG1hdGhvcHt9XCFcbWF0aHJte2R9XGV0YX09XGxlZnQoXGZyYWN7XG1hdGhvcHt9XCFcbWF0aHJte2R9XGV0YX17XG1hdGhvcHt9XCFcbWF0aHJte2R9XGJldGF9XHJpZ2h0KV57XHRvcH1cbGVmdChcZnJhY3tcbWF0aG9we31cIVxtYXRocm17ZH1cbXV9e1xtYXRob3B7fVwhXG1hdGhybXtkfVxldGF9XHJpZ2h0KV57XHRvcH1cZnJhY3tcbWF0aG9we31cIVxtYXRocm17ZH1cbG4gTChcYmV0YSl9e1xtYXRob3B7fVwhXG1hdGhybXtkfVxtdX0gXFwKCT0mXGxlZnQoXGZyYWN7XG1hdGhvcHt9XCFcbWF0aHJte2R9XGV0YX17XG1hdGhvcHt9XCFcbWF0aHJte2R9XGJldGF9XHJpZ2h0KV57XHRvcH1cbGVmdChcZnJhY3tcbWF0aG9we31cIVxtYXRocm17ZH1cbXV9e1xtYXRob3B7fVwhXG1hdGhybXtkfVxldGF9XHJpZ2h0KV57XHRvcH1cbGVmdChcZnJhY3tcbWF0aG9we31cIVxtYXRocm17ZH1cdGhldGF9e1xtYXRob3B7fVwhXG1hdGhybXtkfVxtdX1ccmlnaHQpXntcdG9wfVxmcmFje1xtYXRob3B7fVwhXG1hdGhybXtkfVxsbiBMKFxiZXRhKX17XG1hdGhvcHt9XCFcbWF0aHJte2R9XHRoZXRhfT1YXntcdG9wfVxmcmFje1xtYXRob3B7fVwhXG1hdGhybXtkfVxtdX17XG1hdGhvcHt9XCFcbWF0aHJte2R9XGV0YX1cZnJhY3tcbWF0aG9we31cIVxtYXRocm17ZH1cdGhldGF9e1xtYXRob3B7fVwhXG1hdGhybXtkfVxtdX1cZnJhY3tcbWF0aG9we31cIVxtYXRocm17ZH1cbG4gTChcYmV0YSl9e1xtYXRob3B7fVwhXG1hdGhybXtkfVx0aGV0YX0KXGVuZHthbGlnbip9"></span></p>
 <p><span class="math display">\[\begin{align*}

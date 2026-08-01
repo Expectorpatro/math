@@ -1,177 +1,840 @@
 \section{主成分分析}
 
-\gls{PCA}的目的是：对数据进行一个线性变换，在最大程度保留原始信息的前提下进行数据的降维。反映在变量上就是说，对所有的变量进行一个线性变换，使得变换后得到的变量彼此之间不相关，并且是所有可能的线性变换中方差最大的一些变量（我们认为方差体现了信息量的大小）。
+\gls{PCA}是一种无监督的线性降维方法。它通过正交变换将原变量改写为一组彼此不相关的线性组合，并按照这些线性组合的方差从大到小排列。保留前几个主成分，就等价于在平方Euclid距离下保留原数据中方差最大的低维线性结构。\par
+需要注意，“方差较大意味着信息较多”并不是一般意义上的信息论结论。在PCA中，它的准确含义是：在所有给定维数的正交线性投影中，主成分子空间能够保留最大的总方差，并使平均平方重构误差最小。
 
 \subsection{总体主成分分析}
+
 \begin{definition}
-	设$\mathbf{X}$是一个$n$维随机向量，其均值向量为$\mu=(\seq{\mu}{n})$、协方差矩阵为$\Sigma=(\sigma_{ij}),\;i,j=1,2,\dots,n$。对$\mathbf{X}$进行一个线性变换$\mathcal{T}$得到一个$n$维随机向量$\mathbf{Y}=(\seq{Y}{n})^{\top}$，$\mathcal{T}$的矩阵为$A=(\alpha_1^{\top};\alpha_2^{\top};\cdots;\alpha_n^{\top})$。若：
-	\begin{enumerate}
-		\item $AA^{\top}=I_n$；
-		\item $\operatorname{Cov}(\mathbf{Y})$是一个对角矩阵，即$\operatorname{Cov}(Y_i,Y_j)=0,\;i\ne j$；
-		\item $Y_1$是所有对$\mathbf{X}$进行线性变换后得到的随机变量中方差最大的随机变量，$Y_2$是与$Y_1$不相关的所有对$\mathbf{X}$进行线性变换后得到的随机变量中方差第二大的随机变量，以此类推。
-	\end{enumerate}
-	则分别称$\seq{Y}{n}$是第一、第二、……、第$n$主成分。
+	设$\mathbf{X}=(\seq{X}{n})^{\top}$是概率空间$(X,\mathscr{F},P)$上的$n$维随机向量，$\operatorname{E}(\mathbf{X}^{\top}\mathbf{X})<+\infty$，其均值向量和协方差矩阵分别为：
+	\begin{equation*}
+		\boldsymbol{\mu}=(\seq{\mu}{n})^{\top},\;
+		\Sigma=(\sigma_{ij})\in M_n(\mathbb{R})
+	\end{equation*}
+	在单位向量中依次选择$\seq{\alpha}{n}$，使得：
+	\begin{align*}
+		\alpha_1
+		&\in\operatorname*{arg\,max}_{||\alpha||=1}
+		\operatorname{Var}(\alpha^{\top}\mathbf{X}), \\
+		\alpha_i
+		&\in\operatorname*{arg\,max}_{\substack{||\alpha||=1\\
+		\alpha\perp\alpha_1,\dots,\alpha_{i-1}}}
+		\operatorname{Var}(\alpha^{\top}\mathbf{X}),
+		\quad i=2,3,\dots,n.
+	\end{align*}
+	称$Y_i=\alpha_i^{\top}\mathbf{X}$为$\mathbf{X}$的第$i$\gls{PrincipalComponent}，称$\alpha_i$为第$i$主成分方向，称$\alpha_i$的各分量为第$i$主成分的线性组合系数。
 \end{definition}
-\begin{theorem}
-	若不对$\mathcal{T}$的矩阵$A$作出相应的限制，即去除$AA^{\top}=I_n$的限制，对$\mathbf{X}$进行线性变换后得到的$Y_i,\;i=1,2,\dots,n$的方差可以任意大。
-\end{theorem}
-\begin{proof}
-	由\cref{prop:CovMat}(3)可知：
+
+\begin{note}
+	单位长度约束用于排除任意放缩。事实上，由\cref{prop:CovMat}(3)可知：
 	\begin{equation*}
-		\operatorname{Var}(Y_i)=\operatorname{Cov}(\mathbf{Y})(i,i)=\operatorname{Cov}(A\mathbf{X})(i,i)=(A\Sigma A^{\top})(i,i)=\alpha_i^{\top}\Sigma\alpha_i
+		\operatorname{Var}(\alpha^{\top}\mathbf{X})
+		=\alpha^{\top}\Sigma\alpha.
 	\end{equation*}
-	若$\operatorname{Var}(Y_i)>0$，取矩阵$B=kA$，$\mathbf{Z}=kA\mathbf{X}$，则：
+	若$\Sigma\ne\mathbf{0}$，则存在$\alpha_0$使$\alpha_0^{\top}\Sigma\alpha_0>0$，于是：
 	\begin{equation*}
-		\operatorname{Var}(Z_i)=(k\alpha_i)^{\top}\Sigma(k\alpha_i)=k^2\alpha_i^{\top}\Sigma\alpha_i
+		\operatorname{Var}(c\alpha_0^{\top}\mathbf{X})
+		=c^2\alpha_0^{\top}\Sigma\alpha_0
+		\longrightarrow+\infty,\quad c\longrightarrow+\infty.
 	\end{equation*}
-	即改变$k$的值就可对$Y_i,\;i=1,2,\dots,n$的方差进行任意的放缩。
-\end{proof}
+	因此，若不限制方向向量的长度，最大方差问题没有有限解。当$\Sigma=\mathbf{0}$时，所有线性组合的方差都为$0$。
+\end{note}
+
 \begin{theorem}\label{theo:PCA}
-	设$\mathbf{X}$是一个$n$维随机向量，$\Sigma$是其协方差矩阵，$\Sigma$的特征值\footnote{若特征多项式有重根，则标准正交化特征向量组不唯一，主成分也不唯一。}从大到小记作$\seq{\lambda}{n}$，$\seq{\varphi}{n}$为对应的标准正交化特征向量，则$\mathbf{X}$的第$i$个主成分以及其方差为：
+	设$\Sigma$的特征值从大到小记作：
 	\begin{equation*}
-		Y_i=\varphi_i^{\top}\mathbf{X},\;\operatorname{Var}(Y_i)=\varphi_i^{\top}\Sigma\varphi_i=\lambda_i
+		\lambda_1\geqslant\lambda_2\geqslant\cdots\geqslant\lambda_n\geqslant0,
+	\end{equation*}
+	$\seq{\varphi}{n}$为对应的一组标准正交特征向量，其中：
+	\begin{equation*}
+		\varphi_i=(\varphi_{1i},\varphi_{2i},\dots,\varphi_{ni})^{\top}.
+	\end{equation*}
+	则主成分方向可取为$\alpha_i=\varphi_i$，从而：
+	\begin{equation*}
+		Y_i=\varphi_i^{\top}\mathbf{X},\quad
+		\operatorname{E}(Y_i)=\varphi_i^{\top}\boldsymbol{\mu},\quad
+		\operatorname{Var}(Y_i)=\lambda_i,\quad i=1,2,\dots,n.
+	\end{equation*}
+	并且不同主成分彼此不相关，即：
+	\begin{equation*}
+		\operatorname{Cov}(Y_i,Y_j)=0,\quad i\ne j.
 	\end{equation*}
 \end{theorem}
 \begin{proof}
-	考虑到：
+	由\cref{prop:CovMat}(2)可知$\Sigma$是实对称半正定矩阵，所以根据\cref{prop:HermitianMatEigen}(3)可取$\Sigma$的一组标准正交特征向量$\seq{\varphi}{n}$，并且其特征值均非负。\par
+	对任意单位向量$\alpha\in\mathbb{R}^{n}$，存在$\seq{c}{n}$使得：
 	\begin{equation*}
-		\operatorname{Var}(Y_i)=\alpha_i^{\top}\Sigma\alpha_i,\quad
-		\operatorname{Cov}(Y_i,Y_j)=\alpha_i^{\top}\Sigma\alpha_j
+		\alpha=\sum_{j=1}^{n}c_j\varphi_j,\quad
+		\sum_{j=1}^{n}c_j^2=1.
 	\end{equation*}
-	求解主成分的过程即为求解：
-	\begin{gather*}
-		\alpha_i=\arg\max\alpha_i^{\top}\Sigma\alpha_i,\quad
-		\operatorname{s.t.}
-		\begin{cases}
-			||\alpha_i||=1,\;&i=1,2,\dots,n\\
-			\alpha_i^{\top}\Sigma\alpha_j=0,\;&j<i
-		\end{cases}
-	\end{gather*}
-	由\cref{theo:maxminxAx/xx}可知上述结论成立。
+	由$\Sigma\varphi_j=\lambda_j\varphi_j$可得：
+	\begin{equation*}
+		\operatorname{Var}(\alpha^{\top}\mathbf{X})
+		=\alpha^{\top}\Sigma\alpha
+		=\sum_{j=1}^{n}\lambda_jc_j^2
+		\leqslant\lambda_1.
+	\end{equation*}
+	取$\alpha=\varphi_1$时等号成立，所以第一主成分方向可取为$\varphi_1$。\par
+	设前$i-1$个主成分方向已依次取为$\varphi_1,\dots,\varphi_{i-1}$。若$\alpha\perp\varphi_1,\dots,\varphi_{i-1}$，则$c_1=\cdots=c_{i-1}=0$，于是：
+	\begin{equation*}
+		\operatorname{Var}(\alpha^{\top}\mathbf{X})
+		=\sum_{j=i}^{n}\lambda_jc_j^2
+		\leqslant\lambda_i\sum_{j=i}^{n}c_j^2
+		=\lambda_i.
+	\end{equation*}
+	取$\alpha=\varphi_i$时等号成立，所以第$i$主成分方向可取为$\varphi_i$。由数学归纳法可知$\seq{\varphi}{n}$依次给出全部主成分方向。\par
+	最后，由\cref{prop:CovMat}(3)可得：
+	\begin{equation*}
+		\operatorname{Cov}(Y_i,Y_j)
+		=\varphi_i^{\top}\Sigma\varphi_j
+		=\lambda_j\varphi_i^{\top}\varphi_j
+		=0,\quad i\ne j.
+	\end{equation*}
+	综上，结论成立。
 \end{proof}
-\begin{definition}
-	将第$i$个主成分$Y_i$与变量$X_j$的相关系数$\rho(Y_i,X_j)$称为\gls{FactorLoading}。
-\end{definition}
-\begin{definition}
-	称主成分$\seq{Y}{k}$与变量$X_j$之间的复相关系数的平方$R^2$为$\seq{Y}{k}$对$X_j$的贡献率。
-\end{definition}
-\begin{property}\label{prop:PCA}
-	总体主成分具有如下性质：
+
+\begin{note}
+	令$\mathbf{Z}=\mathbf{X}-\boldsymbol{\mu}$，则：
+	\begin{equation*}
+		Y_i-\operatorname{E}(Y_i)=\varphi_i^{\top}\mathbf{Z}.
+	\end{equation*}
+	有些文献直接将$\varphi_i^{\top}\mathbf{Z}$称为第$i$主成分。两种写法只相差一个常数，因此主成分方向、方差、相关系数与重构误差完全相同。样本PCA中的“主成分得分”通常指中心化后的取值。
+\end{note}
+
+\begin{note}
+	主成分方向具有如下不唯一性：
 	\begin{enumerate}
-		\item $\operatorname{Cov}(\mathbf{Y})=\operatorname{diag}\{\seq{\lambda}{n}\}$；
-		\item $\mathbf{Y}$的方差之和等于$\mathbf{X}$的方差之和，即$\sum\limits_{i=1}^{n}\lambda_i=\sum\limits_{i=1}^{n}\sigma_{ii}$；
-		\item $\rho(Y_i,X_j)=\dfrac{\sqrt{\lambda_i}\alpha_{ij}}{\sqrt{\sigma_{jj}}},\;i,j=1,2,\dots,n$；
-		\item 第$i$个主成分与原变量的因子负荷量满足$\sum\limits_{j=1}^{n}\sigma_{jj}\rho^2(Y_i,X_j)=\lambda_i$；
-		\item 原变量的第$j$个分量与所有主成分的因子负荷量满足$\sum\limits_{i=1}^{n}\rho^2(Y_i,X_j)=1$；
-		\item 若$\Sigma>\mathbf{0}$，则原变量的第$j$个分量与前$k$个主成分之间的复相关系数满足：
+		\item 即使$\lambda_i$是单特征值，$\varphi_i$与$-\varphi_i$都可以作为主成分方向；改变方向的正负号只会同时改变相应主成分得分和因子负荷量的正负号；
+		\item 若特征值有重根，则对应的特征子空间唯一，但其中选取的标准正交基不唯一，所以单个主成分方向不唯一；
+		\item 若$1\leqslant k<n$且$\lambda_k>\lambda_{k+1}$，则前$k$个特征向量张成的主成分子空间唯一；若$\lambda_k=\lambda_{k+1}$，则最优保留方差仍然唯一，但具体的$k$维最优子空间可能不唯一。
+	\end{enumerate}
+\end{note}
+
+\begin{property}\label{prop:PCA}
+	记：
+	\begin{equation*}
+		V=(\varphi_1,\varphi_2,\dots,\varphi_n),\quad
+		\varLambda=\operatorname{diag}\{\seq{\lambda}{n}\},\quad
+		\mathbf{Y}=(\seq{Y}{n})^{\top}=V^{\top}\mathbf{X}.
+	\end{equation*}
+	则总体主成分具有如下性质：
+	\begin{enumerate}
+		\item $V$是正交矩阵，并且：
 		\begin{equation*}
-			R^2=\sum_{i=1}^{k}\rho^2(Y_i,X_j)=\sum_{i=1}^{k}\frac{\lambda_i\alpha_{ij}^2}{\sigma_{ii}}
+			\Sigma=V\varLambda V^{\top},\quad
+			V^{\top}\Sigma V=\varLambda;
+		\end{equation*}
+		\item $\operatorname{E}(\mathbf{Y})=V^{\top}\boldsymbol{\mu}$，且：
+		\begin{equation*}
+			\operatorname{Cov}(\mathbf{Y})
+			=\operatorname{diag}\{\seq{\lambda}{n}\};
+		\end{equation*}
+		\item 主成分的总方差等于原变量的总方差，即：
+		\begin{equation*}
+			\sum_{i=1}^{n}\operatorname{Var}(Y_i)
+			=\sum_{i=1}^{n}\lambda_i
+			=\operatorname{tr}(\Sigma)
+			=\sum_{j=1}^{n}\sigma_{jj};
+		\end{equation*}
+		\item 使用全部主成分时，正交变换不会损失信息，并且：
+		\begin{equation*}
+			\mathbf{X}=V\mathbf{Y},\quad
+			\mathbf{X}-\boldsymbol{\mu}
+			=V[\mathbf{Y}-\operatorname{E}(\mathbf{Y})].
 		\end{equation*}
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)由\cref{theo:PCA}直接可得。\par
-	(2)由\cref{prop:CovMat}(3)和\cref{prop:Trace}(3)可得：
-	\begin{align*}
-		\sum_{i=1}^{n}\operatorname{Var}(Y_i)
-		&=\operatorname{tr}[\operatorname{Cov}(\mathbf{Y})]=\operatorname{tr}[\operatorname{Cov}(A\mathbf{X})]=\operatorname{tr}(A\Sigma A^{\top}) \\
-		&=\operatorname{tr}(\Sigma A^{\top}A)=\operatorname{tr}(\Sigma)=\sum_{i=1}^{n}\operatorname{Var}(X_i)
-	\end{align*}\par
-	(3)由\cref{prop:CovMat}(3)可得：
-	\begin{align*}
-		\rho(Y_i,X_j)
-		&=\frac{\operatorname{Cov}(Y_i,X_j)}{\sqrt{\operatorname{Var}(Y_i)\operatorname{Var}(X_j)}}=\frac{\operatorname{Cov}(\alpha_i^{\top}\mathbf{X},e_j^{\top}\mathbf{X})}{\sqrt{\lambda_i\sigma_{jj}}} \\
-		&=\frac{\alpha_i^{\top}\Sigma e_j}{\sqrt{\lambda_i\sigma_{jj}}}=\frac{e_j^{\top}\Sigma\alpha_i}{\sqrt{\lambda_i\sigma_{jj}}}=\frac{e_j^{\top}\lambda_i\alpha_i}{\sqrt{\lambda_i\sigma_{jj}}}=\frac{\sqrt{\lambda_i}\alpha_{ij}}{\sqrt{\sigma_{jj}}}
-	\end{align*}\par
-	(4)由(3)可得：
+	(1)由$\seq{\varphi}{n}$是标准正交向量组可得$V^{\top}V=VV^{\top}=I_n$。又因为$\Sigma\varphi_i=\lambda_i\varphi_i$，所以：
 	\begin{equation*}
-		\sum_{j=1}^{n}\sigma_{jj}\rho^2(Y_i,X_j)=\sum_{j=1}^{n}\lambda_i\alpha_{ij}^2=\lambda_i\alpha_i^{\top}\alpha_i=\lambda_i
-	\end{equation*}\par
-	(5)由\cref{prop:MultipleCorrelationCoefficient}(3)和\cref{prop:CorrelationCoefficient}(1)立即可得。\par
-	(6)当$\Sigma>\mathbf{0}$时，由\cref{theo:PositiveDefinite}(3.5)可知$\Sigma$的特征值都大于$0$，根据\cref{theo:PCA}即$\operatorname{Var}(Y_i)>0$，于是由\cref{prop:MultipleCorrelationCoefficient}(1)和(3)可立即得出结论。
-\end{proof}
-\begin{definition}
-	称第$i$个主成分$Y_i$的方差与所有主成分方差之和的比值为$Y_i$的方差贡献率，记为$\eta_i$，即$\eta_i=\lambda_i\Big/\sum\limits_{j=1}^{n}\lambda_j$。将$\sum\limits_{i=1}^{k}\lambda_i\Big/\sum\limits_{i=1}^{n}\lambda_i$称为主成分$\seq{Y}{k}$的累计方差贡献率。
-\end{definition}
-由前述，我们一般通过选择主成分的个数来实现对数据的降维，即选择主成分的个数使它们的累计方差贡献率达到一定比例（一般为$85\%$）。
-
-\subsection{样本主成分分析}
-假设对$n$维随机变量$\mathbf{X}$进行$m$次独立观测，得到$m$个$n$维样本$\seq{x}{m}$。在样本主成分分析中，我们使用样本来估计$\mathbf{X}$的协方差矩阵，即：
-\begin{equation*}
-	\hat{\boldsymbol{\mu}}=\frac{1}{m}\sum_{i=1}^{m}x_i,\;S=(s_{ij})=\frac{1}{m-1}\sum_{i=1}^{m}(x_i-\hat{\boldsymbol{\mu}})(x_i-\hat{\boldsymbol{\mu}})^{\top},\;i,j=1,2,\dots,n
-\end{equation*}
-其余步骤与总体主成分分析一致。
-
-\subsection{注意事项}
-\subsubsection{多重共线性问题}
-当原始变量出现多重共线性时，重复的信息在方差占比中会重复进行计算，导致方差占比被改变。为了达到一定的累积贡献率，就会不可避免地使得主成分也融入重复信息（可以从一个极端案例来想：添加一个重复变量到原先一点都不重复的观测样本集中），所以主成分是无法解决重复信息问题的。主成分分析从另一个角度是依赖于多重共线性的：我们需要舍弃方差贡献率小的主成分。如果没有方差贡献率较小的主成分，这说明原数据几乎没有多重共线性情况，此时无论舍弃哪个主成分都将导致严重的信息损失。
-\subsubsection{相关矩阵导出主成分}
-上面我们都是对协方差矩阵的特征值分解进行计算，但在现实中，各变量的量纲可能不一样，这就导致各变量方差的量级会不一样，方差越大，由\cref{prop:PCA}(2)可知必然会导致该变量在主成分构成中的占比变大，但此时的大方差可能仅仅是因为量纲的不同，从变异系数的角度可能各变量的波动差距没有那么明显。为了消除量纲带来的影响，我们会对数据进行标准化，注意到标准化后数据的协方差矩阵即为相关矩阵，此时将相关矩阵作对应的特征值分解即可。但需要注意：标准化后\textbf{各变量方差相等均为$1$，损失了部分信息}，所以会使得\textbf{标准化后的各变量在对主成分构成中的作用趋于相等}。因此，取值范围在同量级的数据建议使用协方差矩阵直接求解主成分，若变量之间数量级差异较大，再使用相关矩阵求解主成分。
-\begin{algorithm}[H]
-	\caption{主成分分析（PCA）}
-	\begin{algorithmic}[1]
-		\State \textbf{Input:} 原始数据矩阵 $\mathbf{X}$
-		\State \textbf{Output:} 主成分得分 $\mathbf{Y}$，选定的主成分个数 $k$
-		
-		\If{变量量纲差异明显}
-		\State 将$\mathbf{X}$标准化得到$\mathbf{Z}$
-		\Else
-		\State 保留原始数据 $\mathbf{Z} = \mathbf{X}$
-		\EndIf
-		
-		\If{存在多重共线性（最小特征值 $\approx 0$）}
-		\State 删除或合并相关变量
-		\Else
-		\State 保留原始变量
-		\EndIf
-		
-		\State 计算协方差矩阵：$\Sigma = \text{cov}(\mathbf{Z})$，对 $\Sigma$ 进行特征值分解：$\Sigma = A \Lambda A^{\top}$
-		\State 初始化 $k \gets 1$, 累计贡献率 $\gets 0$
-	
-		\Repeat
-		\State 选择第 $k$ 个主成分，更新累计贡献率
-		\If{累计贡献率 $< $ 阈值}
-		\State $k \gets k + 1$
-		\EndIf
-		\Until{累计贡献率 $\geqslant$ 阈值}
-		
-		\State 计算主成分得分：$\mathbf{Y}=A_k\mathbf{Z}$（$A_k$为矩阵$A$的前$k$行构成的矩阵），输出 $\mathbf{Y}$ 和 $k$
-	\end{algorithmic}
-\end{algorithm}
-
-\subsection{应用：主成分回归}
-\begin{note}
-	我们将介绍PCA在解决线性模型复共线性问题上的应用，接下来将延续在岭估计处提到的线性回归模型的典则形式，并将$\operatorname{diag}\{\seq{\lambda}{p-1}\}$设置为$\lambda_1>\lambda_2>\cdots>\lambda_{p-1}$的形式。由\info{矩阵多项式的特征向量}可知$Y$实际上是经过PCA处理后的数据，当$X^{\top}X$存在很小的特征值时，不妨设它们为$\lambda_{r+1},\lambda_{r+2},\dots,\lambda_{p-1}$，由\cref{prop:PCA}(1)可知$Y_{r+1},Y_{r+2},\dots,Y_{p-1}$的方差很小，于是我们可以舍弃它们，从而得到如下模型：
-	\begin{equation*}
-		y=\alpha_0\mathbf{1}_n+\mathbf{Y}_1\delta_1+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
+		\Sigma V=V\varLambda.
 	\end{equation*}
-	其中$\mathbf{Y}_1$是$Y$的前$r$列，$\delta_1$是$\delta_I$的前$r$行。称如上模型给出的估计$\hat{\delta}_I=(\hat{\delta}_1,\mathbf{0})^{\top}$为$\hat{\delta}$的\gls{PrincipalComponentEstimate}。
+	等式两侧分别右乘$V^{\top}$和左乘$V^{\top}$即可得到结论。\par
+	(2)由期望的线性性和\cref{prop:CovMat}(3)可得：
+	\begin{equation*}
+		\operatorname{E}(\mathbf{Y})=V^{\top}\boldsymbol{\mu},\quad
+		\operatorname{Cov}(\mathbf{Y})
+		=V^{\top}\Sigma V
+		=\varLambda.
+	\end{equation*}\par
+	(3)由(2)、\cref{prop:CovMat}(1)和$\Sigma$的谱分解可得：
+	\begin{equation*}
+		\sum_{i=1}^{n}\operatorname{Var}(Y_i)
+		=\operatorname{tr}(\varLambda)
+		=\sum_{i=1}^{n}\lambda_i
+		=\operatorname{tr}(\Sigma)
+		=\sum_{j=1}^{n}\sigma_{jj}.
+	\end{equation*}\par
+	(4)由$\mathbf{Y}=V^{\top}\mathbf{X}$和$VV^{\top}=I_n$可得：
+	\begin{equation*}
+		V\mathbf{Y}=VV^{\top}\mathbf{X}=\mathbf{X}.
+	\end{equation*}
+	对中心化后的随机向量作相同计算即可得到第二式。
+\end{proof}
+
+\begin{note}
+	不同主成分不相关，但一般不能由此推出它们相互独立。若$\mathbf{X}$服从多元正态分布，则由\cref{prop:MultiNormal}(2)(8)可知$\mathbf{Y}$仍服从多元正态分布，此时不相关可推出相互独立。
 \end{note}
-\begin{property}
-	中心化模型的主成分回归具有如下性质：
+
+\begin{note}
+	设$r=\operatorname{rank}(\Sigma)\geqslant1$，$\varLambda_r=\operatorname{diag}\{\seq{\lambda}{r}\}$，$V_r=(\varphi_1,\dots,\varphi_r)$。则：
+	\begin{equation*}
+		\mathbf{W}
+		=\varLambda_r^{-\frac{1}{2}}V_r^{\top}
+		(\mathbf{X}-\boldsymbol{\mu})
+	\end{equation*}
+	满足$\operatorname{Cov}(\mathbf{W})=I_r$。这个在PCA去相关后进一步将各主成分方差缩放为$1$的过程称为白化。PCA本身只保证不相关，并不要求各主成分具有相同方差。
+\end{note}
+
+\subsection{主成分降维与最优重构}
+
+\begin{theorem}\label{theo:PCAOptimalReconstruction}
+	设$1\leqslant k\leqslant n$，$B\in M_{n\times k}(\mathbb{R})$满足$B^{\top}B=I_k$。记$\mathbf{Z}=\mathbf{X}-\boldsymbol{\mu}$，并用$\mathcal{M}(B)$上的正交投影重构$\mathbf{X}$：
+	\begin{equation*}
+		\widehat{\mathbf{X}}_B
+		=\boldsymbol{\mu}+BB^{\top}\mathbf{Z}.
+	\end{equation*}
+	则：
+	\begin{align*}
+		\operatorname{E}(||B^{\top}\mathbf{Z}||^2)
+		&\leqslant\sum_{i=1}^{k}\lambda_i, \\
+		\operatorname{E}(||\mathbf{X}-\widehat{\mathbf{X}}_B||^2)
+		&\geqslant\sum_{i=k+1}^{n}\lambda_i.
+	\end{align*}
+	取$V_k=(\varphi_1,\dots,\varphi_k)$时两式同时取等号。因此，前$k$个主成分张成的子空间在所有$k$维正交投影子空间中保留的方差最大，并且平均平方重构误差最小。此时：
+	\begin{equation*}
+		\widehat{\mathbf{X}}_k
+		=\boldsymbol{\mu}+V_kV_k^{\top}(\mathbf{X}-\boldsymbol{\mu}).
+	\end{equation*}
+	而且：
+	\begin{gather*}
+		\operatorname{Cov}(\widehat{\mathbf{X}}_k)
+		=V_k\operatorname{diag}\{\seq{\lambda}{k}\}V_k^{\top}, \\
+		\operatorname{Cov}(\mathbf{X}-\widehat{\mathbf{X}}_k)
+		=\sum_{i=k+1}^{n}\lambda_i\varphi_i\varphi_i^{\top}.
+	\end{gather*}
+\end{theorem}
+\begin{proof}
+	将$B$与$C=V^{\top}B$的列向量分别记为$\seq{b}{k}$与$\seq{c}{k}$，并记$C=(c_{ij})\in M_{n\times k}(\mathbb{R})$。由$V$为正交矩阵和$B^{\top}B=I_k$可得$C^{\top}C=I_k$。记：
+	\begin{equation*}
+		w_i=\sum_{j=1}^{k}c_{ij}^2,\quad i=1,2,\dots,n.
+	\end{equation*}
+	因为$CC^{\top}$是正交投影矩阵，所以$0\leqslant w_i\leqslant1$，并且：
+	\begin{equation*}
+		\sum_{i=1}^{n}w_i
+		=\sum_{i=1}^{n}\sum_{j=1}^{k}c_{ij}^2
+		=\sum_{j=1}^{k}||c_j||^2
+		=k.
+	\end{equation*}
+	于是：
+	\begin{align*}
+		\operatorname{E}(||B^{\top}\mathbf{Z}||^2)
+		&=\sum_{j=1}^{k}\operatorname{Var}(b_j^{\top}\mathbf{X}) \\
+		&=\sum_{j=1}^{k}b_j^{\top}\Sigma b_j
+		=\sum_{i=1}^{n}\lambda_iw_i \\
+		&\leqslant
+		\sum_{i=1}^{k}\lambda_iw_i
+		+\lambda_k\sum_{i=k+1}^{n}w_i \\
+		&=k\lambda_k+\sum_{i=1}^{k}(\lambda_i-\lambda_k)w_i \\
+		&\leqslant\sum_{i=1}^{k}\lambda_i.
+	\end{align*}
+	取$B=V_k$时，$w_i=1,\;i=1,2,\dots,k$，其余$w_i=0$，所以第一式取等号。\par
+		记$P_B=BB^{\top}=\sum_{j=1}^{k}b_jb_j^{\top}$。逐项展开迹可得
+		$\operatorname{tr}(P_B\Sigma)=\sum_{j=1}^{k}b_j^{\top}\Sigma b_j$。
+		再由$P_B$是对称幂等矩阵、\cref{theo:ERVQuadraticForm}和\cref{prop:Trace}(1)(2)可得：
+	\begin{align*}
+		\operatorname{E}(||\mathbf{X}-\widehat{\mathbf{X}}_B||^2)
+		&=\operatorname{E}[\mathbf{Z}^{\top}(I_n-P_B)\mathbf{Z}] \\
+		&=\operatorname{tr}[(I_n-P_B)\Sigma] \\
+		&=\operatorname{tr}(\Sigma)
+		-\sum_{j=1}^{k}b_j^{\top}\Sigma b_j \\
+		&\geqslant
+		\sum_{i=1}^{n}\lambda_i-\sum_{i=1}^{k}\lambda_i
+		=\sum_{i=k+1}^{n}\lambda_i.
+	\end{align*}
+	取$B=V_k$时第二式也取等号。最后，由\cref{prop:CovMat}(3)和$I_n-V_kV_k^{\top}=\sum_{i=k+1}^{n}\varphi_i\varphi_i^{\top}$可得两条协方差公式。
+\end{proof}
+
+\begin{definition}
+	设$\operatorname{tr}(\Sigma)>0$。称：
+	\begin{equation*}
+		\eta_i
+		=\frac{\lambda_i}{\sum_{j=1}^{n}\lambda_j}
+		=\frac{\lambda_i}{\operatorname{tr}(\Sigma)}
+	\end{equation*}
+	为第$i$主成分的方差贡献率，称：
+	\begin{equation*}
+		\eta(k)
+		=\frac{\sum_{i=1}^{k}\lambda_i}
+		{\sum_{i=1}^{n}\lambda_i}
+	\end{equation*}
+	为前$k$个主成分的累计方差贡献率。
+\end{definition}
+
+由\cref{theo:PCAOptimalReconstruction}可知：
+\begin{equation*}
+	\frac{\operatorname{E}(||\mathbf{X}-\widehat{\mathbf{X}}_k||^2)}
+	{\operatorname{E}(||\mathbf{X}-\boldsymbol{\mu}||^2)}
+	=1-\eta(k).
+\end{equation*}
+因此，累计方差贡献率不仅表示保留方差的比例，也等于平方重构误差相对于总方差的减少比例。
+
+\subsection{主成分的系数、得分与因子负荷}
+
+\begin{definition}
+	设$\lambda_i>0,\;\sigma_{jj}>0$。称第$i$主成分$Y_i$与原变量$X_j$的相关系数：
+	\begin{equation*}
+		\ell_{ji}
+		\coloneq\rho(X_j,Y_i)
+		=\operatorname{Corr}(X_j,Y_i)
+	\end{equation*}
+	为变量$X_j$在第$i$主成分上的\gls{FactorLoading}。
+\end{definition}
+
+\begin{definition}
+	设$r=\operatorname{rank}(\Sigma)$，$\sigma_{jj}>0$，$1\leqslant k\leqslant r$。称：
+	\begin{equation*}
+		R_j^2(k)
+		\coloneq
+		\sum_{i=1}^{k}\ell_{ji}^2
+	\end{equation*}
+	为前$k$个主成分对变量$X_j$的方差解释比例。
+\end{definition}
+
+\begin{property}\label{prop:PCALoading}
+		设$r=\operatorname{rank}(\Sigma)$，$1\leqslant k\leqslant r$，且$\sigma_{jj}>0,\;j=1,2,\dots,n$。则：
 	\begin{enumerate}
-		\item $\hat{\alpha}_0=\overline{y},\;\hat{\delta}_1=(\mathbf{Y}_1^{\top}\mathbf{Y}_1)^{-1}\mathbf{Y}_1^{\top}y=\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}\mathbf{Y}_1^{\top}y=\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}Q_1\tilde{X}_c^{\top}y,\hat{\alpha}_I=Q_1^{\top}\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}\mathbf{Y}_1^{\top}y=Q_1^{\top}\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}Q\tilde{X}_c^{\top}y$，其中$Q_1$是$Q$的前$r$行；
-		\item 主成分估计一般是有偏估计；
-		\item 当原中心化设计阵存在复共线性关系时，适当选择保留的主成分个数可以使得主成分估计比LSE具有更小的$\operatorname{MSE}$。
+		\item 主成分与原变量的协方差为：
+		\begin{equation*}
+			\operatorname{Cov}(Y_i,X_j)
+			=\lambda_i\varphi_{ji};
+		\end{equation*}
+		\item 对$i=1,2,\dots,r$，因子负荷量为：
+		\begin{equation*}
+			\ell_{ji}
+			=\frac{\sqrt{\lambda_i}\varphi_{ji}}
+			{\sqrt{\sigma_{jj}}};
+		\end{equation*}
+		\item 第$i$主成分的因子负荷量满足：
+		\begin{equation*}
+			\sum_{j=1}^{n}\sigma_{jj}\ell_{ji}^2
+			=\lambda_i,\quad i=1,2,\dots,r;
+		\end{equation*}
+		\item 变量$X_j$在全部正方差主成分上的因子负荷量满足：
+		\begin{equation*}
+			\sum_{i=1}^{r}\ell_{ji}^2=1;
+		\end{equation*}
+		\item $R_j^2(k)$等于$X_j$与$\mathbf{Y}_{(k)}=(Y_1,\dots,Y_k)^{\top}$之间的复相关系数平方，并且：
+		\begin{equation*}
+			R_j^2(k)
+			=\sum_{i=1}^{k}\frac{\lambda_i\varphi_{ji}^2}{\sigma_{jj}};
+		\end{equation*}
+		\item 令：
+		\begin{equation*}
+			D_{\sigma}
+			=\operatorname{diag}
+			\{\sqrt{\sigma_{11}},\sqrt{\sigma_{22}},\dots,\sqrt{\sigma_{nn}}\},
+		\end{equation*}
+		则正方差主成分的因子负荷矩阵为：
+		\begin{equation*}
+			L=D_{\sigma}^{-1}V_r\varLambda_r^{\frac{1}{2}},
+		\end{equation*}
+		其中$V_r=(\varphi_1,\dots,\varphi_r)$，$\varLambda_r=\operatorname{diag}\{\seq{\lambda}{r}\}$。
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)显然$\mathbf{Y}_1$也是中心化的，所以第一式成立。由\cref{prop:OrthogonalUnitaryMatrix}(1)和\cref{prop:InvertibleMatrix}(16)可知$Y$是列满秩的，所以由\cref{prop:LinearlyDependent}(1)可得$\mathbf{Y}_1$是列满秩的，根据\cref{theo:LinearRegressionModel}(1)可得$(\mathbf{Y}_1^{\top}\mathbf{Y}_1)^{-1}$存在。由正则方程即可得$\hat{\delta}_1=(\mathbf{Y}_1^{\top}\mathbf{Y}_1)^{-1}\mathbf{Y}_1^{\top}y$。根据\cref{prop:Transpose}(4)可知：
+	(1)由\cref{prop:CovMat}(3)和$\Sigma\varphi_i=\lambda_i\varphi_i$可得：
+	\begin{align*}
+		\operatorname{Cov}(Y_i,X_j)
+		&=\operatorname{Cov}(\varphi_i^{\top}\mathbf{X},e_j^{\top}\mathbf{X}) \\
+		&=\varphi_i^{\top}\Sigma e_j
+		=e_j^{\top}\Sigma\varphi_i
+		=\lambda_ie_j^{\top}\varphi_i
+		=\lambda_i\varphi_{ji},
+	\end{align*}
+	其中$e_j$是$\mathbb{R}^{n}$的第$j$个标准单位向量。\par
+	(2)由(1)和\cref{theo:PCA}可得：
 	\begin{equation*}
-		\mathbf{Y}_1^{\top}\mathbf{Y}_1=Q_1\tilde{X}_c^{\top}\tilde{X}_cQ_1^{\top}=\operatorname{diag}\{\seq{\lambda}{r}\}
-	\end{equation*}
-	其中$Q_1$是$Q$的前$r$行，于是有：
+		\ell_{ji}
+		=\frac{\operatorname{Cov}(X_j,Y_i)}
+		{\sqrt{\operatorname{Var}(X_j)\operatorname{Var}(Y_i)}}
+		=\frac{\lambda_i\varphi_{ji}}
+		{\sqrt{\sigma_{jj}\lambda_i}}
+		=\frac{\sqrt{\lambda_i}\varphi_{ji}}{\sqrt{\sigma_{jj}}}.
+	\end{equation*}\par
+	(3)由(2)和$||\varphi_i||=1$可得：
 	\begin{equation*}
-		\hat{\delta}_1=(\mathbf{Y}_1^{\top}\mathbf{Y}_1)^{-1}\mathbf{Y}_1^{\top}y=\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}\mathbf{Y}_1^{\top}y=\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}Q_1\tilde{X}_c^{\top}y
-	\end{equation*}
-	由\cref{prop:Transpose}(4)、\cref{prop:InvertibleMatrix}(11)和\cref{theo:LinearRegressionModel}(3)可得：
+		\sum_{j=1}^{n}\sigma_{jj}\ell_{ji}^2
+		=\lambda_i\sum_{j=1}^{n}\varphi_{ji}^2
+		=\lambda_i.
+	\end{equation*}\par
+	(4)由$\Sigma=V_r\varLambda_rV_r^{\top}$可知：
 	\begin{equation*}
-		\hat{\alpha}_I=(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}\tilde{X}_c^{\top}y=Q^{\top}\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{p-1}}\right\}Q\tilde{X}_c^{\top}y
+		\sigma_{jj}
+		=e_j^{\top}\Sigma e_j
+		=\sum_{i=1}^{r}\lambda_i\varphi_{ji}^2.
 	\end{equation*}
+	两侧同除以$\sigma_{jj}$，再由(2)即可得到结论。\par
+	(5)由\cref{prop:PCA}(2)可知：
+	\begin{equation*}
+		\operatorname{Cov}(\mathbf{Y}_{(k)})
+		=\operatorname{diag}\{\seq{\lambda}{k}\}.
+	\end{equation*}
+	由(1)，$\operatorname{Cov}(\mathbf{Y}_{(k)},X_j)
+	=(\lambda_1\varphi_{j1},\dots,\lambda_k\varphi_{jk})^{\top}$。将其代入复相关系数的定义可得：
+	\begin{align*}
+		R_j^2(k)
+		&=\frac{1}{\sigma_{jj}}
+		[\operatorname{Cov}(\mathbf{Y}_{(k)},X_j)]^{\top}
+		[\operatorname{Cov}(\mathbf{Y}_{(k)})]^{-1}
+		\operatorname{Cov}(\mathbf{Y}_{(k)},X_j) \\
+		&=\sum_{i=1}^{k}\frac{\lambda_i\varphi_{ji}^2}{\sigma_{jj}}
+		=\sum_{i=1}^{k}\ell_{ji}^2.
+	\end{align*}\par
+	(6)由(2)逐个排列矩阵元素即可得到。
 \end{proof}
 
+\begin{note}
+	主成分方向系数$\varphi_{ji}$与因子负荷量$\ell_{ji}$描述不同对象：前者说明如何由原变量构造主成分，后者说明原变量与主成分的线性相关程度。本节将相关系数称为因子负荷量；有些软件或文献也会将特征向量系数称为loading，使用时应先确认其定义。若原变量已经标准化，则$\sigma_{jj}=1$，此时$\ell_{ji}=\sqrt{\lambda_i}\varphi_{ji}$。
+\end{note}
 
+\subsection{样本主成分分析}
 
+设$m\geqslant2$，对$n$维随机向量$\mathbf{X}$进行$m$次独立观测，得到$x_i\in\mathbb{R}^{n},\;i=1,2,\dots,m$。将样本按行排列为数据矩阵：
+\begin{equation*}
+	X=
+	\begin{pmatrix}
+		x_1^{\top} \\
+		x_2^{\top} \\
+		\vdots \\
+		x_m^{\top}
+	\end{pmatrix}
+	\in M_{m\times n}(\mathbb{R}).
+\end{equation*}
+定义样本均值向量、中心化数据矩阵和样本协方差矩阵：
+\begin{gather*}
+	\widehat{\boldsymbol{\mu}}
+	=\frac{1}{m}\sum_{i=1}^{m}x_i,\quad
+	X_c=X-\mathbf{1}_m\widehat{\boldsymbol{\mu}}^{\top}, \\
+	S=(s_{jl})
+	=\frac{1}{m-1}X_c^{\top}X_c
+	=\frac{1}{m-1}\sum_{i=1}^{m}
+	(x_i-\widehat{\boldsymbol{\mu}})
+	(x_i-\widehat{\boldsymbol{\mu}})^{\top}.
+\end{gather*}
+设$S$的谱分解为：
+\begin{equation*}
+	S=\widehat{V}\widehat{\varLambda}\widehat{V}^{\top},\quad
+	\widehat{V}=(\widehat{\varphi}_1,\dots,\widehat{\varphi}_n),\quad
+	\widehat{\varLambda}
+	=\operatorname{diag}\{\hat{\lambda}_1,\dots,\hat{\lambda}_n\},
+\end{equation*}
+其中$\hat{\lambda}_1\geqslant\cdots\geqslant\hat{\lambda}_n\geqslant0$。称：
+\begin{equation*}
+	T=X_c\widehat{V}
+\end{equation*}
+为样本的主成分得分矩阵，其第$i$列$t_i=X_c\widehat{\varphi}_i$由全部样本在第$i$主成分方向上的得分构成。
 
+\begin{property}\label{prop:SamplePCA}
+		对任意整数$k\in\{1,\dots,n\}$，样本主成分具有如下性质：
+	\begin{enumerate}
+		\item 每个主成分得分的样本均值为$0$，即$\mathbf{1}_m^{\top}T=\mathbf{0}$；
+		\item 得分矩阵的样本协方差矩阵为：
+		\begin{equation*}
+			\frac{1}{m-1}T^{\top}T
+			=\widehat{\varLambda};
+		\end{equation*}
+		\item 记$\widehat{V}_k=(\widehat{\varphi}_1,\dots,\widehat{\varphi}_k)$，$T_k=X_c\widehat{V}_k$，则使用前$k$个主成分得到的样本重构为：
+			\begin{equation*}
+				\widehat{X}_k
+				=\mathbf{1}_m\widehat{\boldsymbol{\mu}}^{\top}
+				+T_k\widehat{V}_k^{\top};
+		\end{equation*}
+		\item 若定义$||A||_F^2\coloneq\operatorname{tr}(A^{\top}A)$，则样本重构误差为：
+		\begin{equation*}
+			||X-\widehat{X}_k||_F^2
+			=(m-1)\sum_{i=k+1}^{n}\hat{\lambda}_i;
+		\end{equation*}
+		\item 对任意满足$B^{\top}B=I_k$的$B\in M_{n\times k}(\mathbb{R})$，都有：
+		\begin{equation*}
+			||X_c-X_cBB^{\top}||_F^2
+			\geqslant
+			||X_c-X_c\widehat{V}_k\widehat{V}_k^{\top}||_F^2;
+		\end{equation*}
+		\item $\operatorname{rank}(S)=\operatorname{rank}(X_c)\leqslant\min\{n,m-1\}$，所以样本PCA至多有$\min\{n,m-1\}$个正方差主成分。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由中心化数据矩阵的定义可得$\mathbf{1}_m^{\top}X_c=\mathbf{0}$，所以：
+	\begin{equation*}
+		\mathbf{1}_m^{\top}T
+		=\mathbf{1}_m^{\top}X_c\widehat{V}
+		=\mathbf{0}.
+	\end{equation*}\par
+	(2)由$S$和$T$的定义可得：
+	\begin{equation*}
+		\frac{1}{m-1}T^{\top}T
+		=\widehat{V}^{\top}
+		\left(\frac{1}{m-1}X_c^{\top}X_c\right)
+		\widehat{V}
+		=\widehat{V}^{\top}S\widehat{V}
+		=\widehat{\varLambda}.
+	\end{equation*}\par
+	(3)将中心化后的得分变换逆变换回原变量空间，再加回样本均值即可得到。\par
+	(4)记$\widehat{P}_k=\widehat{V}_k\widehat{V}_k^{\top}$。由$\widehat{P}_k$是对称幂等矩阵可得：
+	\begin{align*}
+		||X-\widehat{X}_k||_F^2
+		&=||X_c(I_n-\widehat{P}_k)||_F^2 \\
+		&=\operatorname{tr}[(I_n-\widehat{P}_k)X_c^{\top}X_c(I_n-\widehat{P}_k)] \\
+		&=(m-1)\operatorname{tr}[(I_n-\widehat{P}_k)S(I_n-\widehat{P}_k)] \\
+		&=(m-1)\sum_{i=k+1}^{n}\hat{\lambda}_i.
+	\end{align*}\par
+	(5)将\cref{theo:PCAOptimalReconstruction}证明中的$\Sigma$替换为$S$，再将等式整体乘以$m-1$即可得到。\par
+	(6)由$\mathbf{1}_m^{\top}X_c=\mathbf{0}$可知$X_c$的$m$行线性相关，所以$\operatorname{rank}(X_c)\leqslant m-1$。又因为$X_c$只有$n$列，所以$\operatorname{rank}(X_c)\leqslant n$。根据\cref{prop:MatrixRank}(8)可得$\operatorname{rank}(X_c^{\top}X_c)=\operatorname{rank}(X_c)$，于是结论成立。
+\end{proof}
 
+\begin{note}
+	若使用$\dfrac{1}{m}X_c^{\top}X_c$而不是$\dfrac{1}{m-1}X_c^{\top}X_c$作为样本协方差矩阵，则所有特征值都乘以同一个常数$\dfrac{m-1}{m}$，主成分方向、得分方向和方差贡献率不变。不同软件对分母的选择可能不同，比较特征值时应先核对约定。
+\end{note}
 
+得分矩阵$T$的第$i$行给出第$i$个观测在各主成分坐标轴下的位置，因此前两个或前三个主成分的得分图常用于观察样本的聚集、分离和异常点。因子负荷图用于观察原变量与主成分的关系；将得分和变量方向同时表示的图称为双标图。解释这类图时应同时说明是否标准化以及得分、方向向量采用的缩放方式。
+
+\subsubsection{样本PCA与SVD的关系}
+
+\begin{theorem}\label{theo:SamplePCASVD}
+		设$q=\operatorname{rank}(X_c)\geqslant1$，中心化数据矩阵的紧奇异值分解为：
+		\begin{gather*}
+			X_c=U_qD_qV_q^{\top},\quad
+			U_q=(u_1,\dots,u_q),\quad
+			V_q=(v_1,\dots,v_q), \\
+			D_q=\operatorname{diag}\{\seq{d}{q}\},\quad
+			d_1\geqslant\cdots\geqslant d_q>0.
+		\end{gather*}
+	则$V_q$的列向量是$S$属于正特征值的主成分方向，并且：
+	\begin{equation*}
+		\hat{\lambda}_i=\frac{d_i^2}{m-1},\quad
+		T_q=X_cV_q=U_qD_q.
+	\end{equation*}
+		对任意整数$k\in\{1,\dots,q\}$，记：
+		\begin{equation*}
+			U_k=(u_1,\dots,u_k),\quad
+			V_k=(v_1,\dots,v_k),\quad
+			D_k=\operatorname{diag}\{\seq{d}{k}\}.
+		\end{equation*}
+		保留前$k$个主成分时：
+	\begin{equation*}
+		X_cV_kV_k^{\top}
+		=U_kD_kV_k^{\top},\quad
+		||X_c-U_kD_kV_k^{\top}||_F^2
+		=\sum_{i=k+1}^{q}d_i^2.
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	由\cref{theo:SVD}可知$X_c$存在上述奇异值分解。于是：
+	\begin{equation*}
+		S=\frac{1}{m-1}X_c^{\top}X_c
+		=V_q\frac{D_q^2}{m-1}V_q^{\top}.
+	\end{equation*}
+	因此$V_q$的列向量是$S$的正特征值对应的标准正交特征向量，且$\hat{\lambda}_i=d_i^2/(m-1)$。其余结论由矩阵乘法和\cref{prop:SamplePCA}(4)立即可得。
+\end{proof}
+
+直接对$X_c$作SVD通常比先构造$S$再进行特征值分解更稳定。当变量数$n$远大于样本数$m$时，由$\operatorname{rank}(X_c)\leqslant m-1$可知只有至多$m-1$个正奇异值，此时使用紧SVD可以避免计算大量必为$0$的特征值。
+
+\subsection{协方差矩阵与相关矩阵导出的主成分}
+
+\begin{property}\label{prop:CorrelationPCA}
+	设原变量的方差都大于$0$，令：
+	\begin{equation*}
+		D_{\sigma}
+		=\operatorname{diag}
+		\{\sqrt{\sigma_{11}},\sqrt{\sigma_{22}},\dots,\sqrt{\sigma_{nn}}\},\quad
+		\mathbf{X}^{\star}
+		=D_{\sigma}^{-1}(\mathbf{X}-\boldsymbol{\mu}).
+	\end{equation*}
+	则标准化随机向量$\mathbf{X}^{\star}$的协方差矩阵为原变量的相关矩阵：
+	\begin{equation*}
+		R=D_{\sigma}^{-1}\Sigma D_{\sigma}^{-1}.
+	\end{equation*}
+若$R$的特征值为$\seq{\lambda^{\star}}{n}$，则：
+	\begin{equation*}
+		\sum_{i=1}^{n}\lambda_i^{\star}
+		=\operatorname{tr}(R)=n.
+	\end{equation*}
+\end{property}
+\begin{proof}
+	由\cref{prop:CovMat}(3)可得：
+	\begin{equation*}
+		\operatorname{Cov}(\mathbf{X}^{\star})
+		=D_{\sigma}^{-1}\Sigma D_{\sigma}^{-1}=R.
+	\end{equation*}
+	因为$R$的主对角元都为$1$，所以$\operatorname{tr}(R)=n$，再由\cref{prop:PCA}(3)即可得到特征值之和。
+\end{proof}
+
+在样本情形下，若$s_{jj}>0,\;j=1,2,\dots,n$，令：
+\begin{equation*}
+	D_S
+	=\operatorname{diag}
+	\{\sqrt{s_{11}},\sqrt{s_{22}},\dots,\sqrt{s_{nn}}\},\quad
+	X_s=X_cD_S^{-1}.
+\end{equation*}
+则：
+\begin{equation*}
+	\widehat{R}=\frac{1}{m-1}X_s^{\top}X_s
+	=D_S^{-1}SD_S^{-1}
+\end{equation*}
+是样本相关矩阵。若$\widehat{R}=V^{\star}\varLambda^{\star}(V^{\star})^{\top}$，并令$V_k^{\star}$为$V^{\star}$的前$k$列，则对任意整数$k\in\{1,\dots,n\}$，标准化数据的得分矩阵和原量纲下的重构分别为：
+\begin{equation*}
+	T_k^{\star}=X_sV_k^{\star},\quad
+	\widehat{X}_k
+	=\mathbf{1}_m\widehat{\boldsymbol{\mu}}^{\top}
+	+T_k^{\star}(V_k^{\star})^{\top}D_S.
+\end{equation*}
+
+\begin{note}
+		当各变量的量纲不同，或者变量方差的数量级差异主要来自计量单位时，通常使用相关矩阵进行PCA；当变量具有相同量纲，并且方差大小本身具有明确的研究含义时，通常使用协方差矩阵。在各变量标准差非零，并且保留均值与标准差时，标准化是可逆变换。它并不直接删除观测信息，而是改变PCA所使用的距离和变量权重；真正的信息损失发生在舍弃主成分时。样本方差为$0$的变量不能标准化，应先单独处理。
+\end{note}
+
+\subsection{主成分个数的选择}
+
+主成分个数$k$决定了模型的压缩程度与重构误差。以下用$\lambda_i$和$\eta(k)$泛指当前所分析的协方差矩阵或相关矩阵的特征值与累计方差贡献率；在样本情形下，相应量记为$\hat{\lambda}_i$和$\hat{\eta}(k)$。常见选择方法如下：
+\begin{enumerate}
+	\item \textbf{累计方差贡献率：}给定阈值$\tau\in(0,1]$，选择最小的$k$使$\eta(k)\geqslant\tau$。常见经验阈值为$80\%$、$85\%$、$90\%$或$95\%$。阈值越高，重构误差越小，但降维程度也越弱；
+	\item \textbf{碎石图：}将特征值$\lambda_i$或方差贡献率$\eta_i$按照主成分编号作图，在曲线由陡峭变为平缓的“拐点”处截断；
+	\item \textbf{特征值大于$1$准则：}仅在相关矩阵PCA中，平均特征值等于$1$，因此可保留$\lambda_i^{\star}>1$的主成分。该方法只是经验准则，不能替代具体问题中的判断；
+	\item \textbf{重构或下游任务验证：}根据验证样本上的重构误差，或者分类、聚类、回归等后续任务的表现选择$k$。当PCA用于预测时，这种方法通常比固定累计贡献率更可靠；
+	\item \textbf{平行分析：}将实际样本特征值与无相关结构的模拟数据特征值比较，仅保留明显超过随机噪声水平的主成分。
+\end{enumerate}
+因此，累计方差贡献率达到$85\%$只能作为一种常用经验规则，不是普遍适用的定理。
+
+\begin{algorithm}[H]
+	\caption{主成分分析（PCA）}
+	\label{alg:PCA}
+	\begin{algorithmic}[1]
+		\Require 数据矩阵$X\in M_{m\times n}(\mathbb{R})$，$m\geqslant2$，是否标准化，主成分选择规则；若标准化，则各列样本方差均大于$0$；若不标准化，则至少一列样本方差大于$0$
+		\Ensure 所用坐标中的主成分方向$V_k$，原变量的线性组合系数$A_k$，得分矩阵$T_k$，累计方差贡献率和重构矩阵$\widehat{X}_k$
+		\State 计算$\widehat{\boldsymbol{\mu}}=\dfrac{1}{m}X^{\top}\mathbf{1}_m$和$X_c=X-\mathbf{1}_m\widehat{\boldsymbol{\mu}}^{\top}$
+		\If{需要标准化}
+			\State 计算各列的样本标准差并组成对角矩阵$D_S$，令$C=D_S$
+		\Else
+			\State 令$C=I_n$
+		\EndIf
+		\State 令$Z=X_cC^{-1}$，计算$S_Z=\dfrac{1}{m-1}Z^{\top}Z$
+		\State 求$S_Z$的一组标准正交特征向量，并将特征值按降序记为$\hat{\lambda}_1,\dots,\hat{\lambda}_n$
+		\State 令$\widehat{\varLambda}=\operatorname{diag}\{\hat{\lambda}_1,\dots,\hat{\lambda}_n\}$，以对应特征向量为列组成$V$
+		\State 对$j=1,2,\dots,n$计算$\hat{\eta}(j)=\dfrac{\sum_{i=1}^{j}\hat{\lambda}_i}{\sum_{i=1}^{n}\hat{\lambda}_i}$
+		\State 根据累计贡献率、碎石图或验证误差等规则选择$k$
+		\State 令$V_k$为$V$的前$k$列，计算$A_k=C^{-1}V_k$和$T_k=X_cA_k=ZV_k$
+		\State 计算$\widehat{X}_k=\mathbf{1}_m\widehat{\boldsymbol{\mu}}^{\top}+T_kV_k^{\top}C$
+		\State \Return $V_k,A_k,T_k,\widehat{X}_k$及累计方差贡献率
+	\end{algorithmic}
+\end{algorithm}
+
+\subsection{注意事项}
+
+\subsubsection{复共线性与重复变量}
+
+对于中心化数据矩阵$X_c$，若存在非零向量$\alpha$使$X_c\alpha=\mathbf{0}$，则所有观测都满足
+$\alpha^{\top}x_i=\alpha^{\top}\widehat{\boldsymbol{\mu}}$，即原变量在含常数项的意义下存在精确仿射关系。此时：
+\begin{equation*}
+	\alpha^{\top}S\alpha
+	=\frac{1}{m-1}||X_c\alpha||^2=0,
+\end{equation*}
+所以$S$存在零特征值。反之，若$S$存在零特征值，也可得到上述精确仿射关系。近似的\gls{Multicollinearity}关系通常表现为很小的特征值。\par
+因此，PCA确实可以把精确或近似线性冗余集中到小方差方向，并通过舍弃这些方向实现压缩。例如，加入一个完全重复的变量会产生一个零方差方向，舍弃它不会造成线性重构损失。但PCA不会自动识别变量在研究含义上是否属于重复测量：重复加入某一变量会改变变量空间中的权重，从而改变主成分方向和方差贡献率。是否删除或合并重复变量仍需要领域知识，不能作为PCA算法中的固定步骤。
+
+\subsubsection{PCA能够与不能做什么}
+
+PCA寻找的是线性子空间，所以无法概括一般的非线性流形结构；它依赖样本协方差矩阵，因此可能对异常值较敏感；它是无监督方法，只使用自变量自身的变异，不保证高方差主成分对某个响应变量最有预测价值；主成分还是原变量的线性组合，当许多系数同时较大时，主成分可能难以赋予简单的实际含义。\par
+此外，PCA本身不直接处理缺失值。实际分析中应先说明缺失值、异常值和变量尺度的处理方式，再解释主成分方向、得分和因子负荷量。
+
+\subsection{应用：主成分回归}
+
+本小节沿用线性模型部分的记号：$n$表示样本量，$p-1$表示解释变量个数；这与前文样本PCA中“$m$表示样本量、$n$表示变量维数”的记号约定不同。
+
+\begin{definition}\label{def:PrincipalComponentRegression}
+	考虑\cref{model:CentralizedStandardizedLinearModel}中的中心化线性回归模型：
+	\begin{equation*}
+		y=\alpha_0\mathbf{1}_n+\tilde{X}_c\alpha_I+\varepsilon,\quad
+		\operatorname{E}(\varepsilon)=\mathbf{0},\quad
+		\operatorname{Cov}(\varepsilon)=\sigma^2I_n.
+	\end{equation*}
+	设$\operatorname{rank}(\tilde{X}_c)=p-1$，并作谱分解：
+		\begin{equation*}
+			\tilde{X}_c^{\top}\tilde{X}_c
+			=Q^{\top}\varLambda Q,\quad
+			\varLambda=\operatorname{diag}\{\seq{\lambda}{p-1}\},\quad
+			\lambda_1\geqslant\cdots\geqslant\lambda_{p-1}>0,
+		\end{equation*}
+			其中$Q\in M_{(p-1)\times(p-1)}(\mathbb{R})$为正交矩阵，$Q$的第$i$行是属于$\lambda_i$的标准正交特征向量的转置。这里的$\lambda_i$是Gram矩阵
+		$\tilde{X}_c^{\top}\tilde{X}_c$的特征值；若前文样本PCA的样本协方差矩阵为
+		$S=(n-1)^{-1}\tilde{X}_c^{\top}\tilde{X}_c$，则此处$\lambda_i=(n-1)\hat{\lambda}_i$。
+			记：
+			\begin{equation*}
+				Y=\tilde{X}_cQ^{\top},\quad
+				\delta_I=(\seq{\delta}{p-1})^{\top}=Q\alpha_I,
+			\end{equation*}
+		其中$Y\in M_{n\times(p-1)}(\mathbb{R})$，$\delta_I\in\mathbb{R}^{p-1}$，
+		则模型的典则形式为：
+		\begin{equation*}
+			y=\alpha_0\mathbf{1}_n+Y\delta_I+\varepsilon,\quad
+			Y^{\top}Y=\varLambda.
+		\end{equation*}
+			给定整数$r\in\{1,\dots,p-2\}$，并固定一组按特征值降序排列的标准正交特征向量，作分块：
+		\begin{equation*}
+			Q=
+			\begin{pmatrix}
+				Q_{(1)} \\
+				Q_{(2)}
+			\end{pmatrix},\quad
+			Y=(Y_{(1)},Y_{(2)}),\quad
+			\delta_I=
+			\begin{pmatrix}
+				\delta_{(1)} \\
+				\delta_{(2)}
+			\end{pmatrix},
+		\end{equation*}
+		其中：
+		\begin{gather*}
+			Q_{(1)}\in M_{r\times(p-1)}(\mathbb{R}),\quad
+			Q_{(2)}\in M_{(p-1-r)\times(p-1)}(\mathbb{R}), \\
+			Y_{(1)}=\tilde{X}_cQ_{(1)}^{\top}\in M_{n\times r}(\mathbb{R}),\quad
+			Y_{(2)}=\tilde{X}_cQ_{(2)}^{\top}\in M_{n\times(p-1-r)}(\mathbb{R}), \\
+			\delta_{(1)}\in\mathbb{R}^{r},\quad
+			\delta_{(2)}\in\mathbb{R}^{p-1-r}.
+		\end{gather*}
+		记$\varLambda_{(1)}=\operatorname{diag}\{\seq{\lambda}{r}\}$，称：
+		\begin{gather*}
+			\hat{\delta}_{(1)}
+			=\varLambda_{(1)}^{-1}Y_{(1)}^{\top}y,\quad
+			\hat{\delta}_I^{(r)}
+			=
+			\begin{pmatrix}
+				\hat{\delta}_{(1)} \\
+				\mathbf{0}
+			\end{pmatrix}, \\
+			\hat{\alpha}_I^{(r)}
+			=Q^{\top}\hat{\delta}_I^{(r)}
+			=Q_{(1)}^{\top}\varLambda_{(1)}^{-1}
+			Q_{(1)}\tilde{X}_c^{\top}y
+		\end{gather*}
+		为保留前$r$个主成分时$\alpha_I$的\gls{PrincipalComponentEstimate}，由此得到的方法称为主成分回归。
+\end{definition}
+
+\begin{property}\label{prop:PrincipalComponentRegression}
+	\cref{def:PrincipalComponentRegression}中的主成分回归具有如下性质。以下均方误差是斜率系数向量在Euclid平方损失下的风险，而不是训练误差或预测误差。
+		\begin{enumerate}
+			\item 截距与拟合值分别为：
+			\begin{equation*}
+				\hat{\alpha}_0=\overline{y},\quad
+				\hat{y}^{(r)}
+				=\overline{y}\mathbf{1}_n
+				+Y_{(1)}\varLambda_{(1)}^{-1}Y_{(1)}^{\top}y;
+			\end{equation*}
+			\item $\hat{\delta}_{(1)}$是$\delta_{(1)}$的无偏估计，但$\hat{\alpha}_I^{(r)}$一般是有偏估计，并且：
+			\begin{equation*}
+				\operatorname{E}(\hat{\alpha}_I^{(r)})
+				=Q_{(1)}^{\top}\delta_{(1)},\quad
+				\operatorname{Bias}(\hat{\alpha}_I^{(r)})
+				=-Q_{(2)}^{\top}\delta_{(2)};
+			\end{equation*}
+			\item 主成分估计的协方差矩阵和均方误差为：
+			\begin{gather*}
+				\operatorname{Cov}(\hat{\alpha}_I^{(r)})
+				=\sigma^2Q_{(1)}^{\top}\varLambda_{(1)}^{-1}Q_{(1)}, \\
+				\operatorname{MSE}(\hat{\alpha}_I^{(r)})
+				=\sigma^2\sum_{i=1}^{r}\frac{1}{\lambda_i}
+			+\sum_{i=r+1}^{p-1}\delta_i^2;
+		\end{gather*}
+		\item 最小二乘估计$\hat{\alpha}_I$满足：
+		\begin{equation*}
+			\operatorname{MSE}(\hat{\alpha}_I)
+			=\sigma^2\sum_{i=1}^{p-1}\frac{1}{\lambda_i}.
+		\end{equation*}
+		因此：
+		\begin{equation*}
+			\operatorname{MSE}(\hat{\alpha}_I^{(r)})
+			<\operatorname{MSE}(\hat{\alpha}_I)
+			\iff
+			\sum_{i=r+1}^{p-1}\delta_i^2
+			<\sigma^2\sum_{i=r+1}^{p-1}\frac{1}{\lambda_i}.
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由$\mathbf{1}_n^{\top}\tilde{X}_c=\mathbf{0}$可得$\mathbf{1}_n^{\top}Y_{(1)}=\mathbf{0}$，所以正则方程中关于截距的方程给出$\hat{\alpha}_0=\overline{y}$。又因为：
+		\begin{equation*}
+			Y_{(1)}^{\top}Y_{(1)}
+			=Q_{(1)}\tilde{X}_c^{\top}\tilde{X}_cQ_{(1)}^{\top}
+			=\varLambda_{(1)},
+		\end{equation*}
+		所以：
+		\begin{equation*}
+			\hat{\delta}_{(1)}
+			=(Y_{(1)}^{\top}Y_{(1)})^{-1}Y_{(1)}^{\top}y
+			=\varLambda_{(1)}^{-1}Y_{(1)}^{\top}y.
+		\end{equation*}
+		由只保留$Y_{(1)}$的最小二乘拟合可得$\hat{y}^{(r)}$。\par
+		(2)注意到$Y_{(1)}^{\top}Y_{(2)}=\mathbf{0}$，于是：
+		\begin{align*}
+			\operatorname{E}(\hat{\delta}_{(1)})
+			&=\varLambda_{(1)}^{-1}Y_{(1)}^{\top}
+			(\alpha_0\mathbf{1}_n
+			+Y_{(1)}\delta_{(1)}+Y_{(2)}\delta_{(2)}) \\
+			&=\varLambda_{(1)}^{-1}
+			Y_{(1)}^{\top}Y_{(1)}\delta_{(1)}
+			=\delta_{(1)}.
+		\end{align*}
+		因此$\operatorname{E}(\hat{\alpha}_I^{(r)})=Q_{(1)}^{\top}\delta_{(1)}$。另一方面：
+		\begin{equation*}
+			\alpha_I
+			=Q^{\top}\delta_I
+			=Q_{(1)}^{\top}\delta_{(1)}
+			+Q_{(2)}^{\top}\delta_{(2)},
+		\end{equation*}
+		所以偏差为$-Q_{(2)}^{\top}\delta_{(2)}$。\par
+		(3)由\cref{prop:CovMat}(3)可得：
+		\begin{align*}
+			\operatorname{Cov}(\hat{\delta}_{(1)})
+			&=\varLambda_{(1)}^{-1}Y_{(1)}^{\top}
+			(\sigma^2I_n)
+			Y_{(1)}\varLambda_{(1)}^{-1} \\
+			&=\sigma^2\varLambda_{(1)}^{-1}.
+		\end{align*}
+		于是：
+		\begin{equation*}
+			\operatorname{Cov}(\hat{\alpha}_I^{(r)})
+			=Q_{(1)}^{\top}\operatorname{Cov}(\hat{\delta}_{(1)})Q_{(1)}
+			=\sigma^2Q_{(1)}^{\top}\varLambda_{(1)}^{-1}Q_{(1)}.
+		\end{equation*}
+		由\cref{prop:MSE}(1)、$Q_{(1)}Q_{(1)}^{\top}=I_r$和
+		$Q_{(2)}Q_{(2)}^{\top}=I_{p-1-r}$可得：
+		\begin{align*}
+			\operatorname{MSE}(\hat{\alpha}_I^{(r)})
+			&=\operatorname{tr}[\operatorname{Cov}(\hat{\alpha}_I^{(r)})]
+			+||Q_{(2)}^{\top}\delta_{(2)}||^2 \\
+			&=\sigma^2\operatorname{tr}(\varLambda_{(1)}^{-1})
+			+\delta_{(2)}^{\top}
+			Q_{(2)}Q_{(2)}^{\top}\delta_{(2)} \\
+			&=\sigma^2\sum_{i=1}^{r}\frac{1}{\lambda_i}
+			+\sum_{i=r+1}^{p-1}\delta_i^2.
+	\end{align*}\par
+	(4)由\cref{theo:LinearRegressionModel}(3)(6)可知最小二乘估计无偏，且：
+	\begin{equation*}
+		\operatorname{Cov}(\hat{\alpha}_I)
+		=\sigma^2(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}
+		=\sigma^2Q^{\top}\varLambda^{-1}Q.
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\operatorname{MSE}(\hat{\alpha}_I)
+		=\sigma^2\operatorname{tr}(\varLambda^{-1})
+		=\sigma^2\sum_{i=1}^{p-1}\frac{1}{\lambda_i}.
+	\end{equation*}
+	将其与(3)相减即可得到取严格小于号的充分必要条件。
+\end{proof}
+
+\begin{note}
+	主成分回归通过舍弃小特征值方向降低估计方差，但代价是将这些方向上的回归系数设为$0$，从而引入偏差。小方差主成分仍可能与响应变量高度相关，所以仅根据自变量的累计方差贡献率选择$r$并不一定得到最好的预测模型；实际中通常结合交叉验证选择$r$。\par
+	若$\lambda_r>\lambda_{r+1}$，保留的$r$维主子空间由数据唯一确定；若$\lambda_r=\lambda_{r+1}$，在该重特征值子空间内部截断会依赖所选特征向量基。此时应保留或舍弃整个重特征值子空间，或者明确报告所采用的基。若将定义自然延拓到$r=p-1$，则不再截断，并退化为通常的最小二乘估计。\par
+	若$\tilde{X}_c$存在精确复共线性，则$\tilde{X}_c^{\top}\tilde{X}_c$含有零特征值，完整的最小二乘参数不再唯一。此时仍可在正特征值对应的主成分子空间上进行回归，但被舍弃零特征值方向上的原回归系数不可识别。
+\end{note}

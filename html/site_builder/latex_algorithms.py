@@ -12,6 +12,7 @@ from .constants import (
 )
 from .latex_parsing import read_balanced, skip_space
 
+
 def replace_algorithm_inline_macros(text: str) -> str:
     def replace_braced_macro(
         value: str,
@@ -33,9 +34,7 @@ def replace_algorithm_inline_macros(text: str) -> str:
             try:
                 for _ in range(argument_count):
                     position = skip_space(value, position)
-                    argument, position = read_balanced(
-                        value, position, "{", "}"
-                    )
+                    argument, position = read_balanced(value, position, "{", "}")
                     arguments.append(argument)
             except ValueError:
                 result.append(value[match.start() : match.end()])
@@ -48,17 +47,11 @@ def replace_algorithm_inline_macros(text: str) -> str:
     text = replace_braced_macro(
         text,
         "Comment",
-        lambda arguments, _value, _position: (
-            rf"\textit{{（{arguments[0]}）}}"
-        ),
+        lambda arguments, _value, _position: rf"\textit{{（{arguments[0]}）}}",
     )
 
-    def replace_call(
-        arguments: list[str], value: str, position: int
-    ) -> str:
-        unescaped_dollars = len(
-            re.findall(r"(?<!\\)\$", value[:position])
-        )
+    def replace_call(arguments: list[str], value: str, position: int) -> str:
+        unescaped_dollars = len(re.findall(r"(?<!\\)\$", value[:position]))
         name, parameters = arguments
         if unescaped_dollars % 2:
             return (
@@ -79,10 +72,9 @@ def replace_algorithm_inline_macros(text: str) -> str:
 def convert_algorithmic_body(text: str) -> str:
     command_pattern = re.compile(
         r"^[ \t]*\\(?P<command>"
-        r"Statex|State|Require|Ensure|ForAll|For|EndFor|"
+        r"Statex|State|Require|Ensure|For|EndFor|"
         r"If|ElsIf|Else|EndIf|While|EndWhile|Repeat|Until|"
-        r"Function|EndFunction|Procedure|EndProcedure|"
-        r"Loop|EndLoop|Comment"
+        r"Function|EndFunction"
         r")\b",
         flags=re.MULTILINE,
     )
@@ -92,7 +84,8 @@ def convert_algorithmic_body(text: str) -> str:
         if not content:
             return ""
         return (
-            r"\begin{enumerate}" "\n"
+            r"\begin{enumerate}"
+            "\n"
             rf"\item \textbf{{{ALGORITHM_COMMAND_PREFIX}STATE}} "
             f"{content}\n"
             r"\end{enumerate}"
@@ -106,17 +99,13 @@ def convert_algorithmic_body(text: str) -> str:
         suffix = f" {content}" if content else ""
         return rf"\item {marker(kind)}{suffix}"
 
-    def braced_arguments(
-        value: str, count: int
-    ) -> tuple[list[str], str]:
+    def braced_arguments(value: str, count: int) -> tuple[list[str], str]:
         position = 0
         arguments: list[str] = []
         try:
             for _ in range(count):
                 position = skip_space(value, position)
-                argument, position = read_balanced(
-                    value, position, "{", "}"
-                )
+                argument, position = read_balanced(value, position, "{", "}")
                 arguments.append(argument)
         except ValueError:
             return [], value
@@ -124,56 +113,40 @@ def convert_algorithmic_body(text: str) -> str:
 
     output = [r"\begin{enumerate}"]
     stack: list[str] = []
-    prefix = replace_algorithm_inline_macros(
-        text[: matches[0].start()]
-    ).strip()
+    prefix = replace_algorithm_inline_macros(text[: matches[0].start()]).strip()
     if prefix:
         output.append(item("state", prefix))
 
     opening_commands = {
         "For": ("for", "for", "do"),
-        "ForAll": ("for", "for all", "do"),
         "If": ("if", "if", "then"),
         "While": ("while", "while", "do"),
         "Function": ("function", "function", ""),
-        "Procedure": ("procedure", "procedure", ""),
-        "Loop": ("loop", "loop", ""),
     }
     ending_commands = {
         "EndFor": ("for", "end for"),
         "EndIf": ("if", "end if"),
         "EndWhile": ("while", "end while"),
         "EndFunction": ("function", "end function"),
-        "EndProcedure": ("procedure", "end procedure"),
-        "EndLoop": ("loop", "end loop"),
+    }
+    input_output_labels = {
+        "Require": "Input:",
+        "Ensure": "Output:",
     }
 
     for index, match in enumerate(matches):
         command = match.group("command")
         segment_end = (
-            matches[index + 1].start()
-            if index + 1 < len(matches)
-            else len(text)
+            matches[index + 1].start() if index + 1 < len(matches) else len(text)
         )
         remainder = text[match.end() : segment_end]
 
-        if command in {"Require", "Ensure"}:
-            label = "输入：" if command == "Require" else "输出："
-            output.append(
-                item(command.lower(), rf"\textbf{{{label}}} {remainder}")
-            )
+        if command in input_output_labels:
+            label = input_output_labels[command]
+            output.append(item(command.lower(), rf"\textbf{{{label}}} {remainder}"))
             continue
         if command in {"State", "Statex"}:
             output.append(item(command.lower(), remainder))
-            continue
-        if command == "Comment":
-            arguments, tail = braced_arguments(remainder, 1)
-            content = (
-                rf"\textit{{（{arguments[0]}）}} {tail}"
-                if arguments
-                else remainder
-            )
-            output.append(item("comment", content))
             continue
         if command == "Repeat":
             output.append(item("repeat", r"\textbf{repeat}"))
@@ -185,9 +158,7 @@ def convert_algorithmic_body(text: str) -> str:
             if stack:
                 output.append(r"\end{enumerate}")
                 stack.pop()
-            condition = (
-                f"{arguments[0]} {tail}" if arguments else remainder
-            )
+            condition = f"{arguments[0]} {tail}" if arguments else remainder
             output.append(
                 item(
                     "until",
@@ -214,14 +185,10 @@ def convert_algorithmic_body(text: str) -> str:
                 output.append(r"\begin{enumerate}")
             continue
         if command in opening_commands:
-            stack_kind, opening_label, ending_label = opening_commands[
-                command
-            ]
-            argument_count = 2 if command in {"Function", "Procedure"} else 1
-            arguments, tail = braced_arguments(
-                remainder, argument_count
-            )
-            if command in {"Function", "Procedure"} and len(arguments) == 2:
+            stack_kind, opening_label, ending_label = opening_commands[command]
+            argument_count = 2 if command == "Function" else 1
+            arguments, tail = braced_arguments(remainder, argument_count)
+            if command == "Function" and len(arguments) == 2:
                 principal = rf"\textsc{{{arguments[0]}}}({arguments[1]})"
             elif arguments:
                 principal = arguments[0]
@@ -241,9 +208,7 @@ def convert_algorithmic_body(text: str) -> str:
             if stack:
                 output.append(r"\end{enumerate}")
                 stack.pop()
-            output.append(
-                item(stack_kind + "-end", rf"\textbf{{{label}}} {remainder}")
-            )
+            output.append(item(stack_kind + "-end", rf"\textbf{{{label}}} {remainder}"))
             continue
 
         output.append(item("state", remainder))
@@ -255,9 +220,7 @@ def convert_algorithmic_body(text: str) -> str:
     return "\n".join(output)
 
 
-def patch_algorithm_environments(
-    text: str, marker_counter: list[int]
-) -> str:
+def patch_algorithm_environments(text: str, marker_counter: list[int]) -> str:
     algorithm_pattern = re.compile(
         r"^[ \t]*\\begin\s*\{algorithm\}(?:\s*\[[^\]]*\])?"
         r"(?P<body>.*?)"
@@ -303,18 +266,14 @@ def patch_algorithm_environments(
         )
         body = algorithmic_pattern.sub(
             lambda algorithmic: (
-                r"\begin{algorithmic}" "\n"
+                r"\begin{algorithmic}"
+                "\n"
                 + convert_algorithmic_body(algorithmic.group("body"))
                 + "\n"
                 + r"\end{algorithmic}"
             ),
             body,
         )
-        return (
-            r"\begin{algorithm}" "\n"
-            + body.strip()
-            + "\n"
-            + r"\end{algorithm}"
-        )
+        return r"\begin{algorithm}" "\n" + body.strip() + "\n" + r"\end{algorithm}"
 
     return algorithm_pattern.sub(replacement, text)

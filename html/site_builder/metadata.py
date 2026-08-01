@@ -11,7 +11,7 @@ from typing import Any, NoReturn
 
 from .config import BuildPaths
 from .errors import BuildError
-from .latex_sources import strip_tex_comments
+from .latex_parsing import strip_tex_comments
 
 
 def fail(message: str) -> NoReturn:

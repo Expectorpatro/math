@@ -235,6 +235,7 @@ git push origin main
 - `algorithm` 与 `algpseudocode` 会转换为带标题、章内编号、行号和缩进的算法块；支持 `Require/Ensure/State/Statex`、条件、循环、函数、注释、`Call/Return` 以及 `label/cref` 算法引用。
 - 行内数学公式通过 CSS 在左右各保留少量视觉间距，不修改原始 TeX 中的`$...$`；只有实际越过正文右边界的公式才会变成可横向滚动区域，普通公式的行高和基线不受影响。
 - `minted` 和 `inputminted` 由 Pandoc 转成带语法高亮的代码块；后者引用的代码文件会自动复制到暂存目录。
+- 独立编译 TikZ 图片时使用的扩展库会自动读取 `settings.tex` 中的 `\usetikzlibrary` 和 `\usepgfplotslibrary` 声明，无需在 Python 构建器中重复维护。
 - `densityplot` 环境在 PDF 中保留固定参数的 TikZ/PGFPlots 图，在网页中替换为可调整参数的 SVG 密度曲线；支持 PDF/CDF 切换、PDF 区间概率、坐标缩放和曲线对比。鼠标移入曲线区域时会显示当前位置与函数值；图表滚动到视口附近才加载数值计算、探针和绘图脚本。相关逻辑按加载器、数学计算、鼠标探针与图表界面拆分，脚本随静态站点一同发布，不依赖外部服务。
 - 每个行间公式会保留转换前的原始 LaTeX；网页在公式右上角提供复制按钮，复制结果不会包含网页构建时生成的编号标签。
 - 与章节同目录的 `computations.order` 控制 Jupyter/Quarto 结果的顺序，构建时自动编号并追加到相应 chapter 末尾。

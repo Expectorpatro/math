@@ -7,7 +7,7 @@ import re
 
 from .config import BuildPaths
 from .errors import BuildError
-from .latex_sources import strip_tex_comments
+from .latex_parsing import strip_tex_comments
 from .models import ComputationGroup
 from .pandoc_tables import latex_to_plain
 

@@ -3,49 +3,32 @@
 \subsection{信息度量与分裂准则}
 \subsubsection{信息量}
 \begin{definition}
-	设$(X,\mathscr{A},P)$为概率空间，$f$是$X$上的离散型随机变量，$f$的取值集合为$\{x_n\}$。称$-\log[P(f=x_n)]$为事件$\{f=x_n\}$的\gls{InformationQuantity}，记作$I(f=x_n)$。
+	设$(X,\mathscr{A},P)$为概率空间，$f$是$X$上的离散型随机变量，$f$的取值集合为$\{x_n\}$。称$-\log_2[P(f=x_n)]$为事件$\{f=x_n\}$的\gls{SelfInformation}，记作$I(f=x_n)$，其中$P(f=x_n)>0$。
 \end{definition}
 \begin{note}
-	信息量定义中对数底的选择是任意的，但在信息论中普遍使用$2$作为对数的底。\par
 	为什么信息量这么定义呢？信息量应该具有如下两个性质：
 	\begin{enumerate}
 		\item 一件事发生的概率越小，那么这件事发生后产生的信息量越大；
 		\item 如果两件事情独立，那么这两件事情都发生所产生的信息量应该等于每件事情各自发生产生的信息量之和。
 	\end{enumerate}
-	由(1)，$I(f=x_n)$需要与$P(f=x_n)$呈反比；由(2)，$I(f=x_n)$应具有对数的形式。
+	由(1)，$I(f=x_n)$需要随$P(f=x_n)$单调下降；由(2)，$I(f=x_n)$应具有对数的形式。
 \end{note}
 \begin{definition}
-	设$(X,\mathscr{A},P)$为概率空间，$f$是$X$上的离散型随机变量，$f$的取值集合为$\{x_n\}$。称$H(f)=\operatorname{E}[I(f)]$为$f$的\gls{InformationEntropy}，由样本计算得到的信息熵被称为\gls{EmpiricalEntropy}，给定某一条件下的信息熵被称为\gls{ConditionalEntropy}。
+	设$(X,\mathscr{A},P)$为概率空间，$f$是$X$上的离散型随机变量，$f$的取值集合为$\{x_n\}$。约定$P(f=x_n)=0$时$P(f=x_n)I(f=x_n)=0$，称$H(f)=\operatorname{E}[I(f)]$为$f$的\gls{InformationEntropy}，由样本得到的经验分布计算出的信息熵被称为\gls{EmpiricalEntropy}。
 \end{definition}
-%\begin{note}
-%	设$X,Y$是两个离散型随机变量，各自有$n$个和$m$个取值，分别为$x_1,x_2,\dots,x_n$和$y_1,y_2,\dots,y_m$，则$X$在$Y$下的条件熵$H(X|Y)$为：
-%	\begin{align*}
-	%		H(X|Y)
-	%		&=E[I(X|Y)]=E\left[\sum_{i=1}^mP(Y=y_i)I(X|Y=y_i)\right] \\
-	%		&=\sum_{i=1}^mP(Y=y_i)E\left[I(X|Y=y_i)\right] \\
-	%		&=\sum_{i=1}^mP(Y=y_i)E\left[-\log_2\Big(P(X|Y=y_i)\Big)\right] \\
-	%		&=-\sum_{i=1}^mP(Y=y_i)\sum_{j=1}^nP(X=x_j|Y=y_i)\log_2\Big[P(X=x_j|Y=y_i)\Big]
-	%	\end{align*}
-%	$X$在$Y=y_i$下的条件熵$H(X|Y=y_i)$为：
-%	\begin{align*}
-	%		H(X|Y=y_i)&=E[I(X|Y=y_i)] \\
-	%		&=E\left[-\log_2\Big(P(X|Y=y_i)\Big)\right] \\
-	%		&=-\sum_{j=1}^nP(X=x_j|Y=y_i)\log_2\Big[P(X=x_j|Y=y_i)\Big]
-	%	\end{align*}
-%\end{note}
 \begin{property}\label{prop:InformationEntropy}
 	设$(X,\mathscr{A},P)$为概率空间，$f$是$X$上的离散型随机变量，$f$的取值集合为$\{x_n\}$。信息熵具有如下性质：
 	\begin{enumerate}
 		\item $H(f)\geqslant0$；
-		\item 若$f$的取值集合为$\{x_i\}_{i=1}^{n}$，则当$P(f=x_1)=P(f=x_2)=\cdots=P(f=x_n)$时，$H(f)$取得最大值$\log(n)$。
+		\item 若$f$的取值集合为$\{x_i\}_{i=1}^{n}$，则当$P(f=x_1)=P(f=x_2)=\cdots=P(f=x_n)$时，$H(f)$取得最大值$\log_2(n)$。
 	\end{enumerate}
 \end{property}
 \begin{proof}
 	(1)由信息熵的定义立即可得。\par
-	(2)由于$\log(x)$在$(0,+\infty)$上为凹函数\info{补充判断理由}，根据\cref{ineq:Jensen}可得：
+	(2)由\cref{prop:ConvexFunction}(3)可知$-\log_2(x)$在$(0,+\infty)$上为凸函数，根据\cref{ineq:Jensen}可得：
 	\begin{align*}
-		H(f)&=\operatorname{E}[I(f)]=-\sum_{i=1}^{n}P(f=x_i)\log[P(f=x_i)]=\sum_{i=1}^{n}P(f=x_i)\log\left[\frac{1}{P(f=x_i)}\right] \\
-		&\leqslant\log\left[\sum_{i=1}^{n}P(f=x_i)\frac{1}{P(f=x_i)}\right]=\log(n)
+		H(f)&=\operatorname{E}[I(f)]=-\sum_{i=1}^{n}P(f=x_i)\log_2[P(f=x_i)]=\sum_{i=1}^{n}P(f=x_i)\log_2\left[\frac{1}{P(f=x_i)}\right] \\
+		&\leqslant\log_2\left[\sum_{i=1}^{n}P(f=x_i)\frac{1}{P(f=x_i)}\right]=\log_2(n)
 	\end{align*}
 	上式取等当且仅当$\dfrac{1}{P(f=x_i)}$为常数，即$P(f=x_1)=P(f=x_2)=\cdots=P(f=x_n)$。
 \end{proof}
@@ -72,16 +55,16 @@
 \end{figure}
 \subsubsection{Gini系数}
 \begin{definition}
-	设分类问题的类别空间为$\mathcal{Y}=\{1,\dots,m\}$，$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$为观测样本集，其中$y_i\in\mathcal{Y}$表示第$i$个样本的真实类别，记$p_i$为第$i$类样本在$\mathcal{D}$中所占比例。称：
+	设分类问题的类别空间为$Y=\{1,\dots,m\}$，$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$为观测样本集，其中$y_i\in Y$表示第$i$个样本的真实类别，记$p_i$为第$i$类样本在$\mathcal{D}$中所占比例。称：
 	\begin{equation*}
 		\operatorname{Gini}(\mathcal{D})=1-\sum_{i=1}^mp_i^2
 	\end{equation*}
 	为观测样本集$\mathcal{D}$的\gls{GiniIndex}。
 \end{definition}
 \begin{property}\label{prop:GiniIndex}
-	设分类问题的类别空间为$\mathcal{Y}=\{1,\dots,m\}$，$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$为观测样本集，其中$y_i\in\mathcal{Y}$表示第$i$个样本的真实类别，记$p_i$为第$i$类样本在$\mathcal{D}$中所占比例。Gini指数具有如下性质：
+	设分类问题的类别空间为$Y=\{1,\dots,m\}$，$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$为观测样本集，其中$y_i\in Y$表示第$i$个样本的真实类别，记$p_i$为第$i$类样本在$\mathcal{D}$中所占比例。Gini指数具有如下性质：
 	\begin{enumerate}
-		\item Gini指数是在样本集合中随机抽取两个样本时，它们属于不同类别的概率；
+		\item Gini指数是在样本集合中独立、有放回地抽取两个样本时，它们属于不同类别的概率；
 		\item $\operatorname{Gini}(\mathcal{D})\leqslant1-\dfrac{1}{m}$，上式取等当且仅当$p_1=\cdots=p_m=\dfrac{1}{m}$。
 	\end{enumerate}
 \end{property}
@@ -89,7 +72,7 @@
 	(1)显然。\par
 	(2)由\cref{ineq:CauchySchiwarz}可得：
 	\begin{equation*}
-			\sum_{i=1}^{m}1^2\sum_{i=1}^{m}p_i^2\geqslant\left(\sum_{i=1}^{m}p_i\right)^2=1
+			\left(\sum_{i=1}^{m}1^2\right)\left(\sum_{i=1}^{m}p_i^2\right)\geqslant\left(\sum_{i=1}^{m}p_i\right)^2=1
 	\end{equation*}
 	上式取等当且仅当$p_1=\cdots=p_m=\frac{1}{m}$，因此：
 	\begin{equation*}
@@ -124,7 +107,7 @@
 	设 $(X,\mathscr{A},P)$ 为概率空间，$f$为$X$上取值于有限集合
 	$\{x_1,\dots,x_n\}$ 的离散型随机变量，其真实分布为：
 	\begin{equation*}
-		p_i=P(f=x_i),\quad i=1,\dots,n
+		p_i=P(f=x_i),\;i=1,\dots,n
 	\end{equation*}
 	另设$q=(q_1,\dots,q_n)$为定义在同一取值集合上的另一概率分布，满足$q_i>0$。称：
 	\begin{equation*}
@@ -133,14 +116,14 @@
 	为分布$p$相对于分布$q$的\gls{CrossEntropy}。
 \end{definition}
 \begin{property}\label{prop:CrossEntropy}
-	设$p=(p_1,\dots,p_n)$与$q=(q_1,\dots,q_n)$为定义在同一有限集合上的概率分布，则$H(p,q)\geqslant H(p,p)$，上式取等当且仅当$q_1=p_1,\dots,q_n=p_n$ 
+	设$p=(p_1,\dots,p_n)$与$q=(q_1,\dots,q_n)$（$p_iq_i\ne0,\;i=1,2,\dots,n$）为定义在同一有限集合上的概率分布，则$H(p,q)\geqslant H(p,p)$，上式取等当且仅当$q_1=p_1,\dots,q_n=p_n$ 。
 \end{property}
 \begin{proof}
 	因为：
 	\begin{equation*}
 		H(p,q)=-\sum_{i=1}^np_i\log q_i=-\sum_{i=1}^np_i\log\frac{q_i}{p_i}-\sum_{i=1}^np_i\log p_i
 	\end{equation*}
-	并且$\log(x)$在$(0,+\infty)$上为凹函数\info{补充判断理由}，由\cref{ineq:Jensen}可知：
+	并且由\cref{prop:ConvexFunction}(3)可知$-\log(x)$在$(0,+\infty)$上为凸函数，由\cref{ineq:Jensen}可知：
 	\begin{equation*}
 		\sum_{i=1}^np_i\log\frac{q_i}{p_i}\leqslant\log\left[\sum_{i=1}^{n}p_i\frac{q_i}{p_i}\right]=0
 	\end{equation*}
@@ -151,9 +134,8 @@
 	且当且仅当$q=p$时取等。
 \end{proof}
 \begin{note}
-	由\cref{prop:CrossEntropy}可知，交叉熵在所有概率分布$q$中以$q=p$为唯一最小值。因而最小化经验交叉熵等价于逼近真实分布$p$，这正是对数损失函数的理论基础。
+	由\cref{prop:CrossEntropy}可知，交叉熵在所有概率分布$q$中以$q=p$为唯一最小值。实际中真实分布$p$通常未知，故以样本的经验分布$\hat{p}$代替$p$，并最小化$H(\hat{p},q)$。在$H(\hat{p},q)$能够充分逼近$H(p,q)$的条件下，该过程使所估计的分布$q$趋近于真实分布$p$。
 \end{note}
-
 交叉熵需要区分真实概率$p$和预测概率$q$。固定真实概率$p=0.25$后，预测概率$q$与$p$一致时交叉熵最小；预测越偏离真实概率，交叉熵越大。
 \begin{figure}[H]
 	\centering
@@ -175,190 +157,417 @@
 	\end{tikzpicture}
 	\caption{真实概率固定为$p=0.25$时的二分类交叉熵。横轴$q$为模型预测第一类的概率。}
 \end{figure}
+\begin{note}
+	由\cref{prop:CrossEntropy}可知，交叉熵在所有概率分布$q$中以$q=p$为唯一最小值。实际中真实分布$p$通常未知，故以样本的经验分布$\hat{p}$代替$p$，并最小化$H(\hat{p},q)$。在$H(\hat{p},q)$能够充分逼近$H(p,q)$的条件下，该过程使所估计的分布$q$趋近于真实分布$p$。
+\end{note}
+\begin{note}
+	在分类问题中，我们可以用逐样本的交叉熵作为损失函数。对于第$i$个样本，若其真实类别为第$k$类，则其真实分布$p_i$是一个one-hot向量，即第$k$个分量为$1$，其余分量为$0$。例如，在二分类问题中有：
+	\begin{equation*}
+		p_i=(1,0)^{\top}\qquad\text{或}\qquad p_i=(0,1)^{\top}
+	\end{equation*}
+	若模型对该样本输出概率分布$q_i$，则其交叉熵为：
+	\begin{equation*}
+		H(p_i,q_i)=-\sum_{j=1}^Kp_{ij}\log q_{ij}=-\log q_{iy_i}
+	\end{equation*}
+	整个数据集上的交叉熵损失通常取各样本损失的平均：
+	\begin{equation*}
+		L_{\mathrm{CE}}=\frac{1}{n}\sum_{i=1}^nH(p_i,q_i)
+	\end{equation*}
+	由此可见，分类问题中的交叉熵分别比较每个样本的真实分布$p_i$与预测分布$q_i$。由于$p_i$是one-hot向量，$H(p_i,q_i)$实际上只取决于模型赋给该样本真实类别的概率$q_{iy_i}$：该概率越接近$1$，损失越小；该概率越接近$0$，损失越大。
+\end{note}
 
 \subsection{决策树}
-决策树从根节点开始，根据某个条件将样本递归地分到不同子节点。内部节点保存判断规则，叶节点保存最终预测。下图以判断今天是否适合户外活动为例；方括号中的两个数字依次表示适合和不适合的历史样本数。对一个新样本，只需从根节点开始依次判断，直至到达叶节点。
+\subsubsection{从判断规则到决策树}
+人们在进行判断时，往往不会同时综合所有信息后直接给出结论，而是依次提出若干问题，并根据每个问题的答案决定接下来应当考虑什么。例如，医生在进行初步问诊时，可能根据患者的体温、全身肌肉酸痛以及近期接触史，判断患者是否需要进一步接受流感检测。为了说明决策树的基本思想，考虑如下简化的判断规则：
+\begin{quote}
+	首先判断患者的体温是否高于$38\,^\circ\mathrm{C}$。若体温高于$38\,^\circ\mathrm{C}$，则继续判断患者是否存在明显的全身肌肉酸痛：若存在，则建议进行流感检测；若不存在，则暂不建议进行流感检测。\par
+	若患者的体温不高于$38\,^\circ\mathrm{C}$，则继续询问其近期是否与流感患者有过密切接触：若有密切接触，则建议进行流感检测；若没有密切接触，则暂不建议进行流感检测。
+\end{quote}
+这里的判断并不是一次完成的，而是由若干个简单问题依次组成。可以将这一系列判断规则表示为一棵树：
 \begin{figure}[H]
 	\centering
 	\begin{tikzpicture}[
 		>=Stealth,
+		thick,
+		font=\small,
 		decision/.style={
-			draw=blue!65!black,
-			fill=blue!6,
-			rounded corners=3pt,
+			draw,
+			rounded corners=4pt,
 			align=center,
-			minimum width=4.2cm,
-			minimum height=1.25cm,
-			font=\small,
+			text width=3.8cm,
+			minimum height=1.2cm,
+			inner sep=6pt
 		},
-		leafGood/.style={
-			draw=teal!70!black,
-			fill=teal!9,
-			rounded corners=3pt,
+		leaf/.style={
+			draw,
+			ellipse,
 			align=center,
-			minimum width=3.2cm,
-			minimum height=1.15cm,
-			font=\small,
+			text width=2.8cm,
+			minimum width=3.8cm,
+			minimum height=1.5cm,
+			inner sep=4pt
 		},
-		leafBad/.style={
-			draw=orange!85!black,
-			fill=orange!10,
-			rounded corners=3pt,
-			align=center,
-			minimum width=3.2cm,
-			minimum height=1.15cm,
-			font=\small,
-		},
-		edge/.style={draw=gray!75, very thick, ->},
-	]
-		\node[decision] (root) at (0,0) {今天下雨吗？\\样本数：$100$，类别计数：$[60,40]$};
-		\node[leafGood] (dry) at (-4,-2.35) {预测：适合户外活动\\样本数：$60$，$[52,8]$};
-		\node[decision] (wind) at (2.7,-2.35) {风力较大吗？\\样本数：$40$，类别计数：$[8,32]$};
-		\node[leafBad] (windy) at (0.7,-4.7) {预测：不适合户外活动\\样本数：$28$，$[1,27]$};
-		\node[leafGood] (calm) at (4.7,-4.7) {预测：适合户外活动\\样本数：$12$，$[7,5]$};
-		\draw[edge] (root) -- node[above left, font=\small] {否} (dry);
-		\draw[edge] (root) -- node[above right, font=\small] {是} (wind);
-		\draw[edge] (wind) -- node[above left, font=\small] {是} (windy);
-		\draw[edge] (wind) -- node[above right, font=\small] {否} (calm);
+		edge label/.style={
+			fill=white,
+			inner sep=1pt,
+			font=\small
+		}
+		]
+		% nodes
+		\node[decision] (root) at (0,0) {体温是否高于\\$38\,^\circ\mathrm{C}$？};
+		
+		\node[decision] (leftdec) at (-5,-2.7) {是否存在明显的\\全身肌肉酸痛？};
+		\node[decision] (rightdec) at (5,-2.7) {近期是否与\\流感患者\\有过密切接触？};
+		
+		\node[leaf] (l1) at (-7.4,-5.5) {建议进行\\流感检测};
+		\node[leaf] (l2) at (-2.6,-5.5) {暂不建议进行\\流感检测};
+		\node[leaf] (r1) at (2.6,-5.5) {建议进行\\流感检测};
+		\node[leaf] (r2) at (7.4,-5.5) {暂不建议进行\\流感检测};
+		
+		% edges from root
+		\draw[->] (root.south west) -- (leftdec.north)
+		node[midway, above left=2pt, edge label] {是};
+		\draw[->] (root.south east) -- (rightdec.north)
+		node[midway, above right=2pt, edge label] {否};
+		
+		% edges from left decision
+		\draw[->] (leftdec.south west) -- (l1.north)
+		node[midway, above left=2pt, edge label] {是};
+		\draw[->] (leftdec.south east) -- (l2.north)
+		node[midway, above right=2pt, edge label] {否};
+		
+		% edges from right decision
+		\draw[->] (rightdec.south west) -- (r1.north)
+		node[midway, above left=2pt, edge label] {是};
+		\draw[->] (rightdec.south east) -- (r2.north)
+		node[midway, above right=2pt, edge label] {否};
 	\end{tikzpicture}
-	\caption{二分类决策树示意图。每次判断都把当前节点中的样本分到两个子节点，叶节点以占比最高的类别作为预测。}
-	\label{fig:decision-tree-example}
-\end{figure}
-
+	\caption{由一系列问诊规则构成的决策树示例}
+	\label{fig:DecisionTreeExample}
+\end{figure}\par
+在\cref{fig:DecisionTreeExample}中，最上方的问题是整个判断过程的起点，称为\gls{RootNode}；中间包含判断规则的节点称为内部节点；每个问题的不同答案对应从该节点出发的一条分支；不再提出新问题、而是直接给出预测结果的节点称为\gls{LeafNode}。从根节点出发，沿着每次判断所选择的分支，最终到达某个叶节点，这一系列连续的判断构成一条路径。每条路径都可以看作一组判断规则的组合，而每个叶节点则对应满足这些规则的一类样本。\par
+决策树正是将这种基于连续提问的经验判断转化为一种可以从数据中学习的预测方法。给定训练数据集$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^{n}$，决策树需要完成两个任务：首先，从样本特征中选择适当的判断问题；其次，根据训练样本决定每条判断路径最终应当给出什么预测结果。\par
+对于数值型特征，第$j$个特征和阈值$\tau$可以构成一个二元判断问题：
+\begin{equation*}
+	x_j\leqslant\tau\;?
+\end{equation*}
+根据该问题的答案，当前节点中的数据集$\mathcal{D}_t$被划分为两个部分：
+\begin{equation*}
+	\mathcal{D}_{tL}(j,\tau)=\{(x,y)\in\mathcal{D}_t:x_j\leqslant\tau\},\quad\mathcal{D}_{tR}(j,\tau)=\{(x,y)\in\mathcal{D}_t:x_j>\tau\}
+\end{equation*}
+其中$\mathcal{D}_{tL}(j,\tau)$和$\mathcal{D}_{tR}(j,\tau)$分别对应判断问题的两个答案，也就是当前节点产生的两个子节点。决策树随后在每个子节点中继续寻找新的判断问题，并重复这一划分过程。因此，决策树的构造过程具有递归结构：一个节点被划分为两个子节点，而每个子节点又可以继续被划分，直到满足某种停止条件。\par
+从几何上看，每个判断规则都会对特征空间施加一个限制条件。例如，一条由如下判断组成的路径：
+\begin{equation*}
+	x_{j_1}\leqslant\tau_1,\quad x_{j_2}>\tau_2,\quad x_{j_3}\leqslant\tau_3
+\end{equation*}
+对应特征空间中的一个区域：
+\begin{equation*}
+	R_t=\left\{x:x_{j_1}\leqslant\tau_1,\;x_{j_2}>\tau_2,\;x_{j_3}\leqslant\tau_3\right\}
+\end{equation*}
+所有落入同一个区域$R_t$的样本最终到达同一个叶节点，并共享相同的预测规则。因此，决策树本质上将特征空间划分为若干互不重叠的区域，并在每个区域内使用一个简单的局部预测。\par
+在分类问题中，设叶节点$t$包含的数据集为$\mathcal{D}_t$，其中第$k$类样本所占的比例为：
+\begin{equation*}
+	\hat{p}_{tk}=\frac{1}{|\mathcal{D}_t|}\sum_{(x,y)\in\mathcal{D}_t}I(y=k),\;k=1,2,\dots,K
+\end{equation*}
+对于落入该叶节点的新样本$x$，决策树将$\hat{p}_{tk}$作为类别$k$的预测概率，并将样本预测为该节点中的多数类别：
+\begin{equation*}
+	\hat{y}(x)=\underset{1\leqslant k\leqslant K}{\arg\max}\;\hat{p}_{tk}
+\end{equation*}\par
+在回归问题中，同一个叶节点中的样本共享一个常数预测值$\hat{c}_t$：
+\begin{equation*}
+	\hat{y}(x)=\hat{c}_t,\;x\in R_t
+\end{equation*}
+根据所选择的损失函数，$\hat{c}_t$可以取节点中响应变量的均值、中位数或者其他适当的统计量，原则是使得损失函数值最小。\par
+由此可见，一个判断规则是否合理，关键在于它是否将具有相似响应结果的样本分到一起。对于分类树，我们希望同一节点中的样本尽可能属于相同类别；对于回归树，我们希望同一节点中的响应值尽可能接近。换言之，决策树需要寻找能够使子节点中的响应变量更加同质的判断规则。\par
+为了比较不同判断规则的优劣，首先需要度量一个节点中的响应变量究竟有多混杂。这个量称为\gls{NodeImpurity}。
+\subsubsection{节点不纯度}
+设$\mathcal{D}$是某个节点中的数据集。在该节点不再继续划分时，所有样本将共享同一个局部预测。对于给定损失函数$\ell$，可以将节点不纯度统一定义为节点内最优常数预测所达到的最小平均经验损失：
+\begin{equation*}
+	I_{\ell}(\mathcal{D})=\underset{a\in\mathcal{A}}{\min}\;\frac{1}{|\mathcal{D}|}\sum_{(x,y)\in\mathcal{D}}\ell(y,a)
+\end{equation*}
+其中$\mathcal{A}$表示允许的节点预测空间。节点不纯度越小，说明使用单一预测描述该节点中的所有样本所造成的损失越小，因而节点中的响应变量越同质。\par
+在分类问题中，由\cref{prop:InformationEntropy}(2)和\cref{prop:GiniIndex}(2)可知，信息熵与Gini不纯度都可以用于衡量节点中的类别分布是否集中。当节点中的样本全部属于同一类别时，二者均为$0$；类别分布越分散，二者的取值越大。因此，它们都可以作为分类树中的节点不纯度指标。\par
+若使用交叉熵作为分类损失，记该节点中第$k$类样本的数量及比例分别为$n_k$和$p_k$，则：
+\begin{equation*}
+	p=(p_1,p_2,\dots,p_K)^{\top}
+\end{equation*}
+表示节点中的经验类别分布。在分类树中，每个叶节点以一个类别概率向量作为落入该节点的所有样本的共同预测。记节点的类别概率预测为：
+\begin{equation*}
+	q=(q_1,q_2,\dots,q_K)^{\top},\quad q_k\geqslant0,\quad\sum_{k=1}^Kq_k=1
+\end{equation*}
+根据分类问题中逐样本交叉熵损失的定义，类别为$y$的样本对应的损失为$-\log q_y$。因为节点内的所有样本共享同一个概率预测$q$，所以真实类别为$k$的每个样本都产生相同的交叉熵损失$-\log q_k$。因为节点中共有$n_k$个第$k$类样本，所以将样本按照真实类别分组可得：
+\begin{equation*}
+	-\frac{1}{n}\sum_{(x,y)\in\mathcal{D}}\log q_y=-\frac{1}{n}\sum_{k=1}^Kn_k\log q_k=-\sum_{k=1}^Kp_k\log q_k
+\end{equation*}
+即节点内的平均交叉熵损失就是节点经验类别分布$p$与预测类别分布$q$之间的交叉熵。根据\cref{prop:CrossEntropy}，此时节点内最优常数预测所达到的经验损失恰好就是该节点经验类别分布的信息熵。这进一步给出了以信息熵作为节点不纯度指标的理论依据。\par
+在回归问题中，若使用平方误差损失：
+\begin{equation*}
+	\ell(y,c)=(y-c)^2
+\end{equation*}
+则最优节点预测为样本均值：
+\begin{equation*}
+	\hat{c}=\bar{y}=\frac{1}{n}\sum_{(x,y)\in\mathcal{D}}y
+\end{equation*}
+对应的节点不纯度为：
+\begin{equation*}
+	I_{\mathrm{SE}}(\mathcal{D})=\frac{1}{n}\sum_{(x,y)\in\mathcal{D}}(y-\bar{y})^2
+\end{equation*}\par
+若使用绝对误差损失：
+\begin{equation*}
+	\ell(y,c)=|y-c|
+\end{equation*}
+则最优节点预测为样本中位数：
+\begin{equation*}
+	\hat{c}=\operatorname{median}\{y:(x,y)\in\mathcal{D}\}
+\end{equation*}
+对应的节点不纯度为：
+\begin{equation*}
+	I_{\mathrm{AE}}(\mathcal{D})=\frac{1}{n}\sum_{(x,y)\in\mathcal{D}}|y-\hat{c}|
+\end{equation*}\par
+在给定数据集和准则后，节点不纯度的计算过程可总结为\cref{alg:NodeImpurity}。
 \begin{algorithm}[H]
-	\caption{Classification and Regression Tree}
+	\caption{Node Impurity}
+	\label{alg:NodeImpurity}
 	\begin{algorithmic}[1]
-		\State \textbf{Input:}
-		dataset $\mathcal{D}$,
-		feature set $\mathcal{F}$,
-		maximum depth $D_{\max}$,
-		minimum samples to split $N_{\text{split}}$,
-		minimum samples per leaf $N_{\text{leaf}}$,
-		minimum impurity decrease $\Delta_{\min}$,
-		criterion
+		\Require Nonempty node dataset $\mathcal{D}$ and splitting criterion
+		\Ensure Node impurity $I(\mathcal{D})$
 		
-		\State \textbf{Output:} Decision tree node $T$
+		\If{criterion $\in
+			\{\texttt{gini},\texttt{entropy},\texttt{cross entropy}\}$}
+		\State Let the class label set be $\{1,\dots,m\}$
+		\State $n_i\gets|\{(x,y)\in\mathcal{D}:y=i\}|$,
+		$p_i\gets n_i/|\mathcal{D}|$, $i=1,\dots,m$
 		
-		\Function{BuildTree}{$\mathcal{D}, d$}
-		\If{$|\mathcal{D}| < N_{\text{split}}$ \textbf{or} $d = D_{\max}$ 
-			\textbf{or} all labels in $\mathcal{D}$ are identical 
-			\textbf{or} no feature in $\mathcal{F}$ exhibits variation on $\mathcal{D}$}
-		\State \Return a leaf node predicting the majority class with class distribution:
-		\begin{equation*}
-			\left\{p_i=\frac{n_i}{|\mathcal{D}|}:n_i=|\{(x,y)\in\mathcal{D}:y=i\}|,\;i=1,2,\dots,m,\;m=\text{number of classes}\right\}
-		\end{equation*} 
-		or the constant minimizing the chosen criterion (for regression) on $\mathcal{D}$
+		\If{criterion $=\texttt{gini}$}
+		\State $I(\mathcal{D})\gets
+		1-\sum\limits_{i=1}^mp_i^2$
+		\ElsIf{criterion $\in
+			\{\texttt{entropy},\texttt{cross entropy}\}$}
+		\State $I(\mathcal{D})\gets
+		-\sum\limits_{\{i:p_i>0\}}p_i\log p_i$
+		\Comment{$0\log0$ is interpreted as $0$}
 		\EndIf
 		
-		\State $I_{\text{parent}}\gets\Call{NodeImpurity}{\mathcal{D}, \text{criterion}}$\Comment{Compute parent node impurity}
-
-		\State $(F, \tau, I_{\text{split}}) \gets \Call{FindBestSplit}{\mathcal{D}, \mathcal{F}, \text{criterion}, N_{\text{leaf}}}$\Comment{Search best binary split}
-		\If{$(F, \tau, I_{\text{split}})=\texttt{None}$ \text{or} $\Delta=I_{\text{parent}}-I_{\text{split}}<\Delta_{\min}$}
-		\State \Return Leaf node with prediction and class distribution or constant
-		\EndIf
-	
-		\State $\mathcal{D}_L \gets \{(x,y)\in\mathcal{D}:x[F]\leqslant\tau\}$, $\mathcal{D}_R \gets \{(x,y)\in\mathcal{D}:x[F]>\tau\}$
-
-		\State Initialize node 
-		$T \gets \{\text{type: "node"}, \text{feature: } F, \text{threshold: } \tau, 
-		\text{impurity decrease: }\Delta\}$
-		\State $T.\text{left} \gets \Call{BuildTree}{\mathcal{D}_L, d+1}$, $T.\text{right} \gets \Call{BuildTree}{\mathcal{D}_R, d+1}$
-		\State \Return $T$
-		\EndFunction
+		\ElsIf{criterion $=\texttt{squared error}$}
+		\State $\bar{y}\gets
+		|\mathcal{D}|^{-1}\sum\limits_{(x,y)\in\mathcal{D}}y$
+		\State $I(\mathcal{D})\gets
+		|\mathcal{D}|^{-1}\sum\limits_{(x,y)\in\mathcal{D}}(y-\bar{y})^2$
 		
-		\State \Return \Call{BuildTree}{$\mathcal{D}, 0$}
-	\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}[H]
-	\caption{Node Impurity Function}
-	\begin{algorithmic}[1]
-		\State \textbf{Input:} node dataset $\mathcal{D}$, criterion
-		\State \textbf{Output:} node impurity $I(\mathcal{D})$
-		
-		\State $n \gets |\mathcal{D}|$
-		
-		\If{criterion $\in \{\texttt{gini}, \texttt{entropy}, \texttt{cross entropy}\}$}\Comment{Classification impurity}
-		\State Let class label set be $\{1,\dots,m\}$
-		\State $n_i \gets |\{(x,y)\in\mathcal{D}:y=i\}|$, \quad $p_i \gets \dfrac{n_i}{n}$
-		
-		\If{criterion = \texttt{gini}}
-		\State $I(\mathcal{D}) \gets 1 - \sum\limits_{i=1}^m p_i^2$
-		\ElsIf{criterion = \texttt{entropy} \textbf{or} \texttt{cross entropy}}
-		\State $I(\mathcal{D}) \gets - \sum\limits_{i=1}^m p_i \log p_i$
-		\EndIf
-		
-		\ElsIf{criterion $\in \{\texttt{squared error}, \texttt{absolute error}\}$}\Comment{Regression impurity}
-		
-		\If{criterion = \texttt{squared error}}
-		\State $\bar{y} \gets \dfrac{1}{n} \sum\limits_{(x,y)\in\mathcal{D}} y$, $I(\mathcal{D}) \gets \dfrac{1}{n} \sum\limits_{(x,y)\in\mathcal{D}} (y-\bar{y})^2$
-		
-		\ElsIf{criterion = \texttt{absolute error}}
-		\State $m \gets \operatorname{median}\{y:(x,y)\in\mathcal{D}\}$, $I(\mathcal{D}) \gets \dfrac{1}{n} \sum\limits_{(x,y)\in\mathcal{D}} |y-m|$
-		\EndIf
+		\ElsIf{criterion $=\texttt{absolute error}$}
+		\State $\widetilde{y}\gets
+		\operatorname{median}\{y:(x,y)\in\mathcal{D}\}$
+		\State $I(\mathcal{D})\gets
+		|\mathcal{D}|^{-1}\sum\limits_{(x,y)\in\mathcal{D}}|y-\widetilde{y}|$
 		\EndIf
 		
 		\State \Return $I(\mathcal{D})$
 	\end{algorithmic}
 \end{algorithm}
 
+\subsubsection{寻找最优划分}
+节点不纯度衡量的是单个节点内部的同质程度。接下来需要判断某个划分规则能否使划分后的两个子节点比原节点更加同质。\par
+对于候选划分$s=(j,\tau)$，记划分后的数据集为：
+\begin{equation*}
+	\mathcal{D}_L(s)=\mathcal{D}_L(j,\tau),\quad\mathcal{D}_R(s)=\mathcal{D}_R(j,\tau)
+\end{equation*}
+由于两个子节点包含的样本量可能不同，划分后的总体不纯度定义为两个子节点不纯度的样本量加权平均：
+\begin{equation*}
+	I_{\mathrm{split}}(s;\mathcal{D})=\frac{|\mathcal{D}_L(s)|}{|\mathcal{D}|}I[\mathcal{D}_L(s)]+\frac{|\mathcal{D}_R(s)|}{|\mathcal{D}|}I[\mathcal{D}_R(s)]
+\end{equation*}
+该划分带来的不纯度下降为：
+\begin{equation*}
+	\Delta I(s;\mathcal{D})=I(\mathcal{D})-I_{\mathrm{split}}(s;\mathcal{D})
+\end{equation*}\par
+因此，最优划分可以等价地定义为使划分后不纯度最小的规则：
+\begin{equation*}
+	s^{\ast}=\underset{s\in\mathcal{S}(\mathcal{D})}{\arg\min}\;I_{\mathrm{split}}(s;\mathcal{D})
+\end{equation*}
+或者使不纯度下降最大的规则：
+\begin{equation*}
+	s^{\ast}=\underset{s\in\mathcal{S}(\mathcal{D})}{\arg\max}\;\Delta I(s;\mathcal{D})
+\end{equation*}
+其中$\mathcal{S}(\mathcal{D})$表示当前节点中允许使用的候选划分集合。\par
+对于数值型特征，通常将相邻不同观测值的中点作为候选阈值。若特征$j$在当前节点中的不同取值为：
+\begin{equation*}
+	v_1<v_2<\cdots<v_q
+\end{equation*}
+则候选阈值集合可以取为：
+\begin{equation*}
+	\left\{\frac{v_r+v_{r+1}}{2}:r=1,2,\dots,q-1\right\}
+\end{equation*}
+为了避免产生仅包含极少量样本的子节点，还可以要求
+\begin{equation*}
+	|\mathcal{D}_L(s)|\geqslant N_{\mathrm{leaf}},\quad|\mathcal{D}_R(s)|\geqslant N_{\mathrm{leaf}}
+\end{equation*}
+不满足该条件的候选划分不参与最优划分的比较。\par
+遍历所有特征及其候选阈值并选择最优划分的过程可总结为\cref{alg:FindBestSplit}。
 \begin{algorithm}[H]
-	\caption{Find the Best Split}
+	\caption{Find the Best Binary Split}
+	\label{alg:FindBestSplit}
 	\begin{algorithmic}[1]
-		\State \textbf{Input:} dataset $\mathcal{D}$, feature set $\mathcal{F}$, criterion, minimum samples per leaf $N_{\text{leaf}}$
-		\State \textbf{Output:} best split $(F, \tau, I_{\text{split}})$ or \texttt{None}
+		\Require Dataset $\mathcal{D}$, feature set $\mathcal{F}$,
+		splitting criterion,
+		minimum samples per leaf $N_{\mathrm{leaf}}$
+		\Ensure Best split $(F^\ast,\tau^\ast,I_{\mathrm{split}}^\ast)$
+		or \texttt{None}
 		
-		\State Initialize: $I_{\text{split}} \gets +\infty$, $(F,\tau) \gets \texttt{None}$
+		\State $I_{\mathrm{split}}^\ast\gets+\infty$, $(F^\ast,\tau^\ast)\gets\texttt{None}$
 		
-		\For{each feature $F' \in \mathcal{F}$}
+		\For{each feature $F\in\mathcal{F}$}
+		\State Let $v_1<\cdots<v_q$ be the distinct observed values
+		of feature $F$ in $\mathcal{D}$
 		
-		\If{all samples in $\mathcal{D}$ have identical values on $F'$}
-		\State \textbf{continue} \Comment{This feature cannot be split}
+		\If{$q=1$}
+		\State \textbf{continue}
+		\Comment{Feature $F$ is constant on the current node}
 		\EndIf
 		
-		\State Generate candidate thresholds $\{\tau'\}$ from sorted unique values of feature $F'$
-		\Comment{Typically midpoints between consecutive distinct values}
+		\State $\mathcal{T}_F\gets
+		\{(v_j+v_{j+1})/2:j=1,\dots,q-1\}$
 		
-		\For{each threshold $\tau'$}
+		\For{each candidate threshold $\tau\in\mathcal{T}_F$}
+		\State $\mathcal{D}_L\gets
+		\{(x,y)\in\mathcal{D}:x[F]\leqslant\tau\}$, 
+		$\mathcal{D}_R\gets
+		\{(x,y)\in\mathcal{D}:x[F]>\tau\}$
 		
-		\State $\mathcal{D}_L \gets \{(x,y)\in\mathcal{D}: x[F']\leqslant\tau'\}$, $\mathcal{D}_R \gets \{(x,y)\in\mathcal{D}: x[F'] > \tau'\}$
-		
-		\If{$|\mathcal{D}_L| < N_{\text{leaf}}$ \textbf{or} $|\mathcal{D}_R| < N_{\text{leaf}}$}
-		\State \textbf{continue} \Comment{Violates min\_samples\_leaf}
+		\If{$|\mathcal{D}_L|<N_{\mathrm{leaf}}$
+			\textbf{or}
+			$|\mathcal{D}_R|<N_{\mathrm{leaf}}$}
+		\State \textbf{continue}
+		\Comment{The split would create an undersized leaf}
 		\EndIf
 		
-		\State $I_L \gets \Call{NodeImpurity}{\mathcal{D}_L, \text{criterion}}$, $I_R \gets \Call{NodeImpurity}{\mathcal{D}_R, \text{criterion}}$
-		\State $I_{\text{split}}' \gets \dfrac{|\mathcal{D}_L|}{|\mathcal{D}|} I_L 
-		+ \dfrac{|\mathcal{D}_R|}{|\mathcal{D}|} I_R$
+		\State $I_L\gets
+		\Call{NodeImpurity}{\mathcal{D}_L,\text{criterion}}$, 
+		$I_R\gets
+		\Call{NodeImpurity}{\mathcal{D}_R,\text{criterion}}$
 		
-		\If{$I_{\text{split}}' < I_{\text{split}}$}
-		\State $I_{\text{split}}' \gets I_{\text{split}}$, $(F,\tau) \gets (F',\tau')$
+		\State $I_{\mathrm{candidate}}\gets
+		\dfrac{|\mathcal{D}_L|}{|\mathcal{D}|}I_L+
+		\dfrac{|\mathcal{D}_R|}{|\mathcal{D}|}I_R$
+		
+		\If{$I_{\mathrm{candidate}}<I_{\mathrm{split}}^\ast$}
+		\State $I_{\mathrm{split}}^\ast\gets
+		I_{\mathrm{candidate}}$, 
+		$(F^\ast,\tau^\ast)\gets(F,\tau)$
 		\EndIf
-		
 		\EndFor
 		\EndFor
 		
-		\If{$(F,\tau) = \texttt{None}$}
+		\If{$(F^\ast,\tau^\ast)=\texttt{None}$}
 		\State \Return \texttt{None}
 		\Else
-		\State \Return $(F,\tau, I_{\text{split}})$
+		\State \Return
+		$(F^\ast,\tau^\ast,I_{\mathrm{split}}^\ast)$
 		\EndIf
 	\end{algorithmic}
 \end{algorithm}
-
-上述算法基于\gls{CART}框架，采用自顶向下的递归贪心策略生成二叉树结构。树的生长过程由函数\textsc{BuildTree}控制，并在每个节点通过搜索最优特征与阈值对$(F,\tau)$实现二叉划分。\par
-在节点生成阶段，算法设置了多重停止条件以限制树的复杂度，包括最大深度$D_{\max}$、最小可分裂样本数$N_{\text{split}}$、节点纯度一致性以及特征不可再分性等，从而实现预剪枝正则化并防止过拟合。\par
-节点划分依据加权节点纯度最小化准则，通过最小化：
+\subsubsection{完整算法}
+完整的\gls{CART}对应的决策树生长过程可总结为\cref{alg:CART}。本文的算法不包含CART树生长完成后的代价复杂度后剪枝过程。
+\begin{algorithm}[H]
+	\caption{Classification and Regression Tree}
+	\label{alg:CART}
+	\begin{algorithmic}[1]
+		\Require Dataset $\mathcal{D}$, feature set $\mathcal{F}$,
+		maximum depth $D_{\max}$,
+		minimum samples to split $N_{\mathrm{split}}$,
+		minimum samples per leaf $N_{\mathrm{leaf}}$,
+		minimum impurity decrease $\Delta_{\min}$,
+		splitting criterion
+		\Ensure Root node $T$ of the fitted decision tree
+		
+		\Function{CreateLeaf}{$\mathcal{D}$}
+		\If{criterion $\in\{\texttt{gini},\texttt{entropy},\texttt{cross entropy}\}$}
+		\State Let the class label set be $\{1,\dots,m\}$
+		\State $n_i\gets|\{(x,y)\in\mathcal{D}:y=i\}|$,
+		$p_i\gets n_i/|\mathcal{D}|$, $i=1,\dots,m$
+		\State $\hat{y}\gets\operatorname*{\arg\max}_{1\leqslant i\leqslant m}p_i$
+		\State \Return
+		$\{\text{type: \texttt{leaf}},\text{ prediction: }\hat{y},
+		\text{ class probabilities: }(p_1,\dots,p_m)\}$
+		\ElsIf{criterion $=\texttt{squared error}$}
+		\State $\hat{y}\gets|\mathcal{D}|^{-1}
+		\sum\limits_{(x,y)\in\mathcal{D}}y$
+		\State \Return
+		$\{\text{type: \texttt{leaf}},\text{ prediction: }\hat{y}\}$
+		\ElsIf{criterion $=\texttt{absolute error}$}
+		\State $\hat{y}\gets
+		\operatorname{median}\{y:(x,y)\in\mathcal{D}\}$
+		\State \Return
+		$\{\text{type: \texttt{leaf}},\text{ prediction: }\hat{y}\}$
+		\EndIf
+		\EndFunction
+		
+		\Function{BuildTree}{$\mathcal{D},d$}
+		\If{$|\mathcal{D}|<N_{\mathrm{split}}$
+			\textbf{or} $d\geqslant D_{\max}$
+			\textbf{or} all responses in $\mathcal{D}$ are identical
+			\textbf{or} no feature in $\mathcal{F}$ varies on $\mathcal{D}$}
+		\State \Return \Call{CreateLeaf}{$\mathcal{D}$}
+		\Comment{Stopping rules}
+		\EndIf
+		
+		\State $I_{\mathrm{parent}}\gets
+		\Call{NodeImpurity}{\mathcal{D},\text{criterion}}$
+		
+		\State $S\gets
+		\Call{FindBestSplit}
+		{\mathcal{D},\mathcal{F},\text{criterion},N_{\mathrm{leaf}}}$
+		
+		\If{$S=\texttt{None}$}
+		\State \Return \Call{CreateLeaf}{$\mathcal{D}$}
+		\EndIf
+		
+		\State $(F,\tau,I_{\mathrm{split}})\gets S$, $\Delta\gets I_{\mathrm{parent}}-I_{\mathrm{split}}$
+		
+		\If{$\Delta<\Delta_{\min}$}
+		\State \Return \Call{CreateLeaf}{$\mathcal{D}$}
+		\Comment{Insufficient impurity decrease}
+		\EndIf
+		
+		\State $\mathcal{D}_L\gets
+		\{(x,y)\in\mathcal{D}:x[F]\leqslant\tau\}$, 
+		$\mathcal{D}_R\gets
+		\{(x,y)\in\mathcal{D}:x[F]>\tau\}$
+		
+		\State $T\gets
+		\{\text{type: \texttt{node}},
+		\text{ feature: }F,
+		\text{ threshold: }\tau,
+		\text{ impurity: }I_{\mathrm{parent}},
+		\text{ impurity decrease: }\Delta,
+		\text{ sample size: }|\mathcal{D}|\}$
+		
+		\State $T.\text{left}\gets
+		\Call{BuildTree}{\mathcal{D}_L,d+1}$, 
+		$T.\text{right}\gets
+		\Call{BuildTree}{\mathcal{D}_R,d+1}$
+		
+		\State \Return $T$
+		\EndFunction
+		
+		\State \Return \Call{BuildTree}{$\mathcal{D},0$}
+	\end{algorithmic}
+\end{algorithm}
+前述算法框不仅规定了如何选择最优划分，还通过若干停止条件限制决策树的继续生长。这些条件属于决策树的\gls{PrePruning}机制，其目的在于避免模型为追求训练集上的局部改进而形成过于复杂的树，从而降低过拟合的风险。\par
+如果不限制树的生长，决策树可以不断划分特征空间，甚至为少数异常样本或者错误标记的样本建立单独的叶节点。此时训练误差可能非常小，但模型学习到的往往是训练样本中的随机波动，而不是总体中稳定的规律。在本文给出的CART生长算法中，$D_{\max}$直接限制树的深度，即样本从根节点到叶节点所经过的路径长度；$N_{\mathrm{split}}$阻止样本量过小的节点继续划分；$N_{\mathrm{leaf}}$防止划分产生仅包含少数样本的叶节点；$\Delta_{\min}$则要求一次划分必须带来足够明显的不纯度下降。上述参数从树的深度、节点样本量和划分收益等不同方面限制树的生长，共同控制决策树的复杂度。\par
+因此，决策树算法的完整逻辑可以概括为：节点不纯度规定什么叫作响应同质；最优划分寻找能够最大程度提高同质性的局部规则；递归生长将这些局部规则组合为完整的预测路径；复杂度约束则防止树为了降低训练误差而不断拟合样本噪声。\par
+\subsubsection{特征重要性}
+决策树模型可以根据各特征在所有分裂节点上带来的纯度改进衡量该特征的重要性，某一特征若多次被用于关键节点划分，并且能够带来更明显的纯度提升，则说明该特征对样本区分和结果预测具有更重要的作用。由于不同节点包含的样本数可能相差很大，发生在树根附近的划分通常影响较多样本，而发生在树的深层节点中的划分只影响少量样本。因此，还需要根据当前节点所包含的样本比例对不纯度下降进行加权。设根节点中的完整训练数据集为$\mathcal{D}_0$，节点$t$中的数据集为$\mathcal{D}_t$，该节点采用的划分规则为$s_t^{\ast}=(j_t,\tau_t)$，则特征$j$的未归一化重要性定义为：
 \begin{equation*}
-	I_{\text{split}}=\frac{|\mathcal{D}_L|}{|\mathcal{D}|}I(\mathcal{D}_L)+\frac{|\mathcal{D}_R|}{|\mathcal{D}|}I(\mathcal{D}_R)
+	\widetilde{\operatorname{FI}}_j=\sum_{\substack{t\text{为非叶节点} \\ j_t=j}}\frac{|\mathcal{D}_t|}{|\mathcal{D}_0|}\Delta I(s_t^{\ast};\mathcal{D}_t)
 \end{equation*}
-选择最优划分，并要求纯度提升量$\Delta=I_{\text{parent}}-I_{\text{split}}$不小于给定阈值$\Delta_{\min}$。\par
-当递归终止时生成叶节点。对于分类问题，叶节点预测为多数类并记录类别经验分布以支持概率输出；对于回归问题，叶节点预测为最小化所选损失函数的常数解。最终得到的决策树以递归结构表示，预测阶段沿节点划分路径自顶向下遍历直至到达叶节点获得预测结果。  \par
-此外，决策树模型还可以基于各特征在所有分裂节点上的纯度改进贡献得到特征重要性。在树的生长过程中，模型会不断选择能够最有效提升节点划分效果的特征进行分裂；某一特征若多次被用于关键节点划分，并且能够带来更明显的纯度提升，则说明该特征对样本区分和结果预测具有更重要的作用。通常将该特征在所有相关分裂节点上所产生的纯度提升量对节点样本数进行加权累计，并对所有特征的该统计量进行归一化处理，最终得到每一个特征的重要性得分。该得分越高，表明该特征在决策树模型中的作用越显著，对最终预测结果的影响也越大。在接下来的集成模型中，也可类似得到模型的特征重要性。
+也就是说，需要将所有使用特征$j$进行划分的节点找出，并将这些节点带来的加权不纯度下降累加起来。最后对所有特征的重要性进行归一化，得到：
+\begin{equation*}
+	\operatorname{FI}_j=\frac{\widetilde{\operatorname{FI}}_j}{\sum\limits_{k=1}^p\widetilde{\operatorname{FI}}_k}
+\end{equation*}
+这一指标通常称为基于不纯度下降的特征重要性。该得分越高，表明该特征在决策树模型中的作用越显著，对最终预测结果的影响也越大。在接下来的集成模型中，也可类似得到模型的特征重要性。
 
 \subsection{Bagging模型}
 \begin{definition}
-	设$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$为观测样本集，其中$x_i$为第$i$个样本的特征向量，$y_i$是第$i$个样本的标签或值，$\mathcal{D}^{(1)},\mathcal{D}^{(2)},\dots,\mathcal{D}^{(B)}$是从$\mathcal{D}$通过自助采样独立重复抽取的规模为$n$的训练子集，在每个子集$\mathcal{D}^{(b)}$上训练一个\gls{BaseLearner}$f^{(b)}$。\gls{BaggingEnsembleModel}定义为各基学习器输出的聚合函数。对于回归问题，集成预测函数定义为简单平均；对于分类问题，集成预测函数定义为多数投票。
+	设$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$为观测样本集，$\mathcal{D}^{(1)},\mathcal{D}^{(2)},\dots,\mathcal{D}^{(B)}$是从$\mathcal{D}$通过独立重复抽取的规模为$n$的训练子集，在每个子集$\mathcal{D}^{(b)}$上训练一个\gls{BaseLearner}$f^{(b)}$。\gls{BaggingEnsembleModel}定义为各基学习器输出的聚合函数。对于回归问题，集成预测函数定义为简单平均；对于分类问题，集成预测函数定义为多数投票。
 \end{definition}
 \begin{property}\label{prop:Bagging}
 	设在固定样本点$x$处，Bagging模型各个基学习器的预测为随机变量$\{f^{(b)}(x)\}_{b=1}^B$。Bagging模型具有如下性质：
@@ -421,9 +630,9 @@
 \subsubsection{GBDT}
 \begin{algorithm}[H]
 	\caption{Gradient Boosting Decision Tree}
+	\label{alg:GBDT}
 	\begin{algorithmic}[1]
-		\State \textbf{Input:}
-		training set $\mathcal{D}_{\mathrm{train}}=\{(x_i,y_i)\}_{i=1}^n$,
+		\Require Training set $\mathcal{D}_{\mathrm{train}}=\{(x_i,y_i)\}_{i=1}^n$,
 		validation set $\mathcal{D}_{\mathrm{val}}=\{(x_i^{(v)},y_i^{(v)})\}_{i=1}^{n_v}$,
 		loss function $\ell(y,F(x))$,
 		number of boosting iterations $B$,
@@ -432,7 +641,7 @@
 		tolerance $\varepsilon$,
 		tree-building parameters for \Call{BuildTree}{$\cdot$}
 		
-		\State \textbf{Output:} Additive model $F_{\hat{b}}(x)$
+		\Ensure Additive model $F_{\hat{b}}(x)$
 		
 		\State Initialize the model prediction with a common output $F_0(x)$ for all samples
 		\Statex \textit{For classification, this output is the empirical distribution of the training samples.}
@@ -575,9 +784,9 @@ XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进�
 这就是XGBoost中用于评估一个候选分裂是否值得采用的分裂增益公式。XGBoost将树结构的生长过程直接纳入了统一的优化框架之中（GBDT是分开的），使得每一次分裂都具有明确的目标函数解释。
 \begin{algorithm}[H]
 	\caption{Extreme Gradient Boosting}
+	\label{alg:XGBoost}
 	\begin{algorithmic}[1]
-		\State \textbf{Input:}
-		training set $\mathcal{D}_{\mathrm{train}}=\{(x_i,y_i)\}_{i=1}^n$,
+		\Require Training set $\mathcal{D}_{\mathrm{train}}=\{(x_i,y_i)\}_{i=1}^n$,
 		validation set $\mathcal{D}_{\mathrm{val}}=\{(x_i^{(v)},y_i^{(v)})\}_{i=1}^{n_v}$,
 		loss function $\ell(y,\hat y)$,
 		number of boosting iterations $B$,
@@ -587,7 +796,7 @@ XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进�
 		tolerance $\varepsilon$,
 		tree-building parameters for \Call{BuildTree}{$\cdot$}
 		
-		\State \textbf{Output:} Additive model $\hat y_{\hat b}(x)$
+		\Ensure Additive model $\hat y_{\hat b}(x)$
 		
 		\State Initialize the model prediction with a common output $F_0(x)$ for all samples
 		\Statex \textit{For classification, this output is the empirical distribution of the training samples.}

@@ -284,35 +284,30 @@
 	\caption{K-means Clustering (Lloyd's Algorithm)}
 	\label{alg:Kmeans}
 	\begin{algorithmic}[1]
-		\Require
-		Data points $X=\{x_n\}_{i=1}^{n}\subseteq\mathbb{R}^m$;
+		\Require Data points $\mathcal{D}=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m$;
 		number of clusters $K$;
 		maximum number of iterations $T$;
 		tolerance $\varepsilon$
-		\Ensure
-		Cluster assignments $\{C_1,\dots,C_K\}$;
+		\Ensure Cluster assignments $\{C_1,\dots,C_K\}$;
 		centroids $\{\mu_1,\dots,\mu_K\}$
 		
-		\State Select the first centroid $\mu_1$ uniformly at random from $X$
-		\Comment{Initialization step}
-		\For{$k=2$ to $K$}
-		\For{each data point $x_i \in \mathcal{X}$}
+		\State Select the first centroid $\mu_1$ uniformly at random from $\mathcal{D}$ \Comment{Initialization step}
+		\For{$k=2$ \textbf{to} $K$}
+		\For{each data point $x_i \in\mathcal{D}$}
 		\State $D_i^2 \gets \min\limits_{1\leqslant j < k} \|x_i - \mu_j\|^2$
 		\EndFor
-		\State Select $\mu_k$ from $X$ with probability
+		\State Select $\mu_k$ from $\mathcal{D}$ with probability
 		\[
 		P(x_i) = \frac{D_i^2}{\sum\limits_{j=1}^n D_j^2}
 		\]
 		\EndFor
 		
-		\For{$t=1$ to $T$}
-		\Comment{Assignment step}
-		\For{each data point $x_i\in X$}
+		\For{$t=1$ \textbf{to} $T$} \Comment{Assignment step}
+		\For{each data point $x_i\in\mathcal{D}$}
 		\State $y_i \gets \underset{k=1,2,\dots,K}{\arg\min}\|x_i-\mu_k\|^2$, assign $x_i$ to cluster $C_{y_i}$
 		\EndFor
 		
-		\For{$k=1$ to $K$}
-		\Comment{Update step}
+		\For{$k=1$ \textbf{to} $K$} \Comment{Update step}
 		\State $\mu_k^{\text{new}} \gets \dfrac{1}{|C_k|}
 		\sum\limits_{x_i\in C_k} x_i$
 		\EndFor
@@ -335,12 +330,10 @@
 	\caption{K-modes Clustering Algorithm with Cao Initialization}
 	\label{alg:Kmodes}
 	\begin{algorithmic}[1]
-		\Require
-		Categorical data $X=\{x_i\}_{i=1}^n$, where $x_i=(x_{i1},\dots,x_{ip})$;
+		\Require Categorical data $\mathcal{D}=\{x_i\}_{i=1}^n$, where $x_i=(x_{i1},\dots,x_{ip})$;
 		number of clusters $K$;
 		maximum number of iterations $T$
-		\Ensure
-		Cluster assignments $\{C_1,\dots,C_K\}$;
+		\Ensure Cluster assignments $\{C_1,\dots,C_K\}$;
 		modes $\{m_1,\dots,m_K\}$
 		
 		\State For each categorical variable $j=1,\dots,p$, let $\mathcal C_j$ denote its set of possible categories.
@@ -352,11 +345,11 @@
 		\sum_{i=1}^n I(x_{ij}=c)
 		\]
 		\State Define sample density: $\mathrm{dens}(x_i)=\sum\limits_{j=1}^p f_j(x_{ij})$
-		\State Select the first mode: $m_1 \gets \underset{x_i\in X}{\arg\max}\;\mathrm{dens}(x_i)$
-		\For{$k=2$ to $K$}
+		\State Select the first mode: $m_1 \gets \underset{x_i\in\mathcal{D}}{\arg\max}\;\mathrm{dens}(x_i)$
+		\For{$k=2$ \textbf{to} $K$}
 		\State Select
 		\[
-		m_k \gets \underset{x_i\in X}{\arg\max}
+		m_k \gets \underset{x_i\in\mathcal{D}}{\arg\max}
 		\Bigl(
 		\mathrm{dens}(x_i)\cdot
 		\min_{1\leqslant r<k}\sum_{j=1}^p I(x_{ij}\neq m_{rj})
@@ -364,16 +357,14 @@
 		\]
 		\EndFor
 		
-		\For{$t=1$ to $T$}
-		\Comment{Assignment step}
-		\For{each data point $x_i\in X$}
+		\For{$t=1$ \textbf{to} $T$} \Comment{Assignment step}
+		\For{each data point $x_i\in\mathcal{D}$}
 		\State $y_i \gets \underset{k=1,2,\dots,K}{\arg\min}
 		\sum\limits_{j=1}^p I(x_{ij}\neq m_{kj})$, assign $x_i$ to cluster $C_{y_i}$
 		\EndFor
 		
-		\For{$k=1$ to $K$}
-		\Comment{Update step}
-		\For{$j=1$ to $p$}
+		\For{$k=1$ \textbf{to} $K$} \Comment{Update step}
+		\For{$j=1$ \textbf{to} $p$}
 		\State $m_{kj} \gets \operatorname{mode}\{x_{ij}:x_i\in C_k\}$
 		\EndFor
 		\EndFor
@@ -396,25 +387,21 @@ Cao初始化的核心思想在于：初始聚类原型应当同时具备代表�
 	\caption{K-prototypes Clustering Algorithm}
 	\label{alg:Kprototypes}
 	\begin{algorithmic}[1]
-		\Require
-		Mixed-type data $X=\{x_i=(x_i^{(n)},x_i^{(c)})\}_{i=1}^n$;
+		\Require Mixed-type data $\mathcal{D}=\{x_i=(x_i^{(n)},x_i^{(c)})\}_{i=1}^n$;
 		number of clusters $K$;
 		trade-off parameter $\gamma>0$;
 		maximum number of iterations $T$
-		\Ensure
-		Cluster assignments $\{C_1,\dots,C_K\}$;
+		\Ensure Cluster assignments $\{C_1,\dots,C_K\}$;
 		prototypes $\{(\mu_k,m_k)\}_{k=1}^K$
 		
-		\Comment{Initialization step}
-		\State Initialize numerical prototypes $\mu_1,\dots,\mu_K$
+		\State Initialize numerical prototypes $\mu_1,\dots,\mu_K$ \Comment{Initialization step}
 		by applying K-means++ initialization
 		
 		\State Initialize categorical prototypes $m_1,\dots,m_K$
 		by applying Cao initialization
 		
-		\For{$t=1$ to $T$}
-		\Comment{Assignment step}
-		\For{each data point $x_i\in X$}
+		\For{$t=1$ \textbf{to} $T$} \Comment{Assignment step}
+		\For{each data point $x_i\in\mathcal{D}$}
 		\State $y_i \gets \underset{k=1,2,\dots,K}{\arg\min}
 		\Big(
 		\|x_i^{(n)}-\mu_k\|^2
@@ -423,11 +410,10 @@ Cao初始化的核心思想在于：初始聚类原型应当同时具备代表�
 		\Big)$, assign $x_i$ to cluster $C_{y_i}$
 		\EndFor
 		
-		\For{$k=1$ to $K$}
-		\Comment{Update step}
+		\For{$k=1$ \textbf{to} $K$} \Comment{Update step}
 		\State $\mu_k \gets \dfrac{1}{|C_k|}
 		\sum\limits_{x_i\in C_k} x_i^{(n)}$
-		\For{$j=1$ to $\dim(x_i^{(c)})$}
+		\For{$j=1$ \textbf{to} $\dim(x_i^{(c)})$}
 		\State $m_{kj} \gets
 		\operatorname{mode}\{x_{ij}^{(c)}:x_i\in C_k\}$
 		\EndFor
@@ -454,13 +440,11 @@ Cao初始化的核心思想在于：初始聚类原型应当同时具备代表�
 	\caption{Agglomerative Hierarchical Clustering}
 	\label{alg:AgglomerativeHierarchicalClustering}
 	\begin{algorithmic}[1]
-		\Require
-		Data points $X=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m$;
+		\Require Data points $\mathcal{D}=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m$;
 		linkage criterion $L$;
 		distance metric $\rho(\cdot,\cdot)$;
 		target number of clusters $K$ \textbf{or} distance threshold $h_0$
-		\Ensure
-		Cluster assignments $\{C_1,\dots,C_{K}\}$;
+		\Ensure Cluster assignments $\{C_1,\dots,C_{K}\}$;
 		merge history (dendrogram)
 		
 		\State Initialize clusters $C_i \gets \{x_i\}$ for $i=1,\dots,n$
@@ -497,22 +481,20 @@ Cao初始化的核心思想在于：初始聚类原型应当同时具备代表�
 	\caption{DBSCAN (Density-Based Spatial Clustering of Applications with Noise)}
 	\label{alg:DBSCAN}
 	\begin{algorithmic}[1]
-		\Require
-		Data points $X=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m$;
+		\Require Data points $\mathcal{D}=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m$;
 		neighborhood radius $\varepsilon$;
 		minimum number of points $\operatorname{MinPts}$
-		\Ensure
-		Cluster assignments $\{C_1,\dots,C_K\}$;
+		\Ensure Cluster assignments $\{C_1,\dots,C_K\}$;
 		noise set $\mathcal{N}$
 		
 		\State Mark all points as \textbf{unvisited}
 		\State $K \gets 0$, $\mathcal{N}\gets\varnothing$
 		
-		\For{each point $x_i\in X$}
+		\For{each point $x_i\in\mathcal{D}$}
 		\If{$x_i$ is visited}
 		\State \textbf{continue}
 		\EndIf
-		\State Mark $x_i$ as visited; $U(x_i,\varepsilon)\gets\{x_j\in X:\rho(x_j,x_i)\leqslant\varepsilon\}$
+		\State Mark $x_i$ as visited; $U(x_i,\varepsilon)\gets\{x_j\in\mathcal{D}:\rho(x_j,x_i)\leqslant\varepsilon\}$
 		
 		\If{$|U(x_i,\varepsilon)|<\operatorname{MinPts}$}
 		\State Label $x_i$ as \textbf{noise}; $\mathcal{N}\gets\mathcal{N}\cup\{x_i\}$
@@ -524,7 +506,7 @@ Cao初始化的核心思想在于：初始聚类原型应当同时具备代表�
 		\State Select $x_p\in S$ and remove it from $S$
 		
 		\If{$x_p$ is not visited}
-		\State Mark $x_p$ as visited; $U(x_p,\varepsilon)\gets\{x_j\in X:\rho(x_j,x_p)\leqslant\varepsilon\}$
+		\State Mark $x_p$ as visited; $U(x_p,\varepsilon)\gets\{x_j\in\mathcal{D}:\rho(x_j,x_p)\leqslant\varepsilon\}$
 		\If{$|U(x_p,\varepsilon)|\geqslant\operatorname{MinPts}$}
 		\State $S\gets S\cup[U(x_p,\varepsilon)\setminus\{x_p\}]$
 		\EndIf
@@ -615,18 +597,16 @@ DBSCAN首先将所有样本标记为未访问，并依次选择尚未访问的�
 	\caption{OPTICS (Ordering Points To Identify the Clustering Structure)}
 	\label{alg:OPTICS}
 	\begin{algorithmic}[1]
-		\Require
-		Data points $X=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m$;
+		\Require Data points $\mathcal{D}=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m$;
 		maximum neighborhood radius $\varepsilon_{\max}$;
 		minimum number of points $\operatorname{MinPts}$
-		\Ensure
-		Cluster ordering $\mathcal{O}$;
+		\Ensure Cluster ordering $\mathcal{O}$;
 		reachability distances $\{d_{\text{reach}}(x_i)\}$
 		
 		\State Mark all points as \textbf{unprocessed}
 		\State Initialize $d_{\text{reach}}(x_i)\gets +\infty$ for all $x_i$ and empty ordering list $\mathcal{O}$
 		
-		\For{each point $x_i\in X$}
+		\For{each point $x_i\in\mathcal{D}$}
 		\If{$x_i$ is processed}
 		\State \textbf{continue}
 		\EndIf

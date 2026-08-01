@@ -189,6 +189,7 @@ class BookTransformer(GlossaryAppenderMixin):
         self.inequality = 0
         self.algorithm = 0
         self.figure = 0
+        self.table = 0
 
         self.counter_values: dict[str, int] = {
             spec.counter: 0 for spec in theorem_specs.values()
@@ -237,6 +238,7 @@ class BookTransformer(GlossaryAppenderMixin):
             self.equation = 0
             self.algorithm = 0
             self.figure = 0
+            self.table = 0
             self.reset_counters_for_parent("chapter")
             return f"第 {self.chapter} 章", "章", str(self.chapter)
         if level == self.section_level:
@@ -717,10 +719,20 @@ class BookTransformer(GlossaryAppenderMixin):
                     if table is None:
                         fail(f"找不到暂存表格：{marker}")
                     self.content_counts["latex-table"] += 1
+                    number = ""
+                    if table.caption:
+                        self.table += 1
+                        number = (
+                            f"{self.chapter}.{self.table}"
+                            if self.chapter
+                            else str(self.table)
+                        )
+                        if table.label:
+                            self.labels[table.label] = ("表", number)
                     result.append(
                         {
                             "t": "RawBlock",
-                            "c": ["html", render_latex_table(table)],
+                            "c": ["html", render_latex_table(table, number)],
                         }
                     )
                     continue

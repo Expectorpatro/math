@@ -1,5 +1,26 @@
 """Balanced-delimiter helpers shared by LaTeX preprocessors."""
 
+
+def strip_tex_comments(text: str) -> str:
+    """Strip ordinary TeX comments while preserving escaped percent signs."""
+    cleaned: list[str] = []
+    for line in text.splitlines():
+        cut = len(line)
+        for index, char in enumerate(line):
+            if char != "%":
+                continue
+            slash_count = 0
+            cursor = index - 1
+            while cursor >= 0 and line[cursor] == "\\":
+                slash_count += 1
+                cursor -= 1
+            if slash_count % 2 == 0:
+                cut = index
+                break
+        cleaned.append(line[:cut])
+    return "\n".join(cleaned)
+
+
 def skip_space(text: str, position: int) -> int:
     while position < len(text) and text[position].isspace():
         position += 1

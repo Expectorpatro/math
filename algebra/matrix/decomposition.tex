@@ -81,6 +81,7 @@
 	由\cref{alg:gauss}可知对第$k$列进行消元后，第$k$行的前$k-1$个数都是$0$，不会在后续过程中再使用到它们，于是$L$矩阵中的元素可以直接存储在$A$的下三角区域（除了主对角线），$U$矩阵即为消元后所剩下的上三角矩阵。
 	\begin{algorithm}[H]
 		\caption{In-place LU Factorization (without pivoting)}
+		\label{alg:LUFactorization}
 		\begin{algorithmic}[1]
 			\Require $A=(a_{ij})\in M_{n}(K)$
 			\Ensure The lower triangular part of $A$ (excluding the diagonal) stores $L$,
@@ -137,22 +138,24 @@
 		\end{pmatrix}
 	\end{equation*}
 	的线性方程组$Lx=b$或$Ux=b$，有下述两种求解算法：
-	\begin{algorithm}
+	\begin{algorithm}[H]
 		\caption{Forward Substitution for Lower Triangular Systems}
+		\label{alg:ForwardSubstitution}
 		\begin{algorithmic}[1]
-			\Require Lower triangular matrix $L=(l_{ij})\in M_{n}(\mathbb{K})$, right-hand side vector $b\in\mathbb{K}^n$
-			\Ensure Solution vector $x\in\mathbb{K}^n$ satisfying $Lx=b$
+			\Require Lower triangular matrix $L=(l_{ij})\in M_{n}(K)$, right-hand side vector $b\in K^n$
+			\Ensure Solution vector $x\in K^n$ satisfying $Lx=b$
 			
 			\For{$i=1$ \textbf{to} $n$}
 				\State $x_i \gets \dfrac{b_i - \sum\limits_{j=1}^{i-1} l_{ij}x_j}{l_{ii}}$
 			\EndFor
 		\end{algorithmic}
 	\end{algorithm}
-	\begin{algorithm}
+	\begin{algorithm}[H]
 		\caption{Backward Substitution for Upper Triangular Systems}
+		\label{alg:BackwardSubstitution}
 		\begin{algorithmic}[1]
-			\Require Upper triangular matrix $U=(u_{ij})\in M_{n}(K)$, right-hand side vector $b\in\mathbb{K}^n$
-			\Ensure Solution vector $x\in\mathbb{K}^n$ satisfying $Ux=b$
+			\Require Upper triangular matrix $U=(u_{ij})\in M_{n}(K)$, right-hand side vector $b\in K^n$
+			\Ensure Solution vector $x\in K^n$ satisfying $Ux=b$
 			
 			\For{$i=n$ \textbf{downto} $1$}
 				\State $x_i \gets \dfrac{b_i - \sum\limits_{j=i+1}^{n} u_{ij}x_j}{u_{ii}}$
@@ -213,6 +216,7 @@
 	根据上面的公式我们可以逐列求解$L$。
 	\begin{algorithm}[H]
 		\caption{Cholesky Factorization (Comparison Method)}
+		\label{alg:CholeskyFactorization}
 		\begin{algorithmic}[1]
 			\Require $A=(a_{ij})\in M_{n}(\mathbb{R})$, symmetric and positive definite
 			\Ensure The lower triangular part of $A$ stores $L$

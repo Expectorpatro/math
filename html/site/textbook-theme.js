@@ -4,6 +4,7 @@
   // Theme persistence, Quarto stylesheet synchronization, and toggle placement.
 
   const QUARTO_THEME_STORAGE_KEY = "quarto-color-scheme";
+  const FILE_THEME_PREFIX = "textbook-theme:";
 
   const normalizeTheme = (value) =>
     value === "dark" || value === "light" ? value : null;
@@ -13,28 +14,43 @@
   const quartoThemePreference = (theme) =>
     theme === "dark" ? "alternate" : "default";
 
-  const writeStorage = (storage, key, value) => {
+  const savedTheme = (win) => {
+    if (win.location.protocol === "file:") {
+      return normalizeTheme(
+        win.name.startsWith(FILE_THEME_PREFIX)
+          ? win.name.slice(FILE_THEME_PREFIX.length)
+          : null
+      );
+    }
     try {
-      storage.setItem(key, value);
+      const preference = win.localStorage.getItem(QUARTO_THEME_STORAGE_KEY);
+      if (preference === "alternate") return "dark";
+      if (preference === "default") return "light";
+    } catch (_error) {
+      // Fall back to the theme already selected by Quarto.
+    }
+    return null;
+  };
+
+  const writeTheme = (win, theme) => {
+    if (win.location.protocol === "file:") {
+      win.name = `${FILE_THEME_PREFIX}${theme}`;
+      return;
+    }
+    try {
+      win.localStorage.setItem(
+        QUARTO_THEME_STORAGE_KEY,
+        quartoThemePreference(theme)
+      );
     } catch (_error) {
       // The page remains usable when storage is disabled; only persistence is lost.
     }
   };
 
-  const localStorageFor = (win) => {
-    try {
-      return win.localStorage;
-    } catch (_error) {
-      return null;
-    }
-  };
-
   const currentTheme = (doc) =>
-    doc.body.classList.contains("quarto-dark") ? "dark" : "light";
-
-  const writeTheme = (storage, theme) => {
-    writeStorage(storage, QUARTO_THEME_STORAGE_KEY, quartoThemePreference(theme));
-  };
+    doc.querySelector("link.quarto-color-alternate[rel=stylesheet]")
+      ? "dark"
+      : "light";
 
   const updateThemeButton = (button, theme) => {
     const isDark = theme === "dark";
@@ -74,7 +90,7 @@
   const applyTheme = (theme, button, doc, win) => {
     const normalized = normalizeTheme(theme) || "light";
     setQuartoColorScheme(normalized, doc, win);
-    writeTheme(localStorageFor(win), normalized);
+    writeTheme(win, normalized);
     updateThemeButton(button, normalized);
   };
 
@@ -108,7 +124,9 @@
     };
 
     const restoreTheme = () => {
-      updateThemeButton(button, currentTheme(doc));
+      const theme = savedTheme(win) || currentTheme(doc);
+      setQuartoColorScheme(theme, doc, win);
+      updateThemeButton(button, theme);
     };
 
     place();

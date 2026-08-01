@@ -15,6 +15,7 @@ from xml.etree import ElementTree
 from .commands import CommandRunner
 from .config import BuildConfig
 from .errors import BuildError
+from .latex_parsing import read_balanced, skip_space, strip_tex_comments
 
 
 @dataclass(frozen=True, slots=True)
@@ -98,12 +99,42 @@ def svg_dimensions(text: str) -> tuple[float, float] | None:
     return None
 
 
+def latex_library_names(text: str, command: str) -> tuple[str, ...]:
+    """Collect and deduplicate libraries declared by a braced LaTeX command."""
+    text = strip_tex_comments(text)
+    pattern = re.compile(rf"\\{re.escape(command)}\b")
+    libraries: list[str] = []
+    for match in pattern.finditer(text):
+        position = skip_space(text, match.end())
+        try:
+            argument, _ = read_balanced(text, position, "{", "}")
+        except ValueError as error:
+            raise BuildError(
+                rf"settings.tex 中的 \{command} 缺少完整的花括号参数"
+            ) from error
+        libraries.extend(
+            re.sub(r"\s+", "", raw_library)
+            for raw_library in argument.split(",")
+            if raw_library.strip()
+        )
+    return tuple(dict.fromkeys(libraries))
+
+
 class TikzRenderer:
     """Compile TikZ with XeLaTeX and render it as high-resolution PNG."""
 
     def __init__(self, config: BuildConfig, runner: CommandRunner) -> None:
         self.config = config
         self.runner = runner
+        settings = config.paths.settings_tex.read_text(encoding="utf-8")
+        self.tikz_libraries = latex_library_names(
+            settings,
+            "usetikzlibrary",
+        )
+        self.pgfplots_libraries = latex_library_names(
+            settings,
+            "usepgfplotslibrary",
+        )
 
     def render(self, tikz_source: str, source: Path) -> Path:
         paths = self.config.paths
@@ -149,19 +180,23 @@ class TikzRenderer:
 
     def _wrapper(self, tikz_source: str) -> str:
         border = self.config.images.tikz_border_points
-        return "\n".join(
+        lines = [
+            rf"\documentclass[tikz,border={border:g}pt]{{standalone}}",
+            r"\usepackage[UTF8,fontset=fandol]{ctex}",
+            r"\usepackage{amsmath,amssymb,mathtools}",
+            r"\usepackage{tikz}",
+        ]
+        if self.tikz_libraries:
+            lines.append(
+                rf"\usetikzlibrary{{{','.join(self.tikz_libraries)}}}"
+            )
+        lines.append(r"\usepackage{pgfplots}")
+        if self.pgfplots_libraries:
+            lines.append(
+                rf"\usepgfplotslibrary{{{','.join(self.pgfplots_libraries)}}}"
+            )
+        lines.extend(
             [
-                rf"\documentclass[tikz,border={border:g}pt]{{standalone}}",
-                r"\usepackage[UTF8,fontset=fandol]{ctex}",
-                r"\usepackage{amsmath,amssymb,mathtools}",
-                r"\usepackage{tikz}",
-                (
-                    r"\usetikzlibrary{positioning,fit,calc,arrows.meta,"
-                    r"shapes.geometric,shapes.misc,3d,matrix,"
-                    r"decorations.pathreplacing}"
-                ),
-                r"\usepackage{pgfplots}",
-                r"\usepgfplotslibrary{groupplots}",
                 r"\pgfplotsset{compat=1.18}",
                 r"\begin{document}",
                 tikz_source.strip(),
@@ -169,6 +204,7 @@ class TikzRenderer:
                 "",
             ]
         )
+        return "\n".join(lines)
 
     def _compile_xelatex(
         self,

@@ -25,7 +25,7 @@ from .images import TikzRenderer
 from .latex_algorithms import patch_algorithm_environments
 from .models import LatexTable, LatexTableCell, LatexTableRow, Term, TheoremSpec
 from .pandoc_ast import scoped_term_key
-from .latex_parsing import read_balanced, skip_space
+from .latex_parsing import read_balanced, skip_space, strip_tex_comments
 
 
 def fail(message: str) -> None:
@@ -49,28 +49,6 @@ def clean_generated_directory(
         path,
         managed=managed,
     )
-
-
-def strip_tex_comments(text: str) -> str:
-    """Strip ordinary TeX comments while preserving escaped percent signs."""
-    cleaned: list[str] = []
-    for line in text.splitlines():
-        cut = len(line)
-        for index, char in enumerate(line):
-            if char != "%":
-                continue
-            slash_count = 0
-            cursor = index - 1
-            while cursor >= 0 and line[cursor] == "\\":
-                slash_count += 1
-                cursor -= 1
-            if slash_count % 2 == 0:
-                cut = index
-                break
-        cleaned.append(line[:cut])
-    return "\n".join(cleaned)
-
-
 
 
 def patch_todo_macros(text: str, marker_counter: list[int]) -> str:
@@ -334,6 +312,9 @@ def parse_latex_table(
         except ValueError:
             caption = ""
 
+    label_match = re.search(r"\\label\s*\{([^{}]+)\}", table_source)
+    label = label_match.group(1).strip() if label_match else ""
+
     parsed_rows: list[LatexTableRow] = []
     for raw_row in split_latex_table_rows(
         strip_tex_comments(table_source[position:tabular_end])
@@ -376,6 +357,7 @@ def parse_latex_table(
     }
     return LatexTable(
         caption=caption.strip(),
+        label=label,
         alignments=tuple(alignments),
         vertical_rules=frozenset(vertical_rules),
         rows=tuple(parsed_rows),

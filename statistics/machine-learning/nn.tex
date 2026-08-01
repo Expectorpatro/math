@@ -278,54 +278,60 @@
 \end{definition}
 \begin{algorithm}[H]
 	\caption{Batch Gradient Descent}
+	\label{alg:BatchGradientDescent}
 	\begin{algorithmic}[1]
-		\State \textbf{Input:} initial parameter $\theta_0$, learning rate $\eta$, number of iterations $T$, training set $\mathcal{D}$
+		\Require Initial parameter $\theta_0$, learning rate $\eta$, number of iterations $T$, training set $\mathcal{D}$
+		\Ensure Final parameter estimate $\theta_T$
 		\For{$t = 1,2,\dots,T$}
-		\State Compute the empirical risk $\widehat{\mathcal{R}}(\theta_t)$ on the whole dataset $\mathcal{D}$
-		\State Compute the full gradient $g_t=\dif\widehat{\mathcal{R}}(\theta_t)$
-		\State Update the parameter:
-		\begin{equation*}
-			\theta_{t+1} \gets \theta_t - \eta\, g_t
-		\end{equation*}
+			\State Compute the empirical risk $\widehat{\mathcal{R}}(\theta_t)$ on the whole dataset $\mathcal{D}$
+			\State Compute the full gradient $g_t=\dif\widehat{\mathcal{R}}(\theta_t)$
+			\State Update the parameter:
+			\begin{equation*}
+				\theta_{t+1} \gets \theta_t - \eta\, g_t
+			\end{equation*}
 		\EndFor
-		\State \textbf{Return:} final parameter estimate $\theta_T$
+		\State \Return $\theta_T$
 	\end{algorithmic}
 \end{algorithm}
 \begin{algorithm}[H]
 	\caption{Stochastic Gradient Descent (SGD)}
+	\label{alg:StochasticGradientDescent}
 	\begin{algorithmic}[1]
-		\State \textbf{Input:} initial parameter $\theta_0$, learning rate $\eta$, number of iterations $T$, training set $\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$
+		\Require Initial parameter $\theta_0$, learning rate $\eta$, number of iterations $T$, training set $\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$
+		\Ensure Final parameter estimate $\theta_T$
 		\For{$t = 1,2,\dots,T$}
-		\State Randomly sample one data point $(x_{i_t}, y_{i_t})$ from $\mathcal{D}$
-		\State Compute the stochastic gradient
-		\[
-		g_t = \dif L[f(x_{i_t};\theta_t), y_{i_t}]
-		\]
-		\State Update the parameter:
-		\[
-		\theta_{t+1} \gets \theta_t - \eta\, g_t
-		\]
+			\State Randomly sample one data point $(x_{i_t}, y_{i_t})$ from $\mathcal{D}$
+			\State Compute the stochastic gradient
+			\[
+				g_t = \dif L[f(x_{i_t};\theta_t), y_{i_t}]
+			\]
+			\State Update the parameter:
+			\[
+				\theta_{t+1} \gets \theta_t - \eta\, g_t
+			\]
 		\EndFor
-		\State \textbf{Return:} final parameter estimate $\theta_T$
+		\State \Return $\theta_T$
 	\end{algorithmic}
 \end{algorithm}
 \begin{algorithm}[H]
 	\caption{Mini-batch Gradient Descent}
+	\label{alg:MiniBatchGradientDescent}
 	\begin{algorithmic}[1]
-		\State \textbf{Input:} initial parameter $\theta_0$, learning rate $\eta$, number of iterations $T$, training set $\mathcal{D}$, batch size $B$
+		\Require Initial parameter $\theta_0$, learning rate $\eta$, number of iterations $T$, training set $\mathcal{D}$, batch size $B$
+		\Ensure Final parameter estimate $\theta_T$
 		\For{$t = 1,2,\dots,T$}
-		\State Randomly sample a mini-batch $\mathcal{B}_t \subseteq \mathcal{D}$ with $|\mathcal{B}_t| = B$
-		\State Compute the mini-batch gradient
-		\[
-		g_t = \frac{1}{B} \sum_{(x_i,y_i)\in \mathcal{B}_t}
-		\dif L[f(x_i;\theta_t), y_i]
-		\]
-		\State Update the parameter:
-		\[
-		\theta_{t+1} \gets \theta_t - \eta\, g_t
-		\]
+			\State Randomly sample a mini-batch $\mathcal{B}_t \subseteq \mathcal{D}$ with $|\mathcal{B}_t| = B$
+			\State Compute the mini-batch gradient
+			\[
+				g_t = \frac{1}{B} \sum_{(x_i,y_i)\in \mathcal{B}_t}
+				\dif L[f(x_i;\theta_t), y_i]
+			\]
+			\State Update the parameter:
+			\[
+				\theta_{t+1} \gets \theta_t - \eta\, g_t
+			\]
 		\EndFor
-		\State \textbf{Return:} final parameter estimate $\theta_T$
+		\State \Return $\theta_T$
 	\end{algorithmic}
 \end{algorithm}
 
@@ -460,19 +466,16 @@
 	\label{alg:stacked_rnn_forward}
 	\begin{algorithmic}[1]
 		
-		\Require 
-		Input sequence $\{x_t^{(1)}\}_{t=1}^T$, 
+		\Require Input sequence $\{x_t^{(1)}\}_{t=1}^T$, 
 		parameters $\{W_h^{(l)}, W_x^{(l)}, b_h^{(l)}\}_{l=1}^{L}$, 
 		activation functions $\phi(\cdot)$
 		
-		\Ensure 
-		Hidden states $\{h_t^{(L)}\}_{t=1}^{T}$
+		\Ensure Hidden states $\{h_t^{(L)}\}_{t=1}^{T}$
 		\State Initialize hidden states $h_0^{(l)} = \mathbf{0}$ for all $l = 1,\dots,L$
 		\For{$t = 1$ \textbf{to} $T$}   \Comment{Iterate over time steps}
 		\For{$l= 1$ \textbf{to} $L$}  \Comment{Iterate over layers}
 		\If{$l\ne1$}
-		\State $x_t^{(l)} \gets h_t^{(l-1)}$
-		\Comment{Output of previous layer as current input}
+		\State $x_t^{(l)} \gets h_t^{(l-1)}$ \Comment{Output of previous layer as current input}
 		\EndIf
 		\State $h_t^{(l)} 
 		\gets 
@@ -496,24 +499,19 @@
 	\label{alg:stacked_lstm_forward}
 	\begin{algorithmic}[1]
 		
-		\Require 
-		Input sequence $\{x_t^{(1)}\}_{t=1}^T$, 
+		\Require Input sequence $\{x_t^{(1)}\}_{t=1}^T$, 
 		parameters $\{W_f^{(l)},W_i^{(l)},W_c^{(l)},W_o^{(l)},b_f^{(l)},b_i^{(l)},b_c^{(l)},b_o^{(l)}\}_{l=1}^{L}$
 		
-		\Ensure 
-		Hidden states $\{h_t^{(l)}\}_{l=1}^{L}$ and cell states $\{c_t^{(l)}\}_{l=1}^{L}$
+		\Ensure Hidden states $\{h_t^{(l)}\}_{l=1}^{L}$ and cell states $\{c_t^{(l)}\}_{l=1}^{L}$
 		
 		\State Initialize $h_0^{(l)}=\mathbf{0},\; c_0^{(l)}=\mathbf{0}$ for all $l=1,\dots,L$
 		
-		\For{$t=1$ \textbf{to} $T$}  
-		\Comment{Iterate over time steps}
+		\For{$t=1$ \textbf{to} $T$} \Comment{Iterate over time steps}
 		
-		\For{$l=1$ \textbf{to} $L$}  
-		\Comment{Iterate over layers}
+		\For{$l=1$ \textbf{to} $L$} \Comment{Iterate over layers}
 		
 		\If{$l\ne 1$}
-		\State $x_t^{(l)} \gets h_t^{(l-1)}$
-		\Comment{Input from the previous layer}
+		\State $x_t^{(l)} \gets h_t^{(l-1)}$ \Comment{Input from the previous layer}
 		\EndIf
 		
 		\State Forget gate: controls how much of $c_{t-1}^{(l)}$ is retained
@@ -559,24 +557,19 @@
 	\label{alg:stacked_gru_forward}
 	\begin{algorithmic}[1]
 		
-		\Require 
-		Input sequence $\{x_t^{(1)}\}_{t=1}^T$, 
+		\Require Input sequence $\{x_t^{(1)}\}_{t=1}^T$, 
 		parameters $\{W_z^{(l)},W_r^{(l)},W_h^{(l)},b_z^{(l)},b_r^{(l)},b_h^{(l)}\}_{l=1}^{L}$
 		
-		\Ensure 
-		Hidden states $\{h_t^{(l)}\}_{l=1}^{L}$
+		\Ensure Hidden states $\{h_t^{(l)}\}_{l=1}^{L}$
 		
 		\State Initialize $h_0^{(l)}=\mathbf{0}$ for all $l=1,\dots,L$
 		
-		\For{$t=1$ \textbf{to} $T$}  
-		\Comment{Iterate over time steps}
+		\For{$t=1$ \textbf{to} $T$} \Comment{Iterate over time steps}
 		
-		\For{$l=1$ \textbf{to} $L$}  
-		\Comment{Iterate over layers}
+		\For{$l=1$ \textbf{to} $L$} \Comment{Iterate over layers}
 		
 		\If{$l\ne 1$}
-		\State $x_t^{(l)} \gets h_t^{(l-1)}$
-		\Comment{Input from the previous layer}
+		\State $x_t^{(l)} \gets h_t^{(l-1)}$ \Comment{Input from the previous layer}
 		\EndIf
 		
 		\State Update gate: controls how much of the past state is retained

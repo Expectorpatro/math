@@ -37,10 +37,10 @@ region_colours <- c(
 
 本实验使用R自带的`USArrests`数据完成一次主成分分析（PCA），重点回答四个问题：
 
-1. 变量量纲为何会影响基于协方差矩阵的PCA；
-2. PCA与协方差矩阵特征值分解之间有何关系；
+1. 原始数据的第一主成分是否被大尺度变量主导；
+2. 标准化后各变量如何共同构成主要变异方向；
 3. 如何根据累计方差贡献率选择主成分个数；
-4. 降维后保留的信息量与重构误差如何变化。
+4. 哪些州对前两个主成分的形成影响最大，地区之间呈现怎样的差异。
 
 `USArrests`记录了美国50个州在1973年的四项指标。`Murder`、`Assault`和`Rape`分别是每10万居民中的案件数，`UrbanPop`是城市人口所占百分比。州所属地区只用于给得分图着色，不参与PCA拟合。
 
@@ -66,9 +66,28 @@ data.frame(
 
 `Assault`的标准差远大于其他变量。若直接对原始数据的协方差矩阵进行特征值分解，大尺度变量会对总方差产生更大的影响。
 
-## 比较标准化前后的方差贡献率
+PCA还依赖变量之间的相关结构。先计算样本相关矩阵：
+
+```{r}
+#| label: arrests-correlation
+
+arrests_correlation <- cor(arrests)
+round(arrests_correlation, 3)
+```
+
+`Murder`与`Assault`的相关性最强，`Rape`也与两者呈明显正相关；`UrbanPop`与`Murder`的线性相关性则很弱。因此，标准化后的PCA既要概括三项犯罪指标的共同变化，也要保留城市化程度提供的不同信息。
+
+## 比较标准化前后的第一主成分
 
 分别对原始数据和标准化数据拟合PCA。标准化将每个变量变换为均值为0、样本方差为1的变量，此时PCA等价于对原变量的样本相关矩阵进行特征值分解。
+
+为了判断第一主成分是否被某个变量主导，不能只比较方差贡献率，还应检查因子负荷。第$j$个变量在第一主成分上的因子负荷为
+
+$$
+\rho(X_j,Y_1),
+$$
+
+即该变量与第一主成分得分的相关系数。其绝对值越接近1，第一主成分与该变量的变化越接近。
 
 ```{r}
 #| label: pca-scale-comparison
@@ -87,7 +106,29 @@ pca_standardized <- prcomp(arrests, center = TRUE, scale. = TRUE)
 raw_ratio <- variance_ratio(pca_raw)
 standardized_ratio <- variance_ratio(pca_standardized)
 
-data.frame(
+standardized_arrests <- scale(arrests, center = TRUE, scale = TRUE)
+
+# 调整PC1的正负号，使Assault的因子负荷为正，便于比较和解释。
+raw_pc1_direction <- if (cor(arrests$Assault, pca_raw$x[, 1]) < 0) -1 else 1
+standardized_pc1_direction <- if (
+  cor(standardized_arrests[, "Assault"], pca_standardized$x[, 1]) < 0
+) {
+  -1
+} else {
+  1
+}
+
+raw_pc1_scores <- raw_pc1_direction * pca_raw$x[, 1]
+standardized_pc1_scores <- standardized_pc1_direction *
+  pca_standardized$x[, 1]
+
+raw_pc1_loadings <- cor(as.matrix(arrests), raw_pc1_scores)[, 1]
+standardized_pc1_loadings <- cor(
+  standardized_arrests,
+  standardized_pc1_scores
+)[, 1]
+
+scale_effect_summary <- data.frame(
   Data = c("Raw", "Standardized"),
   PC1VarianceRatio = c(raw_ratio[1], standardized_ratio[1]),
   FirstTwoPCs = c(sum(raw_ratio[1:2]), sum(standardized_ratio[1:2])),
@@ -96,6 +137,51 @@ data.frame(
     components_for_threshold(pca_standardized)
   ),
   row.names = NULL
+)
+
+pc1_loading_comparison <- data.frame(
+  Variable = names(arrests),
+  StandardDeviation = vapply(arrests, sd, numeric(1)),
+  RawPC1Loading = raw_pc1_loadings,
+  StandardizedPC1Loading = standardized_pc1_loadings,
+  RawPC1Rotation = raw_pc1_direction * pca_raw$rotation[, 1],
+  StandardizedPC1Rotation = standardized_pc1_direction *
+    pca_standardized$rotation[, 1],
+  row.names = NULL
+)
+
+scale_effect_summary
+pc1_loading_comparison
+```
+
+```{r}
+#| label: pca-loading-comparison
+#| fig-width: 8
+#| fig-height: 5
+
+pc1_loading_matrix <- rbind(
+  Raw = abs(raw_pc1_loadings),
+  Standardized = abs(standardized_pc1_loadings)
+)
+
+barplot(
+  pc1_loading_matrix,
+  beside = TRUE,
+  names.arg = names(arrests),
+  col = c(colour_smooth, colour_main),
+  border = NA,
+  ylim = c(0, 1.08),
+  main = "Absolute PC1 Loadings before and after Standardization",
+  xlab = "Variable",
+  ylab = "Absolute Loading"
+)
+abline(h = 1, lty = 3, col = "grey55")
+legend(
+  "topright",
+  legend = rownames(pc1_loading_matrix),
+  fill = c(colour_smooth, colour_main),
+  border = NA,
+  bty = "n"
 )
 ```
 
@@ -130,36 +216,11 @@ barplot(
 par(old_par)
 ```
 
-原始数据的第一主成分吸收了绝大部分方差，这主要反映`Assault`的尺度较大，而不是其余变量都没有信息。标准化后，方差贡献率分散到多个主成分；这正是变量量纲不同且需要等权比较时使用相关矩阵PCA的原因。
+原始数据PC1与`Assault`的因子负荷为`r sprintf("%.4f", raw_pc1_loadings["Assault"])`，几乎达到1；同时，`Assault`在PC1方向向量中的系数为`r sprintf("%.4f", raw_pc1_direction * pca_raw$rotation["Assault", 1])`。这两项证据共同说明：原始数据的PC1几乎沿着`Assault`的变化方向，而`Assault`远大的标准差使它主导了协方差矩阵的最大变异方向。
 
-## 用特征值分解核对PCA
+`Murder`和`Rape`在原始PC1上的因子负荷也不低，并不意味着它们在PC1公式中的权重同样大；主要原因是它们本身与`Assault`正相关。这里，rotation描述主成分由各原变量如何线性组合，loading描述原变量与主成分的相关程度，二者含义不能混用。
 
-对样本相关矩阵进行特征值分解，并按特征值从大到小排列。每个单位特征向量给出一个主成分方向，对应特征值就是该主成分的样本方差。
-
-```{r}
-#| label: pca-eigendecomposition
-
-arrests_correlation <- cor(arrests)
-correlation_eigendecomposition <- eigen(
-  arrests_correlation,
-  symmetric = TRUE
-)
-
-direction_alignment <- abs(diag(crossprod(
-  correlation_eigendecomposition$vectors,
-  pca_standardized$rotation
-)))
-
-data.frame(
-  Component = paste0("PC", seq_along(correlation_eigendecomposition$values)),
-  CorrelationEigenvalue = correlation_eigendecomposition$values,
-  PCAExplainedVariance = pca_standardized$sdev^2,
-  AbsoluteDirectionAlignment = direction_alignment,
-  row.names = NULL
-)
-```
-
-两种算法得到相同的特征值，方向的绝对内积为1。这里取绝对值是因为特征向量乘以$-1$后仍代表同一条主成分轴，因而主成分方向的正负号本身没有统计含义。
+标准化后，PC1在`Assault`、`Rape`和`Murder`上的因子负荷分别为`r sprintf("%.3f", standardized_pc1_loadings["Assault"])`、`r sprintf("%.3f", standardized_pc1_loadings["Rape"])`和`r sprintf("%.3f", standardized_pc1_loadings["Murder"])`。三项犯罪指标共同决定第一主成分，不再由`Assault`的量纲单独控制。与此同时，PC1的方差贡献率从`r sprintf("%.1f\\%%", 100 * raw_ratio[1])`降为`r sprintf("%.1f\\%%", 100 * standardized_ratio[1])`，说明原始数据中看似极高的解释比例主要来自尺度效应。
 
 ## 根据累计方差贡献率选择维数
 
@@ -244,7 +305,7 @@ cat(
 
 本例中，前`r selected_k`个主成分的累计方差贡献率为`r sprintf("%.1f\\%%", 100 * standardized_cumulative_ratio[selected_k])`，首次超过85%的阈值。
 
-## 查看主成分得分与因子负荷
+## 解释前两个主成分
 
 主成分得分是标准化样本在主成分方向上的坐标。因子负荷定义为主成分与原变量的相关系数；其绝对值越大，表示该变量与相应主成分的线性关系越强。
 
@@ -253,11 +314,30 @@ cat(
 #| fig-width: 12
 #| fig-height: 5.5
 
-standardized_arrests <- scale(arrests, center = TRUE, scale = TRUE)
-pca_scores <- pca_standardized$x
+pca_directions <- c(
+  standardized_pc1_direction,
+  rep(1, ncol(pca_standardized$x) - 1)
+)
+pca_scores <- sweep(pca_standardized$x, 2, pca_directions, `*`)
 factor_loadings <- cor(standardized_arrests, pca_scores)
 
-state_regions <- state.region[match(rownames(arrests), state.name)]
+state_regions <- as.character(
+  state.region[match(rownames(arrests), state.name)]
+)
+score_contributions <- sweep(
+  pca_scores[, 1:2, drop = FALSE]^2,
+  2,
+  colSums(pca_scores[, 1:2, drop = FALSE]^2),
+  `/`
+) *
+  100
+states_to_label <- unique(unlist(lapply(
+  1:2,
+  function(component) {
+    names(sort(score_contributions[, component], decreasing = TRUE))[1:3]
+  }
+)))
+
 displayed_loadings <- factor_loadings[
   nrow(factor_loadings):1,
   1:2,
@@ -277,6 +357,14 @@ plot(
   main = "Scores on the First Two Components"
 )
 abline(h = 0, v = 0, lty = 3, col = "grey55")
+text(
+  pca_scores[states_to_label, 1],
+  pca_scores[states_to_label, 2],
+  labels = states_to_label,
+  pos = 3,
+  cex = 0.66,
+  col = "grey20"
+)
 legend(
   "topright",
   legend = names(region_colours),
@@ -324,66 +412,75 @@ par(old_par)
 round(factor_loadings[, 1:2, drop = FALSE], 3)
 ```
 
-前两个主成分的得分图已经呈现出州际差异的主要结构，但地区标签只是用于解释图形的辅助信息。PCA本身没有使用这些标签，因此仍然是无监督的线性降维方法。
+第一主成分在三项犯罪指标上的因子负荷都较高，可以解释为“暴力犯罪总体水平”：PC1得分越高，`Murder`、`Assault`和`Rape`通常越高。第二主成分在`UrbanPop`上的因子负荷为`r sprintf("%.3f", factor_loadings["UrbanPop", "PC2"])`，远大于其他变量，主要刻画城市人口比例方向。由于PC2在`Murder`上的负荷为负，它还包含“城市化程度较高但谋杀率相对较低”与相反情形之间的对比。
 
-## 观察维数与重构误差的关系
+## 识别对主成分影响较大的州
 
-保留前$K$个主成分后，可以把得分投影回原来的四维标准化空间。随着$K$增加，被舍弃的主成分越来越少，平均重构误差应单调下降。
+一个州在第$k$个主成分上的贡献定义为其得分平方占该主成分全部得分平方和的比例：
+
+$$
+\operatorname{Ctr}_{ik}
+=\frac{y_{ik}^2}{\sum_{j=1}^{50}y_{jk}^2}.
+$$
+
+贡献较大的州位于相应主成分轴的两端，对该方向的样本差异具有较强代表性。
 
 ```{r}
-#| label: pca-reconstruction
+#| label: pca-state-contributions
 
-component_numbers <- seq_len(ncol(standardized_arrests))
-reconstruction_mse <- vapply(
-  component_numbers,
-  function(k) {
-    reconstructed <- pca_scores[, seq_len(k), drop = FALSE] %*%
-      t(pca_standardized$rotation[, seq_len(k), drop = FALSE])
-    mean((standardized_arrests - reconstructed)^2)
-  },
-  numeric(1)
-)
+top_contributing_states <- do.call(
+  rbind,
+  lapply(
+    1:2,
+    function(component) {
+      state_names <- names(sort(
+        score_contributions[, component],
+        decreasing = TRUE
+      ))[1:5]
 
-plot(
-  component_numbers,
-  reconstruction_mse,
-  type = "b",
-  pch = 19,
-  lwd = 2,
-  col = colour_accent,
-  xaxt = "n",
-  xlab = "Number of Retained Components",
-  ylab = "Mean Squared Reconstruction Error",
-  main = "Reconstruction Error after Dimensionality Reduction"
-)
-axis(1, at = component_numbers)
-points(
-  selected_k,
-  reconstruction_mse[selected_k],
-  pch = 21,
-  cex = 1.5,
-  bg = "grey15",
-  col = "white"
-)
-text(
-  selected_k,
-  reconstruction_mse[selected_k],
-  labels = paste0("85% threshold: K = ", selected_k),
-  pos = 4,
-  offset = 0.7
+      data.frame(
+        Component = paste0("PC", component),
+        State = state_names,
+        Region = state_regions[match(state_names, rownames(arrests))],
+        Score = pca_scores[state_names, component],
+        ContributionPercent = score_contributions[state_names, component],
+        arrests[state_names, , drop = FALSE],
+        row.names = NULL
+      )
+    }
+  )
 )
 
-data.frame(
-  RetainedComponents = component_numbers,
-  CumulativeVarianceRatio = standardized_cumulative_ratio,
-  ReconstructionMSE = reconstruction_mse,
-  row.names = NULL
-)
+top_contributing_states
 ```
 
-## 观察
+PC1贡献最大的州同时出现在暴力犯罪指标的高端或低端。例如，Florida、Nevada和California具有较高的PC1得分，而North Dakota、Vermont等州位于相反方向。PC2贡献较大的州主要由`UrbanPop`与犯罪指标之间的相对关系决定，而不只是由某一个指标的绝对大小决定。
 
-- 当变量量纲差异明显时，直接使用协方差矩阵会让大尺度变量主导结果；是否标准化必须结合变量含义判断。
-- 标准化数据的PCA与样本相关矩阵的特征值分解给出相同结果，主成分方向的正负号可以同时翻转。
-- 本例在85%的累计方差贡献率下保留`r selected_k`个主成分；保留的主成分越多，累计方差贡献率越高，重构误差越低。
-- PCA降维是在简化表示与信息损失之间作取舍。得分图适合展示样本结构，因子负荷则帮助解释每个主成分与原变量之间的关系。
+最后汇总各地区在前两个主成分上的平均位置与内部离散程度。地区信息仍然没有参与PCA拟合，只用于事后解释。
+
+```{r}
+#| label: pca-region-summary
+
+region_score_summary <- do.call(
+  rbind,
+  lapply(
+    names(region_colours),
+    function(region) {
+      region_rows <- state_regions == region
+      data.frame(
+        Region = region,
+        States = sum(region_rows),
+        MeanPC1 = mean(pca_scores[region_rows, 1]),
+        SDPC1 = sd(pca_scores[region_rows, 1]),
+        MeanPC2 = mean(pca_scores[region_rows, 2]),
+        SDPC2 = sd(pca_scores[region_rows, 2]),
+        row.names = NULL
+      )
+    }
+  )
+)
+
+region_score_summary
+```
+
+南部和西部地区的平均PC1得分较高，说明它们在这份1973年数据中的三项暴力犯罪指标整体偏高；南部地区的平均PC2得分较低，而东北部和西部较高，主要反映城市化程度及其与犯罪指标的相对关系。各地区内部的标准差仍然较大，因此这些结果只能描述该历史数据集中的总体结构，不能据此作因果解释，也不能代表当前情况。
