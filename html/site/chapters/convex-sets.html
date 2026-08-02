@@ -738,7 +738,8 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#id--bdb945e7" id="toc-id--bdb945e7" class="nav-link" data-scroll-target="#id--bdb945e7"><span class="header-section-number">8.1.1</span> 映射的上下极限与半连续性</a></li>
   <li><a href="#id--8d38c465" id="toc-id--8d38c465" class="nav-link" data-scroll-target="#id--8d38c465"><span class="header-section-number">8.1.2</span> 线搜索法</a></li>
-  <li><a href="#newton-a1474c7c" id="toc-newton-a1474c7c" class="nav-link" data-scroll-target="#newton-a1474c7c"><span class="header-section-number">8.1.3</span> Newton法</a></li>
+  <li><a href="#id--631f6459" id="toc-id--631f6459" class="nav-link" data-scroll-target="#id--631f6459"><span class="header-section-number">8.1.3</span> 梯度下降法</a></li>
+  <li><a href="#newton-a1474c7c" id="toc-newton-a1474c7c" class="nav-link" data-scroll-target="#newton-a1474c7c"><span class="header-section-number">8.1.4</span> Newton法</a></li>
   </ul></li>
   <li class="computation-toc-item"><a href="#computed-results" class="nav-link" data-scroll-target="#computed-results">计算实验</a><ul class="collapse"><li><a href="#computation-case-01" class="nav-link" data-scroll-target="#computation-case-01">实验 01 · Newton 法：局部二次收敛</a></li></ul></li></ul>
 </nav>
@@ -1184,7 +1185,7 @@ f(y)\geqslant f(x)+g^T(y-x)
 </section>
 <section id="id--8d38c465" class="level3">
 <h3 class="anchored" data-anchor-id="id--8d38c465"><span class="header-section-number">8.1.2</span> 线搜索法</h3>
-<p>在迭代优化算法中，一次迭代通常包含两个基本问题：首先确定一个搜索方向，其次确定沿该方向移动的步长。如果步长过小，则每次迭代的推进幅度有限，算法收敛速度可能很慢；如果步长过大，则损失函数值不但不能下降，反而可能上升。因此，步长选择需要在”保证下降”和”保持足够推进”之间取得平衡。</p>
+<p>在迭代优化算法中，一次迭代通常包含两个基本步骤：首先确定一个能够使损失函数下降的搜索方向，其次确定沿该方向移动的步长。搜索方向决定参数更新的方向，而步长决定参数沿该方向移动的距离。若步长过小，则每次迭代的推进幅度有限，算法的收敛速度可能较慢；若步长过大，则可能越过适宜的更新区域，使损失函数值无法下降，甚至反而增大。因此，步长的选择需要在保证损失函数充分下降与维持足够迭代进展之间取得平衡。</p>
 <p>线搜索法正是为了解决这一问题而引入的。所谓线搜索法，是指在当前点<span class="math inline">\(x_n\)</span>和搜索方向<span class="math inline">\(d_n\)</span>确定之后，沿着射线<span class="math inline">\(\{x_n+\alpha d_n:\alpha&gt;0\}\)</span>寻找一个合适的步长<span class="math inline">\(\alpha_n\)</span>，并用它更新迭代点。</p>
 <figure id="fig-8-4" class="textbook-figure figure" data-latex-placement="H">
 <img src="../_tikz/tikz-cb5c4780ecfeeb2f365b.png" class="tikz-image figure-img" style="width:92.0%" width="1982" height="1136" alt="TikZ 数学图示" loading="lazy" decoding="async">
@@ -1349,10 +1350,28 @@ f(x_{n+1})\leqslant f(x_0)-\frac{c_1(1-c_2)}{L}\sum_{i=0}^{n}\cos^2\theta_i||\na
 <p><strong>note 8.6</strong>. 上述定理中的条件是很直观的，如果<span class="math inline">\(\theta_n\)</span>很接近<span class="math inline">\(\dfrac{\pi}{2}\)</span>，就意味着梯度方向和下降方向垂直，根据<a href="../chapters/calculus.html#theo-TaylorTheorem-f2dab84a" class="textbook-cross-reference" data-reference-key="theo:TaylorTheorem" data-reference-kind="ref+label" data-reference-title="定理 4.6" data-reference-items="1" data-reference-hint="请查看第 1 项">定理 4.6(1)</a>可知此此时损失函数值几乎不发生变化。</p>
 </div>
 </section>
+<section id="id--631f6459" class="level3">
+<h3 class="anchored" data-anchor-id="id--631f6459"><span class="header-section-number">8.1.3</span> 梯度下降法</h3>
+<div id="method-GradientDescent-94d8e324" class="method theorem-block env-method">
+<p><strong>Method 8.1</strong>. <strong>（Gradient Descent）</strong></p>
+<p>设<span class="math inline">\(X\)</span>为实Hilbert空间，开集<span class="math inline">\(E\subseteq X\)</span>，函数<span class="math inline">\(f:E\to\mathbb{R}\)</span>在<span class="math inline">\(E\)</span>上Gâteaux可微，任取初始点<span class="math inline">\(x_0\in E\)</span>。在第<span class="math inline">\(n\)</span>次迭代中计算梯度<span class="math inline">\(\nabla fx_n\)</span>；若<span class="math inline">\(\nabla fx_n=\mathbf{0}\)</span>，则停止迭代，否则选择步长<span class="math inline">\(\alpha_n&gt;0\)</span>使得<span class="math inline">\(x_n-\alpha_n\nabla fx_n\in E\)</span>，并令： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl4X3tuKzF9PXhfbi1cYWxwaGFfblxuYWJsYSBmeF9uClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+x_{n+1}=x_n-\alpha_n\nabla fx_n
+\end{equation*}\]</span></p>
+<p>如此反复更新得到迭代点列<span class="math inline">\(\{x_n\}\)</span>，这种方法称为<a href="../chapters/glossary-g.html#term-GradientDescent" class="term" title="gradient descent">梯度下降<span class="term-english">（gradient descent）</span></a>，步长<span class="math inline">\(\alpha_n\)</span>被称为<a href="../chapters/glossary-l.html#term-LR" class="term" title="learning rate, LR">学习率<span class="term-english">（learning rate, LR）</span></a>。</p>
+</div>
+<div id="note-8-7" class="note theorem-block env-note">
+<p><strong>note 8.7</strong>. 由<a href="../chapters/calculus.html#prop-Gradient-dd9bc2c2" class="textbook-cross-reference" data-reference-key="prop:Gradient" data-reference-kind="ref+label" data-reference-title="性质 4.1.4">性质 4.1.4</a>可知，在所有单位方向中负梯度方向： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQktXGZyYWN7XG5hYmxhIGZ4X259e3x8XG5hYmxhIGZ4X258fH0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+-\frac{\nabla fx_n}{||\nabla fx_n||}
+\end{equation*}\]</span></p>
+<p>使<span class="math inline">\(f\)</span>在<span class="math inline">\(x_n\)</span>处的方向导数最小，由方向导数的定义可知它是当前点处使得函数值下降最快的单位方向。</p>
+</div>
+</section>
 <section id="newton-a1474c7c" class="level3">
-<h3 class="anchored" data-anchor-id="newton-a1474c7c"><span class="header-section-number">8.1.3</span> Newton法</h3>
+<h3 class="anchored" data-anchor-id="newton-a1474c7c"><span class="header-section-number">8.1.4</span> Newton法</h3>
 <div id="method-NewtonMethod-603ef508" class="method theorem-block env-method">
-<p><strong>Method 8.1</strong>. <strong>（Newton Method）</strong></p>
+<p><strong>Method 8.2</strong>. <strong>（Newton Method）</strong></p>
 <p>设<span class="math inline">\(E\subseteq \mathbb{R}^m\)</span>为开集，函数<span class="math inline">\(f\in C^2(E):E\to\mathbb{R}\)</span>。给定当前迭代点<span class="math inline">\(x_n\in E\)</span>，<span class="math inline">\(\nabla^2fx_n\)</span>可逆，根据<a href="../chapters/calculus.html#theo-TaylorTheorem-f2dab84a" class="textbook-cross-reference" data-reference-key="theo:TaylorTheorem" data-reference-kind="ref+label" data-reference-title="定理 4.6" data-reference-items="1" data-reference-hint="请查看第 1 项">定理 4.6(1)</a>，考虑在<span class="math inline">\(x_n\)</span>处沿方向<span class="math inline">\(d_n\)</span>的二阶Taylor近似： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlmKHhfbitkX24pJlxhcHByb3ggZih4X24pK1xvcGVyYXRvcm5hbWV7RH1meF9uKGRfbikrXGZyYWN7MX17Mn1cb3BlcmF0b3JuYW1le0R9XjJmeF9uKGRfbixkX24pIFxcCgkJJj1mKHhfbikrKFxuYWJsYSBmeF9uKV5UZF9uK1xmcmFjezF9ezJ9ZF9uXlRcbmFibGFeMmZ4X25kX24KXGVuZHthbGlnbip9"></span></p>
 <p><span class="math display">\[\begin{align*}
 f(x_n+d_n)&amp;\approx f(x_n)+\operatorname{D}fx_n(d_n)+\frac{1}{2}\operatorname{D}^2fx_n(d_n,d_n) \\

@@ -247,29 +247,7 @@
 \end{definition}
 
 \subsection{模型学习}
-\subsubsection{损失函数}
-\begin{definition}
-	设观测样本集为\(\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n\)，模型为函数$f_\theta$，记$\hat{y}_i=f_\theta(x_i)$。若函数$L(y,\hat{y})$用于衡量模型预测值与真实值之间差异，则称$L$为\gls{LossFunction}。称：
-	\begin{equation*}
-		\widehat{\mathcal{R}}(\theta)=\frac{1}{n}\sum_{i=1}^{n}L[y_i,f_\theta(x_i)]
-	\end{equation*}
-	为\gls{EmpiricalRisk}。
-\end{definition}
-\subsubsection{梯度下降}
-\begin{definition}
-	\gls{GradientDescent}指的是：在最小化目标函数$f$的优化问题中，每次迭代过程为在当前点$x_t$处沿负梯度方向移动一小步。
-\end{definition}
-\begin{definition}
-	称正数$\eta>0$为\gls{LR}。 
-\end{definition}
-\begin{note}
-	在第$t$次迭代中，参数更新通常写为：
-	\begin{equation*}
-		\theta_{t+1}=\theta_t-\eta g_t
-	\end{equation*}
-	其中$g_t$为当前点处目标函数关于参数$\theta$的梯度估计。\par
-	学习率决定了参数更新的幅度：$\eta$过大会导致算法发散或震荡，$\eta$过小则会使收敛速度显著变慢。
-\end{note}
+神经网络通常以经验风险$\hat{R}(\theta)$为训练目标，并利用\cref{method:GradientDescent}反复更新参数。由于训练集往往包含大量样本，下面根据每次用于计算梯度的样本数量，介绍梯度下降在神经网络训练中的三种实现形式。以下用$\eta>0$表示学习率，用$g_t$表示第$t$次迭代中使用的梯度或梯度估计。
 \begin{definition}
 	设训练集为$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$。称$\mathcal{B}\subseteq\mathcal{D}$为一个\gls{Batch}，$|\mathcal{B}|$被称作\gls{BatchSize}。
 \end{definition}
@@ -283,8 +261,8 @@
 		\Require Initial parameter $\theta_0$, learning rate $\eta$, number of iterations $T$, training set $\mathcal{D}$
 		\Ensure Final parameter estimate $\theta_T$
 		\For{$t = 1,2,\dots,T$}
-			\State Compute the empirical risk $\widehat{\mathcal{R}}(\theta_t)$ on the whole dataset $\mathcal{D}$
-			\State Compute the full gradient $g_t=\dif\widehat{\mathcal{R}}(\theta_t)$
+			\State Compute the empirical risk $\hat{R}(\theta_t)$ on the whole dataset $\mathcal{D}$
+			\State Compute the full gradient $g_t=\nabla\hat{R}(\theta_t)$
 			\State Update the parameter:
 			\begin{equation*}
 				\theta_{t+1} \gets \theta_t - \eta\, g_t
@@ -303,7 +281,7 @@
 			\State Randomly sample one data point $(x_{i_t}, y_{i_t})$ from $\mathcal{D}$
 			\State Compute the stochastic gradient
 			\[
-				g_t = \dif L[f(x_{i_t};\theta_t), y_{i_t}]
+				g_t = \left.\nabla_\theta L[y_{i_t},f_\theta(x_{i_t})]\right|_{\theta=\theta_t}
 			\]
 			\State Update the parameter:
 			\[
@@ -324,7 +302,7 @@
 			\State Compute the mini-batch gradient
 			\[
 				g_t = \frac{1}{B} \sum_{(x_i,y_i)\in \mathcal{B}_t}
-				\dif L[f(x_i;\theta_t), y_i]
+				\left.\nabla_\theta L[y_i,f_\theta(x_i)]\right|_{\theta=\theta_t}
 			\]
 			\State Update the parameter:
 			\[

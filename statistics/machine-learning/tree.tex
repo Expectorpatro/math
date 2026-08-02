@@ -102,79 +102,6 @@
 	\end{tikzpicture}
 	\caption{二分类样本的Gini指数。节点越接近单一类别，Gini指数越接近$0$。}
 \end{figure}
-\subsubsection{交叉熵}
-\begin{definition}
-	设 $(X,\mathscr{A},P)$ 为概率空间，$f$为$X$上取值于有限集合
-	$\{x_1,\dots,x_n\}$ 的离散型随机变量，其真实分布为：
-	\begin{equation*}
-		p_i=P(f=x_i),\;i=1,\dots,n
-	\end{equation*}
-	另设$q=(q_1,\dots,q_n)$为定义在同一取值集合上的另一概率分布，满足$q_i>0$。称：
-	\begin{equation*}
-		H(p,q)=-\sum_{i=1}^np_i\log q_i
-	\end{equation*}
-	为分布$p$相对于分布$q$的\gls{CrossEntropy}。
-\end{definition}
-\begin{property}\label{prop:CrossEntropy}
-	设$p=(p_1,\dots,p_n)$与$q=(q_1,\dots,q_n)$（$p_iq_i\ne0,\;i=1,2,\dots,n$）为定义在同一有限集合上的概率分布，则$H(p,q)\geqslant H(p,p)$，上式取等当且仅当$q_1=p_1,\dots,q_n=p_n$ 。
-\end{property}
-\begin{proof}
-	因为：
-	\begin{equation*}
-		H(p,q)=-\sum_{i=1}^np_i\log q_i=-\sum_{i=1}^np_i\log\frac{q_i}{p_i}-\sum_{i=1}^np_i\log p_i
-	\end{equation*}
-	并且由\cref{prop:ConvexFunction}(3)可知$-\log(x)$在$(0,+\infty)$上为凸函数，由\cref{ineq:Jensen}可知：
-	\begin{equation*}
-		\sum_{i=1}^np_i\log\frac{q_i}{p_i}\leqslant\log\left[\sum_{i=1}^{n}p_i\frac{q_i}{p_i}\right]=0
-	\end{equation*}
-	上式取等当且仅当$\dfrac{q_i}{p_i}$为常数，即$q_i=p_i$。所以：
-	\begin{equation*}
-		H(p,q)\geqslant-\sum_{i=1}^np_i\log p_i=H(p,p)
-	\end{equation*}
-	且当且仅当$q=p$时取等。
-\end{proof}
-\begin{note}
-	由\cref{prop:CrossEntropy}可知，交叉熵在所有概率分布$q$中以$q=p$为唯一最小值。实际中真实分布$p$通常未知，故以样本的经验分布$\hat{p}$代替$p$，并最小化$H(\hat{p},q)$。在$H(\hat{p},q)$能够充分逼近$H(p,q)$的条件下，该过程使所估计的分布$q$趋近于真实分布$p$。
-\end{note}
-交叉熵需要区分真实概率$p$和预测概率$q$。固定真实概率$p=0.25$后，预测概率$q$与$p$一致时交叉熵最小；预测越偏离真实概率，交叉熵越大。
-\begin{figure}[H]
-	\centering
-	\begin{tikzpicture}
-		\begin{axis}[
-			width=9.2cm, height=5.6cm,
-			xlabel={$q$}, ylabel={$H(p,q)$},
-			xmin=0, xmax=1, ymin=0, ymax=4.5,
-			xtick={0,0.25,0.5,0.75,1}, ytick={0,1,2,3,4},
-			axis lines=left, grid=major,
-			grid style={draw=gray!18},
-			samples=200,
-		]
-			\addplot[very thick, orange!85!black, domain=0.02:0.98]
-				{-(0.25*ln(x)+0.75*ln(1-x))/ln(2)};
-			\addplot[only marks, mark=*, orange!85!black] coordinates {(0.25,0.81128)};
-			\draw[dashed, gray] (axis cs:0.25,0) -- (axis cs:0.25,0.81128);
-		\end{axis}
-	\end{tikzpicture}
-	\caption{真实概率固定为$p=0.25$时的二分类交叉熵。横轴$q$为模型预测第一类的概率。}
-\end{figure}
-\begin{note}
-	由\cref{prop:CrossEntropy}可知，交叉熵在所有概率分布$q$中以$q=p$为唯一最小值。实际中真实分布$p$通常未知，故以样本的经验分布$\hat{p}$代替$p$，并最小化$H(\hat{p},q)$。在$H(\hat{p},q)$能够充分逼近$H(p,q)$的条件下，该过程使所估计的分布$q$趋近于真实分布$p$。
-\end{note}
-\begin{note}
-	在分类问题中，我们可以用逐样本的交叉熵作为损失函数。对于第$i$个样本，若其真实类别为第$k$类，则其真实分布$p_i$是一个one-hot向量，即第$k$个分量为$1$，其余分量为$0$。例如，在二分类问题中有：
-	\begin{equation*}
-		p_i=(1,0)^{\top}\qquad\text{或}\qquad p_i=(0,1)^{\top}
-	\end{equation*}
-	若模型对该样本输出概率分布$q_i$，则其交叉熵为：
-	\begin{equation*}
-		H(p_i,q_i)=-\sum_{j=1}^Kp_{ij}\log q_{ij}=-\log q_{iy_i}
-	\end{equation*}
-	整个数据集上的交叉熵损失通常取各样本损失的平均：
-	\begin{equation*}
-		L_{\mathrm{CE}}=\frac{1}{n}\sum_{i=1}^nH(p_i,q_i)
-	\end{equation*}
-	由此可见，分类问题中的交叉熵分别比较每个样本的真实分布$p_i$与预测分布$q_i$。由于$p_i$是one-hot向量，$H(p_i,q_i)$实际上只取决于模型赋给该样本真实类别的概率$q_{iy_i}$：该概率越接近$1$，损失越小；该概率越接近$0$，损失越大。
-\end{note}
 
 \subsection{决策树}
 \subsubsection{从判断规则到决策树}
@@ -281,28 +208,28 @@
 由此可见，一个判断规则是否合理，关键在于它是否将具有相似响应结果的样本分到一起。对于分类树，我们希望同一节点中的样本尽可能属于相同类别；对于回归树，我们希望同一节点中的响应值尽可能接近。换言之，决策树需要寻找能够使子节点中的响应变量更加同质的判断规则。\par
 为了比较不同判断规则的优劣，首先需要度量一个节点中的响应变量究竟有多混杂。这个量称为\gls{NodeImpurity}。
 \subsubsection{节点不纯度}
-设$\mathcal{D}$是某个节点中的数据集。在该节点不再继续划分时，所有样本将共享同一个局部预测。对于给定损失函数$\ell$，可以将节点不纯度统一定义为节点内最优常数预测所达到的最小平均经验损失：
+设$\mathcal{D}$是某个节点中的数据集。在该节点不再继续划分时，所有样本将共享同一个局部预测。对于给定损失函数$L$，可以将节点不纯度统一定义为节点内最优常数预测所达到的最小平均经验损失：
 \begin{equation*}
-	I_{\ell}(\mathcal{D})=\underset{a\in\mathcal{A}}{\min}\;\frac{1}{|\mathcal{D}|}\sum_{(x,y)\in\mathcal{D}}\ell(y,a)
+	I_{L}(\mathcal{D})=\underset{a\in\mathcal{A}}{\min}\;\frac{1}{|\mathcal{D}|}\sum_{(x,y)\in\mathcal{D}}L(y,a)
 \end{equation*}
 其中$\mathcal{A}$表示允许的节点预测空间。节点不纯度越小，说明使用单一预测描述该节点中的所有样本所造成的损失越小，因而节点中的响应变量越同质。\par
 在分类问题中，由\cref{prop:InformationEntropy}(2)和\cref{prop:GiniIndex}(2)可知，信息熵与Gini不纯度都可以用于衡量节点中的类别分布是否集中。当节点中的样本全部属于同一类别时，二者均为$0$；类别分布越分散，二者的取值越大。因此，它们都可以作为分类树中的节点不纯度指标。\par
-若使用交叉熵作为分类损失，记该节点中第$k$类样本的数量及比例分别为$n_k$和$p_k$，则：
-\begin{equation*}
-	p=(p_1,p_2,\dots,p_K)^{\top}
-\end{equation*}
-表示节点中的经验类别分布。在分类树中，每个叶节点以一个类别概率向量作为落入该节点的所有样本的共同预测。记节点的类别概率预测为：
-\begin{equation*}
-	q=(q_1,q_2,\dots,q_K)^{\top},\quad q_k\geqslant0,\quad\sum_{k=1}^Kq_k=1
-\end{equation*}
-根据分类问题中逐样本交叉熵损失的定义，类别为$y$的样本对应的损失为$-\log q_y$。因为节点内的所有样本共享同一个概率预测$q$，所以真实类别为$k$的每个样本都产生相同的交叉熵损失$-\log q_k$。因为节点中共有$n_k$个第$k$类样本，所以将样本按照真实类别分组可得：
-\begin{equation*}
-	-\frac{1}{n}\sum_{(x,y)\in\mathcal{D}}\log q_y=-\frac{1}{n}\sum_{k=1}^Kn_k\log q_k=-\sum_{k=1}^Kp_k\log q_k
-\end{equation*}
-即节点内的平均交叉熵损失就是节点经验类别分布$p$与预测类别分布$q$之间的交叉熵。根据\cref{prop:CrossEntropy}，此时节点内最优常数预测所达到的经验损失恰好就是该节点经验类别分布的信息熵。这进一步给出了以信息熵作为节点不纯度指标的理论依据。\par
+%若使用交叉熵作为分类损失，记该节点中第$k$类样本的数量及比例分别为$n_k$和$p_k$，则：
+%\begin{equation*}
+%	p=(p_1,p_2,\dots,p_K)^{\top}
+%\end{equation*}
+%表示节点中的经验类别分布。在分类树中，每个叶节点以一个类别概率向量作为落入该节点的所有样本的共同预测。记节点的类别概率预测为：
+%\begin{equation*}
+%	q=(q_1,q_2,\dots,q_K)^{\top},\quad q_k\geqslant0,\quad\sum_{k=1}^Kq_k=1
+%\end{equation*}
+%根据分类问题中逐样本交叉熵损失的定义，类别为$y$的样本对应的损失为$-\log q_y$。因为节点内的所有样本共享同一个概率预测$q$，所以真实类别为$k$的每个样本都产生相同的交叉熵损失$-\log q_k$。因为节点中共有$n_k$个第$k$类样本，所以将样本按照真实类别分组可得：
+%\begin{equation*}
+%	-\frac{1}{n}\sum_{(x,y)\in\mathcal{D}}\log q_y=-\frac{1}{n}\sum_{k=1}^Kn_k\log q_k=-\sum_{k=1}^Kp_k\log q_k
+%\end{equation*}
+%即节点内的平均交叉熵损失就是节点经验类别分布$p$与预测类别分布$q$之间的交叉熵。根据\cref{prop:CrossEntropy}，此时节点内最优常数预测所达到的经验损失恰好就是该节点经验类别分布的信息熵。这进一步给出了以信息熵作为节点不纯度指标的理论依据。\par
 在回归问题中，若使用平方误差损失：
 \begin{equation*}
-	\ell(y,c)=(y-c)^2
+	L(y,c)=(y-c)^2
 \end{equation*}
 则最优节点预测为样本均值：
 \begin{equation*}
@@ -310,11 +237,11 @@
 \end{equation*}
 对应的节点不纯度为：
 \begin{equation*}
-	I_{\mathrm{SE}}(\mathcal{D})=\frac{1}{n}\sum_{(x,y)\in\mathcal{D}}(y-\bar{y})^2
+	I_{\mathrm{SE}}(\mathcal{D})=\frac{1}{n}\sum_{(x,y)\in\mathcal{D}}(y-\hat{c})^2
 \end{equation*}\par
 若使用绝对误差损失：
 \begin{equation*}
-	\ell(y,c)=|y-c|
+	L(y,c)=|y-c|
 \end{equation*}
 则最优节点预测为样本中位数：
 \begin{equation*}
@@ -333,7 +260,7 @@
 		\Ensure Node impurity $I(\mathcal{D})$
 		
 		\If{criterion $\in
-			\{\texttt{gini},\texttt{entropy},\texttt{cross entropy}\}$}
+			\{\texttt{gini},\texttt{entropy}\}$}
 		\State Let the class label set be $\{1,\dots,m\}$
 		\State $n_i\gets|\{(x,y)\in\mathcal{D}:y=i\}|$,
 		$p_i\gets n_i/|\mathcal{D}|$, $i=1,\dots,m$
@@ -341,8 +268,7 @@
 		\If{criterion $=\texttt{gini}$}
 		\State $I(\mathcal{D})\gets
 		1-\sum\limits_{i=1}^mp_i^2$
-		\ElsIf{criterion $\in
-			\{\texttt{entropy},\texttt{cross entropy}\}$}
+		\ElsIf{criterion $=\texttt{entropy}$}
 		\State $I(\mathcal{D})\gets
 		-\sum\limits_{\{i:p_i>0\}}p_i\log p_i$
 		\Comment{$0\log0$ is interpreted as $0$}
@@ -483,7 +409,7 @@
 		\State Let the class label set be $\{1,\dots,m\}$
 		\State $n_i\gets|\{(x,y)\in\mathcal{D}:y=i\}|$,
 		$p_i\gets n_i/|\mathcal{D}|$, $i=1,\dots,m$
-		\State $\hat{y}\gets\operatorname*{\arg\max}_{1\leqslant i\leqslant m}p_i$
+		\State $\hat{y}\gets\operatorname*{\arg\max}\limits_{1\leqslant i\leqslant m}p_i$
 		\State \Return
 		$\{\text{type: \texttt{leaf}},\text{ prediction: }\hat{y},
 		\text{ class probabilities: }(p_1,\dots,p_m)\}$
@@ -628,13 +554,31 @@
 	设$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$为观测样本集，其中$x_i$为第$i$个样本的特征向量，$y_i$是第$i$个样本的标签或值。Boosting通过顺序生成基学习器$f^{(1)},f^{(2)},\dots,f^{(B)}$来构造集成模型，其中每一步训练都基于前一步的拟合结果，对先前被错误预测的样本赋予更高关注，或对当前残差进行进一步拟合。\gls{BoostingEnsembleModel}定义为各基学习器输出的加权聚合函数。对于回归问题，集成预测函数通常定义为加权求和；对于分类问题，集成预测函数通常定义为加权投票。
 \end{definition}
 \subsubsection{GBDT}
+GBDT将Boosting逐步修正预测的思想与梯度下降联系起来。它先以训练集上的最优常数预测$F_0(x)\equiv c_0$为起点，再逐轮叠加回归树以修正当前预测。设损失函数关于预测值可微，当前加法模型为$F_{b-1}$，其在训练集上的经验损失为：
+\begin{equation*}
+	\mathcal{L}(F_{b-1})=\sum_{i=1}^{n}L[y_i,F_{b-1}(x_i)]
+\end{equation*}
+若直接在所有可能的回归树中寻找使$\mathcal{L}(F_{b-1}+f)$最小的$f$，通常难以完成。GBDT转而考察损失函数关于当前预测值的局部变化，并将第$i$个样本在第$b$轮的\textbf{伪残差}定义为：
+\begin{equation*}
+	r_{ib}=-\left.\frac{\partial L(y_i,z)}{\partial z}\right|_{z=F_{b-1}(x_i)}
+\end{equation*}
+由一阶近似可知：
+\begin{equation*}
+	\mathcal{L}(F_{b-1}+f)\approx\mathcal{L}(F_{b-1})-\sum_{i=1}^{n}r_{ib}f(x_i)
+\end{equation*}
+因此，$r_{ib}$描述了为了使当前损失下降，第$i$个样本的预测值应当优先调整的方向。使用回归树拟合数据集$\{(x_i,r_{ib})\}_{i=1}^{n}$，就是用一棵分段常数的树逼近这一负梯度方向。
+\par
+伪残差推广了通常意义下的残差。例如，当$L(y,z)=\dfrac{1}{2}(y-z)^2$时有：
+\begin{equation*}
+	r_{ib}=y_i-F_{b-1}(x_i)
+\end{equation*}
+此时每棵新树拟合当前模型尚未解释的预测误差；对于其他可微损失，伪残差仍然给出相应损失下最直接的局部修正方向。完整的GBDT训练过程如下。
 \begin{algorithm}[H]
 	\caption{Gradient Boosting Decision Tree}
-	\label{alg:GBDT}
 	\begin{algorithmic}[1]
 		\Require Training set $\mathcal{D}_{\mathrm{train}}=\{(x_i,y_i)\}_{i=1}^n$,
 		validation set $\mathcal{D}_{\mathrm{val}}=\{(x_i^{(v)},y_i^{(v)})\}_{i=1}^{n_v}$,
-		loss function $\ell(y,F(x))$,
+		loss function $L(y,F(x))$,
 		number of boosting iterations $B$,
 		learning rate $\eta$,
 		early-stopping patience $P$,
@@ -643,22 +587,20 @@
 		
 		\Ensure Additive model $F_{\hat{b}}(x)$
 		
-		\State Initialize the model prediction with a common output $F_0(x)$ for all samples
-		\Statex \textit{For classification, this output is the empirical distribution of the training samples.}
-		\Statex \textit{for regression, it is the constant minimizing the empirical loss on the training set.}
+		\State Initialize the model prediction with an optimal constant $F_0(x)\equiv c_0$ for all samples, which means that $c_0\in\operatorname*{arg\,min}\limits_{c\in\mathbb{R}}\sum\limits_{i=1}^nL(y_i,c)$
 		
 		\State $\hat{b}\gets 0$, $c_{\mathrm{stop}}\gets 0$, $L_{\mathrm{best}}\gets +\infty$
 		
 		\For{$b=1,2,\dots,B$}
 		\State Compute pseudo-residuals for all training samples
 		\begin{equation*}
-			r_{ib}\gets-\nabla\ell[y_i,F_{b-1}(x_i)],
+			r_{ib}\gets-\left.\frac{\partial L(y_i,z)}{\partial z}\right|_{z=F_{b-1}(x_i)}
 			\quad i=1,2,\dots,n
 		\end{equation*}
 		
-		\State Fit a regression tree $T_b\gets\Call{BuildTree}{\{(x_i,r_{ib})\}_{i=1}^n}$
+		\State Fit a regression tree $T_b\gets\Call{BuildTree}{\{(x_i,r_{ib})\}_{i=1}^n, 0}$
 		
-		\State Let the leaf rigions of $T_b$ be $R_{1b},R_{2b},\dots,R_{J_bb}$
+		\State Let the leaf regions of $T_b$ be $\{R_{jb}\}_{j=1}^{J_b}$
 
 		\For{$j=1,2,\dots,J_b$}
 		\State Compute the optimal leaf output on region $R_{jb}$
@@ -666,14 +608,14 @@
 			\gamma_{jb}\gets
 			\underset{\gamma\in\mathbb{R}}{\arg\min}
 			\sum_{x_i\in R_{jb}}
-			\ell[y_i,F_{b-1}(x_i)+\gamma]
+			L[y_i,F_{b-1}(x_i)+\gamma]
 		\end{equation*}
 		\EndFor
 		
 		\State Define the $b$-th base learner $f_b(x)\gets\sum\limits_{j=1}^{J_b}\gamma_{jb}I(x\in R_{jb})$ and update the additive model $F_b(x)\gets F_{b-1}(x)+\eta f_b(x)$
 		
 		\State Evaluate the validation loss $L_b\gets
-		\dfrac{1}{n_v}\sum\limits_{i=1}^{n_v}\ell[y_i^{(v)},F_b(x_i^{(v)})]$
+		\dfrac{1}{n_v}\sum\limits_{i=1}^{n_v}L[y_i^{(v)},F_b(x_i^{(v)})]$
 	
 		\If{$L_b<L_{\mathrm{best}}-\varepsilon$}
 		\State $L_{\mathrm{best}}\gets L_b$, $\hat b\gets b$, $c_{\mathrm{stop}}\gets 0$
@@ -689,11 +631,20 @@
 		\State \Return $F_{\hat{b}}(x)$
 	\end{algorithmic}
 \end{algorithm}
+每轮迭代包含两个相互配合的步骤。首先，回归树$T_b$根据伪残差决定划分区域$\{R_{jb}\}_{j=1}^{J_b}$，从而确定哪些样本共享同一种修正；随后，在每个叶节点中直接以原损失函数为准求解$\gamma_{jb}$，从而确定该区域应当修正多少。前者确定新树的结构，后者确定各叶节点的输出，二者共同得到基学习器$f_b$。
+\par
+学习率$\eta$对新树的修正幅度进行收缩。通常$0<\eta\leqslant1$；较小的$\eta$使模型更新更加保守，但往往需要更多轮迭代。经过$\hat{b}$轮后，最终模型可写为：
+\begin{equation*}
+	F_{\hat{b}}(x)=c_0+\eta\sum_{b=1}^{\hat{b}}f_b(x)
+\end{equation*}
+算法并不直接返回循环结束时的模型，而是返回按照容许精度$\varepsilon$记录的最佳验证模型$F_{\hat{b}}$。其中$\varepsilon$规定一次有效改进至少应达到的幅度，$P$规定最多允许连续多少轮没有有效改进；该早停机制与单棵树的深度、叶节点样本量等参数共同控制模型复杂度，避免不断增加新树而拟合训练数据中的随机波动。
+\par
+虽然每轮拟合的是回归树，GBDT仍然可以用于分类问题。此时模型并不直接聚合各棵树给出的类别标签，而是令$F_b(x)$表示实值分类得分，由所选择的可微分类损失决定伪残差，再依据该损失将得分转化为类别预测或类别概率。上述算法采用标量输出，直接适用于回归和二分类；多分类情形需要将$F_b(x)$扩展为各类别对应的得分向量，并在每轮为各类别拟合相应的回归树。
 \subsubsection{XGBoost}
 XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进一步对每一轮新增树的学习过程进行了更精细的刻画。\par
 与传统GBDT主要关注经验损失的下降不同，XGBoost在目标函数中显式加入了对新增树复杂度的正则化惩罚，从而将第$b$轮的优化目标写为：
 \begin{equation*}
-	L^{(b)}=\sum_{i=1}^{n}\ell[y_i,F_{b-1}(x_i)+f_b(x_i)]+\Omega(f_b)
+	L^{(b)}=\sum_{i=1}^{n}L[y_i,F_{b-1}(x_i)+f_b(x_i)]+\Omega(f_b)
 \end{equation*}
 其中，$\Omega(f_b)$表示对第$b$棵树复杂度的惩罚项，定义为：
 \begin{equation*}
@@ -702,19 +653,19 @@ XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进�
 这里，$|T_b|$表示第$b$棵树的叶节点个数，$w_{jb}$表示第$b$棵树第$j$个叶节点的输出值，参数$\gamma$用于惩罚树结构过于复杂的情形，参数$\lambda$用于约束叶节点输出的大小，避免输出太激进。\par
 由于直接对$f_b$进行优化仍然较困难，XGBoost在$F_{b-1}(x_i)$附近对损失函数作二阶近似。令：
 \begin{equation*}
-	g_{ib}=\left.\frac{\partial \ell(y_i,F)}{\partial F}\right|_{F=F_{b-1}(x_i)},
+	g_{ib}=\left.\frac{\partial L(y_i,F)}{\partial F}\right|_{F=F_{b-1}(x_i)},
 	\quad
-	h_{ib}=\left.\frac{\partial^2 \ell(y_i,F)}{\partial F^2}\right|_{F=F_{b-1}(x_i)}
+	h_{ib}=\left.\frac{\partial^2 L(y_i,F)}{\partial F^2}\right|_{F=F_{b-1}(x_i)}
 \end{equation*}
 其中，$g_{ib}$和$h_{ib}$分别表示第$i$个样本在第$b$轮迭代时损失函数关于当前预测的一阶导数和二阶导数。于是由\cref{theo:TaylorTheorem}(1)有近似展开：
 \begin{equation*}
-	\ell[y_i,F_{b-1}(x_i)+f_b(x_i)]\approx\ell[y_i,F_{b-1}(x_i)]+g_{ib}f_b(x_i)+\frac{1}{2}h_{ib}f_b^2(x_i)
+	L[y_i,F_{b-1}(x_i)+f_b(x_i)]\approx L[y_i,F_{b-1}(x_i)]+g_{ib}f_b(x_i)+\frac{1}{2}h_{ib}f_b^2(x_i)
 \end{equation*}
 将其代入$L^{(b)}$，得到：
 \begin{equation*}
-	L^{(b)}\approx\sum_{i=1}^{n}\left\{\ell[y_i,F_{b-1}(x_i)]+g_{ib}f_b(x_i)+\frac{1}{2}h_{ib}f_b^2(x_i)\right\}+\Omega(f_b)
+	L^{(b)}\approx\sum_{i=1}^{n}\left\{L[y_i,F_{b-1}(x_i)]+g_{ib}f_b(x_i)+\frac{1}{2}h_{ib}f_b^2(x_i)\right\}+\Omega(f_b)
 \end{equation*}
-其中，$\sum\limits_{i=1}^{n}\ell[y_i,F_{b-1}(x_i)]$与当前轮新增树$f_b$无关，于是第$b$轮真正需要优化的目标可写为：
+其中，$\sum\limits_{i=1}^{n}L[y_i,F_{b-1}(x_i)]$与当前轮新增树$f_b$无关，于是第$b$轮真正需要优化的目标可写为：
 \begin{equation*}
 	\tilde{L}^{(b)}=\sum_{i=1}^{n}\left[g_{ib}f_b(x_i)+\frac{1}{2}h_{ib}f_b^2(x_i)\right]+\Omega(f_b)
 \end{equation*}
@@ -788,7 +739,7 @@ XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进�
 	\begin{algorithmic}[1]
 		\Require Training set $\mathcal{D}_{\mathrm{train}}=\{(x_i,y_i)\}_{i=1}^n$,
 		validation set $\mathcal{D}_{\mathrm{val}}=\{(x_i^{(v)},y_i^{(v)})\}_{i=1}^{n_v}$,
-		loss function $\ell(y,\hat y)$,
+		loss function $L(y,\hat y)$,
 		number of boosting iterations $B$,
 		learning rate $\eta$,
 		regularization parameters $\lambda,\gamma$,
@@ -806,7 +757,7 @@ XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进�
 		
 		\For{$b=1,2,\dots,B$}
 		\State Compute first- and second-order statistics for all training samples:
-		\State $g_{ib}\gets \dfrac{\partial\ell(y_i,F)}{\partial F}\big|_{F=F_{b-1}(x_i)},\;h_{ib}\gets \dfrac{\partial^2\ell(y_i,F)}{\partial F^2}\big|_{F=F_{b-1}(x_i)},\;i=1,2,\dots,n$
+		\State $g_{ib}\gets \dfrac{\partial L(y_i,F)}{\partial F}\big|_{F=F_{b-1}(x_i)},\;h_{ib}\gets \dfrac{\partial^2L(y_i,F)}{\partial F^2}\big|_{F=F_{b-1}(x_i)},\;i=1,2,\dots,n$
 		
 		\State Fit a regression tree structure $T_b\gets\Call{BuildTree}{\{(x_i,g_{ib},h_{ib})\}_{i=1}^n,\lambda,\gamma}$
 		
@@ -824,7 +775,7 @@ XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进�
 		
 		\State Define the $b$-th base learner $f_b(x)\gets\sum\limits_{j=1}^{J_b}w_{jb}I(x\in R_{jb})$ and update the additive model $F_b(x)\gets F_{b-1}(x)+\eta f_b(x)$
 		
-		\State Evaluate the validation loss $L_b\gets\frac{1}{n_v}\sum\limits_{i=1}^{n_v}\ell[y_i^{(v)},F_b(x_i^{(v)})]$
+		\State Evaluate the validation loss $L_b\gets\frac{1}{n_v}\sum\limits_{i=1}^{n_v}L[y_i^{(v)},F_b(x_i^{(v)})]$
 		
 		\If{$L_b<L_{\mathrm{best}}-\varepsilon$}
 		\State $L_{\mathrm{best}}\gets L_b$, $\hat b\gets b$, $c_{\mathrm{stop}}\gets 0$

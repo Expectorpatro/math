@@ -497,7 +497,7 @@
 \end{definition}
 
 \subsection{线搜索法}
-在迭代优化算法中，一次迭代通常包含两个基本问题：首先确定一个搜索方向，其次确定沿该方向移动的步长。如果步长过小，则每次迭代的推进幅度有限，算法收敛速度可能很慢；如果步长过大，则损失函数值不但不能下降，反而可能上升。因此，步长选择需要在“保证下降”和“保持足够推进”之间取得平衡。\par
+在迭代优化算法中，一次迭代通常包含两个基本步骤：首先确定一个能够使损失函数下降的搜索方向，其次确定沿该方向移动的步长。搜索方向决定参数更新的方向，而步长决定参数沿该方向移动的距离。若步长过小，则每次迭代的推进幅度有限，算法的收敛速度可能较慢；若步长过大，则可能越过适宜的更新区域，使损失函数值无法下降，甚至反而增大。因此，步长的选择需要在保证损失函数充分下降与维持足够迭代进展之间取得平衡。\par
 线搜索法正是为了解决这一问题而引入的。所谓线搜索法，是指在当前点$x_n$和搜索方向$d_n$确定之后，沿着射线$\{x_n+\alpha d_n:\alpha>0\}$寻找一个合适的步长$\alpha_n$，并用它更新迭代点。
 \begin{figure}[H]
 	\centering
@@ -678,6 +678,22 @@
 \end{proof}
 \begin{note}
 	上述定理中的条件是很直观的，如果$\theta_n$很接近$\dfrac{\pi}{2}$，就意味着梯度方向和下降方向垂直，根据\cref{theo:TaylorTheorem}(1)可知此此时损失函数值几乎不发生变化。
+\end{note}
+
+\subsection{梯度下降法}
+\begin{method}[Gradient Descent]\label{method:GradientDescent}
+	设$X$为实Hilbert空间，开集$E\subseteq X$，函数$f:E\to\mathbb{R}$在$E$上G\^ateaux可微，任取初始点$x_0\in E$。在第$n$次迭代中计算梯度$\nabla fx_n$；若$\nabla fx_n=\mathbf{0}$，则停止迭代，否则选择步长$\alpha_n>0$使得$x_n-\alpha_n\nabla fx_n\in E$，并令：
+	\begin{equation*}
+		x_{n+1}=x_n-\alpha_n\nabla fx_n
+	\end{equation*}
+	如此反复更新得到迭代点列$\{x_n\}$，这种方法称为\gls{GradientDescent}，步长$\alpha_n$被称为\gls{LR}。
+\end{method}
+\begin{note}
+	由\cref{prop:Gradient}可知，在所有单位方向中负梯度方向：
+	\begin{equation*}
+		-\frac{\nabla fx_n}{||\nabla fx_n||}
+	\end{equation*}
+	使$f$在$x_n$处的方向导数最小，由方向导数的定义可知它是当前点处使得函数值下降最快的单位方向。
 \end{note}
 
 \subsection{Newton法}
