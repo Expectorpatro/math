@@ -14,7 +14,7 @@
 \end{equation*}
 称$R(\theta)$为模型$f_\theta$的总体风险。总体风险越小，表示模型在未知样本上产生的平均预测损失越小。因此，从预测角度看，理想的参数应满足：
 \begin{equation*}
-	\theta^\ast\in\operatorname*{arg\,min}_{\theta\in\Theta}R(\theta)
+	\theta^\ast\in\underset{\theta\in\Theta}{\arg\min}R(\theta)
 \end{equation*}
 然而，分布$P$通常未知，因此总体风险$R(\theta)$无法直接计算。训练时只能利用观测数据，以样本平均损失近似总体风险。
 \begin{definition}
@@ -26,7 +26,7 @@
 \end{definition}
 以经验风险作为训练目标时，模型训练可以表示为
 \begin{equation*}
-	\hat{\theta}\in\operatorname*{arg\,min}_{\theta\in\Theta}\hat{R}(\theta)
+	\hat{\theta}\in\underset{\theta\in\Theta}{\arg\min}\hat{R}(\theta)
 \end{equation*}
 这种通过最小化经验风险选择模型参数的方法称为经验风险最小化。由于$\hat{R}(\theta)$依赖于随机抽取的观测数据，因此所得参数$\hat{\theta}$也是数据的函数。
 \subsubsection{例子}
@@ -52,7 +52,6 @@
 \begin{equation*}
 	\hat{R}(\theta)\coloneq\frac{1}{n}\sum_{i=1}^{n}L[y_i,q_\theta(x_i)]=-\frac{1}{n}\sum_{i=1}^{n}\ln q_{\theta y_i}(x_i)
 \end{equation*}
-最小化$\hat{R}(\theta)$与最大化$Q_{\mathcal{D}}(\theta)$等价。
 %\begin{definition}
 %	设 $(X,\mathscr{A},P)$ 为概率空间，$f$为$X$上取值于有限集合
 %	$\{x_1,\dots,x_n\}$ 的离散型随机变量，其真实分布为：
@@ -276,7 +275,7 @@
 	数据集划分后的模型训练与选择通常按下列顺序进行：
 	\begin{enumerate}
 		\item 在训练集$\mathcal{D}_{\mathrm{train}}$上估计模型的可学习参数$\theta$；
-		\item 在验证集$\mathcal{D}_{\mathrm{val}}$上比较模型结构与超参数，并据此选择模型；
+		\item 在验证集$\mathcal{D}_{\mathrm{val}}$上比较不同模型的性能，并据此选择模型；
 		\item 确定全部建模方案后，只在测试集$\mathcal{D}_{\mathrm{test}}$上进行一次最终评价，报告模型对未见数据的性能估计。
 	\end{enumerate}
 \end{method}
@@ -296,13 +295,13 @@
 	\end{equation*}
 	在$\mathcal{F}_c$中最小化经验风险：
 	\begin{equation*}
-		\hat{f}_c\in\mathop{\arg\min}_{f\in\mathcal{F}_c}\hat{R}_{\mathrm{train}}(f)
+		\hat{f}_c\in\underset{f\in\mathcal{F}_c}{\arg\min}\hat{R}_{\mathrm{train}}(f)
 	\end{equation*}
 	称为约束形式的\gls{Regularization}。其中，$c$称为复杂度上界。
 \end{definition}
 实际计算中更常使用正则化的惩罚形式：
 \begin{equation*}
-	\hat{f}_\lambda\in\mathop{\arg\min}_{f\in\mathcal{F}}\left\{\hat{R}_{\mathrm{train}}(f)+\lambda\Omega(f)\right\},\;\lambda\geqslant0
+	\hat{f}_\lambda\in\underset{f\in\mathcal{F}}{\arg\min}\left\{\hat{R}_{\mathrm{train}}(f)+\lambda\Omega(f)\right\},\;\lambda\geqslant0
 \end{equation*}
 其中，$\hat{R}_{\mathrm{train}}(f)+\lambda\Omega(f)$称为正则化目标函数，$\lambda$称为\gls{RegularizationStrength}。当$\lambda=0$时，该问题退化为原来的经验风险最小化；$\lambda$越大，模型复杂度在目标函数中付出的代价越大，训练过程便越倾向于选择简单模型。
 \begin{note}

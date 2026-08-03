@@ -18,6 +18,7 @@ def configure_matplotlib() -> None:
 
     rcParams.update(
         {
+            "axes.grid": False,
             "svg.fonttype": "path",
             "svg.hashsalt": "textbook",
         }

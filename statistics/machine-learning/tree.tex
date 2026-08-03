@@ -57,26 +57,26 @@
 \begin{definition}
 	设分类问题的类别空间为$Y=\{1,\dots,m\}$，$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$为观测样本集，其中$y_i\in Y$表示第$i$个样本的真实类别，记$p_i$为第$i$类样本在$\mathcal{D}$中所占比例。称：
 	\begin{equation*}
-		\operatorname{Gini}(\mathcal{D})=1-\sum_{i=1}^mp_i^2
+		\operatorname{Gini}(\mathcal{D})=1-\sum_{i=1}^Kp_i^2
 	\end{equation*}
 	为观测样本集$\mathcal{D}$的\gls{GiniIndex}。
 \end{definition}
 \begin{property}\label{prop:GiniIndex}
-	设分类问题的类别空间为$Y=\{1,\dots,m\}$，$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$为观测样本集，其中$y_i\in Y$表示第$i$个样本的真实类别，记$p_i$为第$i$类样本在$\mathcal{D}$中所占比例。Gini指数具有如下性质：
+	设分类问题的类别空间为$Y=\{1,2,\dots,K\}$，$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$为观测样本集，其中$y_i\in Y$表示第$i$个样本的真实类别，记$p_i$为第$i$类样本在$\mathcal{D}$中所占比例。Gini指数具有如下性质：
 	\begin{enumerate}
 		\item Gini指数是在样本集合中独立、有放回地抽取两个样本时，它们属于不同类别的概率；
-		\item $\operatorname{Gini}(\mathcal{D})\leqslant1-\dfrac{1}{m}$，上式取等当且仅当$p_1=\cdots=p_m=\dfrac{1}{m}$。
+		\item $\operatorname{Gini}(\mathcal{D})\leqslant1-\dfrac{1}{K}$，上式取等当且仅当$p_1=p_2=\cdots=p_K=\dfrac{1}{K}$。
 	\end{enumerate}
 \end{property}
 \begin{proof}
 	(1)显然。\par
 	(2)由\cref{ineq:CauchySchiwarz}可得：
 	\begin{equation*}
-			\left(\sum_{i=1}^{m}1^2\right)\left(\sum_{i=1}^{m}p_i^2\right)\geqslant\left(\sum_{i=1}^{m}p_i\right)^2=1
+			\left(\sum_{i=1}^{K}1^2\right)\left(\sum_{i=1}^{K}p_i^2\right)\geqslant\left(\sum_{i=1}^{K}p_i\right)^2=1
 	\end{equation*}
-	上式取等当且仅当$p_1=\cdots=p_m=\frac{1}{m}$，因此：
+	上式取等当且仅当$p_1=p_2=\cdots=p_K=\frac{1}{K}$，因此：
 	\begin{equation*}
-		\operatorname{Gini}(\mathcal{D})=1-\sum_{i=1}^{m}p_i^2\leqslant1-\frac{1}{m}\qedhere
+		\operatorname{Gini}(\mathcal{D})=1-\sum_{i=1}^{K}p_i^2\leqslant1-\frac{1}{K}\qedhere
 	\end{equation*}
 \end{proof}
 \begin{note}
@@ -178,7 +178,7 @@
 \begin{equation*}
 	x_j\leqslant\tau\;?
 \end{equation*}
-根据该问题的答案，当前节点中的数据集$\mathcal{D}_t$被划分为两个部分：
+根据该问题的答案，可以将当前节点中的数据集$\mathcal{D}_t$划分为两个部分：
 \begin{equation*}
 	\mathcal{D}_{tL}(j,\tau)=\{(x,y)\in\mathcal{D}_t:x_j\leqslant\tau\},\quad\mathcal{D}_{tR}(j,\tau)=\{(x,y)\in\mathcal{D}_t:x_j>\tau\}
 \end{equation*}
@@ -406,13 +406,13 @@
 		
 		\Function{CreateLeaf}{$\mathcal{D}$}
 		\If{criterion $\in\{\texttt{gini},\texttt{entropy},\texttt{cross entropy}\}$}
-		\State Let the class label set be $\{1,\dots,m\}$
+		\State Let the class label set be $\{1,2,\dots,K\}$
 		\State $n_i\gets|\{(x,y)\in\mathcal{D}:y=i\}|$,
-		$p_i\gets n_i/|\mathcal{D}|$, $i=1,\dots,m$
-		\State $\hat{y}\gets\operatorname*{\arg\max}\limits_{1\leqslant i\leqslant m}p_i$
+		$p_i\gets n_i/|\mathcal{D}|$, $i=1,2,\dots,K$
+		\State $\hat{y}\gets\underset{1\leqslant i\leqslant K}{\arg\max}\;p_i$
 		\State \Return
 		$\{\text{type: \texttt{leaf}},\text{ prediction: }\hat{y},
-		\text{ class probabilities: }(p_1,\dots,p_m)\}$
+		\text{ class probabilities: }(p_1,p_2,\dots,p_K)\}$
 		\ElsIf{criterion $=\texttt{squared error}$}
 		\State $\hat{y}\gets|\mathcal{D}|^{-1}
 		\sum\limits_{(x,y)\in\mathcal{D}}y$
@@ -489,90 +489,101 @@
 \begin{equation*}
 	\operatorname{FI}_j=\frac{\widetilde{\operatorname{FI}}_j}{\sum\limits_{k=1}^p\widetilde{\operatorname{FI}}_k}
 \end{equation*}
-这一指标通常称为基于不纯度下降的特征重要性。该得分越高，表明该特征在决策树模型中的作用越显著，对最终预测结果的影响也越大。在接下来的集成模型中，也可类似得到模型的特征重要性。
+这一指标通常称为基于不纯度下降的特征重要性。该得分越高，表明该特征在决策树模型中的作用越显著，对最终预测结果的影响也越大。
 
-\subsection{Bagging模型}
-\begin{definition}
-	设$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$为观测样本集，$\mathcal{D}^{(1)},\mathcal{D}^{(2)},\dots,\mathcal{D}^{(B)}$是从$\mathcal{D}$通过独立重复抽取的规模为$n$的训练子集，在每个子集$\mathcal{D}^{(b)}$上训练一个\gls{BaseLearner}$f^{(b)}$。\gls{BaggingEnsembleModel}定义为各基学习器输出的聚合函数。对于回归问题，集成预测函数定义为简单平均；对于分类问题，集成预测函数定义为多数投票。
-\end{definition}
-\begin{property}\label{prop:Bagging}
-	设在固定样本点$x$处，Bagging模型各个基学习器的预测为随机变量$\{f^{(b)}(x)\}_{b=1}^B$。Bagging模型具有如下性质：
+\subsection{随机森林}
+单棵决策树采用自上而下的贪心策略：在每个节点上，只根据当前到达该节点的样本选择局部最优的划分，而一旦划分确定，后续节点便只能在由该划分得到的子样本上继续生长。因此，靠近根节点的划分不仅决定样本最初被如何分组，还会改变之后各个节点所面对的数据，从而影响整棵子树的结构。\par
+当训练样本发生轻微变化时，原本表现接近的几个候选划分可能交换优劣次序，使算法选择不同的划分变量或划分点。若这种变化发生在靠近根节点的位置，大量样本会被重新分配到不同的分支，后续所有划分都可能随之改变，最终形成结构和预测结果差异显著的决策树。因此，单棵决策树对训练数据中的随机扰动较为敏感，通常具有较大的方差。\par
+为了减小这种不稳定性，可以利用不同的训练样本生成$B$棵决策树$T_1,T_2,\dots,T_B$，再将它们的预测结果聚合起来。对于回归任务，通常取各棵树预测的平均值：
+\begin{equation*}
+	f_{\mathrm{bag}}(x)=\frac{1}{B}\sum_{b=1}^{B}T_b(x)
+\end{equation*}
+对于类别集合$Y=\{1,2,\dots,K\}$上的分类任务，通常采用多数投票：
+\begin{equation*}
+	f_{\mathrm{bag}}(x)=\underset{1\leqslant k\leqslant K}{\arg\max}\;
+	\sum_{b=1}^{B}I[T_b(x)=k]
+\end{equation*}
+这种聚合之所以能够改善单棵树的预测，可以由下面的性质说明。
+\begin{property}\label{prop:TreeEnsemble}
+	在固定样本点$x$处，树的集成模型具有如下性质：
 	\begin{enumerate}
-		\item 若对任意$b$和$b'\ne b$有$\operatorname{Var}(f_b)=\sigma^2$且$\operatorname{Corr}(f_b,f_{b'})=\rho$，则Bagging模型预测的方差满足：
+		\item 若任意一棵树的预测均满足$\operatorname{Var}[T_b(x)]=\sigma^2$，且任意两棵不同的树均满足$\operatorname{Corr}[T_b(x),T_{b'}(x)]=\rho$，则平均预测的方差为：
 		\begin{equation*}
-			\operatorname{Var}[f_{\text{bag}}(x)]=\sigma^2\left(\rho+\frac{1-\rho}{B}\right)
+			\operatorname{Var}[f_{\mathrm{bag}}(x)]=\sigma^2\left(\rho+\frac{1-\rho}{B}\right)
 		\end{equation*}
-		\item 二分类多数投票情形下，若每个基分类器的错误率$p<\dfrac{1}{2}$，则在各分类器相互独立的假设下，Bagging 集成分类器的错误率随$B$指数下降；当基分类器之间存在正相关时，错误率下降速度受相关性限制，并趋于一个正值。
+		\item 对于二分类任务，设$B$为奇数，每棵树在$x$处出错的概率均为$p<1/2$。若各棵树的错误事件相互独立，则多数投票出错的概率满足：
+		\begin{equation*}
+			P[f_{\mathrm{bag}}(x)\ne y]\leqslant\exp\left[-2B\left(\frac{1}{2}-p\right)^2\right]
+		\end{equation*}
 	\end{enumerate}
 \end{property}
 \begin{proof}
 	(1)由\cref{prop:CovMat}(3)和\cref{prop:Variance}(3)可知：
 	\begin{align*}
-		\operatorname{Var}\left(f_{\text{bag}}(x)\right)
-		&=\operatorname{Var}\left(\frac{1}{B}\sum_{b=1}^Bf_b\right)=\frac{1}{B^2}\left[\sum_{b=1}^B\operatorname{Var}(f_b)+2\sum_{1\leqslant b<b'\leqslant B}\operatorname{Cov}(f_b,f_{b'})\right] \\
-		&=\frac{1}{B^2}\left[B\sigma^2+B(B-1)\rho\sigma^2\right]=\sigma^2\left(\frac{1}{B}+\frac{B-1}{B}\rho\right)
+		\operatorname{Var}[f_{\mathrm{bag}}(x)]
+		&=\frac{1}{B^2}\left\{\sum_{b=1}^{B}\operatorname{Var}[T_b(x)]+2\sum_{1\leqslant b<b'\leqslant B}\operatorname{Cov}[T_b(x),T_{b'}(x)]\right\} \\
+		&=\frac{B\sigma^2+B(B-1)\rho\sigma^2}{B^2}
 		=\sigma^2\left(\rho+\frac{1-\rho}{B}\right)
-	\end{align*}\par
-	(2)设二分类情形中类别为$\{-1,1\}$，样本$x$的真实类别为$y$，第$b$个基分类器的错误指示变量记为$I_b=I[f^{(b)}(x)\ne y]$。\par
-	若各分类器相互独立，则由条件和\cref{prop:Binom}(1)可知：
-	\begin{equation*}
-		P(I_b=1)=p<\dfrac{1}{2},\quad S_B=\sum_{b=1}^BI_b\sim\operatorname{Binomial}(B,p)
-	\end{equation*}
-	且多数投票出错当且仅当$S_B>B/2$。根据\cref{theo:HoeffdingBound}可知当$p<1/2$时，Bagging模型出错的概率为：
-	\begin{equation*}
-		P\left(S_B>\frac{B}{2}\right)=P\left(\frac{S_B}{B}-p\geqslant\frac{1}{2}-p\right)\leqslant\exp\left[-\frac{2B^2}{B}\left(\frac{1}{2}-p\right)^2\right]=\exp\left[-2B\left(\frac{1}{2}-p\right)^2\right]
-	\end{equation*}
-	即Bagging的错误率随基学习器个数$B$指数级下降。\par
-	若误差之间满足$\operatorname{Corr}(I_b,I_{b'})=\rho>0$，则由\cref{prop:Variance}(3)和\cref{prop:Binom}(2)可知：
-	\begin{align*}
-		\operatorname{Var}(S_B)		&=\operatorname{Var}\left(\sum_{b=1}^BI_b\right)=\sum_{b=1}^B\operatorname{Var}(I_b)+2\sum_{1\leqslant b<b'\leqslant B}\operatorname{Cov}(I_b,I_{b'}) \\
-		&=Bp(1-p)+B(B-1)\rho p(1-p)=Bp(1-p)[1+(B-1)\rho]
 	\end{align*}
-	根据\cref{prop:CovMat}(3)可得$\operatorname{E}(S_B)=Bp$。因为$\operatorname{Var}(S_B)\sim B^2\rho p(1-p)(B\to+\infty)$，于是由\info{CLT}可知：
+	(2)令$I_b=I[T_b(x)\ne y]$，则多数投票出错时有$B^{-1}\sum\limits_{b=1}^{B}I_b>1/2$。由\cref{theo:HoeffdingBound}可得：
 	\begin{equation*}
-		\frac{S_B-Bp}{\sqrt{B^2\rho p(1-p)}}\overset{d}{\longrightarrow}\operatorname{N}(0,1)
+		P[f_{\mathrm{bag}}(x)\ne y]
+		\leqslant P\left(\frac{1}{B}\sum_{b=1}^{B}I_b-p\geqslant\frac{1}{2}-p\right)
+		\leqslant\exp\left[-2B\left(\frac{1}{2}-p\right)^2\right]\qedhere
 	\end{equation*}
-	所以：
-	\begin{align*}
-		P\left(S_B>\frac{B}{2}\right)&=P\left(\frac{S_B-Bp}{\sqrt{B^2\rho p(1-p)}}>\frac{\frac{1}{2}-p}{\sqrt{\rho p(1-p)}}
-		\right)  \\
-		&\longrightarrow1-\Phi\left(\frac{\frac{1}{2}-p}{\sqrt{\rho p(1-p)}}\right)<1,\;(B\to+\infty)\qedhere
-	\end{align*}
 \end{proof}
+第一条性质表明，增加树的数量可以逐渐消除各棵树中互不相关的波动，但无法消除它们共同的波动：即使$B$不断增大，集成预测的方差仍受到$\rho\sigma^2$的限制。第二条性质则说明，当每棵树的判断优于随机猜测，并且各棵树的错误不易同时发生时，多数投票可以指数级降低分类错误率。因此，有效的树集成既要求单棵树具有一定的预测能力，也要求不同树之间存在足够的差异。\par
+\gls{RF}正是依据上述条件构造的。它仍以决策树作为基本模型，以保留决策树拟合复杂关系的能力；同时通过样本与特征两个层面的随机化，降低不同树之间的相关性。设训练数据集为$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^{n}$，其中$x_i$具有$p$个特征。训练第$b$棵树时，先从$\mathcal{D}$中有放回地抽取$n$个样本，得到样本集$\mathcal{D}^{(b)}$。不同的树使用不同的样本集，因而会受到不同样本扰动的影响。
 \begin{note}
-	根据\cref{prop:Bagging}(1)(2)，集成学习的有效性依赖于基学习器之间同时具备较高预测精度与足够的异质性（方差的第二项可由基学习器个数$B$来控制降低）。若所有基学习器高度相关，简单平均或投票并不能显著改善模型性能。\par
-	在 Bagging 框架中，异质性主要通过随机化机制引入：
-	\begin{enumerate}
-		\item \textbf{样本层面的异质性}：通过自助采样生成不同训练子集，使各基学习器在不同样本扰动下进行训练；
-		\item \textbf{特征层面的异质性}：对特征也进行自助采样，各基学习器仅在随机选取的特征子集上进行划分搜索。
-	\end{enumerate}
-	此外，自助采样还自然诱导出\gls{OOB}的概念。对于第$b$个基学习器，其训练集是从原始训练集自助采样得到的，因此总有一部分样本未被该次抽样选中，这部分样本称为该基学习器的袋外样本。由于这些样本未参与第$b$个基学习器的训练，故可用来对其进行近似的独立验证。进一步地，对每个训练样本，收集所有未使用该样本进行训练的基学习器所给出的预测，并进行平均或投票，即可得到该样本的OOB预测；将所有样本的OOB预测与真实响应比较，便可构造OOB误差估计。因而，OOB误差相当于Bagging方法内部自带的一种验证机制，可在不额外划分验证集的情况下评估模型的泛化性能。
+	重复采样还可以为模型提供内部验证。对于某棵树，没有被其样本集选中的训练样本称为该树的\gls{OOB}。对每个训练样本，只聚合所有未使用该样本进行训练的树所给出的预测，便可得到相应的OOB预测；将OOB预测与真实响应比较，可以在不另外划分验证集的情况下估计模型的真实误差。
+\end{note}
+仅通过对训练样本进行随机抽样，虽然可以使各棵决策树接触不同的数据，但未必能够充分降低树与树之间的相关性。特别是当少数特征具有显著较强的预测能力时，这些特征可能在不同的训练样本上仍然反复成为靠近根节点的最优划分特征，使不同树形成相似的结构。为进一步增加树之间的差异，随机森林在划分每个节点时，会从全部$p$个特征中随机抽取$q$个候选特征，并且只在这些特征上寻找当前节点的最优划分。候选特征集合在每个节点处重新独立抽取，因此，即使某个强特征在全部特征中通常能够产生最优划分，它也并非在每个节点都能参与竞争。这样可以促使不同的树使用不同的特征形成划分，从而降低树之间的相关性，并通过集成平均获得更显著的方差缩减或错误率下降。
+\begin{note}
+	随机森林使用决策树作为基本模型，但这种“分别训练多个模型，再对预测进行平均或投票”的思想并不局限于决策树。只要单个模型具有一定的预测能力，并且能够通过训练样本或模型结构的随机化产生足够不同的预测，就可以采用类似的集成方法。
 \end{note}
 
-\subsection{Boosting模型}
-\begin{definition}
-	设$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$为观测样本集，其中$x_i$为第$i$个样本的特征向量，$y_i$是第$i$个样本的标签或值。Boosting通过顺序生成基学习器$f^{(1)},f^{(2)},\dots,f^{(B)}$来构造集成模型，其中每一步训练都基于前一步的拟合结果，对先前被错误预测的样本赋予更高关注，或对当前残差进行进一步拟合。\gls{BoostingEnsembleModel}定义为各基学习器输出的加权聚合函数。对于回归问题，集成预测函数通常定义为加权求和；对于分类问题，集成预测函数通常定义为加权投票。
-\end{definition}
-\subsubsection{GBDT}
-GBDT将Boosting逐步修正预测的思想与梯度下降联系起来。它先以训练集上的最优常数预测$F_0(x)\equiv c_0$为起点，再逐轮叠加回归树以修正当前预测。设损失函数关于预测值可微，当前加法模型为$F_{b-1}$，其在训练集上的经验损失为：
+\subsection{GBDT}
+\subsubsection{逐步修正已有预测}
+\gls{GBDT}采用逐步构建加法模型的方式：先给出一个简单的初始预测，再依次加入若干棵回归树，使每棵新树针对当前模型预测不足的部分进行修正。因此，随着回归树逐棵加入，模型的预测结果也不断得到改进。\par
+在加入任何回归树之前，模型尚未利用样本特征，因而无法对不同样本作出区分。此时，最自然的做法是令所有样本共享同一个常数预测，并选择使训练集经验损失最小的常数作为模型的初始值：
 \begin{equation*}
-	\mathcal{L}(F_{b-1})=\sum_{i=1}^{n}L[y_i,F_{b-1}(x_i)]
-\end{equation*}
-若直接在所有可能的回归树中寻找使$\mathcal{L}(F_{b-1}+f)$最小的$f$，通常难以完成。GBDT转而考察损失函数关于当前预测值的局部变化，并将第$i$个样本在第$b$轮的\textbf{伪残差}定义为：
+	F_0(x)\equiv c_0,\quad c_0\in\underset{c\in\mathbb{R}}{\arg\min}\sum_{i=1}^{n}L(y_i,c)
+\end{equation*}\par
+设第$b$轮开始时已有模型为$F_{b-1}$，新树将特征空间划分为$J_b$个叶节点区域$\{R_{jb}\}_{j=1}^{J_b}$。若$x_i\in R_{jb}$，则新树为样本$x_i$提供同一个新增值$\gamma_{jb}$，使其预测由$F_{b-1}(x_i)$变为$F_{b-1}(x_i)+\gamma_{jb}$。由于该区域中的所有样本必须共享这个新增值，$\gamma_{jb}$应当使这些样本更新后的总损失最小，即：
 \begin{equation*}
-	r_{ib}=-\left.\frac{\partial L(y_i,z)}{\partial z}\right|_{z=F_{b-1}(x_i)}
+	\gamma_{jb}\in
+	\underset{\gamma\in\mathbb{R}^{}}{\arg\min}
+	\sum_{x_i\in R_{jb}}
+	L[y_i,F_{b-1}(x_i)+\gamma]
 \end{equation*}
-由一阶近似可知：
+因此，第$b$棵树可以写为：
 \begin{equation*}
-	\mathcal{L}(F_{b-1}+f)\approx\mathcal{L}(F_{b-1})-\sum_{i=1}^{n}r_{ib}f(x_i)
+	f_b(x)=\sum_{j=1}^{J_b}\gamma_{jb}I(x\in R_{jb})
 \end{equation*}
-因此，$r_{ib}$描述了为了使当前损失下降，第$i$个样本的预测值应当优先调整的方向。使用回归树拟合数据集$\{(x_i,r_{ib})\}_{i=1}^{n}$，就是用一棵分段常数的树逼近这一负梯度方向。
-\par
-伪残差推广了通常意义下的残差。例如，当$L(y,z)=\dfrac{1}{2}(y-z)^2$时有：
+\subsubsection{学习率}
+如果将$f_b$完整地加入当前模型，就相当于完全接受新树在本轮给出的修正。GBDT通常只加入其中的一部分，即采用更新
 \begin{equation*}
-	r_{ib}=y_i-F_{b-1}(x_i)
+	F_b(x)=F_{b-1}(x)+\eta f_b(x),\quad0<\eta\leqslant1
 \end{equation*}
-此时每棵新树拟合当前模型尚未解释的预测误差；对于其他可微损失，伪残差仍然给出相应损失下最直接的局部修正方向。完整的GBDT训练过程如下。
+其中$\eta$称为学习率。\par
+随着迭代不断进行，模型会逐步拟合当前尚未解释的部分。前期的待修正部分主要包含较为稳定的结构，而在模型已经拟合得较好之后，剩余部分中噪声所占的比例会逐渐增大。若每一轮都完整加入新树，模型便会较快地继续追随这些细微波动，最终趋向于对训练数据的近乎完美拟合，从而产生过拟合。较小的学习率限制了每轮修正的幅度，因此可以减缓模型拟合噪声的速度。\par
+此外，GBDT是一个前向构造的加法模型，已经加入的树不会在后续训练中重新调整。如果某一棵树给出了存在偏差的修正，较大的学习率会使这种偏差对整体模型产生较强影响；较小的学习率则可以限制单棵树造成的偏移，使模型的训练过程更加稳定，并有助于降低预测方差。\par
+需要注意的是减小$\eta$意味着每棵树只能完成较小幅度的修正，因此通常需要相应增加回归树的数量。学习率与树的数量共同决定模型的拟合速度和复杂程度，需要配合选择。
+\subsubsection{伪残差与树的生长}
+叶节点新增值的计算建立在树的划分结构已经确定的基础上。为了真正生成第$b$棵树，还需要确定哪些样本应当进入同一个叶节点。GBDT中的新树拟合的不是响应变量本身，而是当前模型需要作出的修正，因此，应当将所需修正方向和修正幅度相近的样本划分到同一叶节点，使它们能够共享一个叶节点新增值。\par
+设第$b-1$轮模型对样本$x_i$的预测为$F_{b-1}(x_i)$，若在此基础上增加一个较小的修正$\delta_i$，则由\cref{theo:TaylorTheorem}(1)可得：
+\begin{equation*}
+	L[y_i,F_{b-1}(x_i)+\delta_i]\approx L[y_i,F_{b-1}(x_i)]-r_{ib}\delta_i
+\end{equation*}
+其中：
+\begin{equation*}
+	r_{ib}=-\left.\frac{\partial L(y_i,F(x_i))}{\partial F(x_i)}\right|_{F=F_{b-1}}
+\end{equation*}
+称为第$i$个样本在第$b$轮的\textbf{伪残差}。\par
+伪残差刻画了当前预测应当修正的局部方向及相对强度。若$r_{ib}>0$，增大预测值可以使损失下降；若$r_{ib}<0$，则应减小预测值；而$|r_{ib}|$越大，说明当前损失对相应方向的修正越敏感。因此，两个样本的伪残差相近，意味着它们在当前模型下需要沿相同方向、以相近的相对强度进行修正。GBDT正是利用这种相似性来组织样本：在第$b$轮回归树的生长中，$\operatorname{BuildTree}(\mathcal{D},d)$接收的数据集为$\mathcal{D}=\{(x_i,r_{ib})\}_{i=1}^n$。对于每个候选划分，算法根据划分后各子节点内伪残差的离散程度评价其优劣，并选择能够使节点内伪残差更加集中的划分。这与普通决策树依据节点不纯度选择划分的思想相同。需要注意的是，伪残差在这里仅用于确定树的划分结构，即决定哪些样本进入同一个叶节点，并不等同于叶节点最终输出想要拟合的新增值。待树结构确定后，各叶节点的新增值还需要通过最小化原损失函数另行计算。\par
+对于分类任务，响应变量$y_i$虽然是离散类别，由损失函数导数得到的伪残差$r_{ib}$却是实数，因此每一轮拟合的基学习器仍然是回归树。此时GBDT实际上将分类训练转化成了回归问题：加法模型$F_b(x)$逐步学习连续的分类得分，再根据该得分与给定阈值确定类别。
+\subsubsection{完整算法}
+综上，GBDT的每一轮训练依次完成三件事：根据当前预测计算伪残差，使用伪残差拟合回归树的划分结构，再根据原损失函数计算各叶节点的最优新增值。最后将经过学习率收缩的新树加入当前模型。完整过程如下。
 \begin{algorithm}[H]
 	\caption{Gradient Boosting Decision Tree}
 	\begin{algorithmic}[1]
@@ -587,7 +598,7 @@ GBDT将Boosting逐步修正预测的思想与梯度下降联系起来。它先�
 		
 		\Ensure Additive model $F_{\hat{b}}(x)$
 		
-		\State Initialize the model prediction with an optimal constant $F_0(x)\equiv c_0$ for all samples, which means that $c_0\in\operatorname*{arg\,min}\limits_{c\in\mathbb{R}}\sum\limits_{i=1}^nL(y_i,c)$
+		\State Initialize the model prediction with an optimal constant $F_0(x)\equiv c_0$ for all samples, which means that $c_0\in\underset{c\in\mathbb{R}}{\arg\min}\sum\limits_{i=1}^nL(y_i,c)$
 		
 		\State $\hat{b}\gets 0$, $c_{\mathrm{stop}}\gets 0$, $L_{\mathrm{best}}\gets +\infty$
 		
@@ -631,17 +642,11 @@ GBDT将Boosting逐步修正预测的思想与梯度下降联系起来。它先�
 		\State \Return $F_{\hat{b}}(x)$
 	\end{algorithmic}
 \end{algorithm}
-每轮迭代包含两个相互配合的步骤。首先，回归树$T_b$根据伪残差决定划分区域$\{R_{jb}\}_{j=1}^{J_b}$，从而确定哪些样本共享同一种修正；随后，在每个叶节点中直接以原损失函数为准求解$\gamma_{jb}$，从而确定该区域应当修正多少。前者确定新树的结构，后者确定各叶节点的输出，二者共同得到基学习器$f_b$。
-\par
-学习率$\eta$对新树的修正幅度进行收缩。通常$0<\eta\leqslant1$；较小的$\eta$使模型更新更加保守，但往往需要更多轮迭代。经过$\hat{b}$轮后，最终模型可写为：
-\begin{equation*}
-	F_{\hat{b}}(x)=c_0+\eta\sum_{b=1}^{\hat{b}}f_b(x)
-\end{equation*}
-算法并不直接返回循环结束时的模型，而是返回按照容许精度$\varepsilon$记录的最佳验证模型$F_{\hat{b}}$。其中$\varepsilon$规定一次有效改进至少应达到的幅度，$P$规定最多允许连续多少轮没有有效改进；该早停机制与单棵树的深度、叶节点样本量等参数共同控制模型复杂度，避免不断增加新树而拟合训练数据中的随机波动。
-\par
-虽然每轮拟合的是回归树，GBDT仍然可以用于分类问题。此时模型并不直接聚合各棵树给出的类别标签，而是令$F_b(x)$表示实值分类得分，由所选择的可微分类损失决定伪残差，再依据该损失将得分转化为类别预测或类别概率。上述算法采用标量输出，直接适用于回归和二分类；多分类情形需要将$F_b(x)$扩展为各类别对应的得分向量，并在每轮为各类别拟合相应的回归树。
-\subsubsection{XGBoost}
+上述算法引入了\gls{EarlyStopping}机制。树的数量$B$通常无法预先确定，$B$过小时模型可能尚未充分拟合，$B$过大时后续树又会逐渐拟合训练数据中的噪声，导致过拟合。因此，算法将$B$仅作为最大迭代次数，并根据验证损失决定实际拟合的树数。
+
+\subsection{XGBoost}
 XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进一步对每一轮新增树的学习过程进行了更精细的刻画。\par
+\subsubsection{正则化}
 与传统GBDT主要关注经验损失的下降不同，XGBoost在目标函数中显式加入了对新增树复杂度的正则化惩罚，从而将第$b$轮的优化目标写为：
 \begin{equation*}
 	L^{(b)}=\sum_{i=1}^{n}L[y_i,F_{b-1}(x_i)+f_b(x_i)]+\Omega(f_b)
@@ -651,6 +656,7 @@ XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进�
 	\Omega(f_b)=\gamma|T_b|+\frac{1}{2}\lambda\sum_{j=1}^{J_b}w_{jb}^2
 \end{equation*}
 这里，$|T_b|$表示第$b$棵树的叶节点个数，$w_{jb}$表示第$b$棵树第$j$个叶节点的输出值，参数$\gamma$用于惩罚树结构过于复杂的情形，参数$\lambda$用于约束叶节点输出的大小，避免输出太激进。\par
+\subsubsection{叶节点输出}
 由于直接对$f_b$进行优化仍然较困难，XGBoost在$F_{b-1}(x_i)$附近对损失函数作二阶近似。令：
 \begin{equation*}
 	g_{ib}=\left.\frac{\partial L(y_i,F)}{\partial F}\right|_{F=F_{b-1}(x_i)},
@@ -685,6 +691,7 @@ XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进�
 	w_{jb}^{\star}=-\frac{G_{jb}}{H_{jb}+\lambda},\quad\tilde{L}^{(b)\star}=-\frac{1}{2}\sum_{j=1}^{J_b}\frac{G_{jb}^2}{H_{jb}+\lambda}+\gamma|T_b|
 \end{equation*}
 这个式子表明，一旦树的划分结构确定，叶节点权重可以显式求出，而且整棵树的优劣也可以直接由各叶节点上的$G_{jb}$与$H_{jb}$来衡量。进一步地，XGBoost在生成树时正是利用这一目标值来计算分裂增益，从而决定最优划分并判断一个结点是否值得继续分裂。\par
+\subsubsection{节点分裂}
 设在第$b$轮迭代中，当前有某个待分裂叶节点$R$，其对应的一阶与二阶统计量分别为：
 \begin{equation*}
 	G=\sum_{x_i\in R}g_{ib},
@@ -733,6 +740,7 @@ XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进�
 \end{align*}
 由于我们希望目标函数尽可能小，因此只有当$\Delta<0$时，分裂才会使目标函数下降，也才是有利的分裂。\par
 这就是XGBoost中用于评估一个候选分裂是否值得采用的分裂增益公式。XGBoost将树结构的生长过程直接纳入了统一的优化框架之中（GBDT是分开的），使得每一次分裂都具有明确的目标函数解释。
+\subsubsection{完整算法}
 \begin{algorithm}[H]
 	\caption{Extreme Gradient Boosting}
 	\label{alg:XGBoost}
@@ -791,15 +799,19 @@ XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进�
 		\State \Return $F_{\hat b}(x)$
 	\end{algorithmic}
 \end{algorithm}
-
-\subsection{工程优化}
-\subsubsection{Histogram}
-Histogram方法的基本思想是：先用分位点将连续特征离散化为有限个bin，再仅在bin边界上搜索候选切分点，这一方法又分为全局和局部两种。\par
-全局分位点是指，在训练开始前，基于整个训练集一次性计算每个特征的分位点，并固定分箱边界。此后所有样本都先被编码为bin编号，后续建树过程始终使用这套固定分箱。这样可以将原始连续特征的浮点存储转化为较小范围的整数存储，从而节省内存并提高切分搜索效率。\par
-局部分位点是指，在树生长过程中，每次结点分裂后，仅基于当前结点内样本重新计算分位点，并重新定义该结点的分箱映射。局部分位点能够更贴合当前结点的局部数据分布，但需要在每次分裂后重新计算分位点，计算代价更高。
-\subsubsection{Column Block}
-在树模型训练中，主要计算开销之一在于对特征取值进行排序，候选分点计算需要排序，计算统计量需要排序，划分样本也需要排序。为避免重复排序，XGBoost将输入数据预先组织每一列从小到大排序的形式，并为每个取值记录其对应的样本索引。这样一来，由于每一列已经按特征值排序，无论是枚举分点还是计算统计量都只需对该列做一次线性扫描。
-\subsubsection{稀疏感知与缺失值处理}
-在实际数据中，一部分特征位置可能缺失，另一部分则在稀疏存储下未被显式记录。前者对应缺失值，后者对应稀疏值。二者的共同点在于：它们都不能像普通观测值那样直接用于当前特征上的切分搜索。\par
-为此，XGBoost将稀疏值与缺失值统一处理。在评估某一特征的候选切分时，算法仅对取值已知的样本进行扫描，而将其余样本视为未观测部分，并分别比较其进入左子结点或右子结点时的目标函数增益，最终将增益更大的方向记为默认方向。因而，模型可以在训练过程中自适应地学习缺失值和稀疏值分配方式。\par
-在代码实现上，若数据整体具有较强稀疏性，可直接以稀疏矩阵形式传入模型；若仅部分变量存在稀疏或缺失现象，则更适合保留通常的表格表示，并将相应位置显式记为missing。
+\subsubsection{工程优化}
+在结点分裂过程中，XGBoost需要依次考察所有候选特征，并在每个特征上寻找使目标函数增益最大的切分点。对于连续特征，精确贪心算法需要先按照特征值对样本排序，再沿排序结果依次扫描所有相邻取值之间的候选切分点，并在扫描过程中累计左右子结点的一阶与二阶梯度统计量。因此，树构造的主要计算开销来自两个方面：一是特征值的排序与重复访问，二是大量候选切分点的枚举。XGBoost分别通过Column Block与基于Histogram的近似切分搜索缓解这两个问题。\par
+\paragraph{Column Block}
+精确切分搜索要求按照每个特征的取值顺序扫描样本。若在每个结点、每轮Boosting中都重新进行排序，计算代价将十分高昂。为避免重复排序，XGBoost在训练开始前将数据组织为按列存储的block，并使每一列按照对应特征值从小到大排列，同时记录每个特征值对应的样本索引。\par
+这一排序结果只需要计算一次，随后可以在不同结点和不同轮次中重复使用。对于某个特征，算法只需沿预先排序的特征列做线性扫描，便可以依次累计梯度统计量并枚举候选切分点。不同特征列之间的切分搜索还可以并行执行，从而进一步提高树构造效率。\par
+\paragraph{Histogram与近似切分搜索}
+Column Block避免了重复排序，但精确贪心算法仍需考察连续特征的所有可能切分位置。当特征包含大量不同取值时，候选切分点的数量可能接近样本数量。为减少候选点，XGBoost采用近似切分搜索：首先根据特征分布选取有限个候选边界，将连续特征划分为若干个bin；随后不再逐个扫描原始特征值，而是将落入同一bin的样本的一阶与二阶梯度统计量分别聚合，仅在相邻bin的边界处评估切分增益。因此，切分搜索的复杂度主要取决于bin的数量，而不再直接取决于特征不同取值的数量。\par
+\paragraph{全局候选点与局部候选点}
+根据候选切分点的生成时机，近似切分搜索可以分为全局方法和局部方法。\par
+全局方法在树开始构造时，基于根结点中的样本为每个特征生成一套候选切分点，并在该树的所有结点中重复使用相同的候选边界。由于候选点不需要随结点变化而重新计算，全局方法的计算开销较低，但为了在不同深度的结点中仍然保持足够的切分精度，通常需要设置较多的候选点。\par
+在采用固定全局分箱的Histogram实现中，分箱边界还可以在训练开始前统一确定。此后，每个连续特征值都可以预先转换为有限范围内的bin编号。因而，后续树构造过程可以直接存储和访问整数形式的bin编号，而不必反复读取原始浮点特征值。这不仅减少了内存占用，也改善了缓存命中率和Histogram统计量的计算效率。\par
+局部方法则在每个结点上，仅根据进入该结点的样本重新计算候选切分点。随着树不断生长，局部分位点可以逐渐适应不同结点内的局部特征分布，因此通常能够用较少的候选点获得较精细的切分；但每次结点分裂后都需要重新执行分位点近似，计算代价明显更高。\par
+\paragraph{稀疏感知与缺失值处理}
+无论采用精确切分还是Histogram近似切分，算法都需要沿当前特征扫描样本并累计梯度统计量。在实际数据中，一个特征可能仅在部分样本上具有显式记录：一部分位置是真实的缺失值，另一部分则可能由于稀疏存储而被省略，例如One-hot Encoding中大量取值为零的未激活位置。\par
+为此，XGBoost采用稀疏感知的切分搜索。对于每个特征，算法只扫描显式记录的非缺失取值，并据此完成排序、分箱以及梯度统计量的累计；未显式记录样本（包含缺失值与稀疏值）的统计量则可以由当前结点的总统计量减去显式观测部分的统计量得到，因而无须逐个访问这些样本。这样，切分搜索的计算量主要取决于非缺失元素的数量，而不是稠密矩阵的总元素数量。\par
+对于未显式记录的样本，算法无法直接根据特征值与切分点的大小关系确定其所属分支。因此，在评估每个候选切分时，XGBoost分别计算将这些样本全部分配至左子结点和全部分配至右子结点时的切分增益，并将增益较大的方向记录为该切分的默认方向。预测时，若样本在当前切分特征上的取值缺失或未显式记录，便沿所学习的默认方向继续向下传播。

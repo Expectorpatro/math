@@ -412,7 +412,7 @@ class BookTransformer(GlossaryAppenderMixin):
 
         caption = [
             span_inline(
-                [str_inline(f"算法 {number}")],
+                [str_inline(f"Algorithm {number}")],
                 classes=["algorithm-number"],
             )
         ]
