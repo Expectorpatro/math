@@ -593,8 +593,7 @@
 		number of boosting iterations $B$,
 		learning rate $\eta$,
 		early-stopping patience $P$,
-		tolerance $\varepsilon$,
-		tree-building parameters for \Call{BuildTree}{$\cdot$}
+		tolerance $\varepsilon$
 		
 		\Ensure Additive model $F_{\hat{b}}(x)$
 		
@@ -663,7 +662,7 @@ XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进�
 	\quad
 	h_{ib}=\left.\frac{\partial^2 L(y_i,F)}{\partial F^2}\right|_{F=F_{b-1}(x_i)}
 \end{equation*}
-其中，$g_{ib}$和$h_{ib}$分别表示第$i$个样本在第$b$轮迭代时损失函数关于当前预测的一阶导数和二阶导数。于是由\cref{theo:TaylorTheorem}(1)有近似展开：
+其中，$g_{ib}$和$h_{ib}$分别表示第$i$个样本在第$b$轮迭代时损失函数关于当前预测的一阶导数和二阶导数。于是由\cref{theo:TaylorTheorem}(1)有近似展开\footnote{从这里也可以看出约束叶节点输出值的一个原因：使得泰勒展开更加精确。}：
 \begin{equation*}
 	L[y_i,F_{b-1}(x_i)+f_b(x_i)]\approx L[y_i,F_{b-1}(x_i)]+g_{ib}f_b(x_i)+\frac{1}{2}h_{ib}f_b^2(x_i)
 \end{equation*}
@@ -752,14 +751,11 @@ XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进�
 		learning rate $\eta$,
 		regularization parameters $\lambda,\gamma$,
 		early-stopping patience $P$,
-		tolerance $\varepsilon$,
-		tree-building parameters for \Call{BuildTree}{$\cdot$}
+		tolerance $\varepsilon$
 		
 		\Ensure Additive model $\hat y_{\hat b}(x)$
 		
-		\State Initialize the model prediction with a common output $F_0(x)$ for all samples
-		\Statex \textit{For classification, this output is the empirical distribution of the training samples.}
-		\Statex \textit{for regression, it is the constant minimizing the empirical loss on the training set.}
+		\State Initialize the model prediction with an optimal constant $F_0(x)\equiv c_0$ for all samples, which means that $c_0\in\underset{c\in\mathbb{R}}{\arg\min}\sum\limits_{i=1}^nL(y_i,c)$
 		
 		\State $\hat b\gets 0$, $c_{\mathrm{stop}}\gets 0$, $L_{\mathrm{best}}\gets +\infty$
 		
@@ -767,7 +763,7 @@ XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进�
 		\State Compute first- and second-order statistics for all training samples:
 		\State $g_{ib}\gets \dfrac{\partial L(y_i,F)}{\partial F}\big|_{F=F_{b-1}(x_i)},\;h_{ib}\gets \dfrac{\partial^2L(y_i,F)}{\partial F^2}\big|_{F=F_{b-1}(x_i)},\;i=1,2,\dots,n$
 		
-		\State Fit a regression tree structure $T_b\gets\Call{BuildTree}{\{(x_i,g_{ib},h_{ib})\}_{i=1}^n,\lambda,\gamma}$
+		\State Fit a regression tree structure $T_b$
 		
 		\State Let the leaf regions of $T_b$ be $R_{1b},R_{2b},\dots,R_{J_b b}$
 		
@@ -783,7 +779,7 @@ XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进�
 		
 		\State Define the $b$-th base learner $f_b(x)\gets\sum\limits_{j=1}^{J_b}w_{jb}I(x\in R_{jb})$ and update the additive model $F_b(x)\gets F_{b-1}(x)+\eta f_b(x)$
 		
-		\State Evaluate the validation loss $L_b\gets\frac{1}{n_v}\sum\limits_{i=1}^{n_v}L[y_i^{(v)},F_b(x_i^{(v)})]$
+		\State Evaluate the validation loss $L_b\gets\dfrac{1}{n_v}\sum\limits_{i=1}^{n_v}L[y_i^{(v)},F_b(x_i^{(v)})]$
 		
 		\If{$L_b<L_{\mathrm{best}}-\varepsilon$}
 		\State $L_{\mathrm{best}}\gets L_b$, $\hat b\gets b$, $c_{\mathrm{stop}}\gets 0$

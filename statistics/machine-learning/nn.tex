@@ -69,7 +69,7 @@
 	\end{tikzpicture}
 \end{center}
 \begin{definition}
-	若映射$f_\theta:\mathbb{R}^m\rightarrow\mathbb{R}^n$可以表示为若干线性变换与逐元素非线性映射的复合：
+	若映射$f_\theta:\mathbb{R}^m\rightarrow\mathbb{R}^n$可以表示为若干线性映射与逐元素非线性映射的复合：
 	\begin{equation*}
 		f_\theta(x)=\phi^{(L)}\!\circ \phi^{(L-1)} \circ \cdots \circ \phi^{(1)}(x)
 	\end{equation*}
@@ -247,71 +247,156 @@
 \end{definition}
 
 \subsection{模型学习}
-神经网络通常以经验风险$\hat{R}(\theta)$为训练目标，并利用\cref{method:GradientDescent}反复更新参数。由于训练集往往包含大量样本，下面根据每次用于计算梯度的样本数量，介绍梯度下降在神经网络训练中的三种实现形式。以下用$\eta>0$表示学习率，用$g_t$表示第$t$次迭代中使用的梯度或梯度估计。
+神经网络通常以经验风险$\hat{R}(\theta)$为训练目标，并利用\cref{method:GradientDescent}反复更新参数。记第$i$个样本产生的损失为：
+\begin{equation*}
+	\ell_i(\theta)\coloneq L[y_i,f_\theta(x_i)]
+\end{equation*}
+则经验风险及其关于参数的梯度分别为：
+\begin{equation*}
+	\hat{R}(\theta)=\frac{1}{n}\sum_{i=1}^n\ell_i(\theta),\quad
+	\nabla\hat{R}(\theta)=\frac{1}{n}\sum_{i=1}^n\nabla\ell_i(\theta)
+\end{equation*}
+
+\subsubsection{批与轮}
 \begin{definition}
-	设训练集为$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$。称$\mathcal{B}\subseteq\mathcal{D}$为一个\gls{Batch}，$|\mathcal{B}|$被称作\gls{BatchSize}。
+	设训练集为$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$。在一次参数更新中用于计算梯度的样本集合$\mathcal{B}\subseteq\mathcal{D}$称为一个\gls{Batch}，其样本数量$|\mathcal{B}|$称为\gls{BatchSize}。一次参数更新称为一次迭代。
 \end{definition}
 \begin{definition}
-	称对整个训练集$\mathcal{D}$完整遍历一次的过程为一\gls{Epoch}。
+	将训练集排列（通常在每一轮开始时重新随机排列）并依次划分为不交的样本集：
+	\begin{equation*}
+		\mathcal{D}=\mathcal{B}_{e,1}\cup\mathcal{B}_{e,2}\cup\cdots\cup\mathcal{B}_{e,M},\quad M=\left\lceil\frac{n}{B}\right\rceil
+	\end{equation*}
+	其中除最后一批外均有$|\mathcal{B}_{e,r}|=B$。依次使用这些批完成参数更新，使每个训练样本恰好被使用一次的过程称为一个\gls{Epoch}，下标$e$表示轮数。
 \end{definition}
+因此，批大小$B$决定一次迭代使用多少样本，而轮数决定训练集被完整使用多少次。在相同轮数下，较小的批大小会产生更多次参数更新；在相同迭代次数下，不同批大小所使用的样本总量也不同。
+
+\subsubsection{批量梯度下降}
+若每次参数更新都使用整个训练集，则在第$e$轮计算的梯度为：
+\begin{equation*}
+	g_e=\nabla\hat{R}(\theta_e)
+	=\frac{1}{n}\sum_{i=1}^n\nabla\ell_i(\theta_e),
+\end{equation*}
+并按照：
+\begin{equation*}
+	\theta_{e+1}=\theta_e-\eta_e g_e
+\end{equation*}
+更新参数。这种方法称为\textbf{批量梯度下降}。在这种方法中，整个训练集$\mathcal{D}$本身构成一个批，因而批大小为$B=n$，每一轮只进行一次参数更新。\par
+批量梯度下降在给定参数处使用经验风险的准确梯度，目标函数的变化通常较为平稳。其缺点是必须完成全部$n$个样本的梯度计算后才能更新一次参数；当$n$很大时，单次更新的代价较高。由于更新方向中没有随机扰动，在非凸目标函数的平坦区域或鞍点附近也可能前进缓慢。
 \begin{algorithm}[H]
 	\caption{Batch Gradient Descent}
 	\label{alg:BatchGradientDescent}
 	\begin{algorithmic}[1]
-		\Require Initial parameter $\theta_0$, learning rate $\eta$, number of iterations $T$, training set $\mathcal{D}$
-		\Ensure Final parameter estimate $\theta_T$
-		\For{$t = 1,2,\dots,T$}
-			\State Compute the empirical risk $\hat{R}(\theta_t)$ on the whole dataset $\mathcal{D}$
-			\State Compute the full gradient $g_t=\nabla\hat{R}(\theta_t)$
-			\State Update the parameter:
-			\begin{equation*}
-				\theta_{t+1} \gets \theta_t - \eta\, g_t
-			\end{equation*}
+		\Require Training set $\mathcal{D}$, initial parameter $\theta_0$, number of epochs $E$, learning rates $\{\eta_e\}_{e=0}^{E-1}$
+		\Ensure Final parameter $\theta_E$
+		\For{$e=0,1,\dots,E-1$}
+			\State $g_e\gets\dfrac{1}{n}\displaystyle\sum_{i=1}^n\nabla\ell_i(\theta_e)$
+			\State $\theta_{e+1}\gets\theta_e-\eta_e g_e$
 		\EndFor
-		\State \Return $\theta_T$
+		\State \Return $\theta_E$
 	\end{algorithmic}
 \end{algorithm}
+\subsubsection{随机梯度下降}
+设第$e$轮开始时将训练样本随机排列为：
+\begin{equation*}
+	\pi_e(1),\pi_e(2),\dots,\pi_e(n)
+\end{equation*}
+其中$\pi_e$是$\{1,2,\dots,n\}$的一个随机排列。随后依次使用单个样本的梯度更新参数。这种方法称为\textbf{随机梯度下降}。此时每个批只包含一个样本，即$B=1$，所以每一轮产生$n$次参数更新。\par
+随机梯度下降不必等待全部样本的梯度计算完成便可以更新参数，并且梯度中由抽样带来的随机扰动可能帮助迭代点离开部分平坦区域。其缺点是单个样本对总体梯度的代表性较弱，梯度方差较大，目标函数值和参数序列容易发生明显波动。当学习率固定时，这种噪声通常不会随训练自动消失，迭代点可能长期在驻点附近波动。
 \begin{algorithm}[H]
-	\caption{Stochastic Gradient Descent (SGD)}
+	\caption{Stochastic Gradient Descent}
 	\label{alg:StochasticGradientDescent}
 	\begin{algorithmic}[1]
-		\Require Initial parameter $\theta_0$, learning rate $\eta$, number of iterations $T$, training set $\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$
-		\Ensure Final parameter estimate $\theta_T$
-		\For{$t = 1,2,\dots,T$}
-			\State Randomly sample one data point $(x_{i_t}, y_{i_t})$ from $\mathcal{D}$
-			\State Compute the stochastic gradient
-			\[
-				g_t = \left.\nabla_\theta L[y_{i_t},f_\theta(x_{i_t})]\right|_{\theta=\theta_t}
-			\]
-			\State Update the parameter:
-			\[
-				\theta_{t+1} \gets \theta_t - \eta\, g_t
-			\]
+		\Require Training set $\mathcal{D}$, initial parameter $\theta_0$, number of epochs $E$, learning rates $\{\eta_k\}$
+		\Ensure Final parameter $\theta_k$
+		\State $k\gets0$
+		\For{$e=1,2,\dots,E$}
+			\State Generate a random permutation $\pi_e$ of $\{1,2,\dots,n\}$
+			\For{$r=1,2,\dots,n$}
+				\State $i\gets\pi_e(r)$
+				\State $g_k\gets\nabla\ell_i(\theta_k)$
+				\State $\theta_{k+1}\gets\theta_k-\eta_k g_k$
+				\State $k\gets k+1$
+			\EndFor
 		\EndFor
-		\State \Return $\theta_T$
+		\State \Return $\theta_k$
 	\end{algorithmic}
 \end{algorithm}
+\subsubsection{小批量梯度下降}
+批量梯度下降的梯度准确但更新次数较少，随机梯度下降能够频繁更新参数、帮助脱离平坦区域但梯度方差较大。介于二者之间，可以在每次迭代中使用包含多个样本、但又不等于整个训练集的批$\mathcal{B}_{er}$。相应的批梯度为：
+\begin{equation*}
+	g_{er}(\theta)=\frac{1}{|\mathcal{B}_{er}|}
+	\sum_{(x_i,y_i)\in\mathcal{B}_{er}}\nabla\ell_i(\theta)
+\end{equation*}
+使用这一梯度估计更新参数的方法称为小批量梯度下降。此时$1<B<n$，每一轮产生$M=\lceil n/B\rceil$次参数更新。\par
+批大小能够直接控制梯度估计的随机性。批过小时参数波动较大，批过大时则逐渐失去频繁更新和随机扰动的作用。
 \begin{algorithm}[H]
 	\caption{Mini-batch Gradient Descent}
 	\label{alg:MiniBatchGradientDescent}
 	\begin{algorithmic}[1]
-		\Require Initial parameter $\theta_0$, learning rate $\eta$, number of iterations $T$, training set $\mathcal{D}$, batch size $B$
-		\Ensure Final parameter estimate $\theta_T$
-		\For{$t = 1,2,\dots,T$}
-			\State Randomly sample a mini-batch $\mathcal{B}_t \subseteq \mathcal{D}$ with $|\mathcal{B}_t| = B$
-			\State Compute the mini-batch gradient
-			\[
-				g_t = \frac{1}{B} \sum_{(x_i,y_i)\in \mathcal{B}_t}
-				\left.\nabla_\theta L[y_i,f_\theta(x_i)]\right|_{\theta=\theta_t}
-			\]
-			\State Update the parameter:
-			\[
-				\theta_{t+1} \gets \theta_t - \eta\, g_t
-			\]
+		\Require Training set $\mathcal{D}$, initial parameter $\theta_0$, batch size $B$, number of epochs $E$, learning rates $\{\eta_k\}$
+		\Ensure Final parameter $\theta_k$
+		\State $k\gets0$
+		\State $M\gets\left\lceil n/B\right\rceil$
+		\For{$e=1,2,\dots,E$}
+			\State Randomly partition $\mathcal{D}$ into $\mathcal{B}_{e,1},\dots,\mathcal{B}_{e,M}$
+			\For{$r=1,2,\dots,M$}
+				\State $g_k\gets\dfrac{1}{|\mathcal{B}_{er}|}
+				\displaystyle\sum_{(x_i,y_i)\in\mathcal{B}_{er}}\nabla\ell_i(\theta_k)$
+				\State $\theta_{k+1}\gets\theta_k-\eta_k g_k$
+				\State $k\gets k+1$
+			\EndFor
 		\EndFor
-		\State \Return $\theta_T$
+		\State \Return $\theta_k$
 	\end{algorithmic}
 \end{algorithm}
+\subsubsection{梯度消失与梯度爆炸}
+神经网络参数的梯度需要由链式法则逐层传递。为便于说明，暂设各层激活函数均逐元素作用。令$a^{(0)}=x$，并将第$l$层写为：
+\begin{equation*}
+	z^{(l)}=W^{(l)}a^{(l-1)}+b^{(l)},\qquad
+	a^{(l)}=\sigma^{(l)}(z^{(l)}).
+\end{equation*}
+记：
+\begin{equation*}
+	D^{(l)}\coloneq\operatorname{diag}\!\left(
+	\sigma^{(l)\prime}(z^{(l)})
+	\right),\qquad
+	J^{(l)}\coloneq D^{(l)}W^{(l)},
+\end{equation*}
+其中$J^{(l)}$是$a^{(l)}$关于$a^{(l-1)}$的Jacobi矩阵。若某层使用Softmax等非逐元素映射，只需将$D^{(l)}$替换为该映射的完整Jacobi矩阵。对单个样本损失$\ell$，链式法则给出：
+\begin{equation*}
+	\nabla_{a^{(l)}}\ell
+	=\left(J^{(l+1)}\right)^\top
+	\left(J^{(l+2)}\right)^\top\cdots
+	\left(J^{(L)}\right)^\top
+	\nabla_{a^{(L)}}\ell.
+\end{equation*}
+从而：
+\begin{equation*}
+	\left\|\nabla_{a^{(l)}}\ell\right\|
+	\leqslant
+	\left\|\nabla_{a^{(L)}}\ell\right\|
+	\prod_{r=l+1}^{L}\left\|J^{(r)}\right\|.
+\end{equation*}
+若这些Jacobi矩阵在梯度传播的方向上连续产生压缩，则乘积会随网络深度迅速趋近于$0$，使靠近输入端的层几乎得不到有效梯度，这种现象称为\gls{VanishingGradient}。若这些矩阵连续产生放大，则梯度范数可能随深度迅速增大，这种现象称为\gls{ExplodingGradient}。
+
+Sigmoid函数满足$0<\sigma'(x)\leqslant1/4$，并且当$|x|$较大时导数接近$0$；双曲正切函数在饱和区域的导数也接近$0$，因此深层网络反复使用这些激活函数时容易产生梯度消失。梯度消失会使浅层参数更新缓慢，梯度爆炸则会使一次参数更新幅度过大，导致损失和参数序列剧烈波动。对循环神经网络而言，梯度还需要沿时间方向反复乘以与隐藏状态转移有关的Jacobi矩阵，所以当序列较长时，这两种现象尤为明显。
+
+缓解梯度消失或梯度爆炸的常见思路包括合理控制初始权重的尺度、选用不易饱和的激活函数、缩短梯度必须连续传播的路径，以及在序列模型中使用LSTM或GRU等门控结构。梯度裁剪则是专门限制过大梯度的一种方法。
+\begin{definition}
+	将关于全部参数的梯度依次排列为向量$g$。给定阈值$c>0$，定义按整体范数进行的\gls{GradientClipping}为：
+	\begin{equation*}
+		\operatorname{clip}_c(g)=
+		\begin{cases}
+			g,&\|g\|\leqslant c,\\[2mm]
+			\dfrac{c}{\|g\|}g,&\|g\|>c.
+		\end{cases}
+	\end{equation*}
+\end{definition}
+经过裁剪后总有$\|\operatorname{clip}_c(g)\|\leqslant c$，并且当$\|g\|>c$时只缩小梯度长度而不改变其方向。相应的参数更新变为：
+\begin{equation*}
+	\theta_{k+1}=\theta_k-\eta_k\operatorname{clip}_c(g_k).
+\end{equation*}
+梯度裁剪可以防止个别迭代产生过大的参数变化，但它不能恢复已经消失的梯度，也不能替代对网络结构、激活函数、初始参数和学习率的合理选择。
 
 \subsection{序列网络}
 \subsubsection{循环神经网络（Recurrent Neural Network, RNN）}
