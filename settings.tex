@@ -102,38 +102,83 @@
 \crefname{figure}{图}{图}
 \newcommand{\seq}[2]{#1_1, #1_2, \dots, #1_{#2}}
 
-% 设置英文和中文字体
-\setmainfont{Times New Roman}
-\setCJKmainfont{Songti SC}[BoldFont=Songti SC Bold, ItalicFont=Songti SC Light]
+% 设置英文和中文字体。
+% ctexbook 使用 fontset=none，避免其 macOS 预设的 STHeiti/STKaiti 字形映射
+% 与下方设置重复；本机字体缺失时退回 TeX Live 自带的 Fandol 字体。
+\IfFontExistsTF{Times New Roman}
+	{\setmainfont{Times New Roman}[
+		SmallCapsFont = texgyretermes-regular.otf,
+		SmallCapsFeatures = {Letters=SmallCaps}
+	]}
+	{\setmainfont{texgyretermes-regular.otf}[
+		BoldFont = texgyretermes-bold.otf,
+		ItalicFont = texgyretermes-italic.otf,
+		BoldItalicFont = texgyretermes-bolditalic.otf
+	]}
+\IfFontExistsTF{Songti SC}{
+	\setCJKmainfont{Songti SC}[
+		UprightFont = * Regular,
+		BoldFont = * Bold,
+		ItalicFont = * Light,
+		BoldItalicFont = * Bold
+	]
+}{
+	\setCJKmainfont{FandolSong-Regular.otf}[
+		BoldFont = FandolSong-Bold.otf,
+		ItalicFont = FandolKai-Regular.otf,
+		BoldItalicFont = FandolSong-Bold.otf
+	]
+}
+% 当前系统列出的 PingFang SC 来自受保留的界面字体集合，XeLaTeX 不能稳定发现；
+% 标题改用可直接嵌入 PDF 的 Hiragino Sans GB。
+\IfFontExistsTF{Hiragino Sans GB}{
+	\setCJKsansfont{Hiragino Sans GB}[
+		UprightFont = * W3,
+		BoldFont = * W6,
+		ItalicFont = * W3,
+		BoldItalicFont = * W6
+	]
+	\setCJKmonofont{Hiragino Sans GB}[
+		UprightFont = * W3,
+		BoldFont = * W6,
+		ItalicFont = * W3,
+		BoldItalicFont = * W6
+	]
+}{
+	\setCJKsansfont{FandolHei-Regular.otf}[
+		BoldFont = FandolHei-Bold.otf
+	]
+	\setCJKmonofont{FandolFang-Regular.otf}
+}
 % 设置标题字体
 \titleformat{\chapter}[display]
-{\normalfont\huge\bfseries\heiti}
+{\normalfont\huge\bfseries\sffamily}
 {\chaptername\ \thechapter}
 {20pt}{\huge}
 [\vspace{10pt}\titlerule] % 添加标题下划线
 \titleformat{\section}
-{\normalfont\Large\bfseries\heiti}
+{\normalfont\Large\bfseries\sffamily}
 {\thesection}
 {1em}
 {}
 \titleformat{\subsection}
-{\normalfont\large\bfseries\heiti}
+{\normalfont\large\bfseries\sffamily}
 {\thesubsection}
 {1em}
 {}
 \titleformat{\subsubsection}
-{\normalfont\normalsize\bfseries\heiti\color{teal}}
+{\normalfont\normalsize\bfseries\sffamily\color{teal}}
 {\thesubsubsection}
 {1em}
 {}
 \titleformat{\paragraph}[runin]
-{\normalfont\normalsize\bfseries\heiti}
+{\normalfont\normalsize\bfseries\sffamily}
 {}
 {0em}
 {}
 [:]
 \titleformat{\subparagraph}[runin]
-{\normalfont\normalsize\bfseries\heiti}
+{\normalfont\normalsize\bfseries\sffamily}
 {}
 {0em}
 {}

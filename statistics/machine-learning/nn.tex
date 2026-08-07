@@ -69,7 +69,7 @@
 	\end{tikzpicture}
 \end{center}
 \begin{definition}
-	若映射$f_\theta:\mathbb{R}^m\rightarrow\mathbb{R}^n$可以表示为若干线性映射与逐元素非线性映射的复合：
+	若映射$f_\theta:\mathbb{R}^m\rightarrow\mathbb{R}^n$可以表示为若干仿射映射与逐元素非线性映射的复合：
 	\begin{equation*}
 		f_\theta(x)=\phi^{(L)}\!\circ \phi^{(L-1)} \circ \cdots \circ \phi^{(1)}(x)
 	\end{equation*}
@@ -121,6 +121,9 @@
 	\end{tikzpicture}
 	\caption{Sigmoid 激活函数$\sigma(x)=\dfrac{1}{1+e^{-x}}$}
 \end{figure}
+\begin{note}
+	Sigmoid函数可以将神经网络最终输出的实数值转换到区间$(0,1)$内，因此可以将$\sigma(x)$解释为样本属于正类的预测概率，而$1-\sigma(x)$则表示样本属于负类的预测概率，从而可用于二分类任务。
+\end{note}
 \begin{definition}
 	称函数：
 	\begin{equation*}
@@ -245,197 +248,96 @@
 	\end{equation*}
 	为\gls{SoftmaxFunction}。
 \end{definition}
+\begin{note}
+	Softmax函数可以将神经网络最终输出的实数向量转换为概率向量$\sigma(x)$，其中每个分量均非负且满足：
+	\begin{equation*}
+		\sum_{i=1}^n\sigma(x)_i=1
+	\end{equation*}
+	因此，$\sigma(x)_i$可以解释为样本属于第$i$个类别的预测概率，从而可用于多分类任务。
+\end{note}
 
 \subsection{模型学习}
-神经网络通常以经验风险$\hat{R}(\theta)$为训练目标，并利用\cref{method:GradientDescent}反复更新参数。记第$i$个样本产生的损失为：
-\begin{equation*}
-	\ell_i(\theta)\coloneq L[y_i,f_\theta(x_i)]
-\end{equation*}
-则经验风险及其关于参数的梯度分别为：
-\begin{equation*}
-	\hat{R}(\theta)=\frac{1}{n}\sum_{i=1}^n\ell_i(\theta),\quad
-	\nabla\hat{R}(\theta)=\frac{1}{n}\sum_{i=1}^n\nabla\ell_i(\theta)
-\end{equation*}
-
+神经网络通常以经验风险$\hat{R}(\theta)$为训练目标，并利用\cref{method:GradientDescent}反复更新参数。
 \subsubsection{批与轮}
 \begin{definition}
-	设训练集为$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$。在一次参数更新中用于计算梯度的样本集合$\mathcal{B}\subseteq\mathcal{D}$称为一个\gls{Batch}，其样本数量$|\mathcal{B}|$称为\gls{BatchSize}。一次参数更新称为一次迭代。
+	设训练集为$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^n$。在一次参数更新中用于计算梯度\footnote{这里计算梯度指的是：分别计算本次参数更新所使用的各个样本的损失函数关于参数的梯度，并取这些梯度的算术平均。}的样本集合$\mathcal{B}\subseteq\mathcal{D}$称为一个\gls{Batch}，其样本数量$|\mathcal{B}|$称为\gls{BatchSize}。
 \end{definition}
 \begin{definition}
-	将训练集排列（通常在每一轮开始时重新随机排列）并依次划分为不交的样本集：
+	将训练集排列并依次划分为不交的样本集：
 	\begin{equation*}
-		\mathcal{D}=\mathcal{B}_{e,1}\cup\mathcal{B}_{e,2}\cup\cdots\cup\mathcal{B}_{e,M},\quad M=\left\lceil\frac{n}{B}\right\rceil
+		\mathcal{D}=\mathcal{B}_{e1}\cup\mathcal{B}_{e2}\cup\cdots\cup\mathcal{B}_{eM},\quad M=\left\lceil\frac{n}{B}\right\rceil
 	\end{equation*}
-	其中除最后一批外均有$|\mathcal{B}_{e,r}|=B$。依次使用这些批完成参数更新，使每个训练样本恰好被使用一次的过程称为一个\gls{Epoch}，下标$e$表示轮数。
+	其中$|\mathcal{B}_{er}|=B,\;i=1,2,\dots,M-1$。依次使用这些批完成参数更新，使每个训练样本恰好被使用一次的过程称为一个\gls{Epoch}，下标$e$表示轮数。
 \end{definition}
-因此，批大小$B$决定一次迭代使用多少样本，而轮数决定训练集被完整使用多少次。在相同轮数下，较小的批大小会产生更多次参数更新；在相同迭代次数下，不同批大小所使用的样本总量也不同。
-
+因此，批大小$B$决定一次迭代使用多少样本，而轮数决定训练集被完整使用多少次。
 \subsubsection{批量梯度下降}
-若每次参数更新都使用整个训练集，则在第$e$轮计算的梯度为：
-\begin{equation*}
-	g_e=\nabla\hat{R}(\theta_e)
-	=\frac{1}{n}\sum_{i=1}^n\nabla\ell_i(\theta_e),
-\end{equation*}
-并按照：
-\begin{equation*}
-	\theta_{e+1}=\theta_e-\eta_e g_e
-\end{equation*}
-更新参数。这种方法称为\textbf{批量梯度下降}。在这种方法中，整个训练集$\mathcal{D}$本身构成一个批，因而批大小为$B=n$，每一轮只进行一次参数更新。\par
+若每次参数更新都使用整个训练集去计算梯度，这种方法称为\textbf{批量梯度下降}。在这种方法中，整个训练集$\mathcal{D}$本身构成一个批，因而批大小为$B=n$，每一轮只进行一次参数更新。\par
 批量梯度下降在给定参数处使用经验风险的准确梯度，目标函数的变化通常较为平稳。其缺点是必须完成全部$n$个样本的梯度计算后才能更新一次参数；当$n$很大时，单次更新的代价较高。由于更新方向中没有随机扰动，在非凸目标函数的平坦区域或鞍点附近也可能前进缓慢。
-\begin{algorithm}[H]
-	\caption{Batch Gradient Descent}
-	\label{alg:BatchGradientDescent}
-	\begin{algorithmic}[1]
-		\Require Training set $\mathcal{D}$, initial parameter $\theta_0$, number of epochs $E$, learning rates $\{\eta_e\}_{e=0}^{E-1}$
-		\Ensure Final parameter $\theta_E$
-		\For{$e=0,1,\dots,E-1$}
-			\State $g_e\gets\dfrac{1}{n}\displaystyle\sum_{i=1}^n\nabla\ell_i(\theta_e)$
-			\State $\theta_{e+1}\gets\theta_e-\eta_e g_e$
-		\EndFor
-		\State \Return $\theta_E$
-	\end{algorithmic}
-\end{algorithm}
 \subsubsection{随机梯度下降}
 设第$e$轮开始时将训练样本随机排列为：
 \begin{equation*}
 	\pi_e(1),\pi_e(2),\dots,\pi_e(n)
 \end{equation*}
 其中$\pi_e$是$\{1,2,\dots,n\}$的一个随机排列。随后依次使用单个样本的梯度更新参数。这种方法称为\textbf{随机梯度下降}。此时每个批只包含一个样本，即$B=1$，所以每一轮产生$n$次参数更新。\par
-随机梯度下降不必等待全部样本的梯度计算完成便可以更新参数，并且梯度中由抽样带来的随机扰动可能帮助迭代点离开部分平坦区域。其缺点是单个样本对总体梯度的代表性较弱，梯度方差较大，目标函数值和参数序列容易发生明显波动。当学习率固定时，这种噪声通常不会随训练自动消失，迭代点可能长期在驻点附近波动。
-\begin{algorithm}[H]
-	\caption{Stochastic Gradient Descent}
-	\label{alg:StochasticGradientDescent}
-	\begin{algorithmic}[1]
-		\Require Training set $\mathcal{D}$, initial parameter $\theta_0$, number of epochs $E$, learning rates $\{\eta_k\}$
-		\Ensure Final parameter $\theta_k$
-		\State $k\gets0$
-		\For{$e=1,2,\dots,E$}
-			\State Generate a random permutation $\pi_e$ of $\{1,2,\dots,n\}$
-			\For{$r=1,2,\dots,n$}
-				\State $i\gets\pi_e(r)$
-				\State $g_k\gets\nabla\ell_i(\theta_k)$
-				\State $\theta_{k+1}\gets\theta_k-\eta_k g_k$
-				\State $k\gets k+1$
-			\EndFor
-		\EndFor
-		\State \Return $\theta_k$
-	\end{algorithmic}
-\end{algorithm}
+随机梯度下降不必等待全部样本的梯度计算完成便可以更新参数，并且梯度中由抽样带来的随机扰动可能帮助迭代点离开部分平坦区域。其缺点是单个样本对总体梯度的代表性较弱，梯度方差较大，目标函数值和参数序列容易发生明显波动。
 \subsubsection{小批量梯度下降}
-批量梯度下降的梯度准确但更新次数较少，随机梯度下降能够频繁更新参数、帮助脱离平坦区域但梯度方差较大。介于二者之间，可以在每次迭代中使用包含多个样本、但又不等于整个训练集的批$\mathcal{B}_{er}$。相应的批梯度为：
-\begin{equation*}
-	g_{er}(\theta)=\frac{1}{|\mathcal{B}_{er}|}
-	\sum_{(x_i,y_i)\in\mathcal{B}_{er}}\nabla\ell_i(\theta)
-\end{equation*}
-使用这一梯度估计更新参数的方法称为小批量梯度下降。此时$1<B<n$，每一轮产生$M=\lceil n/B\rceil$次参数更新。\par
+批量梯度下降的梯度准确但更新次数较少，随机梯度下降能够频繁更新参数、帮助脱离平坦区域但梯度方差较大。介于二者之间，可以在每次迭代中使用包含多个样本、但又不等于整个训练集的批$\mathcal{B}_{er}$。使用这一种梯度估计更新参数的方法称为小批量梯度下降。此时$1<B<n$，每一轮产生$M=\lceil n/B\rceil$次参数更新。\par
 批大小能够直接控制梯度估计的随机性。批过小时参数波动较大，批过大时则逐渐失去频繁更新和随机扰动的作用。
-\begin{algorithm}[H]
-	\caption{Mini-batch Gradient Descent}
-	\label{alg:MiniBatchGradientDescent}
-	\begin{algorithmic}[1]
-		\Require Training set $\mathcal{D}$, initial parameter $\theta_0$, batch size $B$, number of epochs $E$, learning rates $\{\eta_k\}$
-		\Ensure Final parameter $\theta_k$
-		\State $k\gets0$
-		\State $M\gets\left\lceil n/B\right\rceil$
-		\For{$e=1,2,\dots,E$}
-			\State Randomly partition $\mathcal{D}$ into $\mathcal{B}_{e,1},\dots,\mathcal{B}_{e,M}$
-			\For{$r=1,2,\dots,M$}
-				\State $g_k\gets\dfrac{1}{|\mathcal{B}_{er}|}
-				\displaystyle\sum_{(x_i,y_i)\in\mathcal{B}_{er}}\nabla\ell_i(\theta_k)$
-				\State $\theta_{k+1}\gets\theta_k-\eta_k g_k$
-				\State $k\gets k+1$
-			\EndFor
-		\EndFor
-		\State \Return $\theta_k$
-	\end{algorithmic}
-\end{algorithm}
 \subsubsection{梯度消失与梯度爆炸}
-神经网络参数的梯度需要由链式法则逐层传递。为便于说明，暂设各层激活函数均逐元素作用。令$a^{(0)}=x$，并将第$l$层写为：
-\begin{equation*}
-	z^{(l)}=W^{(l)}a^{(l-1)}+b^{(l)},\qquad
-	a^{(l)}=\sigma^{(l)}(z^{(l)}).
-\end{equation*}
-记：
-\begin{equation*}
-	D^{(l)}\coloneq\operatorname{diag}\!\left(
-	\sigma^{(l)\prime}(z^{(l)})
-	\right),\qquad
-	J^{(l)}\coloneq D^{(l)}W^{(l)},
-\end{equation*}
-其中$J^{(l)}$是$a^{(l)}$关于$a^{(l-1)}$的Jacobi矩阵。若某层使用Softmax等非逐元素映射，只需将$D^{(l)}$替换为该映射的完整Jacobi矩阵。对单个样本损失$\ell$，链式法则给出：
-\begin{equation*}
-	\nabla_{a^{(l)}}\ell
-	=\left(J^{(l+1)}\right)^\top
-	\left(J^{(l+2)}\right)^\top\cdots
-	\left(J^{(L)}\right)^\top
-	\nabla_{a^{(L)}}\ell.
-\end{equation*}
-从而：
-\begin{equation*}
-	\left\|\nabla_{a^{(l)}}\ell\right\|
-	\leqslant
-	\left\|\nabla_{a^{(L)}}\ell\right\|
-	\prod_{r=l+1}^{L}\left\|J^{(r)}\right\|.
-\end{equation*}
-若这些Jacobi矩阵在梯度传播的方向上连续产生压缩，则乘积会随网络深度迅速趋近于$0$，使靠近输入端的层几乎得不到有效梯度，这种现象称为\gls{VanishingGradient}。若这些矩阵连续产生放大，则梯度范数可能随深度迅速增大，这种现象称为\gls{ExplodingGradient}。
-
-Sigmoid函数满足$0<\sigma'(x)\leqslant1/4$，并且当$|x|$较大时导数接近$0$；双曲正切函数在饱和区域的导数也接近$0$，因此深层网络反复使用这些激活函数时容易产生梯度消失。梯度消失会使浅层参数更新缓慢，梯度爆炸则会使一次参数更新幅度过大，导致损失和参数序列剧烈波动。对循环神经网络而言，梯度还需要沿时间方向反复乘以与隐藏状态转移有关的Jacobi矩阵，所以当序列较长时，这两种现象尤为明显。
-
-缓解梯度消失或梯度爆炸的常见思路包括合理控制初始权重的尺度、选用不易饱和的激活函数、缩短梯度必须连续传播的路径，以及在序列模型中使用LSTM或GRU等门控结构。梯度裁剪则是专门限制过大梯度的一种方法。
+神经网络参数的梯度需要根据链式法则由输出层向输入层逐层传递。由于这一过程包含许多导数的连续相乘，当其中大多数因子的绝对值小于$1$时，连乘结果会随着网络深度迅速缩小；当其中许多因子的绝对值大于$1$时，连乘结果则可能迅速增大。前一种现象称为\gls{VanishingGradient}，后一种现象称为\gls{ExplodingGradient}。\par
+发生梯度消失时，靠近输入端的网络层得到的梯度接近$0$，相应参数在每次迭代中几乎不发生变化。于是这些层的学习速度远慢于靠近输出端的网络层，严重时即使继续增加训练轮数也难以得到有效更新。随着网络深度增加，更多网络层可能处于这种近似停止学习的状态，使增加深度无法带来预期的表达能力。\par
+发生梯度爆炸时，部分参数的梯度范数会变得很大，使一次迭代产生过大的参数变化。此时经验风险可能在迭代过程中剧烈波动，参数序列可能偏离原有的下降区域，严重时甚至无法收敛。\par
+因此，梯度消失主要表现为参数更新过慢，而梯度爆炸主要表现为参数更新幅度失去控制。\par
+预防梯度消失或梯度爆炸，首先应当选择导数不易接近$0$且不会过大的激活函数。Sigmoid函数和双曲正切函数在当$|x|$较大时导数都接近$0$，因此在深层网络的隐藏层中反复使用这类激活函数会增大梯度消失的可能性。对于梯度爆炸，还可以在参数更新前限制梯度的整体大小。
 \begin{definition}
 	将关于全部参数的梯度依次排列为向量$g$。给定阈值$c>0$，定义按整体范数进行的\gls{GradientClipping}为：
 	\begin{equation*}
 		\operatorname{clip}_c(g)=
 		\begin{cases}
-			g,&\|g\|\leqslant c,\\[2mm]
-			\dfrac{c}{\|g\|}g,&\|g\|>c.
+			g,&||g||\leqslant c \\
+			\dfrac{c}{||g||}g,&||g||>c
 		\end{cases}
 	\end{equation*}
 \end{definition}
-经过裁剪后总有$\|\operatorname{clip}_c(g)\|\leqslant c$，并且当$\|g\|>c$时只缩小梯度长度而不改变其方向。相应的参数更新变为：
-\begin{equation*}
-	\theta_{k+1}=\theta_k-\eta_k\operatorname{clip}_c(g_k).
-\end{equation*}
-梯度裁剪可以防止个别迭代产生过大的参数变化，但它不能恢复已经消失的梯度，也不能替代对网络结构、激活函数、初始参数和学习率的合理选择。
+经过裁剪后总有$||\operatorname{clip}_c(g)||\leqslant c$，并且当$\|g\|>c$时只缩小梯度长度而不改变其方向。梯度裁剪为每次迭代中的参数变化提供了上界，可以防止个别过大的梯度直接造成参数更新失控。
 
 \subsection{序列网络}
-\subsubsection{循环神经网络（Recurrent Neural Network, RNN）}
-\begin{figure}[H]
-	\centering
-	\begin{tikzpicture}[
-		font=\small,
-		arrow/.style={->, thick},
-		state/.style={circle, draw, thick, minimum size=8mm, inner sep=0pt},
-		block/.style={rectangle, draw, thick, rounded corners=4pt,
-			minimum width=3.0cm, minimum height=1.4cm, align=center}
-		]
-		
-		% ---- Column 1: inputs and previous state ----
-		\node[state] (x)     at (0,  1.4) {$x_t$};
-		\node[state] (hprev) at (0, -1.4) {$h_{t-1}$};
-		
-		% ---- Column 2: RNN cell ----
-		\node[block] (rnn) at (4, 0) {RNN Cell};
-		
-		% ---- Column 3: current hidden state (aligned horizontally) ----
-		\node[state] (ht) at (8, 0) {$h_t$};
-		
-		% ---- Equations ----
-		\node at (4, -2.4)
-		{$h_t=\phi\!\left(W_h h_{t-1}+W_x x_t+b_h\right)$};
-		
-		% ---- Arrows (clean geometry) ----
-		% x_t -> top-left corner of RNN
-		\draw[arrow] (x.east) -- (rnn.north west);
-		
-		% h_{t-1} -> bottom-left corner of RNN
-		\draw[arrow] (hprev.east) -- (rnn.south west);
-		
-		% RNN -> h_t (straight horizontal)
-		\draw[arrow] (rnn.east) -- (ht.west);
-	\end{tikzpicture}
-	\caption{单个时间步的RNN单元计算结构}
-\end{figure}
+在许多预测问题中，一个样本所包含的信息并非集中在单个观测中，而是沿着某种顺序逐步展开。模型依次接收$x_1,x_2,\dots,x_T$，并在处理当前观测$x_t$时结合此前已经获得的信息，从而不断更新对整个样本的理解。例如，文本的含义随着词语依次出现而逐渐形成，语音信号需要结合前后时刻的变化加以识别，患者的健康状态也常常需要根据一系列按时间记录的检查结果进行判断。因此，这类预测问题的输入不应被视为彼此独立的一组向量，而应被视为一个具有内部顺序的整体。
+\begin{definition}
+	设$T\in\mathbb{N}^+$。称有序向量组：
+	\begin{equation*}
+		x_{1:T}=(x_1,x_2,\dots,x_T),\quad x_t\in\mathbb{R}^m,\quad t=1,2,\dots,T
+	\end{equation*}
+	为长度为$T$的\gls{SequenceData}，其中$t$为\gls{TimeStep}索引，$x_t$表示第$t$个时间步的观测向量。
+\end{definition}
+本节考虑序列到单值输出的任务，即将整个输入序列$x_{1:T}$映射为单个输出$y$，其中$y$可以是离散的类别标签，也可以是连续的数值。\par
+为了在预测中体现输入序列的先后顺序，一种自然的建模方式是按照$x_1,x_2,\dots,x_T$的顺序依次处理各个观测。在处理序列的过程中，模型维护一个随时间步不断更新的内部状态：每读入一个新的观测，便结合当前观测与此前形成的状态更新这一内部状态，从而使历史信息能够沿序列逐步传递。
+\begin{definition}
+	设映射$f_\theta:\mathbb{R}^m\times\mathbb{R}^d\to\mathbb{R}^d$，给定初始状态$h_0\in\mathbb{R}^d$。对于输入序列$x_1,x_2,\dots,x_T$，递推定义：
+	\begin{equation*}
+		h_t=f_\theta(x_t,h_{t-1}),\quad t=1,2,\dots,T
+	\end{equation*}
+	称$h_t$为模型在第$t$个时间步的\gls{HiddenState}。
+\end{definition}
+隐藏状态$h_t$可以看作模型在处理完$x_1,x_2,\dots,x_t$后形成的内部表示。它并不是对全部历史输入的逐项存储，而是通过递推映射$f_\theta$对历史信息进行压缩和整合，从中保留对当前任务有用的信息。因此，在处理完整个输入序列后，可以将最终隐藏状态$h_T$视为模型对整个序列所提取的信息表示，并在此基础上进行预测。例如将$h_T$输入到一个一般的神经网络$g$中去得到$\hat{y}=g(h_T)$。\par
+初始状态$h_0$通常取为$\mathbf{0}$，也可以作为模型参数进行学习。由于在所有时间步中使用的是同一个映射$f_\theta$，模型的参数数量不会随序列长度$T$增加，并且同一模型可以递推处理不同长度的输入序列。
+\begin{note}
+	在这一统一表示下，序列网络的核心在于如何构造状态更新映射$f_\theta$。不同的序列网络本质上对应于$f_\theta$的不同参数化方式。
+\end{note}
+\subsubsection{循环神经网络}
+\begin{definition}
+	设输入维数为$m$，隐藏状态维数为$d$，给定：
+	\begin{equation*}
+		W_x\in\mathbb{R}^{d\times m},\quad W_h\in\mathbb{R}^{d\times d},\quad b\in\mathbb{R}^d
+	\end{equation*}
+	则第$t$个时间步的隐藏状态定义为：
+	\begin{equation*}
+		h_t=\phi(W_xx_t+W_hh_{t-1}+b),\quad t=1,2,\dots,T
+	\end{equation*}
+	其中$\phi$为逐元素作用的激活函数，初始状态$h_0$为给定向量。由上式定义的序列映射称为\gls{RNN}。
+\end{definition}
+在这一状态更新式中，$W_xx_t$提取当前输入的信息，$W_hh_{t-1}$将上一时间步形成的历史状态传递到当前时间步。\par
+为了逐层提取序列特征，可以将多个RNN沿网络深度方向堆叠。第$l$层第$t$个时间步的输入为第$l-1$层第$t$个时间步计算出的隐藏状态。
 \begin{figure}[H]
 	\centering
 	\begin{tikzpicture}[
@@ -522,15 +424,14 @@ Sigmoid函数满足$0<\sigma'(x)\leqslant1/4$，并且当$|x|$较大时导数接
 		\node[left] at (-1.6,0) {Layer 2};
 		
 	\end{tikzpicture}
-	\caption{循环神经网络结构示意图}
+	\caption{多层循环神经网络结构示意图}
 \end{figure}
 \begin{algorithm}[H]
 	\caption{Forward Propagation of a Multi-layer RNN}
-	\label{alg:stacked_rnn_forward}
 	\begin{algorithmic}[1]
 		
 		\Require Input sequence $\{x_t^{(1)}\}_{t=1}^T$, 
-		parameters $\{W_h^{(l)}, W_x^{(l)}, b_h^{(l)}\}_{l=1}^{L}$, 
+		parameters $\{W_h^{(l)}, W_x^{(l)}, b^{(l)}\}_{l=1}^{L}$, 
 		activation functions $\phi(\cdot)$
 		
 		\Ensure Hidden states $\{h_t^{(L)}\}_{t=1}^{T}$
@@ -540,26 +441,349 @@ Sigmoid函数满足$0<\sigma'(x)\leqslant1/4$，并且当$|x|$较大时导数接
 		\If{$l\ne1$}
 		\State $x_t^{(l)} \gets h_t^{(l-1)}$ \Comment{Output of previous layer as current input}
 		\EndIf
-		\State $h_t^{(l)} 
-		\gets 
-		\phi\left(
-		W_h^{(l)} h_{t-1}^{(l)} 
-		+ 
-		W_x^{(l)} x_t^{(l)} 
-		+ 
-		b_h^{(l)}
-		\right)$
+		\State $h_t^{(l)}\gets\phi\left(W_h^{(l)}h_{t-1}^{(l)}+W_x^{(l)}x_t^{(l)}+b^{(l)}\right)$
 		\EndFor
 		\EndFor
 	\end{algorithmic}
 \end{algorithm}
+对于序列到单个输出的任务，需要进一步将隐藏状态序列$\{h_t^{(L)}\}_{t=1}^{T}$汇总为一个固定维数的序列表示。常见的做法是取最终隐藏状态，或者对所有隐藏状态求均值，即：
+\begin{equation*}
+	z=h_T^{(L)}\quad\text{或}\quad z=\frac{1}{T}\sum_{t=1}^Th_t^{(L)}
+\end{equation*}
+得到序列表示$z$后，可将其输入一个一般的神经网络$g$从而得到输出值。
 \begin{note}
-由于隐藏状态不断累积先前信息，RNN 能够捕捉序列中的依赖关系。
+	RNN在每个时间步都用当前输入和上一隐藏状态共同生成新的隐藏状态，但没有单独的机制判断哪些历史信息应当保留、哪些信息应当遗忘。随着时间步不断推进，较早的信息可能在反复更新中逐渐被后来的输入覆盖，导致模型难以区分当前状态中的短期信息和需要长期保留的信息。\par
+	RNN的另一个重要问题出现在长序列训练过程中。梯度沿时间方向反向传播时，需要连续经过许多次状态更新；链式法则中的导数连乘可能使早期时间步的梯度迅速缩小，形成梯度消失，也可能使梯度迅速增大，形成梯度爆炸。
 \end{note}
-\subsubsection{长短期记忆网络（Long Short-Term Memory, LSTM）}
+\subsubsection{长短期记忆网络}
+\gls{LSTM}是为了解决普通RNN在长序列训练中出现的梯度消失与梯度爆炸问题而提出的结构，它在隐藏状态$h_t$之外引入\gls{CellState}$\;c_t\in\mathbb{R}^d$。隐藏状态主要用于产生当前输出并传递给下一时间步，细胞状态则为历史信息提供一条单独的传递路径。模型利用若干取值位于$(0,1)$的向量控制信息在各个分量上的保留、写入和输出，这些向量统称为\gls{Gate}。\par
+将上一时间步的隐藏状态与当前输入拼接为：
+\begin{equation*}
+	q_t=[h_{t-1};x_t]\in\mathbb{R}^{d+m}
+\end{equation*}
+其中分号表示按分量纵向拼接。给定权重矩阵：
+\begin{equation*}
+	W_f,W_i,W_c,W_o\in\mathbb{R}^{d\times(d+m)}
+\end{equation*}
+和偏置$b_f,b_i,b_c,b_o\in\mathbb{R}^d$，LSTM按照下列顺序更新状态。递推开始前还需给定初始隐藏状态$h_0$和初始细胞状态$c_0$。\par
+首先计算\textbf{遗忘门}：
+\begin{equation*}
+	f_t=\sigma(W_fq_t+b_f)
+\end{equation*}
+Sigmoid函数逐分量将结果映射到$(0,1)$。$f_t$的某一分量越接近$1$，相应的旧细胞状态越多地被保留；越接近$0$，相应信息越多地被遗忘。\par
+随后计算\textbf{输入门}和\textbf{候选细胞状态}：
+\begin{align*}
+	i_t&=\sigma(W_iq_t+b_i),\\
+	\widetilde{c}_t&=\tanh(W_cq_t+b_c)
+\end{align*}
+输入门$i_t$决定候选信息中有多少可以写入细胞状态，候选状态$\widetilde{c}_t$则给出根据当前输入和上一隐藏状态形成的新信息。由遗忘门和输入门共同更新细胞状态：
+\begin{equation*}
+	c_t=f_t\odot c_{t-1}+i_t\odot\widetilde{c}_t
+\end{equation*}
+其中$\odot$表示Hadamard乘积。第一项表示从旧细胞状态中保留的信息，第二项表示写入的新信息。\par
+最后计算\textbf{输出门}与隐藏状态：
+\begin{align*}
+	o_t&=\sigma(W_oq_t+b_o),\\
+	h_t&=o_t\odot\tanh(c_t)
+\end{align*}
+输出门$o_t$决定细胞状态的哪些分量可以形成当前隐藏状态。预测结果仍然由$h_t$经过任务所需的输出映射得到。\par
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[
+		font=\small,
+		>=Latex,
+		gate/.style={rectangle,draw,thick,rounded corners=2pt,minimum width=2.1cm,minimum height=7mm,align=center},
+		state/.style={rectangle,draw,thick,rounded corners=3pt,minimum width=4.1cm,minimum height=1.7cm,align=center},
+		arrow/.style={->,thick}
+		]
+		\node (q) at (0,0) {$q_t=[h_{t-1};x_t]$};
+		\node[gate] (f) at (3.4,2.1) {Forget gate $f_t$};
+		\node[gate] (i) at (3.4,0.7) {Input gate $i_t$};
+		\node[gate] (cc) at (3.4,-0.7) {Candidate $\widetilde{c}_t$};
+		\node[gate] (o) at (3.4,-2.1) {Output gate $o_t$};
+		\node[state] (update) at (7.5,0) {$c_t=f_t\odot c_{t-1}+i_t\odot\widetilde{c}_t$\\[1mm]$h_t=o_t\odot\tanh(c_t)$};
+		\node (cp) at (7.5,2.4) {$c_{t-1}$};
+		\node (ct) at (10.5,0.7) {$c_t$};
+		\node (ht) at (10.5,-0.7) {$h_t$};
+		\draw[arrow] (q) -- (f);
+		\draw[arrow] (q) -- (i);
+		\draw[arrow] (q) -- (cc);
+		\draw[arrow] (q) -- (o);
+		\draw[arrow] (f) -- (update);
+		\draw[arrow] (i) -- (update);
+		\draw[arrow] (cc) -- (update);
+		\draw[arrow] (o) -- (update);
+		\draw[arrow] (cp) -- (update.north);
+		\draw[arrow] (update) -- (ct);
+		\draw[arrow] (update) -- (ht);
+	\end{tikzpicture}
+	\caption{单个时间步的LSTM状态更新}
+\end{figure}
+构造多层LSTM时，第$l$层在时间$t$产生的$h_t^{(l)}$作为第$l+1$层在同一时间步的输入，而每一层分别维护自己的隐藏状态和细胞状态。
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[
+		>=Latex,
+		font=\small,
+		cell/.style={
+			draw,
+			rounded corners=2pt,
+			minimum width=1.75cm,
+			minimum height=0.85cm,
+			align=center,
+			inner sep=2pt
+		},
+		inputnode/.style={
+			draw,
+			circle,
+			minimum size=0.72cm,
+			inner sep=0pt
+		},
+		outputnode/.style={
+			draw,
+			rounded corners=2pt,
+			minimum width=1.20cm,
+			minimum height=0.78cm,
+			align=center
+		},
+		conn/.style={
+			->,
+			thick
+		},
+		edgelabel/.style={
+			midway,
+			fill=white,
+			inner sep=1pt,
+			font=\scriptsize
+		},
+		layerlabel/.style={
+			font=\small,
+			anchor=east
+		}
+		]
+		
+		% Horizontal positions for t=1, t=2, ..., t=T
+		\def\xone{0}
+		\def\xtwo{3.2}
+		\def\xdots{6.9}
+		\def\xT{10.6}
+		
+		% Vertical positions for layer 1, layer 2, ..., layer L
+		\def\yone{0}
+		\def\ytwo{2.15}
+		\def\ydots{4.30}
+		\def\yL{6.45}
+		
+		% -----------------------------
+		% Layer 1
+		% -----------------------------
+		\node[cell] (l11) at (\xone,\yone) {$\mathrm{LSTM}_{1}^{(1)}$};
+		\node[cell] (l12) at (\xtwo,\yone) {$\mathrm{LSTM}_{2}^{(1)}$};
+		\node[cell] (l1T) at (\xT,\yone) {$\mathrm{LSTM}_{T}^{(1)}$};
+		
+		% -----------------------------
+		% Layer 2
+		% -----------------------------
+		\node[cell] (l21) at (\xone,\ytwo) {$\mathrm{LSTM}_{1}^{(2)}$};
+		\node[cell] (l22) at (\xtwo,\ytwo) {$\mathrm{LSTM}_{2}^{(2)}$};
+		\node[cell] (l2T) at (\xT,\ytwo) {$\mathrm{LSTM}_{T}^{(2)}$};
+		
+		% -----------------------------
+		% Layer L
+		% -----------------------------
+		\node[cell] (lL1) at (\xone,\yL) {$\mathrm{LSTM}_{1}^{(L)}$};
+		\node[cell] (lL2) at (\xtwo,\yL) {$\mathrm{LSTM}_{2}^{(L)}$};
+		\node[cell] (lLT) at (\xT,\yL) {$\mathrm{LSTM}_{T}^{(L)}$};
+		
+		% -----------------------------
+		% Horizontal ellipses for time steps
+		% -----------------------------
+		\node (tdots1) at (\xdots,\yone) {$\cdots$};
+		\node (tdots2) at (\xdots,\ytwo) {$\cdots$};
+		\node (tdotsL) at (\xdots,\yL) {$\cdots$};
+		
+		% -----------------------------
+		% Vertical ellipses for hidden layers
+		% -----------------------------
+		\node (vdots1) at (\xone,\ydots) {$\vdots$};
+		\node (vdots2) at (\xtwo,\ydots) {$\vdots$};
+		\node (vdotsT) at (\xT,\ydots) {$\vdots$};
+		
+		% -----------------------------
+		% Input nodes
+		% -----------------------------
+		\node[inputnode] (x1) at (\xone,-1.55) {$x_1$};
+		\node[inputnode] (x2) at (\xtwo,-1.55) {$x_2$};
+		\node[inputnode] (xTnode) at (\xT,-1.55) {$x_T$};
+		
+		\draw[conn] (x1) -- (l11);
+		\draw[conn] (x2) -- (l12);
+		\draw[conn] (xTnode) -- (l1T);
+		
+		% -----------------------------
+		% Recurrent connections in layer 1
+		% -----------------------------
+		\draw[conn]
+		(l11.east) --
+		node[edgelabel,above] {$(h_1^{(1)},c_1^{(1)})$}
+		(l12.west);
+		
+		\draw[conn]
+		(l12.east) --
+		node[edgelabel,above] {$(h_2^{(1)},c_2^{(1)})$}
+		(tdots1.west);
+		
+		\draw[conn]
+		(tdots1.east) --
+		node[edgelabel,above] {$(h_{T-1}^{(1)},c_{T-1}^{(1)})$}
+		(l1T.west);
+		
+		% -----------------------------
+		% Recurrent connections in layer 2
+		% -----------------------------
+		\draw[conn]
+		(l21.east) --
+		node[edgelabel,above] {$(h_1^{(2)},c_1^{(2)})$}
+		(l22.west);
+		
+		\draw[conn]
+		(l22.east) --
+		node[edgelabel,above] {$(h_2^{(2)},c_2^{(2)})$}
+		(tdots2.west);
+		
+		\draw[conn]
+		(tdots2.east) --
+		node[edgelabel,above] {$(h_{T-1}^{(2)},c_{T-1}^{(2)})$}
+		(l2T.west);
+		
+		% -----------------------------
+		% Recurrent connections in layer L
+		% -----------------------------
+		\draw[conn]
+		(lL1.east) --
+		node[edgelabel,above] {$(h_1^{(L)},c_1^{(L)})$}
+		(lL2.west);
+		
+		\draw[conn]
+		(lL2.east) --
+		node[edgelabel,above] {$(h_2^{(L)},c_2^{(L)})$}
+		(tdotsL.west);
+		
+		\draw[conn]
+		(tdotsL.east) --
+		node[edgelabel,above] {$(h_{T-1}^{(L)},c_{T-1}^{(L)})$}
+		(lLT.west);
+		
+		% -----------------------------
+		% Initial states for each displayed layer
+		% -----------------------------
+		\draw[conn]
+		($(l11.west)+(-1.65,0)$) --
+		node[edgelabel,above] {$(h_0^{(1)},c_0^{(1)})$}
+		(l11.west);
+		
+		\draw[conn]
+		($(l21.west)+(-1.65,0)$) --
+		node[edgelabel,above] {$(h_0^{(2)},c_0^{(2)})$}
+		(l21.west);
+		
+		\draw[conn]
+		($(lL1.west)+(-1.65,0)$) --
+		node[edgelabel,above] {$(h_0^{(L)},c_0^{(L)})$}
+		(lL1.west);
+		
+		% -----------------------------
+		% Vertical connections between layers
+		% -----------------------------
+		\draw[conn]
+		(l11.north) --
+		node[edgelabel,right] {$h_1^{(1)}$}
+		(l21.south);
+		
+		\draw[conn]
+		(l12.north) --
+		node[edgelabel,right] {$h_2^{(1)}$}
+		(l22.south);
+		
+		\draw[conn]
+		(l1T.north) --
+		node[edgelabel,right] {$h_T^{(1)}$}
+		(l2T.south);
+		
+		\draw[conn]
+		(l21.north) --
+		node[edgelabel,right] {$h_1^{(2)}$}
+		(vdots1.south);
+		
+		\draw[conn]
+		(l22.north) --
+		node[edgelabel,right] {$h_2^{(2)}$}
+		(vdots2.south);
+		
+		\draw[conn]
+		(l2T.north) --
+		node[edgelabel,right] {$h_T^{(2)}$}
+		(vdotsT.south);
+		
+		\draw[conn]
+		(vdots1.north) --
+		node[edgelabel,right] {$h_1^{(L-1)}$}
+		(lL1.south);
+		
+		\draw[conn]
+		(vdots2.north) --
+		node[edgelabel,right] {$h_2^{(L-1)}$}
+		(lL2.south);
+		
+		\draw[conn]
+		(vdotsT.north) --
+		node[edgelabel,right] {$h_T^{(L-1)}$}
+		(lLT.south);
+		
+		% -----------------------------
+		% Layer labels
+		% -----------------------------
+		\node[layerlabel] at (-2.6,\yone) {Layer $1$};
+		\node[layerlabel] at (-2.6,\ytwo) {Layer $2$};
+		\node[layerlabel] at (-2.6,\ydots) {$\vdots$};
+		\node[layerlabel] at (-2.6,\yL) {Layer $L$};
+		
+		% -----------------------------
+		% Time-step labels
+		% -----------------------------
+		\node at (\xone,-2.55) {$t=1$};
+		\node at (\xtwo,-2.55) {$t=2$};
+		\node at (\xdots,-2.55) {$\cdots$};
+		\node at (\xT,-2.55) {$t=T$};
+		
+		% -----------------------------
+		% Sequence representation and output network
+		% -----------------------------
+		\node[outputnode] (z) at (13.0,\yL) {$z$};
+		\node[outputnode] (g) at (15.2,\yL) {$g$};
+		\node (yhat) at (16.8,\yL) {$\hat y$};
+		
+		\draw[conn]
+		(lLT.east) --
+		node[edgelabel,above] {$h_T^{(L)}$}
+		(z.west);
+		
+		\draw[conn] (z) -- (g);
+		\draw[conn] (g) -- (yhat);
+		
+		% -----------------------------
+		% Time direction arrow
+		% -----------------------------
+		\draw[->,thick]
+		(1.6,-3.20) -- (8.8,-3.20);
+		
+		\node at (5.2,-3.62) {Time Direction};
+		
+	\end{tikzpicture}
+	\caption{多层LSTM在时间维度上的展开结构}
+\end{figure}
 \begin{algorithm}[H]
 	\caption{Forward Propagation of a Multi-layer LSTM}
-	\label{alg:stacked_lstm_forward}
 	\begin{algorithmic}[1]
 		
 		\Require Input sequence $\{x_t^{(1)}\}_{t=1}^T$, 
@@ -610,11 +834,88 @@ Sigmoid函数满足$0<\sigma'(x)\leqslant1/4$，并且当$|x|$较大时导数接
 		\EndFor
 	\end{algorithmic}
 \end{algorithm}
-\begin{note}
-	在LSTM中，由于sigmoid函数的值域为$(-1,1)$，遗忘门、输入门、输出门分别给出了要对过往信息遗忘的比例、输入信息以往的比例、当前记忆输出的比例。而候选记忆与输出阶段采用 $\tanh$，则是为了将内部状态压缩到有界且零中心的区间 $(-1,1)$，使得无论时间步有多长，内部状态都在一定范围之内，既保证了数值稳定性，又维持良好的梯度传播性质。\par
-	这种“线性记忆通道 + 门控比例调节 + 有界非线性输出”的结构，使得 LSTM 能够在长时间尺度上同时实现稳定记忆存储与灵活信息选择，是其优于普通RNN的核心原因。
-\end{note}
-\subsubsection{门控循环单元（Gated Recurrent Unit, GRU）}
+对于序列到单个输出的任务，LSTM同样可以将最后一层的隐藏状态序列$\{h_t^{(L)}\}_{t=1}^{T}$汇总为固定维数的序列表示，例如：
+\begin{equation*}
+	z=h_T^{(L)}\quad\text{或}\quad z=\frac{1}{T}\sum_{t=1}^Th_t^{(L)}
+\end{equation*}
+随后将$z$输入一个一般的神经网络$g$，得到最终输出值。
+\subsubsection{门控循环单元}
+\gls{GRU}的设计目标是对LSTM的门控记忆机制进行简化。它将细胞状态与隐藏状态合并为单一的隐藏状态，并只保留重置门和更新门，从而减少需要维护的状态和门控变量，在保留门控信息传递能力的同时降低模型结构的复杂程度。\par
+将上一隐藏状态与当前输入拼接为：
+\begin{equation*}
+	q_t=[h_{t-1};x_t]\in\mathbb{R}^{d+m}
+\end{equation*}
+给定权重矩阵$W_r,W_z\in\mathbb{R}^{d\times(d+m)}$和偏置$b_r,b_z\in\mathbb{R}^d$，分别定义\textbf{重置门}和\textbf{更新门}：
+\begin{align*}
+	r_t&=\sigma(W_rq_t+b_r),\\
+	z_t&=\sigma(W_zq_t+b_z)
+\end{align*}
+两个门的每个分量都位于$(0,1)$。重置门用于控制旧隐藏状态在形成候选状态时所占的比例，更新门则用于控制最终状态中旧信息和候选信息的组合比例。\par
+将重置门作用在上一隐藏状态上，再与当前输入拼接，得到候选隐藏状态：
+\begin{equation*}
+	\widetilde{h}_t=\tanh\left(W_h[r_t\odot h_{t-1};x_t]+b_h\right)
+\end{equation*}
+其中$W_h\in\mathbb{R}^{d\times(d+m)}$，$b_h\in\mathbb{R}^d$。当$r_t$的某一分量接近$0$时，上一隐藏状态的相应信息在形成候选状态时受到抑制；当其接近$1$时，相应历史信息被较完整地用于计算候选状态。\par
+最终隐藏状态由旧隐藏状态和候选隐藏状态逐分量组合：
+\begin{equation*}
+	h_t=z_t\odot h_{t-1}+(1-z_t)\odot\widetilde{h}_t
+\end{equation*}
+在这一约定下，$z_t$越接近$1$，旧隐藏状态保留得越多；$z_t$越接近$0$，当前状态越多地采用候选隐藏状态。由于这一更新包含旧状态与候选状态的加法组合，模型可以在不同时间步上选择保持已有信息或者写入新信息。
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[
+		font=\small,
+		>=Latex,
+		gate/.style={
+			rectangle,
+			draw,
+			thick,
+			rounded corners=2pt,
+			minimum width=2.3cm,
+			minimum height=8mm,
+			align=center
+		},
+		state/.style={
+			rectangle,
+			draw,
+			thick,
+			rounded corners=3pt,
+			minimum width=4.4cm,
+			minimum height=1.6cm,
+			align=center
+		},
+		arrow/.style={->,thick}
+		]
+		
+		\node (q) at (0,0) {$q_t=[h_{t-1};x_t]$};
+		
+		\node[gate] (r) at (3.4,1.4) {Reset gate $r_t$};
+		\node[gate] (z) at (3.4,0) {Update gate $z_t$};
+		\node[gate] (cand) at (3.4,-1.4) {Candidate $\widetilde{h}_t$};
+		
+		\node[state] (update) at (7.8,0)
+		{
+			$h_t=z_t\odot h_{t-1}+(1-z_t)\odot\widetilde{h}_t$
+		};
+		
+		\node (hp) at (7.8,1.95) {$h_{t-1}$};
+		\node (ht) at (11.5,0) {$h_t$};
+		
+		\draw[arrow] (q) -- (r);
+		\draw[arrow] (q) -- (z);
+		\draw[arrow] (q) -- (cand);
+		
+		\draw[arrow] (r) -- (update);
+		\draw[arrow] (z) -- (update);
+		\draw[arrow] (cand) -- (update);
+		
+		\draw[arrow] (hp) -- (update.north);
+		\draw[arrow] (update) -- (ht);
+		
+	\end{tikzpicture}
+	\caption{单个时间步的GRU状态更新}
+\end{figure}
+构造多层GRU时，第$l$层在时间$t$产生的$h_t^{(l)}$作为第$l+1$层同一时间步的输入，每一层分别维护自己的隐藏状态。
 \begin{algorithm}[H]
 	\caption{Forward Propagation of a Multi-layer GRU}
 	\label{alg:stacked_gru_forward}
@@ -658,23 +959,22 @@ Sigmoid函数满足$0<\sigma'(x)\leqslant1/4$，并且当$|x|$较大时导数接
 		\EndFor
 	\end{algorithmic}
 \end{algorithm}
-\begin{note}
-	与LSTM不同，GRU通过将细胞状态与隐藏状态合并为单一状态 $h_t$，并仅引入更新门与重置门对信息流进行控制，从而在保持长期依赖建模能力的同时，显著简化了模型结构与参数规模，但在表达能力与长期记忆精细控制方面略逊于LSTM。
-\end{note}
+GRU得到最终输出值的方法与RNN和LSTM一样。
 
 \subsection{图像网络}
-在计算机中，一幅图像本质上是一个规则网格上的数值函数。首先将连续的平面区域离散化为一个由$H\times W$个小方格组成的网格，每一个小方格称为一个\gls{Pixel}，有序对$(H,W)$称为图像的\gls{SpatialResolution}。像素是图像的最小空间单位，其空间位置通常用整数坐标$(p,q)$表示，其中$p=1,2,\dots,H,\;q=1,2,\dots,W$。因此，一幅分辨率为$H\times W$的图像可以看作在离散网格 $\{1,2,\dots,H\}\times\{1,2,\dots,W\}$ 上定义的数值函数。\par
-对于灰度图像（就是黑白图片）而言，每个像素仅对应一个实数，用来描述该位置的强度。灰度强度刻画了该像素“有多亮”或“有多暗”，通常取值在某个区间内，例如：
+先说明计算机如何表示图像，再讨论如何利用图像自身的结构设计网络。\par
+具体地，一幅图像可以看作规则空间网格上的数值函数。将连续的平面区域离散化为由$H\times W$个小方格组成的网格，每一个小方格称为一个\gls{Pixel}，有序对$(H,W)$称为图像的\gls{SpatialResolution}。像素的空间位置通常用整数坐标$(p,q)$表示，其中$p=1,2,\dots,H,\;q=1,2,\dots,W$。因此，一幅分辨率为$H\times W$的图像可以看作在离散网格$\{1,2,\dots,H\}\times\{1,2,\dots,W\}$上定义的数值函数。\par
+对于灰度图像而言，每个像素仅对应一个实数，用来描述该位置的亮度。灰度强度刻画了该像素有多亮或有多暗，通常取值在某个区间内，例如：
 \begin{equation*}
-	I_{p,q} \in [0,255] \quad \text{或} \quad I_{p,q} \in [0,1]
+	I_{p,q}\in[0,255]\quad\text{或}\quad I_{p,q}\in[0,1]
 \end{equation*}
 其中数值越大表示亮度越高，数值越小表示亮度越低。这样，一幅灰度图像可以用一个矩阵$I\in M_{H\times W}(\mathbb{R})$来表示。\par
-对于彩色图像，每个像素不仅具有亮度信息，还包含颜色信息。计算机中最常用的颜色表示方式是RGB模型，即用红色（Red）、绿色（Green）与蓝色（Blue）三种基色的强度线性组合来表示任意颜色。对应地，每一个像素不再是一个标量，而是一个三维向量，这三个分量分别称为三个\gls{Channel}，表示该像素在R、G、B三种基色上的强度大小。\par
+对于彩色图像，每个像素不仅具有亮度信息，还包含颜色信息。计算机中最常用的颜色表示方式是RGB模型，即用红色、绿色与蓝色三种基色的强度线性组合来表示任意颜色。对应地，每一个像素不再是一个标量，而是一个三维向量，这三个分量分别称为三个\gls{Channel}，表示该像素在R、G、B三种基色（即红绿蓝）上的强度大小。\par
 设图像的空间分辨率为$H\times W$，则一幅RGB彩色图像可以表示为一个三维张量：
 \begin{equation*}
 	I=(I_{p,q,c})\in\mathbb{R}^{H\times W\times3}
 \end{equation*}
-其中$(p,q)$表示像素的空间位置，$c\in\{1,2,3\}$分别对应红、绿、蓝三个颜色通道，$I_{p,q,c}$表示位于位置$(p,q)$的像素在第$c$个通道上的\textbf{灰度强度}，即该颜色分量的亮度大小。\par
+其中$(p,q)$表示像素的空间位置，$c\in\{1,2,3\}$分别对应红、绿、蓝三个颜色通道，$I_{p,q,c}$表示位于位置$(p,q)$的像素在第$c$个通道上的强度，即该颜色分量的亮度大小。\par
 从矩阵的角度看，一幅彩色图像等价于三张大小为$H\times W$的灰度图像在通道维度上的叠加：
 \begin{equation*}
 	I=\big(I^{(R)},I^{(G)},I^{(B)}\big)
@@ -684,35 +984,40 @@ Sigmoid函数满足$0<\sigma'(x)\leqslant1/4$，并且当$|x|$较大时导数接
 	I^{(R)},I^{(G)},I^{(B)}\in\mathbb{R}^{H\times W}
 \end{equation*}
 分别表示红色通道、绿色通道与蓝色通道对应的灰度矩阵。\par
-换言之，像素刻画\textbf{空间位置}，灰度强度刻画\textbf{亮度大小}，通道刻画\textbf{颜色分量}。
+换言之，像素坐标刻画\textbf{空间位置}，通道数值刻画\textbf{颜色分量的强度}。对于图像而言，空间位置不是可以任意交换的标签：交换两个像素的位置通常会改变图像的含义。正因为如此，图像模型需要同时尊重局部邻域关系和空间排列关系。
 \subsubsection{卷积}
 \begin{definition}
 	设输入图像为$X\in M_{H\times W}(\mathbb{R})$。在图像的每一个空间位置$(i,j)$，取其邻域窗口：
 	\begin{equation*}
-		\{(i+u-1,\; j+v-1) : u=1,\dots,h,\; v=1,\dots,w\}
+		\{(i+u-1,j+v-1):u=1,2,\dots,h,\; v=1,2,\dots,w\}
 	\end{equation*}
-	并对该邻域内的像素值施加一组固定权重$K=(K_{u,v})\in M_{h\times w}(\mathbb{R})$，定义局部加权求和
+	并对该邻域内的像素值施加一组固定权重$K=(K_{uv})\in M_{h\times w}(\mathbb{R})$，定义局部加权求和：
 	\begin{equation*}
-		S_{i,j}=\sum_{u=1}^h\sum_{v=1}^wK_{u,v}X_{i+u-1,j+v-1}
+		s_{ij}=\sum_{u=1}^h\sum_{v=1}^wK_{uv}X(i+u-1;j+v-1)
 	\end{equation*}	
-	由此在整个空间网格上得到的二维数组$S=(S_{i,j})$称为由该局部加权算子产生的\gls{FeatureMap}。
+	由此在整个空间网格上得到的二维数组$S=(s_{ij})$称为由该局部加权算子产生的\gls{FeatureMap}。对于包含多个颜色通道的输入，每个通道都有一组对应的权重。
 \end{definition}
 \begin{definition}
-	称矩阵$K=(K_{u,v})\in M_{h\times w}(\mathbb{R})$为\gls{ConvolutionKernel}。
+	称矩阵$K=(K_{uv})\in M_{h\times w}(\mathbb{R})$为\gls{ConvolutionKernel}。
 \end{definition}
-\begin{figure}[htbp]
+\begin{note}
+	卷积是针对空间网格设计的局部算子。它包含以下几方面的建模假设。
+	\begin{enumerate}
+		\item \textbf{局部连接：}输出位置$(i,j)$只使用输入位置$(i,j)$附近的窗口，而不直接连接整幅图像。这个假设利用了图像的局部相关性：相邻像素往往共同构成边缘、纹理等局部结构。
+		\item \textbf{权值共享：}同一个卷积核$K$被用于所有空间位置，因此模型学习的是某种局部模式，而不是某个固定位置上的特定像素组合。这样既显著减少了参数数量，也使同一种模式出现在不同位置时能够被同一组参数检测出来。
+		\item \textbf{平移等变性：}在忽略边界处理的影响时，如果输入图像中的局部模式发生平移，由该卷积核产生的特征图也会相应平移，而不会因为模式改变了绝对位置就完全失效。
+	\end{enumerate}
+\end{note}
+\begin{figure}[H]
 	\centering
 	\begin{tikzpicture}[scale=0.85]
-		
-		% ========= 输入 5x5 =========
 		\foreach \i in {0,...,4} {
 			\foreach \j in {0,...,4} {
 				\draw[gray] (\j,\i) rectangle ++(1,1);
 			}
 		}
-		\node at (2.5,5.8) {\small 输入特征图 $X\in\mathbb{R}^{5\times 5}$};
+		\node at (2.5,5.8) {\small Input feature map $X\in\mathbb{R}^{5\times 5}$};
 		
-		% 三个 3x3 窗口：左上/中间/右下
 		\fill[blue!20]   (0,2) rectangle (3,5);
 		\draw[thick,blue] (0,2) rectangle (3,5);
 		
@@ -722,18 +1027,14 @@ Sigmoid函数满足$0<\sigma'(x)\leqslant1/4$，并且当$|x|$较大时导数接
 		\fill[red!20]   (2,0) rectangle (5,3);
 		\draw[thick,red] (2,0) rectangle (5,3);
 		
-		\node at (2.5,-0.8) {\small 不同位置的 $3\times 3$ 卷积窗口（滑动）};
-		
-		% ========= 输出 3x3 =========
 		\begin{scope}[xshift=9cm]
 			\foreach \i in {0,...,2} {
 				\foreach \j in {0,...,2} {
 					\draw[gray] (\j,\i) rectangle ++(1,1);
 				}
 			}
-			\node at (1.5,3.8) {\small 输出特征图 $Y\in\mathbb{R}^{3\times 3}$};
+			\node at (1.5,3.8) {\small Output feature map $Y\in\mathbb{R}^{3\times 3}$};
 			
-			% 三个对应输出像素：左上/中心/右下
 			\fill[blue!20]   (0,2) rectangle ++(1,1);
 			\draw[thick,blue] (0,2) rectangle ++(1,1);
 			
@@ -743,45 +1044,132 @@ Sigmoid函数满足$0<\sigma'(x)\leqslant1/4$，并且当$|x|$较大时导数接
 			\fill[red!20]    (2,0) rectangle ++(1,1);
 			\draw[thick,red]  (2,0) rectangle ++(1,1);
 		\end{scope}
-		
-		% ========= 关键：用“中心点 -> 中心点”画箭头（保证对准） =========
-		% 输入窗口中心
+
 		\coordinate (inB) at ($(0,2)!0.5!(3,5)$);
 		\coordinate (inG) at ($(1,1)!0.5!(4,4)$);
 		\coordinate (inR) at ($(2,0)!0.5!(5,3)$);
 		
-		% 输出像素中心（注意已 xshift=9cm）
 		\coordinate (outB) at ($(9cm,0) + (0.5,2.5)$);
 		\coordinate (outG) at ($(9cm,0) + (1.5,1.5)$);
 		\coordinate (outR) at ($(9cm,0) + (2.5,0.5)$);
 		
-		% 为了避免箭头穿过输出方块，可把终点稍微往左移一点
 		\draw[->,thick,blue]               (inB) -- ($(outB)+(-0.15,0)$);
 		\draw[->,thick,green!70!black]     (inG) -- ($(outG)+(-0.15,0)$);
 		\draw[->,thick,red]                (inR) -- ($(outR)+(-0.15,0)$);
 		
-		% ========= 公式 =========
-		\node[align=center] at (2.5,-2.2) {\small
-			$Y_{i,j}=\displaystyle\sum_{u=1}^{3}\sum_{v=1}^{3}K_{u,v}\,X_{i+u-1,\,j+v-1}$
+		\node[align=center] at (7,-1.5) {\small
+			$Y(i;j)=\displaystyle\sum_{u=1}^{3}\sum_{v=1}^{3}K_{uv}\,X(i+u-1;j+v-1)$
 		};
 		
 	\end{tikzpicture}
 	\caption{二维离散卷积的滑动窗口与输出位置对应关系示意图}
 \end{figure}
-\begin{note}
-	特征图可以理解为：由原始图像通过某种局部加权求和得到的新的二维图像，其每个像素表示某种“特征”的强弱。
-\end{note}
 \subsubsection{池化}
 \begin{definition}
-	设输入特征图为$X \in M_{H \times W}(\mathbb{R})$。给定窗口尺寸$(h,w)$以及步幅$(s_h, s_w)$。在输出位置$(i,j)$处，取像素空间位置邻域窗口：
+	设输入特征图为$X\in M_{H\times W}(\mathbb{R})$。给定窗口尺寸$(h,w)$以及步幅$(s_h, s_w)$。在输出特征图位置$(i,j)$处，取$X$中的元素集合：
 	\begin{equation*}
-		W_{i,j}=\bigl\{\, (\, (i-1)s_h + u,\; (j-1)s_w + v \,) :
-		u=1,\dots,h,\; v=1,\dots,w \,\bigr\}
+		W_{ij}=\bigl\{\,(\,(i-1)s_h+u,\;(j-1)s_w+v\,):u=1,2,\dots,h,\;v=1,2,\dots,w\,\bigr\}
 	\end{equation*}
-	并在该邻域内对像素值施加一个映射$P:\mathbb{R}^{h\times w}\to \mathbb{R}$，称$P$为\gls{PoolingOperator}，该操作称为\gls{Pooling}。
+	并在该集合内对像素值施加一个映射$P:\mathbb{R}^{h\times w}\to\mathbb{R}$，称$P$为\gls{PoolingOperator}，该操作称为\gls{Pooling}。
 \end{definition}
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[
+		x=1cm,
+		y=1cm,
+		>=Stealth,
+		font=\small
+		]
+		
+		% =========================================================
+		% Input feature map
+		% =========================================================
+		\node[font=\large] at (2,5.1) {Input feature map $X$};
+		
+		% Four pooling windows
+		\fill[orange!20]  (0,2) rectangle (2,4);
+		\fill[blue!15]    (2,2) rectangle (4,4);
+		\fill[magenta!18] (0,0) rectangle (2,2);
+		\fill[cyan!18]    (2,0) rectangle (4,2);
+		
+		% Input grid
+		\draw[thick] (0,0) rectangle (4,4);
+		\foreach \x in {1,2,3}{
+			\draw (\x,0)--(\x,4);
+		}
+		\foreach \y in {1,2,3}{
+			\draw (0,\y)--(4,\y);
+		}
+		
+		% Pooling-window boundaries
+		\draw[orange,very thick]  (0,2) rectangle (2,4);
+		\draw[blue,very thick]    (2,2) rectangle (4,4);
+		\draw[magenta,very thick] (0,0) rectangle (2,2);
+		\draw[cyan,very thick]    (2,0) rectangle (4,2);
+		
+		% Window labels
+		\node[orange]  at (1,4.35) {$W_{11}$};
+		\node[blue]    at (3,4.35) {$W_{12}$};
+		\node[magenta] at (1,-0.35) {$W_{21}$};
+		\node[cyan]    at (3,-0.35) {$W_{22}$};
+		
+		% Input indices
+		\foreach \j in {1,...,4}{
+			\node[above] at ({\j-0.5},4) {$\j$};
+		}
+		\foreach \i in {1,...,4}{
+			\node[left] at (0,{4.5-\i}) {$\i$};
+		}
+		
+		% =========================================================
+		% Output feature map
+		% =========================================================
+		\node[font=\large] at (8.7,5.1) {Output feature map $Y$};
+		
+		% Output cells
+		\fill[orange!20]  (7.0,3.2) rectangle (8.7,4.4);
+		\fill[blue!15]    (8.7,3.2) rectangle (10.4,4.4);
+		\fill[magenta!18] (7.0,2.0) rectangle (8.7,3.2);
+		\fill[cyan!18]    (8.7,2.0) rectangle (10.4,3.2);
+		
+		% Output grid
+		\draw[thick] (7.0,2.0) rectangle (10.4,4.4);
+		\draw (8.7,2.0)--(8.7,4.4);
+		\draw (7.0,3.2)--(10.4,3.2);
+		
+		% Output entries
+		\node at (7.85,3.8) {$Y(1,1)$};
+		\node at (9.55,3.8) {$Y(1,2)$};
+		\node at (7.85,2.6) {$Y(2,1)$};
+		\node at (9.55,2.6) {$Y(2,2)$};
+		
+		% Output indices
+		\node[above] at (7.85,4.4) {$1$};
+		\node[above] at (9.55,4.4) {$2$};
+		\node[left]  at (7.0,3.8) {$1$};
+		\node[left]  at (7.0,2.6) {$2$};
+		
+		% =========================================================
+		% Mapping arrows
+		% =========================================================
+		\draw[->,orange,thick]
+		(2,3.6) to[out=12,in=170] (7.85,3.8);
+		
+		\draw[->,blue,thick]
+		(4,3.4) to[out=8,in=160] (9.55,3.8);
+		
+		\draw[->,magenta,thick]
+		(2,0.9) to[out=0,in=190] (7.85,2.6);
+		
+		\draw[->,cyan,thick]
+		(4,0.7) to[out=0,in=200] (9.55,2.6);
+		
+	\end{tikzpicture}
+	\caption{窗口尺寸为$(2,2)$、步幅为$(2,2)$的池化计算示意图}
+\end{figure}
 \begin{note}
-	卷积只能是局部加权，其主要作用为特征提取与线性滤波，通过可学习权重检测局部模式，而池化则对应着一般的函数，功能为空间降采样。\par
+	卷积得到的特征图在相邻空间位置上通常具有较强的冗余性，因此没有必要在网络的所有层中始终保留同样精细的空间分辨率。为了降低后续计算量，可以对特征图进行降采样。\par
+	但是，若直接从相邻位置中间隔取值，得到的结果会较强地依赖于具体的采样位置：输入发生很小的平移，就可能使被保留的响应发生明显变化。因此，可以对一个局部邻域内的响应进行聚合，再用聚合结果代表这一邻域。池化正是基于这一思想：它在舍弃部分空间分辨率进行空间降采样的同时，使表示对局部范围内的位置变化不那么敏感。\par
 	常见池化函数有：
 	\begin{enumerate}
 		\item \textbf{最大池化}：在窗口内取最大值。
@@ -789,21 +1177,30 @@ Sigmoid函数满足$0<\sigma'(x)\leqslant1/4$，并且当$|x|$较大时导数接
 	\end{enumerate}
 \end{note}
 \subsubsection{填充}
-在上述卷积与池化定义中，邻域窗口$W_{i,j}$可能在靠近边界时超出输入特征图$X$的定义域。为使边界位置也能应用同样的局部算子，通常在输入矩阵四周引入\gls{Padding}。在卷积与池化中，所有邻域窗口$W_{i,j}$实际均作用在扩展特征图$\tilde{X}$上。
-\subsubsection{CNN}
-\gls{CNN}是一类专门用于对网格结构数据进行分类的神经网络模型，在计算机视觉、医学影像分析以及模式识别等领域得到了广泛应用。其核心思想是通过局部连接、权值共享以及层级化特征学习机制，在保持参数规模可控的同时，有效建模输入数据中的空间局部相关性与层级结构信息。\par
-典型的卷积神经网络由特征提取阶段和分类阶段两部分组成。特征提取阶段由 $L$ 个堆叠的特征提取块构成，每一块通常包含卷积层、非线性激活函数以及池化层，用于逐层从原始输入中提取由低级到高级的层级化表示。卷积层通过局部加权运算提取空间局部模式，激活函数引入非线性变换，而池化层则通过降采样操作增强模型的平移不变性并降低特征分辨率。\par
-在完成多层特征抽取之后，网络进入分类阶段。该阶段首先将高维特征图展平成一维向量，并通过若干全连接层对特征进行全局整合，最终由Softmax层输出关于各类别的预测概率。
-\begin{figure}[t]
+在上述卷积与池化定义中，邻域窗口$W_{ij}$在靠近边界时可能超出输入特征图$X$的定义域。为使边界位置仍能使用同样的局部算子，通常在输入特征图四周引入\gls{Padding}，即补充一圈预先规定的数值，得到扩展特征图$\tilde{X}$，然后对$\tilde{X}$进行卷积或池化操作。
+\begin{note}
+	卷积中的padding除了规定边界之外的取值方式外，还可以控制卷积后特征图的空间尺寸。若卷积核大小为$h\times w$，步长为$1$，并分别在上下和左右各补充$p_h$行与$p_w$列，则卷积后的空间尺寸为：
+	\begin{equation*}
+		(H+2p_h-h+1)\times(W+2p_w-w+1)
+	\end{equation*}
+	因此，不使用padding时，卷积会使特征图的空间尺寸逐渐缩小；而当$h,w$均为奇数并取：
+	\begin{equation*}
+		p_h=\frac{h-1}{2},\quad p_w=\frac{w-1}{2}
+	\end{equation*}
+	时，可以使卷积前后的空间尺寸保持为$H\times W$。这种处理使边界附近的像素也能够参与与内部位置相同形式的局部卷积，同时避免特征图在连续卷积过程中因边界舍弃而过快缩小。
+\end{note}
+\subsubsection{卷积神经网络}
+\gls{CNN}由特征提取阶段和预测阶段组成。特征提取阶段由若干卷积、激活和降采样操作交替堆叠而成，最前面的卷积层在小邻域内寻找边缘、方向和简单纹理等低级模式；后续卷积层再把相邻位置的低级模式组合成角点、局部形状等更复杂的结构；随着层数增加，单个位置能够利用的输入区域逐步扩大，最终形成对物体部件乃至整体形状的表示。池化进一步降低特征图的空间分辨率，使模型对小范围的位置变化更稳定。非线性激活函数使这些局部组合不再只是线性叠加，从而能够表达更复杂的判别关系。预测阶段将高层特征进行整合，并根据任务输出类别概率或其他预测量。
+\begin{figure}[H]
 	\centering
 	\begin{tikzpicture}[
 		font=\small,
 		>=Latex,
 		node distance=8mm,
-		block/.style={draw, rounded corners=2pt, minimum height=7mm, minimum width=32mm, align=center},
+		block/.style={draw, rounded corners=2pt, minimum height=7mm, minimum width=34mm, align=center},
 		conv/.style={block, fill=blue!10},
 		pool/.style={block, fill=green!12},
-		fc/.style={block, fill=orange!15},
+		head/.style={block, fill=orange!15},
 		op/.style={block, fill=gray!10},
 		arrow/.style={->, thick}
 		]
@@ -814,32 +1211,29 @@ Sigmoid函数满足$0<\sigma'(x)\leqslant1/4$，并且当$|x|$较大时导数接
 		\node[block, fill=yellow!15] (in) {Input};
 		
 		% =========================
-		% First feature block (one layer)
+		% First feature block
 		% =========================
 		\node[conv, below=of in] (c1) {Conv};
 		\node[op, below=2mm of c1] (r1) {Activation Function};
 		\node[pool, below=2mm of r1] (p1) {Pool};
 		
 		% =========================
-		% Dots for middle layers
+		% Middle omitted blocks
 		% =========================
 		\node[below=8mm of p1] (dots) {$\vdots$};
 		
 		% =========================
-		% Last feature block (one layer)
+		% Last feature block
 		% =========================
 		\node[conv, below=8mm of dots] (cL) {Conv};
 		\node[op, below=2mm of cL] (rL) {Activation Function};
 		\node[pool, below=2mm of rL] (pL) {Pool};
 		
 		% =========================
-		% Classifier
+		% Output head
 		% =========================
-		\node[op, below=of pL] (flat) {Flatten};
-		\node[fc, below=2mm of flat] (f1) {FC};
-		\node[op, below=2mm of f1] (rF) {Activation Function};
-		\node[fc, below=2mm of rF] (f2) {FC};
-		\node[op, below=2mm of f2] (sm) {Softmax};
+		\node[head, below=12mm of pL, minimum width=42mm, minimum height=9mm] (head)
+		{Classifier / Regressor};
 		
 		% =========================
 		% Arrows
@@ -854,33 +1248,31 @@ Sigmoid函数满足$0<\sigma'(x)\leqslant1/4$，并且当$|x|$较大时导数接
 		\draw[arrow] (cL) -- (rL);
 		\draw[arrow] (rL) -- (pL);
 		
-		\draw[arrow] (pL) -- (flat);
-		\draw[arrow] (flat) -- (f1);
-		\draw[arrow] (f1) -- (rF);
-		\draw[arrow] (rF) -- (f2);
-		\draw[arrow] (f2) -- (sm);
+		\draw[arrow] (pL) -- (head);
 		
 		% =========================
-		% Left brace: single layer definition
+		% Left brace: one block
 		% =========================
-		\draw [decorate, decoration={brace, mirror, amplitude=5pt}]
-		($(c1.north west)+(-6mm,0)$) -- ($(p1.south west)+(-6mm,0)$)
-		node[midway, left=8mm] {\small One Feature Block};
+		\draw[decorate, decoration={brace, mirror, amplitude=5pt}]
+		($(c1.north west)+(-10mm,0)$) -- ($(p1.south west)+(-10mm,0)$)
+		node[midway, left=10mm] {\small One Feature Block};
 		
 		% =========================
-		% Right brace: L layers in total
+		% Right brace: all feature blocks
 		% =========================
-		\draw [decorate, decoration={brace, amplitude=7pt}]
-		($(c1.north east)+(6mm,0)$) -- ($(pL.south east)+(6mm,0)$)
-		node[midway, right=10mm] {\small $L$ Feature Extraction Blocks};
+		\draw[decorate, decoration={brace, amplitude=6pt}]
+		($(c1.north east)+(10mm,0)$) -- ($(pL.south east)+(10mm,0)$)
+		node[midway, right=12mm, align=left] {\small $L$ Feature Extraction\\\small Blocks};
 		
 		% =========================
-		% Grouping boxes (optional but clean)
+		% Grouping boxes
 		% =========================
 		\node[draw, dashed, rounded corners=2pt, inner sep=6pt, fit=(c1)(pL)] {};
-		\node[draw, dashed, rounded corners=2pt, inner sep=6pt, fit=(flat)(sm),
-		label={[font=\small]right:Classifier}] {};
+		\node[draw, dashed, rounded corners=2pt, inner sep=6pt, fit=(head)] {};
 		
 	\end{tikzpicture}
 	\caption{卷积神经网络结构示意图}
 \end{figure}
+\begin{note}
+	CNN是将图像的空间性质写入模型结构的神经网络。它适用于像素排列在规则网格上、邻近位置通常相关、同一种局部模式可能出现在不同位置的数据，例如自然图像和部分医学影像。对于行列只表示变量编号的矩阵，或者局部邻域没有稳定含义的表格数据，卷积所加入的空间假设未必成立，直接使用CNN反而可能限制模型的表达能力。
+\end{note}
