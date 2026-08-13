@@ -457,7 +457,7 @@
 	\begin{equation*}
 		\operatorname{KL}(\psi\|\varphi)=\int_{X}\ln\frac{\dif\psi}{\dif\varphi}\dif\psi=\int_{X}\ln\left(\frac{\dif\psi}{\dif\mu}\Big/\frac{\dif\varphi}{\dif\mu}\right)\dif\psi=\int_{X}\ln\frac{q(y)}{p(y\mid x)}q(y)\dif\mu
 	\end{equation*}
-	由于KL散度公式中存在未知的$p(y\mid x)$，于是需要将其转变为易于求解的形式。由\info{贝叶斯公式}和\cref{prop:MeasurableIntegral}(6)可得：
+	由于KL散度公式中存在未知的$p(y\mid x)$，于是需要将其转变为易于求解的形式。由\cref{prop:ConditionalProbability}(1)和\cref{prop:MeasurableIntegral}(6)可得：
 	\begin{align*}
 		&\operatorname{KL}(\psi\|\varphi)=\int_{X}q(y)\ln\frac{q(y)}{p(y\mid x)}\dif\mu=\int_{X}q(y)[\ln q(y)-\ln p(y\mid x)]\dif\mu \\
 		=&\int_{X}q(y)[\ln q(y)-\ln p(y,x)+\ln p(x)]\dif\mu \\
@@ -485,12 +485,12 @@
 	\hat{\theta}=\underset{\theta}{\arg\max}\ln p_{\theta}(f)
 \end{equation*}
 然而，在许多含有潜在结构的统计模型中，观测变量$f$本身的概率分布并不容易直接写出。真正容易描述的，往往是它在某些无法观测的隐变量$g$给定条件下的条件分布。有时，隐变量$g$本身的分布也不是单纯的辅助工具，而是我们希望估计和理解的对象。\par
-但是在引入隐变量之后，我们需要通过对隐变量积分，才能得到观测变量的边际似然。设$g$为概率空间$(X,\mathscr{A},P)$到可测空间$(Z,\mathscr{C})$上的可测映射，$Pg^{-1}\ll\nu$，根据\cref{theo:RadonNikodym}，记$\dfrac{\dif Pg^{-1}}{\dif\nu}=q(g)$，由\info{全概率公式}和\cref{lem:IntChangeOfMeasure}可得：
+但是在引入隐变量之后，我们需要通过对隐变量积分，才能得到观测变量的边际似然。设$g$为概率空间$(X,\mathscr{A},P)$到可测空间$(Z,\mathscr{C})$上的可测映射，$Pg^{-1}\ll\nu$，根据\cref{theo:RadonNikodym}，记$\dfrac{\dif Pg^{-1}}{\dif\nu}=q(g)$，由\cref{prop:ConditionalProbability}(2)和\cref{lem:IntChangeOfMeasure}可得：
 \begin{equation*}
 	p_{\theta}(f)=\int_{Z}p_{\theta}(f\mid g)\dif Pg^{-1}=\int_{Z}q(g)p_{\theta}(f\mid g)\dif\nu
 \end{equation*}
 原本我们只是想最大化一个对数似然函数，但由于隐变量无法观测，观测数据的概率必须通过积分得到，这使得目标函数通常难以直接优化。EM算法(Expectation-Maximization Algorithm)正是为了解决这类问题而提出的。\par
-由\cref{ineq:Jensen}、\info{贝叶斯公式}和\cref{prop:MeasurableIntegral}(6)可得：
+由\cref{ineq:Jensen}、\cref{prop:ConditionalProbability}(1)和\cref{prop:MeasurableIntegral}(6)可得：
 \begin{align*}
 	&\ln p_{\theta}(f)=\ln\int_{Z}q(g)p_{\theta}(f\mid g)\dif\nu=\ln\operatorname{E}[p_{\theta}(f\mid g)]\geqslant\operatorname{E}[\ln p_{\theta}(f\mid g)] \\
 	=&\int_{Z}q(g)[\ln p_{\theta}(f\mid g)]\dif\nu=\int_{Z}q(g)[\ln p_{\theta}(f,g)-\ln q(g)]\dif\nu \\
@@ -506,7 +506,7 @@
 \end{equation*}
 这个$L(q,y)$就是边际对数似然$\ln p_{\theta}(f)$的一个下界。\par
 EM算法的基本思想就是：既然直接最大化$\ln p_{\theta}(f)$比较困难，那么可以转而反复提高这个下界。若一组$\hat{q},\hat{\theta}$使得$L(q,y)$达到最大，则$\hat{\theta}$也应该是$\theta$的极大似然估计。\par
-进一步地，由\cref{prop:RadonNikodym}(5)、\cref{lem:IntChangeOfMeasure}和\info{贝叶斯公式}可知这个下界与真实边际对数似然之间的差距可以精确写成一个KL散度：
+进一步地，由\cref{prop:RadonNikodym}(5)、\cref{lem:IntChangeOfMeasure}和\cref{prop:ConditionalProbability}(1)可知这个下界与真实边际对数似然之间的差距可以精确写成一个KL散度：
 \begin{align*}
 	&\operatorname{KL}[q(g)\|p_{\theta}(g\mid f)]=\int_{Z}q(g)\ln\frac{q(g)}{p_{\theta}(g\mid f)}\dif\nu \\
 	=&\int_{Z}q(g)\ln q(g)\dif\nu-

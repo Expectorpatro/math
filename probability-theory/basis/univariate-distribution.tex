@@ -1212,120 +1212,101 @@
 \end{proof}
 
 \subsection{随机数的生成}
-\begin{theorem}\label{theo:AcceptanceRejectionSampling}
-	设$(X,\mathscr{A},P)$是一个概率空间，$\mu\ll P$，$\tilde{\pi}:X\to[0,\infty)$是$\mathscr{A}$上的可测函数，且满足：
+随机数的生成是对随机问题进行数值检验的重要工具。对于随机现象的分布、概率或数字特征等理论结论，可以按照给定的概率分布生成大量观测值来模拟随机试验，进而检验理论结论是否与数值结果相符。对于含有随机步骤的算法，还可以在相同条件下重复运行，比较多次运行的结果，以考察算法输出的波动及其稳定性。\par
+随机数的生成通常以均匀分布为基础。数论中的同余等方法可以帮助我们在计算机上构造具有良好均匀性的伪随机数列，从而实现均匀分布的抽样。但对于概率密度较为复杂的分布，直接抽样往往并不容易。此时可以选取一个容易抽样的概率分布$Q$作为候选分布，先从$Q$中生成候选观测值，再按照适当的概率接受或拒绝该观测值。若接受概率选择得适当，则最终被接受的样本虽然最初来自$Q$，其条件分布却可以恰好等于目标分布$\pi$。这一思想对应的实现就是接受拒绝抽样法。
+\begin{method}
+	设$(Y,\mathscr{A},\mu)$是$\sigma$有限测度空间，$\tilde{\pi}:Y\to[0,+\infty)$是其上的可测函数，且：
 	\begin{equation*}
-		Z:=\int_{X}\tilde{\pi}(x)\dif\mu\in(0,+\infty)
+		Z\coloneq\int_{Y}\tilde{\pi}(y)\dif\mu\in(0,+\infty)
 	\end{equation*}
-	目标概率测度$\pi$为：
+	在$(Y,\mathscr{A})$上定义目标概率测度$\pi$：
 	\begin{equation*}
-		\pi(A):=\frac{1}{Z}\int_{A}\tilde{\pi}(x)\dif\mu,\quad\forall A\in\mathscr{A}
+		\pi(B)\coloneq\frac{1}{Z}\int_{B}\tilde{\pi}(y)\dif\mu,\quad\forall\;B\in\mathscr{A}
 	\end{equation*}
-	$Q$是一个提议概率测度且$Q\ll\mu$，记其Radon-Nikodym导数为$q=\dif Q/\dif\mu$。若存在常数$M\in(0,+\infty)$使得：
+	设$Q$是$(Y,\mathscr{A})$上的概率测度，$Q\ll\mu$。根据\cref{theo:RadonNikodym}，取$q\coloneq\dfrac{\dif Q}{\dif\mu}$的一个非负版本（不讨论存在性）。若存在$M\in(0,+\infty)$使得：
 	\begin{equation*}
-		\tilde{\pi}(x)\leqslant Mq(x)\;\text{a.e. 于}(X,\mathscr{A},\mu)
+		\tilde{\pi}(y)\leqslant Mq(y)\;\text{a.e.于}(Y,\mathscr{A},\mu)
 	\end{equation*}
-	考虑如下接受--拒绝采样算法：
+	则令：
+	\begin{equation*}
+		\alpha(y)\coloneq
+		\begin{cases}
+			\dfrac{\tilde{\pi}(y)}{Mq(y)},&q(y)>0 \\
+			0,&q(y)=0
+		\end{cases}
+	\end{equation*}
+	在$\mu$零测集上适当修改$\alpha$，可使$0\leqslant\alpha(y)\leqslant1$对任意的$y\in Y$成立。设$f$为概率空间$(X,\mathscr{F},P)$到$(Y,\mathscr{A})$上的可测映射且$Pf^{-1}=Q$，$U\sim\operatorname{U}(0,1)$且$U$与$f$独立。接受--拒绝法按如下步骤生成一个观测值：
 	\begin{enumerate}
-		\item 生成$f\sim Q$；
-		\item 在与$f$独立的条件下生成$U\sim\mathrm{Unif}(0,1)$；
-		\item 若
-		\begin{equation*}
-			U\leqslant\alpha(f):=\frac{\tilde{\pi}(f)}{Mq(f)},
-		\end{equation*}
-		则接受$f$，否则拒绝并返回第$1$步重新生成。
+		\item 从$Q$中抽取候选值，即生成$f$的一个观测值$y\in Y$；
+		\item 独立生成$U$的一个观测值$u\in(0,1)$；
+		\item 若$u\leqslant\alpha(y)$，则接受并输出$y$；否则拒绝$y$，并与此前试验独立地返回第(1)步。
 	\end{enumerate}
-	记单次试验中的接受事件为$B=\{U\leqslant\alpha(f)\}$，则有以下结论成立：
-	\begin{enumerate}
-		\item 给定接受事件$B$，随机变量$f$的条件分布恰为目标分布$\pi$，即：
-		\begin{equation*}
-			P(f\in A|B)=\pi(A),\quad\forall A\in\mathscr{A}
-		\end{equation*}
-		\item 单次试验的接受概率为：
-		\begin{equation*}
-			P(A)=\frac{Z}{M}
-		\end{equation*}
-		\item 设$Y$为算法第一次被接受时输出的样本，则
-		\begin{equation*}
-			Y\sim \pi
-		\end{equation*}
-	\end{enumerate}
-\end{theorem}
+	算法一次运行输出最终被接受的观测值$y\in Y$，单次试验的接受概率为$Z/M$，算法以概率$1$在有限步内输出一个值，且算法的输出的概率分布为$\pi$。
+\end{method}
 \begin{proof}
-	(1)任取$A\in\mathscr{A}$。由全概率公式以及$U$与$f$的独立性，
+	对任意的$x\in X$，$f(x)$就是第(1)步生成的候选观测值，$U(x)$就是第(2)步生成的均匀分布观测值。记单次试验的接受事件为：
 	\begin{equation*}
-		P(f\in A,B)=\int_{A}P(f=x,B)Q(\dif x)=\int_{A}\frac{P(B)Q(\dif x)}{Q(\dif x)}Q(\dif x)=\int_{A}P(B|f=x)Q(\dif x)
+		C\coloneq\{U\leqslant\alpha(f)\}
 	\end{equation*}
-	又由于$U\sim\mathrm{Unif}(0,1)$，且由支配条件$\tilde{\pi}(x)\le M q(x)$可知$0\le \alpha(x)\le 1$，从而
+	根据\cref{prop:MeasurableFunction}(5.a)(1.b)可知$C\in\mathscr{F}$。\par
+	由\cref{prop:Independent}(5.a)可知：
 	\begin{equation*}
-		\mathbb{P}(A\mid X=x)
-		=\mathbb{P}(U\le \alpha(x))
-		=\alpha(x)
-		=\frac{\tilde{\pi}(x)}{M q(x)},\qquad \mu\text{-a.e.}
+		P(f,U)^{-1}=Pf^{-1}\times PU^{-1}
 	\end{equation*}
-	利用$Q(dx)=q(x)\,d\mu(x)$，得到
+	其中$Pf^{-1}$与$PU^{-1}$分别为$f$与$U$的概率分布。任取$A\in\sigma(f)$，则存在$B\in\mathcal{B}(\mathbb{R})$使得：
 	\begin{equation*}
-		\mathbb{P}(X\in B,A)
-		=\int_{B}\frac{\tilde{\pi}(x)}{M q(x)}\,q(x)\,d\mu(x)
-		=\frac{1}{M}\int_{B}\tilde{\pi}(x)\,d\mu(x).
+		A=\{f\in B\}
 	\end{equation*}
-	
-	\medskip
-	\noindent\textbf{第二步：计算接受概率$\mathbb{P}(A)$。}
-	
-	取$B=\mathcal{X}$，由上式直接得到
-	\begin{equation*}
-		\mathbb{P}(A)
-		=\frac{1}{M}\int_{\mathcal{X}}\tilde{\pi}(x)\,d\mu(x)
-		=\frac{Z}{M},
-	\end{equation*}
-	从而证明(ii)。
-	
-	\medskip
-	\noindent\textbf{第三步：确定条件分布$\mathcal{L}(X\mid A)$。}
-	
-	由条件概率定义以及前两步，
+	于是由\cref{theo:Fubini}(2)、指示函数的乘积性质、均匀分布的定义、\cref{theo:IntBySubstitution}和\cref{theo:MeasurableCountableIntegral}可得：
 	\begin{align*}
-		\mathbb{P}(X\in B\mid A)
-		&=\frac{\mathbb{P}(X\in B,A)}{\mathbb{P}(A)} \\
-		&=\frac{\frac{1}{M}\int_{B}\tilde{\pi}(x)\,d\mu(x)}{\frac{1}{M}\int_{\mathcal{X}}\tilde{\pi}(x)\,d\mu(x)} \\
-		&=\frac{1}{Z}\int_{B}\tilde{\pi}(x)\,d\mu(x)
-		=\Pi(B),
+		&P(A\cap C)=P\left(\{f\in B\}\cap\{U\leqslant\alpha(f)\}\right) \\
+		=&\int_{\mathbb{R}\times[0,1]}I_{B\cap\{U\leqslant\alpha(f)\}}\dif P(f,U)^{-1}=\int_{\mathbb{R}}\int_{[0,1]}I_{B}I_{\{U\leqslant\alpha(f)\}}\dif PU^{-1}\dif Pf^{-1} \\
+		=&\int_{\mathbb{R}}I_{B}\left[\int_{[0,1]}I_{\{U\leqslant\alpha(f)\}}\dif PU^{-1}\right]\dif Pf^{-1}=\int_{\mathbb{R}}I_{B}\alpha(f)\dif Pf^{-1} \\
+		=&\int_{X}I_{A}\alpha[f(x)]\dif P=\int_{A}\alpha[f(x)]\dif P
 	\end{align*}
-	这即证明了(i)。
-	
-	\medskip
-	\noindent\textbf{第四步：算法输出样本的分布。}
-	
-	设$(X_k,U_k)_{k\ge1}$是独立同分布的试验序列，定义
+	根据非负简单函数积分的定义可得：
 	\begin{equation*}
-		A_k:=\{U_k\le \alpha(X_k)\},\qquad 
-		T:=\inf\{k\ge1:A_k\text{发生}\},\qquad 
-		Y:=X_T.
+		P(A\cap C)=\int_{A}I_C(x)\dif P
 	\end{equation*}
-	则$Y$即算法的输出样本。
-	
-	对任意$B\in\mathcal{B}$，有
-	\begin{align*}
-		\mathbb{P}(Y\in B)
-		&=\sum_{k=1}^{\infty}\mathbb{P}(T=k,X_k\in B) \\
-		&=\sum_{k=1}^{\infty}\mathbb{P}(A_1^c,\dots,A_{k-1}^c)\,\mathbb{P}(A_k,X_k\in B).
-	\end{align*}
-	由于各次试验独立同分布，
+	所以对于任意$A\in\sigma(f)$均有：
 	\begin{equation*}
-		\mathbb{P}(A_1^c,\dots,A_{k-1}^c)=(1-\mathbb{P}(A))^{k-1},
-		\qquad 
-		\mathbb{P}(A_k,X_k\in B)=\mathbb{P}(A,X\in B).
+		\int_{A}I_C(x)\dif P=\int_{A}\alpha[f(x)]\dif P
 	\end{equation*}
-	因此
+	可以验证$\alpha(f)$是$\sigma(f)$可测随机变量，所以根据条件期望的定义可得：
+	\begin{equation*}
+		\operatorname{E}\left[I_C\mid\sigma(f)\right]=\alpha(f)\;\text{a.e.于$(X,\mathscr{F},P)$}
+	\end{equation*}
+	即：
+	\begin{equation*}
+		P(C\mid f)=\alpha(f)\;\text{a.e.于$(X,\mathscr{F},P)$}
+	\end{equation*}\par
+	任取$B\in\mathscr{A}$。根据\cref{prop:ConditionalProbability}(2)、指示函数的乘积性质、\cref{theo:ConditionalExpectationPullOut}、\cref{prop:MeasurableIntegral}(8)、\cref{theo:MeasurableCountableIntegral}、\cref{lem:IntChangeOfMeasure}和\cref{prop:MeasurableIntegral}(6)可得：
 	\begin{align*}
-		\mathbb{P}(Y\in B)
-		&=\left[\sum_{k=1}^{\infty}(1-\mathbb{P}(A))^{k-1}\right]\mathbb{P}(A,X\in B) \\
-		&=\frac{1}{\mathbb{P}(A)}\mathbb{P}(A,X\in B)
-		=\mathbb{P}(X\in B\mid A)
-		=\Pi(B),
+		&P(\{f\in B\}\cap C)=\operatorname{E}[P(\{f\in B\}\cap C\mid f)]=\operatorname{E}\{\operatorname{E}[I_{\{f\in B\}\cap C}\mid f]\} \\
+		=&\operatorname{E}\{\operatorname{E}[I_{\{f\in B\}}I_C\mid f]\}=\operatorname{E}\{I_{\{f\in B\}}\operatorname{E}[I_C\mid f]\}=\operatorname{E}[I(f\in B)P(C\mid f)] \\
+		=&\operatorname{E}[I(f\in B)\alpha(f)]=\int_{B}\alpha(f)\dif Q=\int_{B}\alpha(f)q(f)\dif\mu=\frac{1}{M}\int_{B}\tilde{\pi}(f)\dif\mu
 	\end{align*}
-	其中最后一步由(i)成立。
-	
-	故$Y\sim\Pi$，从而证明(iii)。证毕。
+	取$B=Y$可得单次试验的接受概率为：
+	\begin{equation*}
+		P(C)=\frac{1}{M}\int_{Y}\tilde{\pi}(f)\dif\mu=\frac{Z}{M}>0
+	\end{equation*}\par
+	若$Q(B)>0$，由\cref{prop:ConditionalProbability}(1)可得：
+	\begin{equation*}
+		P(\{f\in B\}\mid C)=\frac{P(\{f\in B\}\cap C)}{P(C)}=\frac{\dfrac{1}{M}\int_{B}\tilde{\pi}(f)\dif\mu}{Z/M}=\frac{1}{Z}\int_{B}\tilde{\pi}(f)\dif\mu=\pi(B)
+	\end{equation*}
+	若$Q(B)=0$，则根据\cref{prop:ConditionalProbability}(1)可知$P(\{f\in B\}\mid C)=0$，并且由条件和\cref{prop:MeasurableIntegral}(7)(6)可得：
+	\begin{equation*}
+		0\leqslant\pi(B)=\frac{1}{Z}\int_{B}\tilde{\pi}(f)\dif\mu\leqslant\frac{M}{Z}\int_{B}q(f)\dif\mu=\frac{M}{Z}Q(B)=0
+	\end{equation*}
+	所以此时仍有$P(\{f\in B\}\mid C)=\pi(B)$。\par
+	综上，单次试验中$f$在接受事件$C$发生条件下的条件分布为$\pi$。\par
+	设$\{(f_n,U_n)\}$为各次相互独立且与$(f,U)$同分布的试验序列，记：
+	\begin{equation*}
+		C_n\coloneq\{U_n\leqslant\alpha(f_n)\},\quad T(x)\coloneq\inf\{n\in\mathbb{N}^+:x\in C_n\},\quad x\in X
+	\end{equation*}
+	由\cref{prop:Measure}(1)(3)（上连续性）和各次试验相互独立可得：
+	\begin{equation*}
+		P(T<+\infty)=1-P\left(\underset{n=1}{\overset{+\infty}{\cap}}\{T>n\}\right)=1-\lim_{n\to+\infty}\left(1-\frac{Z}{M}\right)^n=1
+	\end{equation*}
+	即算法以概率$1$在有限步内输出一个值$y$。
 \end{proof}
