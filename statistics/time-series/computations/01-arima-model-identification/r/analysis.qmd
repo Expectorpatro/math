@@ -1,0 +1,632 @@
+---
+title: "AR、MA 与 ARMA 模型识别"
+format:
+  html:
+    embed-resources: true
+    toc: false
+    code-copy: true
+execute:
+  echo: true
+  warning: false
+  message: false
+  fig-align: center
+  fig-width: 8
+  fig-height: 5
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+book_project_root <- Sys.getenv("BOOK_PROJECT_ROOT", unset = "../../../../..")
+source(file.path(book_project_root, "figure_settings", "figures.R"))
+configure_knitr_figures(book_project_root)
+
+if (!requireNamespace("fpp3", quietly = TRUE)) {
+  stop("This document requires the fpp3 package from the project renv library.")
+}
+if (!requireNamespace("tseries", quietly = TRUE)) {
+  stop(
+    "This document requires the tseries package from the project renv library."
+  )
+}
+
+options(width = 100, digits = 5, scipen = 6)
+
+colour_main <- "#355c8a"
+colour_smooth <- "#c45a3c"
+colour_accent <- "#4f8a5b"
+```
+
+下面的辅助函数分别整理ADF检验的$p$值、ACF/PACF数值、参数估计与Ljung--Box检验结果，并统一绘制诊断图和预测图。函数代码作为实验的一部分完整展示，便于读者直接复现计算。
+
+```{r}
+#| label: helper-functions
+#| include: true
+#| echo: true
+
+adf_result_table <- function(x, series_name) {
+  test <- tseries::adf.test(as.numeric(na.omit(x)))
+  data.frame(
+    Series = series_name,
+    LagOrder = unname(test$parameter),
+    PValue = unname(test$p.value),
+    row.names = NULL
+  )
+}
+
+correlation_table <- function(x, lag_max = 10L) {
+  data.frame(
+    Lag = seq_len(lag_max),
+    ACF = as.numeric(acf(x, lag.max = lag_max, plot = FALSE)$acf)[-1],
+    PACF = as.numeric(pacf(x, lag.max = lag_max, plot = FALSE)$acf),
+    Approximate95PercentBound = 1.96 / sqrt(length(x)),
+    row.names = NULL
+  )
+}
+
+coefficient_table <- function(model) {
+  standard_errors <- sqrt(diag(model$var.coef))
+  z_statistics <- coef(model) / standard_errors
+  data.frame(
+    Term = names(coef(model)),
+    Estimate = unname(coef(model)),
+    StandardError = unname(standard_errors),
+    PValue = unname(2 * pnorm(-abs(z_statistics))),
+    row.names = NULL
+  )
+}
+
+ljung_box_table <- function(model, lag, fitdf) {
+  test <- Box.test(
+    na.omit(residuals(model)),
+    lag = lag,
+    type = "Ljung-Box",
+    fitdf = fitdf
+  )
+  data.frame(
+    Lag = lag,
+    Statistic = unname(test$statistic),
+    DegreesOfFreedom = unname(test$parameter),
+    PValue = unname(test$p.value),
+    row.names = NULL
+  )
+}
+
+forecast_table <- function(prediction) {
+  data.frame(
+    Horizon = seq_along(prediction$pred),
+    PointForecast = as.numeric(prediction$pred),
+    Lower95 = as.numeric(prediction$pred - 1.96 * prediction$se),
+    Upper95 = as.numeric(prediction$pred + 1.96 * prediction$se),
+    row.names = NULL
+  )
+}
+
+plot_acf_pacf <- function(x, series_name) {
+  old_par <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+  acf(
+    as.numeric(x),
+    lag.max = 20,
+    col = colour_main,
+    main = paste("ACF:", series_name)
+  )
+  pacf(
+    as.numeric(x),
+    lag.max = 20,
+    col = colour_smooth,
+    main = paste("PACF:", series_name)
+  )
+  par(old_par)
+}
+
+plot_residuals <- function(model, model_name) {
+  model_residuals <- na.omit(residuals(model))
+  old_par <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+  plot(
+    model_residuals,
+    type = "l",
+    lwd = 1.2,
+    col = colour_main,
+    main = paste(model_name, "Residuals"),
+    xlab = "Time",
+    ylab = "Residual"
+  )
+  abline(h = 0, lty = 2, col = "grey45")
+  acf(
+    as.numeric(model_residuals),
+    lag.max = 20,
+    col = colour_smooth,
+    main = paste("Residual ACF:", model_name)
+  )
+  par(old_par)
+}
+
+plot_forecast <- function(observed, prediction, title, y_label) {
+  point_forecast <- prediction$pred
+  lower <- point_forecast - 1.96 * prediction$se
+  upper <- point_forecast + 1.96 * prediction$se
+
+  plot(
+    observed,
+    type = "l",
+    lwd = 1.4,
+    col = colour_main,
+    xlim = range(c(time(observed), time(point_forecast))),
+    ylim = range(c(observed, lower, upper), na.rm = TRUE),
+    main = title,
+    xlab = "Time",
+    ylab = y_label
+  )
+  polygon(
+    c(time(point_forecast), rev(time(point_forecast))),
+    c(lower, rev(upper)),
+    border = NA,
+    col = grDevices::adjustcolor(colour_smooth, alpha.f = 0.22)
+  )
+  lines(point_forecast, lwd = 1.6, col = colour_smooth)
+  legend(
+    "topleft",
+    legend = c("Observed", "Forecast", "95% interval"),
+    col = c(colour_main, colour_smooth, NA),
+    lty = c(1, 1, NA),
+    lwd = c(1.4, 1.6, NA),
+    fill = c(
+      NA,
+      NA,
+      grDevices::adjustcolor(colour_smooth, alpha.f = 0.22)
+    ),
+    border = NA,
+    bty = "n"
+  )
+}
+```
+
+本实验用三个彼此独立的真实时间序列，完成从原始数据、平稳性判断、ACF与PACF识别，到模型拟合、残差诊断和预测的完整过程。重点是根据样本相关图提出一个有统计依据的低阶模型，而不是自动搜索模型或比较信息准则。
+
+三个实验使用统一的识别逻辑：AR模型的ACF通常逐渐衰减而PACF近似截尾；MA模型的ACF近似截尾而PACF逐渐衰减；ARMA模型的ACF和PACF通常都不在某个很低的阶数后突然消失。样本相关图不会完全复制理论图形，因而应结合相邻滞后的整体形态，而不能根据某一根偶然越过置信界限的竖线机械判断。
+
+平稳性辅助判断采用`tseries::adf.test()`。该实现以“序列具有单位根”为原假设、以“序列平稳”为备择假设，在检验回归中包含常数项和线性趋势项，默认滞后阶数为$\lfloor(n-1)^{1/3}\rfloor$。下面直接报告$p$值，并与5%显著性水平比较：$p<0.05$时拒绝单位根原假设。ADF检验只作为时间序列图和ACF之外的辅助证据。
+
+## 实验一：AR模型
+
+### 原始序列与平稳性
+
+R自带的`lh`数据记录一名女性血样中黄体生成素的浓度，共连续观测48次，相邻观测间隔10分钟。时间坐标表示观测次序，而不是年份。
+
+```{r}
+#| label: ar-data
+
+ar_series <- datasets::lh
+
+data.frame(
+  Series = "lh",
+  Observations = length(ar_series),
+  FirstObservation = start(ar_series)[1],
+  LastObservation = end(ar_series)[1],
+  SamplingIntervalMinutes = 10
+)
+```
+
+```{r}
+#| label: ar-original-series
+#| fig-width: 8
+#| fig-height: 4.5
+
+plot(
+  ar_series,
+  type = "l",
+  lwd = 1.4,
+  col = colour_main,
+  main = "Luteinizing Hormone Level",
+  xlab = "Observation number",
+  ylab = "Hormone level"
+)
+```
+
+序列在1.4至3.5之间上下波动，没有持续趋势或随时间扩大的波动幅度。ADF检验得到$p=0.0462$，在5%水平拒绝单位根原假设，不过这一结果接近$0.05$的判断界限。结合时间序列图，没有必要再作差分；原序列直接作为平稳工作序列。
+
+```{r}
+#| label: ar-adf
+
+adf_result_table(ar_series, "lh")
+```
+
+### ACF、PACF与阶数判断
+
+```{r}
+#| label: ar-acf-pacf
+#| fig-width: 11
+#| fig-height: 4.5
+
+plot_acf_pacf(ar_series, "Hormone Level")
+```
+
+```{r}
+#| label: ar-correlation-values
+
+correlation_table(ar_series, lag_max = 10L)
+```
+
+样本ACF在第1阶为$0.5755$，随后迅速减弱并以正负交替的小幅相关逐渐趋近于零，表现为较快的拖尾。PACF只有第1阶的$0.5755$越过约$\pm0.2829$的置信界限，第2阶及以后均落在界限内，因而呈现清楚的一阶截尾特征。这一组合与AR(1)模型最为一致。
+
+### 模型拟合
+
+```{r}
+#| label: ar-model
+
+ar_model <- arima(
+  ar_series,
+  order = c(1, 0, 0),
+  include.mean = TRUE,
+  method = "ML"
+)
+
+coefficient_table(ar_model)
+data.frame(InnovationVariance = ar_model$sigma2)
+```
+
+AR系数估计为$0.5739$，标准误为$0.1161$，近似双侧检验得到$p<0.001$，说明一阶线性依赖十分明确。均值参数估计为$2.4133$，其$p<0.001$。`arima()`输出的`intercept`是平稳序列的均值参数，而不是非中心化方程中的常数项；估计模型应写为
+
+$$
+X_t-2.4133=0.5739(X_{t-1}-2.4133)+\varepsilon_t,
+\qquad \widehat{\sigma}^2_{\varepsilon}=0.1975.
+$$
+
+### 残差诊断
+
+```{r}
+#| label: ar-residual-diagnostics
+#| fig-width: 11
+#| fig-height: 4.5
+
+plot_residuals(ar_model, "Hormone Level AR(1)")
+```
+
+```{r}
+#| label: ar-ljung-box
+
+ljung_box_table(ar_model, lag = 10L, fitdf = 1L)
+```
+
+残差围绕零波动，前20阶残差ACF全部位于约$\pm0.2829$的置信界限内。10阶Ljung--Box统计量为$9.3564$，自由度为9，$p=0.4050$，没有证据拒绝残差无自相关的原假设。因此，AR(1)已经提取了该序列中主要的线性时间依赖；这里的“近似白噪声”仅指没有发现剩余线性自相关，并不等同于证明残差彼此独立。
+
+### 向前预测
+
+```{r}
+#| label: ar-forecast-computation
+
+ar_prediction <- predict(ar_model, n.ahead = 8L)
+forecast_table(ar_prediction)
+```
+
+```{r}
+#| label: ar-forecast-plot
+#| fig-width: 9
+#| fig-height: 5
+
+plot_forecast(
+  ar_series,
+  ar_prediction,
+  "AR(1) Forecast for Hormone Level",
+  "Hormone level"
+)
+```
+
+点预测从$2.6926$逐步回到长期均值$2.4133$附近，这是平稳AR(1)多步预测的典型形态；随着预测步长增加，预测区间先扩张，然后逐渐接近长期预测不确定性。
+
+## 实验二：MA模型
+
+### 原始序列与一阶差分
+
+R自带的`Nile`数据记录1871年至1970年阿斯旺的尼罗河年流量，单位为$10^8\ \mathrm{m}^3$。原始图在约1898年前后出现明显的水平变化，均值稳定性值得怀疑。
+
+```{r}
+#| label: ma-data
+
+ma_series <- datasets::Nile
+ma_working <- diff(ma_series)
+
+data.frame(
+  Series = "Nile",
+  Observations = length(ma_series),
+  FirstYear = start(ma_series)[1],
+  LastYear = end(ma_series)[1],
+  Unit = "10^8 cubic metres"
+)
+```
+
+```{r}
+#| label: ma-original-and-differenced
+#| fig-width: 11
+#| fig-height: 4.5
+
+old_par <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+plot(
+  ma_series,
+  type = "l",
+  lwd = 1.4,
+  col = colour_main,
+  main = "Annual Nile Flow",
+  xlab = "Year",
+  ylab = expression(Flow ~ (10^8 ~ m^3))
+)
+plot(
+  ma_working,
+  type = "l",
+  lwd = 1.2,
+  col = colour_accent,
+  main = "First Difference of Annual Nile Flow",
+  xlab = "Year",
+  ylab = "First difference"
+)
+par(old_par)
+```
+
+原序列ADF检验得到$p=0.0642$，在5%水平不能拒绝单位根原假设。作一次普通一阶差分后，序列围绕零上下波动，没有继续差分的图形理由；差分序列的ADF检验输出$p=0.0100$，并提示真实$p$值小于该数值。因而可以拒绝单位根原假设，后续对$W_t=Y_t-Y_{t-1}$进行相关结构识别。
+
+```{r}
+#| label: ma-adf
+
+rbind(
+  adf_result_table(ma_series, "Nile level"),
+  adf_result_table(ma_working, "First difference")
+)
+```
+
+### ACF、PACF与阶数判断
+
+```{r}
+#| label: ma-acf-pacf
+#| fig-width: 11
+#| fig-height: 4.5
+
+plot_acf_pacf(ma_working, "First Difference of Nile Flow")
+```
+
+```{r}
+#| label: ma-correlation-values
+
+correlation_table(ma_working, lag_max = 10L)
+```
+
+差分序列ACF在第1阶为$-0.4020$，明显越过约$\pm0.1970$的置信界限；第2阶起大部分相关已经接近零。第8阶的$0.2312$是一个孤立的样本尖峰，并没有形成连续衰减结构。与此相对，PACF从$-0.4020$、$-0.2456$开始，随后以较小的负相关总体向零衰减，表现为拖尾。因而，这里将ACF解释为近似一阶截尾，并为差分序列选择MA(1)模型；对原始流量而言，这就是无漂移的ARIMA(0,1,1)模型。
+
+### 模型拟合
+
+```{r}
+#| label: ma-model
+
+ma_model <- arima(
+  ma_series,
+  order = c(0, 1, 1),
+  include.mean = FALSE,
+  method = "ML"
+)
+
+coefficient_table(ma_model)
+data.frame(InnovationVariance = ma_model$sigma2)
+```
+
+MA系数估计为$-0.7329$，标准误为$0.1143$，近似双侧检验得到$p<0.001$。工作序列的估计方程为
+
+$$
+W_t=\varepsilon_t-0.7329\varepsilon_{t-1},
+\qquad W_t=Y_t-Y_{t-1},
+\qquad \widehat{\sigma}^2_{\varepsilon}=20599.9.
+$$
+
+### 残差诊断
+
+```{r}
+#| label: ma-residual-diagnostics
+#| fig-width: 11
+#| fig-height: 4.5
+
+plot_residuals(ma_model, "Nile ARIMA(0,1,1)")
+```
+
+```{r}
+#| label: ma-ljung-box
+
+ljung_box_table(ma_model, lag = 10L, fitdf = 1L)
+```
+
+残差ACF没有持续的拖尾，第10阶相关$-0.1978$仅略微越过约$\pm0.1960$的界限。10阶Ljung--Box统计量为$13.3873$，自由度为9，$p=0.1459$，整体上没有证据拒绝无自相关原假设。综合判断，ARIMA(0,1,1)已经提取了主要线性依赖；孤立的边界尖峰提醒我们，“近似白噪声”是有限样本下的判断，而不是所有样本相关恰好为零。
+
+### 向前预测
+
+```{r}
+#| label: ma-forecast-computation
+
+ma_prediction <- predict(ma_model, n.ahead = 8L)
+forecast_table(ma_prediction)
+```
+
+```{r}
+#| label: ma-forecast-plot
+#| fig-width: 9
+#| fig-height: 5
+
+plot_forecast(
+  ma_series,
+  ma_prediction,
+  "ARIMA(0,1,1) Forecast for Annual Nile Flow",
+  expression(Flow ~ (10^8 ~ m^3))
+)
+```
+
+无漂移ARIMA(0,1,1)的8个点预测均为$798.367$，而预测区间随步长逐渐变宽。点预测保持不变并不表示未来流量没有波动；它表示在模型给定的信息下，未来创新的条件均值为零，而累积的不确定性仍在增加。
+
+## 实验三：ARMA模型
+
+### 原始序列与平稳性
+
+`fpp3::us_change`记录美国消费、收入、生产、储蓄和失业率等经济变量的季度百分比变动。本实验使用1970年第1季度至2019年第2季度的失业率变动序列，共198个观测。这里分析的是“失业率的季度变动”，而不是失业率水平本身。
+
+```{r}
+#| label: arma-data
+
+unemployment_data <- as.data.frame(fpp3::us_change)
+quarter_label <- as.character(unemployment_data$Quarter[1])
+start_year <- as.integer(substr(quarter_label, 1L, 4L))
+start_quarter <- as.integer(sub(".*Q", "", quarter_label))
+arma_series <- ts(
+  unemployment_data$Unemployment,
+  start = c(start_year, start_quarter),
+  frequency = 4
+)
+arma_working <- arma_series
+
+data.frame(
+  Series = "Quarterly change in US unemployment",
+  Observations = length(arma_series),
+  FirstQuarter = "1970 Q1",
+  LastQuarter = "2019 Q2"
+)
+```
+
+```{r}
+#| label: arma-original-series
+#| fig-width: 8
+#| fig-height: 4.5
+
+plot(
+  arma_series,
+  type = "l",
+  lwd = 1.4,
+  col = colour_main,
+  main = "Quarterly Change in US Unemployment",
+  xlab = "Year",
+  ylab = "Percentage change"
+)
+abline(h = 0, lty = 2, col = "grey45")
+```
+
+序列大部分时间围绕零上下波动，没有持续趋势，也没有需要季节差分的稳定季度周期；少数经济冲击时期出现较大的正负变动。ADF检验输出$p=0.0100$，并提示真实$p$值小于该数值，因此在5%水平拒绝单位根原假设。原序列已经适合作为平稳工作序列，不作额外差分或去趋势。
+
+```{r}
+#| label: arma-adf
+
+adf_result_table(arma_series, "US unemployment change")
+```
+
+### ACF、PACF与混合结构
+
+```{r}
+#| label: arma-acf-pacf
+#| fig-width: 11
+#| fig-height: 4.5
+
+plot_acf_pacf(arma_working, "US Unemployment Change")
+```
+
+```{r}
+#| label: arma-correlation-values
+
+correlation_table(arma_working, lag_max = 20L)
+```
+
+ACF前3阶依次为$0.5237$、$0.3834$和$0.2469$，先逐步衰减而不是在第1阶突然截尾；随后出现一段接近零的相关，又在第8至16阶形成较小的负相关尾部。PACF前两阶为$0.5237$和$0.1504$，第4阶和第8阶分别为$-0.1883$和$-0.2744$，其余多为较小的正负相关。两幅图都没有呈现纯AR或纯MA模型那种整齐、低阶的截尾，而是带有逐渐减弱和零星波动的拖尾形态。因此先考虑同时包含一阶AR和一阶MA项的最简混合模型ARMA(1,1)。
+
+为了检验这一图形判断，下面只检查两个最直接的纯模型候选AR(1)和MA(1)是否留下明显相关。这是对ACF/PACF解释的针对性核验，不是枚举模型或按信息准则选阶。
+
+```{r}
+#| label: arma-pure-model-check
+
+arma_ar1 <- arima(
+  arma_working,
+  order = c(1, 0, 0),
+  include.mean = TRUE,
+  method = "ML"
+)
+arma_ma1 <- arima(
+  arma_working,
+  order = c(0, 0, 1),
+  include.mean = TRUE,
+  method = "ML"
+)
+
+rbind(
+  AR1 = ljung_box_table(arma_ar1, lag = 20L, fitdf = 1L),
+  MA1 = ljung_box_table(arma_ma1, lag = 20L, fitdf = 1L)
+)
+```
+
+AR(1)残差的20阶Ljung--Box检验得到$Q=30.3092$、$p=0.0480$，在5%水平刚好拒绝无自相关原假设；MA(1)残差得到$Q=49.5413$、$p=0.00015$，明确留下了线性自相关。两个最简单的纯模型都没有充分解释相关结构，这支持在低阶模型中同时保留AR项和MA项。
+
+### 模型拟合
+
+```{r}
+#| label: arma-model
+
+arma_model <- arima(
+  arma_working,
+  order = c(1, 0, 1),
+  include.mean = TRUE,
+  method = "ML"
+)
+
+coefficient_table(arma_model)
+data.frame(InnovationVariance = arma_model$sigma2)
+```
+
+AR系数估计为$0.6977$，标准误为$0.0820$，近似双侧检验的$p<0.001$；MA系数估计为$-0.2222$，标准误为$0.1031$，$p=0.0311$。因此AR项和MA项都提供了可辨认的线性信息。`intercept`给出的平稳序列均值估计为$0.0081$，标准误为$0.0557$，$p=0.8839$，与序列围绕零波动的图形一致。以$\mu=0.0081$表示均值，估计模型为
+
+$$
+X_t-\mu=0.6977(X_{t-1}-\mu)+\varepsilon_t
+-0.2222\varepsilon_{t-1},
+\qquad \widehat{\sigma}^2_{\varepsilon}=0.0943.
+$$
+
+### 残差诊断
+
+```{r}
+#| label: arma-residual-diagnostics
+#| fig-width: 11
+#| fig-height: 4.5
+
+plot_residuals(arma_model, "Unemployment Change ARMA(1,1)")
+```
+
+```{r}
+#| label: arma-ljung-box
+
+ljung_box_table(arma_model, lag = 20L, fitdf = 2L)
+```
+
+残差大体围绕零波动，前20阶残差ACF不再表现出连续衰减；第4阶和第8阶分别为$-0.1578$和$-0.1993$，越过约$\pm0.1393$的置信界限，但属于相隔较远的孤立尖峰。20阶Ljung--Box统计量为$25.5094$，自由度为18，$p=0.1115$，整体上没有证据拒绝残差无自相关的原假设。与AR(1)和MA(1)的结果相比，ARMA(1,1)已经较好地提取主要线性依赖。这里仍不能据此断言残差独立、正态或同方差，因为Ljung--Box检验只针对一组残差自相关的联合显著性。
+
+### 向前预测
+
+```{r}
+#| label: arma-forecast-computation
+
+arma_prediction <- predict(arma_model, n.ahead = 8L)
+forecast_table(arma_prediction)
+```
+
+```{r}
+#| label: arma-forecast-plot
+#| fig-width: 9
+#| fig-height: 5
+
+plot_forecast(
+  arma_series,
+  arma_prediction,
+  "ARMA(1,1) Forecast for US Unemployment Change",
+  "Percentage change"
+)
+```
+
+未来8个季度的点预测从$-0.0519$逐步回到接近零的长期均值，第8步为$0.0033$。95%预测区间逐渐稳定在约$[-0.72,0.73]$。这正是平稳ARMA模型的典型多步预测：当前冲击的影响逐步衰减，点预测回归长期均值，预测不确定性则接近过程的长期水平。
+
+## 三个实验的对照
+
+| 实验 | 平稳化处理 | 工作序列ADF $p$值 | ACF形态 | PACF形态 | 最终模型 | 检验滞后阶数 | Ljung--Box $p$值 |
+|---|---|---:|---|---|---|---:|---:|
+| 黄体生成素浓度 | 不变换 | 0.0462 | 快速拖尾 | 1阶后截尾 | AR(1) | 10 | 0.4050 |
+| 尼罗河年流量 | 一阶差分 | 0.0100（报告下限） | 近似1阶截尾 | 总体拖尾 | ARIMA(0,1,1) | 10 | 0.1459 |
+| 美国失业率季度变动 | 不变换 | 0.0100（报告下限） | 逐步衰减并有负相关尾部 | 无清晰低阶截尾 | ARMA(1,1) | 20 | 0.1115 |
+
+三个实验说明，ACF与PACF的“截尾”和“拖尾”是模型识别线索而不是机械规则。面对实际数据，应先用时间序列图和简单单位根检验确定工作序列，再根据ACF/PACF提出低阶模型，最后由残差图、残差ACF和Ljung--Box检验检查是否仍有系统性的线性相关。只有这三个环节彼此一致时，一个简单ARIMA模型才构成完整、可解释的分析结果。

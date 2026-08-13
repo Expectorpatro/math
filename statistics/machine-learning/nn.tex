@@ -69,7 +69,7 @@
 	\end{tikzpicture}
 \end{center}
 \begin{definition}
-	若映射$f_\theta:\mathbb{R}^m\rightarrow\mathbb{R}^n$可以表示为若干仿射映射与逐元素非线性映射的复合：
+	若映射$f_\theta:\mathbb{R}^p\rightarrow\mathbb{R}^n$可以表示为若干仿射映射与逐元素非线性映射的复合：
 	\begin{equation*}
 		f_\theta(x)=\phi^{(L)}\!\circ \phi^{(L-1)} \circ \cdots \circ \phi^{(1)}(x)
 	\end{equation*}
@@ -84,13 +84,13 @@
 		\item $\sigma^{(l)}$ 为逐元素作用的非线性函数，
 		\item $\theta=\{W^{(l)},b^{(l)}\}_{l=1}^L$ 为网络的全部可学习参数；
 	\end{itemize}
-	则称$f_\theta$为\gls{NN}，非线性映射$\sigma^{(l)}$被称之为\gls{ActivationFunction}。当$L>2$ 时，位于输入层与输出层之间的各层称为\gls{HiddenLayer}。
+	则称$f_\theta$为\gls{NN}，$\phi^{(l)}(z)$的每一个分量为\gls{Neuron}，非线性映射$\sigma^{(l)}$被称之为\gls{ActivationFunction}。当$L>2$ 时，位于输入层与输出层之间的各层称为\gls{HiddenLayer}。
 \end{definition}
 \begin{note}
 	引入激活函数的原因有两点：
 	\begin{enumerate}
 		\item 如果网络中所有层都是线性函数，则整个网络表示的是线性模型，增加深度不会提升表达能力（无论增加多少层，总能以一个线性映射来等价表示，即多层神经网络等价于一层）。
-		\item 引入非线性函数可以使得模型有能力拟合非线性函数，
+		\item 引入非线性函数可以使得模型有能力拟合非线性函数。
 	\end{enumerate}
 \end{note}
 下面给出一些常见的激活函数。
@@ -242,7 +242,7 @@
 	\caption{ELU 激活函数（$\alpha=1$）}
 \end{figure}
 \begin{definition}
-	设输入向量$z=(\seq{x}{n})^\top$，称映射：
+	设输入向量$x=(\seq{x}{n})^\top$，称映射：
 	\begin{equation*}
 		\sigma(x)_i=\frac{e^{x_i}}{\sum\limits_{j=1}^ne^{x_j}}, \quad i=1,\dots,n
 	\end{equation*}
@@ -306,14 +306,14 @@
 \begin{definition}
 	设$T\in\mathbb{N}^+$。称有序向量组：
 	\begin{equation*}
-		x_{1:T}=(x_1,x_2,\dots,x_T),\quad x_t\in\mathbb{R}^m,\quad t=1,2,\dots,T
+		x_{1:T}=(x_1,x_2,\dots,x_T),\quad x_t\in\mathbb{R}^p,\quad t=1,2,\dots,T
 	\end{equation*}
 	为长度为$T$的\gls{SequenceData}，其中$t$为\gls{TimeStep}索引，$x_t$表示第$t$个时间步的观测向量。
 \end{definition}
 本节考虑序列到单值输出的任务，即将整个输入序列$x_{1:T}$映射为单个输出$y$，其中$y$可以是离散的类别标签，也可以是连续的数值。\par
 为了在预测中体现输入序列的先后顺序，一种自然的建模方式是按照$x_1,x_2,\dots,x_T$的顺序依次处理各个观测。在处理序列的过程中，模型维护一个随时间步不断更新的内部状态：每读入一个新的观测，便结合当前观测与此前形成的状态更新这一内部状态，从而使历史信息能够沿序列逐步传递。
 \begin{definition}
-	设映射$f_\theta:\mathbb{R}^m\times\mathbb{R}^d\to\mathbb{R}^d$，给定初始状态$h_0\in\mathbb{R}^d$。对于输入序列$x_1,x_2,\dots,x_T$，递推定义：
+	设映射$f_\theta:\mathbb{R}^p\times\mathbb{R}^d\to\mathbb{R}^d$，给定初始状态$h_0\in\mathbb{R}^d$。对于输入序列$x_1,x_2,\dots,x_T$，递推定义：
 	\begin{equation*}
 		h_t=f_\theta(x_t,h_{t-1}),\quad t=1,2,\dots,T
 	\end{equation*}
@@ -326,9 +326,9 @@
 \end{note}
 \subsubsection{循环神经网络}
 \begin{definition}
-	设输入维数为$m$，隐藏状态维数为$d$，给定：
+	设输入维数为$p$，隐藏状态维数为$d$，给定：
 	\begin{equation*}
-		W_x\in\mathbb{R}^{d\times m},\quad W_h\in\mathbb{R}^{d\times d},\quad b\in\mathbb{R}^d
+		W_x\in\mathbb{R}^{d\times p},\quad W_h\in\mathbb{R}^{d\times d},\quad b\in\mathbb{R}^d
 	\end{equation*}
 	则第$t$个时间步的隐藏状态定义为：
 	\begin{equation*}
@@ -459,11 +459,11 @@
 \gls{LSTM}是为了解决普通RNN在长序列训练中出现的梯度消失与梯度爆炸问题而提出的结构，它在隐藏状态$h_t$之外引入\gls{CellState}$\;c_t\in\mathbb{R}^d$。隐藏状态主要用于产生当前输出并传递给下一时间步，细胞状态则为历史信息提供一条单独的传递路径。模型利用若干取值位于$(0,1)$的向量控制信息在各个分量上的保留、写入和输出，这些向量统称为\gls{Gate}。\par
 将上一时间步的隐藏状态与当前输入拼接为：
 \begin{equation*}
-	q_t=[h_{t-1};x_t]\in\mathbb{R}^{d+m}
+	q_t=[h_{t-1};x_t]\in\mathbb{R}^{d+p}
 \end{equation*}
 其中分号表示按分量纵向拼接。给定权重矩阵：
 \begin{equation*}
-	W_f,W_i,W_c,W_o\in\mathbb{R}^{d\times(d+m)}
+	W_f,W_i,W_c,W_o\in\mathbb{R}^{d\times(d+p)}
 \end{equation*}
 和偏置$b_f,b_i,b_c,b_o\in\mathbb{R}^d$，LSTM按照下列顺序更新状态。递推开始前还需给定初始隐藏状态$h_0$和初始细胞状态$c_0$。\par
 首先计算\textbf{遗忘门}：
@@ -843,9 +843,9 @@ Sigmoid函数逐分量将结果映射到$(0,1)$。$f_t$的某一分量越接近$
 \gls{GRU}的设计目标是对LSTM的门控记忆机制进行简化。它将细胞状态与隐藏状态合并为单一的隐藏状态，并只保留重置门和更新门，从而减少需要维护的状态和门控变量，在保留门控信息传递能力的同时降低模型结构的复杂程度。\par
 将上一隐藏状态与当前输入拼接为：
 \begin{equation*}
-	q_t=[h_{t-1};x_t]\in\mathbb{R}^{d+m}
+	q_t=[h_{t-1};x_t]\in\mathbb{R}^{d+p}
 \end{equation*}
-给定权重矩阵$W_r,W_z\in\mathbb{R}^{d\times(d+m)}$和偏置$b_r,b_z\in\mathbb{R}^d$，分别定义\textbf{重置门}和\textbf{更新门}：
+给定权重矩阵$W_r,W_z\in\mathbb{R}^{d\times(d+p)}$和偏置$b_r,b_z\in\mathbb{R}^d$，分别定义\textbf{重置门}和\textbf{更新门}：
 \begin{align*}
 	r_t&=\sigma(W_rq_t+b_r),\\
 	z_t&=\sigma(W_zq_t+b_z)
@@ -855,7 +855,7 @@ Sigmoid函数逐分量将结果映射到$(0,1)$。$f_t$的某一分量越接近$
 \begin{equation*}
 	\widetilde{h}_t=\tanh\left(W_h[r_t\odot h_{t-1};x_t]+b_h\right)
 \end{equation*}
-其中$W_h\in\mathbb{R}^{d\times(d+m)}$，$b_h\in\mathbb{R}^d$。当$r_t$的某一分量接近$0$时，上一隐藏状态的相应信息在形成候选状态时受到抑制；当其接近$1$时，相应历史信息被较完整地用于计算候选状态。\par
+其中$W_h\in\mathbb{R}^{d\times(d+p)}$，$b_h\in\mathbb{R}^d$。当$r_t$的某一分量接近$0$时，上一隐藏状态的相应信息在形成候选状态时受到抑制；当其接近$1$时，相应历史信息被较完整地用于计算候选状态。\par
 最终隐藏状态由旧隐藏状态和候选隐藏状态逐分量组合：
 \begin{equation*}
 	h_t=z_t\odot h_{t-1}+(1-z_t)\odot\widetilde{h}_t
@@ -1000,6 +1000,7 @@ GRU得到最终输出值的方法与RNN和LSTM一样。
 \begin{definition}
 	称矩阵$K=(K_{uv})\in M_{h\times w}(\mathbb{R})$为\gls{ConvolutionKernel}。
 \end{definition}
+
 \begin{note}
 	卷积是针对空间网格设计的局部算子。它包含以下几方面的建模假设。
 	\begin{enumerate}
@@ -1190,7 +1191,7 @@ GRU得到最终输出值的方法与RNN和LSTM一样。
 	时，可以使卷积前后的空间尺寸保持为$H\times W$。这种处理使边界附近的像素也能够参与与内部位置相同形式的局部卷积，同时避免特征图在连续卷积过程中因边界舍弃而过快缩小。
 \end{note}
 \subsubsection{卷积神经网络}
-\gls{CNN}由特征提取阶段和预测阶段组成。特征提取阶段由若干卷积、激活和降采样操作交替堆叠而成，最前面的卷积层在小邻域内寻找边缘、方向和简单纹理等低级模式；后续卷积层再把相邻位置的低级模式组合成角点、局部形状等更复杂的结构；随着层数增加，单个位置能够利用的输入区域逐步扩大，最终形成对物体部件乃至整体形状的表示。池化进一步降低特征图的空间分辨率，使模型对小范围的位置变化更稳定。非线性激活函数使这些局部组合不再只是线性叠加，从而能够表达更复杂的判别关系。预测阶段将高层特征进行整合，并根据任务输出类别概率或其他预测量。
+\gls{CNN}由特征提取阶段和预测阶段组成。特征提取阶段由若干卷积、激活和降采样操作交替堆叠而成，最前面的卷积层在小邻域内寻找边缘、方向和简单纹理等低级模式；后续卷积层再把相邻位置的低级模式组合成角点、局部形状等更复杂的结构；随着层数增加，单个位置能够利用的输入区域逐步扩大，最终形成对物体部件乃至整体形状的表示。池化进一步降低特征图的空间分辨率，使模型对小范围的位置变化更稳定。非线性激活函数使这些局部组合不再只是线性叠加，从而能够表达更复杂的判别关系。预测阶段将高层特征进行整合，并根据任务输出类别概率或其他预测量，也即将特征图展平为向量（多通道则每个通道展平为向量后再拼接为一个最终的特征向量）输入到分类器或回归器中。
 \begin{figure}[H]
 	\centering
 	\begin{tikzpicture}[
@@ -1276,3 +1277,182 @@ GRU得到最终输出值的方法与RNN和LSTM一样。
 \begin{note}
 	CNN是将图像的空间性质写入模型结构的神经网络。它适用于像素排列在规则网格上、邻近位置通常相关、同一种局部模式可能出现在不同位置的数据，例如自然图像和部分医学影像。对于行列只表示变量编号的矩阵，或者局部邻域没有稳定含义的表格数据，卷积所加入的空间假设未必成立，直接使用CNN反而可能限制模型的表达能力。
 \end{note}
+
+\subsection{深层神经网络的常用改进方法}
+增加神经网络的层数通常能够扩大模型可以表示的函数范围，使网络有能力逐层构造更加复杂的特征表示。然而，网络变深并不意味着模型一定更容易获得更好的性能，因为深度增加的同时也会显著提高模型的优化难度。本节介绍几种针对这一问题的常用改进方法。
+\subsubsection{批归一化}
+设第$l$层的输入为$h^{(l-1)}$，权重矩阵和偏置向量分别为$W^{(l)}$和$b^{(l)}$，其线性变换为：
+\begin{equation*}
+	z^{(l)}=W^{(l)}h^{(l-1)}+b^{(l)}
+\end{equation*}
+则在反向传播过程中，损失函数$L$关于权重矩阵$W^{(l)}$的梯度满足：
+\begin{equation*}
+	\nabla_{W^{(l)}}L=\frac{\partial L}{\partial z^{(l)}}\left(h^{(l-1)}\right)^\top
+\end{equation*}
+因此，该层输入特征$h^{(l-1)}$的数值尺度会直接影响参数梯度的数值尺度。当不同网络层产生的特征在均值、方差或整体数值尺度上存在较大差异时，损失函数$L$对不同层参数的敏感程度也可能存在较大差异，从而使不同网络层参数的梯度具有不同的数值尺度。若采用统一的学习率$\eta$进行梯度下降，第$l$层的权重矩阵按照：
+\begin{equation*}
+	W^{(l)}\leftarrow W^{(l)}-\eta\nabla_{W^{(l)}}L
+\end{equation*}
+进行更新。此时，实际的参数更新幅度不仅取决于学习率$\eta$，还取决于梯度$\nabla_{W^{(l)}}L$的尺度。当不同网络层的梯度尺度相差较大时，同一个学习率便难以同时适应所有网络层：较大的学习率可能使梯度较大的网络层参数更新过于剧烈，导致损失函数发生震荡甚至使训练过程不稳定；而为了避免这种情况选取较小的学习率，又可能使梯度较小的网络层参数更新过于缓慢，从而降低整体的优化速度。\par
+因此，使不同网络层产生的中间特征保持较为稳定且相近的数值尺度，有助于减小不同网络层之间梯度尺度的差异，使统一的学习率能够更加有效地作用于不同网络层，从而提高网络训练过程的稳定性。
+\begin{definition}
+	设某一网络层在一个批上得到的输入为$\mathcal{B}=(x_{ij})\in M_{B\times p}(\mathbb{R})$，其中第$i$行表示第$i$个样本的输入向量，第$j$列表示第$j$个特征。对每一个特征$j=1,2,\dots,p$，计算该批样本上的均值与方差：
+	\begin{equation*}
+		\mu_{\mathcal{B}j}=\frac{1}{B}\sum_{i=1}^{B}x_{ij},\quad\sigma_{\mathcal{B}j}^2=\frac{1}{B}\sum_{i=1}^{B}(x_{ij}-\mu_{\mathcal{B}j})^2
+	\end{equation*}
+	给定常数$\varepsilon>0$，将$x_{ij}$变换为：
+	\begin{equation*}
+		\hat{x}_{ij}=\frac{x_{ij}-\mu_{\mathcal{B}j}}{\sqrt{\sigma_{\mathcal{B}j}^2+\varepsilon}}
+	\end{equation*}
+	定义这一层的输出为：
+	\begin{equation*}
+		\tilde{x}_{ij}=\gamma_j\hat{x}_{ij}+\beta_j
+	\end{equation*}
+	其中$\gamma_j$和$\beta_j$是随网络其他参数一起学习的伸缩参数和平移参数。称上述变换为\gls{BN}。
+\end{definition}
+定义中的$\varepsilon$用于避免分母为$0$。\par
+归一化使同一批次中各个特征的取值具有较为一致的数值尺度，从而减弱参数更新对参数初始值和学习率选择的敏感性，使网络的优化过程更加稳定。与此同时，引入可学习的伸缩参数$\gamma_j$和平移参数$\beta_j$，使网络能够根据任务需要重新调整标准化后特征的尺度和位置。因此，BN在提供稳定数值尺度的基础上，保留网络学习适当特征分布的能力。
+\begin{note}
+	上述给出的BN的计算过程是在训练阶段时进行的操作，每个样本的归一化结果会受到同一批中其他样本的影响，而在推断的阶段，我们希望训练好的神经网络表示一个确定的函数，即给定同一个输入$x$，网络应该给出确定的输出，而不应该取决于这个样本恰好和哪些其他样本一起送进网络。为了在推断阶段获得不依赖于当前批次的统计量，通常在训练过程中为每一个特征维护均值和方差的滑动估计。\par
+	不同深度学习框架对均值与方差估计值的具体实现略有不同，但训练阶段使用当前批次统计量、推断阶段使用训练期间维护的固定统计量这一原则是一致的。
+\end{note}
+\subsubsection{层归一化}
+批归一化沿样本方向计算同一特征的均值和方差。另一种思路是对每个样本分别归一化其内部特征。仍设$X=(x_{ij})\in M_{B\times p}(\mathbb{R})$，对第$i$个样本计算：
+\begin{align*}
+	\mu_i&=\frac{1}{p}\sum_{j=1}^{p}x_{ij} \\
+	\sigma_i^2&=\frac{1}{p}\sum_{j=1}^{p}(x_{ij}-\mu_i)^2
+\end{align*}
+并定义：
+\begin{align*}
+	\hat{x}_{ij}&=\frac{x_{ij}-\mu_i}{\sqrt{\sigma_i^2+\varepsilon}} \\
+	y_{ij}&=\gamma_j\hat{x}_{ij}+\beta_j
+\end{align*}
+称上述变换为\gls{LN}。层归一化的均值和方差只由当前样本的特征决定，不依赖同一批中的其他样本，因此训练和预测可以使用相同的计算方式。对于序列网络，可以在每个时间步对隐藏状态向量进行层归一化，此时不同序列是否被分到同一批不会改变某个样本的归一化结果。
+
+层归一化适用于批较小、样本长度不同或者不希望样本之间相互影响的情形。其局限在于，它把当前样本的一组特征共同用于估计均值和方差；如果这些特征的绝对尺度本身包含重要信息，或者不同特征不适合被放在同一归一化范围内，归一化就可能削弱有用信号。因此，使用层归一化时需要明确哪些维度共同描述一个特征向量，而不能仅因为输入是矩阵就沿所有维度进行归一化。
+\subsubsection{残差连接}
+设某一组网络层的输入为$x\in\mathbb{R}^d$，希望得到的输出表示为$y\in\mathbb{R}^d$。在普通的层叠结构中，这组网络层需要利用参数$\theta$直接学习一个完整映射：
+\begin{equation*}
+	y=H_\theta(x)
+\end{equation*}
+若输入$x$已经是较好的特征表示，新增网络层可能只需要对它进行很小的调整，甚至应当原样保留它。此时，普通的层叠结构仍然需要依靠若干带参数的线性变换和非线性激活共同近似恒等映射。随着网络层数增加，多个网络层需要相互配合才能保持已有表示，参数优化的难度也会随之增加。因此，较深的模型即使具有更强的表示能力，其训练误差也可能比相应的浅层模型更高。
+\begin{definition}
+	设$F_\theta:\mathbb{R}^d\to\mathbb{R}^d$为一组网络层构成的映射，将其输出与输入$x$相加，得到：
+	\begin{equation*}
+		y=x+F_\theta(x)
+	\end{equation*}
+	称从输入$x$直接到达相加位置的路径为\gls{ResidualConnection}，称$F_\theta$为残差映射。
+\end{definition}
+上述结构将需要学习的完整映射写成恒等映射与残差映射之和，其基本结构如下图所示。
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[
+		>=latex,
+		node distance=1.8cm and 2.2cm,
+		box/.style={
+			draw,
+			rounded corners,
+			minimum width=3.2cm,
+			minimum height=1.15cm,
+			align=center
+		},
+		add/.style={
+			draw,
+			circle,
+			minimum size=0.8cm,
+			inner sep=0pt
+		}
+		]
+
+		\node (x) {$x$};
+		\node[box, right=2.2cm of x] (F) {$F_\theta(x)$\\残差映射};
+		\node[add, right=2.0cm of F] (add) {$+$};
+		\node[right=1.8cm of add] (y) {$y$};
+
+		\draw[->] (x) -- (F);
+		\draw[->] (F) -- node[above] {$F_\theta(x)$} (add);
+		\draw[->] (add) -- node[above] {$x+F_\theta(x)$} (y);
+
+		\draw[->]
+		(x)
+		|- ++(0,-1.5)
+		-| node[pos=0.75,below] {恒等路径}
+		(add);
+
+	\end{tikzpicture}
+	\caption{残差连接的基本结构}
+\end{figure}
+在这种参数化方式下，完整映射$H_\theta$可以表示为：
+\begin{equation*}
+	H_\theta(x)=x+F_\theta(x)
+\end{equation*}
+上述结构将完整映射$H_\theta$表示为恒等映射与残差映射之和，即：
+\begin{equation*}
+	H_\theta(x)=x+F_\theta(x)
+\end{equation*}
+因此，$F_\theta$所学习的是目标表示相对于输入$x$的变化：
+\begin{equation*}
+	F_\theta(x)=H_\theta(x)-x
+\end{equation*}
+当理想映射接近恒等映射时，$F_\theta$只需要学习较小的修正；特别地，当已有表示无需改变时，只需使：
+\begin{equation*}
+	F_\theta(x)\approx\mathbf{0}
+\end{equation*}
+便有：
+\begin{equation*}
+	y=x+F_\theta(x)\approx x
+\end{equation*}
+因此，恒等映射已经直接包含在残差结构中，而不需要再由若干带参数的网络层通过训练近似得到。\par
+这一性质降低了增加网络深度所带来的风险。若新增的残差模块不能进一步改善已有表示，它可以通过使残差映射接近于零而近似退化为恒等映射，从而保留原有网络已经学习到的表示。换言之，加深后的残差网络能够较容易地包含较浅网络所实现的映射作为一种特殊情形，因此增加网络层数不再必然破坏已有表示，这有助于缓解深层网络中的退化问题。
+\begin{note}
+	残差相加要求两条路径的输出具有相同的形状。若残差映射将输入从$\mathbb{R}^d$变换到$\mathbb{R}^m$，就需要先利用映射$P:\mathbb{R}^d\to\mathbb{R}^m$调整输入路径，随后再进行相加：
+	\begin{equation*}
+		y=P(x)+F_\theta(x)
+	\end{equation*}\par
+	残差连接不仅改变了网络对映射的参数化方式，也改变了梯度在网络中的传播方式。若残差映射$F_\theta$在$x$处可微，记其梯度为$J_{F_\theta}(x)$。对于：
+	\begin{equation*}
+		y=x+F_\theta(x)
+	\end{equation*}
+	有：
+	\begin{equation*}
+		\frac{\partial y}{\partial x}=I_d+J_{F_\theta}(x)
+	\end{equation*}
+	因此，对于依赖于输出$y$的损失函数$L$，根据链式法则可得：
+	\begin{equation*}
+		\nabla_xL=\left[I_d+J_{F_\theta}(x)\right]^\top\nabla_yL=\nabla_yL+J_{F_\theta}(x)^\top\nabla_yL
+	\end{equation*}
+	其中，第一项$\nabla_yL$来自残差连接所提供的恒等路径，第二项$J_{F_\theta}(x)^\top\nabla_yL$则来自残差映射。对于普通的层叠网络，梯度向前传播时需要连续经过各网络层的梯度；当这些变换在相应方向上反复缩小梯度时，梯度的大小会随着传播距离的增加而不断衰减，从而产生梯度消失。残差连接引入恒等路径后，传回输入端的梯度中显式包含不经过残差映射内部各网络层的分量$\nabla_yL$，因此梯度不再完全依赖残差分支中的连续变换进行传播。随着网络不断加深，这种直接的梯度传播路径能够减弱连续梯度乘积对梯度大小的影响，从而缓解梯度在向较早网络层传播过程中逐渐衰减的问题，并改善深层网络的优化。
+\end{note}
+\subsubsection{随机失活}
+普通神经网络在每次训练时通常使用同一组神经元，因此一个神经元在学习特征时可以始终依赖其他神经元所提供的信息。随着训练进行，不同神经元可能逐渐形成固定的协作方式：单个神经元不必独立提取具有较强预测能力的特征，而只需要在其他若干神经元同时存在时提供其中一部分信息。这种现象称为神经元之间的共适应。当模型具有较多参数时，网络可能进一步利用多个神经元之间复杂而高度特化的组合来拟合训练数据中的偶然关联。这样的组合虽然能够降低训练误差，却未必反映总体数据中稳定存在的规律，因此可能导致模型在新样本上的预测性能下降。为了减弱模型对固定特征组合的依赖，可以在训练过程中随机屏蔽部分神经元，使模型不能假定某个特征在每次参数更新时都一定存在。
+\begin{definition}
+	设某一隐藏层对一个样本产生的输出为：
+	\begin{equation*}
+		h=(h_1,h_2,\dots,h_d)^{\top}\in\mathbb{R}^d
+	\end{equation*}
+	给定保留概率$q\in(0,1]$，每次在训练阶段计算该层输出时，生成相互独立且与$h$无关的随机变量：
+	\begin{equation*}
+		m_j\sim\operatorname{Bernoulli}(q),\quad j=1,2,\dots,d
+	\end{equation*}
+	并将传递给下一层的输出定义为：
+	\begin{equation*}
+		\tilde{h}_j=\frac{m_j}{q}h_j,\quad j=1,2,\dots,d
+	\end{equation*}
+	称上述变换为\gls{Dropout}。
+\end{definition}
+当$m_j=0$时，第$j$个神经元的输出被置为$0$，该神经元在当前计算中不再向后续网络层传递信息；当$m_j=1$时，该神经元被保留，其输出被放大为$h_j/q$。因此，每次计算所保留的神经元组合都可能不同，同一个输入在训练阶段也可能产生不同的中间表示。\par
+保留神经元时除以$q$，是为了补偿随机失活造成的输出尺度下降。由于$m_j$与$h_j$相互独立且$\operatorname{E}(m_j)=q$，所以在给定$h_j$时有：
+\begin{equation*}
+	\operatorname{E}(\tilde{h}_j\mid h_j)=\frac{h_j}{q}\operatorname{E}(m_j)=h_j
+\end{equation*}
+这表明随机失活虽然会改变某一次计算得到的具体输出，但不会改变单个神经元输出的条件期望。因子$1/q$的作用不是增强被保留神经元的重要性，而是使训练阶段输出的平均数值尺度与未进行随机失活时保持一致。与此同时，该随机输出的条件方差为：
+\begin{equation*}
+	\operatorname{Var}(\tilde{h}_j\mid h_j)=\frac{1-q}{q}h_j^2
+\end{equation*}
+因此，$q$越小，随机失活向该神经元输出中引入的随机波动通常越大。\par
+随机失活使网络在每次训练时只能使用部分中间特征。若模型的预测过度依赖某几个神经元构成的固定组合，一旦其中某个神经元被屏蔽，预测误差就会增大。为了在不同随机屏蔽结果下都能给出较好的预测，模型需要把有用信息分散到更多特征中，并学习在部分特征暂时缺失时仍然有效的表示。随机失活由此向训练过程引入扰动，限制模型对训练数据中特定特征组合的精细拟合，从而起到正则化作用。它并没有删除网络参数，预测阶段模型可以表示的函数形式也没有改变，而是通过改变训练时使用这些参数的方式来降低过拟合风险。\par
+保留概率$q$控制随机失活的强度。当$q$接近$1$时，大部分神经元始终参与训练，正则化作用较弱；当$q$过小时，模型在每次训练中能够使用的信息过少，梯度的随机波动也会增大，从而导致训练速度下降甚至产生欠拟合。随机失活通常用于容易产生过拟合的隐藏层；若模型本身已经欠拟合，继续增加失活概率只会进一步削弱模型的学习能力。
+\begin{note}
+	随机失活在训练阶段和预测阶段采用不同的计算方式。训练阶段需要反复生成新的随机变量$m_j$并使用$\tilde{h}_j$；预测阶段则关闭随机屏蔽，直接使用原输出$h_j$。由于训练阶段已经使用因子$1/q$保持输出的条件期望，预测阶段无需再对$h_j$进行额外缩放。
+\end{note}
+
