@@ -1213,29 +1213,100 @@
 
 \subsection{随机数的生成}
 随机数的生成是对随机问题进行数值检验的重要工具。对于随机现象的分布、概率或数字特征等理论结论，可以按照给定的概率分布生成大量观测值来模拟随机试验，进而检验理论结论是否与数值结果相符。对于含有随机步骤的算法，还可以在相同条件下重复运行，比较多次运行的结果，以考察算法输出的波动及其稳定性。\par
-随机数的生成通常以均匀分布为基础。数论中的同余等方法可以帮助我们在计算机上构造具有良好均匀性的伪随机数列，从而实现均匀分布的抽样。但对于概率密度较为复杂的分布，直接抽样往往并不容易。此时可以选取一个容易抽样的概率分布$Q$作为候选分布，先从$Q$中生成候选观测值，再按照适当的概率接受或拒绝该观测值。若接受概率选择得适当，则最终被接受的样本虽然最初来自$Q$，其条件分布却可以恰好等于目标分布$\pi$。这一思想对应的实现就是接受拒绝抽样法。
+随机数的生成通常以均匀分布为基础。数论中的同余等方法可以帮助我们在计算机上构造具有良好均匀性的伪随机数列，从而实现均匀分布的抽样。但对于概率密度较为复杂的分布，直接抽样往往并不容易。
+\subsubsection{逆变换法}
+\begin{definition}
+	设$F$是$\mathbb{R}$上的准分布函数。定义：
+	\begin{equation*}
+		\forall\;t\in(F(-\infty),F(+\infty)),\;F^{\leftarrow}(t)=\inf\{x\in\mathbb{R}:F(x)\geqslant t\}
+	\end{equation*}
+	称$F^{\leftarrow}$为$F$的\gls{Left-continuousInverse}。
+\end{definition}
+\begin{property}\label{prop:LeftcontinuousInverse}
+	对任意$\mathbb{R}$上的准分布函数$F$，有：
+	\begin{enumerate}
+		\item $\forall\;t\in(F(-\infty),F(+\infty)),\;\forall\;x\in\mathbb{R},\;F^{\leftarrow}(t)\leqslant x\Leftrightarrow F(x)\geqslant t$；
+		\item $\forall\;t\in(F(-\infty),F(+\infty)),\;F^{\leftarrow}(t)\in\mathbb{R}$；
+		\item $F^{\leftarrow}$左连续；
+		\item $F^{\leftarrow}$单调递增。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由$F$的单调性可得：
+	\begin{equation*}
+		F^{\leftarrow}(t)\leqslant x\Leftrightarrow\inf\{y\in\mathbb{R}:F(y)\geqslant t\}\leqslant x\Leftrightarrow F(x)\geqslant t
+	\end{equation*}\par
+	(2)若存在$t\in(F(-\infty),F(+\infty))$使得$F^{\leftarrow}(t)=-\infty$，则对于任意的$x\in\mathbb{R}$有$F^{\leftarrow}(t)\leqslant x$，由(1)可得$F(x)\geqslant t$，根据$F$的单调性，此时应有$t\leqslant F(-\infty)$，矛盾。正无穷的情况同理可得。\par
+	(3)对任意的$t\in(F(-\infty),F(+\infty))$，取任意的$\{t_n\}\uparrow t$，则对任意的$n\in\mathbb{N}^+$有：
+	\begin{equation*}
+		\{x\in\mathbb{R}:F(x)\geqslant t\}\subseteq\{x\in\mathbb{R}:F(x)\geqslant t_n\},\;\{x\in\mathbb{R}:F(x)\geqslant t_{n+1}\}\subseteq\{x\in\mathbb{R}:F(x)\geqslant t_n\}
+	\end{equation*}
+	于是$F^{\leftarrow}(t)\geqslant F^{\leftarrow}(t_n),\;F^{\leftarrow}(t_{n+1})\geqslant F^{\leftarrow}(t_n)$，所以$\{F^{\leftarrow}(t_n)\}$单调递增且有上界。由\cref{prop:RSeq}(7)可知$\{F^{\leftarrow}(t_n)\}$存在极限，根据\cref{prop:RSeq}(6)可得该极限小于等于$F^{\leftarrow}(t)$。若：
+	\begin{equation*}
+		\lim_{n\to+\infty}F^{\leftarrow}(t_n)<F^{\leftarrow}(t)
+	\end{equation*}
+	由\info{实数的稠密性}可取$y$满足：
+	\begin{equation*}
+		\lim_{n\to+\infty}F^{\leftarrow}(t_n)<y<F^{\leftarrow}(t)
+	\end{equation*}
+	根据\cref{prop:RSeq}(5)可知存在$N\in\mathbb{N}^+$使得当$n>N$时有$F^{\leftarrow}(t_n)<y$，于是$F(t_n)\leqslant F(y)\leqslant F(t)$。因为$F$是单调递增的且$\{t_n\}\uparrow t$，上式成立当且仅当$F(y)=F(t)$，由(1)可知此时$y\geqslant F^{\leftarrow}(t)$，矛盾。\par
+	(4)由(3)的证明过程立即可得。
+\end{proof}
+\begin{note}
+	左连续逆实际就是广义的分位点。
+\end{note}
+若目标分布的分布函数具有容易计算的左连续逆，则可以将均匀分布的观测值直接变换为目标分布的观测值，这种方法称为逆变换法。
+\begin{method}
+	设$U$是概率空间$(X,\mathscr{F},P)$上服从$\operatorname{U}(0,1)$的随机变量。根据连续型随机变量的定义，在$P$零测集上适当修改$U$可使得$U(X)\subseteq(0,1)$。令：
+	\begin{equation*}
+		f=F^{\leftarrow}(U)
+	\end{equation*}
+	逆变换法按如下步骤生成一个观测值：
+	\begin{enumerate}
+		\item 生成$U$的一个观测值$u\in(0,1)$；
+		\item 输出$y=F^{\leftarrow}(u)$。
+	\end{enumerate}
+	则$f\sim F$，即算法的输出服从分布函数$F$所确定的概率分布。
+\end{method}
+\begin{proof}
+	任取$u\in(0,1)$，由\cref{prop:LeftcontinuousInverse}(1)可知对任意的$y\in\mathbb{R}$有：
+	\begin{equation*}
+		F^{\leftarrow}(u)\leqslant y\iff u\leqslant F(y)
+	\end{equation*}
+	于是根据\cref{prop:BorelSigmaField}(1.b)可知：
+	\begin{equation*}
+		\{u\in(0,1):F^{\leftarrow}(u)\leqslant y\}=(0,F(y)]\cap(0,1)\in\mathcal{B}(\mathbb{R})
+	\end{equation*}
+	根据\cref{prop:MeasurableFunction}(1.b)可知$F^{\leftarrow}$是Borel函数，由\cref{prop:MeasurableMapping}(2)可知$f=F^{\leftarrow}(U)$是随机变量。对任意的$y\in\mathbb{R}$，由均匀分布的定义可得：
+	\begin{equation*}
+		P(f\leqslant y)=P(F^{\leftarrow}(U)\leqslant y)=P(U\leqslant F(y))=F(y)
+	\end{equation*}
+	由$y$的任意性可知$f\sim F$。
+\end{proof}
+\subsubsection{接受拒绝法}
+另一种生成服从给定分布$\pi$的随机数的思想为：可以选取一个容易抽样的概率分布$Q$作为候选分布，先从$Q$中生成候选观测值，再按照适当的概率接受或拒绝该观测值。若接受概率选择得适当，则最终被接受的样本虽然最初来自$Q$，其条件分布却可以恰好等于目标分布$\pi$。这一思想对应的实现就是接受拒绝抽样法。
 \begin{method}
 	设$(Y,\mathscr{A},\mu)$是$\sigma$有限测度空间，$\tilde{\pi}:Y\to[0,+\infty)$是其上的可测函数，且：
 	\begin{equation*}
-		Z\coloneq\int_{Y}\tilde{\pi}(y)\dif\mu\in(0,+\infty)
+		Z=\int_{Y}\tilde{\pi}(y)\dif\mu\in(0,+\infty)
 	\end{equation*}
 	在$(Y,\mathscr{A})$上定义目标概率测度$\pi$：
 	\begin{equation*}
-		\pi(B)\coloneq\frac{1}{Z}\int_{B}\tilde{\pi}(y)\dif\mu,\quad\forall\;B\in\mathscr{A}
+		\pi(B)=\frac{1}{Z}\int_{B}\tilde{\pi}(y)\dif\mu,\quad\forall\;B\in\mathscr{A}
 	\end{equation*}
-	设$Q$是$(Y,\mathscr{A})$上的概率测度，$Q\ll\mu$。根据\cref{theo:RadonNikodym}，取$q\coloneq\dfrac{\dif Q}{\dif\mu}$的一个非负版本（不讨论存在性）。若存在$M\in(0,+\infty)$使得：
+	设$Q$是$(Y,\mathscr{A})$上的概率测度，$Q\ll\mu$。根据\cref{theo:RadonNikodym}，取$q=\dfrac{\dif Q}{\dif\mu}$的一个非负版本（不讨论存在性）。若存在$M\in(0,+\infty)$使得：
 	\begin{equation*}
 		\tilde{\pi}(y)\leqslant Mq(y)\;\text{a.e.于}(Y,\mathscr{A},\mu)
 	\end{equation*}
 	则令：
 	\begin{equation*}
-		\alpha(y)\coloneq
+		\alpha(y)=
 		\begin{cases}
 			\dfrac{\tilde{\pi}(y)}{Mq(y)},&q(y)>0 \\
 			0,&q(y)=0
 		\end{cases}
 	\end{equation*}
-	在$\mu$零测集上适当修改$\alpha$，可使$0\leqslant\alpha(y)\leqslant1$对任意的$y\in Y$成立。设$f$为概率空间$(X,\mathscr{F},P)$到$(Y,\mathscr{A})$上的可测映射且$Pf^{-1}=Q$，$U\sim\operatorname{U}(0,1)$且$U$与$f$独立。接受--拒绝法按如下步骤生成一个观测值：
+	在$\mu$零测集上适当修改$\alpha$，可使$0\leqslant\alpha(y)\leqslant1$对任意的$y\in Y$成立。设$f$为概率空间$(X,\mathscr{F},P)$到$(Y,\mathscr{A})$上的可测映射且$Pf^{-1}=Q$，$U\sim\operatorname{U}(0,1)$且$U$与$f$独立。接受拒绝法按如下步骤生成一个观测值：
 	\begin{enumerate}
 		\item 从$Q$中抽取候选值，即生成$f$的一个观测值$y\in Y$；
 		\item 独立生成$U$的一个观测值$u\in(0,1)$；
@@ -1246,7 +1317,7 @@
 \begin{proof}
 	对任意的$x\in X$，$f(x)$就是第(1)步生成的候选观测值，$U(x)$就是第(2)步生成的均匀分布观测值。记单次试验的接受事件为：
 	\begin{equation*}
-		C\coloneq\{U\leqslant\alpha(f)\}
+		C=\{U\leqslant\alpha(f)\}
 	\end{equation*}
 	根据\cref{prop:MeasurableFunction}(5.a)(1.b)可知$C\in\mathscr{F}$。\par
 	由\cref{prop:Independent}(5.a)可知：
@@ -1302,7 +1373,7 @@
 	综上，单次试验中$f$在接受事件$C$发生条件下的条件分布为$\pi$。\par
 	设$\{(f_n,U_n)\}$为各次相互独立且与$(f,U)$同分布的试验序列，记：
 	\begin{equation*}
-		C_n\coloneq\{U_n\leqslant\alpha(f_n)\},\quad T(x)\coloneq\inf\{n\in\mathbb{N}^+:x\in C_n\},\quad x\in X
+		C_n=\{U_n\leqslant\alpha(f_n)\},\quad T(x)=\inf\{n\in\mathbb{N}^+:x\in C_n\},\quad x\in X
 	\end{equation*}
 	由\cref{prop:Measure}(1)(3)（上连续性）和各次试验相互独立可得：
 	\begin{equation*}

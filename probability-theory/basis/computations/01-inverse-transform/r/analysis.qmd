@@ -1,0 +1,187 @@
+---
+title: "逆变换法"
+format:
+  html:
+    embed-resources: true
+    toc: false
+    code-copy: true
+execute:
+  echo: true
+  warning: false
+  message: false
+  fig-align: center
+  fig-width: 8
+  fig-height: 5
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+book_project_root <- Sys.getenv("BOOK_PROJECT_ROOT", unset = "../../../../..")
+source(file.path(book_project_root, "figure_settings", "figures.R"))
+configure_knitr_figures(book_project_root)
+
+options(width = 100, digits = 5, scipen = 6)
+
+colour_main <- "#355c8a"
+colour_smooth <- "#c45a3c"
+colour_accent <- "#4f8a5b"
+colour_fill <- grDevices::adjustcolor(colour_main, alpha.f = 0.45)
+```
+
+本实验用逆变换法生成指数分布的随机数，并将生成结果的经验分布与理论分布进行比较。取参数为$\lambda=2$的指数分布，其分布函数和左连续逆分别为
+
+$$
+F(x)=
+\begin{cases}
+0,&x<0,\\
+1-\exp(-2x),&x\geqslant0,
+\end{cases}
+\qquad
+F^{\leftarrow}(u)=-\frac{1}{2}\log(1-u),\quad 0<u<1.
+$$
+
+因此，若$U\sim\operatorname{U}(0,1)$，则$X=F^{\leftarrow}(U)$服从参数为$2$的指数分布。下面固定随机种子并生成$10000$个观测值。代码使用`log1p(-u)`计算$\log(1-u)$，以减小$u$接近$0$时直接相减造成的数值误差。
+
+## 生成随机数
+
+```{r}
+#| label: inverse-transform-sample
+
+set.seed(20260814)
+
+sample_size <- 10000L
+rate <- 2
+uniform_values <- runif(sample_size)
+inverse_sample <- -log1p(-uniform_values) / rate
+
+head(inverse_sample, 10)
+```
+
+指数分布的理论均值为$1/\lambda$，理论方差为$1/\lambda^2$。除比较均值和方差外，还计算经验分布函数$F_n$与理论分布函数$F$之间的最大距离
+
+$$
+D_n=\sup_{x\in\mathbb{R}}|F_n(x)-F(x)|.
+$$
+
+```{r}
+#| label: inverse-transform-summary
+
+ordered_inverse_sample <- sort(inverse_sample)
+theoretical_cdf_at_sample <- pexp(ordered_inverse_sample, rate = rate)
+empirical_cdf_upper <- seq_len(sample_size) / sample_size
+empirical_cdf_lower <- (seq_len(sample_size) - 1) / sample_size
+
+cdf_maximum_distance <- max(
+  abs(empirical_cdf_upper - theoretical_cdf_at_sample),
+  abs(empirical_cdf_lower - theoretical_cdf_at_sample)
+)
+
+distribution_summary <- data.frame(
+  Quantity = c("Mean", "Variance", "Maximum CDF distance"),
+  Empirical = c(
+    mean(inverse_sample),
+    var(inverse_sample),
+    cdf_maximum_distance
+  ),
+  Theoretical = c(1 / rate, 1 / rate^2, 0),
+  row.names = NULL
+)
+
+distribution_summary
+```
+
+理论分位数为$F^{\leftarrow}(p)=-\log(1-p)/\lambda$。选取若干概率水平，进一步比较样本分位数与理论分位数。
+
+```{r}
+#| label: inverse-transform-quantiles
+
+probability_levels <- c(0.1, 0.25, 0.5, 0.75, 0.9, 0.95)
+
+quantile_comparison <- data.frame(
+  Probability = probability_levels,
+  Empirical = as.numeric(
+    quantile(inverse_sample, probs = probability_levels, names = FALSE)
+  ),
+  Theoretical = qexp(probability_levels, rate = rate),
+  row.names = NULL
+)
+
+quantile_comparison
+```
+
+## 经验分布与理论分布
+
+左图用直方图表示生成结果的经验密度，并叠加指数分布的理论密度；右图比较经验分布函数与理论分布函数。为使主体部分更清楚，密度图和分布函数图的横坐标只显示到理论分布的$99.5\%$分位点，数值汇总仍然使用全部观测值。
+
+```{r}
+#| label: inverse-transform-distribution-comparison
+#| fig-width: 11
+#| fig-height: 4.5
+
+plot_limit <- qexp(0.995, rate = rate)
+inverse_histogram <- hist(inverse_sample, breaks = "FD", plot = FALSE)
+
+old_par <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+
+plot(
+  inverse_histogram,
+  freq = FALSE,
+  col = colour_fill,
+  border = "white",
+  xlim = c(0, plot_limit),
+  main = "Density Comparison",
+  xlab = "Generated Value",
+  ylab = "Density"
+)
+curve(
+  dexp(x, rate = rate),
+  from = 0,
+  to = plot_limit,
+  add = TRUE,
+  col = colour_smooth,
+  lwd = 2.2
+)
+legend(
+  "topright",
+  legend = c("Empirical density", "Theoretical density"),
+  col = c(colour_fill, colour_smooth),
+  lwd = c(8, 2.2),
+  bty = "n"
+)
+
+plot(
+  ecdf(inverse_sample),
+  verticals = TRUE,
+  do.points = FALSE,
+  col = colour_main,
+  lwd = 1.5,
+  xlim = c(0, plot_limit),
+  ylim = c(0, 1),
+  main = "CDF Comparison",
+  xlab = "Generated Value",
+  ylab = "Cumulative Probability"
+)
+curve(
+  pexp(x, rate = rate),
+  from = 0,
+  to = plot_limit,
+  add = TRUE,
+  col = colour_smooth,
+  lwd = 2.2,
+  lty = 2
+)
+legend(
+  "bottomright",
+  legend = c("Empirical CDF", "Theoretical CDF"),
+  col = c(colour_main, colour_smooth),
+  lty = c(1, 2),
+  lwd = c(1.5, 2.2),
+  bty = "n"
+)
+
+par(old_par)
+```
+
+生成结果的样本均值与理论均值之差为`r sprintf("%.5f", abs(mean(inverse_sample) - 1 / rate))`，样本方差与理论方差之差为`r sprintf("%.5f", abs(var(inverse_sample) - 1 / rate^2))`，经验分布函数与理论分布函数的最大距离为`r sprintf("%.5f", cdf_maximum_distance)`。图形和数值结果共同表明，逆变换后的观测值与目标指数分布吻合；有限样本造成的差异不会完全消失，但样本量增大时通常会减小。

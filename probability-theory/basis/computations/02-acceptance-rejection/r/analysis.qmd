@@ -1,0 +1,260 @@
+---
+title: "接受--拒绝法"
+format:
+  html:
+    embed-resources: true
+    toc: false
+    code-copy: true
+execute:
+  echo: true
+  warning: false
+  message: false
+  fig-align: center
+  fig-width: 8
+  fig-height: 5
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+book_project_root <- Sys.getenv("BOOK_PROJECT_ROOT", unset = "../../../../..")
+source(file.path(book_project_root, "figure_settings", "figures.R"))
+configure_knitr_figures(book_project_root)
+
+options(width = 100, digits = 5, scipen = 6)
+
+colour_main <- "#355c8a"
+colour_smooth <- "#c45a3c"
+colour_accent <- "#4f8a5b"
+colour_fill <- grDevices::adjustcolor(colour_main, alpha.f = 0.45)
+```
+
+本实验用接受--拒绝法生成$\operatorname{Beta}(2,5)$分布的随机数，并将最终接受的观测值的经验分布与理论分布进行比较。目标概率密度为
+
+$$
+p(y)=30y(1-y)^4I_{(0,1)}(y).
+$$
+
+取容易抽样的$\operatorname{U}(0,1)$分布为候选分布，其概率密度在$(0,1)$上为$q(y)=1$。目标密度在$y=1/5$处取得最大值，因此可以取
+
+$$
+M=p\left(\frac{1}{5}\right)=\frac{1536}{625}=2.4576,
+\qquad p(y)\leqslant Mq(y).
+$$
+
+对每个候选值$Y$独立生成$U\sim\operatorname{U}(0,1)$；当$U\leqslant p(Y)/(Mq(Y))=p(Y)/M$时接受$Y$，否则重新抽取。由于$p$已经归一化，单次试验的理论接受概率为$1/M$。
+
+## 生成随机数
+
+下面的函数逐次生成候选值并进行接受或拒绝，直到得到指定数量的观测值。函数同时返回候选值总数，用于检验实际接受率是否接近理论接受率。
+
+```{r}
+#| label: acceptance-rejection-function
+
+accept_reject_beta <- function(n, shape1, shape2, envelope_constant) {
+  accepted_values <- numeric(n)
+  accepted_count <- 0L
+  proposal_count <- 0L
+
+  while (accepted_count < n) {
+    candidate <- runif(1)
+    uniform_value <- runif(1)
+    proposal_count <- proposal_count + 1L
+
+    acceptance_probability <- dbeta(
+      candidate,
+      shape1 = shape1,
+      shape2 = shape2
+    ) /
+      envelope_constant
+
+    if (uniform_value <= acceptance_probability) {
+      accepted_count <- accepted_count + 1L
+      accepted_values[accepted_count] <- candidate
+    }
+  }
+
+  list(values = accepted_values, proposals = proposal_count)
+}
+```
+
+```{r}
+#| label: acceptance-rejection-sample
+
+set.seed(20260814)
+
+sample_size <- 10000L
+shape1 <- 2
+shape2 <- 5
+target_mode <- (shape1 - 1) / (shape1 + shape2 - 2)
+envelope_constant <- dbeta(
+  target_mode,
+  shape1 = shape1,
+  shape2 = shape2
+)
+
+simulation <- accept_reject_beta(
+  n = sample_size,
+  shape1 = shape1,
+  shape2 = shape2,
+  envelope_constant = envelope_constant
+)
+
+accepted_sample <- simulation$values
+proposal_count <- simulation$proposals
+
+head(accepted_sample, 10)
+```
+
+## 接受率与数字特征
+
+理论上，每得到一个被接受的观测值平均需要提出$M$个候选值。下面同时比较经验接受率与理论接受率。
+
+```{r}
+#| label: acceptance-rate-summary
+
+acceptance_summary <- data.frame(
+  Accepted = sample_size,
+  Proposed = proposal_count,
+  EmpiricalAcceptanceRate = sample_size / proposal_count,
+  TheoreticalAcceptanceRate = 1 / envelope_constant,
+  TheoreticalProposalsPerAcceptedValue = envelope_constant,
+  row.names = NULL
+)
+
+acceptance_summary
+```
+
+$\operatorname{Beta}(a,b)$分布的理论均值和方差分别为
+
+$$
+\frac{a}{a+b},
+\qquad
+\frac{ab}{(a+b)^2(a+b+1)}.
+$$
+
+与逆变换法的实验相同，这里还计算经验分布函数与理论分布函数之间的最大距离。
+
+```{r}
+#| label: acceptance-rejection-summary
+
+ordered_accepted_sample <- sort(accepted_sample)
+theoretical_cdf_at_sample <- pbeta(
+  ordered_accepted_sample,
+  shape1 = shape1,
+  shape2 = shape2
+)
+empirical_cdf_upper <- seq_len(sample_size) / sample_size
+empirical_cdf_lower <- (seq_len(sample_size) - 1) / sample_size
+
+cdf_maximum_distance <- max(
+  abs(empirical_cdf_upper - theoretical_cdf_at_sample),
+  abs(empirical_cdf_lower - theoretical_cdf_at_sample)
+)
+
+theoretical_mean <- shape1 / (shape1 + shape2)
+theoretical_variance <- shape1 *
+  shape2 /
+  ((shape1 + shape2)^2 * (shape1 + shape2 + 1))
+
+distribution_summary <- data.frame(
+  Quantity = c("Mean", "Variance", "Maximum CDF distance"),
+  Empirical = c(
+    mean(accepted_sample),
+    var(accepted_sample),
+    cdf_maximum_distance
+  ),
+  Theoretical = c(theoretical_mean, theoretical_variance, 0),
+  row.names = NULL
+)
+
+distribution_summary
+```
+
+## 经验分布与理论分布
+
+左图用直方图表示最终被接受的观测值的经验密度，并叠加目标密度以及包络函数$Mq$；右图比较经验分布函数与$\operatorname{Beta}(2,5)$分布的理论分布函数。
+
+```{r}
+#| label: acceptance-rejection-distribution-comparison
+#| fig-width: 11
+#| fig-height: 4.5
+
+accepted_histogram <- hist(accepted_sample, breaks = "FD", plot = FALSE)
+density_upper_limit <- 1.08 *
+  max(
+    envelope_constant,
+    accepted_histogram$density
+  )
+
+old_par <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))
+
+plot(
+  accepted_histogram,
+  freq = FALSE,
+  col = colour_fill,
+  border = "white",
+  xlim = c(0, 1),
+  ylim = c(0, density_upper_limit),
+  main = "Density Comparison",
+  xlab = "Accepted Value",
+  ylab = "Density"
+)
+curve(
+  dbeta(x, shape1 = shape1, shape2 = shape2),
+  from = 0,
+  to = 1,
+  add = TRUE,
+  col = colour_smooth,
+  lwd = 2.2
+)
+abline(
+  h = envelope_constant,
+  col = colour_accent,
+  lwd = 1.8,
+  lty = 2
+)
+legend(
+  "topright",
+  legend = c("Empirical density", "Target density", "Envelope Mq"),
+  col = c(colour_fill, colour_smooth, colour_accent),
+  lty = c(1, 1, 2),
+  lwd = c(8, 2.2, 1.8),
+  bty = "n"
+)
+
+plot(
+  ecdf(accepted_sample),
+  verticals = TRUE,
+  do.points = FALSE,
+  col = colour_main,
+  lwd = 1.5,
+  xlim = c(0, 1),
+  ylim = c(0, 1),
+  main = "CDF Comparison",
+  xlab = "Accepted Value",
+  ylab = "Cumulative Probability"
+)
+curve(
+  pbeta(x, shape1 = shape1, shape2 = shape2),
+  from = 0,
+  to = 1,
+  add = TRUE,
+  col = colour_smooth,
+  lwd = 2.2,
+  lty = 2
+)
+legend(
+  "bottomright",
+  legend = c("Empirical CDF", "Theoretical CDF"),
+  col = c(colour_main, colour_smooth),
+  lty = c(1, 2),
+  lwd = c(1.5, 2.2),
+  bty = "n"
+)
+
+par(old_par)
+```
+
+本次模拟的实际接受率为`r sprintf("%.4f", sample_size / proposal_count)`，理论接受率为`r sprintf("%.4f", 1 / envelope_constant)`。最终被接受的观测值的样本均值与理论均值之差为`r sprintf("%.5f", abs(mean(accepted_sample) - theoretical_mean))`，样本方差与理论方差之差为`r sprintf("%.5f", abs(var(accepted_sample) - theoretical_variance))`，经验分布函数与理论分布函数的最大距离为`r sprintf("%.5f", cdf_maximum_distance)`。接受率、数字特征和分布图均与理论结果相符，说明接受步骤将均匀候选分布校正为了目标$\operatorname{Beta}(2,5)$分布。

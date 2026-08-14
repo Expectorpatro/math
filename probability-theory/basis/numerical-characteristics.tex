@@ -343,11 +343,64 @@
 	需要注意随机变量的期望是可以取无穷的，而矩则必须是有限值。
 \end{note}
 
+\subsection{方差}
+\begin{definition}
+	设$f$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量。若$[f-\operatorname{E}(f)]^2$的积分存在，则称：
+	\begin{equation*}
+		\operatorname{Var}(f)=\operatorname{E}\{[f-\operatorname{E}(f)]^2\}
+	\end{equation*}
+	为$f$的\gls{Variance}。
+\end{definition}
+\begin{definition}
+	设$f$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量，$\mathscr{A}$是$\mathscr{F}$的一个子$\sigma$域。称：
+	\begin{equation*}
+		\operatorname{Var}(f\mid\mathscr{A})=\operatorname{E}\{[f-\operatorname{E}(f\mid\mathscr{A})]^2\mid\mathscr{A}\}
+	\end{equation*}
+	为$f$关于$\mathscr{A}$的条件方差。$f$关于随机变量$g$的条件方差为$f$关于$\sigma(g)$的条件方差。
+\end{definition}
+\begin{property}\label{prop:Variance}
+	设$f,g$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量。方差具有如下性质：
+	\begin{enumerate}
+		\item 若$f\in L_2(X)$，则$\operatorname{Var}(f)=\operatorname{E}(f^2)-[\operatorname{E}(f)]^2<+\infty$。若$\mathscr{A}$是$\mathscr{F}$的子$\sigma$域，则$\operatorname{Var}(f\mid\mathscr{A})=\operatorname{E}(f^2\mid\mathscr{A})-[\operatorname{E}(f\mid\mathscr{A})]^2<+\infty$；
+		\item 若$f\in L_2(X)$，则$\operatorname{Var}(f)=\operatorname{E}[\operatorname{Var}(f|g)]+\operatorname{Var}[\operatorname{E}(f|g)]$；
+		\item 若$f,g\in L_2(X)$，则$\operatorname{Var}(f\pm g)=\operatorname{Var}(f)\pm2\operatorname{Cov}(f,g)+\operatorname{Var}(g)$；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由\cref{prop:Moment}(1)(3)可知$\operatorname{E}(f)=\mu\in\mathbb{R}$。根据方差的定义和\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{align*}
+		\operatorname{Var}(f)=\operatorname{E}[(f-\mu)^2]=\operatorname{E}(f^2-2\mu f+\mu^2)=\operatorname{E}(f^2)-2\mu^2+\mu^2=\operatorname{E}(f^2)-\mu^2<+\infty
+	\end{align*}
+	条件方差的结论类似可得，只需再使用\cref{theo:ConditionalExpectationPullOut}和\cref{prop:ConditionalExpectation}(3)。\par
+	(2)由\cref{prop:Moment}(1)(3)可知$\operatorname{E}(f)=\mu\in\mathbb{R}$。根据(1)和\cref{prop:ConditionalExpectation}(3)可得：
+	\begin{align*}
+		\operatorname{E}[\operatorname{Var}(f|g)]
+		&=\operatorname{E}\{\operatorname{E}(f^2|g)-[\operatorname{E}(f|g)]^2\} \\
+		&=\operatorname{E}[\operatorname{E}(f^2|g)]-\operatorname{E}\{[\operatorname{E}(f|g)]^2\} \\
+		&=\operatorname{E}(f^2)-\operatorname{E}\{[\operatorname{E}(f|g)]^2\} \\
+		\operatorname{Var}[\operatorname{E}(f|g)]
+		&=\operatorname{E}\{[\operatorname{E}(f|g)]^2\}-\{\operatorname{E}[\operatorname{E}(f|g)]\}^2 \\
+		&=\operatorname{E}\{[\operatorname{E}(f|g)]^2\}-[\operatorname{E}(f)]^2
+	\end{align*}
+	于是：
+	\begin{equation*}
+		\operatorname{E}[\operatorname{Var}(f|g)]+\operatorname{Var}[\operatorname{E}(f|g)]=\operatorname{E}(f^2)-[\operatorname{E}(f)]^2=\operatorname{Var}(f)
+	\end{equation*}\par
+	(3)由\cref{prop:Moment}(1)(3)可知$\operatorname{E}(f)=\mu\in\mathbb{R}$。同理可得$\operatorname{E}(g)\in\mathbb{R}$。由方差的定义、(1)和\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{align*}
+		\operatorname{Var}(f\pm g)
+		&=\operatorname{E}[f\pm g-\operatorname{E}(f\pm g)]^2 \\
+		&=\operatorname{E}\{[f-\operatorname{E}(f)\pm[g-\operatorname{E}(g)]]\}^2 \\
+		&=\operatorname{E}\{[f-\operatorname{E}(f)]^2\pm 2[f-\operatorname{E}(f)][g-\operatorname{E}(g)]+[g-\operatorname{E}(g)]^2\} \\
+		&=\operatorname{Var}(f)\pm2\operatorname{Cov}(f,g)+\operatorname{Var}(g)\qedhere
+	\end{align*}
+\end{proof}
+
 \subsection{协方差}
 \begin{definition}
-	设$\mathbf{X}=(\seq{X}{m})$和$\mathbf{Y}=(\seq{Y}{n})$分别为概率空间$(X,\mathscr{F},P)$上的随机向量。根据\cref{theo:ProductMeasurable}，若$\mathbf{X}$和$\mathbf{Y}$的各分量都在$L_2(X)$中，由\cref{ineq:CauchySchiwarz}和\cref{prop:Lp}(2)可知：
+	设$\mathbf{X}$和$\mathbf{Y}$为概率空间$(X,\mathscr{F},P)$上的随机向量。根据\cref{theo:ProductMeasurable}，若$\mathbf{X}$和$\mathbf{Y}$的各分量都在$L_2(X)$中，由\cref{ineq:CauchySchiwarz}和\cref{prop:Variance}(1)可知：
 	\begin{equation*}
-		\operatorname{Cov}(\mathbf{X},\mathbf{Y})=\operatorname{E}\{[\mathbf{X}-\operatorname{E}(\mathbf{X})]\mathbf{Y}-\operatorname{E}(\mathbf{Y})^{\top}\}
+		\operatorname{Cov}(\mathbf{X},\mathbf{Y})=\operatorname{E}\{[\mathbf{X}-\operatorname{E}(\mathbf{X})][\mathbf{Y}-\operatorname{E}(\mathbf{Y})]^{\top}\}
 	\end{equation*}
 	一定存在且每个元素都是有限值，称其为$\mathbf{X}$与$\mathbf{Y}$的\gls{Covariance}矩阵。若$\mathbf{X}=\mathbf{Y}$，则可将$\operatorname{Cov}(\mathbf{X},\mathbf{Y})$简写为$\operatorname{Cov}(\mathbf{X})$。
 \end{definition}
@@ -362,8 +415,8 @@
 \begin{property}\label{prop:CovMat}
 	协方差矩阵具有如下性质：
 	\begin{enumerate}
-		\item $\mathbf{X}$是一个$n$维随机向量，则$\operatorname{tr}[\operatorname{Cov}(\mathbf{X})]=\sum\limits_{i=1}^{n}\operatorname{Var}(\mathbf{X}_i)$；
-		\item $\mathbf{X}$是一个$n$维随机向量，则$\operatorname{Cov}(\mathbf{X})$是半正定的对称矩阵；
+		\item 若$\mathbf{X}$是一个$n$维随机向量，则$\operatorname{tr}[\operatorname{Cov}(\mathbf{X})]=\sum\limits_{i=1}^{n}\operatorname{Var}(\mathbf{X}_i)$；
+		\item 若$\mathbf{X}$是一个$n$维随机向量，则$\operatorname{Cov}(\mathbf{X})$是半正定的对称矩阵；
 		\item 设$A$和$B$分别为$p\times n$和$q\times m$非随机矩阵，$\mathbf{X}$和$\mathbf{Y}$分别为$n$维、$m$维随机向量，则：
 		\begin{equation*}
 			\operatorname{Cov}(A\mathbf{X},B\mathbf{Y})=A\operatorname{Cov}(\mathbf{X},\mathbf{Y})B^{\top}
@@ -446,55 +499,6 @@
 	由\cref{prop:NonnegativeMeasurableIntegral}(9)可知$a^{\top}\mathbf{X}=a^{\top}\operatorname{E}(\mathbf{X})\;$a.s.于$(X,\mathscr{F},P)$，矛盾，所以$\operatorname{Cov}(\mathbf{X})$可逆。
 \end{proof}
 
-\subsection{方差}
-\begin{definition}
-	设$f$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量。若$[f-\operatorname{E}(f)]^2$的积分存在，则称：
-	\begin{equation*}
-		\operatorname{Var}(f)\coloneq\operatorname{E}\{[f-\operatorname{E}(f)]^2\}
-	\end{equation*}
-	为$f$的\gls{Variance}。若$[f-\operatorname{E}(f)]^2$可积，则称$f$的方差是有限的。
-\end{definition}
-\begin{property}\label{prop:Variance}
-	设$f,g$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量。方差具有如下性质：
-	\begin{enumerate}
-		\item 若$f\in L_2(X)$，则$\operatorname{Var}(f)=\operatorname{E}(f^2)-[\operatorname{E}(f)]^2<+\infty$；
-		\item 若$f\in L_2(X)$，则$\operatorname{Var}(f)=\operatorname{E}[\operatorname{Var}(f|g)]+\operatorname{Var}[\operatorname{E}(f|g)]$；
-		\item 若$f,g\in L_2(X)$，则$\operatorname{Var}(f\pm g)=\operatorname{Var}(f)\pm2\operatorname{Cov}(f,g)+\operatorname{Var}(g)$；
-	\end{enumerate}
-\end{property}
-\begin{proof}
-	(1)由\cref{prop:Moment}(1)(3)可知$\operatorname{E}(f)=\mu\in\mathbb{R}$。根据方差的定义和\cref{prop:MeasurableIntegral}(6)可得：
-	\begin{align*}
-		\operatorname{Var}(f)
-		=\operatorname{E}[(f-\mu)^2]
-		=\operatorname{E}(f^2-2\mu f+\mu^2)
-		=\operatorname{E}(f^2)-2\mu^2+\mu^2
-		=\operatorname{E}(f^2)-\mu^2<+\infty
-	\end{align*}\par
-	(2)由\cref{prop:Moment}(1)(3)可知$\operatorname{E}(f)=\mu\in\mathbb{R}$。根据(1)和\cref{prop:ConditionalExpectation}(3)可得：
-	\begin{align*}
-		\operatorname{E}[\operatorname{Var}(f|g)]
-		&=\operatorname{E}\{\operatorname{E}(f^2|g)-[\operatorname{E}(f|g)]^2\} \\
-		&=\operatorname{E}[\operatorname{E}(f^2|g)]-\operatorname{E}\{[\operatorname{E}(f|g)]^2\} \\
-		&=\operatorname{E}(f^2)-\operatorname{E}\{[\operatorname{E}(f|g)]^2\} \\
-		\operatorname{Var}[\operatorname{E}(f|g)]
-		&=\operatorname{E}\{[\operatorname{E}(f|g)]^2\}-\{\operatorname{E}[\operatorname{E}(f|g)]\}^2 \\
-		&=\operatorname{E}\{[\operatorname{E}(f|g)]^2\}-[\operatorname{E}(f)]^2
-	\end{align*}
-	于是：
-	\begin{equation*}
-		\operatorname{E}[\operatorname{Var}(f|g)]+\operatorname{Var}[\operatorname{E}(f|g)]=\operatorname{E}(f^2)-[\operatorname{E}(f)]^2=\operatorname{Var}(f)
-	\end{equation*}\par
-	(3)由\cref{prop:Moment}(1)(3)可知$\operatorname{E}(f)=\mu\in\mathbb{R}$。同理可得$\operatorname{E}(g)\in\mathbb{R}$。由方差的定义、(1)和\cref{prop:MeasurableIntegral}(6)可得：
-	\begin{align*}
-		\operatorname{Var}(f\pm g)
-		&=\operatorname{E}[f\pm g-\operatorname{E}(f\pm g)]^2 \\
-		&=\operatorname{E}\{[f-\operatorname{E}(f)\pm[g-\operatorname{E}(g)]]\}^2 \\
-		&=\operatorname{E}\{[f-\operatorname{E}(f)]^2\pm 2[f-\operatorname{E}(f)][g-\operatorname{E}(g)]+[g-\operatorname{E}(g)]^2\} \\
-		&=\operatorname{Var}(f)\pm2\operatorname{Cov}(f,g)+\operatorname{Var}(g)\qedhere
-	\end{align*}
-\end{proof}
-
 \subsection{均方误差}
 \begin{definition}
 	设$f$是概率空间$(X,\mathscr{F},P)$上的$n$维随机向量，$g\in\mathbb{R}^{n}$。若$(f-g)^{\top}(f-g)$的积分存在，则称：
@@ -504,11 +508,11 @@
 	为$f$关于$g$的\gls{MSE}。
 \end{definition}
 \begin{property}\label{prop:MSE}
-	设$f$是概率空间$(X,\mathscr{F},P)$上的$n$维随机向量，$g\in\mathbb{R}^{n}$，$(f-g)^{\top}(f-g)$的积分存在。
+	设$f$是概率空间$(X,\mathscr{F},P)$上的$n$维随机向量，$g\in\mathbb{R}^{n}$，$f$关于$g$的均方误差存在。
 	\begin{enumerate}
 		\item 若$\operatorname{E}(f)$存在，则：
 		\begin{equation*}
-			\operatorname{MSE}(f)=\operatorname{tr}\operatorname{Cov}(f)+[\operatorname{E}(f)-g]^{\top}[\operatorname{E}(f)-g]
+			\operatorname{MSE}(f)=\operatorname{tr}[\operatorname{Cov}(f)]+[\operatorname{E}(f)-g]^{\top}[\operatorname{E}(f)-g]
 		\end{equation*}
 		\item 若$f^{\top}f$期望存在且$\operatorname{E}(f)=g$，则：
 		\begin{equation*}
@@ -519,7 +523,7 @@
 \begin{proof}
 	(1)由\cref{prop:Trace}(3)和\cref{prop:MeasurableIntegral}(6)可得：
 	\begin{align*}
-		&\operatorname{MSE}(f,g)=\operatorname{E}\{[f-\operatorname{E}(f)+\operatorname{E}(f)-g]^{\top}[f-\operatorname{E}(f)+\operatorname{E}(f)-g]\} \\
+		&\operatorname{MSE}(f)=\operatorname{E}\{[f-\operatorname{E}(f)+\operatorname{E}(f)-g]^{\top}[f-\operatorname{E}(f)+\operatorname{E}(f)-g]\} \\
 		=&\operatorname{E}\{[f-\operatorname{E}(f)]^{\top}[f-\operatorname{E}(f)]+[f-\operatorname{E}(f)]^{\top}[\operatorname{E}(f)-g]+ \\
 		&[\operatorname{E}(f)-g]^{\top}[f-\operatorname{E}(f)]+[\operatorname{E}(f)-g]^{\top}[\operatorname{E}(f)-g]\} \\
 		=&\operatorname{E}\{\operatorname{tr}[f-\operatorname{E}(f)]^{\top}[f-\operatorname{E}(f)]\}+\operatorname{E}\{[f-\operatorname{E}(f)]^{\top}\}[\operatorname{E}(f)-g] \\
@@ -600,7 +604,7 @@
 
 \subsection{二次型}
 \begin{definition}
-	$\mathbf{X}$是一个$n$维随机向量，$A=(a_{ij})$为$n$阶非随机实对称阵，则随机变量：
+	设$\mathbf{X}$是一个$n$维随机向量，$A=(a_{ij})$为$n$阶非随机实对称阵，则随机变量：
 	\begin{equation*}
 		\mathbf{X}^{\top}A\mathbf{X}=\sum_{i=1}^{n}\sum_{j=1}^{n}a_{ij}\mathbf{X}_i\mathbf{X}_j
 	\end{equation*}
@@ -608,7 +612,7 @@
 \end{definition}
 \subsubsection{随机变量二次型的均值}
 \begin{theorem}\label{theo:ERVQuadraticForm}
-	$\mathbf{X}$是一个$n$维随机向量，$\operatorname{E}(\mathbf{X})=\mu,\;\operatorname{Cov}(\mathbf{X})=\Sigma$，则：
+	设$\mathbf{X}$是一个$n$维随机向量，$\operatorname{E}(\mathbf{X})=\mu,\;\operatorname{Cov}(\mathbf{X})=\Sigma$，则：
 	\begin{equation*}
 		\operatorname{E}(\mathbf{X}^{\top}A\mathbf{X})=\mu^{\top}A\mu+\operatorname{tr}(A\Sigma)
 	\end{equation*}	
