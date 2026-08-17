@@ -8,14 +8,14 @@
 			\operatorname{Cov}(\varepsilon)=\sigma^2I_n
 		\end{cases}
 	\end{equation*}
-	其中$\varepsilon:\Omega\to\mathbb{R}^n$为随机误差向量，则称上述模型为\gls{LinearModel}。称$X$为\gls{DesignMatrix}，随机向量$Y$的一次观测记为$y\in\mathbb{R}^n$，称$y$为\gls{ObservationVector}。
+	其中$\varepsilon:\Omega\to\mathbb{R}^n$为随机误差向量，则称上述模型为\gls{LinearModel}。称$X$为\gls{DesignMatrix}。对固定的$\omega\in\Omega$，将随机向量$Y$的一次观测实现记为$y\coloneq Y(\omega)\in\mathbb{R}^n$，称$y$为\gls{ObservationVector}；此后$y$表示给定的非随机向量。
 \end{definition}
 在实际问题中，设计矩阵$X$和观测向量$y$是已知的，而参数向量$\beta$是未知的。线性模型认为$Y$的均值具有线性结构：
 \begin{equation*}
 	\operatorname{E}(Y)=X\beta
 \end{equation*}
 因而我们希望根据观测数据$y$寻找一个参数向量，使得相应的拟合值$X\beta$能够尽可能接近$y$。\par
-由于随机误差的存在，观测向量$y$一般并不恰好属于$X$的象$\operatorname{Im}(X)$，因此方程$X\beta=y$通常没有解。为此，我们不再要求拟合值$X\beta$与观测向量$y$完全相等，而是要求二者之间的差值$y-X\beta$尽可能接近$\mathbf{0}$。最常用的度量方式是标准范数的平方，由此得到最小二乘法。
+由于随机误差的存在，观测向量$y$一般并不恰好属于$X$的列空间$\mathcal{M}(X)$，因此方程$X\beta=y$通常没有解。为此，我们不再要求拟合值$X\beta$与观测向量$y$完全相等，而是要求二者之间的差值$y-X\beta$尽可能接近$\mathbf{0}$。最常用的度量方式是标准范数的平方，由此得到最小二乘法。
 \begin{definition}
 	对于给定的设计矩阵$X\in\mathbb{R}^{n\times p}$和观测向量$y\in\mathbb{R}^n$，定义：
 	\begin{equation*}
@@ -70,18 +70,26 @@
 	\end{equation*}
 	当$\beta=\hat{\beta}$时上式最小，所以$\hat{\beta}$是一个最小二乘解。
 \end{proof}
+\begin{definition}
+	固定$X^{\top}X$的一个广义逆$(X^{\top}X)^-$，定义最小二乘估计映射：
+	\begin{equation*}
+		\hat{\beta}:\mathbb{R}^n\to\mathbb{R}^p,\quad
+		\hat{\beta}(z)\coloneq(X^{\top}X)^-X^{\top}z
+	\end{equation*}
+	则$\hat{\beta}(Y):\Omega\to\mathbb{R}^p$是由随机向量$Y$得到的最小二乘估计量，$\hat{\beta}(y)$是其在观测向量$y$处的观测值。下文仅讨论给定观测向量$y$的最小二乘问题时，将$\hat{\beta}(y)$简记为$\hat{\beta}$。
+\end{definition}
 \begin{derivation}
-	由于对任意$b\in\mathbb{R}^p$，向量$Xb$都属于$X$的列空间$\operatorname{Im}(X)$，故所有可能的拟合值为集合：
+	由于对任意$b\in\mathbb{R}^p$，向量$Xb$都属于$X$的列空间$\mathcal{M}(X)$，故所有可能的拟合值为集合：
 	\begin{equation*}
-		\{Xb:b\in\mathbb{R}^p\}=\operatorname{Im}(X)
+		\{Xb:b\in\mathbb{R}^p\}=\mathcal{M}(X)
 	\end{equation*}
-	因此，最小二乘问题等价于在子空间$\operatorname{Im}(X)$（\cref{prop:LinearMapping}(6)）中寻找与$y$距离最近的向量，即：
+	因此，最小二乘问题等价于在子空间$\mathcal{M}(X)$（\cref{prop:LinearMapping}(6)）中寻找与$y$距离最近的向量，即：
 	\begin{equation*}
-		\min_{z\in\operatorname{Im}(X)}||y-z||^2
+		\min_{z\in\mathcal{M}(X)}||y-z||^2
 	\end{equation*}
-	若$\hat{\beta}$是最小二乘解，并记$\hat{y}=X\hat{\beta}$，则$\hat{y}\in\operatorname{Im}(X)$且满足：
+	若$\hat{\beta}$是最小二乘解，并记$\hat{y}=X\hat{\beta}$，则$\hat{y}\in\mathcal{M}(X)$且满足：
 	\begin{equation*}
-		||y-\hat{y}||=\min_{z\in\operatorname{Im}(X)}||y-z||
+		||y-\hat{y}||=\min_{z\in\mathcal{M}(X)}||y-z||
 	\end{equation*}
 	由正则方程：
 	\begin{equation*}
@@ -91,7 +99,7 @@
 	\begin{equation*}
 		X^{\top}(y-X\hat{\beta})=\mathbf{0}
 	\end{equation*}
-	这表明$y-\hat{y}$与$X$的每一列都正交，从而与整个子空间$\operatorname{Im}(X)$正交。故$\hat{y}=X\hat{\beta}$正是$y$在$\operatorname{Im}(X)$上的正交投影。
+	这表明$y-\hat{y}$与$X$的每一列都正交，从而与整个子空间$\mathcal{M}(X)$正交。故$\hat{y}=X\hat{\beta}$正是$y$在$\mathcal{M}(X)$上的正交投影。
 \end{derivation}
 \begin{figure}[htbp]
 	\centering
@@ -155,13 +163,13 @@
 		right=5pt,
 		fill=white,
 		inner sep=1.5pt
-		] {$y-\hat y$};
+		] {$y-\hat{y}$};
 		
 		\fill (O) circle (1.5pt);
 		\fill (Yhat) circle (1.7pt);
 		
 		\node[above left=2pt] at (O) {$\mathbf{0}$};
-		\node[below=6pt] at (Yhat) {$\hat y=X\hat\beta$};
+		\node[below=6pt] at (Yhat) {$\hat{y}=X\hat{\beta}$};
 	
 		\pic[
 		draw,
@@ -170,10 +178,10 @@
 		] {right angle=O--Yhat--Y};
 		
 		\node[below right=3pt] at (B)
-		{$\operatorname{Im}(X)$};
+		{$\mathcal{M}(X)$};
 		
 	\end{tikzpicture}
-	\caption{$\hat{y}=X\hat{\beta}$是$y$在$\operatorname{Im}(X)$上的正交投影}
+	\caption{$\hat{y}=X\hat{\beta}$是$y$在$\mathcal{M}(X)$上的正交投影}
 \end{figure}
 \begin{note}
 	接下来我们将涉及到非常多的公式，初学会觉得非常难记，但如果从投影的角度去理解的话，很多公式都是直观上非常显然的，也就更好记忆了。
@@ -184,18 +192,18 @@
 	设非随机向量$c\in\mathbb{R}^{p}$。若存在非随机向量$\alpha\in\mathbb{R}^{n}$使得$\operatorname{E}(\alpha^{\top}Y)=c^{\top}\beta$对任意的$\beta\in\mathbb{R}^{p}$成立，则称$c^{\top}\beta$为\gls{EstimableFunction}。
 \end{definition}
 \begin{note}
-	由\cref{theo:LSELinearModel}可知$\beta$的最小二乘估计一般并不唯一，因此不能直接讨论$\beta$本身的估计。由于线性模型通过$\operatorname{E}(Y)=X\beta$刻画参数与观测变量之间的线性关系，我们转而关注$\beta$的线性函数$c^{\top}\beta$。由于实际能够观测到的只有$Y$，自然要考察是否存在$\alpha\in\mathbb{R}^{n}$使得$\alpha^{\top}Y$是$c^{\top}\beta$的线性无偏估计量。
+	由\cref{theo:LSELinearModel}可知$\beta$的最小二乘估计一般并不唯一，因此不能直接讨论$\beta$本身的估计。由于线性模型通过$\operatorname{E}(Y)=X\beta$刻画参数与观测变量之间的线性关系，我们转而关注$\beta$的线性函数$c^{\top}\beta$。实际能够观测到的是随机向量$Y$的一次实现$y$，因此自然要考察是否存在$\alpha\in\mathbb{R}^{n}$使得$\alpha^{\top}Y$是$c^{\top}\beta$的线性无偏估计量。
 \end{note}
 \begin{property}\label{prop:EstimableFunction}
-	对于\cref{model:LinearModel}，设$c^{\top}\beta$和$d^{\top}\beta$是可估函数，$\hat{\beta}$是$\beta$的最小二乘估计，则：
+	对于\cref{model:LinearModel}，设$c^{\top}\beta$和$d^{\top}\beta$是可估函数，$\hat{\beta}(Y)$是$\beta$的最小二乘估计量，则：
 	\begin{enumerate}
 		\item 使$c^{\top}\beta$成为可估函数的全体向量$c$构成$\mathcal{M}(X^{\top})$；
 		\item 可估函数的全体构成一个$\mathbb{R}$上的$\operatorname{rank}(X)$维线性空间；
-		\item $c^{\top}\hat{\beta}$与$(X^{\top}X)^-$的选择无关；
-		\item $c^{\top}\hat{\beta}$为$c^{\top}\beta$的无偏估计；
-		\item  $\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})=\sigma^2c^{\top}(X^{\top}X)^-d$且与$(X^{\top}X)^-$的选择无关；
-		\item (Gauss-Markov)当$\sigma^2>0$时，在方差最小的意义下$c^{\top}\hat{\beta}$是$c^{\top}\beta$唯一的BLUE；
-		\item 设$\varphi_i=c_i^{\top}\beta,\;i=1,2,\dots,k$都是可估函数，$\seq{\alpha}{k}\in\mathbb{R}$，则$\varphi=\sum\limits_{i=1}^{k}\alpha_i\varphi_i$也是可估的，$\hat{\varphi}=\sum\limits_{i=1}^{k}\alpha_ic_i^{\top}\hat{\beta}$是$\varphi$的无偏估计。当当$\sigma^2>0$时，在方差最小的意义下$\hat{\varphi}$时$\varphi$唯一的BLUE。
+		\item $c^{\top}\hat{\beta}(Y)$与$(X^{\top}X)^-$的选择无关；
+		\item $c^{\top}\hat{\beta}(Y)$为$c^{\top}\beta$的无偏估计；
+		\item  $\operatorname{Cov}[c^{\top}\hat{\beta}(Y),d^{\top}\hat{\beta}(Y)]=\sigma^2c^{\top}(X^{\top}X)^-d$且与$(X^{\top}X)^-$的选择无关；
+		\item (Gauss-Markov)当$\sigma^2>0$时，在方差最小的意义下$c^{\top}\hat{\beta}(Y)$是$c^{\top}\beta$唯一的BLUE；
+		\item 设$\varphi_i=c_i^{\top}\beta,\;i=1,2,\dots,k$都是可估函数，$\seq{\alpha}{k}\in\mathbb{R}$，则$\varphi=\sum\limits_{i=1}^{k}\alpha_i\varphi_i$也是可估的，$\hat{\varphi}(Y)=\sum\limits_{i=1}^{k}\alpha_ic_i^{\top}\hat{\beta}(Y)$是$\varphi$的无偏估计。当当$\sigma^2>0$时，在方差最小的意义下$\hat{\varphi}(Y)$时$\varphi$唯一的BLUE。
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -222,25 +230,25 @@
 	因此，可估函数的全体构成一个$\mathbb{R}$上的$\operatorname{rank}(X)$维线性空间。\par
 	(3)因为$c^{\top}\beta$可估，由(1)可知存在$\alpha\in\mathbb{R}^{n}$使得$c=X^{\top}\alpha$，于是由\cref{prop:Transpose}(4)和\cref{theo:LSELinearModel}可得：
 	\begin{equation*}
-		c^{\top}\hat{\beta}=\alpha^{\top}X(X^{\top}X)^-X^{\top}y
+		c^{\top}\hat{\beta}(Y)=\alpha^{\top}X(X^{\top}X)^-X^{\top}Y
 	\end{equation*}
 	由\cref{prop:A-}(4)即可得出结论。\par
 	(4)因为$c^{\top}\beta$可估，由(1)可知存在$\alpha\in\mathbb{R}^{n}$使得$c=X^{\top}\alpha$，根据\cref{theo:LSELinearModel}、\cref{prop:MeasurableIntegral}(6)和\cref{prop:A-}(7)可得：
 	\begin{equation*}
-		\operatorname{E}(c^{\top}\hat{\beta})=\operatorname{E}[c^{\top}(X^{\top}X)^-X^{\top}Y]=c^{\top}(X^{\top}X)^-X^{\top}X\beta=c^{\top}\beta
+		\operatorname{E}[c^{\top}\hat{\beta}(Y)]=\operatorname{E}[c^{\top}(X^{\top}X)^-X^{\top}Y]=c^{\top}(X^{\top}X)^-X^{\top}X\beta=c^{\top}\beta
 	\end{equation*}\par
 	(5)因为$c^{\top}\beta,d^{\top}\beta$是可估函数，由(1)可知存在$\alpha,\gamma\in\mathbb{R}^{n}$使得$c=X^{\top}\alpha,d=X^{\top}\gamma$。根据\cref{theo:LSELinearModel}、\cref{prop:CovMat}(3)、\cref{prop:Transpose}(4)和\cref{prop:A-}(7)(5)(4)可得：
 	\begin{align*}
-		&\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})=\operatorname{Cov}[c^{\top}(X^{\top}X)^-X^{\top}Y,d^{\top}(X^{\top}X)^-X^{\top}Y] \\
+		&\operatorname{Cov}[c^{\top}\hat{\beta}(Y),d^{\top}\hat{\beta}(Y)]=\operatorname{Cov}[c^{\top}(X^{\top}X)^-X^{\top}Y,d^{\top}(X^{\top}X)^-X^{\top}Y] \\
 		=&c^{\top}(X^{\top}X)^-X^{\top}\operatorname{Cov}(Y)X[(X^{\top}X)^-]^{\top}d =c^{\top}(X^{\top}X)^-X^{\top}\sigma^2I_nX[(X^{\top}X)^-]^{\top}d \\
 		=&\sigma^2c^{\top}(X^{\top}X)^-X^{\top}X[(X^{\top}X)^-]^{\top}d=\sigma^2c^{\top}[(X^{\top}X)^-]^{\top}d=\sigma^2\alpha^{\top}X[(X^{\top}X)^-]^{\top}X^{\top}\gamma \\
 		=&\sigma^2\alpha^{\top}X(X^{\top}X)^-X^{\top}\gamma=\sigma^2c^{\top}(X^{\top}X)^-d
 	\end{align*}
-	根据\cref{prop:Transpose}(4)和\cref{theo:VectorSpaceAAAT}可知$c^{\top}=\alpha^{\top}X\in\mathcal{M}(X^{\top})=\mathcal{M}(X^{\top}X),d=X^{\top}\gamma\in\mathcal{M}(X^{\top})=\mathcal{M}(X^{\top}X)$，由\cref{prop:A-}(3)可得$\operatorname{Cov}(c^{\top}\hat{\beta},d^{\top}\hat{\beta})$与$(X^{\top}X)^-$的选择无关。\par
+	根据\cref{prop:Transpose}(4)和\cref{theo:VectorSpaceAAAT}可知$c^{\top}=\alpha^{\top}X\in\mathcal{M}(X^{\top})=\mathcal{M}(X^{\top}X),d=X^{\top}\gamma\in\mathcal{M}(X^{\top})=\mathcal{M}(X^{\top}X)$，由\cref{prop:A-}(3)可得$\operatorname{Cov}[c^{\top}\hat{\beta}(Y),d^{\top}\hat{\beta}(Y)]$与$(X^{\top}X)^-$的选择无关。\par
 	(6)无偏性由(4)可得，线性性由\cref{theo:LSELinearModel}可知，下证方差最小。\par
 	设$a^{\top}Y$为$c^{\top}\beta$的任一无偏估计，由(1)的过程可知$c=X^{\top}a$。根据\cref{prop:CovMat}(3)和(5)可得：
 	\begin{equation*}
-		\operatorname{Var}(a^{\top}Y)-\operatorname{Var}(c^{\top}\hat{\beta})=\sigma^2[a^{\top}a-c^{\top}(X^{\top}X)^-c]
+		\operatorname{Var}(a^{\top}Y)-\operatorname{Var}[c^{\top}\hat{\beta}(Y)]=\sigma^2[a^{\top}a-c^{\top}(X^{\top}X)^-c]
 	\end{equation*}
 	由\cref{prop:Transpose}(4)和\cref{prop:A-}(7)可得：
 	\begin{align*}
@@ -260,76 +268,88 @@
 	\end{align*}
 	于是：
 	\begin{equation*}
-		\operatorname{Var}(a^{\top}Y)-\operatorname{Var}(c^{\top}\hat{\beta})=\sigma^2||a-X(X^{\top}X)^-c||^2\geqslant0
+		\operatorname{Var}(a^{\top}Y)-\operatorname{Var}[c^{\top}\hat{\beta}(Y)]=\sigma^2||a-X(X^{\top}X)^-c||^2\geqslant0
 	\end{equation*}
-	所以$\operatorname{Var}(a^{\top}Y)=\operatorname{Var}(c^{\top}\hat{\beta})$当且仅当$a=X(X^{\top}X)^-c$，由\cref{theo:LSELinearModel}可知$a=X(X^{\top}X)^-c\Leftrightarrow a^{\top}=c^{\top}(X^{\top}X)^-X^{\top}\Leftrightarrow a^{\top}y=c^{\top}(X^{\top}X)^-X^{\top}y=c^{\top}\hat{\beta}$。\par
+	所以$\operatorname{Var}(a^{\top}Y)=\operatorname{Var}[c^{\top}\hat{\beta}(Y)]$当且仅当$a=X(X^{\top}X)^-c$，由\cref{theo:LSELinearModel}可知$a=X(X^{\top}X)^-c\Leftrightarrow a^{\top}=c^{\top}(X^{\top}X)^-X^{\top}\Leftrightarrow a^{\top}Y=c^{\top}(X^{\top}X)^-X^{\top}Y=c^{\top}\hat{\beta}(Y)$。\par
 	(7)由(2)可知$\varphi$是可估的。\par
-	由(4)可得$c_i^{\top}\hat{\beta}$是$c_i^{\top}\beta$的无偏估计，根据\cref{prop:MeasurableIntegral}(6)可得：
+	由(4)可得$c_i^{\top}\hat{\beta}(Y)$是$c_i^{\top}\beta$的无偏估计，根据\cref{prop:MeasurableIntegral}(6)可得：
 	\begin{equation*}
-		\operatorname{E}(\hat{\varphi})=\operatorname{E}\left(\sum_{i=1}^{k}\alpha_ic_i^{\top}\hat{\beta}\right)=\sum_{i=1}^{k}\alpha_i\operatorname{E}(c_i^{\top}\hat{\beta})=\sum_{i=1}^{k}\alpha_ic_i^{\top}\beta=\varphi
+		\operatorname{E}[\hat{\varphi}(Y)]=\operatorname{E}\left[\sum_{i=1}^{k}\alpha_ic_i^{\top}\hat{\beta}(Y)\right]=\sum_{i=1}^{k}\alpha_i\operatorname{E}[c_i^{\top}\hat{\beta}(Y)]=\sum_{i=1}^{k}\alpha_ic_i^{\top}\beta=\varphi
 	\end{equation*}
-	即$\hat{\varphi}$是一个无偏估计。\par
+	即$\hat{\varphi}(Y)$是一个无偏估计。\par
 	令$c=\sum\limits_{i=1}^{k}\alpha_ic_i$，则$\varphi=c^{\top}\beta$。设$\gamma^{\top}Y$是$\varphi$的一个无偏估计，于是由(6)可得：
 	\begin{equation*}
-		\operatorname{Var}(\gamma^{\top}Y)-\operatorname{Var}(c^{\top}\hat{\beta})=\sigma^2||\gamma-X(X^{\top}X)^-c||^2
+		\operatorname{Var}(\gamma^{\top}Y)-\operatorname{Var}[c^{\top}\hat{\beta}(Y)]=\sigma^2||\gamma-X(X^{\top}X)^-c||^2
 	\end{equation*}
-	上式等于$0\Leftrightarrow \gamma^{\top}y=c^{\top}\hat{\beta}=\hat{\varphi}$，即$\hat{\varphi}$是唯一的BLUE。
+	上式等于$0\Leftrightarrow \gamma^{\top}Y=c^{\top}\hat{\beta}(Y)=\hat{\varphi}(Y)$，即$\hat{\varphi}(Y)$是唯一的BLUE。
 \end{proof}
 \begin{definition}
-	对于\cref{model:LinearModel}，若$c^{\top}\beta$是可估函数，称$c^{\top}\hat{\beta}$为$c^{\top}\beta$的LSE，其中$\hat{\beta}$为$\beta$的最小二乘估计。
+	对于\cref{model:LinearModel}，若$c^{\top}\beta$是可估函数，称$c^{\top}\hat{\beta}(Y)$为$c^{\top}\beta$的LSE，称$c^{\top}\hat{\beta}(y)$为该估计量在观测向量$y$处的观测值。
 \end{definition}
 \subsubsection{残差}
 \begin{definition}
-	对于\cref{model:LinearModel}，记$\hat{y}=X\hat{\beta}$，其中$\hat{\beta}$是$\beta$的最小二乘估计。称$\hat{e}=Y-\hat{y}$为\gls{ResidualVector}，称$\hat{e}^{\top}\hat{e}$为\gls{SSE}。
+	对于\cref{model:LinearModel}，记向$\mathcal{M}(X)$的正交投影阵为：
+	\begin{equation*}
+		P_X\coloneq X(X^{\top}X)^-X^{\top}\in\mathbb{R}^{n\times n}
+	\end{equation*}
+	定义随机拟合向量$\widehat{Y}:\Omega\to\mathbb{R}^n$及随机残差向量$\widehat{E}:\Omega\to\mathbb{R}^n$为：
+	\begin{equation*}
+		\widehat{Y}\coloneq X\hat{\beta}(Y)=P_XY,\quad
+		\widehat{E}\coloneq Y-\widehat{Y}=(I_n-P_X)Y
+	\end{equation*}
+	称$\widehat{E}$为随机\gls{ResidualVector}。它们在观测向量$y$处的观测值分别记为：
+	\begin{equation*}
+		\hat{y}\coloneq X\hat{\beta}(y)=P_Xy,\quad
+		\hat{e}\coloneq y-\hat{y}=(I_n-P_X)y
+	\end{equation*}
+	称$\hat{e}$为观测残差向量。定义\gls{SSE}函数：
+	\begin{equation*}
+		\operatorname{SSE}(z)\coloneq z^{\top}(I_n-P_X)z,\quad z\in\mathbb{R}^n
+	\end{equation*}
+	于是$\operatorname{SSE}(Y)=\widehat{E}^{\top}\widehat{E}$为随机变量，$\operatorname{SSE}(y)=\hat{e}^{\top}\hat{e}$为它在观测向量$y$处的观测值。
 \end{definition}
 \begin{property}\label{prop:ehat}
-	对于\cref{model:LinearModel}，$\hat{\beta}$为$\beta$的最小二乘估计，则残差向量$\hat{e}$满足：
+	对于\cref{model:LinearModel}，随机拟合向量$\widehat{Y}$与随机残差向量$\widehat{E}$满足：
 	\begin{enumerate}
-		\item $\operatorname{E}(\hat{e})=0,\;\operatorname{Cov}(\hat{e})=\sigma^2(I_n-P_X)$；
-		\item $\operatorname{SSE}=y^{\top}(I_n-P_X)y$；
-		\item $\operatorname{Cov}(\hat{y},\hat{e})=\mathbf{0}$；
+		\item $\operatorname{E}(\widehat{E})=\mathbf{0}_n,\;\operatorname{Cov}(\widehat{E})=\sigma^2(I_n-P_X)$；
+		\item $\operatorname{SSE}(Y)=Y^{\top}(I_n-P_X)Y,\;\operatorname{SSE}(y)=y^{\top}(I_n-P_X)y$；
+		\item $\operatorname{Cov}(\widehat{Y},\widehat{E})=\mathbf{0}_{n\times n}$；
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)由\cref{prop:OrthogonalProjectionMat}(2)可知向$\mathcal{M}(X)$的正交投影阵$P_X=X(X^{\top}X)^-X^{\top}$，根据\cref{prop:OrthogonalProjectionMat}(7)(3)可知$I_n-P_X$是对称幂等阵，所以由\cref{prop:CovMat}(3)可得：
+	(1)根据\cref{prop:OrthogonalProjectionMat}(7)(3)可知$I_n-P_X$是对称幂等阵，所以由\cref{prop:CovMat}(3)可得：
 	\begin{gather*}
 		\begin{aligned}
-			\operatorname{E}(\hat{e})&=\operatorname{E}(y-X\hat{\beta})=\operatorname{E}[I_ny-X(X^{\top}X)^-X^{\top}y]=(I_n-P_X)\operatorname{E}(y) \\
-			&=(I_n-P_X)X\beta=(X-X)\beta=0
+			\operatorname{E}(\widehat{E})&=\operatorname{E}[(I_n-P_X)Y]=(I_n-P_X)\operatorname{E}(Y) \\
+			&=(I_n-P_X)X\beta=(X-X)\beta=\mathbf{0}_n
 		\end{aligned} \\
 		\begin{aligned}
-			\operatorname{Cov}(\hat{e})&=\operatorname{Cov}[(I_n-P_X)y]=(I_n-P_X)\operatorname{Cov}(y)(I_n-P_X)^{\top} \\
-			&=(I_n-P_X)\operatorname{Cov}(y)(I_n-P_X)=\sigma^2(I_n-P_X)
+			\operatorname{Cov}(\widehat{E})&=\operatorname{Cov}[(I_n-P_X)Y]=(I_n-P_X)\operatorname{Cov}(Y)(I_n-P_X)^{\top} \\
+			&=(I_n-P_X)\operatorname{Cov}(Y)(I_n-P_X)=\sigma^2(I_n-P_X)
 		\end{aligned}
 	\end{gather*}\par
-	(2)由(1)的证明过程可知：
+	(2)因为$I_n-P_X$是对称幂等阵，所以对任意的$z\in\mathbb{R}^n$，由\cref{prop:Transpose}(4)可得：
 	\begin{equation*}
-		\hat{e}=(I_n-P_X)y
-	\end{equation*}
-	且$I_n-P_X$是一个对称幂等阵，于是由\cref{prop:Transpose}(4)可得：
-	\begin{equation*}
-		\hat{e}^{\top}\hat{e}=y^{\top}(I_n-P_X)^{\top}(I_n-P_X)y=y^{\top}(I_n-P_X)(I_n-P_X)y=y^{\top}(I_n-P_X)y
+		[(I_n-P_X)z]^{\top}(I_n-P_X)z=z^{\top}(I_n-P_X)^{\top}(I_n-P_X)z=z^{\top}(I_n-P_X)z
 	\end{equation*}\par
 	(3)由\cref{prop:CovMat}(5)(3)和\cref{prop:OrthogonalProjectionMat}(2)(8)可得
 	\begin{align*}
-		\operatorname{Cov}(\hat{y},\hat{e})&=\operatorname{Cov}(\hat{y},y-\hat{y})=\operatorname{Cov}(\hat{y},y)-\operatorname{Cov}(\hat{y}) \\
-		&=\operatorname{Cov}[X(X^{\top}X)^-X^{\top}y,y]-\operatorname{Cov}[X(X^{\top}X)^-X^{\top}y] \\
-		&=\operatorname{Cov}[P_Xy,(I_n-P_X)y]=P_X\operatorname{Cov}(y)(I_n-P_X) \\
-		&=\sigma^2P_X(I_n-P_X)=\mathbf{0}\qedhere
+		\operatorname{Cov}(\widehat{Y},\widehat{E})&=\operatorname{Cov}[P_XY,(I_n-P_X)Y] \\
+		&=P_X\operatorname{Cov}(Y)(I_n-P_X)=\sigma^2P_X(I_n-P_X)=\mathbf{0}_{n\times n}\qedhere
 	\end{align*}
 \end{proof}
 \subsubsection{误差方差}
 \begin{theorem}\label{theo:VarianceOfErrorTerm}
-	对于\cref{model:LinearModel}，$\hat{\beta}$为正则方程的解，$\operatorname{rank}(X)=r$，则：
+	对于\cref{model:LinearModel}，$\operatorname{rank}(X)=r$，则随机变量：
 	\begin{equation*}
-		\hat{\sigma}^2=\frac{\operatorname{SSE}}{n-r}
+		\hat{\sigma}^2(Y)\coloneq\frac{\operatorname{SSE}(Y)}{n-r}
 	\end{equation*}
 	是$\sigma^2$的无偏估计。
 \end{theorem}
 \begin{proof}
 	注意到$(I_n-P_X)X=X-X=\mathbf{0}$，由\cref{prop:ehat}(2)、\cref{theo:ERVQuadraticForm}和\cref{prop:Transpose}(4)可得：
 	\begin{align*}
-		\operatorname{E}(\operatorname{SSE})&=\operatorname{E}[y^{\top}(I_n-P_X)y] =\beta^{\top}X^{\top}(I_n-P_X)X\beta+\operatorname{tr}[(I_n-P_X)\sigma^2I_n] \\
+		\operatorname{E}[\operatorname{SSE}(Y)]&=\operatorname{E}[Y^{\top}(I_n-P_X)Y] =\beta^{\top}X^{\top}(I_n-P_X)X\beta+\operatorname{tr}[(I_n-P_X)\sigma^2I_n] \\
 		&=\sigma^2\operatorname{tr}(I_n-P_X)
 	\end{align*}
 	由\cref{prop:OrthogonalProjectionMat}(7)(3)、\cref{prop:IdempotentMat}(2)(5)和\cref{prop:OrthogonalProjectionMat}(1)可得：
@@ -338,23 +358,27 @@
 	\end{equation*}
 	根据\cref{prop:MeasurableIntegral}(6)即：
 	\begin{equation*}
-		\operatorname{E}\left(\frac{\operatorname{SSE}}{n-r}\right)=\sigma^2\qedhere
+		\operatorname{E}[\hat{\sigma}^2(Y)]=\operatorname{E}\left[\frac{\operatorname{SSE}(Y)}{n-r}\right]=\sigma^2\qedhere
 	\end{equation*}
 \end{proof}
 \begin{definition}
-	称$\hat{\sigma}^2$为$\sigma^2$的LSE。
+	称$\hat{\sigma}^2(Y)$为$\sigma^2$的LSE，称：
+	\begin{equation*}
+		\hat{\sigma}^2(y)\coloneq\frac{\operatorname{SSE}(y)}{n-r}
+	\end{equation*}
+	为该估计量在观测向量$y$处的观测值。仅讨论观测值时，将$\hat{\sigma}^2(y)$简记为$\hat{\sigma}^2$。
 \end{definition}
 
 \subsection{约束最小二乘估计}
 \begin{lemma}\label{lem:AXTXAT}
-	若$A\in M_{k\times p}(K)$，$\operatorname{rank}(A)=k$且$\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top})$，则$A(X^{\top}X)^{-}A^{\top}$正定，于是根据\cref{theo:PositiveDefinite}(6)可知$A(X^{\top}X)^{-}A^{\top}$可逆。
+	若$A\in\mathbb{R}^{k\times p}$，$\operatorname{rank}(A)=k$且$\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top})$，则$A(X^{\top}X)^{-}A^{\top}$正定，于是根据\cref{theo:PositiveDefinite}(6)可知$A(X^{\top}X)^{-}A^{\top}$可逆。
 \end{lemma}
 \begin{proof}
-	由\cref{theo:VectorSpaceAAAT}可知$\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top}X)$，于是存在$B\in M_{p\times k}(K)$使得$A^{\top}=X^{\top}XB$。根据\cref{prop:Transpose}(4)可得：
+	由\cref{theo:VectorSpaceAAAT}可知$\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top}X)$，于是存在$B\in\mathbb{R}^{p\times k}$使得$A^{\top}=X^{\top}XB$。根据\cref{prop:Transpose}(4)可得：
 	\begin{equation*}
 		A(X^{\top}X)^{-}A^{\top}=B^{\top}X^{\top}X(X^{\top}X)^{-}X^{\top}XB=B^{\top}X^{\top}XB
 	\end{equation*}
-	注意到对任意的$x\in K^k$有$x^{\top}B^{\top}X^{\top}XBx=||XBx||^2\geqslant0$。若存在非零的$x\in K^k$使得$x^{\top}B^{\top}X^{\top}XBx=||XBx||^2=0$，则：
+	注意到对任意的$x\in\mathbb{R}^k$有$x^{\top}B^{\top}X^{\top}XBx=||XBx||^2\geqslant0$。若存在非零的$x\in\mathbb{R}^k$使得$x^{\top}B^{\top}X^{\top}XBx=||XBx||^2=0$，则：
 	\begin{equation*}
 		A^{\top}x=X^{\top}XBx=\mathbf{0}
 	\end{equation*}
@@ -363,7 +387,7 @@
 \begin{theorem}\label{theo:ConstraintLinearModel}
 	对于\cref{model:LinearModel}，假设：
 	\begin{equation*}
-		A\beta=b,\quad A\in M_{k\times p}(K),\quad\operatorname{rank}(A)=k,\quad\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top})
+		A\beta=b,\quad A\in\mathbb{R}^{k\times p},\quad b\in\mathbb{R}^k,\quad\operatorname{rank}(A)=k,\quad\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top})
 	\end{equation*}
 	且$A\beta=b$相容，则：
 	\begin{equation*}
@@ -432,10 +456,10 @@
 	由\cref{prop:A-}(5)(7)以及$\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top})$可得：
 	\begin{align*}
 		(\hat{\beta}-\hat{\beta}_A)^{\top}X^{\top}X(\hat{\beta}_A-\beta)
-		&=[(X^{\top}X)^-A^{\top}\hat{\lambda}]^{\top}X^{\top}X(\beta_A-\beta)
-		=\hat{\lambda}^{\top}A(X^{\top}X)^-X^{\top}X(\beta_A-\beta) \\
-		&=\hat{\lambda}^{\top}A(\beta_A-\beta)
-		=\hat{\lambda}^{\top}(A\beta_A-A\beta)=0
+		&=[(X^{\top}X)^-A^{\top}\hat{\lambda}]^{\top}X^{\top}X(\hat{\beta}_A-\beta)
+		=\hat{\lambda}^{\top}A(X^{\top}X)^-X^{\top}X(\hat{\beta}_A-\beta) \\
+		&=\hat{\lambda}^{\top}A(\hat{\beta}_A-\beta)
+		=\hat{\lambda}^{\top}(A\hat{\beta}_A-A\beta)=0
 	\end{align*}
 	所以：
 	\begin{equation*}
@@ -447,64 +471,83 @@
 	\end{equation*}
 	等号成立当且仅当$\beta=\hat{\beta}_A$，于是$\hat{\beta}_A$是LSE。
 \end{proof}
+\begin{definition}
+	在\cref{theo:ConstraintLinearModel}的假设下，对任意$z\in\mathbb{R}^n$定义约束最小二乘估计映射：
+	\begin{equation*}
+		\hat{\beta}_A(z)\coloneq\hat{\beta}(z)-(X^{\top}X)^-A^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}[A\hat{\beta}(z)-b]
+	\end{equation*}
+	并定义约束残差平方和函数：
+	\begin{equation*}
+		\operatorname{SSE}_A(z)\coloneq||z-X\hat{\beta}_A(z)||^2
+	\end{equation*}
+	于是$\hat{\beta}_A(Y)$与$\operatorname{SSE}_A(Y)$是随机对象，$\hat{\beta}_A(y)$与$\operatorname{SSE}_A(y)$是它们在观测向量$y$处的观测值。仅讨论观测值时，将$\hat{\beta}_A(y)$简记为$\hat{\beta}_A$。
+\end{definition}
 \subsubsection{误差方差}
 \begin{theorem}
 	在\cref{theo:ConstraintLinearModel}的假设下，在参数区域$A\beta=b$上，
 	\begin{equation*}
-		\hat{\sigma}_A^2=\frac{||y-X\hat{\beta}_A||^2}{n-r+k}=\frac{\operatorname{SSE}_A}{n-r+k}
+		\hat{\sigma}_A^2(Y)\coloneq\frac{||Y-X\hat{\beta}_A(Y)||^2}{n-r+k}=\frac{\operatorname{SSE}_A(Y)}{n-r+k}
 	\end{equation*}
 	是$\sigma^2$的无偏估计。
 \end{theorem}
 \begin{proof}
 	由\cref{theo:ConstraintLinearModel}可知：
 	\begin{equation*}
-		\operatorname{E}(||y-X\hat{\beta}_A||^2)=\operatorname{E}[||y-X\hat{\beta}||^2+||X(\hat{\beta}-\hat{\beta}_A)||^2]=\operatorname{E}(||y-X\hat{\beta}||^2)+\operatorname{E}[||X(\hat{\beta}-\hat{\beta}_A)||^2]
+		\operatorname{E}[||Y-X\hat{\beta}_A(Y)||^2]=\operatorname{E}\{||Y-X\hat{\beta}(Y)||^2+||X[\hat{\beta}(Y)-\hat{\beta}_A(Y)]||^2\}
+		=\operatorname{E}[||Y-X\hat{\beta}(Y)||^2]+\operatorname{E}\{||X[\hat{\beta}(Y)-\hat{\beta}_A(Y)]||^2\}
 	\end{equation*}
 	根据\cref{theo:VarianceOfErrorTerm}可知：
 	\begin{equation*}
-		\operatorname{E}(||y-X\hat{\beta}||^2)=(n-r)\sigma^2
+		\operatorname{E}[||Y-X\hat{\beta}(Y)||^2]=(n-r)\sigma^2
 	\end{equation*}
 	由\cref{prop:A-}(5)(7)、$\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top})$
 	\begin{align*}
-		||X(\hat{\beta}-\hat{\beta}_A)||&=(\hat{\beta}-\hat{\beta}_A)^{\top}X^{\top}X(\hat{\beta}-\hat{\beta}_A) \\
-		&=\{(X^{\top}X)^-A^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b)\}^{\top} \\
-		&\quad\cdot X^{\top}X(X^{\top}X)^-A^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b) \\
-		&=(A\hat{\beta}-b)^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}A(X^{\top}X)^- \\
-		&\quad\cdot X^{\top}X(X^{\top}X)^-A^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b) \\
-		&=(A\hat{\beta}-b)^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}A(X^{\top}X)^-A^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b) \\
-		&=(A\hat{\beta}-b)^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b)
+		||X[\hat{\beta}(Y)-\hat{\beta}_A(Y)]||&=[\hat{\beta}(Y)-\hat{\beta}_A(Y)]^{\top}X^{\top}X[\hat{\beta}(Y)-\hat{\beta}_A(Y)] \\
+		&=\{(X^{\top}X)^-A^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}[A\hat{\beta}(Y)-b]\}^{\top} \\
+		&\quad\cdot X^{\top}X(X^{\top}X)^-A^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}[A\hat{\beta}(Y)-b] \\
+		&=[A\hat{\beta}(Y)-b]^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}A(X^{\top}X)^- \\
+		&\quad\cdot X^{\top}X(X^{\top}X)^-A^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}[A\hat{\beta}(Y)-b] \\
+		&=[A\hat{\beta}(Y)-b]^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}A(X^{\top}X)^-A^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}[A\hat{\beta}(Y)-b] \\
+		&=[A\hat{\beta}(Y)-b]^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}[A\hat{\beta}(Y)-b]
 	\end{align*}
 	因为$\mathcal{M}(A^{\top})\subseteq\mathcal{M}(X^{\top})$，所以由\cref{prop:EstimableFunction}(1)可知$A\beta$的每一个元素都是可估函数，于是由\cref{theo:ERVQuadraticForm}和\cref{prop:EstimableFunction}(4)(5)可知：
 	\begin{align*}
-		\operatorname{E}(||X(\hat{\beta}-\hat{\beta}_A)||)
-		&=\operatorname{E}\{(A\hat{\beta}-b)^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\hat{\beta}-b)\} \\
+		\operatorname{E}\{||X[\hat{\beta}(Y)-\hat{\beta}_A(Y)]||\}
+		&=\operatorname{E}\{[A\hat{\beta}(Y)-b]^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}[A\hat{\beta}(Y)-b]\} \\
 		&=(A\beta-b)^{\top}[A(X^{\top}X)^-A^{\top}]^{-1}(A\beta-b) \\
-		&\quad+\operatorname{tr}\{[A(X^{\top}X)^-A^{\top}]^{-1}\operatorname{Cov}(A\hat{\beta}-b)\} \\
+		&\quad+\operatorname{tr}\{[A(X^{\top}X)^-A^{\top}]^{-1}\operatorname{Cov}[A\hat{\beta}(Y)-b]\} \\
 		&=\operatorname{tr}\{[A(X^{\top}X)^-A^{\top}]^{-1}\sigma^2A(X^{\top}X)^-A^{\top}\}=\sigma^2\operatorname{tr}(I_k)=k\sigma^2
 	\end{align*}
 	所以：
 	\begin{equation*}
-		\operatorname{E}(||y-X\hat{\beta}_A||^2)=(n-r+k)\sigma^2
+		\operatorname{E}[||Y-X\hat{\beta}_A(Y)||^2]=(n-r+k)\sigma^2
 	\end{equation*}
 	即在参数区域$A\beta=b$上，
 	\begin{equation*}
-		\hat{\sigma}_A^2=\frac{||y-X\hat{\beta}_A||^2}{n-r+k}
+		\hat{\sigma}_A^2(Y)=\frac{||Y-X\hat{\beta}_A(Y)||^2}{n-r+k}
 	\end{equation*}
 	是$\sigma^2$的无偏估计。
 \end{proof}
+\begin{definition}
+	称：
+	\begin{equation*}
+		\hat{\sigma}_A^2(y)\coloneq\frac{\operatorname{SSE}_A(y)}{n-r+k}
+	\end{equation*}
+	为$\hat{\sigma}_A^2(Y)$在观测向量$y$处的观测值。仅讨论观测值时，将$\hat{\sigma}_A^2(y)$简记为$\hat{\sigma}_A^2$。
+\end{definition}
 
 \subsection{实际计算}
 \begin{theorem}\label{theo:SSESSEACalculate}
 	对于无约束条件以及约束$A\beta=\mathbf{0}$，有：
 	\begin{gather*}
-		\operatorname{SSE}=||y-X\hat{\beta}||^2=y^{\top}y-\hat{\beta}^{\top}X^{\top}y,\quad
-		\operatorname{SSE}_A=||y-X\hat{\beta}_A||^2=y^{\top}y-\hat{\beta}_A^{\top}X^{\top}y
+		\operatorname{SSE}(y)=||y-X\hat{\beta}||^2=y^{\top}y-\hat{\beta}^{\top}X^{\top}y,\quad
+		\operatorname{SSE}_A(y)=||y-X\hat{\beta}_A||^2=y^{\top}y-\hat{\beta}_A^{\top}X^{\top}y
 	\end{gather*}
 \end{theorem}
 \begin{proof}
 	由\cref{prop:A-}(6)可知：
 	\begin{align*}
-		\operatorname{SSE}&=(y-X\hat{\beta})^{\top}(y-X\hat{\beta})=y^{\top}y-y^{\top}X\hat{\beta}-\hat{\beta}^{\top}X^{\top}y+\hat{\beta}^{\top}X^{\top}X\hat{\beta} \\
+		\operatorname{SSE}(y)&=(y-X\hat{\beta})^{\top}(y-X\hat{\beta})=y^{\top}y-y^{\top}X\hat{\beta}-\hat{\beta}^{\top}X^{\top}y+\hat{\beta}^{\top}X^{\top}X\hat{\beta} \\
 		&=y^{\top}y-2\hat{\beta}^{\top}X^{\top}y+\hat{\beta}^{\top}X^{\top}X(X^{\top}X)^-X^{\top}y=y^{\top}y-2\hat{\beta}^{\top}X^{\top}y+\hat{\beta}^{\top}X^{\top}y \\
 		&=y^{\top}y-\hat{\beta}^{\top}X^{\top}y
 	\end{align*}
@@ -517,35 +560,35 @@
 	\end{equation*}
 	其中$\lambda$为Lagrange乘子，于是有：
 	\begin{align*}
-		\operatorname{SSE}_A&=(y-X\hat{\beta}_A)^{\top}(y-X\hat{\beta}_A)=y^{\top}y-y^{\top}X\hat{\beta}_A-\hat{\beta}_A^{\top}X^{\top}y+\hat{\beta}_A^{\top}X^{\top}X\hat{\beta}_A \\
-		&=y^{\top}y-\hat{\beta}_A^{\top}X^{\top}y+\hat{\beta}_A^{\top}X^{\top}X\hat{\beta}_A-\hat{\beta}^{\top}X^{\top}y=y^{\top}y-\hat{\beta}_A^{\top}X^{\top}y+\hat{\beta}_A^{\top}(X^{\top}X\hat{\beta}_A-X^{\top}y) \\
+		\operatorname{SSE}_A(y)&=(y-X\hat{\beta}_A)^{\top}(y-X\hat{\beta}_A)=y^{\top}y-y^{\top}X\hat{\beta}_A-\hat{\beta}_A^{\top}X^{\top}y+\hat{\beta}_A^{\top}X^{\top}X\hat{\beta}_A \\
+		&=y^{\top}y-\hat{\beta}_A^{\top}X^{\top}y+\hat{\beta}_A^{\top}X^{\top}X\hat{\beta}_A-\hat{\beta}_A^{\top}X^{\top}y=y^{\top}y-\hat{\beta}_A^{\top}X^{\top}y+\hat{\beta}_A^{\top}(X^{\top}X\hat{\beta}_A-X^{\top}y) \\
 		&=y^{\top}y-\hat{\beta}_A^{\top}X^{\top}y-\hat{\beta}_A^{\top}A^{\top}\hat{\lambda}=y^{\top}y-\hat{\beta}_A^{\top}X^{\top}y\qedhere
 	\end{align*}
 \end{proof}
 \begin{definition}
-	称$\hat{\beta}^{\top}X^{\top}y=y^{\top}P_Xy$为\gls{RSS}，记为$\operatorname{RSS}(\beta)$。称$\hat{\beta}_A^{\top}X^{\top}y$为约束条件$A\beta=\mathbf{0}$下的回归平方和，记为$\operatorname{RSS}_A(\beta)$。称$y^{\top}y$为总平方和，记作$\operatorname{RSS}_{\text{总}}$。称$\sqrt{\dfrac{\operatorname{RSS}(\beta)}{\operatorname{RSS}_{\text{总}}}}$为$y$与$\seq{X}{p}$之间的复相关系数，记作$\operatorname{R}$。
+	称$\hat{\beta}^{\top}X^{\top}y=y^{\top}P_Xy$为\gls{RSS}，记为$\operatorname{RSS}(y)$。称$\hat{\beta}_A^{\top}X^{\top}y$为约束条件$A\beta=\mathbf{0}$下的回归平方和，记为$\operatorname{RSS}_A(y)$。称$y^{\top}y$为总平方和，记作$\operatorname{RSS}_{\text{总}}$。称$\sqrt{\dfrac{\operatorname{RSS}(y)}{\operatorname{RSS}_{\text{总}}}}$为$y$与设计矩阵$X$的列向量之间的复相关系数，记作$\operatorname{R}$。
 \end{definition}
 \begin{property}\label{prop:RSS=RSSbeta+SSE}
-	$\operatorname{RSS}_{\text{总}}=\operatorname{RSS}(\beta)+\operatorname{SSE}$。
+	$\operatorname{RSS}_{\text{总}}=\operatorname{RSS}(y)+\operatorname{SSE}(y)$。
 \end{property}
 \begin{proof}
-	由\cref{prop:ehat}(2)可得$\operatorname{RSS}(\beta)+\operatorname{SSE}=y^{\top}P_Xy+y^{\top}(I_n-P_X)y=y^{\top}y=\operatorname{RSS}_{\text{总}}$。
+	由\cref{prop:ehat}(2)可得$\operatorname{RSS}(y)+\operatorname{SSE}(y)=y^{\top}P_Xy+y^{\top}(I_n-P_X)y=y^{\top}y=\operatorname{RSS}_{\text{总}}$。
 \end{proof}
 \begin{note}
-	回归平方和表示了数据平方和$y^{\top}y$中能够由因变量$y$与自变量$\seq{X}{p}$的线性关系解释的部分，因为它是$y$在$<\seq{X}{p}>$上投影长度的平方。由此可以看出$\operatorname{R}^2\leqslant1$。我们用$\operatorname{R}^2$来度量$\seq{X}{p}$对$y$线性拟合程度的好坏，越接近$1$越好。
+	回归平方和表示了数据平方和$y^{\top}y$中能够由因变量$y$与设计矩阵$X$的列向量之间的线性关系解释的部分，因为它是$y$在$\mathcal{M}(X)$上投影长度的平方。由此可以看出$\operatorname{R}^2\leqslant1$。我们用$\operatorname{R}^2$来度量设计矩阵$X$对$y$线性拟合程度的好坏，越接近$1$越好。
 \end{note}
 
 \subsection{预测}
 \label{def:LinearModelForcast}
-假设要预测$m$个点$x_{0i}=(x_{0i1},x_{0i2},\dots,x_{0ip}),\;i=1,2,\dots,m$，它们所对应的因变量为$y_{01},y_{02},\dots,y_{0m}$。已知$y_{0i}$和历史数据服从同一个线性模型，即：
+假设要预测$m$个点$x_{0i}=(x_{0i1},x_{0i2},\dots,x_{0ip}),\;i=1,2,\dots,m$，它们所对应的因变量组成随机向量$Y_0:\Omega\to\mathbb{R}^m$。假设$Y_0$和历史数据服从同一个线性模型，即：
 \begin{gather*}
-	y_0=X_0\beta+\varepsilon_0,\quad\operatorname{E}(\varepsilon_0)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon_0)=\sigma^2I_m \\
-	y_0=
+	Y_0=X_0\beta+\varepsilon_0,\quad\operatorname{E}(\varepsilon_0)=\mathbf{0}_m,\quad\operatorname{Cov}(\varepsilon_0)=\sigma^2I_m \\
+	Y_0=
 	\begin{pmatrix}
-		y_{01} \\
-		y_{02} \\
+		Y_{01} \\
+		Y_{02} \\
 		\vdots \\
-		y_{0m}
+		Y_{0m}
 	\end{pmatrix},\quad
 	X_0=
 	\begin{pmatrix}
@@ -562,18 +605,33 @@
 		\varepsilon_{0m}
 	\end{pmatrix}
 \end{gather*}
+其中$X_0\in\mathbb{R}^{m\times p}$为非随机设计矩阵，$\varepsilon_0:\Omega\to\mathbb{R}^m$为随机误差向量。对固定的$\omega\in\Omega$，将随机向量$Y_0$的一次观测实现记为$y_0\coloneq Y_0(\omega)=(y_{01},y_{02},\dots,y_{0m})^{\top}\in\mathbb{R}^m$；此后$y_0$表示给定的非随机向量。
 \textbf{假设$\mathcal{M}(X_0^{\top})\subseteq\mathcal{M}(X^{\top})$}。
 \subsubsection{被测量与历史数据无关}
 \begin{derivation}
-	此时使用$\operatorname{E}(y_0)=X_0\beta$的估计去进行预测。\par
-	由\cref{theo:VectorSpaceAAAT}可知$\mathcal{M}(X^{\top})=\mathcal{M}(X^{\top}X)$，于是$\mathcal{M}(X_0^{\top})\subseteq\mathcal{M}(X^{\top})=\mathcal{M}(X^{\top}X)$，由\cref{prop:A-}(3)可知$X_0(X^{\top}X)^-X^{\top}y$与广义逆$(X^{\top}X)^-$的选择无关。\par
-	因为$\mathcal{M}(X_0^{\top})\subseteq\mathcal{M}(X^{\top})$，所以$X_0\beta$是可估的，它具有可估函数的性质。但需注意，因为$y_0$也是一个随机变量，所以这里的无偏性指的是$\operatorname{E}(\hat{y}_0-y_0)=0$。
+	此时使用$\operatorname{E}(Y_0)=X_0\beta$的估计去进行预测，记相应的随机预测量及其在观测向量$y$处的观测值分别为：
+	\begin{equation*}
+		\widehat{Y}_0\coloneq X_0\hat{\beta}(Y),\quad
+		\hat{y}_0\coloneq X_0\hat{\beta}(y)
+	\end{equation*}\par
+	由\cref{theo:VectorSpaceAAAT}可知$\mathcal{M}(X^{\top})=\mathcal{M}(X^{\top}X)$，于是$\mathcal{M}(X_0^{\top})\subseteq\mathcal{M}(X^{\top})=\mathcal{M}(X^{\top}X)$，由\cref{prop:A-}(3)可知$X_0\hat{\beta}(y)=X_0(X^{\top}X)^-X^{\top}y$与广义逆$(X^{\top}X)^-$的选择无关。\par
+	因为$\mathcal{M}(X_0^{\top})\subseteq\mathcal{M}(X^{\top})$，所以$X_0\beta$是可估的，它具有可估函数的性质。但需注意，因为$Y_0$也是一个随机向量，所以这里的无偏性指的是$\operatorname{E}(\widehat{Y}_0-Y_0)=\mathbf{0}_m$。
 \end{derivation}
 \subsubsection{被测量与历史数据相关}
 \begin{derivation}
-	在某些情况下，$y_0$和$y$确实具有一定的相关性，用$\operatorname{Cov}(\varepsilon,\varepsilon_0)=\sigma^2V^{\top}$来度量它们之间的相关性，此时有：
+	在某些情况下，$Y_0$和$Y$确实具有一定的相关性，设非随机矩阵$V\in\mathbb{R}^{m\times n}$，用$\operatorname{Cov}(\varepsilon,\varepsilon_0)=\sigma^2V^{\top}$来度量它们之间的相关性，此时有：
 	\begin{equation*}
-		\operatorname{Cov}[(y,y_0)^{\top}]=\operatorname{Cov}[(\varepsilon,\varepsilon_0)^{\top}]=\sigma^2
+		\operatorname{Cov}
+		\begin{pmatrix}
+			Y \\
+			Y_0
+		\end{pmatrix}
+		=\operatorname{Cov}
+		\begin{pmatrix}
+			\varepsilon \\
+			\varepsilon_0
+		\end{pmatrix}
+		=\sigma^2
 		\begin{pmatrix}
 			I_n & V^{\top} \\
 			V & I_m 
@@ -581,24 +639,27 @@
 	\end{equation*}
 \end{derivation}
 \begin{definition}
-	记$\hat{y}=Cy$是$y$的一个线性无偏估计，称：
+	对任意非随机矩阵$C\in\mathbb{R}^{m\times n}$，记$\widehat{Y}_0\coloneq CY$为$Y_0$的一个线性无偏预测量，记$\hat{y}_0\coloneq Cy$为该预测量在观测向量$y$处的观测值。称：
 	\begin{equation*}
-		\operatorname{PMSE}(\hat{y})=\operatorname{E}[(\hat{y}-y)^{\top}A(\hat{y}-y)]
+		\operatorname{PMSE}(\widehat{Y}_0)\coloneq\operatorname{E}[(\widehat{Y}_0-Y_0)^{\top}A(\widehat{Y}_0-Y_0)]
 	\end{equation*}
-	为\gls{PMSE}，其中$A>0$。
+	为\gls{PMSE}，其中$A\in\mathbb{R}^{m\times m}$为非随机正定矩阵。
 \end{definition}
 \begin{theorem}\label{theo:PECorrelatedLinearModelForcast}
-	$y_0$在广义预测均方误差意义下的最优线性无偏估计为：
+	$Y_0$在广义预测均方误差意义下的最优线性无偏预测量为：
 	\begin{equation*}
-		\hat{y}_0=X_0\hat{\beta}+V(y-X\hat{\beta})
+		\widehat{Y}_0=X_0\hat{\beta}(Y)+V[Y-X\hat{\beta}(Y)]
 	\end{equation*}
-	其中$\hat{\beta}$为正则方程的解。
+	其在观测向量$y$处的观测值为：
+	\begin{equation*}
+		\hat{y}_0=X_0\hat{\beta}(y)+V[y-X\hat{\beta}(y)]
+	\end{equation*}
 \end{theorem}
 \begin{proof}
-	令$\hat{y}_0=Cy$是一个无偏估计，由\cref{prop:MeasurableIntegral}(6)和\cref{prop:CovMat}(3)可得：
+	令$\widehat{Y}_0=CY$是一个无偏预测量，由\cref{prop:MeasurableIntegral}(6)和\cref{prop:CovMat}(3)可得：
 	\begin{gather*}
-		\hat{y}_0-y_0=Cy-X_0\beta-\varepsilon_0=CX\beta+C\varepsilon-X_0\beta-\varepsilon_0=(CX-X_0)\beta+C\varepsilon-\varepsilon_0 \\
-		\operatorname{E}(\hat{y}_0-y_0)=(CX-X_0)\beta=\mathbf{0}\text{对一切$\beta$成立}\iff CX=X_0 \\
+		\widehat{Y}_0-Y_0=CY-X_0\beta-\varepsilon_0=CX\beta+C\varepsilon-X_0\beta-\varepsilon_0=(CX-X_0)\beta+C\varepsilon-\varepsilon_0 \\
+		\operatorname{E}(\widehat{Y}_0-Y_0)=(CX-X_0)\beta=\mathbf{0}_m\text{对一切$\beta$成立}\iff CX=X_0 \\
 		\begin{aligned}
 			\operatorname{Cov}(C\varepsilon-\varepsilon_0)&=\operatorname{E}[(C\varepsilon-\varepsilon_0)(C\varepsilon-\varepsilon_0)^{\top}]=\operatorname{E}(C\varepsilon\varepsilon^{\top}C^{\top}-C\varepsilon\varepsilon_0^{\top}-\varepsilon_0\varepsilon^{\top}C^{\top}+\varepsilon_0\varepsilon_0^{\top}) \\
 			&=\operatorname{E}(C\varepsilon\varepsilon^{\top}C^{\top})-\operatorname{E}(C\varepsilon\varepsilon_0^{\top})-\operatorname{E}(\varepsilon_0\varepsilon^{\top}C^{\top})+\operatorname{E}(\varepsilon_0\varepsilon_0^{\top}) \\
@@ -610,20 +671,20 @@
 	\end{gather*}
 	由\cref{theo:ERVQuadraticForm}和\cref{prop:Trace}(2)可得：
 	\begin{align*}
-		\operatorname{PMSE}(\hat{y}_0)&=\operatorname{E}[(\hat{y}_0-y)^{\top}A(\hat{y}_0-y)] =\operatorname{E}[(C\varepsilon-\varepsilon_0)^{\top}A(C\varepsilon-\varepsilon_0)] \\
+		\operatorname{PMSE}(\widehat{Y}_0)&=\operatorname{E}[(\widehat{Y}_0-Y_0)^{\top}A(\widehat{Y}_0-Y_0)] =\operatorname{E}[(C\varepsilon-\varepsilon_0)^{\top}A(C\varepsilon-\varepsilon_0)] \\
 		&=\operatorname{tr}[A\sigma^2(CC^{\top}-2CV^{\top}+I_m)] =\sigma^2\operatorname{tr}[A(CC^{\top}-2CV^{\top}+I_m)]
 	\end{align*}
 	接下来的目标就是求解：
 	\begin{equation*}
-		\min_{C}\operatorname{PMSE}(\hat{y}_0),\quad\operatorname{s.t.}CX=X_0
+		\min_{C}\operatorname{PMSE}(\widehat{Y}_0),\quad\operatorname{s.t.}CX=X_0
 	\end{equation*}\par
 	使用Lagrange乘子法，构造辅助函数（不引入$X_0$是因为它是常数，对结果没影响）：
 	\begin{equation*}
 		F(C,\varLambda)=\sigma^2\operatorname{tr}[A(CC^{\top}-2CV^{\top}+I_m)]-2\operatorname{tr}(CX\varLambda)
 	\end{equation*}
-	其中$\varLambda$是Lagrange乘子。由矩阵求导和\cref{prop:Trace}(1)可得：
+	其中$\varLambda\in\mathbb{R}^{p\times m}$是Lagrange乘子。由矩阵求导和\cref{prop:Trace}(1)可得：
 	\begin{align*}
-		\frac{\partial\operatorname{PSME}(\hat{y}_0)}{\partial C}&=\sigma^2\frac{\partial\operatorname{tr}(ACC^{\top})}{\partial C}-2\sigma^2\frac{\partial\operatorname{tr}(ACV^{\top})}{\partial C}-2\frac{\partial\operatorname{tr}(CX\varLambda)}{\partial C} \\
+		\frac{\partial F(C,\varLambda)}{\partial C}&=\sigma^2\frac{\partial\operatorname{tr}(ACC^{\top})}{\partial C}-2\sigma^2\frac{\partial\operatorname{tr}(ACV^{\top})}{\partial C}-2\frac{\partial\operatorname{tr}(CX\varLambda)}{\partial C} \\
 		&=\sigma^22AC-2\sigma^2AV-2\varLambda^{\top}X^{\top}
 	\end{align*}
 	令上式为$0$可得：
@@ -648,7 +709,7 @@
 	\end{align*}
 	由\cref{prop:A-}(3)(4)可知$C$是唯一的，与$(X^{\top}X)^-$的选择无关。所以：
 	\begin{equation*}
-		\hat{y}_0=X_0(X^{\top}X)^-X^{\top}y+V[I_n-X(X^{\top}X)^-X^{\top}]y=X_0\hat{\beta}+V(y-X\hat{\beta})
+		\widehat{Y}_0=X_0(X^{\top}X)^-X^{\top}Y+V[I_n-X(X^{\top}X)^-X^{\top}]Y=X_0\hat{\beta}(Y)+V[Y-X\hat{\beta}(Y)]
 	\end{equation*}
-	为$y_0$在广义预测均方误差意义下的最优线性无偏估计。
+	为$Y_0$在广义预测均方误差意义下的最优线性无偏预测量。
 \end{proof}

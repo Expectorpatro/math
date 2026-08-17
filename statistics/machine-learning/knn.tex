@@ -58,15 +58,16 @@
 \end{figure}
 
 \begin{definition}
-	设$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^{n}$为观测样本集，其中$x_i$为第$i$个样本的特征向量，$y_i$是第$i$个样本的标签或值。给定距离度量$\rho$以及整数$k\geqslant1$，对任意样本$x$，记其$k$个最近邻样本索引集合为：
+	设$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^{n}$为观测样本集，其中$x_i$为第$i$个样本的特征向量，$y_i$是第$i$个样本的标签或值。给定距离度量$\rho$以及整数$1\leqslant k\leqslant n$，对任意样本$x$，记其$k$个最近邻样本索引集合为：
 	\begin{equation*}
-		\mathcal{N}_k(x)=\underset{S\subset\{1,\dots,n\},|S|=k}{\arg\min}\sum_{i\in S}\rho(x,x_i)
+		\mathcal{N}_k(x)=\underset{S\subseteq\{1,\dots,n\},|S|=k}{\arg\min}\sum_{i\in S}\rho(x,x_i)
 	\end{equation*}
-	则称如下规则为\gls{KNN}模型：
+	若上述最小化问题存在多个解，则约定在距离相同的样本中优先选择索引较小者。
+	称如下规则为\gls{KNN}模型：
 	\begin{enumerate}
 		\item \textbf{分类情形：}
 		\begin{equation*}
-			\hat y(x)=\underset{c\in\mathcal{Y}}{\arg\max}\sum_{i\in\mathcal{N}_k(x)}\mathbf{1}(y_i=c)
+			\hat y(x)=\underset{c\in\mathcal{Y}}{\arg\max}\sum_{i\in\mathcal{N}_k(x)}I(y_i=c)
 		\end{equation*}
 		\item \textbf{回归情形：}
 		\begin{equation*}
@@ -79,4 +80,232 @@
 	\end{equation*}
 	其中权重通常取为距离的单调递减函数。
 \end{definition}
-KNN属于一种基于实例(instance-based)的非参数学习方法，其核心思想是在局部邻域中进行统计决策。模型本身不存在显式训练阶段，计算复杂度主要集中在查询阶段的最近邻搜索，因此在高维数据中通常结合KD-Tree或Ball-Tree等空间索引结构以降低搜索成本。
+KNN属于一种非参数学习方法，其核心思想是在局部邻域中进行统计决策。由于KNN不需要通过训练估计一组模型参数，其主要计算开销通常发生在预测阶段：对于每个待预测样本，需要在训练样本中寻找距离最近的若干个样本。最直接的方法是计算待预测样本与所有训练样本之间的距离；当训练样本较多时，这一过程的计算成本较高。为此，可以预先根据训练样本在特征空间中的位置关系，以某种结构对样本进行组织和存储，使得近邻查询过程中能够直接排除部分不可能成为近邻的样本，从而减少实际需要计算的距离数量。\gls{KDTree}和\gls{BallTree}正是基于这一思想构造的两类近邻搜索方法。
+
+\subsection{基于距离下界的精确搜索}
+下文设特征空间$X\subseteq\mathbb{R}^{p}$，查询点为$q\in X$，样本索引集为$\mathcal{I}_0={1,2,\dots,n}$，并设$1\leqslant k\leqslant n$。直接搜索需要计算$q$与全部$n$个样本$x_1,\dots,x_n$之间的距离，再从中选取距离最小的$k$个样本。为了避免在搜索过程中反复对所有已考察样本进行排序，可以始终只保留当前距离$q$最近的$k$个候选样本。若当前候选集合记为$\mathcal{N}_k(q)$，则只需记录其中距离$q$最远的样本；当考察到新的样本$x_i$时，若$x_i$比该样本更接近$q$，便用$x_i$替换它。这样，在任意时刻都只需维护至多$k$个候选样本。\par
+当多个样本与$q$的距离相同时，$k$个最近邻一般并不唯一。为避免这一不确定性，下文约定：若两个样本到$q$的距离相同，则认为样本索引较小者更接近$q$。因此，对任意$i,j\in\mathcal{I}_0$，规定$x_i$优先于$x_j$当且仅当：
+\begin{equation*}
+	\rho(q,x_i)<\rho(q,x_j)\quad\text{或}\quad\rho(q,x_i)=\rho(q,x_j),\;i<j
+\end{equation*}\par
+设$\mathcal{I}\subseteq\mathcal{I}_0$为一组尚待考察的样本索引。若能够根据这组样本在特征空间中的位置，得到查询点$q$到其中所有样本距离的一个共同下界$b(q,\mathcal{I})$，即：
+\begin{equation*}
+	b(q,\mathcal{I})\leqslant\rho(q,x_i),\quad\forall i\in\mathcal{I}
+\end{equation*}
+那么只需将这一距离下界与当前已经得到的第$k$近样本的距离进行比较。若当前已经找到至少$k$个候选样本，并且：
+\begin{equation*}
+	b(q,\mathcal{I})>\tau
+\end{equation*}
+其中$\tau$表示当前第$k$近候选样本到$q$的距离，则对于任意$i\in I$都有：
+\begin{equation*}
+	\rho(q,x_i)>\tau
+\end{equation*}
+因此，这组样本中不可能包含最终的$k$个最近邻，可以将其整体排除，而无须逐一计算其中每个样本与$q$之间的距离。\par
+KD树与球树的基本作用，正是以不同方式将训练样本逐步划分为若干具有一定几何结构的样本集合，并为这些集合构造易于计算的距离下界。两者的主要区别在于如何划分和描述这些样本集合，以及由此如何计算查询点到该集合的距离下界。在此基础上，近邻搜索便可以通过不断比较距离下界与当前第k近距离，排除不可能包含近邻的样本集合，从而减少实际需要计算的样本距离。构建树后的精确搜索算法如下\cref{alg:ExactKNNTreeSearch}所示。
+\begin{algorithm}[H]
+	\caption{Exact $k$-Nearest Neighbour Search by Lower-Bound Pruning}
+	\label{alg:ExactKNNTreeSearch}
+	\begin{algorithmic}[1]
+		\Require Root node $T$, query point $q$, number of neighbours $k$, distance function $\rho$, distance lower bound $b$
+		\Ensure Exact $k$-nearest neighbour index set $\mathcal{N}_k(q)$
+		
+		\State $\mathcal{N}_k(q)\gets\varnothing,\;\tau\gets+\infty$
+		
+		\Function{Update}{$i$}
+		\If{$|\mathcal{N}_k(q)|<k$}
+		\State $\mathcal{N}_k(q)\gets\mathcal{N}_k(q)\cup\{i\}$
+		\Else
+		\State Choose $j\in\mathcal{N}_k(q)$ such that $\rho(q,x_j)=\displaystyle\max_{l\in\mathcal{N}_k(q)}\rho(q,x_l)$ and $j$ is the largest index among samples attaining this distance
+		\If{$\rho(q,x_i)<\rho(q,x_j)$ \textbf{or} $\Big(\rho(q,x_i)=\rho(q,x_j) \textbf{ and } i<j\Big)$}
+		\State $\mathcal{N}_k(q)\gets
+		\bigl(\mathcal{N}_k(q)\setminus\{j\}\bigr)\cup\{i\}$
+		\EndIf
+		\EndIf
+		
+		\If{$|\mathcal{N}_k(q)|=k$}
+		\State $\tau\gets
+		\displaystyle\max_{j\in\mathcal{N}_k(q)}\rho(q,x_j)$
+		\Else
+		\State $\tau\gets+\infty$
+		\EndIf
+		\EndFunction
+		
+		\Function{Search}{$V$}
+		\State Let $\mathcal{I}_V\subseteq\mathcal{I}_0$ denote the sample index set contained in node $V$
+		\If{$V=\texttt{None}$ \textbf{or} $b(q,\mathcal{I}_V)>\tau$}
+		\State \Return
+		\EndIf
+		
+		\If{$V$ is a leaf node}
+		\For{$i\in\mathcal{I}_V$}
+		\State \Call{Update}{$i$}
+		\EndFor
+		\State \Return
+		\EndIf
+		
+		\State Let $V_L$ and $V_R$ be the two child nodes of $V$. Relabel $V_L,V_R$ as $V_1,V_2$ such that $b(q,\mathcal{I}_{V_1})\leqslant b(q,\mathcal{I}_{V_2})$
+		
+		\State \Call{Search}{$V_1$}
+		
+		\If{$b(q,\mathcal{I}_{V_2})\leqslant\tau$}
+		\State \Call{Search}{$V_2$}
+		\EndIf
+		\EndFunction
+		
+		\State \Call{Search}{$T$}
+		\State Sort $\mathcal{N}_k(q)$ by increasing distance to $q$; break ties by increasing sample index
+		\State \Return $\mathcal{N}_k(q)$
+	\end{algorithmic}
+\end{algorithm}
+
+\subsection{KD树}
+\subsubsection{树的构建}
+KD树通过与坐标轴垂直的超平面反复划分特征空间。完整构建过程如\cref{alg:BuildKDTree}所示。我们约定：当多个特征同时取得最大范围时选择索引最小的特征，当多个样本同时取得最远距离时选择索引最小的样本。
+\begin{algorithm}[H]
+	\caption{Build a KD Tree}
+	\label{alg:BuildKDTree}
+	\begin{algorithmic}[1]
+		\Require Feature vectors $\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^{p}$, leaf capacity $1\leqslant m_{\mathrm{leaf}}\leqslant n$
+		\Ensure Root node $T$ of the KD tree
+
+		\State $\mathcal{I}_0\gets\{1,2,\dots,n\}$
+
+		\Function{BuildKD}{$\mathcal{I}$}
+		\State $m\gets|\mathcal{I}|$
+		\State $l_j\gets\min\limits_{i\in\mathcal{I}}x_{ij}$, $u_j\gets\max\limits_{i\in\mathcal{I}}x_{ij}$, $j=1,2,\dots,p$
+		\State $B\gets\prod\limits_{j=1}^{p}[l_j,u_j]$
+		\If{$m\leqslant m_{\mathrm{leaf}}$ \textbf{or} $\max\limits_{1\leqslant j\leqslant p}(u_j-l_j)=0$}
+		\State \Return A leaf node storing $\mathcal{I}$ and $B$
+		\EndIf
+		\State $s\gets\underset{1\leqslant j\leqslant p}{\arg\max}\;(u_j-l_j)$
+		\State Arrange $\mathcal{I}$ as $i_{(1)},i_{(2)},\dots,i_{(m)}$ such that $x_{i_{(1)}s}\leqslant x_{i_{(2)}s}\leqslant\cdots\leqslant x_{i_{(m)}s}$, with smaller sample indices preceding larger ones whenever the corresponding values are equal
+		\State $h\gets\lfloor m/2\rfloor$
+		\State $\mathcal{I}_L\gets\{i_{(1)},\dots,i_{(h)}\}$, $\mathcal{I}_R\gets\{i_{(h+1)},\dots,i_{(m)}\}$
+		\State $a\gets\dfrac{x_{i_{(h)}s}+x_{i_{(h+1)}s}}{2}$
+		\State Create an internal node $V$ storing bounding box $B$
+		\State $V.\text{left}\gets\Call{BuildKD}{\mathcal{I}_L}$
+		\State $V.\text{right}\gets\Call{BuildKD}{\mathcal{I}_R}$
+		\State \Return $V$
+		\EndFunction
+
+		\State \Return \Call{BuildKD}{$\mathcal{I}_0$}
+	\end{algorithmic}
+\end{algorithm}
+\begin{note}
+	在\cref{alg:BuildKDTree}中，内部节点选择满足：
+	\begin{equation*}
+		s\in
+		\underset{1\leqslant j\leqslant p}{\arg\max}
+		\;(u_j-\ell_j)
+	\end{equation*}
+	的坐标作为切分坐标。若包围盒在某一方向上具有很大的跨度，则即使节点中实际没有距离$q$很近的样本，其包围盒仍可能延伸到$q$附近，使得$b(q,V)$较小，从而无法剪枝。因此，优先沿跨度最大的方向切分，可以使不同子节点在空间上更加分离，并提高距离下界剪枝的有效性。\par
+	需要注意的是，若不同特征具有不同的尺度范围，则数值范围较大的特征会更容易被选为切分坐标。因此，通常应在构建KD树之前对特征进行标准化。
+\end{note}
+\subsubsection{距离下界}
+KNN中所采用的距离不同，相应的节点距离下界计算方式也有所不同。下面以欧氏距离为例说明其具体构造。\par
+对查询点$q=(q_1,q_2,\dots,q_p)^{\top}$与节点$V$的包围盒$B_V$，定义第$j$个坐标上到区间$[l_{Vj},u_{Vj}]$的距离为：
+\begin{equation*}
+	\delta_{Vj}(q)=\max\{l_{Vj}-q_j,0,q_j-u_{Vj}\}
+\end{equation*}
+定义$q$到$B_V$的距离为：
+\begin{equation*}
+	b_{\mathrm{KD}}(q,V)=\left[\sum_{j=1}^{p}\delta_{Vj}^{2}(q)\right]^{1/2}
+\end{equation*}
+对任意$i\in\mathcal{I}_V$，由$x_i\in B_V$可知$|q_j-x_{ij}|\geqslant\delta_{Vj}(q)$，所以：
+\begin{equation*}
+	\rho(q,x_i)=\left[\sum_{j=1}^{p}(q_j-x_{ij})^2\right]^{1/2}\geqslant\left[\sum_{j=1}^{p}\delta_{Vj}^{2}(q)\right]^{1/2}=b_{\mathrm{KD}}(q,V)
+\end{equation*}
+将\cref{alg:ExactKNNTreeSearch}中的$b(q,V)$取为$b_{\mathrm{KD}}(q,V)$，即可得到欧氏距离下KD树上的精确$k$近邻搜索。
+\begin{note}
+	画数轴便可知$|q_j-x_{ij}|\geqslant\delta_{Vj}(q)$成立。\cref{fig:KDTreeCoordinateLowerBound}中为$q_j<l_{Vj}$时的情况，$q_j>u_{Vj}$时完全对称，$q_j\in[l_{Vj},u_{Vj}]$时$\delta_{Vj}(q)=0$。
+	\begin{figure}[H]
+		\centering
+		\begin{tikzpicture}[scale=1.1]
+			\draw[->] (-0.5,0) -- (8,0);
+			
+			\coordinate (q) at (0.8,0);
+			\coordinate (l) at (2.8,0);
+			\coordinate (x) at (4.6,0);
+			\coordinate (u) at (6.5,0);
+			
+			\draw[line width=2pt] (l) -- (u);
+			
+			\fill (q) circle (2pt);
+			\fill (l) circle (2pt);
+			\fill (x) circle (2pt);
+			\fill (u) circle (2pt);
+			
+			\node[below] at (q) {$q_j$};
+			\node[below] at (l) {$l_{Vj}$};
+			\node[below] at (x) {$x_{ij}$};
+			\node[below] at (u) {$u_{Vj}$};
+			
+			\draw[<->] ($(q)+(0,0.55)$) -- ($(l)+(0,0.55)$)
+			node[midway,above] {$\delta_{Vj}(q)$};
+			
+			\draw[<->] ($(q)+(0,1.2)$) -- ($(x)+(0,1.2)$)
+			node[midway,above] {$|q_j-x_{ij}|$};
+			
+			\node at (4.65,-0.65) {$[l_{Vj},u_{Vj}]$};
+		\end{tikzpicture}
+		\caption{坐标距离下界$\delta_{Vj}(q)$的几何意义}
+		\label{fig:KDTreeCoordinateLowerBound}
+	\end{figure}
+\end{note}
+
+\subsection{球树}
+\subsubsection{树的构建}
+球树的子节点划分方法并不唯一。\cref{alg:BuildBallTree}给出一种构建方法。首先选择距离当前中心$c$最远的样本$x_{i_a}$，再选择距离$x_{i_a}$最远的样本$x_{i_b}$，将二者作为近似的直径端点。对任意样本$x_i$，定义相对距离得分：
+\begin{equation*}
+	g_i=\rho(x_i,x_{i_a})-\rho(x_i,x_{i_b})
+\end{equation*}
+$g_i$越小，表示$x_i$相对更接近$x_{i_a}$；$g_i$越大，表示$x_i$相对更接近$x_{i_b}$。
+\begin{algorithm}[H]
+	\caption{Build a Ball Tree}
+	\label{alg:BuildBallTree}
+	\begin{algorithmic}[1]
+		\Require Feature vectors $\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^{p}$, leaf capacity $1\leqslant m_{\mathrm{leaf}}\leqslant n$
+		\Ensure Root node $T$ of the ball tree
+		
+		\State $\mathcal{I}_0\gets\{1,2,\dots,n\}$
+		
+		\Function{BuildBall}{$\mathcal{I}$}
+		\State $m\gets|\mathcal{I}|,\;c\gets \underset{c\in\mathbb{R}^{p}}{\arg\min}\sum\limits_{i\in\mathcal{I}}\rho(x_i,c),\;r\gets\max\limits_{i\in\mathcal{I}}\rho(c,x_i)$
+		\State $\mathcal{B}\gets\{x\in\mathbb{R}^{p}:\rho(c,x)\leqslant r\}$
+		\If{$m\leqslant m_{\mathrm{leaf}}$ \textbf{or} $r=0$}
+		\State \Return A leaf node storing $\mathcal{I}$ and $\mathcal{B}$
+		\EndIf
+		\State $i_a\gets\underset{i\in\mathcal{I}}{\arg\max}\;\rho(c,x_i)$
+		\State $i_b\gets\underset{i\in\mathcal{I}}{\arg\max}\;\rho(x_{i_a},x_i)$
+		\State $g_i\gets\rho(x_i,x_{i_a})-\rho(x_i,x_{i_b})$, $i\in\mathcal{I}$
+		\State Arrange $\mathcal{I}$ as $i_{(1)},i_{(2)},\dots,i_{(m)}$ such that $g_{i_{(1)}}\leqslant g_{i_{(2)}}\leqslant\cdots\leqslant g_{i_{(m)}}$, with smaller sample indices preceding larger ones whenever the corresponding values are equal
+		\State $h\gets\lfloor m/2\rfloor$
+		\State $\mathcal{I}_L\gets\{i_{(1)},\dots,i_{(h)}\}$, $\mathcal{I}_R\gets\{i_{(h+1)},\dots,i_{(m)}\}$
+		\State Create an internal node $V$ storing bounding ball $\mathcal{B}$
+		\State $V.\text{left}\gets\Call{BuildBall}{\mathcal{I}_L}$
+		\State $V.\text{right}\gets\Call{BuildBall}{\mathcal{I}_R}$
+		\State \Return $V$
+		\EndFunction
+		
+		\State \Return \Call{BuildBall}{$\mathcal{I}_0$}
+	\end{algorithmic}
+\end{algorithm}
+\subsubsection{距离下界}
+设节点$V$所包含样本的指标集合为$\mathcal{I}_V$，其包围球为：
+\begin{equation*}
+	B_V=\left\{x\in\mathbb{R}^{p}:\rho(c_V,x)\leqslant r_V\right\}
+\end{equation*}
+其中$c_V$和$r_V$分别为包围球的中心与半径。由于$x_i\in B_V$对任意$i\in\mathcal{I}_V$均成立，由三角不等式可得：
+\begin{equation*}
+	\rho(q,x_i)\geqslant\rho(q,c_V)-\rho(c_V,x_i)\geqslant\rho(q,c_V)-r_V
+\end{equation*}
+另一方面，由$\rho(q,x_i)\geqslant0$可知：
+\begin{equation*}
+	\rho(q,x_i)\geqslant\max\left\{0,\rho(q,c_V)-r_V\right\},\quad\forall\;i\in\mathcal{I}_V
+\end{equation*}
+因此定义查询点$q$到节点$V$的距离下界为：
+\begin{equation*}
+	b_{\mathrm{Ball}}(q,V)=\max\left\{0,\rho(q,c_V)-r_V\right\}
+\end{equation*}
+将\cref{alg:ExactKNNTreeSearch}中的节点距离下界$b(q,V)$取为$b_{\mathrm{Ball}}(q,V)$，即可得到基于球树的精确$k$近邻搜索。\par
+与KD树所不同的是，这里的距离下界自然地兼容了所有的距离度量，而无需根据KNN中距离度量的选择来设计相应的距离下界。
