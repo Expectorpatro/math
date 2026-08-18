@@ -792,3 +792,214 @@
 	所以$\{||\nabla fx_n||\}$Q-二次收敛到$0$。
 \end{proof}
 
+\section{启发式算法}
+前面介绍的梯度下降法、牛顿法等方法都属于基于局部信息的确定性优化方法。它们利用目标函数在当前点附近的一阶或二阶导数信息构造搜索方向，并通过不断迭代寻找目标函数的极小点。当优化问题具有较好的数学性质时（如目标函数可微、是凸函数等），这类方法具有清晰的理论基础，并且往往能够获得较好的收敛性质。\par
+然而，在实际优化问题中，我们经常会遇到更加复杂的情形。例如，目标函数可能是非凸的，从而存在大量局部极小点；目标函数可能不可微；决策变量还可能是离散的，使梯度本身失去意义。此时，仅依赖局部导数信息的优化方法会受到明显限制。\par
+这促使我们考虑一种不同于经典数值优化的方法，也即\gls{HeuristicAlgorithm}。启发式算法则不再要求每一步搜索都由梯度、Hessian矩阵等解析信息所决定，而是通过人为设计的搜索机制，在解空间中不断产生、评价和更新候选解。其核心不再是如何精确地确定当前点的下降方向，而是如何在有限的计算资源下有效地搜索整个解空间。\par
+因此，启发式算法所面临的一个基本问题是如何协调\textbf{探索}与\textbf{利用}：一方面，需要充分利用当前已经发现的优质解，在其附近进行更细致的搜索；另一方面，又必须保留探索其他区域的能力，以避免搜索过程过早集中在某个局部最优解附近。不同的启发式算法，本质上就是通过不同的搜索机制来实现这两者之间的平衡。
+\begin{note}
+	启发式算法中有相当一部分方法通过模仿自然界中的某种现象来构造搜索过程，例如生物进化、群体协作、觅食行为、物理退火过程等。这种思想本身并无问题：一个自然现象如果能够抽象出具有明确作用的搜索机制，例如随机扰动、信息共享、选择、记忆或探索与利用之间的动态平衡，那么它完全可以成为设计优化算法的有效启发。\par
+	但是，本人对于近年来大量所谓的“动物园算法“持较为抵触的态度。其典型模式是选择某种动物、植物或自然现象作为新的叙事背景，再将若干已有的随机搜索、局部扰动、个体更新和最优解保留机制重新组合，随后赋予其新的生物学名称，并据此宣称提出了一种新的优化算法。随着这种研究范式不断扩张，文献中逐渐出现了大量以不同动物行为命名、但在数学结构和搜索机制上高度相似的算法。\par
+	从优化的角度看，一个启发式算法是否有价值，并不取决于它所模拟的自然现象是否新颖，而应当取决于它是否引入了新的搜索机制，是否能够解释这种机制为何有效，以及它相对于已有方法究竟解决了什么问题。因此，本节无意对层出不穷的自然启发式算法进行系统罗列，而只选择少数已经被长期研究、广泛应用，并在大量实际问题与工业实践中反复验证有效的经典方法。介绍这些算法的目的也并非记忆某一种具体的自然界类比，而是借助它们理解启发式优化中若干具有普遍意义的思想。
+\end{note}
+
+\subsection{模拟退火算法}
+\gls{SA}是最具代表性的启发式优化方法之一。它所体现的核心思想并不复杂：如果搜索过程始终只接受能够立即改善目标函数的移动，那么算法很容易被局部最优解困住；因此，在搜索的早期阶段，应当允许算法以一定概率接受较差的解，以换取离开当前局部区域、探索其他潜在优质区域的机会，而随着搜索的进行，再逐渐降低这种冒险的程度，使算法最终转向更加稳定的局部改进。\par
+这一思想来自统计物理中的退火过程。高温状态下，粒子具有较强的热运动能力，系统可以在不同能量状态之间频繁跃迁；随着温度缓慢降低，系统逐渐趋向低能量状态。模拟退火将目标函数值类比为系统能量，将温度引入优化过程，并通过一个随温度变化的概率机制决定是否接受使目标函数上升的候选解。\par
+模拟退火真正值得关注的是它给出了一个非常典型的搜索设计原则：\textbf{通过受控地接受劣化解，在全局探索能力与局部优化能力之间建立动态平衡}。高温阶段强调探索，允许搜索越过局部极小值之间的障碍；低温阶段强调利用，使搜索逐渐集中于已经发现的优质区域。温度的下降过程实际上控制着算法从“广泛探索”向“局部收敛”的转变。\par
+从这个角度看，模拟退火可以被理解为对局部搜索的一种随机化扩展。其基本框架由三个核心部分构成：候选解的生成机制、劣化解的接受机制以及温度的下降策略。下面将依次介绍这三个部分，并在此基础上给出模拟退火算法的完整形式。
+\subsubsection{候选解的生成机制}
+考虑优化问题：
+\begin{equation*}
+	\min_{x\in D}f(x)
+\end{equation*}
+其中$D$为非空解空间，$f:D\to\mathbb{R}^{}$为目标函数。模拟退火每个$x\in D$指定一个邻域$U(x)\subseteq D$，并在当前解$x_n$处按照概率分布$q_n(\cdot|x_n)$生成候选解$y_n\in U(x_n)$。\par
+这里的概率分布$q_n(\cdot|x)$并不是由模拟退火算法本身固定给出的，而需要使用者根据具体问题的解空间结构以及所采用的邻域定义自行设计。其作用是规定在给定当前解$x$后，如何在邻域$U(x)$中随机选择下一步的候选解。不同的候选解生成机制对应不同的$q_n(\cdot|x)$，并会直接影响算法对解空间的搜索方式。通常希望$q_n(\cdot|x)$能够使邻域中的候选解具有充分的被访问机会，从而避免搜索被人为限制在解空间的某个局部区域。
+\subsubsection{接受机制}
+在第$n$次迭代中，设当前解为$x_n$，当前温度为$T_n>0$，并由候选解生成机制得到候选解$y_n$。接受机制决定候选解是否成为下一次迭代的当前解：若$y_n$被接受，则令$x_{n+1}=y_n$；否则保持$x_{n+1}=x_n$。记此次移动所引起的目标函数变化为：
+\begin{equation*}
+	\Delta_n=f(y_n)-f(x_n)
+\end{equation*}
+当$\Delta_n\leqslant0$时，候选解不劣于当前解，因此令$x_{n+1}=y_n$；当$\Delta_n>0$时，候选解虽然使目标函数增大，但仍以概率：
+\begin{equation*}
+	\exp\left(-\frac{\Delta_n}{T_n}\right)
+\end{equation*}
+被接受。因此，接受概率可以统一写为：
+\begin{equation*}
+	a_{T_n}(x_n,y_n)=\min\left\{1,\exp\left[-\frac{f(y_n)-f(x_n)}{T_n}\right]\right\}
+\end{equation*}
+具体实现时，可以独立生成$u_n\sim\operatorname{U}(0,1)$，并按照：
+\begin{equation*}
+	x_{n+1}=
+	\begin{cases}
+		y_n,&u_n\leqslant a_{T_n}(x_n,y_n) \\
+		x_n,&u_n>a_{T_n}(x_n,y_n)
+	\end{cases}
+\end{equation*}
+更新当前解。\par
+当$\Delta_n>0$固定时，$\exp(-\Delta_n/T)$关于$T$单调递增，并且：
+\begin{equation*}
+	\lim_{T\to+\infty}\exp\left(-\frac{\Delta_n}{T}\right)=1,\quad\lim_{T\downarrow0}\exp\left(-\frac{\Delta_n}{T}\right)=0
+\end{equation*}
+因此，在高温阶段，算法对劣化移动具有较高的容忍度，可以较自由地离开当前区域并探索其他可能的优质区域；随着温度降低，劣化移动被接受的概率逐渐减小，搜索越来越集中于已经发现的优质区域。在相同温度下，目标函数增加得越多，候选解被接受的概率越小，因此这种随机接受也并非无差别地允许劣化，而是更加倾向于接受程度较小的劣化移动。由此，温度实际上控制着算法在探索与利用之间的权衡：较高的温度强调探索，较低的温度强调利用，而逐渐降温的过程则使搜索从广泛探索平稳过渡到局部精细搜索。
+\subsubsection{温度的下降策略}
+温度下降策略只需要保证温度随迭代不断降低，并逐渐趋近于$0$，即：
+\begin{equation*}
+	T_{k+1}<T_k,\qquad \lim_{k\to+\infty}T_k=0
+\end{equation*}
+常用的温度变化形式包括：
+\begin{gather*}
+	T_k=T_0-\alpha k,\quad\alpha>0 \\
+	T_k=T_0\rho^k,\quad0<\rho<1 \\
+	T_k=\frac{T_0}{1+\alpha k},\quad\alpha>0 \\
+	T_k=\frac{T_0}{(1+\alpha k)^\gamma},\quad\alpha,\gamma>0 \\
+	T_k=\frac{c}{\log(k+k_0)},\quad c>0,\;k_0>1
+\end{gather*}
+\subsubsection{完整算法}
+\begin{algorithm}[H]
+	\caption{Simulated Annealing}
+	\label{alg:SimulatedAnnealing}
+	\begin{algorithmic}[1]
+		\Require Feasible set $D$; objective function $f:D\to\mathbb{R}^{}$;
+		initial solution $x_0\in D$; initial temperature $T_0>0$;
+		proposal distributions $q_k(\cdot|x)$; number of temperature levels $K$;
+		inner-loop lengths $M_k$; cooling rule $T_{k+1}=C(T_k)$
+		\Ensure Best solution $x_{\mathrm{best}}$
+
+		\State $x\gets x_0$, $x_{\mathrm{best}}\gets x_0$, $T\gets T_0$
+		\For{$k=0,1,\dots,K-1$}
+			\For{$j=1,2,\dots,M_k$}
+				\State Generate $y\sim q_k(\cdot|x)$ such that $y\in D$
+				\State $\Delta\gets f(y)-f(x)$
+				\State Generate $u\sim\operatorname{U}(0,1)$
+				\If{$\Delta\leqslant0$ \textbf{or} $u\leqslant\exp(-\Delta/T)$}
+					\State $x\gets y$
+				\EndIf
+				\If{$f(x)<f(x_{\mathrm{best}})$}
+					\State $x_{\mathrm{best}}\gets x$
+				\EndIf
+			\EndFor
+			\State $T\gets C(T)$
+		\EndFor
+		\State \Return $x_{\mathrm{best}}$
+	\end{algorithmic}
+\end{algorithm}
+
+\subsection{遗传算法}
+\gls{GA}是另一类经典的启发式优化方法。相比于模拟退火沿着单个候选解构成的搜索轨迹逐步迭代，遗传算法采用基于种群的搜索机制，在每一代同时保留多个候选解，并通过选择、交叉与变异等遗传操作产生下一代种群。种群中的不同个体可以分布在解空间的不同区域，因此算法能够同时探索多个可能的优化方向，而不必将全部搜索过程集中在某一个当前解附近。\par
+遗传算法的思想来源于生物进化过程：适应度较高的个体具有更大的机会参与繁殖，两个亲本的部分信息通过交叉被组合到子代中，而随机变异则不断向种群引入新的信息。经过多代更新后，优质个体所包含的结构逐渐在种群中积累，从而推动候选解向目标函数较优的区域移动。\par
+遗传算法真正重要的是它所形成的一套种群搜索机制：\textbf{选择操作利用当前已经发现的优质信息，交叉操作重组不同个体中的已有信息，变异操作则维持种群的多样性并探索新的区域}。这三个操作共同决定了算法在探索与利用之间的平衡。
+\subsubsection{个体编码与种群}
+仍考虑优化问题：
+\begin{equation*}
+	\min_{x\in D}f(x)
+\end{equation*}
+其中$D$为非空解空间，$f:D\to\mathbb{R}$为目标函数。遗传算法将每个候选解$x\in D$称为一个个体，并用适合进行交叉与变异操作的数据结构表示该个体，这一表示过程称为编码。\par
+由同一代中的若干个体组成的整体称为一个种群。设种群规模为$N\in\mathbb{N}^+$，第$t$代种群记为：
+\begin{equation*}
+	\mathcal{D}_t=\left(x_1^{(t)},x_2^{(t)},\dots,x_N^{(t)}\right)\in D^N
+\end{equation*}
+初始种群$\mathcal{D}_0$通常从$D$中随机生成；若已经具有若干质量较高的可行解，也可以将其加入初始种群，但仍应保留足够的随机个体以维持初始多样性。
+\subsubsection{适应度}
+遗传算法会为每个个体赋予一个用于衡量其优劣程度的数值，称为适应度。设适应度函数为：
+\begin{equation*}
+	F:D\to\mathbb{R}
+\end{equation*}
+其中$F(x)$表示个体$x\in D$的适应度。适应度越高，通常表示该个体在当前优化问题中越优，并在后续选择过程中具有更大的保留或繁殖机会。\par
+适应度函数通常由目标函数$f$构造。例如，对于最小化问题，应使得目标函数值较小的个体具有较高的适应度，即对于$x_1,x_2\in D$，若：
+\begin{equation*}
+	f(x_1)<f(x_2)
+\end{equation*}
+则通常要求：
+\begin{equation*}
+	F(x_1)>F(x_2)
+\end{equation*}\par
+适应度的具体构造需要根据具体的问题背景去设计。合理的适应度设计既需要反映不同个体之间的质量差异，也应避免少数个体因适应度过高而过早支配整个种群，从而导致种群多样性迅速下降。
+\subsubsection{选择操作}
+选择操作从当前种群$\mathcal{D}_t$中选取个体作为亲本，用于产生下一代个体。其基本原则是使适应度较高的个体具有更大的被选择概率，从而使较优个体所携带的信息更容易保留下来并传递到后续种群。\par
+设第$t$代种群中第$i$个个体的适应度为$F_i^{(t)}$，其被选择的概率为$p_i^{(t)}$。选择机制通常应满足：若：
+\begin{equation*}
+	F_i^{(t)}>F_j^{(t)}
+\end{equation*}
+则相应地有：
+\begin{equation*}
+	p_i^{(t)}>p_j^{(t)}
+\end{equation*}
+具体的选择概率如何由适应度确定并无唯一形式，只要能够体现这种“适应度越高，被选择机会越大”的倾向即可。
+\subsubsection{交叉操作}
+交叉操作将两个亲本的部分编码组合起来生成子代。设两个亲本分别为：
+\begin{equation*}
+	x=(x_1,x_2,\dots,x_m),\qquad z=(z_1,z_2,\dots,z_m)
+\end{equation*}
+对于二进制编码或一般的序列编码，可以随机选择交叉位置$r\in\{1,2,\dots,m-1\}$，并生成：
+\begin{align*}
+	y_1&=(x_1,x_2,\dots,x_r,z_{r+1},z_{r+2},\dots,z_m) \\
+	y_2&=(z_1,z_2,\dots,z_r,x_{r+1},x_{r+2},\dots,x_m)
+\end{align*}
+这种操作称为单点交叉。对于实数向量编码，则可以生成算术组合：
+\begin{align*}
+	y_1&=\lambda x+(1-\lambda)z \\
+	y_2&=(1-\lambda)x+\lambda z
+\end{align*}
+其中$\lambda\in[0,1]$可以固定，也可以在每次交叉时随机生成。交叉通常以概率$p_c\in[0,1]$执行；若没有执行交叉，则直接复制两个亲本作为子代。\par
+交叉操作只负责重组亲本中已经存在的信息，并不保证生成的子代一定属于可行域$D$。例如，单点交叉可能破坏排列编码的合法性，算术交叉在$D$非凸时也可能产生不可行解。因此，实际算法必须针对编码方式设计保持可行性的交叉算子，或者在交叉后通过修复、投影或重新生成等方式将子代变为可行解。
+\subsubsection{变异操作}
+变异操作以较小概率随机改变个体编码中的部分分量。对于二进制编码$x=(x_1,x_2,\dots,x_m)\in\{0,1\}^m$，可以对每个分量独立生成$u_j\sim\operatorname{U}(0,1)$，并按照：
+\begin{equation*}
+	y_j=
+	\begin{cases}
+		1-x_j,&u_j\leqslant p_m \\
+		x_j,&u_j>p_m
+	\end{cases}
+	\quad j=1,2,\dots,m
+\end{equation*}
+进行变异，其中$p_m\in[0,1]$为变异概率。对于实数向量，可以在随机选中的分量上加入随机扰动；对于排列编码，则可以交换两个位置、反转一个区间或将某个元素插入新的位置。\par
+变异能够产生亲本中原本不存在的信息，是防止种群多样性完全消失的重要机制。若$p_m$过小，种群可能在较早阶段集中到某个局部最优区域；若$p_m$过大，子代与亲本之间的关联又会被大量破坏，使遗传算法逐渐退化为随机搜索。因此，变异概率通常明显小于交叉概率。
+\subsubsection{种群更新与精英保留}
+在完成选择、交叉和变异后，算法需要用生成的子代构造下一代种群。最简单的更新方式是直接以全部子代替换当前种群，但由于选择与遗传操作都具有随机性，当前种群中的最优个体可能在更新过程中丢失。为避免已经获得的最优目标函数值变差，可以采用精英保留策略：从$\mathcal{D}_t$中选出目标函数值最小的$e$个个体，直接复制到$\mathcal{D}_{t+1}$中，再用新生成的子代补足其余$N-e$个位置，其中$e\in\{0,1,\dots,N-1\}$。\par
+精英保留保证了历代种群中的最优目标函数值单调不增，但$e$也不宜过大。若大量个体被直接复制，种群中可用于产生新组合的位置会减少，并且相同或相近的精英个体可能迅速占据整个种群，从而削弱探索能力。
+\subsubsection{完整算法}
+\begin{algorithm}[H]
+	\caption{Genetic Algorithm}
+	\label{alg:GeneticAlgorithm}
+	\begin{algorithmic}[1]
+		\Require Feasible set $D$; objective function $f:D\to\mathbb{R}$;
+		fitness function $F$; population size $N$; number of generations $G$;
+		selection operator $\mathcal{S}$; crossover operator $\mathcal{C}$;
+		mutation operator $\mathcal{M}$; crossover probability $p_c$;
+		mutation probability $p_m$; number of elites $e$
+		\Ensure Best solution $x_{\mathrm{best}}$
+		
+		\State Generate an initial population $\mathcal{D}_0\in D^N$
+		\State $x_{\mathrm{best}}\gets\underset{x\in\mathcal{D}_0}{\arg\min}\;f(x)$
+		
+		\For{$t=0,1,\dots,G-1$}
+		\State Evaluate the fitness of all individuals in $\mathcal{D}_t$
+		\State Let $\mathcal{E}_t$ contain the $e$ best individuals in $\mathcal{D}_t$
+		\State $\mathcal{Q}_t\gets\varnothing$
+		
+		\While{$|\mathcal{Q}_t|<N-e$}
+		\State Select two parents $(x_1,x_2)$ from $\mathcal{D}_t$ according to $\mathcal{S}$
+		
+		\If{$\operatorname{U}(0,1)\leqslant p_c$}
+		\State $(y_1,y_2)\gets\mathcal{C}(x_1,x_2)$
+		\Else
+		\State $(y_1,y_2)\gets(x_1,x_2)$
+		\EndIf
+		
+		\State Apply mutation $\mathcal{M}$ to $y_1$ and $y_2$ with probability $p_m$
+		\State Ensure that the resulting offspring belong to $D$
+		\State Add offspring to $\mathcal{Q}_t$
+		\EndWhile
+		
+		\State $\mathcal{D}_{t+1}\gets(\mathcal{E}_t,\mathcal{Q}_t)$
+		\State $x^*\gets\underset{x\in\mathcal{D}_{t+1}}{\arg\min}\;f(x)$
+		
+		\If{$f(x^*)<f(x_{\mathrm{best}})$}
+		\State $x_{\mathrm{best}}\gets x^*$
+		\EndIf
+		\EndFor
+		
+		\State \Return $x_{\mathrm{best}}$
+	\end{algorithmic}
+\end{algorithm}

@@ -1693,8 +1693,8 @@ I_{\mathrm{candidate}}\)</span>, <span class="math inline">\((F^\ast,\tau^\ast)\
 </div>
 </div>
 </section>
-<section id="id--e8a1377b" class="level4">
-<h4 class="anchored" data-anchor-id="id--e8a1377b"><span class="header-section-number">17.3.2.4</span> 完整算法</h4>
+<section id="id-2-0dbb24f8" class="level4">
+<h4 class="anchored" data-anchor-id="id-2-0dbb24f8"><span class="header-section-number">17.3.2.4</span> 完整算法</h4>
 <p>完整的<a href="../chapters/glossary-c.html#term-CART" class="term" title="classification and regression tree, CART">分类回归树<span class="term-english">（classification and regression tree, CART）</span></a>对应的决策树生长过程可总结为<a href="#source-alg-CART-815e7aa9" class="textbook-cross-reference" data-reference-key="alg:CART" data-reference-kind="ref+label" data-reference-title="算法 17.3">算法 17.3</a>。本文的算法不包含CART树生长完成后的代价复杂度后剪枝过程。</p>
 <div id="source-alg-CART-815e7aa9" class="algorithm-block">
 <div class="algorithm-caption">
@@ -1940,8 +1940,8 @@ r_{ib}=-\left.\frac{\partial L(y_i,F(x_i))}{\partial F(x_i)}\right|_{F=F_{b-1}}
 <p>伪残差刻画了当前预测应当修正的局部方向及相对强度。若<span class="math inline">\(r_{ib}&gt;0\)</span>，增大预测值可以使损失下降；若<span class="math inline">\(r_{ib}&lt;0\)</span>，则应减小预测值；而<span class="math inline">\(|r_{ib}|\)</span>越大，说明当前损失对相应方向的修正越敏感。因此，两个样本的伪残差相近，意味着它们在当前模型下需要沿相同方向、以相近的相对强度进行修正。GBDT正是利用这种相似性来组织样本：在第<span class="math inline">\(b\)</span>轮回归树的生长中，<span class="math inline">\(\operatorname{BuildTree}(\mathcal{D},d)\)</span>接收的数据集为<span class="math inline">\(\mathcal{D}=\{(x_i,r_{ib})\}_{i=1}^n\)</span>。对于每个候选划分，算法根据划分后各子节点内伪残差的离散程度评价其优劣，并选择能够使节点内伪残差更加集中的划分。这与普通决策树依据节点不纯度选择划分的思想相同。需要注意的是，伪残差在这里仅用于确定树的划分结构，即决定哪些样本进入同一个叶节点，并不等同于叶节点最终输出想要拟合的新增值。待树结构确定后，各叶节点的新增值还需要通过最小化原损失函数另行计算。</p>
 <p>对于分类任务，响应变量<span class="math inline">\(y_i\)</span>虽然是离散类别，由损失函数导数得到的伪残差<span class="math inline">\(r_{ib}\)</span>却是实数，因此每一轮拟合的基学习器仍然是回归树。此时GBDT实际上将分类训练转化成了回归问题：加法模型<span class="math inline">\(F_b(x)\)</span>逐步学习连续的分类得分，再根据该得分与给定阈值确定类别。</p>
 </section>
-<section id="id-1-359b7c88" class="level4">
-<h4 class="anchored" data-anchor-id="id-1-359b7c88"><span class="header-section-number">17.3.4.4</span> 完整算法</h4>
+<section id="id-3-95db489b" class="level4">
+<h4 class="anchored" data-anchor-id="id-3-95db489b"><span class="header-section-number">17.3.4.4</span> 完整算法</h4>
 <p>综上，GBDT的每一轮训练依次完成三件事：根据当前预测计算伪残差，使用伪残差拟合回归树的划分结构，再根据原损失函数计算各叶节点的最优新增值。最后将经过学习率收缩的新树加入当前模型。完整过程如下。</p>
 <div id="algorithm-17-4" class="algorithm-block">
 <div class="algorithm-caption">
@@ -2136,8 +2136,8 @@ H_R=H-H_L
 <p>由于我们希望目标函数尽可能小，因此只有当<span class="math inline">\(\Delta&lt;0\)</span>时，分裂才会使目标函数下降，也才是有利的分裂。</p>
 <p>这就是XGBoost中用于评估一个候选分裂是否值得采用的分裂增益公式。XGBoost将树结构的生长过程直接纳入了统一的优化框架之中（GBDT是分开的），使得每一次分裂都具有明确的目标函数解释。</p>
 </section>
-<section id="id-2-0dbb24f8" class="level4">
-<h4 class="anchored" data-anchor-id="id-2-0dbb24f8"><span class="header-section-number">17.3.5.4</span> 完整算法</h4>
+<section id="id-4-74d89824" class="level4">
+<h4 class="anchored" data-anchor-id="id-4-74d89824"><span class="header-section-number">17.3.5.4</span> 完整算法</h4>
 <div id="source-alg-XGBoost-2016132c" class="algorithm-block">
 <div class="algorithm-caption">
 <p><span class="algorithm-number">Algorithm 17.5</span> <span class="algorithm-title">Extreme Gradient Boosting</span></p>
