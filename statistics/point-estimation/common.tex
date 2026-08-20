@@ -1,4 +1,5 @@
 \section{常见点估计及其性质}
+\subsection{均值与方差}
 \begin{theorem}\label{theo:xbar}
 	设$(X,\mathscr{A},\mathscr{P})$是统计结构，$\mathbf{X}=(\seq{X}{n})$为从总体$F$中抽取的简单样本，$F$的期望为$\mu$，$\mathbf{Y}=(\seq{Y}{n})$为从总体$G$中抽取的简单样本，$\overline{X}=\dfrac{1}{n}\sum\limits_{i=1}^{n}X_i,\overline{Y}=\dfrac{1}{n}\sum\limits_{i=1}^{n}Y_i$，$a,b\in\mathbb{R}$。有如下等式：
 	\begin{gather*}
@@ -237,4 +238,134 @@
 		&=\frac{(m-1)s_1^2+(n-1)s_2^2}{m+n-1}+\frac{(m+n)mn(\overline{x}_1-\overline{x}_2)^2}{(m+n-1)(m+n)^2} \\
 		&=\frac{(m-1)s_1^2+(n-1)s_2^2}{m+n-1}+\frac{mn(\overline{x}_1-\overline{x}_2)^2}{(m+n-1)(m+n)}\qedhere
 	\end{align*}
+\end{proof}
+
+\subsection{核密度估计}
+在统计分析中，许多问题并不满足预先给定的参数分布假设，数据背后的概率结构往往只能通过样本本身加以认识。相比于均值、方差等只描述分布局部特征的统计量，概率密度函数刻画了随机变量在整个取值空间中的分布规律，因此，对未知概率密度进行估计是理解数据生成机制的一项基础任务。由此产生的核心问题是：在不对总体分布施加过强参数化假设的情况下，如何利用有限样本恢复其潜在的概率密度结构。\par
+设概率空间$(X,\mathscr{F},P)$上的随机变量$f$具有未知概率密度$p$，并观测到独立同分布样本$\seq{f}{n}\overset{\mathrm{iid}}{\sim}p$。若$p$在$x$附近连续，则局部区间中的概率质量满足：
+\begin{equation*}
+	p(x)\approx\frac{P(x-h<f\leqslant x+h)}{2h}
+\end{equation*}
+用样本落入该区间的比例估计局部概率，可得：
+\begin{equation*}
+	\frac{1}{2nh}\sum_{i=1}^{n}I(|x-f_i|\leqslant h)
+\end{equation*}
+这相当于每个样本点$f_i$都对其附近区间$[f_i-h,f_i+h]$贡献一个相同高度的局部概率密度：区间内贡献为$\dfrac{1}{2nh}$，区间外贡献为$0$。因此，每个样本点都可以看成生成了一个以$f_i$为中心、宽度为$2h$、高度为$\frac{1}{2nh}$的矩形函数，而密度估计就是将这$n$个矩形函数逐点相加。\par
+由于矩形边界会使估计结果不连续，因此一个自然的想法就是用一般的平滑权重替换局部计数中的矩形权重。
+\begin{definition}
+	设可测函数$K:\mathbb{R}^{}\to[0,+\infty)$满足：
+	\begin{equation*}
+		\int_{\mathbb{R}^{}}K(x)\dif\lambda=1
+	\end{equation*}
+	称$K$为密度估计中的核。设概率空间$(X,\mathscr{F},P)$上的随机变量$f$具有未知概率密度$p$，并观测到独立同分布样本$\seq{f}{n}\overset{\mathrm{iid}}{\sim}p$。给定\gls{Bandwidth}$h>0$，称：
+	\begin{equation*}
+		\hat{p}_h(x)=\frac{1}{nh}\sum_{i=1}^{n}K\left(\frac{x-f_i}{h}\right)
+	\end{equation*}
+	为$p$的\gls{KDE}。
+\end{definition}
+\begin{note}
+	这里的思想与前面的局部矩形估计并没有本质区别。对于每个观测$f_i$，不再简单地在其附近放置一个矩形，而是在$f_i$处放置一个由核函数$K$描述的概率密度，用它表示该观测对周围位置的局部贡献。将所有观测对应的局部密度叠加起来，就可以得到对总体密度的估计。由于每个观测都累加上了一个概率密度，因此需要对这些局部密度的总和除以$n$。\par
+	在不考虑带宽时，最直接的构造实际上是：
+	\begin{equation*}
+		\hat{p}(x)=\frac{1}{n}\sum_{i=1}^{n}K(x-f_i)
+	\end{equation*}
+	若直接使用$K(x-f_i)$，就等价于默认原始数据中的一个单位距离恰好对应核中的一个单位距离，这一点未必成立。因而需要额外引入与数据同尺度的参数$h>0$，并以$\dfrac{x-f_i}{h}$衡量$x$与观测$f_i$之间的相对距离。这样，$K$决定局部权重随位置变化的基本形状，而$h$提供了独立于$K$的尺度参数，使得同一个核可以适应不同数据。前面的因子$1/h$则来源于\cref{theo:IntBySubstitution}，用于补偿尺度变换$x\to x/h$所引起的积分变化，从而保证缩放后的核函数仍具有单位积分。
+\end{note}
+密度估计中常用的核函数包括：
+\begin{align*}
+	K_{\mathrm{Uniform}}(x)&=\frac{1}{2}I(|x|\leqslant1) \\
+	K_{\mathrm{Triangular}}(x)&=(1-|x|)I(|x|\leqslant1) \\
+	K_{\mathrm{Epanechnikov}}(x)&=\frac{3}{4}(1-x^2)I(|x|\leqslant1) \\
+	K_{\mathrm{Biweight}}(x)&=\frac{15}{16}(1-x^2)^2I(|x|\leqslant1) \\
+	K_{\mathrm{Triweight}}(x)&=\frac{35}{32}(1-x^2)^3I(|x|\leqslant1) \\
+	K_{\mathrm{Cosine}}(x)&=\frac{\pi}{4}\cos\left(\frac{\pi x}{2}\right)I(|x|\leqslant1) \\
+	K_{\mathrm{Gaussian}}(x)&=\frac{1}{\sqrt{2\pi}}\exp\left(-\frac{x^2}{2}\right)
+\end{align*}
+\begin{property}\label{prop:KDEBiasVariance}
+	设$K$关于$0$对称，并记：
+	\begin{equation*}
+		\mu_2(K)=\int_{\mathbb{R}^{}}u^2K(u)\dif\lambda,\quad\nu_K=\int_{\mathbb{R}^{}}K^2(u)\dif\lambda
+	\end{equation*}
+	假设上述积分有限，$p$在$x$附近二阶连续可微，并满足允许下面涉及到的积分展开的控制条件，当$h\to0$时有：
+	\begin{align*}
+		\operatorname{Bias}[\hat{p}_h(x)]&=\frac{h^2}{2}\mu_2(K)p''(x)+\operatorname{o}(h^2) \\
+		\operatorname{Var}[\hat{p}_h(x)]&=\frac{p(x)\nu_K}{nh}+\operatorname{o}\left(\frac{1}{nh}\right)
+	\end{align*}
+\end{property}
+\begin{proof}
+	由\cref{lem:IntChangeOfMeasure}和\cref{theo:IntBySubstitution}可得：
+	\begin{equation*}
+		\operatorname{E}[\hat{p}_h(x)]=\frac{1}{h}\int_{\mathbb{R}}K\left(\frac{x-z}{h}\right)p(z)\dif\lambda(z)=\int_{\mathbb{R}}K(u)p(x-hu)\dif\lambda(u)
+	\end{equation*}
+	根据\cref{theo:TaylorTheorem}可知，对于固定的$u$，当$h\to0$时有：
+	\begin{equation*}
+		p(x-hu)=p(x)-hup'(x)+\frac{h^2u^2}{2}p''(x)++\operatorname{o}(h^2)
+	\end{equation*}
+	因此：
+	\begin{align*}
+		\operatorname{E}[\hat{p}_h(x)]&=\int_{\mathbb{R}}K(u)p(x-hu)\dif\lambda(u) \\
+		&=\int_{\mathbb{R}}K(u)\left[p(x)-hu\,p'(x)+\frac{h^2u^2}{2}p''(x)++\operatorname{o}(h^2)\right]\dif\lambda(u) \\
+		&=p(x)\int_{\mathbb{R}}K(u)\dif\lambda(u)-hp'(x)\int_{\mathbb{R}}uK(u)\dif\lambda(u) \\
+		&\quad+\frac{h^2}{2}p''(x)\int_{\mathbb{R}}u^2K(u)\dif\lambda(u)++\operatorname{o}(h^2)
+	\end{align*}
+	由于核函数满足归一化条件：
+	\begin{equation*}
+		\int_{\mathbb{R}}K(u)\dif\lambda(u)=1
+	\end{equation*}
+	且$K$关于原点对称，即$K(-u)=K(u)$，因此$uK(u)$为奇函数，从而：
+	\begin{equation*}
+		\int_{\mathbb{R}}uK(u)\dif\lambda(u)=0
+	\end{equation*}
+	于是：
+	\begin{align*}
+		\operatorname{E}[\hat{p}_h(x)]=p(x)+\frac{h^2}{2}\mu_2(K)p''(x)++\operatorname{o}(h^2)
+	\end{align*}
+	因此：
+	\begin{equation*}
+		\operatorname{Bias}[\hat{p}_h(x)]=\operatorname{E}[\hat{p}_h(x)]-p(x)=\frac{h^2}{2}\mu_2(K)p''(x)++\operatorname{o}(h^2)
+	\end{equation*}\par
+	下面计算$\hat{p}_h(x)$的方差。记：
+	\begin{equation*}
+		Y_i=\frac{1}{h}K\left(\frac{x-f_i}{h}\right),\qquad i=1,2,\dots,n
+	\end{equation*}
+	则：
+	\begin{equation*}
+		\hat{p}_h(x)=\frac{1}{n}\sum_{i=1}^nY_i
+	\end{equation*}
+	由于$\seq{f}{n}$独立同分布，根据\cref{prop:MeasurableFunction}(5.a)、\cref{prop:MeasurableMapping}(2)和\cref{prop:Independent}(4)可知$Y_1,Y_2,\dots,Y_n$也独立同分布，由\cref{prop:Variance}(3)、\cref{prop:CovMat}(7)、\cref{prop:MeasurableIntegral}(6)和\cref{prop:Variance}(3)可得：
+	\begin{equation*}
+		\operatorname{Var}[\hat{p}_h(x)]=\frac{1}{n}\operatorname{Var}(Y_1)=\frac{1}{n}\left\{\operatorname{E}(Y_1^2)-[\operatorname{E}(Y_1)]^2\right\}
+	\end{equation*}
+	根据\cref{lem:IntChangeOfMeasure}和\cref{theo:IntBySubstitution}可得：
+	\begin{equation*}
+		\operatorname{E}(Y_1^2)=\frac{1}{h^2}\int_{\mathbb{R}}K^2\left(\frac{x-z}{h}\right)p(z)\dif\lambda(z)=\frac{1}{h}\int_{\mathbb{R}}K^2(u)p(x-hu)\dif\lambda(u)
+	\end{equation*}
+	由于$p$在$x$处连续，并且假设满足允许上述积分取极限的控制条件，当$h\to0$时有：
+	\begin{equation*}
+		\int_{\mathbb{R}}K^2(u)p(x-hu)\dif\lambda(u)=p(x)\int_{\mathbb{R}}K^2(u)\dif\lambda(u)+\operatorname{o}(1)
+	\end{equation*}
+	由$\nu_K$的定义可得：
+	\begin{equation*}
+		\operatorname{E}(Y_1^2)=\frac{p(x)\nu_K}{h}+\operatorname{o}\left(\frac{1}{h}\right)
+	\end{equation*}
+	根据前面对期望的展开有：
+	\begin{equation*}
+		\operatorname{E}(Y_1)=\operatorname{E}[\hat{p}_h(x)]=p(x)+\operatorname{O}(h^2)
+	\end{equation*}
+	因此：
+	\begin{equation*}
+		[\operatorname{E}(Y_1)]^2=p^2(x)+\operatorname{O}(h^2)=\operatorname{O}(1)
+	\end{equation*}
+	由于$h\to0$，所以：
+	\begin{equation*}
+		\operatorname{O}(1)=\operatorname{o}\left(\frac{1}{h}\right)
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\operatorname{Var}(Y_1)=\operatorname{E}(Y_1^2)-[\operatorname{E}(Y_1)]^2=\frac{p(x)\nu_K}{h}+\operatorname{o}\left(\frac{1}{h}\right)
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\operatorname{Var}[\hat{p}_h(x)]=\frac{p(x)\nu_K}{nh}+\operatorname{o}\left(\frac{1}{nh}\right)\qedhere
+	\end{equation*}
 \end{proof}
