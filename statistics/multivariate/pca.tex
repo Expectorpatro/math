@@ -1,152 +1,250 @@
 \section{主成分分析}
 
-\gls{PCA}的目的是：对数据进行一个线性变换，在最大程度保留原始信息的前提下进行数据的降维。反映在变量上就是说，对所有的变量进行一个线性变换，使得变换后得到的变量彼此之间不相关，并且是所有可能的线性变换中方差最大的一些变量（我们认为方差体现了信息量的大小）。
+设总体$H$中的每个个体由$p$个特征刻画。当$p$较大时，数据所处的空间维数随之升高，不仅难以直接把握其整体结构，其中还可能包含大量冗余的信息。因而我们希望寻找一个维数较低的空间，使原数据能够在其中得到较为简洁的表示，同时尽可能保留其主要的分布特征，减少由降维所造成的信息损失。\par
+从几何上看，最直接的思路是寻找一个$r$维空间，其中$r<p$，并用原数据在该空间中的表示代替原来的$p$维表示。若将这个$r$维空间限制为线性子空间，那么它必然经过原点，因此仅考虑线性子空间会对低维空间的位置施加不必要的限制。更自然的做法是考虑所有形如：
+\begin{equation*}
+	a+E
+\end{equation*}
+的空间，其中$a\in H$，$E$是$H$的$r$维线性子空间。\par
+在给定这样一个$r$维空间之后，其中对某个数据点最自然的近似是该空间中与它距离最近的点。为了在线性空间中刻画距离，并进一步利用正交性描述最近点，我们在$H$上赋予实内积及其诱导的范数。由\cref{prop:FiniteDimensionalNormedLinearSpace}(2)可知此时$H$构成实Hilbert空间。由$a+E$的凸性、\cref{prop:CompleteMetricSpace}(1)和\cref{theo:BestApproximationElement}可知对于任意$x\in H$，在$a+E$中存在唯一与$x$距离最近的点，该点即为$x$在$a+E$上的正交投影。这便自然给出了衡量降维信息损失的方式：以一个点到其正交投影的平方距离衡量该点在降维过程中产生的信息损失，并进一步以总体意义下的平均平方投影误差衡量整个低维表示所造成的信息损失。\gls{PCA}的基本思想就是在所有$r$维空间中寻找使这一平均平方投影误差最小的空间。\par
+记$\mathcal{P}_E$为从$H$到$E$上的正交投影算子。任取$H$中的点$x$，则$x$在$a+E$上的正交投影$w$满足：
+\begin{equation*}
+	w=\underset{y\in a+E}{\arg\min}\;||x-y||^2
+\end{equation*}
+对任意的$y\in a+E$，存在$z\in E$使得$y=a+z$，所以：
+\begin{equation*}
+	w=a+\underset{z\in E}{\arg\min}\;||x-a-z||^2
+\end{equation*}
+因为：
+\begin{equation*}
+	x-a=\mathcal{P}_E(x-a)+(\mathcal{I}-\mathcal{P}_E)(x-a)
+\end{equation*}
+于是：
+\begin{align*}
+	w&=a+\underset{z\in E}{\arg\min}\;||\mathcal{P}_E(x-a)+(\mathcal{I}-\mathcal{P}_E)(x-a)-z||^2 \\
+	&=a+\underset{z\in E}{\arg\min}\;||[\mathcal{P}_E(x-a)-z]+(\mathcal{I}-\mathcal{P}_E)(x-a)||^2
+\end{align*}
+由直和的定义、\cref{theo:OrthogonalComplementDirectSum}和\cref{prop:Orthogonal}(1)可知：
+\begin{align*}
+	w&=a+\underset{z\in E}{\arg\min}\;[||\mathcal{P}_E(x-a)-z||^2+||(\mathcal{I}-\mathcal{P}_E)(x-a)||^2] \\
+	&=a+\underset{z\in E}{\arg\min}\;||\mathcal{P}_E(x-a)-z||^2
+\end{align*}
+所以：
+\begin{equation}\label{eq:PCAProjection}
+	w=a+\mathcal{P}_E(x-a)
+\end{equation}
+于是：
+\begin{equation*}
+	x-w=x-a-\mathcal{P}_E(x-a)=(\mathcal{I}-\mathcal{P}_E)(x-a)
+\end{equation*}
+平方投影误差为$||(\mathcal{I}-\mathcal{P}_E)(x-a)||^2$。
+\begin{definition}
+	设$f$为从概率空间$(X,\mathscr{F},P)$到有限维实Hilbert空间$H$上的可测映射。对于给定的$r<\dim H$，记$\mathcal{P}_E$为$H$到其上$r$维线性子空间$E$上的正交投影算子。PCA是如下优化问题：
+	\begin{equation*}
+		\underset{\substack{a\in H\\E\subseteq H,\;\dim E=r}}{\arg\min}\;\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-a)||^2]
+	\end{equation*}
+\end{definition}
+\begin{note}
+	上述定义使用有限维实Hilbert空间的语言，是为了强调PCA所依赖的本质结构是内积所赋予的正交结构以及由此产生的正交投影。然而在一般的Hilbert空间中，进一步讨论需要借助Bochner积分和紧自伴算子的谱等理论。由于这些内容并非本节讨论的重点，以下均取$H=\mathbb{R}^m$并赋予标准内积。该情形已经涵盖通常统计学与数据科学中有限维数据的PCA问题，同时避免了引入不必要的泛函分析工具。需要注意，此时$\mathcal{I}$和$\mathcal{P}_E$可以分别表示为单位矩阵和正交投影阵。
+\end{note}
 
 \subsection{总体主成分分析}
-\begin{definition}
-	设$\mathbf{X}$是一个$n$维随机向量，其均值向量为$\mu=(\seq{\mu}{n})$、协方差矩阵为$\Sigma=(\sigma_{ij}),\;i,j=1,2,\dots,n$。对$\mathbf{X}$进行一个线性变换$\mathcal{T}$得到一个$n$维随机向量$\mathbf{Y}=(\seq{Y}{n})^{\top}$，$\mathcal{T}$的矩阵为$A=(\alpha_1^{\top};\alpha_2^{\top};\cdots;\alpha_n^{\top})$。若：
-	\begin{enumerate}
-		\item $AA^{\top}=I_n$；
-		\item $\operatorname{Cov}(\mathbf{Y})$是一个对角矩阵，即$\operatorname{Cov}(Y_i,Y_j)=0,\;i\ne j$；
-		\item $Y_1$是所有对$\mathbf{X}$进行线性变换后得到的随机变量中方差最大的随机变量，$Y_2$是与$Y_1$不相关的所有对$\mathbf{X}$进行线性变换后得到的随机变量中方差第二大的随机变量，以此类推。
-	\end{enumerate}
-	则分别称$\seq{Y}{n}$是第一、第二、……、第$n$主成分。
-\end{definition}
-\begin{theorem}
-	若不对$\mathcal{T}$的矩阵$A$作出相应的限制，即去除$AA^{\top}=I_n$的限制，对$\mathbf{X}$进行线性变换后得到的$Y_i,\;i=1,2,\dots,n$的方差可以任意大。
-\end{theorem}
-\begin{proof}
-	由\cref{prop:CovMat}(3)可知：
-	\begin{equation*}
-		\operatorname{Var}(Y_i)=\operatorname{Cov}(\mathbf{Y})(i,i)=\operatorname{Cov}(A\mathbf{X})(i,i)=(A\Sigma A^{\top})(i,i)=\alpha_i^{\top}\Sigma\alpha_i
-	\end{equation*}
-	若$\operatorname{Var}(Y_i)>0$，取矩阵$B=kA$，$\mathbf{Z}=kA\mathbf{X}$，则：
-	\begin{equation*}
-		\operatorname{Var}(Z_i)=(k\alpha_i)^{\top}\Sigma(k\alpha_i)=k^2\alpha_i^{\top}\Sigma\alpha_i
-	\end{equation*}
-	即改变$k$的值就可对$Y_i,\;i=1,2,\dots,n$的方差进行任意的放缩。
-\end{proof}
+\subsubsection{问题化简}
+设$\mu=\operatorname{E}(f)$，由内积导出范数的定义和\cref{prop:MeasurableIntegral}(6)可知：
+\begin{align*}
+	&\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-a)||^2]=\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-\mu+\mu-a)||^2] \\
+	=&\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-\mu)+(\mathcal{I}-\mathcal{P}_E)(\mu-a)||^2] \\
+	=&\operatorname{E}\left[||(\mathcal{I}-\mathcal{P}_E)(f-\mu)||^2+||(\mathcal{I}-\mathcal{P}_E)(\mu-a)||^2+2\Big((\mathcal{I}-\mathcal{P}_E)(f-\mu),(\mathcal{I}-\mathcal{P}_E)(\mu-a)\Big)\right] \\
+	=&\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-\mu)||^2]+||(\mathcal{I}-\mathcal{P}_E)(\mu-a)||^2+2\operatorname{E}\left[\Big((\mathcal{I}-\mathcal{P}_E)(f-\mu),(\mathcal{I}-\mathcal{P}_E)(\mu-a)\Big)\right]
+\end{align*}
+根据\cref{prop:MeasurableIntegral}(6)和\cref{prop:InnerProduct}(1)可得：
+\begin{align*}
+	&\operatorname{E}\left[\Big((\mathcal{I}-\mathcal{P}_E)(f-\mu),(\mathcal{I}-\mathcal{P}_E)(\mu-a)\Big)\right]=\Big(\operatorname{E}[(\mathcal{I}-\mathcal{P}_E)(f-\mu)],(\mathcal{I}-\mathcal{P}_E)(\mu-a)\Big) \\
+	=&\Big((\mathcal{I}-\mathcal{P}_E)\operatorname{E}(f-\mu),(\mathcal{I}-\mathcal{P}_E)(\mu-a)\Big)=\Big(0,(\mathcal{I}-\mathcal{P}_E)(\mu-a)\Big)=0
+\end{align*}
+于是：
+\begin{equation*}
+	\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-a)||^2]=\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-\mu)||^2]+||(\mathcal{I}-\mathcal{P}_E)(\mu-a)||^2
+\end{equation*}
+对于任意给定的$r$维子空间$E$，上式右侧第一项与$a$无关，而第二项非负，因此关于$a$的最小值在且仅在：
+\begin{equation*}
+	(\mathcal{I}-\mathcal{P}_E)(\mu-a)=\mathbf{0}
+\end{equation*}
+时取得，即$\mu-a=\mathcal{P}_E(\mu-a)$。由正交投影阵的定义可知$\mu-a\in E$，根据\cref{theo:QuotientRelationship}可知：
+\begin{equation*}
+	a+E=\mu+E
+\end{equation*}
+所以PCA的优化问题可化为：
+\begin{equation*}
+	\underset{E\subseteq H,\;\dim E=r}{\arg\min}\;\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-\mu)||^2]
+\end{equation*}\par
+因为：
+\begin{equation*}
+	f-\mu=\mathcal{P}_E(f-\mu)+(\mathcal{I}-\mathcal{P}_E)(f-\mu)
+\end{equation*}
+由直和的定义、\cref{theo:OrthogonalComplementDirectSum}和\cref{prop:Orthogonal}(1)可知：
+\begin{equation*}
+	||f-\mu||^2=||\mathcal{P}_E(f-\mu)||^2+||(\mathcal{I}-\mathcal{P}_E)(f-\mu)||^2
+\end{equation*}
+根据\cref{prop:MeasurableIntegral}(6)可得：
+\begin{equation*}
+	\operatorname{E}(||f-\mu||^2)=\operatorname{E}[||\mathcal{P}_E(f-\mu)||^2]+\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-\mu)||^2]
+\end{equation*}
+因为$\operatorname{E}(||f-\mu||^2)$与$E$的选择无关，所以PCA优化问题可以化为：
+\begin{equation*}
+	\underset{E\subseteq H,\;\dim E=r}{\arg\max}\;\operatorname{E}[||\mathcal{P}_E(f-\mu)||^2]
+\end{equation*}\par
+由于直接在所有$r$维子空间构成的集合上进行优化较为困难，根据\cref{theo:ExistenceOfBasis}，我们转而通过子空间的一组基来参数化$E$，从而将关于子空间的优化转化为关于基矩阵的优化。具体而言，对于任意$r$维子空间$E\subseteq\mathbb{R}^m$，可选取$E$的一组基$\seq{u}{r}$，并令：
+\begin{equation*}
+	U=(\seq{u}{r})\in M_{m\times r}(\mathbb{R})
+\end{equation*}
+则$\mathcal{M}(U)=E$，因此对子空间$E$的选择可以等价地转化为对满列秩矩阵$U$的选择。根据\cref{prop:OrthogonalProjectionMat}(2)可知此时：
+\begin{equation*}
+	\mathcal{P}_E=U(U^{\top}U)^{-1}U^{\top}
+\end{equation*}
+由上式可以发现，若使用任意一组基，则正交投影阵的表示中始终包含$(U^{\top}U)^{-1}$，不利于后续计算，于是我们可以进一步要求$\seq{u}{r}$为$E$的一组标准正交基。此时$U^{\top}U=I_r$，从而正交投影阵简化为：
+\begin{equation*}
+	\mathcal{P}_E=UU^{\top}
+\end{equation*}
+于是PCA优化问题就被化为了：
+\begin{equation*}
+	\underset{\substack{U^{\top}U=I_r\\U\in M_{m\times r}(\mathbb{R})}}{\arg\max}\;\operatorname{E}[||UU^{\top}(f-\mu)||^2]
+\end{equation*}\par
+根据\cref{prop:Transpose}(4)可知：
+\begin{align*}
+	&||UU^{\top}(f-\mu)||^2=[UU^{\top}(f-\mu)]^{\top}UU^{\top}(f-\mu) \\
+	=&(f-\mu)^{\top}UU^{\top}UU^{\top}(f-\mu)=(f-\mu)^{\top}UU^{\top}(f-\mu)
+\end{align*}
+由\cref{prop:Trace}(3)可得：
+\begin{equation*}
+	||UU^{\top}(f-\mu)||^2=\operatorname{tr}[(f-\mu)^{\top}UU^{\top}(f-\mu)]=\operatorname{tr}[U^{\top}(f-\mu)(f-\mu)^{\top}U]
+\end{equation*}
+根据\cref{prop:MeasurableIntegral}(6)可得：
+\begin{align*}
+	&\operatorname{E}[||UU^{\top}(f-\mu)||^2]=\operatorname{E}\{\operatorname{tr}[U^{\top}(f-\mu)(f-\mu)^{\top}U]\} \\
+	=&\operatorname{tr}\{\operatorname{E}[U^{\top}(f-\mu)(f-\mu)^{\top}U]\}=\operatorname{tr}[U^{\top}\operatorname{Cov}(f)U]=\sum_{i=1}^{r}u_i^{\top}\operatorname{Cov}(f)u_i
+\end{align*}
+所以PCA优化问题为：
+\begin{equation*}
+	\underset{\substack{U^{\top}U=I_r\\U\in M_{m\times r}(\mathbb{R})}}{\arg\max}\;\sum_{i=1}^{r}u_i^{\top}\operatorname{Cov}(f)u_i
+\end{equation*}
+\subsubsection{最优子空间}
 \begin{theorem}\label{theo:PCA}
-	设$\mathbf{X}$是一个$n$维随机向量，$\Sigma$是其协方差矩阵，$\Sigma$的特征值\footnote{若特征多项式有重根，则标准正交化特征向量组不唯一，主成分也不唯一。}从大到小记作$\seq{\lambda}{n}$，$\seq{\varphi}{n}$为对应的标准正交化特征向量，则$\mathbf{X}$的第$i$个主成分以及其方差为：
+	设$\operatorname{Cov}(f)$的特征值从大到小为$\seq{\lambda}{m}$，对应的一组标准正交化特征向量为$\seq{\varphi}{m}$，则：
 	\begin{equation*}
-		Y_i=\varphi_i^{\top}\mathbf{X},\;\operatorname{Var}(Y_i)=\varphi_i^{\top}\Sigma\varphi_i=\lambda_i
+		\underset{\substack{U^{\top}U=I_r\\U\in M_{m\times r}(\mathbb{R})}}{\max}\;\sum_{i=1}^{r}u_i^{\top}\operatorname{Cov}(f)u_i=\sum_{i=1}^{r}\lambda_i
 	\end{equation*}
+	且$U=(\seq{\varphi}{r})$为该优化问题的一个最优解，即PCA的最优$r$维子空间可以取$E=\operatorname{span}\{\seq{\varphi}{r}\}$。
 \end{theorem}
 \begin{proof}
-	考虑到：
+	由\cref{prop:HermitianMatEigen}(3)和\cref{theo:Schmidt}，记$\operatorname{Cov}(f)$的特征值从大到小为$\seq{\lambda}{m}$，对应的一组标准正交化特征向量为$\seq{\varphi}{m}$。根据\cref{theo:maxminxAx/xx}可知在单位向量中$\varphi_1$使得：
 	\begin{equation*}
-		\operatorname{Var}(Y_i)=\alpha_i^{\top}\Sigma\alpha_i,\quad
-		\operatorname{Cov}(Y_i,Y_j)=\alpha_i^{\top}\Sigma\alpha_j
+		u^{\top}\operatorname{Cov}(f)u
 	\end{equation*}
-	求解主成分的过程即为求解：
-	\begin{gather*}
-		\alpha_i=\arg\max\alpha_i^{\top}\Sigma\alpha_i,\quad
-		\operatorname{s.t.}
-		\begin{cases}
-			||\alpha_i||=1,\;&i=1,2,\dots,n\\
-			\alpha_i^{\top}\Sigma\alpha_j=0,\;&j<i
-		\end{cases}
-	\end{gather*}
-	由\cref{theo:maxminxAx/xx}可知上述结论成立。
-\end{proof}
-\begin{definition}
-	将第$i$个主成分$Y_i$与变量$X_j$的相关系数$\rho(Y_i,X_j)$称为\gls{FactorLoading}。
-\end{definition}
-\begin{definition}
-	称主成分$\seq{Y}{k}$与变量$X_j$之间的复相关系数的平方$R^2$为$\seq{Y}{k}$对$X_j$的贡献率。
-\end{definition}
-\begin{property}\label{prop:PCA}
-	总体主成分具有如下性质：
-	\begin{enumerate}
-		\item $\operatorname{Cov}(\mathbf{Y})=\operatorname{diag}\{\seq{\lambda}{n}\}$；
-		\item $\mathbf{Y}$的方差之和等于$\mathbf{X}$的方差之和，即$\sum\limits_{i=1}^{n}\lambda_i=\sum\limits_{i=1}^{n}\sigma_{ii}$；
-		\item $\rho(Y_i,X_j)=\dfrac{\sqrt{\lambda_i}\alpha_{ij}}{\sqrt{\sigma_{jj}}},\;i,j=1,2,\dots,n$；
-		\item 第$i$个主成分与原变量的因子负荷量满足$\sum\limits_{j=1}^{n}\sigma_{jj}\rho^2(Y_i,X_j)=\lambda_i$；
-		\item 原变量的第$j$个分量与所有主成分的因子负荷量满足$\sum\limits_{i=1}^{n}\rho^2(Y_i,X_j)=1$；
-		\item 若$\Sigma>\mathbf{0}$，则原变量的第$j$个分量与前$k$个主成分之间的复相关系数满足：
-		\begin{equation*}
-			R^2=\sum_{i=1}^{k}\rho^2(Y_i,X_j)=\sum_{i=1}^{k}\frac{\lambda_i\alpha_{ij}^2}{\sigma_{ii}}
-		\end{equation*}
-	\end{enumerate}
-\end{property}
-\begin{proof}
-	(1)由\cref{theo:PCA}直接可得。\par
-	(2)由\cref{prop:CovMat}(3)和\cref{prop:Trace}(3)可得：
-	\begin{align*}
-		\sum_{i=1}^{n}\operatorname{Var}(Y_i)
-		&=\operatorname{tr}[\operatorname{Cov}(\mathbf{Y})]=\operatorname{tr}[\operatorname{Cov}(A\mathbf{X})]=\operatorname{tr}(A\Sigma A^{\top}) \\
-		&=\operatorname{tr}(\Sigma A^{\top}A)=\operatorname{tr}(\Sigma)=\sum_{i=1}^{n}\operatorname{Var}(X_i)
-	\end{align*}\par
-	(3)由\cref{prop:CovMat}(3)可得：
-	\begin{align*}
-		\rho(Y_i,X_j)
-		&=\frac{\operatorname{Cov}(Y_i,X_j)}{\sqrt{\operatorname{Var}(Y_i)\operatorname{Var}(X_j)}}=\frac{\operatorname{Cov}(\alpha_i^{\top}\mathbf{X},e_j^{\top}\mathbf{X})}{\sqrt{\lambda_i\sigma_{jj}}} \\
-		&=\frac{\alpha_i^{\top}\Sigma e_j}{\sqrt{\lambda_i\sigma_{jj}}}=\frac{e_j^{\top}\Sigma\alpha_i}{\sqrt{\lambda_i\sigma_{jj}}}=\frac{e_j^{\top}\lambda_i\alpha_i}{\sqrt{\lambda_i\sigma_{jj}}}=\frac{\sqrt{\lambda_i}\alpha_{ij}}{\sqrt{\sigma_{jj}}}
-	\end{align*}\par
-	(4)由(3)可得：
+	取得最大值$\lambda_1$；在与$\varphi_1$正交的单位向量中，$\varphi_2$使其取得最大值$\lambda_2$。依此类推，在与$\seq{\varphi}{k-1}$均正交的单位向量中，$\varphi_k$使其取得最大值$\lambda_k$。若$u_i=\varphi_i,\;i=1,2,\dots,r$，则：
 	\begin{equation*}
-		\sum_{j=1}^{n}\sigma_{jj}\rho^2(Y_i,X_j)=\sum_{j=1}^{n}\lambda_i\alpha_{ij}^2=\lambda_i\alpha_i^{\top}\alpha_i=\lambda_i
+		\sum_{i=1}^{r}u_i^{\top}\operatorname{Cov}(f)u_i=\sum_{i=1}^{r}\lambda_i
+	\end{equation*}
+	下面证明：
+	\begin{equation*}
+		\underset{\substack{U^{\top}U=I_r\\U\in M_{m\times r}(\mathbb{R})}}{\max}\;\sum_{i=1}^{r}u_i^{\top}\operatorname{Cov}(f)u_i=\sum_{i=1}^{r}\lambda_i
 	\end{equation*}\par
-	(5)由\cref{prop:MultipleCorrelationCoefficient}(3)和\cref{prop:CorrelationCoefficient}(1)立即可得。\par
-	(6)当$\Sigma>\mathbf{0}$时，由\cref{theo:PositiveDefinite}(3.5)可知$\Sigma$的特征值都大于$0$，根据\cref{theo:PCA}即$\operatorname{Var}(Y_i)>0$，于是由\cref{prop:MultipleCorrelationCoefficient}(1)和(3)可立即得出结论。
+	对于任意满足$U^{\top}U=I_r$的$U=(\seq{u}{r})$，由于$\seq{\varphi}{m}$构成$\mathbb{R}^m$的一组标准正交基，所以存在$\{c_{ij}\}\subseteq\mathbb{R}$使得：
+	\begin{equation*}
+		u_i=\sum_{j=1}^{m}c_{ij}\varphi_j
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		u_i^{\top}\operatorname{Cov}(f)u_i=\sum_{j=1}^{m}\lambda_jc_{ij}^2
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\sum_{i=1}^{r}u_i^{\top}\operatorname{Cov}(f)u_i=\sum_{i=1}^{r}\sum_{j=1}^{m}\lambda_jc_{ij}^2=\sum_{j=1}^{m}\lambda_j\sum_{i=1}^{r}c_{ij}^2
+	\end{equation*}
+	记：
+	\begin{equation*}
+		\alpha_j=\sum_{i=1}^{r}c_{ij}^2
+	\end{equation*}
+	因为$\seq{\varphi}{m}$为标准正交基，根据\cref{theo:BesselInequality}可得：
+	\begin{equation*}
+		\alpha_j=\sum_{i=1}^{r}c_{ij}^2=\sum_{i=1}^{r}[(u_i,\varphi_j)]^2\leqslant||\varphi_j||^2=1
+	\end{equation*}
+	由\cref{prop:Orthogonal}可知：
+	\begin{equation*}
+		||u_i||^2=\sum_{j=1}^{m}c_{ij}^2=1
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\sum_{j=1}^{m}\alpha_j=\sum_{j=1}^{m}\sum_{i=1}^{r}c_{ij}^2=\sum_{i=1}^{r}\sum_{j=1}^{m}c_{ij}^2=\sum_{i=1}^{r}||u_i||^2=r
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\sum_{i=1}^{r}u_i^{\top}\operatorname{Cov}(f)u_i\leqslant\sum_{j=1}^{r}\lambda_j\qedhere
+	\end{equation*}
 \end{proof}
 \begin{definition}
-	称第$i$个主成分$Y_i$的方差与所有主成分方差之和的比值为$Y_i$的方差贡献率，记为$\eta_i$，即$\eta_i=\lambda_i\Big/\sum\limits_{j=1}^{n}\lambda_j$。将$\sum\limits_{i=1}^{k}\lambda_i\Big/\sum\limits_{i=1}^{n}\lambda_i$称为主成分$\seq{Y}{k}$的累计方差贡献率。
+	称$Z_i=\varphi_i^{\top}(f-\mu)$为$f$的第$i$\gls{PrincipalComponent}，$\varphi_i$为$f$的第$i$个\textbf{主成分方向}。
 \end{definition}
-由前述，我们一般通过选择主成分的个数来实现对数据的降维，即选择主成分的个数使它们的累计方差贡献率达到一定比例（一般为$85\%$）。
+\begin{note}
+	由\cref{eq:PCAProjection}可知对于任意的$y\in\mathbb{R}^{m}$，其在$\mu+E$上的投影为：
+	\begin{equation*}
+		\mu+\mathcal{P}_E(y-\mu)=\mu+UU^{\top}(y-\mu)
+	\end{equation*}
+	从上式可以看出，$Z_i$对应于样本$y$的取值$\varphi_i^{\top}(y-\mu)$表示该投影点相对于基点$\mu$，在第$i$个主成分方向$\varphi_i$上的坐标。
+\end{note}
 
 \subsection{样本主成分分析}
-假设对$n$维随机变量$\mathbf{X}$进行$m$次独立观测，得到$m$个$n$维样本$\seq{x}{m}$。在样本主成分分析中，我们使用样本来估计$\mathbf{X}$的协方差矩阵，即：
+假设对$f$进行$n$次独立观测得到$n$个样本$\seq{x}{n}$。我们使用样本来估计$\operatorname{Cov}(f)$，即：
 \begin{equation*}
-	\hat{\boldsymbol{\mu}}=\frac{1}{m}\sum_{i=1}^{m}x_i,\;S=(s_{ij})=\frac{1}{m-1}\sum_{i=1}^{m}(x_i-\hat{\boldsymbol{\mu}})(x_i-\hat{\boldsymbol{\mu}})^{\top},\;i,j=1,2,\dots,n
+	\hat{\mu}=\frac{1}{n}\sum_{i=1}^{n}x_i,\quad S=\frac{1}{n-1}\sum_{i=1}^{n}(x_i-\hat{\mu})(x_i-\hat{\mu})^{\top}
 \end{equation*}
-其余步骤与总体主成分分析一致。
-
-\subsection{注意事项}
-\subsubsection{多重共线性问题}
-当原始变量出现多重共线性时，重复的信息在方差占比中会重复进行计算，导致方差占比被改变。为了达到一定的累积贡献率，就会不可避免地使得主成分也融入重复信息（可以从一个极端案例来想：添加一个重复变量到原先一点都不重复的观测样本集中），所以主成分是无法解决重复信息问题的。主成分分析从另一个角度是依赖于多重共线性的：我们需要舍弃方差贡献率小的主成分。如果没有方差贡献率较小的主成分，这说明原数据几乎没有多重共线性情况，此时无论舍弃哪个主成分都将导致严重的信息损失。
-\subsubsection{相关矩阵导出主成分}
-上面我们都是对协方差矩阵的特征值分解进行计算，但在现实中，各变量的量纲可能不一样，这就导致各变量方差的量级会不一样，方差越大，由\cref{prop:PCA}(2)可知必然会导致该变量在主成分构成中的占比变大，但此时的大方差可能仅仅是因为量纲的不同，从变异系数的角度可能各变量的波动差距没有那么明显。为了消除量纲带来的影响，我们会对数据进行标准化，注意到标准化后数据的协方差矩阵即为相关矩阵，此时将相关矩阵作对应的特征值分解即可。但需要注意：标准化后\textbf{各变量方差相等均为$1$，损失了部分信息}，所以会使得\textbf{标准化后的各变量在对主成分构成中的作用趋于相等}。因此，取值范围在同量级的数据建议使用协方差矩阵直接求解主成分，若变量之间数量级差异较大，再使用相关矩阵求解主成分。
-\begin{algorithm}[H]
-	\caption{主成分分析（PCA）}
-	\begin{algorithmic}[1]
-		\State \textbf{Input:} 原始数据矩阵 $\mathbf{X}$
-		\State \textbf{Output:} 主成分得分 $\mathbf{Y}$，选定的主成分个数 $k$
-		
-		\If{变量量纲差异明显}
-		\State 将$\mathbf{X}$标准化得到$\mathbf{Z}$
-		\Else
-		\State 保留原始数据 $\mathbf{Z} = \mathbf{X}$
-		\EndIf
-		
-		\If{存在多重共线性（最小特征值 $\approx 0$）}
-		\State 删除或合并相关变量
-		\Else
-		\State 保留原始变量
-		\EndIf
-		
-		\State 计算协方差矩阵：$\Sigma = \text{cov}(\mathbf{Z})$，对 $\Sigma$ 进行特征值分解：$\Sigma = A \Lambda A^{\top}$
-		\State 初始化 $k \gets 1$, 累计贡献率 $\gets 0$
-	
-		\Repeat
-		\State 选择第 $k$ 个主成分，更新累计贡献率
-		\If{累计贡献率 $< $ 阈值}
-		\State $k \gets k + 1$
-		\EndIf
-		\Until{累计贡献率 $\geqslant$ 阈值}
-		
-		\State 计算主成分得分：$\mathbf{Y}=A_k\mathbf{Z}$（$A_k$为矩阵$A$的前$k$行构成的矩阵），输出 $\mathbf{Y}$ 和 $k$
-	\end{algorithmic}
-\end{algorithm}
+由\cref{prop:HermitianMatEigen}(3)和\cref{theo:Schmidt}，记$S$的特征值从大到小为$\seq{\hat{\lambda}}{m}$，对应的一组标准正交化特征向量为$\seq{\hat{\varphi}}{m}$。\par
+\subsubsection{降维表示}
+根据\cref{theo:PCA}，对于给定的$r<m$，令：
+\begin{equation*}
+	U_r=(\seq{\hat{\varphi}}{r})\in M_{m\times r}(\mathbb{R})
+\end{equation*}
+则样本PCA所确定的$r$维主成分子空间可以取为：
+\begin{equation*}
+	E_r=\operatorname{span}\{\seq{\hat{\varphi}}{r}\}
+\end{equation*}
+对于任意样本$x_i$，其在$\hat{\mu}+E_r$上的正交投影为：
+\begin{equation*}
+	\hat{\mu}+U_rU_r^{\top}(x_i-\hat{\mu})
+\end{equation*}
+而该投影点相对于基点$\hat{\mu}$在标准正交基$\seq{\hat{\varphi}}{r}$下的坐标为：
+\begin{equation*}
+	z_i=U_r^{\top}(x_i-\hat{\mu})\in\mathbb{R}^r
+\end{equation*}
+其中第$j$个坐标为：
+\begin{equation*}
+	z_{ij}=\hat{\varphi}_j^{\top}(x_i-\hat{\mu})
+\end{equation*}
+在PCA中，我们认为$z_i$为样本$x_i$经过降维后的$r$维表示。称$z_{ij}$为样本$x_i$在第$j$个主成分上的\textbf{主成分得分}。
+\subsubsection{主成分维数的选择}
+PCA中维数$r$决定了保留的信息量与降维程度之间的权衡。可以验证$S$为半正定矩阵，于是由\cref{theo:PositiveSemidefinite}(3.5)可知$S$的特征值满足：
+\begin{equation*}
+	\hat{\lambda}_1\geqslant\hat{\lambda}_2\geqslant\cdots\geqslant\hat{\lambda}_m\geqslant0
+\end{equation*}
+根据\cref{theo:PCA}，第$i$个主成分所对应的样本方差为$\hat{\lambda}_i$，而样本特征的总方差为：
+\begin{equation*}
+	\operatorname{tr}(S)=\sum_{i=1}^{m}\hat{\lambda}_i
+\end{equation*}
+因此，前$r$个主成分所保留的方差占总方差的比例为：
+\begin{equation*}
+	R_r=\sum_{i=1}^{r}\hat{\lambda}_i\Big/\sum_{i=1}^{m}\hat{\lambda}_i
+\end{equation*}
+称$R_r$为前$r$个主成分的\textbf{累计方差解释比例}。给定希望保留的方差比例$\eta\in(0,1)$，可以选择满足$R_r\geqslant\eta$的最小$r$，即：
+\begin{equation*}
+	r=\min\left\{k:\sum_{i=1}^{k}\hat{\lambda}_i\Big/\sum_{i=1}^{m}\hat{\lambda}_i\geqslant\eta\right\}
+\end{equation*}
 
 \subsection{应用：主成分回归}
-\begin{note}
-	我们将介绍PCA在解决线性模型复共线性问题上的应用，接下来将延续在岭估计处提到的线性回归模型的典则形式，并将$\operatorname{diag}\{\seq{\lambda}{p-1}\}$设置为$\lambda_1>\lambda_2>\cdots>\lambda_{p-1}$的形式。由\info{矩阵多项式的特征向量}可知$Y$实际上是经过PCA处理后的数据，当$X^{\top}X$存在很小的特征值时，不妨设它们为$\lambda_{r+1},\lambda_{r+2},\dots,\lambda_{p-1}$，由\cref{prop:PCA}(1)可知$Y_{r+1},Y_{r+2},\dots,Y_{p-1}$的方差很小，于是我们可以舍弃它们，从而得到如下模型：
-	\begin{equation*}
-		y=\alpha_0\mathbf{1}_n+\mathbf{Y}_1\delta_1+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
-	\end{equation*}
-	其中$\mathbf{Y}_1$是$Y$的前$r$列，$\delta_1$是$\delta_I$的前$r$行。称如上模型给出的估计$\hat{\delta}_I=(\hat{\delta}_1,\mathbf{0})^{\top}$为$\hat{\delta}$的\gls{PrincipalComponentEstimate}。
-\end{note}
+我们将介绍PCA在解决线性模型复共线性问题上的应用，接下来将延续在岭估计处提到的线性回归模型的典则形式，并将$\operatorname{diag}\{\seq{\lambda}{p-1}\}$设置为$\lambda_1>\lambda_2>\cdots>\lambda_{p-1}$的形式。由\info{矩阵多项式的特征向量}可知$Y$实际上是经过PCA处理后的数据，当$X^{\top}X$存在很小的特征值时，不妨设它们为$\lambda_{r+1},\lambda_{r+2},\dots,\lambda_{p-1}$，由\cref{theo:PCA}可知$Y_{r+1},Y_{r+2},\dots,Y_{p-1}$的方差很小，于是我们可以舍弃它们，从而得到如下模型：
+\begin{equation*}
+	y=\alpha_0\mathbf{1}_n+\mathbf{Y}_1\delta_1+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
+\end{equation*}
+其中$\mathbf{Y}_1$是$Y$的前$r$列，$\delta_1$是$\delta_I$的前$r$行。称如上模型给出的估计$\hat{\delta}_I=(\hat{\delta}_1,\mathbf{0})^{\top}$为$\hat{\delta}$的\gls{PrincipalComponentEstimate}。
 \begin{property}
 	中心化模型的主成分回归具有如下性质：
 	\begin{enumerate}
@@ -169,9 +267,3 @@
 		\hat{\alpha}_I=(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}\tilde{X}_c^{\top}y=Q^{\top}\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{p-1}}\right\}Q\tilde{X}_c^{\top}y
 	\end{equation*}
 \end{proof}
-
-
-
-
-
-
