@@ -489,7 +489,7 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/probability-measure.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 5 章</span> 概率测度</span></a>
+  <a href="../chapters/probability-measure.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 5 章</span> 测度论</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -1236,108 +1236,203 @@ f[\underbrace{x,x,\dots,x}_{n+1\text{个}x}]\coloneq\frac{f^{(n)}(x)}{n!}
 <p>为<span class="math inline">\(\varphi\)</span>关于<span class="math inline">\(\mu\)</span>的<a href="../chapters/glossary-k.html#term-KullbackLeiblerDivergence" class="term" title="Kullback–Leibler divergence">KL散度<span class="term-english">（Kullback–Leibler divergence）</span></a> ，记为<span class="math inline">\(\operatorname{KL}(\varphi\|\mu)\)</span>。</p>
 </div>
 <div id="note-13-3" class="note theorem-block env-note">
-<p><strong>note 13.3</strong>. 设<span class="math inline">\(\mu\)</span>是可测空间<span class="math inline">\((X,\mathscr{F})\)</span>上的概率测度，我们希望求解<span class="math inline">\(\mu\)</span>但是它很难求解，<a href="../chapters/glossary-v.html#term-VariationalMethod" class="term" title="variational method">变分法<span class="term-english">（variational method）</span></a>的思想就是取一族形式简单、便于计算的概率函数，并在这一族分布中找到一个最接近<span class="math inline">\(p\)</span>的。由<a href="../chapters/appendix.html#ineq-Gibbs-ac5aa063" class="textbook-cross-reference" data-reference-key="ineq:Gibbs" data-reference-kind="ref+label" data-reference-title="不等式 11">不等式 11</a>可以看出KL散度可以被用来衡量分布之间的差异性。</p>
+<p><strong>note 13.3</strong>. 设<span class="math inline">\(\mu\)</span>是可测空间<span class="math inline">\((X,\mathscr{F})\)</span>上的概率测度，我们希望求解<span class="math inline">\(\mu\)</span>但是它很难求解，<a href="../chapters/glossary-v.html#term-VariationalMethod" class="term" title="variational method">变分法<span class="term-english">（variational method）</span></a>的思想就是取一族形式简单、便于计算的概率函数，并在这一族分布中找到一个最接近<span class="math inline">\(p\)</span>的。由<a href="../chapters/appendix.html#ineq-Gibbs-ac5aa063" class="textbook-cross-reference" data-reference-key="ineq:Gibbs" data-reference-kind="ref+label" data-reference-title="不等式 11">不等式 11</a>和<a href="../chapters/probability-measure.html#prop-MeasurableIntegral-c2153bd8" class="textbook-cross-reference" data-reference-key="prop:MeasurableIntegral" data-reference-kind="ref+label" data-reference-title="性质 5.4.3" data-reference-items="8" data-reference-hint="请查看第 8 项">性质 5.4.3(8)</a>可以看出KL散度可以被用来衡量分布之间的差异性。</p>
 </div>
-<div id="note-13-4" class="note theorem-block env-note">
-<p><strong>note 13.4</strong>. 在贝叶斯统计中，我们需要求解后验分布<span class="math inline">\(p(y\mid x)\)</span>，变分法提供了一个视角。</p>
-<p>设<span class="math inline">\(y\mid x\)</span>的概率分布为<span class="math inline">\(\varphi\)</span>，其近似概率分布为<span class="math inline">\(\psi\)</span>，<span class="math inline">\(\varphi,\psi\ll\mu\)</span>，<span class="math inline">\(\varphi,\psi,\mu\)</span>是可测空间<span class="math inline">\((X,\mathscr{F})\)</span>上的概率测度，根据<a href="../chapters/probability-measure.html#theo-RadonNikodym-fd20b306" class="textbook-cross-reference" data-reference-key="theo:RadonNikodym" data-reference-kind="ref+label" data-reference-title="定理 5.33">定理 5.33</a>，记： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlxKHkpPVxmcmFje1xtYXRob3B7fVwhXG1hdGhybXtkfVxwc2l9e1xtYXRob3B7fVwhXG1hdGhybXtkfVxtdX0sXHF1YWQgcCh5XG1pZCB4KT1cZnJhY3tcbWF0aG9we31cIVxtYXRocm17ZH1cdmFycGhpfXtcbWF0aG9we31cIVxtYXRocm17ZH1cbXV9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p>在贝叶斯统计中，设<span class="math inline">\((X,\mathscr{F},P)\)</span>为概率空间，<span class="math inline">\(f\)</span>和<span class="math inline">\(g\)</span>分别为<span class="math inline">\((X,\mathscr{F})\)</span>上的<span class="math inline">\(m\)</span>维和<span class="math inline">\(n\)</span>维随机向量，其中<span class="math inline">\(f\)</span>为贝叶斯模型中作为推断对象的随机向量，<span class="math inline">\(g\)</span>为描述观测数据生成机制的随机向量。给定观测<span class="math inline">\(g=x\)</span>后，贝叶斯推断的目标是求解<span class="math inline">\(f\)</span>的条件概率分布。若<span class="math inline">\(f\)</span>关于<span class="math inline">\(g\)</span>相对于<span class="math inline">\(\lambda^m\)</span>的条件概率密度函数<span class="math inline">\(p_{f\mid g}(y\mid z)\)</span>存在，则对<span class="math inline">\(Pg^{-1}\)</span>几乎处处的<span class="math inline">\(x\)</span>，<span class="math inline">\(p_{f\mid g}(y\mid x)\)</span>即为<span class="math inline">\(f\)</span>在观测<span class="math inline">\(g=x\)</span>下的后验概率密度函数。由于该后验概率密度函数通常难以直接求解，变分推断通过寻找一个易于处理的概率分布对其进行近似。</p>
+<p>固定一个上述条件分布表示成立的观测值<span class="math inline">\(x\in\mathbb{R}^{n}\)</span>，记<span class="math inline">\(f\)</span>在给定<span class="math inline">\(g=x\)</span>条件下的概率分布为<span class="math inline">\(\varphi_x\)</span>，即对于任意<span class="math inline">\(A\in\mathcal{B}(\mathbb{R}^{m})\)</span>有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVx2YXJwaGlfeChBKT1caW50X3tBfXBfe2ZcbWlkIGd9KHlcbWlkIHgpXG1hdGhvcHt9XCFcbWF0aHJte2R9XGxhbWJkYV5tClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
-q(y)=\frac{\mathop{}\!\mathrm{d}\psi}{\mathop{}\!\mathrm{d}\mu},\quad p(y\mid x)=\frac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}
+\varphi_x(A)=\int_{A}p_{f\mid g}(y\mid x)\mathop{}\!\mathrm{d}\lambda^m
 \end{equation*}\]</span></p>
-<p>由<a href="../chapters/probability-measure.html#prop-RadonNikodym-40d93ffc" class="textbook-cross-reference" data-reference-key="prop:RadonNikodym" data-reference-kind="ref+label" data-reference-title="性质 5.6.3" data-reference-items="5" data-reference-hint="请查看第 5 项">性质 5.6.3(5)</a>和<a href="../chapters/probability-measure.html#lem-IntChangeOfMeasure-673686c1" class="textbook-cross-reference" data-reference-key="lem:IntChangeOfMeasure" data-reference-kind="ref+label" data-reference-title="引理 5.10">引理 5.10</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0tMfShccHNpXHxcdmFycGhpKT1caW50X3tYfVxsblxmcmFje1xtYXRob3B7fVwhXG1hdGhybXtkfVxwc2l9e1xtYXRob3B7fVwhXG1hdGhybXtkfVx2YXJwaGl9XG1hdGhvcHt9XCFcbWF0aHJte2R9XHBzaT1caW50X3tYfVxsblxsZWZ0KFxmcmFje1xtYXRob3B7fVwhXG1hdGhybXtkfVxwc2l9e1xtYXRob3B7fVwhXG1hdGhybXtkfVxtdX1cQmlnL1xmcmFje1xtYXRob3B7fVwhXG1hdGhybXtkfVx2YXJwaGl9e1xtYXRob3B7fVwhXG1hdGhybXtkfVxtdX1ccmlnaHQpXG1hdGhvcHt9XCFcbWF0aHJte2R9XHBzaT1caW50X3tYfVxsblxmcmFje3EoeSl9e3AoeVxtaWQgeCl9cSh5KVxtYXRob3B7fVwhXG1hdGhybXtkfVxtdQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p>设<span class="math inline">\(\psi\)</span>为<span class="math inline">\((\mathbb{R}^{m},\mathcal{B}(\mathbb{R}^{m}))\)</span>上的一个概率测度，用于近似<span class="math inline">\(\varphi_x\)</span>。假设<span class="math inline">\(\psi\ll\lambda^m\)</span>，根据<a href="../chapters/probability-measure.html#theo-RadonNikodym-fd20b306" class="textbook-cross-reference" data-reference-key="theo:RadonNikodym" data-reference-kind="ref+label" data-reference-title="定理 5.33">定理 5.33</a>，记<span class="math inline">\(\psi\)</span>的概率密度函数为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXEoeSk9XGZyYWN7XG1hdGhvcHt9XCFcbWF0aHJte2R9XHBzaX17XG1hdGhvcHt9XCFcbWF0aHJte2R9XGxhbWJkYV5tfSh5KQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
-\operatorname{KL}(\psi\|\varphi)=\int_{X}\ln\frac{\mathop{}\!\mathrm{d}\psi}{\mathop{}\!\mathrm{d}\varphi}\mathop{}\!\mathrm{d}\psi=\int_{X}\ln\left(\frac{\mathop{}\!\mathrm{d}\psi}{\mathop{}\!\mathrm{d}\mu}\Big/\frac{\mathop{}\!\mathrm{d}\varphi}{\mathop{}\!\mathrm{d}\mu}\right)\mathop{}\!\mathrm{d}\psi=\int_{X}\ln\frac{q(y)}{p(y\mid x)}q(y)\mathop{}\!\mathrm{d}\mu
+q(y)=\frac{\mathop{}\!\mathrm{d}\psi}{\mathop{}\!\mathrm{d}\lambda^m}(y)
 \end{equation*}\]</span></p>
-<p>由于KL散度公式中存在未知的<span class="math inline">\(p(y\mid x)\)</span>，于是需要将其转变为易于求解的形式。由<a href="../chapters/probability-basics.html#prop-ConditionalProbability-2221f409" class="textbook-cross-reference" data-reference-key="prop:ConditionalProbability" data-reference-kind="ref+label" data-reference-title="性质 6.3.2" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 6.3.2(1)</a>和<a href="../chapters/probability-measure.html#prop-MeasurableIntegral-c2153bd8" class="textbook-cross-reference" data-reference-key="prop:MeasurableIntegral" data-reference-kind="ref+label" data-reference-title="性质 5.4.3" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 5.4.3(6)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQkmXG9wZXJhdG9ybmFtZXtLTH0oXHBzaVx8XHZhcnBoaSk9XGludF97WH1xKHkpXGxuXGZyYWN7cSh5KX17cCh5XG1pZCB4KX1cbWF0aG9we31cIVxtYXRocm17ZH1cbXU9XGludF97WH1xKHkpW1xsbiBxKHkpLVxsbiBwKHlcbWlkIHgpXVxtYXRob3B7fVwhXG1hdGhybXtkfVxtdSBcXAoJCT0mXGludF97WH1xKHkpW1xsbiBxKHkpLVxsbiBwKHkseCkrXGxuIHAoeCldXG1hdGhvcHt9XCFcbWF0aHJte2R9XG11IFxcCgkJPSZcaW50X3tYfXEoeSlbXGxuIHEoeSktXGxuIHAoeSx4KV1cbWF0aG9we31cIVxtYXRocm17ZH1cbXUrXGludF97WH1xKHkpXGxuIHAoeClcbWF0aG9we31cIVxtYXRocm17ZH1cbXUgXFwKCQk9JlxpbnRfe1h9cSh5KVtcbG4gcSh5KS1cbG4gcCh5LHgpXVxtYXRob3B7fVwhXG1hdGhybXtkfVxtdStcbG4gcCh4KVxpbnRfe1h9cSh5KVxtYXRob3B7fVwhXG1hdGhybXtkfVxtdSBcXAoJCT0mXGludF97WH1xKHkpW1xsbiBxKHkpLVxsbiBwKHkseCldXG1hdGhvcHt9XCFcbWF0aHJte2R9XG11K1xsbiBwKHgpClxlbmR7YWxpZ24qfQ=="></span></p>
+<p>根据<span class="math inline">\(\varphi_x\)</span>的定义有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxmcmFje1xtYXRob3B7fVwhXG1hdGhybXtkfVx2YXJwaGlfeH17XG1hdGhvcHt9XCFcbWF0aHJte2R9XGxhbWJkYV5tfSh5KT1wX3tmXG1pZCBnfSh5XG1pZCB4KQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\frac{\mathop{}\!\mathrm{d}\varphi_x}{\mathop{}\!\mathrm{d}\lambda^m}(y)=p_{f\mid g}(y\mid x)
+\end{equation*}\]</span></p>
+<p>若进一步有<span class="math inline">\(\psi\ll\varphi_x\)</span>，则由<a href="../chapters/probability-measure.html#prop-RadonNikodym-40d93ffc" class="textbook-cross-reference" data-reference-key="prop:RadonNikodym" data-reference-kind="ref+label" data-reference-title="性质 5.6.3" data-reference-items="5" data-reference-hint="请查看第 5 项">性质 5.6.3(5)</a>和<a href="../chapters/probability-measure.html#lem-IntChangeOfMeasure-673686c1" class="textbook-cross-reference" data-reference-key="lem:IntChangeOfMeasure" data-reference-kind="ref+label" data-reference-title="引理 5.10">引理 5.10</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCVxvcGVyYXRvcm5hbWV7S0x9KFxwc2lcfFx2YXJwaGlfeCk9XGludF97XG1hdGhiYntSfV57bX19XGxuXGZyYWN7XG1hdGhvcHt9XCFcbWF0aHJte2R9XHBzaX17XG1hdGhvcHt9XCFcbWF0aHJte2R9XHZhcnBoaV94fVxtYXRob3B7fVwhXG1hdGhybXtkfVxwc2k9XGludF97XG1hdGhiYntSfV57bX19XGxuXGxlZnQoXGZyYWN7XG1hdGhvcHt9XCFcbWF0aHJte2R9XHBzaX17XG1hdGhvcHt9XCFcbWF0aHJte2R9XGxhbWJkYV5tfVxCaWcvXGZyYWN7XG1hdGhvcHt9XCFcbWF0aHJte2R9XHZhcnBoaV94fXtcbWF0aG9we31cIVxtYXRocm17ZH1cbGFtYmRhXm19XHJpZ2h0KVxtYXRob3B7fVwhXG1hdGhybXtkfVxwc2k9XGludF97XG1hdGhiYntSfV57bX19cSh5KVxsblxmcmFje3EoeSl9e3Bfe2ZcbWlkIGd9KHlcbWlkIHgpfVxtYXRob3B7fVwhXG1hdGhybXtkfVxsYW1iZGFebQpcZW5ke2FsaWduKn0="></span></p>
 <p><span class="math display">\[\begin{align*}
-&amp;\operatorname{KL}(\psi\|\varphi)=\int_{X}q(y)\ln\frac{q(y)}{p(y\mid x)}\mathop{}\!\mathrm{d}\mu=\int_{X}q(y)[\ln q(y)-\ln p(y\mid x)]\mathop{}\!\mathrm{d}\mu \\
-=&amp;\int_{X}q(y)[\ln q(y)-\ln p(y,x)+\ln p(x)]\mathop{}\!\mathrm{d}\mu \\
-=&amp;\int_{X}q(y)[\ln q(y)-\ln p(y,x)]\mathop{}\!\mathrm{d}\mu+\int_{X}q(y)\ln p(x)\mathop{}\!\mathrm{d}\mu \\
-=&amp;\int_{X}q(y)[\ln q(y)-\ln p(y,x)]\mathop{}\!\mathrm{d}\mu+\ln p(x)\int_{X}q(y)\mathop{}\!\mathrm{d}\mu \\
-=&amp;\int_{X}q(y)[\ln q(y)-\ln p(y,x)]\mathop{}\!\mathrm{d}\mu+\ln p(x)
+\operatorname{KL}(\psi\|\varphi_x)=\int_{\mathbb{R}^{m}}\ln\frac{\mathop{}\!\mathrm{d}\psi}{\mathop{}\!\mathrm{d}\varphi_x}\mathop{}\!\mathrm{d}\psi=\int_{\mathbb{R}^{m}}\ln\left(\frac{\mathop{}\!\mathrm{d}\psi}{\mathop{}\!\mathrm{d}\lambda^m}\Big/\frac{\mathop{}\!\mathrm{d}\varphi_x}{\mathop{}\!\mathrm{d}\lambda^m}\right)\mathop{}\!\mathrm{d}\psi=\int_{\mathbb{R}^{m}}q(y)\ln\frac{q(y)}{p_{f\mid g}(y\mid x)}\mathop{}\!\mathrm{d}\lambda^m
 \end{align*}\]</span></p>
-<p>于是根据<a href="../chapters/probability-measure.html#prop-MeasurableIntegral-c2153bd8" class="textbook-cross-reference" data-reference-key="prop:MeasurableIntegral" data-reference-kind="ref+label" data-reference-title="性质 5.4.3" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 5.4.3(6)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbG4gcCh4KT1caW50X3tYfXEoeSlbXGxuIHAoeSx4KS1cbG4gcSh5KV1cbWF0aG9we31cIVxtYXRocm17ZH1cbXUrXG9wZXJhdG9ybmFtZXtLTH0oXHBzaVx8XHZhcnBoaSkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p>因为<span class="math inline">\(p_{f\mid g}(y\mid x)\)</span>正是需要求解的后验概率密度函数，所以上述KL散度通常不能直接计算。若<span class="math inline">\((f,g)\)</span>存在联合概率密度函数<span class="math inline">\(p_{f,g}\)</span>，且<span class="math inline">\(g\)</span>的概率密度函数<span class="math inline">\(p_g\)</span>满足<span class="math inline">\(p_g(x)&gt;0\)</span>，则由<a href="../chapters/probability-basics.html#prop-ConditionalProbabilityDensity-2e35a7db" class="textbook-cross-reference" data-reference-key="prop:ConditionalProbabilityDensity" data-reference-kind="ref+label" data-reference-title="性质 6.3.5" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 6.3.5(1)</a>和<a href="../chapters/probability-measure.html#prop-MeasurableIntegral-c2153bd8" class="textbook-cross-reference" data-reference-key="prop:MeasurableIntegral" data-reference-kind="ref+label" data-reference-title="性质 5.4.3" data-reference-items="8" data-reference-hint="请查看第 8 项">性质 5.4.3(8)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCVxvcGVyYXRvcm5hbWV7S0x9KFxwc2lcfFx2YXJwaGlfeCkmPVxpbnRfe1xtYXRoYmJ7Un1ee219fXEoeSlcbGVmdFtcbG4gcSh5KS1cbG4gcF97ZlxtaWQgZ30oeVxtaWQgeClccmlnaHRdXG1hdGhvcHt9XCFcbWF0aHJte2R9XGxhbWJkYV5tIFxcCgkmPVxpbnRfe1xtYXRoYmJ7Un1ee219fXEoeSlcbGVmdFtcbG4gcSh5KS1cbG4gcF97ZixnfSh5LHgpK1xsbiBwX2coeClccmlnaHRdXG1hdGhvcHt9XCFcbWF0aHJte2R9XGxhbWJkYV5tIFxcCgkmPVxpbnRfe1xtYXRoYmJ7Un1ee219fXEoeSlcbGVmdFtcbG4gcSh5KS1cbG4gcF97ZixnfSh5LHgpXHJpZ2h0XVxtYXRob3B7fVwhXG1hdGhybXtkfVxsYW1iZGFebStcbG4gcF9nKHgpXGludF97XG1hdGhiYntSfV57bX19cSh5KVxtYXRob3B7fVwhXG1hdGhybXtkfVxsYW1iZGFebSBcXAoJJj1caW50X3tcbWF0aGJie1J9XnttfX1xKHkpXGxlZnRbXGxuIHEoeSktXGxuIHBfe2YsZ30oeSx4KVxyaWdodF1cbWF0aG9we31cIVxtYXRocm17ZH1cbGFtYmRhXm0rXGxuIHBfZyh4KQpcZW5ke2FsaWduKn0="></span></p>
+<p><span class="math display">\[\begin{align*}
+\operatorname{KL}(\psi\|\varphi_x)&amp;=\int_{\mathbb{R}^{m}}q(y)\left[\ln q(y)-\ln p_{f\mid g}(y\mid x)\right]\mathop{}\!\mathrm{d}\lambda^m \\
+&amp;=\int_{\mathbb{R}^{m}}q(y)\left[\ln q(y)-\ln p_{f,g}(y,x)+\ln p_g(x)\right]\mathop{}\!\mathrm{d}\lambda^m \\
+&amp;=\int_{\mathbb{R}^{m}}q(y)\left[\ln q(y)-\ln p_{f,g}(y,x)\right]\mathop{}\!\mathrm{d}\lambda^m+\ln p_g(x)\int_{\mathbb{R}^{m}}q(y)\mathop{}\!\mathrm{d}\lambda^m \\
+&amp;=\int_{\mathbb{R}^{m}}q(y)\left[\ln q(y)-\ln p_{f,g}(y,x)\right]\mathop{}\!\mathrm{d}\lambda^m+\ln p_g(x)
+\end{align*}\]</span></p>
+<p>因此： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxsbiBwX2coeCk9XGludF97XG1hdGhiYntSfV57bX19cSh5KVxsZWZ0W1xsbiBwX3tmLGd9KHkseCktXGxuIHEoeSlccmlnaHRdXG1hdGhvcHt9XCFcbWF0aHJte2R9XGxhbWJkYV5tK1xvcGVyYXRvcm5hbWV7S0x9KFxwc2lcfFx2YXJwaGlfeCkKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
-\ln p(x)=\int_{X}q(y)[\ln p(y,x)-\ln q(y)]\mathop{}\!\mathrm{d}\mu+\operatorname{KL}(\psi\|\varphi)
+\ln p_g(x)=\int_{\mathbb{R}^{m}}q(y)\left[\ln p_{f,g}(y,x)-\ln q(y)\right]\mathop{}\!\mathrm{d}\lambda^m+\operatorname{KL}(\psi\|\varphi_x)
 \end{equation*}\]</span></p>
-<p>因为<span class="math inline">\(\ln p(x)\)</span>与<span class="math inline">\(y\)</span>无关，所以最小化<span class="math inline">\(\operatorname{KL}(q\| p)\)</span>等价于最大化<span class="math inline">\(\int_{X}q(y)[\ln p(y,x)-\ln q(y)]\mathop{}\!\mathrm{d}\mu\)</span>。</p>
-</div>
-<div id="definition-13-11" class="definition theorem-block env-definition">
-<p><strong>Definition 13.11</strong>. 在前述框架下，称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcaW50X3tYfXEoeSlbXGxuIHAoeSx4KS1cbG4gcSh5KV1cbWF0aG9we31cIVxtYXRocm17ZH1cbXUKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p>对于固定的观测<span class="math inline">\(x\)</span>，<span class="math inline">\(\ln p_g(x)\)</span>与<span class="math inline">\(\psi\)</span>无关，因此最小化<span class="math inline">\(\operatorname{KL}(\psi\|\varphi_x)\)</span>等价于最大化： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxpbnRfe1xtYXRoYmJ7Un1ee219fXEoeSlcbGVmdFtcbG4gcF97ZixnfSh5LHgpLVxsbiBxKHkpXHJpZ2h0XVxtYXRob3B7fVwhXG1hdGhybXtkfVxsYW1iZGFebQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
-\int_{X}q(y)[\ln p(y,x)-\ln q(y)]\mathop{}\!\mathrm{d}\mu
+\int_{\mathbb{R}^{m}}q(y)\left[\ln p_{f,g}(y,x)-\ln q(y)\right]\mathop{}\!\mathrm{d}\lambda^m
+\end{equation*}\]</span></p>
+<div id="definition-13-11" class="definition theorem-block env-definition">
+<p><strong>Definition 13.11</strong>. 在前述框架下，称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcaW50X3tcbWF0aGJie1J9XnttfX1xKHkpXGxlZnRbXGxuIHBfe2YsZ30oeSx4KS1cbG4gcSh5KVxyaWdodF1cbWF0aG9we31cIVxtYXRocm17ZH1cbGFtYmRhXm0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\int_{\mathbb{R}^{m}}q(y)\left[\ln p_{f,g}(y,x)-\ln q(y)\right]\mathop{}\!\mathrm{d}\lambda^m
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/glossary-e.html#term-ELBO" class="term" title="evidence lower bound, ELBO">证据下界<span class="term-english">（evidence lower bound, ELBO）</span></a>，记做<span class="math inline">\(L(q,x)\)</span>。</p>
 </div>
+<p>实际计算中，变分推断需要预先选定一个便于计算的概率密度族<span class="math inline">\(\mathscr{P}\)</span>，并求解： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXFeeyp9XGluXHVuZGVyc2V0e3FcaW5cbWF0aHNjcntQfX17XGFyZ1xtYXh9XDtMKHEseCkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+q^{*}\in\underset{q\in\mathscr{P}}{\arg\max}\;L(q,x)
+\end{equation*}\]</span></p>
+<p>其中<span class="math inline">\(q^{*}\)</span>所对应的概率分布作为后验分布<span class="math inline">\(\varphi_x\)</span>的近似。由此，贝叶斯后验推断被转化为关于概率密度函数<span class="math inline">\(q\)</span>的优化问题。</p>
 <section id="em-f307c3c2" class="level3">
 <h3 class="anchored" data-anchor-id="em-f307c3c2"><span class="header-section-number">13.3.1</span> EM算法</h3>
-<p>在极大似然估计中，若观测变量<span class="math inline">\(f\)</span>为从可控参数结构<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>到可测空间<span class="math inline">\((Y,\mathscr{B})\)</span>上的可测映射，参数空间为<span class="math inline">\(\Theta\)</span>，控制测度为<span class="math inline">\(\mu\)</span>，根据<a href="../chapters/probability-measure.html#theo-RadonNikodym-fd20b306" class="textbook-cross-reference" data-reference-key="theo:RadonNikodym" data-reference-kind="ref+label" data-reference-title="定理 5.33">定理 5.33</a>，记<span class="math inline">\(\dfrac{\mathop{}\!\mathrm{d}P_{\theta}}{\mathop{}\!\mathrm{d}\mu}(f)=p_{\theta}(f)\)</span>，那么目标函数可以写成： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxoYXR7XHRoZXRhfT1cdW5kZXJzZXR7XHRoZXRhfXtcYXJnXG1heH1cbG4gcF97XHRoZXRhfShmKQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p>在极大似然估计中，设<span class="math inline">\((X,\mathscr{A},\mathscr{P})\)</span>为参数统计结构，<span class="math inline">\(\Theta\)</span>为参数空间，<span class="math inline">\(f\)</span>为从<span class="math inline">\((X,\mathscr{A})\)</span>到可测空间<span class="math inline">\((Y,\mathscr{B})\)</span>上的可测映射。设<span class="math inline">\(\mu\)</span>为<span class="math inline">\((Y,\mathscr{B})\)</span>上的<span class="math inline">\(\sigma\)</span>有限测度，并且对于任意<span class="math inline">\(\theta\in\Theta\)</span>都有<span class="math inline">\(P_{\theta}f^{-1}\ll\mu\)</span>。根据<a href="../chapters/probability-measure.html#theo-RadonNikodym-fd20b306" class="textbook-cross-reference" data-reference-key="theo:RadonNikodym" data-reference-kind="ref+label" data-reference-title="定理 5.33">定理 5.33</a>，记<span class="math inline">\(f\)</span>在参数<span class="math inline">\(\theta\)</span>下的概率密度函数为<span class="math inline">\(p_{\theta;f}(x)\)</span>。固定观测<span class="math inline">\(x\in Y\)</span>，极大似然估计的目标为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxoYXR7XHRoZXRhfVxpblx1bmRlcnNldHtcdGhldGFcaW5cVGhldGF9e1xhcmdcbWF4fVw7XGxuIHBfe1x0aGV0YTtmfSh4KQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
-\hat{\theta}=\underset{\theta}{\arg\max}\ln p_{\theta}(f)
+\hat{\theta}\in\underset{\theta\in\Theta}{\arg\max}\;\ln p_{\theta;f}(x)
 \end{equation*}\]</span></p>
-<p>然而，在许多含有潜在结构的统计模型中，观测变量<span class="math inline">\(f\)</span>本身的概率分布并不容易直接写出。真正容易描述的，往往是它在某些无法观测的隐变量<span class="math inline">\(g\)</span>给定条件下的条件分布。有时，隐变量<span class="math inline">\(g\)</span>本身的分布也不是单纯的辅助工具，而是我们希望估计和理解的对象。</p>
-<p>但是在引入隐变量之后，我们需要通过对隐变量积分，才能得到观测变量的边际似然。设<span class="math inline">\(g\)</span>为概率空间<span class="math inline">\((X,\mathscr{A},P)\)</span>到可测空间<span class="math inline">\((Z,\mathscr{C})\)</span>上的可测映射，<span class="math inline">\(Pg^{-1}\ll\nu\)</span>，根据<a href="../chapters/probability-measure.html#theo-RadonNikodym-fd20b306" class="textbook-cross-reference" data-reference-key="theo:RadonNikodym" data-reference-kind="ref+label" data-reference-title="定理 5.33">定理 5.33</a>，记<span class="math inline">\(\dfrac{\mathop{}\!\mathrm{d}Pg^{-1}}{\mathop{}\!\mathrm{d}\nu}=q(g)\)</span>，由<a href="../chapters/probability-basics.html#prop-ConditionalProbability-2221f409" class="textbook-cross-reference" data-reference-key="prop:ConditionalProbability" data-reference-kind="ref+label" data-reference-title="性质 6.3.2" data-reference-items="2" data-reference-hint="请查看第 2 项">性质 6.3.2(2)</a>和<a href="../chapters/probability-measure.html#lem-IntChangeOfMeasure-673686c1" class="textbook-cross-reference" data-reference-key="lem:IntChangeOfMeasure" data-reference-kind="ref+label" data-reference-title="引理 5.10">引理 5.10</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXBfe1x0aGV0YX0oZik9XGludF97Wn1wX3tcdGhldGF9KGZcbWlkIGcpXG1hdGhvcHt9XCFcbWF0aHJte2R9UGdeey0xfT1caW50X3tafXEoZylwX3tcdGhldGF9KGZcbWlkIGcpXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p>然而，在许多含有潜在结构的统计模型中，<span class="math inline">\(p_{\theta;f}\)</span>并不容易直接计算。此时通常引入另一个不可直接观测的随机变量<span class="math inline">\(g\)</span>来描述模型中的潜在结构，称<span class="math inline">\(g\)</span>为<a href="../chapters/glossary-l.html#term-LatentVariable" class="term" title="latent variable">隐变量<span class="term-english">（latent variable）</span></a>。设<span class="math inline">\(g\)</span>为从<span class="math inline">\((X,\mathscr{A})\)</span>到可测空间<span class="math inline">\((Z,\mathscr{C})\)</span>上的可测映射，并设<span class="math inline">\(\nu\)</span>为<span class="math inline">\((Z,\mathscr{C})\)</span>上的<span class="math inline">\(\sigma\)</span>有限测度。假设<span class="math inline">\((f,g)\)</span>在<span class="math inline">\(P_{\theta}\)</span>下的联合概率分布关于<span class="math inline">\(\mu\times\nu\)</span>绝对连续，记其联合概率密度函数为<span class="math inline">\(p_{\theta;f,g}(x,z)\)</span>，则由<a href="../chapters/probability-measure.html#theo-MarginalDensity-302eb2a3" class="textbook-cross-reference" data-reference-key="theo:MarginalDensity" data-reference-kind="ref+label" data-reference-title="定理 5.38">定理 5.38</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXBfe1x0aGV0YTtmfSh4KT1caW50X3tafXBfe1x0aGV0YTtmLGd9KHgseilcbWF0aG9we31cIVxtYXRocm17ZH1cbnUKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
-p_{\theta}(f)=\int_{Z}p_{\theta}(f\mid g)\mathop{}\!\mathrm{d}Pg^{-1}=\int_{Z}q(g)p_{\theta}(f\mid g)\mathop{}\!\mathrm{d}\nu
+p_{\theta;f}(x)=\int_{Z}p_{\theta;f,g}(x,z)\mathop{}\!\mathrm{d}\nu
 \end{equation*}\]</span></p>
-<p>原本我们只是想最大化一个对数似然函数，但由于隐变量无法观测，观测数据的概率必须通过积分得到，这使得目标函数通常难以直接优化。EM算法(Expectation-Maximization Algorithm)正是为了解决这类问题而提出的。</p>
-<p>由<a href="../chapters/appendix.html#ineq-Jensen-4973d767" class="textbook-cross-reference" data-reference-key="ineq:Jensen" data-reference-kind="ref+label" data-reference-title="不等式 10">不等式 10</a>、<a href="../chapters/probability-basics.html#prop-ConditionalProbability-2221f409" class="textbook-cross-reference" data-reference-key="prop:ConditionalProbability" data-reference-kind="ref+label" data-reference-title="性质 6.3.2" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 6.3.2(1)</a>和<a href="../chapters/probability-measure.html#prop-MeasurableIntegral-c2153bd8" class="textbook-cross-reference" data-reference-key="prop:MeasurableIntegral" data-reference-kind="ref+label" data-reference-title="性质 5.4.3" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 5.4.3(6)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCSZcbG4gcF97XHRoZXRhfShmKT1cbG5caW50X3tafXEoZylwX3tcdGhldGF9KGZcbWlkIGcpXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51PVxsblxvcGVyYXRvcm5hbWV7RX1bcF97XHRoZXRhfShmXG1pZCBnKV1cZ2Vxc2xhbnRcb3BlcmF0b3JuYW1le0V9W1xsbiBwX3tcdGhldGF9KGZcbWlkIGcpXSBcXAoJPSZcaW50X3tafXEoZylbXGxuIHBfe1x0aGV0YX0oZlxtaWQgZyldXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51PVxpbnRfe1p9cShnKVtcbG4gcF97XHRoZXRhfShmLGcpLVxsbiBxKGcpXVxtYXRob3B7fVwhXG1hdGhybXtkfVxudSBcXAoJPSZcaW50X3tafXEoZylcbG4gcF97XHRoZXRhfShmLGcpXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51LVxpbnRfe1p9cShnKVxsbiBxKGcpXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51ClxlbmR7YWxpZ24qfQ=="></span></p>
+<p>因此观测数据的似然需要通过对潜变量积分得到。即使联合概率密度函数<span class="math inline">\(p_{\theta;f,g}(x,z)\)</span>具有较为简单的形式，<span class="math inline">\(\ln p_{\theta;f}(x)\)</span>仍然可能难以直接优化。<a href="../chapters/glossary-e.html#term-ExpectationMaximizationAlgorithm" class="term" title="expectation-maximization algorithm">最大期望算法<span class="term-english">（expectation-maximization algorithm）</span></a>正是针对这类含有潜变量的极大似然估计问题而提出的。</p>
+<p>固定<span class="math inline">\(\theta\in\Theta\)</span>以及观测<span class="math inline">\(x\in Y\)</span>。设<span class="math inline">\(\psi_q\)</span>为<span class="math inline">\((Z,\mathscr{C})\)</span>上的概率测度，并且<span class="math inline">\(\psi_q\ll\nu\)</span>，记： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXEoeik9XGRmcmFje1xtYXRob3B7fVwhXG1hdGhybXtkfVxwc2lfcX17XG1hdGhvcHt9XCFcbWF0aHJte2R9XG51fSh6KS4KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+q(z)=\dfrac{\mathop{}\!\mathrm{d}\psi_q}{\mathop{}\!\mathrm{d}\nu}(z).
+\end{equation*}\]</span></p>
+<p>若<span class="math inline">\(p_{\theta;f,g}(x,z)=0\)</span>对<span class="math inline">\(\nu\)</span>几乎处处的<span class="math inline">\(z\in\{z\in Z:q(z)=0\}\)</span>成立，并约定<span class="math inline">\(q(z)=0\)</span>时<span class="math inline">\(p_{\theta;f,g}(x,z)/q(z)=0\)</span>，则： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxsbiBwX3tcdGhldGE7Zn0oeCk9XGxuXGludF97Wn1wX3tcdGhldGE7ZixnfSh4LHopXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51PVxsblxpbnRfe1p9cSh6KVxmcmFje3Bfe1x0aGV0YTtmLGd9KHgseil9e3Eoeil9XG1hdGhvcHt9XCFcbWF0aHJte2R9XG51ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\ln p_{\theta;f}(x)=\ln\int_{Z}p_{\theta;f,g}(x,z)\mathop{}\!\mathrm{d}\nu=\ln\int_{Z}q(z)\frac{p_{\theta;f,g}(x,z)}{q(z)}\mathop{}\!\mathrm{d}\nu
+\end{equation*}\]</span></p>
+<p>由<a href="../chapters/appendix.html#ineq-Jensen-4973d767" class="textbook-cross-reference" data-reference-key="ineq:Jensen" data-reference-kind="ref+label" data-reference-title="不等式 10">不等式 10</a>和<a href="../chapters/probability-measure.html#prop-MeasurableIntegral-c2153bd8" class="textbook-cross-reference" data-reference-key="prop:MeasurableIntegral" data-reference-kind="ref+label" data-reference-title="性质 5.4.3" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 5.4.3(6)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCVxsbiBwX3tcdGhldGE7Zn0oeClcZ2Vxc2xhbnRcaW50X3tafXEoeilcbG5cZnJhY3twX3tcdGhldGE7ZixnfSh4LHopfXtxKHopfVxtYXRob3B7fVwhXG1hdGhybXtkfVxudT1caW50X3tafXEoeilcbG4gcF97XHRoZXRhO2YsZ30oeCx6KVxtYXRob3B7fVwhXG1hdGhybXtkfVxudS1caW50X3tafXEoeilcbG4gcSh6KVxtYXRob3B7fVwhXG1hdGhybXtkfVxudQpcZW5ke2FsaWduKn0="></span></p>
 <p><span class="math display">\[\begin{align*}
-&amp;\ln p_{\theta}(f)=\ln\int_{Z}q(g)p_{\theta}(f\mid g)\mathop{}\!\mathrm{d}\nu=\ln\operatorname{E}[p_{\theta}(f\mid g)]\geqslant\operatorname{E}[\ln p_{\theta}(f\mid g)] \\
-=&amp;\int_{Z}q(g)[\ln p_{\theta}(f\mid g)]\mathop{}\!\mathrm{d}\nu=\int_{Z}q(g)[\ln p_{\theta}(f,g)-\ln q(g)]\mathop{}\!\mathrm{d}\nu \\
-=&amp;\int_{Z}q(g)\ln p_{\theta}(f,g)\mathop{}\!\mathrm{d}\nu-\int_{Z}q(g)\ln q(g)\mathop{}\!\mathrm{d}\nu
+\ln p_{\theta;f}(x)\geqslant\int_{Z}q(z)\ln\frac{p_{\theta;f,g}(x,z)}{q(z)}\mathop{}\!\mathrm{d}\nu=\int_{Z}q(z)\ln p_{\theta;f,g}(x,z)\mathop{}\!\mathrm{d}\nu-\int_{Z}q(z)\ln q(z)\mathop{}\!\mathrm{d}\nu
 \end{align*}\]</span></p>
-<p>记： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCUwocSx5KT1caW50X3tafXEoZylcbG4gcF97XHRoZXRhfShmLGcpXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51LVxpbnRfe1p9cShnKVxsbiBxKGcpXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p>记： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCUwocSxcdGhldGE7eCk9XGludF97Wn1xKHopXGxuIHBfe1x0aGV0YTtmLGd9KHgseilcbWF0aG9we31cIVxtYXRocm17ZH1cbnUtXGludF97Wn1xKHopXGxuIHEoeilcbWF0aG9we31cIVxtYXRocm17ZH1cbnUKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
-L(q,y)=\int_{Z}q(g)\ln p_{\theta}(f,g)\mathop{}\!\mathrm{d}\nu-\int_{Z}q(g)\ln q(g)\mathop{}\!\mathrm{d}\nu
+L(q,\theta;x)=\int_{Z}q(z)\ln p_{\theta;f,g}(x,z)\mathop{}\!\mathrm{d}\nu-\int_{Z}q(z)\ln q(z)\mathop{}\!\mathrm{d}\nu
 \end{equation*}\]</span></p>
-<p>则有: <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCUwocSx5KVxsZXFzbGFudFxsbiBwX3tcdGhldGF9KGYpClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p>即<span class="math inline">\(L(q,\theta;x)\)</span>为<span class="math inline">\(\ln p_{\theta;f}(x)\)</span>的下界。</p>
+<p>进一步假设<span class="math inline">\(p_{\theta;f}(x)&gt;0\)</span>，并记潜变量<span class="math inline">\(g\)</span>在给定<span class="math inline">\(f=x\)</span>条件下的条件概率密度函数为<span class="math inline">\(p_{\theta;g\mid f}(z\mid x)\)</span>，将其对应的条件概率分布记为<span class="math inline">\(\varphi_{\theta,x}\)</span>，即对任意的<span class="math inline">\(A\in\mathscr{C}\)</span>有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVx2YXJwaGlfe1x0aGV0YSx4fShBKT1caW50X3tBfXBfe1x0aGV0YTtnXG1pZCBmfSh6XG1pZCB4KVxtYXRob3B7fVwhXG1hdGhybXtkfVxudS4KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
-L(q,y)\leqslant\ln p_{\theta}(f)
+\varphi_{\theta,x}(A)=\int_{A}p_{\theta;g\mid f}(z\mid x)\mathop{}\!\mathrm{d}\nu.
 \end{equation*}\]</span></p>
-<p>这个<span class="math inline">\(L(q,y)\)</span>就是边际对数似然<span class="math inline">\(\ln p_{\theta}(f)\)</span>的一个下界。</p>
-<p>EM算法的基本思想就是：既然直接最大化<span class="math inline">\(\ln p_{\theta}(f)\)</span>比较困难，那么可以转而反复提高这个下界。若一组<span class="math inline">\(\hat{q},\hat{\theta}\)</span>使得<span class="math inline">\(L(q,y)\)</span>达到最大，则<span class="math inline">\(\hat{\theta}\)</span>也应该是<span class="math inline">\(\theta\)</span>的极大似然估计。</p>
-<p>进一步地，由<a href="../chapters/probability-measure.html#prop-RadonNikodym-40d93ffc" class="textbook-cross-reference" data-reference-key="prop:RadonNikodym" data-reference-kind="ref+label" data-reference-title="性质 5.6.3" data-reference-items="5" data-reference-hint="请查看第 5 项">性质 5.6.3(5)</a>、<a href="../chapters/probability-measure.html#lem-IntChangeOfMeasure-673686c1" class="textbook-cross-reference" data-reference-key="lem:IntChangeOfMeasure" data-reference-kind="ref+label" data-reference-title="引理 5.10">引理 5.10</a>和<a href="../chapters/probability-basics.html#prop-ConditionalProbability-2221f409" class="textbook-cross-reference" data-reference-key="prop:ConditionalProbability" data-reference-kind="ref+label" data-reference-title="性质 6.3.2" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 6.3.2(1)</a>可知这个下界与真实边际对数似然之间的差距可以精确写成一个KL散度： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCSZcb3BlcmF0b3JuYW1le0tMfVtxKGcpXHxwX3tcdGhldGF9KGdcbWlkIGYpXT1caW50X3tafXEoZylcbG5cZnJhY3txKGcpfXtwX3tcdGhldGF9KGdcbWlkIGYpfVxtYXRob3B7fVwhXG1hdGhybXtkfVxudSBcXAoJPSZcaW50X3tafXEoZylcbG4gcShnKVxtYXRob3B7fVwhXG1hdGhybXtkfVxudS0KCVxpbnRfe1p9cShnKVxsbiBwX3tcdGhldGF9KGdcbWlkIGYpXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51IFxcCgk9JlxpbnRfe1p9cShnKVxsbiBxKGcpXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51LVxpbnRfe1p9cShnKVxsbiBwX3tcdGhldGF9KGYsZylcbWF0aG9we31cIVxtYXRocm17ZH1cbnUrXGxuIHBfe1x0aGV0YX0oZikKXGVuZHthbGlnbip9"></span></p>
+<p>若<span class="math inline">\(\psi_q\ll\varphi_{\theta,x}\)</span>，则由<a href="../chapters/probability-measure.html#prop-RadonNikodym-40d93ffc" class="textbook-cross-reference" data-reference-key="prop:RadonNikodym" data-reference-kind="ref+label" data-reference-title="性质 5.6.3" data-reference-items="5" data-reference-hint="请查看第 5 项">性质 5.6.3(5)</a>、<a href="../chapters/probability-measure.html#lem-IntChangeOfMeasure-673686c1" class="textbook-cross-reference" data-reference-key="lem:IntChangeOfMeasure" data-reference-kind="ref+label" data-reference-title="引理 5.10">引理 5.10</a>、<a href="../chapters/probability-measure.html#prop-MeasurableIntegral-c2153bd8" class="textbook-cross-reference" data-reference-key="prop:MeasurableIntegral" data-reference-kind="ref+label" data-reference-title="性质 5.4.3" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 5.4.3(6)</a>和<a href="../chapters/probability-basics.html#prop-ConditionalProbabilityDensity-2e35a7db" class="textbook-cross-reference" data-reference-key="prop:ConditionalProbabilityDensity" data-reference-kind="ref+label" data-reference-title="性质 6.3.5" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 6.3.5(1)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCVxvcGVyYXRvcm5hbWV7S0x9KFxwc2lfcVx8XHZhcnBoaV97XHRoZXRhLHh9KSY9XGludF97Wn1cbG5cZGZyYWN7XG1hdGhvcHt9XCFcbWF0aHJte2R9XHBzaV9xfXtcbWF0aG9we31cIVxtYXRocm17ZH1cdmFycGhpX3tcdGhldGEseH19KHopXG1hdGhvcHt9XCFcbWF0aHJte2R9XHBzaV9xPVxpbnRfe1p9XGxuXGxlZnRbXGRmcmFje1xtYXRob3B7fVwhXG1hdGhybXtkfVxwc2lfcX17XG1hdGhvcHt9XCFcbWF0aHJte2R9XG51fSh6KVxCaWcvXGRmcmFje1xtYXRob3B7fVwhXG1hdGhybXtkfVx2YXJwaGlfe1x0aGV0YSx4fX17XG1hdGhvcHt9XCFcbWF0aHJte2R9XG51fSh6KVxyaWdodF1cbWF0aG9we31cIVxtYXRocm17ZH1ccHNpX3E9XGludF97Wn1xKHopXGxuXGZyYWN7cSh6KX17cF97XHRoZXRhO2dcbWlkIGZ9KHpcbWlkIHgpfVxtYXRob3B7fVwhXG1hdGhybXtkfVxudSBcXAoJJj1caW50X3tafXEoeilcbG4gcSh6KVxtYXRob3B7fVwhXG1hdGhybXtkfVxudS1caW50X3tafXEoeilcbG4gcF97XHRoZXRhO2dcbWlkIGZ9KHpcbWlkIHgpXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51IFxcCgkmPVxpbnRfe1p9cSh6KVxsbiBxKHopXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51LVxpbnRfe1p9cSh6KVxsbiBwX3tcdGhldGE7ZixnfSh4LHopXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51K1xsbiBwX3tcdGhldGE7Zn0oeCkKXGVuZHthbGlnbip9"></span></p>
 <p><span class="math display">\[\begin{align*}
-&amp;\operatorname{KL}[q(g)\|p_{\theta}(g\mid f)]=\int_{Z}q(g)\ln\frac{q(g)}{p_{\theta}(g\mid f)}\mathop{}\!\mathrm{d}\nu \\
-=&amp;\int_{Z}q(g)\ln q(g)\mathop{}\!\mathrm{d}\nu-
-\int_{Z}q(g)\ln p_{\theta}(g\mid f)\mathop{}\!\mathrm{d}\nu \\
-=&amp;\int_{Z}q(g)\ln q(g)\mathop{}\!\mathrm{d}\nu-\int_{Z}q(g)\ln p_{\theta}(f,g)\mathop{}\!\mathrm{d}\nu+\ln p_{\theta}(f)
+\operatorname{KL}(\psi_q\|\varphi_{\theta,x})&amp;=\int_{Z}\ln\dfrac{\mathop{}\!\mathrm{d}\psi_q}{\mathop{}\!\mathrm{d}\varphi_{\theta,x}}(z)\mathop{}\!\mathrm{d}\psi_q=\int_{Z}\ln\left[\dfrac{\mathop{}\!\mathrm{d}\psi_q}{\mathop{}\!\mathrm{d}\nu}(z)\Big/\dfrac{\mathop{}\!\mathrm{d}\varphi_{\theta,x}}{\mathop{}\!\mathrm{d}\nu}(z)\right]\mathop{}\!\mathrm{d}\psi_q=\int_{Z}q(z)\ln\frac{q(z)}{p_{\theta;g\mid f}(z\mid x)}\mathop{}\!\mathrm{d}\nu \\
+&amp;=\int_{Z}q(z)\ln q(z)\mathop{}\!\mathrm{d}\nu-\int_{Z}q(z)\ln p_{\theta;g\mid f}(z\mid x)\mathop{}\!\mathrm{d}\nu \\
+&amp;=\int_{Z}q(z)\ln q(z)\mathop{}\!\mathrm{d}\nu-\int_{Z}q(z)\ln p_{\theta;f,g}(x,z)\mathop{}\!\mathrm{d}\nu+\ln p_{\theta;f}(x)
 \end{align*}\]</span></p>
-<p>于是： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxsbiBwX3tcdGhldGF9KGYpPUwocSx5KStcb3BlcmF0b3JuYW1le0tMfVtxKGcpXHxwX3tcdGhldGF9KGdcbWlkIGYpXQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p>因此： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxsbiBwX3tcdGhldGE7Zn0oeCk9TChxLFx0aGV0YTt4KStcb3BlcmF0b3JuYW1le0tMfShccHNpX3FcfFx2YXJwaGlfe1x0aGV0YSx4fSkKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
-\ln p_{\theta}(f)=L(q,y)+\operatorname{KL}[q(g)\|p_{\theta}(g\mid f)]
+\ln p_{\theta;f}(x)=L(q,\theta;x)+\operatorname{KL}(\psi_q\|\varphi_{\theta,x})
 \end{equation*}\]</span></p>
+<p>由<a href="../chapters/appendix.html#ineq-Gibbs-ac5aa063" class="textbook-cross-reference" data-reference-key="ineq:Gibbs" data-reference-kind="ref+label" data-reference-title="不等式 11">不等式 11</a>可知，固定<span class="math inline">\(\theta\)</span>时： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCUwocSxcdGhldGE7eClcbGVxc2xhbnRcbG4gcF97XHRoZXRhO2Z9KHgpClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+L(q,\theta;x)\leqslant\ln p_{\theta;f}(x)
+\end{equation*}\]</span></p>
+<p>并且当： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXEoeik9cF97XHRoZXRhO2dcbWlkIGZ9KHpcbWlkIHgpCglccXF1YWQKCVxudVx0ZXh0ey1hLmUufQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+q(z)=p_{\theta;g\mid f}(z\mid x)
+\qquad
+\nu\text{-a.e.}
+\end{equation*}\]</span></p>
+<p>时等号成立。因此，对于固定的<span class="math inline">\(\theta\)</span>，在所有允许的概率密度函数<span class="math inline">\(q\)</span>中最大化<span class="math inline">\(L(q,\theta;x)\)</span>，等价于令<span class="math inline">\(q\)</span>取为当前参数下潜变量的后验概率密度函数。</p>
+<p>EM算法可以理解为对<span class="math inline">\(L(q,\theta;x)\)</span>关于<span class="math inline">\(q\)</span>和<span class="math inline">\(\theta\)</span>进行交替最大化。由于对于任意固定的<span class="math inline">\(\theta\)</span>都有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVx1bmRlcnNldHtxfXtcc3VwfVw7TChxLFx0aGV0YTt4KQoJPQoJXGxuIHBfe1x0aGV0YTtmfSh4KQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\underset{q}{\sup}\;L(q,\theta;x)
+=
+\ln p_{\theta;f}(x)
+\end{equation*}\]</span></p>
+<p>因此，如果能够对<span class="math inline">\(q\)</span>和<span class="math inline">\(\theta\)</span>进行全局联合最大化，则关于<span class="math inline">\(\theta\)</span>得到的最优解也是观测数据边际似然的极大似然估计。不过，实际的EM算法仅保证边际似然在迭代过程中不下降，并不一般保证收敛到全局极大值。</p>
 <div id="method-13-4" class="method theorem-block env-method">
 <p><strong>Method 13.4</strong>. <strong>（Expectation-Maximization Algorithm）</strong></p>
-<p>EM算法可以理解为对<span class="math inline">\(L(q,y)\)</span>进行坐标上升。具体地说，在第<span class="math inline">\(t\)</span>轮迭代中，假设当前参数为<span class="math inline">\(\theta^{(t)}\)</span>。EM算法交替更新<span class="math inline">\(q\)</span>和<span class="math inline">\(\theta\)</span>。</p>
-<p>首先固定<span class="math inline">\(\theta=\theta^{(t)}\)</span>，求解<span class="math inline">\(q^{(t+1)}\)</span>使得最大化<span class="math inline">\(L(q^{(t+1)},y)\)</span>。由于： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbG4gcF97XHRoZXRhXnsodCl9fShmKT1MKHFeeyh0KzEpfSx5KStcb3BlcmF0b3JuYW1le0tMfVtxXnsodCsxKX0oZylcfHBfe1x0aGV0YV57KHQpfX0oZ1xtaWQgZildClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p>给定初始参数<span class="math inline">\(\theta^{(0)}\in\Theta\)</span>。在第<span class="math inline">\(t\)</span>轮迭代中，假设当前参数为<span class="math inline">\(\theta^{(t)}\)</span>。</p>
+<p>首先固定<span class="math inline">\(\theta=\theta^{(t)}\)</span>，关于<span class="math inline">\(q\)</span>最大化： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlMKHEsXHRoZXRhXnsodCl9O3gpClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
-\ln p_{\theta^{(t)}}(f)=L(q^{(t+1)},y)+\operatorname{KL}[q^{(t+1)}(g)\|p_{\theta^{(t)}}(g\mid f)]
+L(q,\theta^{(t)};x)
 \end{equation*}\]</span></p>
-<p>而左边与<span class="math inline">\(q\)</span>无关，是一个定值，所以最大化<span class="math inline">\(L(q^{(t+1)},y)\)</span>等价于最小化<span class="math inline">\(\operatorname{KL}[q^{(t+1)}(g)\|p_{\theta^{(t)}}(g\mid f)]\)</span>。当<span class="math inline">\(q^{(t+1)}(g)=p_{\theta^{(t)}}(g\mid f)\)</span>时，KL散度达到最小值<span class="math inline">\(0\)</span>。因此，EM算法的E步就是在当前参数<span class="math inline">\(\theta^{(t)}\)</span>下计算隐变量的后验分布。</p>
-<p>接着固定<span class="math inline">\(q=q^{(t+1)}\)</span>，最大化<span class="math inline">\(L(q^{(t+1)},y)\)</span>。因为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlMW3Feeyh0KzEpfSx5XT1caW50X3tafXFeeyh0KzEpfShnKVxsbiBwX3tcdGhldGF9KGYsZylcbWF0aG9we31cIVxtYXRocm17ZH1cbnUtXGludF97Wn1xXnsodCsxKX0oZylcbG4gcV57KHQrMSl9KGcpXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p>由于： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbG4gcF97XHRoZXRhXnsodCl9O2Z9KHgpCgkJPQoJCUwocSxcdGhldGFeeyh0KX07eCkKCQkrCgkJXG9wZXJhdG9ybmFtZXtLTH0KCQlcbGVmdCgKCQlccHNpX3FcbWlkZGxlXHxcdmFycGhpX3tcdGhldGFeeyh0KX0seH0KCQlccmlnaHQpClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
-L[q^{(t+1)},y]=\int_{Z}q^{(t+1)}(g)\ln p_{\theta}(f,g)\mathop{}\!\mathrm{d}\nu-\int_{Z}q^{(t+1)}(g)\ln q^{(t+1)}(g)\mathop{}\!\mathrm{d}\nu
+\ln p_{\theta^{(t)};f}(x)
+=
+L(q,\theta^{(t)};x)
++
+\operatorname{KL}
+\left(
+\psi_q\middle\|\varphi_{\theta^{(t)},x}
+\right)
 \end{equation*}\]</span></p>
-<p>其中第二项不含<span class="math inline">\(\theta\)</span>，所以关于<span class="math inline">\(\theta\)</span>的优化等价于： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcdGhldGFeeyh0KzEpfT1cdW5kZXJzZXR7XHRoZXRhfXtcYXJnXG1heH1caW50X3tafXFeeyh0KzEpfShnKVxsbiBwX3tcdGhldGF9KGYsZylcbWF0aG9we31cIVxtYXRocm17ZH1cbnUKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p>而左侧与<span class="math inline">\(q\)</span>无关，因此最大化<span class="math inline">\(L(q,\theta^{(t)};x)\)</span>等价于最小化： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0tMfQoJCVxsZWZ0KAoJCVxwc2lfcVxtaWRkbGVcfFx2YXJwaGlfe1x0aGV0YV57KHQpfSx4fQoJCVxyaWdodCkKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
-\theta^{(t+1)}=\underset{\theta}{\arg\max}\int_{Z}q^{(t+1)}(g)\ln p_{\theta}(f,g)\mathop{}\!\mathrm{d}\nu
+\operatorname{KL}
+\left(
+\psi_q\middle\|\varphi_{\theta^{(t)},x}
+\right)
 \end{equation*}\]</span></p>
-<p>代入： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlxXnsodCsxKX0oZyk9cF97XHRoZXRhXnsodCl9fShnXG1pZCBmKQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p>根据<a href="../chapters/appendix.html#ineq-Gibbs-ac5aa063" class="textbook-cross-reference" data-reference-key="ineq:Gibbs" data-reference-kind="ref+label" data-reference-title="不等式 11">不等式 11</a>，最优概率密度函数为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlxXnsodCl9KHopCgkJPQoJCXBfe1x0aGV0YV57KHQpfTtnXG1pZCBmfSh6XG1pZCB4KQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
-q^{(t+1)}(g)=p_{\theta^{(t)}}(g\mid f)
+q^{(t)}(z)
+=
+p_{\theta^{(t)};g\mid f}(z\mid x)
 \end{equation*}\]</span></p>
-<p>得到： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcdGhldGFeeyh0KzEpfT1cdW5kZXJzZXR7XHRoZXRhfXtcYXJnXG1heH1caW50X3tafXBfe1x0aGV0YV57KHQpfX0oZ1xtaWQgZilcbG4gcF97XHRoZXRhfShmLGcpXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p>这一步称为<span class="math inline">\(E\)</span>步。</p>
+<p>接着固定<span class="math inline">\(q=q^{(t)}\)</span>，关于<span class="math inline">\(\theta\)</span>最大化： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlMKHFeeyh0KX0sXHRoZXRhO3gpClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
-\theta^{(t+1)}=\underset{\theta}{\arg\max}\int_{Z}p_{\theta^{(t)}}(g\mid f)\ln p_{\theta}(f,g)\mathop{}\!\mathrm{d}\nu
+L(q^{(t)},\theta;x)
 \end{equation*}\]</span></p>
-<p>对于这个优化问题，我们就可以使用一般的极大似然估计去做了。</p>
-<p>上述第一步被称之为<span class="math inline">\(E\)</span>步，第二步被称之为<span class="math inline">\(M\)</span>步，称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcaW50X3tafXFeeyh0KzEpfShnKVxsbiBwX3tcdGhldGF9KGYsZylcbWF0aG9we31cIVxtYXRocm17ZH1cbnUKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p>由于： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlMKHFeeyh0KX0sXHRoZXRhO3gpCgkJPQoJCVxpbnRfe1p9CgkJcV57KHQpfSh6KVxsbiBwX3tcdGhldGE7ZixnfSh4LHopCgkJXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51KHopCgkJLQoJCVxpbnRfe1p9CgkJcV57KHQpfSh6KVxsbiBxXnsodCl9KHopCgkJXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51KHopClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
-\int_{Z}q^{(t+1)}(g)\ln p_{\theta}(f,g)\mathop{}\!\mathrm{d}\nu
+L(q^{(t)},\theta;x)
+=
+\int_{Z}
+q^{(t)}(z)\ln p_{\theta;f,g}(x,z)
+\mathop{}\!\mathrm{d}\nu(z)
+-
+\int_{Z}
+q^{(t)}(z)\ln q^{(t)}(z)
+\mathop{}\!\mathrm{d}\nu(z)
 \end{equation*}\]</span></p>
-<p>为Q函数。</p>
+<p>其中第二项与<span class="math inline">\(\theta\)</span>无关，因此： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcdGhldGFeeyh0KzEpfQoJCVxpbgoJCVx1bmRlcnNldHtcdGhldGFcaW5cVGhldGF9e1xhcmdcbWF4fQoJCVxpbnRfe1p9CgkJcV57KHQpfSh6KQoJCVxsbiBwX3tcdGhldGE7ZixnfSh4LHopCgkJXG1hdGhvcHt9XCFcbWF0aHJte2R9XG51KHopClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\theta^{(t+1)}
+\in
+\underset{\theta\in\Theta}{\arg\max}
+\int_{Z}
+q^{(t)}(z)
+\ln p_{\theta;f,g}(x,z)
+\mathop{}\!\mathrm{d}\nu(z)
+\end{equation*}\]</span></p>
+<p>代入<span class="math inline">\(E\)</span>步得到的： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlxXnsodCl9KHopCgkJPQoJCXBfe1x0aGV0YV57KHQpfTtnXG1pZCBmfSh6XG1pZCB4KQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+q^{(t)}(z)
+=
+p_{\theta^{(t)};g\mid f}(z\mid x)
+\end{equation*}\]</span></p>
+<p>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcdGhldGFeeyh0KzEpfQoJCVxpbgoJCVx1bmRlcnNldHtcdGhldGFcaW5cVGhldGF9e1xhcmdcbWF4fQoJCVxpbnRfe1p9CgkJcF97XHRoZXRhXnsodCl9O2dcbWlkIGZ9KHpcbWlkIHgpCgkJXGxuIHBfe1x0aGV0YTtmLGd9KHgseikKCQlcbWF0aG9we31cIVxtYXRocm17ZH1cbnUoeikKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\theta^{(t+1)}
+\in
+\underset{\theta\in\Theta}{\arg\max}
+\int_{Z}
+p_{\theta^{(t)};g\mid f}(z\mid x)
+\ln p_{\theta;f,g}(x,z)
+\mathop{}\!\mathrm{d}\nu(z)
+\end{equation*}\]</span></p>
+<p>这一步称为<span class="math inline">\(M\)</span>步。</p>
+<p>定义： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlRKFx0aGV0YVxtaWRcdGhldGFeeyh0KX0pCgkJPQoJCVxpbnRfe1p9CgkJcF97XHRoZXRhXnsodCl9O2dcbWlkIGZ9KHpcbWlkIHgpCgkJXGxuIHBfe1x0aGV0YTtmLGd9KHgseikKCQlcbWF0aG9we31cIVxtYXRocm17ZH1cbnUoeikKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+Q(\theta\mid\theta^{(t)})
+=
+\int_{Z}
+p_{\theta^{(t)};g\mid f}(z\mid x)
+\ln p_{\theta;f,g}(x,z)
+\mathop{}\!\mathrm{d}\nu(z)
+\end{equation*}\]</span></p>
+<p>称<span class="math inline">\(Q(\theta\mid\theta^{(t)})\)</span>为EM算法在第<span class="math inline">\(t\)</span>轮迭代中的<span class="math inline">\(Q\)</span>函数。因此<span class="math inline">\(M\)</span>步可以写为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcdGhldGFeeyh0KzEpfQoJCVxpbgoJCVx1bmRlcnNldHtcdGhldGFcaW5cVGhldGF9e1xhcmdcbWF4fQoJCVEoXHRoZXRhXG1pZFx0aGV0YV57KHQpfSkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\theta^{(t+1)}
+\in
+\underset{\theta\in\Theta}{\arg\max}
+Q(\theta\mid\theta^{(t)})
+\end{equation*}\]</span></p>
 </div>
 
 

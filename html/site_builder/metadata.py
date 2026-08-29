@@ -117,6 +117,32 @@ def load_chapter_progress(paths: BuildPaths) -> dict[str, int | None]:
     return result
 
 
+def synchronize_notation_catalog(paths: BuildPaths) -> None:
+    """Copy the skill's notation catalog into the HTML build data."""
+
+    source = paths.notation_catalog_source_file
+    destination = paths.notation_catalog_file
+    try:
+        content = source.read_bytes()
+    except FileNotFoundError:
+        fail(
+            "缺少 notation 规范源："
+            f"{source.relative_to(paths.project_root)}"
+        )
+    except OSError as error:
+        raise BuildError(
+            "无法读取 notation 规范源："
+            f"{source.relative_to(paths.project_root)}（{error}）"
+        ) from error
+    try:
+        destination.write_bytes(content)
+    except OSError as error:
+        raise BuildError(
+            "无法同步 notation 规范："
+            f"{destination.relative_to(paths.project_root)}（{error}）"
+        ) from error
+
+
 def load_notation_catalog(paths: BuildPaths) -> dict[str, Any]:
     notation_catalog = paths.notation_catalog_file
     catalog = _read_json(

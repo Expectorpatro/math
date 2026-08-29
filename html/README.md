@@ -14,7 +14,7 @@ python3 html/build.py
 
 站点的首次发布日期、最近内容更新日期和 GitHub 仓库写在`html/data/site-meta.json`；网站构建日期由构建当天自动生成。19 个正文章节的完成度集中写在 `html/data/chapter-progress.json`：填写 `0`–`100` 的整数即可，`null`表示尚未填写。构建会严格检查章节键，避免拼写错误被静默忽略。
 
-网页“符号与记号说明”页的构建数据位于 `html/data/notation-catalog.json`。该文件是网站源码的一部分，构建会据此生成页面。
+网页“符号与记号说明”的唯一源文件位于 `skills/textbook-latex-style/references/notation-catalog.json`。每次运行 `html/build.py` 时，构建器都会先把它逐字节复制到 `html/data/notation-catalog.json`，再据此生成页面；因此应修改 `skills/` 下的源文件，不要直接维护 `html/data/` 下的副本。
 
 构建并启动本地预览：
 

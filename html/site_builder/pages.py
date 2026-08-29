@@ -20,7 +20,7 @@ PAGE_SLUGS = {
     "矩阵": "matrix",
     "度量空间": "metric-space",
     "微积分": "calculus",
-    "概率测度": "probability-measure",
+    "测度论": "probability-measure",
     "概率初步": "probability-basics",
     "渐进理论初步": "asymptotic-theory",
     "凸集": "convex-sets",
@@ -101,9 +101,7 @@ def split_quarto_pages(
                 source_path=Path("chapters") / f"{page_slug}.qmd",
                 blocks=shifted,
                 part=page_part,
-                sidebar_visible=not page_identifier.startswith(
-                    "glossary-letter-"
-                ),
+                sidebar_visible=not page_identifier.startswith("glossary-letter-"),
             )
         )
         current_blocks = []
@@ -247,8 +245,7 @@ def sanitize_quarto_identifiers(document: dict[str, Any]) -> None:
     identifiers: set[str] = set()
     collect_identifiers(document, identifiers)
     mapping = {
-        identifier: safe_quarto_identifier(identifier)
-        for identifier in identifiers
+        identifier: safe_quarto_identifier(identifier) for identifier in identifiers
     }
 
     def rewrite(value: Any) -> Any:
@@ -306,7 +303,5 @@ def rewrite_quarto_targets(
             value["c"][2][0] = relative
 
     if "c" in value:
-        value["c"] = rewrite_quarto_targets(
-            value["c"], current_page, labels_to_pages
-        )
+        value["c"] = rewrite_quarto_targets(value["c"], current_page, labels_to_pages)
     return value

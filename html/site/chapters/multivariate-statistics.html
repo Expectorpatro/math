@@ -460,7 +460,7 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/probability-measure.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 5 章</span> 概率测度</span></a>
+  <a href="../chapters/probability-measure.html" class="sidebar-item-text sidebar-link"><span class="chapter-title"><span class="header-section-number">第 5 章</span> 测度论</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -740,8 +740,7 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#id--98e785f3" id="toc-id--98e785f3" class="nav-link" data-scroll-target="#id--98e785f3"><span class="header-section-number">15.1.1</span> 总体主成分分析</a></li>
   <li><a href="#id--60d3545d" id="toc-id--60d3545d" class="nav-link" data-scroll-target="#id--60d3545d"><span class="header-section-number">15.1.2</span> 样本主成分分析</a></li>
-  <li><a href="#id--26b238cb" id="toc-id--26b238cb" class="nav-link" data-scroll-target="#id--26b238cb"><span class="header-section-number">15.1.3</span> 注意事项</a></li>
-  <li><a href="#id--e83ac9aa" id="toc-id--e83ac9aa" class="nav-link" data-scroll-target="#id--e83ac9aa"><span class="header-section-number">15.1.4</span> 应用：主成分回归</a></li>
+  <li><a href="#id--e83ac9aa" id="toc-id--e83ac9aa" class="nav-link" data-scroll-target="#id--e83ac9aa"><span class="header-section-number">15.1.3</span> 应用：主成分回归</a></li>
   </ul></li>
   <li><a href="#id--d23576fc" id="toc-id--d23576fc" class="nav-link" data-scroll-target="#id--d23576fc"><span class="header-section-number">15.2</span> 因子分析</a>
   <ul class="collapse">
@@ -771,6 +770,7 @@ window.Quarto = {
   <li><a href="#id--c34b79e0" id="toc-id--c34b79e0" class="nav-link" data-scroll-target="#id--c34b79e0"><span class="header-section-number">15.6.3</span> 凝聚型层次聚类</a></li>
   <li><a href="#dbscan" id="toc-dbscan" class="nav-link" data-scroll-target="#dbscan"><span class="header-section-number">15.6.4</span> DBSCAN</a></li>
   <li><a href="#optics" id="toc-optics" class="nav-link" data-scroll-target="#optics"><span class="header-section-number">15.6.5</span> OPTICS</a></li>
+  <li><a href="#id--3e3c7ae5" id="toc-id--3e3c7ae5" class="nav-link" data-scroll-target="#id--3e3c7ae5"><span class="header-section-number">15.6.6</span> 高斯混合模型</a></li>
   </ul></li>
   <li class="computation-toc-item"><a href="#computed-results" class="nav-link" data-scroll-target="#computed-results">计算实验</a><ul class="collapse"><li><a href="#computation-case-01" class="nav-link" data-scroll-target="#computation-case-01">实验 01 · 主成分分析</a></li><li><a href="#computation-case-02" class="nav-link" data-scroll-target="#computation-case-02">实验 02 · K-means</a></li><li><a href="#computation-case-03" class="nav-link" data-scroll-target="#computation-case-03">实验 03 · 凝聚型层次聚类</a></li><li><a href="#computation-case-04" class="nav-link" data-scroll-target="#computation-case-04">实验 04 · DBSCAN</a></li><li><a href="#computation-case-05" class="nav-link" data-scroll-target="#computation-case-05">实验 05 · OPTICS</a></li></ul></li></ul>
 </nav>
@@ -808,201 +808,271 @@ window.Quarto = {
 </div>
 <section id="id--b9f31572" class="level2">
 <h2 class="anchored" data-anchor-id="id--b9f31572"><span class="header-section-number">15.1</span> 主成分分析</h2>
-<p><a href="../chapters/glossary-p.html#term-PCA" class="term" title="principal component analysis, PCA">主成分分析<span class="term-english">（principal component analysis, PCA）</span></a>的目的是：对数据进行一个线性变换，在最大程度保留原始信息的前提下进行数据的降维。反映在变量上就是说，对所有的变量进行一个线性变换，使得变换后得到的变量彼此之间不相关，并且是所有可能的线性变换中方差最大的一些变量（我们认为方差体现了信息量的大小）。</p>
+<p>设总体<span class="math inline">\(H\)</span>中的每个个体由<span class="math inline">\(p\)</span>个特征刻画。当<span class="math inline">\(p\)</span>较大时，数据所处的空间维数随之升高，不仅难以直接把握其整体结构，其中还可能包含大量冗余的信息。因而我们希望寻找一个维数较低的空间，使原数据能够在其中得到较为简洁的表示，同时尽可能保留其主要的分布特征，减少由降维所造成的信息损失。</p>
+<p>从几何上看，最直接的思路是寻找一个<span class="math inline">\(r\)</span>维空间，其中<span class="math inline">\(r&lt;p\)</span>，并用原数据在该空间中的表示代替原来的<span class="math inline">\(p\)</span>维表示。若将这个<span class="math inline">\(r\)</span>维空间限制为线性子空间，那么它必然经过原点，因此仅考虑线性子空间会对低维空间的位置施加不必要的限制。更自然的做法是考虑所有形如： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCWErRQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+a+E
+\end{equation*}\]</span></p>
+<p>的空间，其中<span class="math inline">\(a\in H\)</span>，<span class="math inline">\(E\)</span>是<span class="math inline">\(H\)</span>的<span class="math inline">\(r\)</span>维线性子空间。</p>
+<p>在给定这样一个<span class="math inline">\(r\)</span>维空间之后，其中对某个数据点最自然的近似是该空间中与它距离最近的点。为了在线性空间中刻画距离，并进一步利用正交性描述最近点，我们在<span class="math inline">\(H\)</span>上赋予实内积及其诱导的范数。由<a href="../chapters/metric-space.html#prop-FiniteDimensionalNormedLinearSpace-2cb2a75d" class="textbook-cross-reference" data-reference-key="prop:FiniteDimensionalNormedLinearSpace" data-reference-kind="ref+label" data-reference-title="性质 3.4.4" data-reference-items="2" data-reference-hint="请查看第 2 项">性质 3.4.4(2)</a>可知此时<span class="math inline">\(H\)</span>构成实Hilbert空间。由<span class="math inline">\(a+E\)</span>的凸性、<a href="../chapters/metric-space.html#prop-CompleteMetricSpace-b7028330" class="textbook-cross-reference" data-reference-key="prop:CompleteMetricSpace" data-reference-kind="ref+label" data-reference-title="性质 3.2.6" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 3.2.6(1)</a>和<a href="../chapters/metric-space.html#theo-BestApproximationElement-269ea474" class="textbook-cross-reference" data-reference-key="theo:BestApproximationElement" data-reference-kind="ref+label" data-reference-title="定理 3.27">定理 3.27</a>可知对于任意<span class="math inline">\(x\in H\)</span>，在<span class="math inline">\(a+E\)</span>中存在唯一与<span class="math inline">\(x\)</span>距离最近的点，该点即为<span class="math inline">\(x\)</span>在<span class="math inline">\(a+E\)</span>上的正交投影。这便自然给出了衡量降维信息损失的方式：以一个点到其正交投影的平方距离衡量该点在降维过程中产生的信息损失，并进一步以总体意义下的平均平方投影误差衡量整个低维表示所造成的信息损失。<a href="../chapters/glossary-p.html#term-PCA" class="term" title="principal component analysis, PCA">主成分分析<span class="term-english">（principal component analysis, PCA）</span></a>的基本思想就是在所有<span class="math inline">\(r\)</span>维空间中寻找使这一平均平方投影误差最小的空间。</p>
+<div id="eq-PCAProjection-85eb31fa" class="equation-block">
+<p>记<span class="math inline">\(\mathcal{P}_E\)</span>为从<span class="math inline">\(H\)</span>到<span class="math inline">\(E\)</span>上的正交投影算子。任取<span class="math inline">\(H\)</span>中的点<span class="math inline">\(x\)</span>，则<span class="math inline">\(x\)</span>在<span class="math inline">\(a+E\)</span>上的正交投影<span class="math inline">\(w\)</span>满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXc9XHVuZGVyc2V0e3lcaW4gYStFfXtcYXJnXG1pbn1cO3x8eC15fHxeMgpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+w=\underset{y\in a+E}{\arg\min}\;||x-y||^2
+\end{equation*}\]</span></p>
+<p>对任意的<span class="math inline">\(y\in a+E\)</span>，存在<span class="math inline">\(z\in E\)</span>使得<span class="math inline">\(y=a+z\)</span>，所以： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXc9YStcdW5kZXJzZXR7elxpbiBFfXtcYXJnXG1pbn1cO3x8eC1hLXp8fF4yClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+w=a+\underset{z\in E}{\arg\min}\;||x-a-z||^2
+\end{equation*}\]</span></p>
+<p>因为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXgtYT1cbWF0aGNhbHtQfV9FKHgtYSkrKFxtYXRoY2Fse0l9LVxtYXRoY2Fse1B9X0UpKHgtYSkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+x-a=\mathcal{P}_E(x-a)+(\mathcal{I}-\mathcal{P}_E)(x-a)
+\end{equation*}\]</span></p>
+<p>于是： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCXcmPWErXHVuZGVyc2V0e3pcaW4gRX17XGFyZ1xtaW59XDt8fFxtYXRoY2Fse1B9X0UoeC1hKSsoXG1hdGhjYWx7SX0tXG1hdGhjYWx7UH1fRSkoeC1hKS16fHxeMiBcXAoJJj1hK1x1bmRlcnNldHt6XGluIEV9e1xhcmdcbWlufVw7fHxbXG1hdGhjYWx7UH1fRSh4LWEpLXpdKyhcbWF0aGNhbHtJfS1cbWF0aGNhbHtQfV9FKSh4LWEpfHxeMgpcZW5ke2FsaWduKn0="></span></p>
+<p><span class="math display">\[\begin{align*}
+w&amp;=a+\underset{z\in E}{\arg\min}\;||\mathcal{P}_E(x-a)+(\mathcal{I}-\mathcal{P}_E)(x-a)-z||^2 \\
+&amp;=a+\underset{z\in E}{\arg\min}\;||[\mathcal{P}_E(x-a)-z]+(\mathcal{I}-\mathcal{P}_E)(x-a)||^2
+\end{align*}\]</span></p>
+<p>由直和的定义、<a href="../chapters/metric-space.html#theo-OrthogonalComplementDirectSum-d368eceb" class="textbook-cross-reference" data-reference-key="theo:OrthogonalComplementDirectSum" data-reference-kind="ref+label" data-reference-title="定理 3.33">定理 3.33</a>和<a href="../chapters/metric-space.html#prop-Orthogonal-dd705229" class="textbook-cross-reference" data-reference-key="prop:Orthogonal" data-reference-kind="ref+label" data-reference-title="性质 3.4.6" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 3.4.6(1)</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCXcmPWErXHVuZGVyc2V0e3pcaW4gRX17XGFyZ1xtaW59XDtbfHxcbWF0aGNhbHtQfV9FKHgtYSktenx8XjIrfHwoXG1hdGhjYWx7SX0tXG1hdGhjYWx7UH1fRSkoeC1hKXx8XjJdIFxcCgkmPWErXHVuZGVyc2V0e3pcaW4gRX17XGFyZ1xtaW59XDt8fFxtYXRoY2Fse1B9X0UoeC1hKS16fHxeMgpcZW5ke2FsaWduKn0="></span></p>
+<p><span class="math display">\[\begin{align*}
+w&amp;=a+\underset{z\in E}{\arg\min}\;[||\mathcal{P}_E(x-a)-z||^2+||(\mathcal{I}-\mathcal{P}_E)(x-a)||^2] \\
+&amp;=a+\underset{z\in E}{\arg\min}\;||\mathcal{P}_E(x-a)-z||^2
+\end{align*}\]</span></p>
+<p>所以： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9ufQpcbGFiZWx7ZXE6UENBUHJvamVjdGlvbn0KCXc9YStcbWF0aGNhbHtQfV9FKHgtYSkKXGVuZHtlcXVhdGlvbn0="></span></p>
+<p><span class="math display">\[\begin{equation}
+\tag{15.1}
+w=a+\mathcal{P}_E(x-a)
+\end{equation}\]</span></p>
+<p>于是： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXgtdz14LWEtXG1hdGhjYWx7UH1fRSh4LWEpPShcbWF0aGNhbHtJfS1cbWF0aGNhbHtQfV9FKSh4LWEpClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+x-w=x-a-\mathcal{P}_E(x-a)=(\mathcal{I}-\mathcal{P}_E)(x-a)
+\end{equation*}\]</span></p>
+<p>平方投影误差为<span class="math inline">\(||(\mathcal{I}-\mathcal{P}_E)(x-a)||^2\)</span>。</p>
+</div>
+<div id="definition-15-1" class="definition theorem-block env-definition">
+<p><strong>Definition 15.1</strong>. 设<span class="math inline">\(f\)</span>为从概率空间<span class="math inline">\((X,\mathscr{F},P)\)</span>到有限维实Hilbert空间<span class="math inline">\(H\)</span>上的可测映射。对于给定的<span class="math inline">\(r&lt;\dim H\)</span>，记<span class="math inline">\(\mathcal{P}_E\)</span>为<span class="math inline">\(H\)</span>到其上<span class="math inline">\(r\)</span>维线性子空间<span class="math inline">\(E\)</span>上的正交投影算子。PCA是如下优化问题： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcdW5kZXJzZXR7XHN1YnN0YWNre2FcaW4gSFxcRVxzdWJzZXRlcSBILFw7XGRpbSBFPXJ9fXtcYXJnXG1pbn1cO1xvcGVyYXRvcm5hbWV7RX1bfHwoXG1hdGhjYWx7SX0tXG1hdGhjYWx7UH1fRSkoZi1hKXx8XjJdClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\underset{\substack{a\in H\\E\subseteq H,\;\dim E=r}}{\arg\min}\;\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-a)||^2]
+\end{equation*}\]</span></p>
+</div>
+<div id="note-15-1" class="note theorem-block env-note">
+<p><strong>note 15.1</strong>. 上述定义使用有限维实Hilbert空间的语言，是为了强调PCA所依赖的本质结构是内积所赋予的正交结构以及由此产生的正交投影。然而在一般的Hilbert空间中，进一步讨论需要借助Bochner积分和紧自伴算子的谱等理论。由于这些内容并非本节讨论的重点，以下均取<span class="math inline">\(H=\mathbb{R}^m\)</span>并赋予标准内积。该情形已经涵盖通常统计学与数据科学中有限维数据的PCA问题，同时避免了引入不必要的泛函分析工具。需要注意，此时<span class="math inline">\(\mathcal{I}\)</span>和<span class="math inline">\(\mathcal{P}_E\)</span>可以分别表示为单位矩阵和正交投影阵。</p>
+</div>
 <section id="id--98e785f3" class="level3">
 <h3 class="anchored" data-anchor-id="id--98e785f3"><span class="header-section-number">15.1.1</span> 总体主成分分析</h3>
-<div id="definition-15-1" class="definition theorem-block env-definition">
-<p><strong>Definition 15.1</strong>. 设<span class="math inline">\(\mathbf{X}\)</span>是一个<span class="math inline">\(n\)</span>维随机向量，其均值向量为<span class="math inline">\(\mu=(\mu_1, \mu_2, \dots, \mu_{n})\)</span>、协方差矩阵为<span class="math inline">\(\Sigma=(\sigma_{ij}),\;i,j=1,2,\dots,n\)</span>。对<span class="math inline">\(\mathbf{X}\)</span>进行一个线性变换<span class="math inline">\(\mathcal{T}\)</span>得到一个<span class="math inline">\(n\)</span>维随机向量<span class="math inline">\(\mathbf{Y}=(Y_1, Y_2, \dots, Y_{n})^{\top}\)</span>，<span class="math inline">\(\mathcal{T}\)</span>的矩阵为<span class="math inline">\(A=(\alpha_1^{\top};\alpha_2^{\top};\cdots;\alpha_n^{\top})\)</span>。若：</p>
-<ol type="1">
-<li><p><span class="math inline">\(AA^{\top}=I_n\)</span>；</p></li>
-<li><p><span class="math inline">\(\operatorname{Cov}(\mathbf{Y})\)</span>是一个对角矩阵，即<span class="math inline">\(\operatorname{Cov}(Y_i,Y_j)=0,\;i\ne j\)</span>；</p></li>
-<li><p><span class="math inline">\(Y_1\)</span>是所有对<span class="math inline">\(\mathbf{X}\)</span>进行线性变换后得到的随机变量中方差最大的随机变量，<span class="math inline">\(Y_2\)</span>是与<span class="math inline">\(Y_1\)</span>不相关的所有对<span class="math inline">\(\mathbf{X}\)</span>进行线性变换后得到的随机变量中方差第二大的随机变量，以此类推。</p></li>
-</ol>
-<p>则分别称<span class="math inline">\(Y_1, Y_2, \dots, Y_{n}\)</span>是第一、第二、……、第<span class="math inline">\(n\)</span>主成分。</p>
-</div>
-<div id="theorem-15-1" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 15.1</strong>. 若不对<span class="math inline">\(\mathcal{T}\)</span>的矩阵<span class="math inline">\(A\)</span>作出相应的限制，即去除<span class="math inline">\(AA^{\top}=I_n\)</span>的限制，对<span class="math inline">\(\mathbf{X}\)</span>进行线性变换后得到的<span class="math inline">\(Y_i,\;i=1,2,\dots,n\)</span>的方差可以任意大。</p>
-</div>
-<div class="proof-block proof">
-<p><span class="proof-title"><em>证明</em>. </span>由<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.6" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 6.3.6(3)</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1Zhcn0oWV9pKT1cb3BlcmF0b3JuYW1le0Nvdn0oXG1hdGhiZntZfSkoaSxpKT1cb3BlcmF0b3JuYW1le0Nvdn0oQVxtYXRoYmZ7WH0pKGksaSk9KEFcU2lnbWEgQV57XHRvcH0pKGksaSk9XGFscGhhX2lee1x0b3B9XFNpZ21hXGFscGhhX2kKXGVuZHtlcXVhdGlvbip9"></span></p>
+<section id="id--9fffff85" class="level4">
+<h4 class="anchored" data-anchor-id="id--9fffff85"><span class="header-section-number">15.1.1.1</span> 问题化简</h4>
+<p>设<span class="math inline">\(\mu=\operatorname{E}(f)\)</span>，由内积导出范数的定义和<a href="../chapters/probability-measure.html#prop-MeasurableIntegral-c2153bd8" class="textbook-cross-reference" data-reference-key="prop:MeasurableIntegral" data-reference-kind="ref+label" data-reference-title="性质 5.4.3" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 5.4.3(6)</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCSZcb3BlcmF0b3JuYW1le0V9W3x8KFxtYXRoY2Fse0l9LVxtYXRoY2Fse1B9X0UpKGYtYSl8fF4yXT1cb3BlcmF0b3JuYW1le0V9W3x8KFxtYXRoY2Fse0l9LVxtYXRoY2Fse1B9X0UpKGYtXG11K1xtdS1hKXx8XjJdIFxcCgk9JlxvcGVyYXRvcm5hbWV7RX1bfHwoXG1hdGhjYWx7SX0tXG1hdGhjYWx7UH1fRSkoZi1cbXUpKyhcbWF0aGNhbHtJfS1cbWF0aGNhbHtQfV9FKShcbXUtYSl8fF4yXSBcXAoJPSZcb3BlcmF0b3JuYW1le0V9XGxlZnRbfHwoXG1hdGhjYWx7SX0tXG1hdGhjYWx7UH1fRSkoZi1cbXUpfHxeMit8fChcbWF0aGNhbHtJfS1cbWF0aGNhbHtQfV9FKShcbXUtYSl8fF4yKzJcQmlnKChcbWF0aGNhbHtJfS1cbWF0aGNhbHtQfV9FKShmLVxtdSksKFxtYXRoY2Fse0l9LVxtYXRoY2Fse1B9X0UpKFxtdS1hKVxCaWcpXHJpZ2h0XSBcXAoJPSZcb3BlcmF0b3JuYW1le0V9W3x8KFxtYXRoY2Fse0l9LVxtYXRoY2Fse1B9X0UpKGYtXG11KXx8XjJdK3x8KFxtYXRoY2Fse0l9LVxtYXRoY2Fse1B9X0UpKFxtdS1hKXx8XjIrMlxvcGVyYXRvcm5hbWV7RX1cbGVmdFtcQmlnKChcbWF0aGNhbHtJfS1cbWF0aGNhbHtQfV9FKShmLVxtdSksKFxtYXRoY2Fse0l9LVxtYXRoY2Fse1B9X0UpKFxtdS1hKVxCaWcpXHJpZ2h0XQpcZW5ke2FsaWduKn0="></span></p>
+<p><span class="math display">\[\begin{align*}
+&amp;\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-a)||^2]=\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-\mu+\mu-a)||^2] \\
+=&amp;\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-\mu)+(\mathcal{I}-\mathcal{P}_E)(\mu-a)||^2] \\
+=&amp;\operatorname{E}\left[||(\mathcal{I}-\mathcal{P}_E)(f-\mu)||^2+||(\mathcal{I}-\mathcal{P}_E)(\mu-a)||^2+2\Big((\mathcal{I}-\mathcal{P}_E)(f-\mu),(\mathcal{I}-\mathcal{P}_E)(\mu-a)\Big)\right] \\
+=&amp;\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-\mu)||^2]+||(\mathcal{I}-\mathcal{P}_E)(\mu-a)||^2+2\operatorname{E}\left[\Big((\mathcal{I}-\mathcal{P}_E)(f-\mu),(\mathcal{I}-\mathcal{P}_E)(\mu-a)\Big)\right]
+\end{align*}\]</span></p>
+<p>根据<a href="../chapters/probability-measure.html#prop-MeasurableIntegral-c2153bd8" class="textbook-cross-reference" data-reference-key="prop:MeasurableIntegral" data-reference-kind="ref+label" data-reference-title="性质 5.4.3" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 5.4.3(6)</a>和<a href="../chapters/metric-space.html#prop-InnerProduct-21510444" class="textbook-cross-reference" data-reference-key="prop:InnerProduct" data-reference-kind="ref+label" data-reference-title="性质 3.4.5" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 3.4.5(1)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCSZcb3BlcmF0b3JuYW1le0V9XGxlZnRbXEJpZygoXG1hdGhjYWx7SX0tXG1hdGhjYWx7UH1fRSkoZi1cbXUpLChcbWF0aGNhbHtJfS1cbWF0aGNhbHtQfV9FKShcbXUtYSlcQmlnKVxyaWdodF09XEJpZyhcb3BlcmF0b3JuYW1le0V9WyhcbWF0aGNhbHtJfS1cbWF0aGNhbHtQfV9FKShmLVxtdSldLChcbWF0aGNhbHtJfS1cbWF0aGNhbHtQfV9FKShcbXUtYSlcQmlnKSBcXAoJPSZcQmlnKChcbWF0aGNhbHtJfS1cbWF0aGNhbHtQfV9FKVxvcGVyYXRvcm5hbWV7RX0oZi1cbXUpLChcbWF0aGNhbHtJfS1cbWF0aGNhbHtQfV9FKShcbXUtYSlcQmlnKT1cQmlnKDAsKFxtYXRoY2Fse0l9LVxtYXRoY2Fse1B9X0UpKFxtdS1hKVxCaWcpPTAKXGVuZHthbGlnbip9"></span></p>
+<p><span class="math display">\[\begin{align*}
+&amp;\operatorname{E}\left[\Big((\mathcal{I}-\mathcal{P}_E)(f-\mu),(\mathcal{I}-\mathcal{P}_E)(\mu-a)\Big)\right]=\Big(\operatorname{E}[(\mathcal{I}-\mathcal{P}_E)(f-\mu)],(\mathcal{I}-\mathcal{P}_E)(\mu-a)\Big) \\
+=&amp;\Big((\mathcal{I}-\mathcal{P}_E)\operatorname{E}(f-\mu),(\mathcal{I}-\mathcal{P}_E)(\mu-a)\Big)=\Big(0,(\mathcal{I}-\mathcal{P}_E)(\mu-a)\Big)=0
+\end{align*}\]</span></p>
+<p>于是： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxvcGVyYXRvcm5hbWV7RX1bfHwoXG1hdGhjYWx7SX0tXG1hdGhjYWx7UH1fRSkoZi1hKXx8XjJdPVxvcGVyYXRvcm5hbWV7RX1bfHwoXG1hdGhjYWx7SX0tXG1hdGhjYWx7UH1fRSkoZi1cbXUpfHxeMl0rfHwoXG1hdGhjYWx7SX0tXG1hdGhjYWx7UH1fRSkoXG11LWEpfHxeMgpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
-\operatorname{Var}(Y_i)=\operatorname{Cov}(\mathbf{Y})(i,i)=\operatorname{Cov}(A\mathbf{X})(i,i)=(A\Sigma A^{\top})(i,i)=\alpha_i^{\top}\Sigma\alpha_i
+\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-a)||^2]=\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-\mu)||^2]+||(\mathcal{I}-\mathcal{P}_E)(\mu-a)||^2
 \end{equation*}\]</span></p>
-<p>若<span class="math inline">\(\operatorname{Var}(Y_i)&gt;0\)</span>，取矩阵<span class="math inline">\(B=kA\)</span>，<span class="math inline">\(\mathbf{Z}=kA\mathbf{X}\)</span>，则： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1Zhcn0oWl9pKT0oa1xhbHBoYV9pKV57XHRvcH1cU2lnbWEoa1xhbHBoYV9pKT1rXjJcYWxwaGFfaV57XHRvcH1cU2lnbWFcYWxwaGFfaQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p>对于任意给定的<span class="math inline">\(r\)</span>维子空间<span class="math inline">\(E\)</span>，上式右侧第一项与<span class="math inline">\(a\)</span>无关，而第二项非负，因此关于<span class="math inline">\(a\)</span>的最小值在且仅在： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCShcbWF0aGNhbHtJfS1cbWF0aGNhbHtQfV9FKShcbXUtYSk9XG1hdGhiZnswfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
-\operatorname{Var}(Z_i)=(k\alpha_i)^{\top}\Sigma(k\alpha_i)=k^2\alpha_i^{\top}\Sigma\alpha_i
+(\mathcal{I}-\mathcal{P}_E)(\mu-a)=\mathbf{0}
 \end{equation*}\]</span></p>
-<p>即改变<span class="math inline">\(k\)</span>的值就可对<span class="math inline">\(Y_i,\;i=1,2,\dots,n\)</span>的方差进行任意的放缩。&nbsp;◻</p>
-</div>
+<p>时取得，即<span class="math inline">\(\mu-a=\mathcal{P}_E(\mu-a)\)</span>。由正交投影阵的定义可知<span class="math inline">\(\mu-a\in E\)</span>，根据<a href="../chapters/linear-space.html#theo-QuotientRelationship-2c972b12" class="textbook-cross-reference" data-reference-key="theo:QuotientRelationship" data-reference-kind="ref+label" data-reference-title="定理 1.9">定理 1.9</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCWErRT1cbXUrRQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+a+E=\mu+E
+\end{equation*}\]</span></p>
+<p>所以PCA的优化问题可化为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVx1bmRlcnNldHtFXHN1YnNldGVxIEgsXDtcZGltIEU9cn17XGFyZ1xtaW59XDtcb3BlcmF0b3JuYW1le0V9W3x8KFxtYXRoY2Fse0l9LVxtYXRoY2Fse1B9X0UpKGYtXG11KXx8XjJdClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\underset{E\subseteq H,\;\dim E=r}{\arg\min}\;\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-\mu)||^2]
+\end{equation*}\]</span></p>
+<p>因为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCWYtXG11PVxtYXRoY2Fse1B9X0UoZi1cbXUpKyhcbWF0aGNhbHtJfS1cbWF0aGNhbHtQfV9FKShmLVxtdSkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+f-\mu=\mathcal{P}_E(f-\mu)+(\mathcal{I}-\mathcal{P}_E)(f-\mu)
+\end{equation*}\]</span></p>
+<p>由直和的定义、<a href="../chapters/metric-space.html#theo-OrthogonalComplementDirectSum-d368eceb" class="textbook-cross-reference" data-reference-key="theo:OrthogonalComplementDirectSum" data-reference-kind="ref+label" data-reference-title="定理 3.33">定理 3.33</a>和<a href="../chapters/metric-space.html#prop-Orthogonal-dd705229" class="textbook-cross-reference" data-reference-key="prop:Orthogonal" data-reference-kind="ref+label" data-reference-title="性质 3.4.6" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 3.4.6(1)</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXx8Zi1cbXV8fF4yPXx8XG1hdGhjYWx7UH1fRShmLVxtdSl8fF4yK3x8KFxtYXRoY2Fse0l9LVxtYXRoY2Fse1B9X0UpKGYtXG11KXx8XjIKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+||f-\mu||^2=||\mathcal{P}_E(f-\mu)||^2+||(\mathcal{I}-\mathcal{P}_E)(f-\mu)||^2
+\end{equation*}\]</span></p>
+<p>根据<a href="../chapters/probability-measure.html#prop-MeasurableIntegral-c2153bd8" class="textbook-cross-reference" data-reference-key="prop:MeasurableIntegral" data-reference-kind="ref+label" data-reference-title="性质 5.4.3" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 5.4.3(6)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxvcGVyYXRvcm5hbWV7RX0ofHxmLVxtdXx8XjIpPVxvcGVyYXRvcm5hbWV7RX1bfHxcbWF0aGNhbHtQfV9FKGYtXG11KXx8XjJdK1xvcGVyYXRvcm5hbWV7RX1bfHwoXG1hdGhjYWx7SX0tXG1hdGhjYWx7UH1fRSkoZi1cbXUpfHxeMl0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\operatorname{E}(||f-\mu||^2)=\operatorname{E}[||\mathcal{P}_E(f-\mu)||^2]+\operatorname{E}[||(\mathcal{I}-\mathcal{P}_E)(f-\mu)||^2]
+\end{equation*}\]</span></p>
+<p>因为<span class="math inline">\(\operatorname{E}(||f-\mu||^2)\)</span>与<span class="math inline">\(E\)</span>的选择无关，所以PCA优化问题可以化为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVx1bmRlcnNldHtFXHN1YnNldGVxIEgsXDtcZGltIEU9cn17XGFyZ1xtYXh9XDtcb3BlcmF0b3JuYW1le0V9W3x8XG1hdGhjYWx7UH1fRShmLVxtdSl8fF4yXQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\underset{E\subseteq H,\;\dim E=r}{\arg\max}\;\operatorname{E}[||\mathcal{P}_E(f-\mu)||^2]
+\end{equation*}\]</span></p>
+<p>由于直接在所有<span class="math inline">\(r\)</span>维子空间构成的集合上进行优化较为困难，根据<a href="../chapters/linear-space.html#theo-ExistenceOfBasis-368cfcc3" class="textbook-cross-reference" data-reference-key="theo:ExistenceOfBasis" data-reference-kind="ref+label" data-reference-title="定理 1.1">定理 1.1</a>，我们转而通过子空间的一组基来参数化<span class="math inline">\(E\)</span>，从而将关于子空间的优化转化为关于基矩阵的优化。具体而言，对于任意<span class="math inline">\(r\)</span>维子空间<span class="math inline">\(E\subseteq\mathbb{R}^m\)</span>，可选取<span class="math inline">\(E\)</span>的一组基<span class="math inline">\(u_1, u_2, \dots, u_{r}\)</span>，并令： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVU9KHVfMSwgdV8yLCBcZG90cywgdV97cn0pXGluIE1fe21cdGltZXMgcn0oXG1hdGhiYntSfSkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+U=(u_1, u_2, \dots, u_{r})\in M_{m\times r}(\mathbb{R})
+\end{equation*}\]</span></p>
+<p>则<span class="math inline">\(\mathcal{M}(U)=E\)</span>，因此对子空间<span class="math inline">\(E\)</span>的选择可以等价地转化为对满列秩矩阵<span class="math inline">\(U\)</span>的选择。根据<a href="../chapters/matrix.html#prop-OrthogonalProjectionMat-364b5ff4" class="textbook-cross-reference" data-reference-key="prop:OrthogonalProjectionMat" data-reference-kind="ref+label" data-reference-title="性质 2.8.2" data-reference-items="2" data-reference-hint="请查看第 2 项">性质 2.8.2(2)</a>可知此时： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxtYXRoY2Fse1B9X0U9VShVXntcdG9wfVUpXnstMX1VXntcdG9wfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\mathcal{P}_E=U(U^{\top}U)^{-1}U^{\top}
+\end{equation*}\]</span></p>
+<p>由上式可以发现，若使用任意一组基，则正交投影阵的表示中始终包含<span class="math inline">\((U^{\top}U)^{-1}\)</span>，不利于后续计算，于是我们可以进一步要求<span class="math inline">\(u_1, u_2, \dots, u_{r}\)</span>为<span class="math inline">\(E\)</span>的一组标准正交基。此时<span class="math inline">\(U^{\top}U=I_r\)</span>，从而正交投影阵简化为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxtYXRoY2Fse1B9X0U9VVVee1x0b3B9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\mathcal{P}_E=UU^{\top}
+\end{equation*}\]</span></p>
+<p>于是PCA优化问题就被化为了： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVx1bmRlcnNldHtcc3Vic3RhY2t7VV57XHRvcH1VPUlfclxcVVxpbiBNX3ttXHRpbWVzIHJ9KFxtYXRoYmJ7Un0pfX17XGFyZ1xtYXh9XDtcb3BlcmF0b3JuYW1le0V9W3x8VVVee1x0b3B9KGYtXG11KXx8XjJdClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\underset{\substack{U^{\top}U=I_r\\U\in M_{m\times r}(\mathbb{R})}}{\arg\max}\;\operatorname{E}[||UU^{\top}(f-\mu)||^2]
+\end{equation*}\]</span></p>
+<p>根据<a href="../chapters/matrix.html#prop-Transpose-559e1e5a" class="textbook-cross-reference" data-reference-key="prop:Transpose" data-reference-kind="ref+label" data-reference-title="性质 2.1.2" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 2.1.2(4)</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCSZ8fFVVXntcdG9wfShmLVxtdSl8fF4yPVtVVV57XHRvcH0oZi1cbXUpXV57XHRvcH1VVV57XHRvcH0oZi1cbXUpIFxcCgk9JihmLVxtdSlee1x0b3B9VVVee1x0b3B9VVVee1x0b3B9KGYtXG11KT0oZi1cbXUpXntcdG9wfVVVXntcdG9wfShmLVxtdSkKXGVuZHthbGlnbip9"></span></p>
+<p><span class="math display">\[\begin{align*}
+&amp;||UU^{\top}(f-\mu)||^2=[UU^{\top}(f-\mu)]^{\top}UU^{\top}(f-\mu) \\
+=&amp;(f-\mu)^{\top}UU^{\top}UU^{\top}(f-\mu)=(f-\mu)^{\top}UU^{\top}(f-\mu)
+\end{align*}\]</span></p>
+<p>由<a href="../chapters/matrix.html#prop-Trace-e3d6427f" class="textbook-cross-reference" data-reference-key="prop:Trace" data-reference-kind="ref+label" data-reference-title="性质 2.1.5" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 2.1.5(3)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXx8VVVee1x0b3B9KGYtXG11KXx8XjI9XG9wZXJhdG9ybmFtZXt0cn1bKGYtXG11KV57XHRvcH1VVV57XHRvcH0oZi1cbXUpXT1cb3BlcmF0b3JuYW1le3RyfVtVXntcdG9wfShmLVxtdSkoZi1cbXUpXntcdG9wfVVdClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+||UU^{\top}(f-\mu)||^2=\operatorname{tr}[(f-\mu)^{\top}UU^{\top}(f-\mu)]=\operatorname{tr}[U^{\top}(f-\mu)(f-\mu)^{\top}U]
+\end{equation*}\]</span></p>
+<p>根据<a href="../chapters/probability-measure.html#prop-MeasurableIntegral-c2153bd8" class="textbook-cross-reference" data-reference-key="prop:MeasurableIntegral" data-reference-kind="ref+label" data-reference-title="性质 5.4.3" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 5.4.3(6)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCSZcb3BlcmF0b3JuYW1le0V9W3x8VVVee1x0b3B9KGYtXG11KXx8XjJdPVxvcGVyYXRvcm5hbWV7RX1ce1xvcGVyYXRvcm5hbWV7dHJ9W1Vee1x0b3B9KGYtXG11KShmLVxtdSlee1x0b3B9VV1cfSBcXAoJPSZcb3BlcmF0b3JuYW1le3RyfVx7XG9wZXJhdG9ybmFtZXtFfVtVXntcdG9wfShmLVxtdSkoZi1cbXUpXntcdG9wfVVdXH09XG9wZXJhdG9ybmFtZXt0cn1bVV57XHRvcH1cb3BlcmF0b3JuYW1le0Nvdn0oZilVXT1cc3VtX3tpPTF9XntyfXVfaV57XHRvcH1cb3BlcmF0b3JuYW1le0Nvdn0oZil1X2kKXGVuZHthbGlnbip9"></span></p>
+<p><span class="math display">\[\begin{align*}
+&amp;\operatorname{E}[||UU^{\top}(f-\mu)||^2]=\operatorname{E}\{\operatorname{tr}[U^{\top}(f-\mu)(f-\mu)^{\top}U]\} \\
+=&amp;\operatorname{tr}\{\operatorname{E}[U^{\top}(f-\mu)(f-\mu)^{\top}U]\}=\operatorname{tr}[U^{\top}\operatorname{Cov}(f)U]=\sum_{i=1}^{r}u_i^{\top}\operatorname{Cov}(f)u_i
+\end{align*}\]</span></p>
+<p>所以PCA优化问题为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVx1bmRlcnNldHtcc3Vic3RhY2t7VV57XHRvcH1VPUlfclxcVVxpbiBNX3ttXHRpbWVzIHJ9KFxtYXRoYmJ7Un0pfX17XGFyZ1xtYXh9XDtcc3VtX3tpPTF9XntyfXVfaV57XHRvcH1cb3BlcmF0b3JuYW1le0Nvdn0oZil1X2kKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\underset{\substack{U^{\top}U=I_r\\U\in M_{m\times r}(\mathbb{R})}}{\arg\max}\;\sum_{i=1}^{r}u_i^{\top}\operatorname{Cov}(f)u_i
+\end{equation*}\]</span></p>
+</section>
+<section id="id--b1132011" class="level4">
+<h4 class="anchored" data-anchor-id="id--b1132011"><span class="header-section-number">15.1.1.2</span> 最优子空间</h4>
 <div id="theo-PCA-db1e4c0f" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 15.2</strong>. 设<span class="math inline">\(\mathbf{X}\)</span>是一个<span class="math inline">\(n\)</span>维随机向量，<span class="math inline">\(\Sigma\)</span>是其协方差矩阵，<span class="math inline">\(\Sigma\)</span>的特征值<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>从大到小记作<span class="math inline">\(\lambda_1, \lambda_2, \dots, \lambda_{n}\)</span>，<span class="math inline">\(\varphi_1, \varphi_2, \dots, \varphi_{n}\)</span>为对应的标准正交化特征向量，则<span class="math inline">\(\mathbf{X}\)</span>的第<span class="math inline">\(i\)</span>个主成分以及其方差为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlZX2k9XHZhcnBoaV9pXntcdG9wfVxtYXRoYmZ7WH0sXDtcb3BlcmF0b3JuYW1le1Zhcn0oWV9pKT1cdmFycGhpX2lee1x0b3B9XFNpZ21hXHZhcnBoaV9pPVxsYW1iZGFfaQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><strong>Theorem 15.1</strong>. 设<span class="math inline">\(\operatorname{Cov}(f)\)</span>的特征值从大到小为<span class="math inline">\(\lambda_1, \lambda_2, \dots, \lambda_{m}\)</span>，对应的一组标准正交化特征向量为<span class="math inline">\(\varphi_1, \varphi_2, \dots, \varphi_{m}\)</span>，则： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcdW5kZXJzZXR7XHN1YnN0YWNre1Vee1x0b3B9VT1JX3JcXFVcaW4gTV97bVx0aW1lcyByfShcbWF0aGJie1J9KX19e1xtYXh9XDtcc3VtX3tpPTF9XntyfXVfaV57XHRvcH1cb3BlcmF0b3JuYW1le0Nvdn0oZil1X2k9XHN1bV97aT0xfV57cn1cbGFtYmRhX2kKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
-Y_i=\varphi_i^{\top}\mathbf{X},\;\operatorname{Var}(Y_i)=\varphi_i^{\top}\Sigma\varphi_i=\lambda_i
+\underset{\substack{U^{\top}U=I_r\\U\in M_{m\times r}(\mathbb{R})}}{\max}\;\sum_{i=1}^{r}u_i^{\top}\operatorname{Cov}(f)u_i=\sum_{i=1}^{r}\lambda_i
 \end{equation*}\]</span></p>
+<p>且<span class="math inline">\(U=(\varphi_1, \varphi_2, \dots, \varphi_{r})\)</span>为该优化问题的一个最优解，即PCA的最优<span class="math inline">\(r\)</span>维子空间可以取<span class="math inline">\(E=\operatorname{span}\{\varphi_1, \varphi_2, \dots, \varphi_{r}\}\)</span>。</p>
 </div>
 <div class="proof-block proof">
-<p><span class="proof-title"><em>证明</em>. </span>考虑到： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1Zhcn0oWV9pKT1cYWxwaGFfaV57XHRvcH1cU2lnbWFcYWxwaGFfaSxccXVhZAoJCVxvcGVyYXRvcm5hbWV7Q292fShZX2ksWV9qKT1cYWxwaGFfaV57XHRvcH1cU2lnbWFcYWxwaGFfagpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="proof-title"><em>证明</em>. </span>由<a href="../chapters/matrix.html#prop-HermitianMatEigen-c19a89c3" class="textbook-cross-reference" data-reference-key="prop:HermitianMatEigen" data-reference-kind="ref+label" data-reference-title="性质 2.6.3" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 2.6.3(3)</a>和<a href="../chapters/metric-space.html#theo-Schmidt-2029fbdb" class="textbook-cross-reference" data-reference-key="theo:Schmidt" data-reference-kind="ref+label" data-reference-title="定理 3.32">定理 3.32</a>，记<span class="math inline">\(\operatorname{Cov}(f)\)</span>的特征值从大到小为<span class="math inline">\(\lambda_1, \lambda_2, \dots, \lambda_{m}\)</span>，对应的一组标准正交化特征向量为<span class="math inline">\(\varphi_1, \varphi_2, \dots, \varphi_{m}\)</span>。根据<a href="../chapters/matrix.html#theo-maxminxAx-xx-203ed34d" class="textbook-cross-reference" data-reference-key="theo:maxminxAx/xx" data-reference-kind="ref+label" data-reference-title="定理 2.16">定理 2.16</a>可知在单位向量中<span class="math inline">\(\varphi_1\)</span>使得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl1XntcdG9wfVxvcGVyYXRvcm5hbWV7Q292fShmKXUKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
-\operatorname{Var}(Y_i)=\alpha_i^{\top}\Sigma\alpha_i,\quad
-\operatorname{Cov}(Y_i,Y_j)=\alpha_i^{\top}\Sigma\alpha_j
+u^{\top}\operatorname{Cov}(f)u
 \end{equation*}\]</span></p>
-<p>求解主成分的过程即为求解： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2dhdGhlcip9CgkJXGFscGhhX2k9XGFyZ1xtYXhcYWxwaGFfaV57XHRvcH1cU2lnbWFcYWxwaGFfaSxccXVhZAoJCVxvcGVyYXRvcm5hbWV7cy50Ln0KCQlcYmVnaW57Y2FzZXN9CgkJCXx8XGFscGhhX2l8fD0xLFw7Jmk9MSwyLFxkb3RzLG5cXAoJCQlcYWxwaGFfaV57XHRvcH1cU2lnbWFcYWxwaGFfaj0wLFw7Jmo8aQoJCVxlbmR7Y2FzZXN9ClxlbmR7Z2F0aGVyKn0="></span></p>
-<p><span class="math display">\[\begin{gather*}
-\alpha_i=\arg\max\alpha_i^{\top}\Sigma\alpha_i,\quad
-\operatorname{s.t.}
-\begin{cases}
-||\alpha_i||=1,\;&amp;i=1,2,\dots,n\\
-\alpha_i^{\top}\Sigma\alpha_j=0,\;&amp;j&lt;i
-\end{cases}
-\end{gather*}\]</span></p>
-<p>由<a href="../chapters/matrix.html#theo-maxminxAx-xx-203ed34d" class="textbook-cross-reference" data-reference-key="theo:maxminxAx/xx" data-reference-kind="ref+label" data-reference-title="定理 2.16">定理 2.16</a>可知上述结论成立。&nbsp;◻</p>
+<p>取得最大值<span class="math inline">\(\lambda_1\)</span>；在与<span class="math inline">\(\varphi_1\)</span>正交的单位向量中，<span class="math inline">\(\varphi_2\)</span>使其取得最大值<span class="math inline">\(\lambda_2\)</span>。依此类推，在与<span class="math inline">\(\varphi_1, \varphi_2, \dots, \varphi_{k-1}\)</span>均正交的单位向量中，<span class="math inline">\(\varphi_k\)</span>使其取得最大值<span class="math inline">\(\lambda_k\)</span>。若<span class="math inline">\(u_i=\varphi_i,\;i=1,2,\dots,r\)</span>，则： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc3VtX3tpPTF9XntyfXVfaV57XHRvcH1cb3BlcmF0b3JuYW1le0Nvdn0oZil1X2k9XHN1bV97aT0xfV57cn1cbGFtYmRhX2kKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\sum_{i=1}^{r}u_i^{\top}\operatorname{Cov}(f)u_i=\sum_{i=1}^{r}\lambda_i
+\end{equation*}\]</span></p>
+<p>下面证明： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcdW5kZXJzZXR7XHN1YnN0YWNre1Vee1x0b3B9VT1JX3JcXFVcaW4gTV97bVx0aW1lcyByfShcbWF0aGJie1J9KX19e1xtYXh9XDtcc3VtX3tpPTF9XntyfXVfaV57XHRvcH1cb3BlcmF0b3JuYW1le0Nvdn0oZil1X2k9XHN1bV97aT0xfV57cn1cbGFtYmRhX2kKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\underset{\substack{U^{\top}U=I_r\\U\in M_{m\times r}(\mathbb{R})}}{\max}\;\sum_{i=1}^{r}u_i^{\top}\operatorname{Cov}(f)u_i=\sum_{i=1}^{r}\lambda_i
+\end{equation*}\]</span></p>
+<p>对于任意满足<span class="math inline">\(U^{\top}U=I_r\)</span>的<span class="math inline">\(U=(u_1, u_2, \dots, u_{r})\)</span>，由于<span class="math inline">\(\varphi_1, \varphi_2, \dots, \varphi_{m}\)</span>构成<span class="math inline">\(\mathbb{R}^m\)</span>的一组标准正交基，所以存在<span class="math inline">\(\{c_{ij}\}\subseteq\mathbb{R}\)</span>使得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl1X2k9XHN1bV97aj0xfV57bX1jX3tpan1cdmFycGhpX2oKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+u_i=\sum_{j=1}^{m}c_{ij}\varphi_j
+\end{equation*}\]</span></p>
+<p>于是： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl1X2lee1x0b3B9XG9wZXJhdG9ybmFtZXtDb3Z9KGYpdV9pPVxzdW1fe2o9MX1ee219XGxhbWJkYV9qY197aWp9XjIKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+u_i^{\top}\operatorname{Cov}(f)u_i=\sum_{j=1}^{m}\lambda_jc_{ij}^2
+\end{equation*}\]</span></p>
+<p>所以： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc3VtX3tpPTF9XntyfXVfaV57XHRvcH1cb3BlcmF0b3JuYW1le0Nvdn0oZil1X2k9XHN1bV97aT0xfV57cn1cc3VtX3tqPTF9XnttfVxsYW1iZGFfamNfe2lqfV4yPVxzdW1fe2o9MX1ee219XGxhbWJkYV9qXHN1bV97aT0xfV57cn1jX3tpan1eMgpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\sum_{i=1}^{r}u_i^{\top}\operatorname{Cov}(f)u_i=\sum_{i=1}^{r}\sum_{j=1}^{m}\lambda_jc_{ij}^2=\sum_{j=1}^{m}\lambda_j\sum_{i=1}^{r}c_{ij}^2
+\end{equation*}\]</span></p>
+<p>记： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYWxwaGFfaj1cc3VtX3tpPTF9XntyfWNfe2lqfV4yClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\alpha_j=\sum_{i=1}^{r}c_{ij}^2
+\end{equation*}\]</span></p>
+<p>因为<span class="math inline">\(\varphi_1, \varphi_2, \dots, \varphi_{m}\)</span>为标准正交基，根据<a href="../chapters/metric-space.html#theo-BesselInequality-b8ab7495" class="textbook-cross-reference" data-reference-key="theo:BesselInequality" data-reference-kind="ref+label" data-reference-title="定理 3.29">定理 3.29</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYWxwaGFfaj1cc3VtX3tpPTF9XntyfWNfe2lqfV4yPVxzdW1fe2k9MX1ee3J9Wyh1X2ksXHZhcnBoaV9qKV1eMlxsZXFzbGFudHx8XHZhcnBoaV9qfHxeMj0xClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\alpha_j=\sum_{i=1}^{r}c_{ij}^2=\sum_{i=1}^{r}[(u_i,\varphi_j)]^2\leqslant||\varphi_j||^2=1
+\end{equation*}\]</span></p>
+<p>由<a href="../chapters/metric-space.html#prop-Orthogonal-dd705229" class="textbook-cross-reference" data-reference-key="prop:Orthogonal" data-reference-kind="ref+label" data-reference-title="性质 3.4.6">性质 3.4.6</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl8fHVfaXx8XjI9XHN1bV97aj0xfV57bX1jX3tpan1eMj0xClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+||u_i||^2=\sum_{j=1}^{m}c_{ij}^2=1
+\end{equation*}\]</span></p>
+<p>于是： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc3VtX3tqPTF9XnttfVxhbHBoYV9qPVxzdW1fe2o9MX1ee219XHN1bV97aT0xfV57cn1jX3tpan1eMj1cc3VtX3tpPTF9XntyfVxzdW1fe2o9MX1ee219Y197aWp9XjI9XHN1bV97aT0xfV57cn18fHVfaXx8XjI9cgpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\sum_{j=1}^{m}\alpha_j=\sum_{j=1}^{m}\sum_{i=1}^{r}c_{ij}^2=\sum_{i=1}^{r}\sum_{j=1}^{m}c_{ij}^2=\sum_{i=1}^{r}||u_i||^2=r
+\end{equation*}\]</span></p>
+<p>所以： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc3VtX3tpPTF9XntyfXVfaV57XHRvcH1cb3BlcmF0b3JuYW1le0Nvdn0oZil1X2lcbGVxc2xhbnRcc3VtX3tqPTF9XntyfVxsYW1iZGFfagpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\sum_{i=1}^{r}u_i^{\top}\operatorname{Cov}(f)u_i\leqslant\sum_{j=1}^{r}\lambda_j
+\end{equation*}\]</span></p>
+<p>◻</p>
 </div>
 <div id="definition-15-2" class="definition theorem-block env-definition">
-<p><strong>Definition 15.2</strong>. 将第<span class="math inline">\(i\)</span>个主成分<span class="math inline">\(Y_i\)</span>与变量<span class="math inline">\(X_j\)</span>的相关系数<span class="math inline">\(\rho(Y_i,X_j)\)</span>称为<a href="../chapters/glossary-f.html#term-FactorLoading" class="term" title="factor loading">因子负荷量<span class="term-english">（factor loading）</span></a>。</p>
+<p><strong>Definition 15.2</strong>. 称<span class="math inline">\(Z_i=\varphi_i^{\top}(f-\mu)\)</span>为<span class="math inline">\(f\)</span>的第<span class="math inline">\(i\)</span><a href="../chapters/glossary-p.html#term-PrincipalComponent" class="term" title="principal component">主成分<span class="term-english">（principal component）</span></a>，<span class="math inline">\(\varphi_i\)</span>为<span class="math inline">\(f\)</span>的第<span class="math inline">\(i\)</span>个<strong>主成分方向</strong>。</p>
 </div>
-<div id="definition-15-3" class="definition theorem-block env-definition">
-<p><strong>Definition 15.3</strong>. 称主成分<span class="math inline">\(Y_1, Y_2, \dots, Y_{k}\)</span>与变量<span class="math inline">\(X_j\)</span>之间的复相关系数的平方<span class="math inline">\(R^2\)</span>为<span class="math inline">\(Y_1, Y_2, \dots, Y_{k}\)</span>对<span class="math inline">\(X_j\)</span>的贡献率。</p>
-</div>
-<div id="prop-PCA-5d690524" class="property theorem-block env-property">
-<p><strong>Property 15.1.1</strong>. 总体主成分具有如下性质：</p>
-<ol type="1">
-<li><p><span class="math inline">\(\operatorname{Cov}(\mathbf{Y})=\operatorname{diag}\{\lambda_1, \lambda_2, \dots, \lambda_{n}\}\)</span>；</p></li>
-<li><p><span class="math inline">\(\mathbf{Y}\)</span>的方差之和等于<span class="math inline">\(\mathbf{X}\)</span>的方差之和，即<span class="math inline">\(\sum\limits_{i=1}^{n}\lambda_i=\sum\limits_{i=1}^{n}\sigma_{ii}\)</span>；</p></li>
-<li><p><span class="math inline">\(\rho(Y_i,X_j)=\dfrac{\sqrt{\lambda_i}\alpha_{ij}}{\sqrt{\sigma_{jj}}},\;i,j=1,2,\dots,n\)</span>；</p></li>
-<li><p>第<span class="math inline">\(i\)</span>个主成分与原变量的因子负荷量满足<span class="math inline">\(\sum\limits_{j=1}^{n}\sigma_{jj}\rho^2(Y_i,X_j)=\lambda_i\)</span>；</p></li>
-<li><p>原变量的第<span class="math inline">\(j\)</span>个分量与所有主成分的因子负荷量满足<span class="math inline">\(\sum\limits_{i=1}^{n}\rho^2(Y_i,X_j)=1\)</span>；</p></li>
-<li><p>若<span class="math inline">\(\Sigma&gt;\mathbf{0}\)</span>，则原变量的第<span class="math inline">\(j\)</span>个分量与前<span class="math inline">\(k\)</span>个主成分之间的复相关系数满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkJUl4yPVxzdW1fe2k9MX1ee2t9XHJob14yKFlfaSxYX2opPVxzdW1fe2k9MX1ee2t9XGZyYWN7XGxhbWJkYV9pXGFscGhhX3tpan1eMn17XHNpZ21hX3tpaX19ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="note-15-2" class="note theorem-block env-note">
+<p><strong>note 15.2</strong>. 由<a href="#eq-PCAProjection-85eb31fa" class="textbook-cross-reference" data-reference-key="eq:PCAProjection" data-reference-kind="ref+label" data-reference-title="公式 15.1">公式 15.1</a>可知对于任意的<span class="math inline">\(y\in\mathbb{R}^{m}\)</span>，其在<span class="math inline">\(\mu+E\)</span>上的投影为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbXUrXG1hdGhjYWx7UH1fRSh5LVxtdSk9XG11K1VVXntcdG9wfSh5LVxtdSkKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
-                R^2=\sum_{i=1}^{k}\rho^2(Y_i,X_j)=\sum_{i=1}^{k}\frac{\lambda_i\alpha_{ij}^2}{\sigma_{ii}}
-    \end{equation*}\]</span></p></li>
-</ol>
-</div>
-<div class="proof-block proof">
-<p><span class="proof-title"><em>证明</em>. </span>(1)由<a href="#theo-PCA-db1e4c0f" class="textbook-cross-reference" data-reference-key="theo:PCA" data-reference-kind="ref+label" data-reference-title="定理 15.2">定理 15.2</a>直接可得。</p>
-<p>(2)由<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.6" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 6.3.6(3)</a>和<a href="../chapters/matrix.html#prop-Trace-e3d6427f" class="textbook-cross-reference" data-reference-key="prop:Trace" data-reference-kind="ref+label" data-reference-title="性质 2.1.5" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 2.1.5(3)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlcc3VtX3tpPTF9XntufVxvcGVyYXRvcm5hbWV7VmFyfShZX2kpCgkJJj1cb3BlcmF0b3JuYW1le3RyfVtcb3BlcmF0b3JuYW1le0Nvdn0oXG1hdGhiZntZfSldPVxvcGVyYXRvcm5hbWV7dHJ9W1xvcGVyYXRvcm5hbWV7Q292fShBXG1hdGhiZntYfSldPVxvcGVyYXRvcm5hbWV7dHJ9KEFcU2lnbWEgQV57XHRvcH0pIFxcCgkJJj1cb3BlcmF0b3JuYW1le3RyfShcU2lnbWEgQV57XHRvcH1BKT1cb3BlcmF0b3JuYW1le3RyfShcU2lnbWEpPVxzdW1fe2k9MX1ee259XG9wZXJhdG9ybmFtZXtWYXJ9KFhfaSkKXGVuZHthbGlnbip9"></span></p>
-<p><span class="math display">\[\begin{align*}
-\sum_{i=1}^{n}\operatorname{Var}(Y_i)
-&amp;=\operatorname{tr}[\operatorname{Cov}(\mathbf{Y})]=\operatorname{tr}[\operatorname{Cov}(A\mathbf{X})]=\operatorname{tr}(A\Sigma A^{\top}) \\
-&amp;=\operatorname{tr}(\Sigma A^{\top}A)=\operatorname{tr}(\Sigma)=\sum_{i=1}^{n}\operatorname{Var}(X_i)
-\end{align*}\]</span></p>
-<p>(3)由<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.6" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 6.3.6(3)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlccmhvKFlfaSxYX2opCgkJJj1cZnJhY3tcb3BlcmF0b3JuYW1le0Nvdn0oWV9pLFhfail9e1xzcXJ0e1xvcGVyYXRvcm5hbWV7VmFyfShZX2kpXG9wZXJhdG9ybmFtZXtWYXJ9KFhfail9fT1cZnJhY3tcb3BlcmF0b3JuYW1le0Nvdn0oXGFscGhhX2lee1x0b3B9XG1hdGhiZntYfSxlX2pee1x0b3B9XG1hdGhiZntYfSl9e1xzcXJ0e1xsYW1iZGFfaVxzaWdtYV97amp9fX0gXFwKCQkmPVxmcmFje1xhbHBoYV9pXntcdG9wfVxTaWdtYSBlX2p9e1xzcXJ0e1xsYW1iZGFfaVxzaWdtYV97amp9fX09XGZyYWN7ZV9qXntcdG9wfVxTaWdtYVxhbHBoYV9pfXtcc3FydHtcbGFtYmRhX2lcc2lnbWFfe2pqfX19PVxmcmFje2Vfal57XHRvcH1cbGFtYmRhX2lcYWxwaGFfaX17XHNxcnR7XGxhbWJkYV9pXHNpZ21hX3tqan19fT1cZnJhY3tcc3FydHtcbGFtYmRhX2l9XGFscGhhX3tpan19e1xzcXJ0e1xzaWdtYV97amp9fX0KXGVuZHthbGlnbip9"></span></p>
-<p><span class="math display">\[\begin{align*}
-\rho(Y_i,X_j)
-&amp;=\frac{\operatorname{Cov}(Y_i,X_j)}{\sqrt{\operatorname{Var}(Y_i)\operatorname{Var}(X_j)}}=\frac{\operatorname{Cov}(\alpha_i^{\top}\mathbf{X},e_j^{\top}\mathbf{X})}{\sqrt{\lambda_i\sigma_{jj}}} \\
-&amp;=\frac{\alpha_i^{\top}\Sigma e_j}{\sqrt{\lambda_i\sigma_{jj}}}=\frac{e_j^{\top}\Sigma\alpha_i}{\sqrt{\lambda_i\sigma_{jj}}}=\frac{e_j^{\top}\lambda_i\alpha_i}{\sqrt{\lambda_i\sigma_{jj}}}=\frac{\sqrt{\lambda_i}\alpha_{ij}}{\sqrt{\sigma_{jj}}}
-\end{align*}\]</span></p>
-<p>(4)由(3)可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc3VtX3tqPTF9XntufVxzaWdtYV97amp9XHJob14yKFlfaSxYX2opPVxzdW1fe2o9MX1ee259XGxhbWJkYV9pXGFscGhhX3tpan1eMj1cbGFtYmRhX2lcYWxwaGFfaV57XHRvcH1cYWxwaGFfaT1cbGFtYmRhX2kKXGVuZHtlcXVhdGlvbip9"></span></p>
-<p><span class="math display">\[\begin{equation*}
-\sum_{j=1}^{n}\sigma_{jj}\rho^2(Y_i,X_j)=\sum_{j=1}^{n}\lambda_i\alpha_{ij}^2=\lambda_i\alpha_i^{\top}\alpha_i=\lambda_i
+\mu+\mathcal{P}_E(y-\mu)=\mu+UU^{\top}(y-\mu)
 \end{equation*}\]</span></p>
-<p>(5)由<a href="../chapters/probability-basics.html#prop-MultipleCorrelationCoefficient-727f45c9" class="textbook-cross-reference" data-reference-key="prop:MultipleCorrelationCoefficient" data-reference-kind="ref+label" data-reference-title="性质 6.3.9" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 6.3.9(3)</a>和<a href="../chapters/probability-basics.html#prop-CorrelationCoefficient-4b0cb356" class="textbook-cross-reference" data-reference-key="prop:CorrelationCoefficient" data-reference-kind="ref+label" data-reference-title="性质 6.3.8" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 6.3.8(1)</a>立即可得。</p>
-<p>(6)当<span class="math inline">\(\Sigma&gt;\mathbf{0}\)</span>时，由<a href="../chapters/matrix.html#theo-PositiveDefinite-bcd1811a" class="textbook-cross-reference" data-reference-key="theo:PositiveDefinite" data-reference-kind="ref+label" data-reference-title="定理 2.17" data-reference-items="3.5" data-reference-hint="请查看第 3.5 项">定理 2.17(3.5)</a>可知<span class="math inline">\(\Sigma\)</span>的特征值都大于<span class="math inline">\(0\)</span>，根据<a href="#theo-PCA-db1e4c0f" class="textbook-cross-reference" data-reference-key="theo:PCA" data-reference-kind="ref+label" data-reference-title="定理 15.2">定理 15.2</a>即<span class="math inline">\(\operatorname{Var}(Y_i)&gt;0\)</span>，于是由<a href="../chapters/probability-basics.html#prop-MultipleCorrelationCoefficient-727f45c9" class="textbook-cross-reference" data-reference-key="prop:MultipleCorrelationCoefficient" data-reference-kind="ref+label" data-reference-title="性质 6.3.9" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 6.3.9(1)</a>和(3)可立即得出结论。&nbsp;◻</p>
+<p>从上式可以看出，<span class="math inline">\(Z_i\)</span>对应于样本<span class="math inline">\(y\)</span>的取值<span class="math inline">\(\varphi_i^{\top}(y-\mu)\)</span>表示该投影点相对于基点<span class="math inline">\(\mu\)</span>，在第<span class="math inline">\(i\)</span>个主成分方向<span class="math inline">\(\varphi_i\)</span>上的坐标。</p>
 </div>
-<div id="definition-15-4" class="definition theorem-block env-definition">
-<p><strong>Definition 15.4</strong>. 称第<span class="math inline">\(i\)</span>个主成分<span class="math inline">\(Y_i\)</span>的方差与所有主成分方差之和的比值为<span class="math inline">\(Y_i\)</span>的方差贡献率，记为<span class="math inline">\(\eta_i\)</span>，即<span class="math inline">\(\eta_i=\lambda_i\Big/\sum\limits_{j=1}^{n}\lambda_j\)</span>。将<span class="math inline">\(\sum\limits_{i=1}^{k}\lambda_i\Big/\sum\limits_{i=1}^{n}\lambda_i\)</span>称为主成分<span class="math inline">\(Y_1, Y_2, \dots, Y_{k}\)</span>的累计方差贡献率。</p>
-</div>
-<p>由前述，我们一般通过选择主成分的个数来实现对数据的降维，即选择主成分的个数使它们的累计方差贡献率达到一定比例（一般为<span class="math inline">\(85\%\)</span>）。</p>
+</section>
 </section>
 <section id="id--60d3545d" class="level3">
 <h3 class="anchored" data-anchor-id="id--60d3545d"><span class="header-section-number">15.1.2</span> 样本主成分分析</h3>
-<p>假设对<span class="math inline">\(n\)</span>维随机变量<span class="math inline">\(\mathbf{X}\)</span>进行<span class="math inline">\(m\)</span>次独立观测，得到<span class="math inline">\(m\)</span>个<span class="math inline">\(n\)</span>维样本<span class="math inline">\(x_1, x_2, \dots, x_{m}\)</span>。在样本主成分分析中，我们使用样本来估计<span class="math inline">\(\mathbf{X}\)</span>的协方差矩阵，即： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxoYXR7XGJvbGRzeW1ib2x7XG11fX09XGZyYWN7MX17bX1cc3VtX3tpPTF9XnttfXhfaSxcO1M9KHNfe2lqfSk9XGZyYWN7MX17bS0xfVxzdW1fe2k9MX1ee219KHhfaS1caGF0e1xib2xkc3ltYm9se1xtdX19KSh4X2ktXGhhdHtcYm9sZHN5bWJvbHtcbXV9fSlee1x0b3B9LFw7aSxqPTEsMixcZG90cyxuClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p>假设对<span class="math inline">\(f\)</span>进行<span class="math inline">\(n\)</span>次独立观测得到<span class="math inline">\(n\)</span>个样本<span class="math inline">\(x_1, x_2, \dots, x_{n}\)</span>。我们使用样本来估计<span class="math inline">\(\operatorname{Cov}(f)\)</span>，即： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxoYXR7XG11fT1cZnJhY3sxfXtufVxzdW1fe2k9MX1ee259eF9pLFxxdWFkIFM9XGZyYWN7MX17bi0xfVxzdW1fe2k9MX1ee259KHhfaS1caGF0e1xtdX0pKHhfaS1caGF0e1xtdX0pXntcdG9wfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
-\hat{\boldsymbol{\mu}}=\frac{1}{m}\sum_{i=1}^{m}x_i,\;S=(s_{ij})=\frac{1}{m-1}\sum_{i=1}^{m}(x_i-\hat{\boldsymbol{\mu}})(x_i-\hat{\boldsymbol{\mu}})^{\top},\;i,j=1,2,\dots,n
+\hat{\mu}=\frac{1}{n}\sum_{i=1}^{n}x_i,\quad S=\frac{1}{n-1}\sum_{i=1}^{n}(x_i-\hat{\mu})(x_i-\hat{\mu})^{\top}
 \end{equation*}\]</span></p>
-<p>其余步骤与总体主成分分析一致。</p>
+<p>由<a href="../chapters/matrix.html#prop-HermitianMatEigen-c19a89c3" class="textbook-cross-reference" data-reference-key="prop:HermitianMatEigen" data-reference-kind="ref+label" data-reference-title="性质 2.6.3" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 2.6.3(3)</a>和<a href="../chapters/metric-space.html#theo-Schmidt-2029fbdb" class="textbook-cross-reference" data-reference-key="theo:Schmidt" data-reference-kind="ref+label" data-reference-title="定理 3.32">定理 3.32</a>，记<span class="math inline">\(S\)</span>的特征值从大到小为<span class="math inline">\(\hat{\lambda}_1, \hat{\lambda}_2, \dots, \hat{\lambda}_{m}\)</span>，对应的一组标准正交化特征向量为<span class="math inline">\(\hat{\varphi}_1, \hat{\varphi}_2, \dots, \hat{\varphi}_{m}\)</span>。</p>
+<section id="id--ccd5083a" class="level4">
+<h4 class="anchored" data-anchor-id="id--ccd5083a"><span class="header-section-number">15.1.2.1</span> 降维表示</h4>
+<p>根据<a href="#theo-PCA-db1e4c0f" class="textbook-cross-reference" data-reference-key="theo:PCA" data-reference-kind="ref+label" data-reference-title="定理 15.1">定理 15.1</a>，对于给定的<span class="math inline">\(r&lt;m\)</span>，令： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVVfcj0oXGhhdHtcdmFycGhpfV8xLCBcaGF0e1x2YXJwaGl9XzIsIFxkb3RzLCBcaGF0e1x2YXJwaGl9X3tyfSlcaW4gTV97bVx0aW1lcyByfShcbWF0aGJie1J9KQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+U_r=(\hat{\varphi}_1, \hat{\varphi}_2, \dots, \hat{\varphi}_{r})\in M_{m\times r}(\mathbb{R})
+\end{equation*}\]</span></p>
+<p>则样本PCA所确定的<span class="math inline">\(r\)</span>维主成分子空间可以取为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCUVfcj1cb3BlcmF0b3JuYW1le3NwYW59XHtcaGF0e1x2YXJwaGl9XzEsIFxoYXR7XHZhcnBoaX1fMiwgXGRvdHMsIFxoYXR7XHZhcnBoaX1fe3J9XH0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+E_r=\operatorname{span}\{\hat{\varphi}_1, \hat{\varphi}_2, \dots, \hat{\varphi}_{r}\}
+\end{equation*}\]</span></p>
+<p>对于任意样本<span class="math inline">\(x_i\)</span>，其在<span class="math inline">\(\hat{\mu}+E_r\)</span>上的正交投影为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxoYXR7XG11fStVX3JVX3Jee1x0b3B9KHhfaS1caGF0e1xtdX0pClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\hat{\mu}+U_rU_r^{\top}(x_i-\hat{\mu})
+\end{equation*}\]</span></p>
+<p>而该投影点相对于基点<span class="math inline">\(\hat{\mu}\)</span>在标准正交基<span class="math inline">\(\hat{\varphi}_1, \hat{\varphi}_2, \dots, \hat{\varphi}_{r}\)</span>下的坐标为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXpfaT1VX3Jee1x0b3B9KHhfaS1caGF0e1xtdX0pXGluXG1hdGhiYntSfV5yClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+z_i=U_r^{\top}(x_i-\hat{\mu})\in\mathbb{R}^r
+\end{equation*}\]</span></p>
+<p>其中第<span class="math inline">\(j\)</span>个坐标为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXpfe2lqfT1caGF0e1x2YXJwaGl9X2pee1x0b3B9KHhfaS1caGF0e1xtdX0pClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+z_{ij}=\hat{\varphi}_j^{\top}(x_i-\hat{\mu})
+\end{equation*}\]</span></p>
+<p>在PCA中，我们认为<span class="math inline">\(z_i\)</span>为样本<span class="math inline">\(x_i\)</span>经过降维后的<span class="math inline">\(r\)</span>维表示。称<span class="math inline">\(z_{ij}\)</span>为样本<span class="math inline">\(x_i\)</span>在第<span class="math inline">\(j\)</span>个主成分上的<strong>主成分得分</strong>。</p>
 </section>
-<section id="id--26b238cb" class="level3">
-<h3 class="anchored" data-anchor-id="id--26b238cb"><span class="header-section-number">15.1.3</span> 注意事项</h3>
-<section id="id--ebc7195b" class="level4">
-<h4 class="anchored" data-anchor-id="id--ebc7195b"><span class="header-section-number">15.1.3.1</span> 多重共线性问题</h4>
-<p>当原始变量出现多重共线性时，重复的信息在方差占比中会重复进行计算，导致方差占比被改变。为了达到一定的累积贡献率，就会不可避免地使得主成分也融入重复信息（可以从一个极端案例来想：添加一个重复变量到原先一点都不重复的观测样本集中），所以主成分是无法解决重复信息问题的。主成分分析从另一个角度是依赖于多重共线性的：我们需要舍弃方差贡献率小的主成分。如果没有方差贡献率较小的主成分，这说明原数据几乎没有多重共线性情况，此时无论舍弃哪个主成分都将导致严重的信息损失。</p>
+<section id="id--4e59a33a" class="level4">
+<h4 class="anchored" data-anchor-id="id--4e59a33a"><span class="header-section-number">15.1.2.2</span> 主成分维数的选择</h4>
+<p>PCA中维数<span class="math inline">\(r\)</span>决定了保留的信息量与降维程度之间的权衡。可以验证<span class="math inline">\(S\)</span>为半正定矩阵，于是由<a href="../chapters/matrix.html#theo-PositiveSemidefinite-cdf79ee9" class="textbook-cross-reference" data-reference-key="theo:PositiveSemidefinite" data-reference-kind="ref+label" data-reference-title="定理 2.18" data-reference-items="3.5" data-reference-hint="请查看第 3.5 项">定理 2.18(3.5)</a>可知<span class="math inline">\(S\)</span>的特征值满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxoYXR7XGxhbWJkYX1fMVxnZXFzbGFudFxoYXR7XGxhbWJkYX1fMlxnZXFzbGFudFxjZG90c1xnZXFzbGFudFxoYXR7XGxhbWJkYX1fbVxnZXFzbGFudDAKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\hat{\lambda}_1\geqslant\hat{\lambda}_2\geqslant\cdots\geqslant\hat{\lambda}_m\geqslant0
+\end{equation*}\]</span></p>
+<p>根据<a href="#theo-PCA-db1e4c0f" class="textbook-cross-reference" data-reference-key="theo:PCA" data-reference-kind="ref+label" data-reference-title="定理 15.1">定理 15.1</a>，第<span class="math inline">\(i\)</span>个主成分所对应的样本方差为<span class="math inline">\(\hat{\lambda}_i\)</span>，而样本特征的总方差为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxvcGVyYXRvcm5hbWV7dHJ9KFMpPVxzdW1fe2k9MX1ee219XGhhdHtcbGFtYmRhfV9pClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\operatorname{tr}(S)=\sum_{i=1}^{m}\hat{\lambda}_i
+\end{equation*}\]</span></p>
+<p>因此，前<span class="math inline">\(r\)</span>个主成分所保留的方差占总方差的比例为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVJfcj1cc3VtX3tpPTF9XntyfVxoYXR7XGxhbWJkYX1faVxCaWcvXHN1bV97aT0xfV57bX1caGF0e1xsYW1iZGF9X2kKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+R_r=\sum_{i=1}^{r}\hat{\lambda}_i\Big/\sum_{i=1}^{m}\hat{\lambda}_i
+\end{equation*}\]</span></p>
+<p>称<span class="math inline">\(R_r\)</span>为前<span class="math inline">\(r\)</span>个主成分的<strong>累计方差解释比例</strong>。给定希望保留的方差比例<span class="math inline">\(\eta\in(0,1)\)</span>，可以选择满足<span class="math inline">\(R_r\geqslant\eta\)</span>的最小<span class="math inline">\(r\)</span>，即： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXI9XG1pblxsZWZ0XHtrOlxzdW1fe2k9MX1ee2t9XGhhdHtcbGFtYmRhfV9pXEJpZy9cc3VtX3tpPTF9XnttfVxoYXR7XGxhbWJkYX1faVxnZXFzbGFudFxldGFccmlnaHRcfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+r=\min\left\{k:\sum_{i=1}^{k}\hat{\lambda}_i\Big/\sum_{i=1}^{m}\hat{\lambda}_i\geqslant\eta\right\}
+\end{equation*}\]</span></p>
 </section>
-<section id="id--b07e5ec7" class="level4">
-<h4 class="anchored" data-anchor-id="id--b07e5ec7"><span class="header-section-number">15.1.3.2</span> 相关矩阵导出主成分</h4>
-<p>上面我们都是对协方差矩阵的特征值分解进行计算，但在现实中，各变量的量纲可能不一样，这就导致各变量方差的量级会不一样，方差越大，由<a href="#prop-PCA-5d690524" class="textbook-cross-reference" data-reference-key="prop:PCA" data-reference-kind="ref+label" data-reference-title="性质 15.1.1" data-reference-items="2" data-reference-hint="请查看第 2 项">性质 15.1.1(2)</a>可知必然会导致该变量在主成分构成中的占比变大，但此时的大方差可能仅仅是因为量纲的不同，从变异系数的角度可能各变量的波动差距没有那么明显。为了消除量纲带来的影响，我们会对数据进行标准化，注意到标准化后数据的协方差矩阵即为相关矩阵，此时将相关矩阵作对应的特征值分解即可。但需要注意：标准化后<strong>各变量方差相等均为<span class="math inline">\(1\)</span>，损失了部分信息</strong>，所以会使得<strong>标准化后的各变量在对主成分构成中的作用趋于相等</strong>。因此，取值范围在同量级的数据建议使用协方差矩阵直接求解主成分，若变量之间数量级差异较大，再使用相关矩阵求解主成分。</p>
-<div id="algorithm-15-1" class="algorithm-block">
-<div class="algorithm-caption">
-<p><span class="algorithm-number">Algorithm 15.1</span> <span class="algorithm-title">主成分分析（PCA）</span></p>
-</div>
-<div class="algorithm-body">
-<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
-<p><strong>Input:</strong> 原始数据矩阵 <span class="math inline">\(\mathbf{X}\)</span></p>
-</div>
-<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
-<p><strong>Output:</strong> 主成分得分 <span class="math inline">\(\mathbf{Y}\)</span>，选定的主成分个数 <span class="math inline">\(k\)</span></p>
-</div>
-<div class="algorithm-line algorithm-if algorithm-depth-0" data-depth="0" data-line="3">
-<p><strong>if</strong> 变量量纲差异明显 <strong>then</strong></p>
-</div>
-<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="4">
-<p>将<span class="math inline">\(\mathbf{X}\)</span>标准化得到<span class="math inline">\(\mathbf{Z}\)</span></p>
-</div>
-<div class="algorithm-line algorithm-else algorithm-depth-0" data-depth="0" data-line="5">
-<p><strong>else</strong></p>
-</div>
-<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="6">
-<p>保留原始数据 <span class="math inline">\(\mathbf{Z} = \mathbf{X}\)</span></p>
-</div>
-<div class="algorithm-line algorithm-if-end algorithm-depth-0" data-depth="0" data-line="7">
-<p><strong>end if</strong></p>
-</div>
-<div class="algorithm-line algorithm-if algorithm-depth-0" data-depth="0" data-line="8">
-<p><strong>if</strong> 存在多重共线性（最小特征值 <span class="math inline">\(\approx 0\)</span>） <strong>then</strong></p>
-</div>
-<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="9">
-<p>删除或合并相关变量</p>
-</div>
-<div class="algorithm-line algorithm-else algorithm-depth-0" data-depth="0" data-line="10">
-<p><strong>else</strong></p>
-</div>
-<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="11">
-<p>保留原始变量</p>
-</div>
-<div class="algorithm-line algorithm-if-end algorithm-depth-0" data-depth="0" data-line="12">
-<p><strong>end if</strong></p>
-</div>
-<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="13">
-<p>计算协方差矩阵：<span class="math inline">\(\Sigma = \text{cov}(\mathbf{Z})\)</span>，对 <span class="math inline">\(\Sigma\)</span> 进行特征值分解：<span class="math inline">\(\Sigma = A \Lambda A^{\top}\)</span></p>
-</div>
-<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="14">
-<p>初始化 <span class="math inline">\(k \gets 1\)</span>, 累计贡献率 <span class="math inline">\(\gets 0\)</span></p>
-</div>
-<div class="algorithm-line algorithm-repeat algorithm-depth-0" data-depth="0" data-line="15">
-<p><strong>repeat</strong></p>
-</div>
-<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="16">
-<p>选择第 <span class="math inline">\(k\)</span> 个主成分，更新累计贡献率</p>
-</div>
-<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="17">
-<p><strong>if</strong> 累计贡献率 <span class="math inline">\(&lt;\)</span> 阈值 <strong>then</strong></p>
-</div>
-<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="18">
-<p><span class="math inline">\(k \gets k + 1\)</span></p>
-</div>
-<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="19">
-<p><strong>end if</strong></p>
-</div>
-<div class="algorithm-line algorithm-until algorithm-depth-0" data-depth="0" data-line="20">
-<p><strong>until</strong> 累计贡献率 <span class="math inline">\(\geqslant\)</span> 阈值</p>
-</div>
-<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="21">
-<p>计算主成分得分：<span class="math inline">\(\mathbf{Y}=A_k\mathbf{Z}\)</span>（<span class="math inline">\(A_k\)</span>为矩阵<span class="math inline">\(A\)</span>的前<span class="math inline">\(k\)</span>行构成的矩阵），输出 <span class="math inline">\(\mathbf{Y}\)</span> 和 <span class="math inline">\(k\)</span></p>
-</div>
-</div>
-</div>
+<section id="id--8a385b9d" class="level4">
+<h4 class="anchored" data-anchor-id="id--8a385b9d"><span class="header-section-number">15.1.2.3</span> 标准化</h4>
+<p>上述主成分维数<span class="math inline">\(r\)</span>的选择依赖于各个主成分所解释的样本方差，因此也会受到原始特征尺度的影响。若不同特征的数值尺度存在较大差异，则尺度较大的特征通常具有更大的样本方差，从而在总方差中占据较大的比例，此时累计方差解释比例也会相应地受到其主导。于是，根据<span class="math inline">\(R_r\)</span>选择得到的<span class="math inline">\(r\)</span>可能主要反映少数大尺度特征的变化，而不能公平地衡量不同特征所包含的信息。为了消除这种由尺度差异造成的影响，可以在执行PCA之前对各个特征进行标准化。</p>
 </section>
 </section>
 <section id="id--e83ac9aa" class="level3">
-<h3 class="anchored" data-anchor-id="id--e83ac9aa"><span class="header-section-number">15.1.4</span> 应用：主成分回归</h3>
-<div id="note-15-1" class="note theorem-block env-note">
-<p><strong>note 15.1</strong>. 我们将介绍PCA在解决线性模型复共线性问题上的应用，接下来将延续在岭估计处提到的线性回归模型的典则形式，并将<span class="math inline">\(\operatorname{diag}\{\lambda_1, \lambda_2, \dots, \lambda_{p-1}\}\)</span>设置为<span class="math inline">\(\lambda_1&gt;\lambda_2&gt;\cdots&gt;\lambda_{p-1}\)</span>的形式。由<span class="todo-note todo-info" role="note">矩阵多项式的特征向量</span>可知<span class="math inline">\(Y\)</span>实际上是经过PCA处理后的数据，当<span class="math inline">\(X^{\top}X\)</span>存在很小的特征值时，不妨设它们为<span class="math inline">\(\lambda_{r+1},\lambda_{r+2},\dots,\lambda_{p-1}\)</span>，由<a href="#prop-PCA-5d690524" class="textbook-cross-reference" data-reference-key="prop:PCA" data-reference-kind="ref+label" data-reference-title="性质 15.1.1" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 15.1.1(1)</a>可知<span class="math inline">\(Y_{r+1},Y_{r+2},\dots,Y_{p-1}\)</span>的方差很小，于是我们可以舍弃它们，从而得到如下模型： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl5PVxhbHBoYV8wXG1hdGhiZnsxfV9uK1xtYXRoYmZ7WX1fMVxkZWx0YV8xK1x2YXJlcHNpbG9uLFxxdWFkXG9wZXJhdG9ybmFtZXtFfShcdmFyZXBzaWxvbik9XG1hdGhiZnswfSxccXVhZFxvcGVyYXRvcm5hbWV7Q292fShcdmFyZXBzaWxvbik9XHNpZ21hXjJJX24KXGVuZHtlcXVhdGlvbip9"></span></p>
+<h3 class="anchored" data-anchor-id="id--e83ac9aa"><span class="header-section-number">15.1.3</span> 应用：主成分回归</h3>
+<p>我们将介绍PCA在解决线性模型复共线性问题上的应用，接下来将延续在岭估计处提到的线性回归模型的典则形式，并将<span class="math inline">\(\operatorname{diag}\{\lambda_1, \lambda_2, \dots, \lambda_{p-1}\}\)</span>设置为<span class="math inline">\(\lambda_1&gt;\lambda_2&gt;\cdots&gt;\lambda_{p-1}\)</span>的形式。由<span class="todo-note todo-info" role="note">矩阵多项式的特征向量</span>可知<span class="math inline">\(Y\)</span>实际上是经过PCA处理后的数据，当<span class="math inline">\(X^{\top}X\)</span>存在很小的特征值时，不妨设它们为<span class="math inline">\(\lambda_{r+1},\lambda_{r+2},\dots,\lambda_{p-1}\)</span>，由<a href="#theo-PCA-db1e4c0f" class="textbook-cross-reference" data-reference-key="theo:PCA" data-reference-kind="ref+label" data-reference-title="定理 15.1">定理 15.1</a>可知<span class="math inline">\(Y_{r+1},Y_{r+2},\dots,Y_{p-1}\)</span>的方差很小，于是我们可以舍弃它们，从而得到如下模型： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXk9XGFscGhhXzBcbWF0aGJmezF9X24rXG1hdGhiZntZfV8xXGRlbHRhXzErXHZhcmVwc2lsb24sXHF1YWRcb3BlcmF0b3JuYW1le0V9KFx2YXJlcHNpbG9uKT1cbWF0aGJmezB9LFxxdWFkXG9wZXJhdG9ybmFtZXtDb3Z9KFx2YXJlcHNpbG9uKT1cc2lnbWFeMklfbgpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 y=\alpha_0\mathbf{1}_n+\mathbf{Y}_1\delta_1+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(\mathbf{Y}_1\)</span>是<span class="math inline">\(Y\)</span>的前<span class="math inline">\(r\)</span>列，<span class="math inline">\(\delta_1\)</span>是<span class="math inline">\(\delta_I\)</span>的前<span class="math inline">\(r\)</span>行。称如上模型给出的估计<span class="math inline">\(\hat{\delta}_I=(\hat{\delta}_1,\mathbf{0})^{\top}\)</span>为<span class="math inline">\(\hat{\delta}\)</span>的<a href="../chapters/glossary-p.html#term-PrincipalComponentEstimate" class="term" title="principal component estimate">主成分估计<span class="term-english">（principal component estimate）</span></a>。</p>
-</div>
-<div id="property-15-1-2" class="property theorem-block env-property">
-<p><strong>Property 15.1.2</strong>. 中心化模型的主成分回归具有如下性质：</p>
+<div id="property-15-1-1" class="property theorem-block env-property">
+<p><strong>Property 15.1.1</strong>. 中心化模型的主成分回归具有如下性质：</p>
 <ol type="1">
 <li><p><span class="math inline">\(\hat{\alpha}_0=\overline{y},\;\hat{\delta}_1=(\mathbf{Y}_1^{\top}\mathbf{Y}_1)^{-1}\mathbf{Y}_1^{\top}y=\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}\mathbf{Y}_1^{\top}y=\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}Q_1\tilde{X}_c^{\top}y,\hat{\alpha}_I=Q_1^{\top}\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}\mathbf{Y}_1^{\top}y=Q_1^{\top}\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}Q\tilde{X}_c^{\top}y\)</span>，其中<span class="math inline">\(Q_1\)</span>是<span class="math inline">\(Q\)</span>的前<span class="math inline">\(r\)</span>行；</p></li>
 <li><p>主成分估计一般是有偏估计；</p></li>
@@ -1030,8 +1100,8 @@ y=\alpha_0\mathbf{1}_n+\mathbf{Y}_1\delta_1+\varepsilon,\quad\operatorname{E}(\v
 <h2 class="anchored" data-anchor-id="id--d23576fc"><span class="header-section-number">15.2</span> 因子分析</h2>
 <p><a href="../chapters/glossary-f.html#term-FactorAnalysis" class="term" title="factor analysis">因子分析<span class="term-english">（factor analysis）</span></a>的目的是从多个高度相关的观测变量中提取出少数几个<a href="../chapters/glossary-l.html#term-LatentFactor" class="term" title="latent factor">潜在因子<span class="term-english">（latent factor）</span></a>，这些因子代表了变量背后的共通结构，从而实现降维并提升可解释性。</p>
 <p>假设对一组学生进行了以下六门课程的测试：语文、英语、数学、物理、化学、生物，发现语文和英语成绩之间高度相关，数学、物理、化学、生物也彼此高度相关。此时可以猜测：这些成绩可能是由两个更基本的”能力”决定的，比如语言能力和理科能力。通过因子分析就可以提取出这两个潜在因子，并发现语文和英语主要由”语言能力”因子决定，理科四门主要由”理科能力”因子解释。这样就可以用两个因子有效地概括了六个变量的结构，同时让模型更易解释、更简洁。</p>
-<div id="definition-15-5" class="definition theorem-block env-definition">
-<p><strong>Definition 15.5</strong>. 设<span class="math inline">\(\mathbf{X}\)</span>是一个可观测的<span class="math inline">\(m\)</span>维随机向量，<span class="math inline">\(\operatorname{E}(\mathbf{X})=\boldsymbol{\mu},\;\operatorname{Cov}(\mathbf{X})=\Sigma=(\sigma_{ij})\)</span>。因子分析的数学模型为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2dhdGhlcip9CgkJXG1hdGhiZntYfT1cYm9sZHN5bWJvbHtcbXV9K0FGK1x2YXJlcHNpbG9uIFxcCgkJXGJlZ2lue2Nhc2VzfQoJCQlcb3BlcmF0b3JuYW1le0V9KEYpPVxtYXRoYmZ7MH0sXDtcb3BlcmF0b3JuYW1le0Nvdn0oRik9SV9uIFxcCgkJCVxvcGVyYXRvcm5hbWV7RX0oXHZhcmVwc2lsb24pPVxtYXRoYmZ7MH0sXDtcb3BlcmF0b3JuYW1le0Nvdn0oXHZhcmVwc2lsb24pPUQ9XG9wZXJhdG9ybmFtZXtkaWFnfVx7XHNpZ21hXjJfMSwgXHNpZ21hXjJfMiwgXGRvdHMsIFxzaWdtYV4yX3ttfVx9IFxcCgkJCVxvcGVyYXRvcm5hbWV7Q292fShGLFx2YXJlcHNpbG9uKT1cbWF0aGJmezB9CgkJXGVuZHtjYXNlc30KXGVuZHtnYXRoZXIqfQ=="></span></p>
+<div id="definition-15-3" class="definition theorem-block env-definition">
+<p><strong>Definition 15.3</strong>. 设<span class="math inline">\(\mathbf{X}\)</span>是一个可观测的<span class="math inline">\(m\)</span>维随机向量，<span class="math inline">\(\operatorname{E}(\mathbf{X})=\boldsymbol{\mu},\;\operatorname{Cov}(\mathbf{X})=\Sigma=(\sigma_{ij})\)</span>。因子分析的数学模型为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2dhdGhlcip9CgkJXG1hdGhiZntYfT1cYm9sZHN5bWJvbHtcbXV9K0FGK1x2YXJlcHNpbG9uIFxcCgkJXGJlZ2lue2Nhc2VzfQoJCQlcb3BlcmF0b3JuYW1le0V9KEYpPVxtYXRoYmZ7MH0sXDtcb3BlcmF0b3JuYW1le0Nvdn0oRik9SV9uIFxcCgkJCVxvcGVyYXRvcm5hbWV7RX0oXHZhcmVwc2lsb24pPVxtYXRoYmZ7MH0sXDtcb3BlcmF0b3JuYW1le0Nvdn0oXHZhcmVwc2lsb24pPUQ9XG9wZXJhdG9ybmFtZXtkaWFnfVx7XHNpZ21hXjJfMSwgXHNpZ21hXjJfMiwgXGRvdHMsIFxzaWdtYV4yX3ttfVx9IFxcCgkJCVxvcGVyYXRvcm5hbWV7Q292fShGLFx2YXJlcHNpbG9uKT1cbWF0aGJmezB9CgkJXGVuZHtjYXNlc30KXGVuZHtnYXRoZXIqfQ=="></span></p>
 <p><span class="math display">\[\begin{gather*}
 \mathbf{X}=\boldsymbol{\mu}+AF+\varepsilon \\
 \begin{cases}
@@ -1064,7 +1134,7 @@ y=\alpha_0\mathbf{1}_n+\mathbf{Y}_1\delta_1+\varepsilon,\quad\operatorname{E}(\v
 </ol>
 </div>
 <div class="proof-block proof">
-<p><span class="proof-title"><em>证明</em>. </span>(1)由<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.6" data-reference-items="3|4|5" data-reference-hint="请查看第 3、4、5 项">性质 6.3.6(3)(4)(5)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlcU2lnbWEmPVxvcGVyYXRvcm5hbWV7Q292fShcbWF0aGJme1h9KT1cb3BlcmF0b3JuYW1le0Nvdn0oXGJvbGRzeW1ib2x7XG11fStBRitcdmFyZXBzaWxvbixcYm9sZHN5bWJvbHtcbXV9K0FGK1x2YXJlcHNpbG9uKSBcXAoJCSY9XG9wZXJhdG9ybmFtZXtDb3Z9KFxib2xkc3ltYm9se1xtdX0sXGJvbGRzeW1ib2x7XG11fStBRitcdmFyZXBzaWxvbikrXG9wZXJhdG9ybmFtZXtDb3Z9KEFGLFxib2xkc3ltYm9se1xtdX0rQUYrXHZhcmVwc2lsb24pK1xvcGVyYXRvcm5hbWV7Q292fShcdmFyZXBzaWxvbixcYm9sZHN5bWJvbHtcbXV9K0FGK1x2YXJlcHNpbG9uKSBcXAoJCSY9XG9wZXJhdG9ybmFtZXtDb3Z9KEFGLFxib2xkc3ltYm9se1xtdX0pK1xvcGVyYXRvcm5hbWV7Q292fShBRikrXG9wZXJhdG9ybmFtZXtDb3Z9KEFGLFx2YXJlcHNpbG9uKStcb3BlcmF0b3JuYW1le0Nvdn0oXG1hdGhiZntcdmFyZXBzaWxvbn0sXGJvbGRzeW1ib2x7XG11fSkrXG9wZXJhdG9ybmFtZXtDb3Z9KFx2YXJlcHNpbG9uLEFGKStcb3BlcmF0b3JuYW1le0Nvdn0oXHZhcmVwc2lsb24pIFxcCgkJJj1BXG9wZXJhdG9ybmFtZXtDb3Z9KEYpQV57XHRvcH0rQVxvcGVyYXRvcm5hbWV7Q292fShGLFx2YXJlcHNpbG9uKStcb3BlcmF0b3JuYW1le0Nvdn0oXHZhcmVwc2lsb24sRilBXntcdG9wfStEIFxcCgkJJj1BQV57XHRvcH0rRApcZW5ke2FsaWduKn0="></span></p>
+<p><span class="proof-title"><em>证明</em>. </span>(1)由<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.4.3" data-reference-items="3|4|5" data-reference-hint="请查看第 3、4、5 项">性质 6.4.3(3)(4)(5)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlcU2lnbWEmPVxvcGVyYXRvcm5hbWV7Q292fShcbWF0aGJme1h9KT1cb3BlcmF0b3JuYW1le0Nvdn0oXGJvbGRzeW1ib2x7XG11fStBRitcdmFyZXBzaWxvbixcYm9sZHN5bWJvbHtcbXV9K0FGK1x2YXJlcHNpbG9uKSBcXAoJCSY9XG9wZXJhdG9ybmFtZXtDb3Z9KFxib2xkc3ltYm9se1xtdX0sXGJvbGRzeW1ib2x7XG11fStBRitcdmFyZXBzaWxvbikrXG9wZXJhdG9ybmFtZXtDb3Z9KEFGLFxib2xkc3ltYm9se1xtdX0rQUYrXHZhcmVwc2lsb24pK1xvcGVyYXRvcm5hbWV7Q292fShcdmFyZXBzaWxvbixcYm9sZHN5bWJvbHtcbXV9K0FGK1x2YXJlcHNpbG9uKSBcXAoJCSY9XG9wZXJhdG9ybmFtZXtDb3Z9KEFGLFxib2xkc3ltYm9se1xtdX0pK1xvcGVyYXRvcm5hbWV7Q292fShBRikrXG9wZXJhdG9ybmFtZXtDb3Z9KEFGLFx2YXJlcHNpbG9uKStcb3BlcmF0b3JuYW1le0Nvdn0oXG1hdGhiZntcdmFyZXBzaWxvbn0sXGJvbGRzeW1ib2x7XG11fSkrXG9wZXJhdG9ybmFtZXtDb3Z9KFx2YXJlcHNpbG9uLEFGKStcb3BlcmF0b3JuYW1le0Nvdn0oXHZhcmVwc2lsb24pIFxcCgkJJj1BXG9wZXJhdG9ybmFtZXtDb3Z9KEYpQV57XHRvcH0rQVxvcGVyYXRvcm5hbWV7Q292fShGLFx2YXJlcHNpbG9uKStcb3BlcmF0b3JuYW1le0Nvdn0oXHZhcmVwc2lsb24sRilBXntcdG9wfStEIFxcCgkJJj1BQV57XHRvcH0rRApcZW5ke2FsaWduKn0="></span></p>
 <p><span class="math display">\[\begin{align*}
 \Sigma&amp;=\operatorname{Cov}(\mathbf{X})=\operatorname{Cov}(\boldsymbol{\mu}+AF+\varepsilon,\boldsymbol{\mu}+AF+\varepsilon) \\
 &amp;=\operatorname{Cov}(\boldsymbol{\mu},\boldsymbol{\mu}+AF+\varepsilon)+\operatorname{Cov}(AF,\boldsymbol{\mu}+AF+\varepsilon)+\operatorname{Cov}(\varepsilon,\boldsymbol{\mu}+AF+\varepsilon) \\
@@ -1073,24 +1143,24 @@ y=\alpha_0\mathbf{1}_n+\mathbf{Y}_1\delta_1+\varepsilon,\quad\operatorname{E}(\v
 &amp;=AA^{\top}+D
 \end{align*}\]</span></p>
 <p>(2)显然。</p>
-<p>(3)取正交矩阵<span class="math inline">\(Q\)</span>，令<span class="math inline">\(A^{\star}=AQ\)</span>，<span class="math inline">\(F^{\star}=Q^{\top}F\)</span>，由<span class="todo-note todo-info" role="note">期望的性质</span>、<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.6" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 6.3.6(3)</a>则依然有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0V9KEZee1xzdGFyfSk9UV57XHRvcH1cb3BlcmF0b3JuYW1le0V9KEYpPVxtYXRoYmZ7MH0sXDtcb3BlcmF0b3JuYW1le0Nvdn0oRl57XHN0YXJ9KT1RXntcdG9wfVxvcGVyYXRvcm5hbWV7Q292fShGKVE9SV9uLFw7XG1hdGhiZntYfT1cYm9sZHN5bWJvbHtcbXV9K0Fee1xzdGFyfUZee1xzdGFyfStcdmFyZXBzaWxvbgpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p>(3)取正交矩阵<span class="math inline">\(Q\)</span>，令<span class="math inline">\(A^{\star}=AQ\)</span>，<span class="math inline">\(F^{\star}=Q^{\top}F\)</span>，由<span class="todo-note todo-info" role="note">期望的性质</span>、<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.4.3" data-reference-items="3" data-reference-hint="请查看第 3 项">性质 6.4.3(3)</a>则依然有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0V9KEZee1xzdGFyfSk9UV57XHRvcH1cb3BlcmF0b3JuYW1le0V9KEYpPVxtYXRoYmZ7MH0sXDtcb3BlcmF0b3JuYW1le0Nvdn0oRl57XHN0YXJ9KT1RXntcdG9wfVxvcGVyYXRvcm5hbWV7Q292fShGKVE9SV9uLFw7XG1hdGhiZntYfT1cYm9sZHN5bWJvbHtcbXV9K0Fee1xzdGFyfUZee1xzdGFyfStcdmFyZXBzaWxvbgpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{E}(F^{\star})=Q^{\top}\operatorname{E}(F)=\mathbf{0},\;\operatorname{Cov}(F^{\star})=Q^{\top}\operatorname{Cov}(F)Q=I_n,\;\mathbf{X}=\boldsymbol{\mu}+A^{\star}F^{\star}+\varepsilon
 \end{equation*}\]</span></p>
-<p>(4)由<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.6" data-reference-items="3|4|5" data-reference-hint="请查看第 3、4、5 项">性质 6.3.6(3)(4)(5)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0Nvdn0oXG1hdGhiZntYfSxGKT1cb3BlcmF0b3JuYW1le0Nvdn0oXGJvbGRzeW1ib2x7XG11fStBRitcdmFyZXBzaWxvbixGKT1cb3BlcmF0b3JuYW1le0Nvdn0oXGJvbGRzeW1ib2x7XG11fSxGKStcb3BlcmF0b3JuYW1le0Nvdn0oQUYsRikrXG9wZXJhdG9ybmFtZXtDb3Z9KFx2YXJlcHNpbG9uLEYpPUEKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p>(4)由<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.4.3" data-reference-items="3|4|5" data-reference-hint="请查看第 3、4、5 项">性质 6.4.3(3)(4)(5)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0Nvdn0oXG1hdGhiZntYfSxGKT1cb3BlcmF0b3JuYW1le0Nvdn0oXGJvbGRzeW1ib2x7XG11fStBRitcdmFyZXBzaWxvbixGKT1cb3BlcmF0b3JuYW1le0Nvdn0oXGJvbGRzeW1ib2x7XG11fSxGKStcb3BlcmF0b3JuYW1le0Nvdn0oQUYsRikrXG9wZXJhdG9ybmFtZXtDb3Z9KFx2YXJlcHNpbG9uLEYpPUEKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{Cov}(\mathbf{X},F)=\operatorname{Cov}(\boldsymbol{\mu}+AF+\varepsilon,F)=\operatorname{Cov}(\boldsymbol{\mu},F)+\operatorname{Cov}(AF,F)+\operatorname{Cov}(\varepsilon,F)=A
 \end{equation*}\]</span></p>
 <p>(5)由(1)即可得到结论。</p>
-<p>(6)由<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.6" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 6.3.6(1)</a>、(1)和<a href="../chapters/matrix.html#prop-Trace-e3d6427f" class="textbook-cross-reference" data-reference-key="prop:Trace" data-reference-kind="ref+label" data-reference-title="性质 2.1.5" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 2.1.5(1)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlcc3VtX3tpPTF9XnttfVxvcGVyYXRvcm5hbWV7VmFyfShcbWF0aGJme1h9X2kpJj1cb3BlcmF0b3JuYW1le3RyfVtcb3BlcmF0b3JuYW1le0Nvdn0oXG1hdGhiZntYfSldPVxvcGVyYXRvcm5hbWV7dHJ9KEFBXntcdG9wfStEKT1cc3VtX3tpPTF9XnttfVxzdW1fe2o9MX1ee259YV97aWp9XjIrXHN1bV97aT0xfV57bn1cc2lnbWFfaV4yIFxcCgkJJj1cc3VtX3tqPTF9XntufVxzdW1fe2k9MX1ee219YV97aWp9XjIrXHN1bV97aT0xfV57bn1cc2lnbWFfaV4yPVxzdW1fe2o9MX1ee259Z19qXjIrXHN1bV97aT0xfV57bn1cc2lnbWFfaV4yClxlbmR7YWxpZ24qfQ=="></span></p>
+<p>(6)由<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.4.3" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 6.4.3(1)</a>、(1)和<a href="../chapters/matrix.html#prop-Trace-e3d6427f" class="textbook-cross-reference" data-reference-key="prop:Trace" data-reference-kind="ref+label" data-reference-title="性质 2.1.5" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 2.1.5(1)</a>可得： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlcc3VtX3tpPTF9XnttfVxvcGVyYXRvcm5hbWV7VmFyfShcbWF0aGJme1h9X2kpJj1cb3BlcmF0b3JuYW1le3RyfVtcb3BlcmF0b3JuYW1le0Nvdn0oXG1hdGhiZntYfSldPVxvcGVyYXRvcm5hbWV7dHJ9KEFBXntcdG9wfStEKT1cc3VtX3tpPTF9XnttfVxzdW1fe2o9MX1ee259YV97aWp9XjIrXHN1bV97aT0xfV57bn1cc2lnbWFfaV4yIFxcCgkJJj1cc3VtX3tqPTF9XntufVxzdW1fe2k9MX1ee219YV97aWp9XjIrXHN1bV97aT0xfV57bn1cc2lnbWFfaV4yPVxzdW1fe2o9MX1ee259Z19qXjIrXHN1bV97aT0xfV57bn1cc2lnbWFfaV4yClxlbmR7YWxpZ24qfQ=="></span></p>
 <p><span class="math display">\[\begin{align*}
 \sum_{i=1}^{m}\operatorname{Var}(\mathbf{X}_i)&amp;=\operatorname{tr}[\operatorname{Cov}(\mathbf{X})]=\operatorname{tr}(AA^{\top}+D)=\sum_{i=1}^{m}\sum_{j=1}^{n}a_{ij}^2+\sum_{i=1}^{n}\sigma_i^2 \\
 &amp;=\sum_{j=1}^{n}\sum_{i=1}^{m}a_{ij}^2+\sum_{i=1}^{n}\sigma_i^2=\sum_{j=1}^{n}g_j^2+\sum_{i=1}^{n}\sigma_i^2
 \end{align*}\]</span></p>
 <p>◻</p>
 </div>
-<div id="definition-15-6" class="definition theorem-block env-definition">
-<p><strong>Definition 15.6</strong>. 称<span class="math inline">\(h_i^2\)</span>为变量<span class="math inline">\(\mathbf{X}_i\)</span>的<a href="../chapters/glossary-c.html#term-CommonVariance" class="term" title="common variance">公共方差<span class="term-english">（common variance）</span></a>，它反映了公共因子对<span class="math inline">\(\mathbf{X}_i\)</span>的方差贡献度。称<span class="math inline">\(\sigma_i^2\)</span>为<span class="math inline">\(\mathbf{X}_i\)</span>的<a href="../chapters/glossary-s.html#term-SpecificVariance" class="term" title="specific variance">特殊方差<span class="term-english">（specific variance）</span></a>，它反映了特殊因子<span class="math inline">\(\varepsilon_i\)</span>对<span class="math inline">\(\mathbf{X}_i\)</span>的方差贡献度。<span class="math inline">\(g_j^2\)</span>可视为公共因子<span class="math inline">\(f_j\)</span>对<span class="math inline">\(\mathbf{X}_1, \mathbf{X}_2, \dots, \mathbf{X}_{m}\)</span>的总方差贡献度。</p>
+<div id="definition-15-4" class="definition theorem-block env-definition">
+<p><strong>Definition 15.4</strong>. 称<span class="math inline">\(h_i^2\)</span>为变量<span class="math inline">\(\mathbf{X}_i\)</span>的<a href="../chapters/glossary-c.html#term-CommonVariance" class="term" title="common variance">公共方差<span class="term-english">（common variance）</span></a>，它反映了公共因子对<span class="math inline">\(\mathbf{X}_i\)</span>的方差贡献度。称<span class="math inline">\(\sigma_i^2\)</span>为<span class="math inline">\(\mathbf{X}_i\)</span>的<a href="../chapters/glossary-s.html#term-SpecificVariance" class="term" title="specific variance">特殊方差<span class="term-english">（specific variance）</span></a>，它反映了特殊因子<span class="math inline">\(\varepsilon_i\)</span>对<span class="math inline">\(\mathbf{X}_i\)</span>的方差贡献度。<span class="math inline">\(g_j^2\)</span>可视为公共因子<span class="math inline">\(f_j\)</span>对<span class="math inline">\(\mathbf{X}_1, \mathbf{X}_2, \dots, \mathbf{X}_{m}\)</span>的总方差贡献度。</p>
 </div>
 <section id="id--b3e99a98" class="level3">
 <h3 class="anchored" data-anchor-id="id--b3e99a98"><span class="header-section-number">15.2.1</span> 参数估计方法</h3>
@@ -1117,7 +1187,7 @@ l_m^{\top}
 \end{pmatrix}
 =\sum_{i=1}^{m}\lambda_il_il_i^{\top}
 \end{equation*}\]</span></p>
-<p>由<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.6" data-reference-items="2" data-reference-hint="请查看第 2 项">性质 6.3.6(2)</a>和<a href="../chapters/matrix.html#theo-PositiveSemidefinite-cdf79ee9" class="textbook-cross-reference" data-reference-key="theo:PositiveSemidefinite" data-reference-kind="ref+label" data-reference-title="定理 2.18" data-reference-items="3.5" data-reference-hint="请查看第 3.5 项">定理 2.18(3.5)</a>可知<span class="math inline">\(\lambda_m\geqslant0\)</span>。当最后<span class="math inline">\(m-n\)</span>个特征值较小时，<span class="math inline">\(\Sigma\)</span>有如下近似： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcU2lnbWE9XHN1bV97aT0xfV57bX1cbGFtYmRhX2lsX2lsX2lee1x0b3B9XGFwcHJveFxzdW1fe2k9MX1ee259XGxhbWJkYV9pbF9pbF9pXntcdG9wfStcaGF0e0R9PVxoYXR7QX1caGF0e0F9XntcdG9wfStcaGF0e0R9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p>由<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.4.3" data-reference-items="2" data-reference-hint="请查看第 2 项">性质 6.4.3(2)</a>和<a href="../chapters/matrix.html#theo-PositiveSemidefinite-cdf79ee9" class="textbook-cross-reference" data-reference-key="theo:PositiveSemidefinite" data-reference-kind="ref+label" data-reference-title="定理 2.18" data-reference-items="3.5" data-reference-hint="请查看第 3.5 项">定理 2.18(3.5)</a>可知<span class="math inline">\(\lambda_m\geqslant0\)</span>。当最后<span class="math inline">\(m-n\)</span>个特征值较小时，<span class="math inline">\(\Sigma\)</span>有如下近似： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcU2lnbWE9XHN1bV97aT0xfV57bX1cbGFtYmRhX2lsX2lsX2lee1x0b3B9XGFwcHJveFxzdW1fe2k9MX1ee259XGxhbWJkYV9pbF9pbF9pXntcdG9wfStcaGF0e0R9PVxoYXR7QX1caGF0e0F9XntcdG9wfStcaGF0e0R9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \Sigma=\sum_{i=1}^{m}\lambda_il_il_i^{\top}\approx\sum_{i=1}^{n}\lambda_il_il_i^{\top}+\hat{D}=\hat{A}\hat{A}^{\top}+\hat{D}
 \end{equation*}\]</span></p>
@@ -1156,7 +1226,7 @@ l_m^{\top}
 </div>
 <div id="source-alg-PrincipalFactorMethod-cfd2214e" class="algorithm-block">
 <div class="algorithm-caption">
-<p><span class="algorithm-number">Algorithm 15.2</span> <span class="algorithm-title">主因子法求解因子分析</span></p>
+<p><span class="algorithm-number">Algorithm 15.1</span> <span class="algorithm-title">主因子法求解因子分析</span></p>
 </div>
 <div class="algorithm-body">
 <div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
@@ -1194,7 +1264,7 @@ l_m^{\top}
 <section id="id--4ad5e402" class="level4">
 <h4 class="anchored" data-anchor-id="id--4ad5e402"><span class="header-section-number">15.2.1.3</span> 正态分布假设下的极大似然估计法</h4>
 <div id="derivation-15-1" class="derivation theorem-block env-derivation">
-<p><strong>Derivation 15.1</strong>. 若假设<span class="math inline">\(F\sim N_n(\mathbf{0},I_n),\;\varepsilon\sim N_m(\mathbf{0},D)\)</span>，因为<span class="math inline">\(F\)</span>和<span class="math inline">\(\varepsilon\)</span>不相关，由<a href="../chapters/probability-basics.html#prop-MultiNormal-b0900be1" class="textbook-cross-reference" data-reference-key="prop:MultiNormal" data-reference-kind="ref+label" data-reference-title="性质 6.4.6" data-reference-items="8" data-reference-hint="请查看第 8 项">性质 6.4.6(8)</a>可知<span class="math inline">\(F\)</span>和<span class="math inline">\(\varepsilon\)</span>独立。由<a href="../chapters/probability-basics.html#theo-MatNormalLinearTransform-28e169ca" class="textbook-cross-reference" data-reference-key="theo:MatNormalLinearTransform" data-reference-kind="ref+label" data-reference-title="定理 6.13">定理 6.13</a>和<a href="../chapters/probability-basics.html#prop-MultiNormal-b0900be1" class="textbook-cross-reference" data-reference-key="prop:MultiNormal" data-reference-kind="ref+label" data-reference-title="性质 6.4.6" data-reference-items="7" data-reference-hint="请查看第 7 项">性质 6.4.6(7)</a>可得<span class="math inline">\(\mathbf{X}\sim N_m(\boldsymbol{\mu},AA^{\top}+D)\)</span>。对<span class="math inline">\(\mathbf{X}\)</span>进行简单抽样获得<span class="math inline">\(s\)</span>个样本，由<a href="../chapters/probability-basics.html#prop-MultiNormal-b0900be1" class="textbook-cross-reference" data-reference-key="prop:MultiNormal" data-reference-kind="ref+label" data-reference-title="性质 6.4.6" data-reference-items="7" data-reference-hint="请查看第 7 项">性质 6.4.6(7)</a>和<a href="../chapters/probability-basics.html#prop-MultiNormal-b0900be1" class="textbook-cross-reference" data-reference-key="prop:MultiNormal" data-reference-kind="ref+label" data-reference-title="性质 6.4.6" data-reference-items="2" data-reference-hint="请查看第 2 项">性质 6.4.6(2)</a>可得这<span class="math inline">\(s\)</span>个样本的均值<span class="math inline">\(\bar{\mathbf{X}}\sim N_n\left(\boldsymbol{\mu},\dfrac{1}{s}(AA^{\top}+D)\right)\)</span>。若样本均值为<span class="math inline">\(\bar{x}\)</span>，则似然函数为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlMKEEsRCk9KDJccGkpXnstXGZyYWN7bX17Mn19fFxkZXRbXGZyYWN7MX17c30oQUFee1x0b3B9K0QpXXxeey1cZnJhY3sxfXsyfX1cZXhwXGxlZnRcey1cZnJhY3sxfXsyfShcYmFye3h9LVxib2xkc3ltYm9se1xtdX0pXntcdG9wfVxsZWZ0W1xmcmFjezF9e3N9KEFBXntcdG9wfStEKVxyaWdodF1eey0xfShcYmFye3h9LVxib2xkc3ltYm9se1xtdX0pXHJpZ2h0XH0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><strong>Derivation 15.1</strong>. 若假设<span class="math inline">\(F\sim N_n(\mathbf{0},I_n),\;\varepsilon\sim N_m(\mathbf{0},D)\)</span>，因为<span class="math inline">\(F\)</span>和<span class="math inline">\(\varepsilon\)</span>不相关，由<a href="../chapters/probability-basics.html#prop-MultiNormal-b0900be1" class="textbook-cross-reference" data-reference-key="prop:MultiNormal" data-reference-kind="ref+label" data-reference-title="性质 6.5.8" data-reference-items="8" data-reference-hint="请查看第 8 项">性质 6.5.8(8)</a>可知<span class="math inline">\(F\)</span>和<span class="math inline">\(\varepsilon\)</span>独立。由<a href="../chapters/probability-basics.html#theo-MatNormalLinearTransform-28e169ca" class="textbook-cross-reference" data-reference-key="theo:MatNormalLinearTransform" data-reference-kind="ref+label" data-reference-title="定理 6.14">定理 6.14</a>和<a href="../chapters/probability-basics.html#prop-MultiNormal-b0900be1" class="textbook-cross-reference" data-reference-key="prop:MultiNormal" data-reference-kind="ref+label" data-reference-title="性质 6.5.8" data-reference-items="7" data-reference-hint="请查看第 7 项">性质 6.5.8(7)</a>可得<span class="math inline">\(\mathbf{X}\sim N_m(\boldsymbol{\mu},AA^{\top}+D)\)</span>。对<span class="math inline">\(\mathbf{X}\)</span>进行简单抽样获得<span class="math inline">\(s\)</span>个样本，由<a href="../chapters/probability-basics.html#prop-MultiNormal-b0900be1" class="textbook-cross-reference" data-reference-key="prop:MultiNormal" data-reference-kind="ref+label" data-reference-title="性质 6.5.8" data-reference-items="7" data-reference-hint="请查看第 7 项">性质 6.5.8(7)</a>和<a href="../chapters/probability-basics.html#prop-MultiNormal-b0900be1" class="textbook-cross-reference" data-reference-key="prop:MultiNormal" data-reference-kind="ref+label" data-reference-title="性质 6.5.8" data-reference-items="2" data-reference-hint="请查看第 2 项">性质 6.5.8(2)</a>可得这<span class="math inline">\(s\)</span>个样本的均值<span class="math inline">\(\bar{\mathbf{X}}\sim N_n\left(\boldsymbol{\mu},\dfrac{1}{s}(AA^{\top}+D)\right)\)</span>。若样本均值为<span class="math inline">\(\bar{x}\)</span>，则似然函数为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlMKEEsRCk9KDJccGkpXnstXGZyYWN7bX17Mn19fFxkZXRbXGZyYWN7MX17c30oQUFee1x0b3B9K0QpXXxeey1cZnJhY3sxfXsyfX1cZXhwXGxlZnRcey1cZnJhY3sxfXsyfShcYmFye3h9LVxib2xkc3ltYm9se1xtdX0pXntcdG9wfVxsZWZ0W1xmcmFjezF9e3N9KEFBXntcdG9wfStEKVxyaWdodF1eey0xfShcYmFye3h9LVxib2xkc3ltYm9se1xtdX0pXHJpZ2h0XH0KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 L(A,D)=(2\pi)^{-\frac{m}{2}}|\det[\frac{1}{s}(AA^{\top}+D)]|^{-\frac{1}{2}}\exp\left\{-\frac{1}{2}(\bar{x}-\boldsymbol{\mu})^{\top}\left[\frac{1}{s}(AA^{\top}+D)\right]^{-1}(\bar{x}-\boldsymbol{\mu})\right\}
 \end{equation*}\]</span></p>
@@ -1242,13 +1312,13 @@ V=\sum_{j=1}^{n}V_j=\frac{1}{m^2}\left\{\sum_{j=1}^{n}\left[m\sum_{i=1}^{m}\frac
 <p><span class="math display">\[\begin{equation*}
 H_0:\Sigma=AA^{\top}+D,\quad H_1:\Sigma\text{为其它任一正定矩阵}
 \end{equation*}\]</span></p>
-<p>由<a href="../chapters/probability-basics.html#prop-MultiNormal-b0900be1" class="textbook-cross-reference" data-reference-key="prop:MultiNormal" data-reference-kind="ref+label" data-reference-title="性质 6.4.6" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 6.4.6(1)</a>可得此时备择假设下的对数似然函数为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlMXzEmPVxzdW1fe2k9MX1ee3B9XGxuXGxlZnRce1xmcmFjezF9eygyXHBpKV57XGZyYWN7bX17Mn19KFxkZXRcU2lnbWEpXntcZnJhY3sxfXsyfX19ZV57LVxmcmFjezF9ezJ9XG9wZXJhdG9ybmFtZXt0cn1bKFxtYXRoYmZ7WF9pfS1cYm9sZHN5bWJvbHtcbXV9KShcbWF0aGJme1hfaX0tXGJvbGRzeW1ib2x7XG11fSlee1x0b3B9XFNpZ21hXnstMX1dfVxyaWdodFx9IFxcCgkJJj1cc3VtX3tpPTF9XntwfVxsZWZ0XHstXGZyYWN7bX17Mn1cbG4oMlxwaSktXGZyYWN7MX17Mn1cbG4oXGRldFxTaWdtYSktXGZyYWN7MX17Mn1cb3BlcmF0b3JuYW1le3RyfVsoXG1hdGhiZntYX2l9LVxib2xkc3ltYm9se1xtdX0pKFxtYXRoYmZ7WF9pfS1cYm9sZHN5bWJvbHtcbXV9KV57XHRvcH1cU2lnbWFeey0xfV1ccmlnaHRcfSBcXAoJCSY9LVxmcmFje3B9ezJ9XGxlZnRce21cbG4oMlxwaSkrXGxuKFxkZXRcU2lnbWEpK1xmcmFjezF9e3B9XHN1bV97aT0xfV57cH1cb3BlcmF0b3JuYW1le3RyfVsoXG1hdGhiZntYX2l9LVxib2xkc3ltYm9se1xtdX0pKFxtYXRoYmZ7WF9pfS1cYm9sZHN5bWJvbHtcbXV9KV57XHRvcH1cU2lnbWFeey0xfV1ccmlnaHRcfQpcZW5ke2FsaWduKn0="></span></p>
+<p>由<a href="../chapters/probability-basics.html#prop-MultiNormal-b0900be1" class="textbook-cross-reference" data-reference-key="prop:MultiNormal" data-reference-kind="ref+label" data-reference-title="性质 6.5.8" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 6.5.8(1)</a>可得此时备择假设下的对数似然函数为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQlMXzEmPVxzdW1fe2k9MX1ee3B9XGxuXGxlZnRce1xmcmFjezF9eygyXHBpKV57XGZyYWN7bX17Mn19KFxkZXRcU2lnbWEpXntcZnJhY3sxfXsyfX19ZV57LVxmcmFjezF9ezJ9XG9wZXJhdG9ybmFtZXt0cn1bKFxtYXRoYmZ7WF9pfS1cYm9sZHN5bWJvbHtcbXV9KShcbWF0aGJme1hfaX0tXGJvbGRzeW1ib2x7XG11fSlee1x0b3B9XFNpZ21hXnstMX1dfVxyaWdodFx9IFxcCgkJJj1cc3VtX3tpPTF9XntwfVxsZWZ0XHstXGZyYWN7bX17Mn1cbG4oMlxwaSktXGZyYWN7MX17Mn1cbG4oXGRldFxTaWdtYSktXGZyYWN7MX17Mn1cb3BlcmF0b3JuYW1le3RyfVsoXG1hdGhiZntYX2l9LVxib2xkc3ltYm9se1xtdX0pKFxtYXRoYmZ7WF9pfS1cYm9sZHN5bWJvbHtcbXV9KV57XHRvcH1cU2lnbWFeey0xfV1ccmlnaHRcfSBcXAoJCSY9LVxmcmFje3B9ezJ9XGxlZnRce21cbG4oMlxwaSkrXGxuKFxkZXRcU2lnbWEpK1xmcmFjezF9e3B9XHN1bV97aT0xfV57cH1cb3BlcmF0b3JuYW1le3RyfVsoXG1hdGhiZntYX2l9LVxib2xkc3ltYm9se1xtdX0pKFxtYXRoYmZ7WF9pfS1cYm9sZHN5bWJvbHtcbXV9KV57XHRvcH1cU2lnbWFeey0xfV1ccmlnaHRcfQpcZW5ke2FsaWduKn0="></span></p>
 <p><span class="math display">\[\begin{align*}
 L_1&amp;=\sum_{i=1}^{p}\ln\left\{\frac{1}{(2\pi)^{\frac{m}{2}}(\det\Sigma)^{\frac{1}{2}}}e^{-\frac{1}{2}\operatorname{tr}[(\mathbf{X_i}-\boldsymbol{\mu})(\mathbf{X_i}-\boldsymbol{\mu})^{\top}\Sigma^{-1}]}\right\} \\
 &amp;=\sum_{i=1}^{p}\left\{-\frac{m}{2}\ln(2\pi)-\frac{1}{2}\ln(\det\Sigma)-\frac{1}{2}\operatorname{tr}[(\mathbf{X_i}-\boldsymbol{\mu})(\mathbf{X_i}-\boldsymbol{\mu})^{\top}\Sigma^{-1}]\right\} \\
 &amp;=-\frac{p}{2}\left\{m\ln(2\pi)+\ln(\det\Sigma)+\frac{1}{p}\sum_{i=1}^{p}\operatorname{tr}[(\mathbf{X_i}-\boldsymbol{\mu})(\mathbf{X_i}-\boldsymbol{\mu})^{\top}\Sigma^{-1}]\right\}
 \end{align*}\]</span></p>
-<p>上式可以化为<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlMXzEoXFNpZ21hKT0tXGZyYWN7cH17Mn1cbGVmdFttXGxuKDJccGkpK1xsbihcZGV0XFNpZ21hKStcb3BlcmF0b3JuYW1le3RyfShTXFNpZ21hXnstMX0pXHJpZ2h0XQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p>上式可以化为<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlMXzEoXFNpZ21hKT0tXGZyYWN7cH17Mn1cbGVmdFttXGxuKDJccGkpK1xsbihcZGV0XFNpZ21hKStcb3BlcmF0b3JuYW1le3RyfShTXFNpZ21hXnstMX0pXHJpZ2h0XQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 L_1(\Sigma)=-\frac{p}{2}\left[m\ln(2\pi)+\ln(\det\Sigma)+\operatorname{tr}(S\Sigma^{-1})\right]
 \end{equation*}\]</span></p>
@@ -1295,8 +1365,8 @@ F=(A^{\top}D^{-1}A)^{-1}A^{\top}D^{-1}(\mathbf{X}-\boldsymbol{\mu})
 <p>需要注意<span class="math inline">\(A^{\top}D^{-1}A\)</span>的可逆性。</p>
 <p>若认为<span class="math inline">\(\mathbf{X}\sim\operatorname{N}_m(\boldsymbol{\mu}+AF,D)\)</span>，则上述解得的<span class="math inline">\(F\)</span>也是极大似然估计的结果。</p>
 </div>
-<div id="definition-15-7" class="definition theorem-block env-definition">
-<p><strong>Definition 15.7</strong>. 称加权最小二乘法得到的因子得分为Bartlett因子得分。</p>
+<div id="definition-15-5" class="definition theorem-block env-definition">
+<p><strong>Definition 15.5</strong>. 称加权最小二乘法得到的因子得分为Bartlett因子得分。</p>
 </div>
 <p>从求解过程可以看出，该方法实际上是对特殊方差更大的变量施以更宽容的残差值。</p>
 </section>
@@ -1307,7 +1377,7 @@ F=(A^{\top}D^{-1}A)^{-1}A^{\top}D^{-1}(\mathbf{X}-\boldsymbol{\mu})
 <p><span class="math display">\[\begin{equation*}
 f_j=\sum_{i=1}^{m}b_{ji}(\mathbf{X}_i-\boldsymbol{\mu}_i)+\varepsilon_j,\;\operatorname{Cov}(\mathbf{X}_i,\varepsilon_j)=0,\quad j=1,2,\dots,n
 \end{equation*}\]</span></p>
-<p>由<a href="#prop-FactorAnalysis-a40dff40" class="textbook-cross-reference" data-reference-key="prop:FactorAnalysis" data-reference-kind="ref+label" data-reference-title="性质 15.2.1" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 15.2.1(4)</a>和<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.3.6" data-reference-items="3|5" data-reference-hint="请查看第 3、5 项">性质 6.3.6(3)(5)</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlhX3tpan09XG9wZXJhdG9ybmFtZXtDb3Z9KFxtYXRoYmZ7WH1faSxmX2opPVxvcGVyYXRvcm5hbWV7Q292fVxsZWZ0W1xtYXRoYmZ7WH1faSxcc3VtX3trPTF9XnttfWJfe2prfShcbWF0aGJme1h9X2stXGJvbGRzeW1ib2x7XG11fV9rKStcdmFyZXBzaWxvbl9qXHJpZ2h0XT1cc3VtX3trPTF9XnttfVxzaWdtYV97aWt9Yl97amt9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p>由<a href="#prop-FactorAnalysis-a40dff40" class="textbook-cross-reference" data-reference-key="prop:FactorAnalysis" data-reference-kind="ref+label" data-reference-title="性质 15.2.1" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 15.2.1(4)</a>和<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.4.3" data-reference-items="3|5" data-reference-hint="请查看第 3、5 项">性质 6.4.3(3)(5)</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlhX3tpan09XG9wZXJhdG9ybmFtZXtDb3Z9KFxtYXRoYmZ7WH1faSxmX2opPVxvcGVyYXRvcm5hbWV7Q292fVxsZWZ0W1xtYXRoYmZ7WH1faSxcc3VtX3trPTF9XnttfWJfe2prfShcbWF0aGJme1h9X2stXGJvbGRzeW1ib2x7XG11fV9rKStcdmFyZXBzaWxvbl9qXHJpZ2h0XT1cc3VtX3trPTF9XnttfVxzaWdtYV97aWt9Yl97amt9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 a_{ij}=\operatorname{Cov}(\mathbf{X}_i,f_j)=\operatorname{Cov}\left[\mathbf{X}_i,\sum_{k=1}^{m}b_{jk}(\mathbf{X}_k-\boldsymbol{\mu}_k)+\varepsilon_j\right]=\sum_{k=1}^{m}\sigma_{ik}b_{jk}
 \end{equation*}\]</span></p>
@@ -1340,8 +1410,8 @@ x_j\approx Wh_j=\sum_{k=1}^{r}h_{kj}w_k,\quad h_{kj}\geqslant0
 \end{equation*}\]</span></p>
 <p>直观上，<span class="math inline">\(W\)</span>的第<span class="math inline">\(k\)</span>列可理解为第<span class="math inline">\(k\)</span>个非负基向量，<span class="math inline">\(H\)</span>的第<span class="math inline">\(k\)</span>行给出该基向量在各个样本中的非负系数。换言之，矩阵分解试图回答的问题是：原始高维数据是否可以由少数共同模式组合而成？</p>
 <p>经典的低秩分解方法，如PCA或SVD，也是在回答类似问题。它们通过寻找低维线性子空间来获得最优的线性低秩近似，从而在平方误差意义下有效保留数据中的主要变化方向。然而，对于天然非负的数据，这类方法存在一个解释上的困难：分解得到的基向量和系数通常允许取负值。负值在代数上没有问题，甚至对最优线性近似是有利的，因为它允许不同方向之间通过正负抵消来表示数据；但在许多实际问题中，这种抵消机制并不符合数据生成过程。例如，词频不能解释为某些主题词的正贡献再减去另一些主题词的负贡献，像素强度也不能自然地解释为若干局部图像部件之间的正负抵消，基因表达强度同样更适合被理解为若干表达程序的非负叠加。</p>
-<div id="definition-15-8" class="definition theorem-block env-definition">
-<p><strong>Definition 15.8</strong>. 设<span class="math inline">\(X=(x_{ij})\in\mathbb{R}^{n\times p}\)</span>且<span class="math inline">\(x_{ij}\geqslant0\)</span>，给定正整数<span class="math inline">\(r&lt;\min\{m,n\}\)</span>。若存在<span class="math inline">\(W\in\mathbb{R}^{n\times r},\;H\in\mathbb{R}^{p\times n}\)</span>满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlYXGFwcHJveCBXSCxccXVhZCBXPSh3X3tpa30pXGluXG1hdGhiYntSfV57blx0aW1lcyByfSxccXVhZCBIPShoX3tran0pXGluXG1hdGhiYntSfV57clx0aW1lcyBwfSxccXVhZCB3X3tpa31cZ2Vxc2xhbnQwLFxxdWFkIGhfe2tqfVxnZXFzbGFudDAKXGVuZHtlcXVhdGlvbip9"></span></p>
+<div id="definition-15-6" class="definition theorem-block env-definition">
+<p><strong>Definition 15.6</strong>. 设<span class="math inline">\(X=(x_{ij})\in\mathbb{R}^{n\times p}\)</span>且<span class="math inline">\(x_{ij}\geqslant0\)</span>，给定正整数<span class="math inline">\(r&lt;\min\{m,n\}\)</span>。若存在<span class="math inline">\(W\in\mathbb{R}^{n\times r},\;H\in\mathbb{R}^{p\times n}\)</span>满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlYXGFwcHJveCBXSCxccXVhZCBXPSh3X3tpa30pXGluXG1hdGhiYntSfV57blx0aW1lcyByfSxccXVhZCBIPShoX3tran0pXGluXG1hdGhiYntSfV57clx0aW1lcyBwfSxccXVhZCB3X3tpa31cZ2Vxc2xhbnQwLFxxdWFkIGhfe2tqfVxnZXFzbGFudDAKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 X\approx WH,\quad W=(w_{ik})\in\mathbb{R}^{n\times r},\quad H=(h_{kj})\in\mathbb{R}^{r\times p},\quad w_{ik}\geqslant0,\quad h_{kj}\geqslant0
 \end{equation*}\]</span></p>
@@ -1395,8 +1465,8 @@ WHH^{\top}=XH^{\top}
 D(X\|WH)=\sum_{i=1}^{m}\sum_{j=1}^{n}\left[x_{ij}\ln\frac{x_{ij}}{(WH)_{ij}}-x_{ij}+(WH)_{ij}\right]
 \end{equation*}\]</span></p>
 <p>其中约定<span class="math inline">\(0\ln0=0\)</span>。这一目标与Poisson模型关系密切：若<span class="math inline">\(x_{ij}\)</span>近似服从均值为<span class="math inline">\((WH)_{ij}\)</span>的Poisson分布且各元素独立，则最大化似然等价于最小化<span class="math inline">\(D(X\|WH)\)</span>。</p>
-<div id="note-15-2" class="note theorem-block env-note">
-<p><strong>note 15.2</strong>. Frobenius目标更接近连续型强度数据的平方误差近似，KL散度目标更适合非负计数数据或相对比例结构明显的数据。实际使用时，目标函数的选择不只是计算问题，也是在选择误差模型。</p>
+<div id="note-15-3" class="note theorem-block env-note">
+<p><strong>note 15.3</strong>. Frobenius目标更接近连续型强度数据的平方误差近似，KL散度目标更适合非负计数数据或相对比例结构明显的数据。实际使用时，目标函数的选择不只是计算问题，也是在选择误差模型。</p>
 </div>
 </section>
 </section>
@@ -1406,8 +1476,8 @@ D(X\|WH)=\sum_{i=1}^{m}\sum_{j=1}^{n}\left[x_{ij}\ln\frac{x_{ij}}{(WH)_{ij}}-x_{
 <p><a href="../chapters/glossary-c.html#term-CCA" class="term" title="canonical correlation analysis, CCA">典型相关分析<span class="term-english">（canonical correlation analysis, CCA）</span></a></p>
 <section id="id--1b9840c2" class="level3">
 <h3 class="anchored" data-anchor-id="id--1b9840c2"><span class="header-section-number">15.4.1</span> 总体典型相关分析</h3>
-<div id="definition-15-9" class="definition theorem-block env-definition">
-<p><strong>Definition 15.9</strong>. 设<span class="math inline">\(\mathbf{X},\mathbf{Y}\)</span>分别是<span class="math inline">\(m,n\)</span>维随机向量，<span class="math inline">\(m+n\)</span>维随机向量<span class="math inline">\((\mathbf{X},\mathbf{Y})^{\top}\)</span>的均值向量<span class="math inline">\(\boldsymbol{\mu}=\mathbf{0}\)</span>，协方差矩阵<span class="math inline">\(\Sigma\)</span>是正定阵。对<span class="math inline">\(\mathbf{X},\mathbf{Y}\)</span>分别进行线性变换<span class="math inline">\(\mathcal{T}_1,\mathcal{T}_2\)</span>得到两个<span class="math inline">\(p\)</span>维随机向量<span class="math inline">\(\mathbf{U}=\mathbf{U}_1, \mathbf{U}_2, \dots, \mathbf{U}_{p},\;\mathbf{V}=\mathbf{V}_1, \mathbf{V}_2, \dots, \mathbf{V}_{p}\)</span>，<span class="math inline">\(\mathcal{T}_1\)</span>和<span class="math inline">\(\mathcal{T}_2\)</span>的矩阵分别为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlBPQoJCVxiZWdpbntwbWF0cml4fQoJCQlcYWxwaGFfMV57XHRvcH0gXFwKCQkJXGFscGhhXzJee1x0b3B9IFxcCgkJCVx2ZG90cyBcXAoJCQlcYWxwaGFfcF57XHRvcH0KCQlcZW5ke3BtYXRyaXh9LFxxdWFkCgkJQj0KCQlcYmVnaW57cG1hdHJpeH0KCQkJXGJldGFfMV57XHRvcH0gXFwKCQkJXGJldGFfMl57XHRvcH0gXFwKCQkJXHZkb3RzIFxcCgkJCVxiZXRhX3Bee1x0b3B9CgkJXGVuZHtwbWF0cml4fQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<div id="definition-15-7" class="definition theorem-block env-definition">
+<p><strong>Definition 15.7</strong>. 设<span class="math inline">\(\mathbf{X},\mathbf{Y}\)</span>分别是<span class="math inline">\(m,n\)</span>维随机向量，<span class="math inline">\(m+n\)</span>维随机向量<span class="math inline">\((\mathbf{X},\mathbf{Y})^{\top}\)</span>的均值向量<span class="math inline">\(\boldsymbol{\mu}=\mathbf{0}\)</span>，协方差矩阵<span class="math inline">\(\Sigma\)</span>是正定阵。对<span class="math inline">\(\mathbf{X},\mathbf{Y}\)</span>分别进行线性变换<span class="math inline">\(\mathcal{T}_1,\mathcal{T}_2\)</span>得到两个<span class="math inline">\(p\)</span>维随机向量<span class="math inline">\(\mathbf{U}=\mathbf{U}_1, \mathbf{U}_2, \dots, \mathbf{U}_{p},\;\mathbf{V}=\mathbf{V}_1, \mathbf{V}_2, \dots, \mathbf{V}_{p}\)</span>，<span class="math inline">\(\mathcal{T}_1\)</span>和<span class="math inline">\(\mathcal{T}_2\)</span>的矩阵分别为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlBPQoJCVxiZWdpbntwbWF0cml4fQoJCQlcYWxwaGFfMV57XHRvcH0gXFwKCQkJXGFscGhhXzJee1x0b3B9IFxcCgkJCVx2ZG90cyBcXAoJCQlcYWxwaGFfcF57XHRvcH0KCQlcZW5ke3BtYXRyaXh9LFxxdWFkCgkJQj0KCQlcYmVnaW57cG1hdHJpeH0KCQkJXGJldGFfMV57XHRvcH0gXFwKCQkJXGJldGFfMl57XHRvcH0gXFwKCQkJXHZkb3RzIFxcCgkJCVxiZXRhX3Bee1x0b3B9CgkJXGVuZHtwbWF0cml4fQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 A=
 \begin{pmatrix}
@@ -1435,8 +1505,8 @@ B=
 <p>则称<span class="math inline">\(\mathbf{U}_i,\mathbf{V}_i\)</span>是第<span class="math inline">\(i\)</span>对<a href="../chapters/glossary-c.html#term-CanonicalVariable" class="term" title="canonical variable">典型变量<span class="term-english">（canonical variable）</span></a>，<span class="math inline">\(i=1,2,\dots,p\)</span>。</p>
 </div>
 <p>这一定义是否足够？</p>
-<div id="theorem-15-3" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 15.3</strong>. 若不对<span class="math inline">\(\mathcal{T}_1,\mathcal{T}_2\)</span>的矩阵<span class="math inline">\(A,B\)</span>作出相应的限制，任何一对典型变量都不唯一。</p>
+<div id="theorem-15-2" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 15.2</strong>. 若不对<span class="math inline">\(\mathcal{T}_1,\mathcal{T}_2\)</span>的矩阵<span class="math inline">\(A,B\)</span>作出相应的限制，任何一对典型变量都不唯一。</p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>由相关系数的性质可知，对随机变量作线性变换不影响它们之间的线性关系，即对任意的<span class="math inline">\(a,b,c,d\in\mathbb{R}\)</span>，有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0NvcnJ9KFxhbHBoYV9pXntcdG9wfVxtYXRoYmZ7WH0sXGJldGFfaV57XHRvcH1cbWF0aGJme1l9KT1cb3BlcmF0b3JuYW1le0NvcnJ9W2EoXGFscGhhX2lee1x0b3B9XG1hdGhiZntYfSkrYixjKFxiZXRhX2lee1x0b3B9XG1hdGhiZntZfSkrZF0sXHF1YWQgaT0xLDIsXGRvdHMscApcZW5ke2VxdWF0aW9uKn0="></span></p>
@@ -1446,8 +1516,8 @@ B=
 <p>所以任何一对典型变量都不唯一。 <span class="todo-note todo-info" role="note">相关系数的性质</span>&nbsp;◻</p>
 </div>
 <p>因此我们需要对<span class="math inline">\(A,B\)</span>进行相应的限制。</p>
-<div id="definition-15-10" class="definition theorem-block env-definition">
-<p><strong>Definition 15.10</strong>. 设<span class="math inline">\(\mathbf{X},\mathbf{Y}\)</span>分别是<span class="math inline">\(m,n\)</span>维随机向量，<span class="math inline">\(m+n\)</span>维随机向量<span class="math inline">\((\mathbf{X},\mathbf{Y})^{\top}\)</span>的均值向量<span class="math inline">\(\boldsymbol{\mu}=\mathbf{0}\)</span>，协方差矩阵<span class="math inline">\(\Sigma\)</span>是正定阵。对<span class="math inline">\(\mathbf{X},\mathbf{Y}\)</span>分别进行线性变换<span class="math inline">\(\mathcal{T}_1,\mathcal{T}_2\)</span>得到两个<span class="math inline">\(p\)</span>维随机向量<span class="math inline">\(\mathbf{U}=\mathbf{U}_1, \mathbf{U}_2, \dots, \mathbf{U}_{p},\;\mathbf{V}=\mathbf{V}_1, \mathbf{V}_2, \dots, \mathbf{V}_{p}\)</span>，<span class="math inline">\(\mathcal{T}_1\)</span>和<span class="math inline">\(\mathcal{T}_2\)</span>的矩阵分别为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlBPQoJCVxiZWdpbntwbWF0cml4fQoJCQlcYWxwaGFfMV57XHRvcH0gXFwKCQkJXGFscGhhXzJee1x0b3B9IFxcCgkJCVx2ZG90cyBcXAoJCQlcYWxwaGFfcF57XHRvcH0KCQlcZW5ke3BtYXRyaXh9LFxxdWFkCgkJQj0KCQlcYmVnaW57cG1hdHJpeH0KCQkJXGJldGFfMV57XHRvcH0gXFwKCQkJXGJldGFfMl57XHRvcH0gXFwKCQkJXHZkb3RzIFxcCgkJCVxiZXRhX3Bee1x0b3B9CgkJXGVuZHtwbWF0cml4fQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<div id="definition-15-8" class="definition theorem-block env-definition">
+<p><strong>Definition 15.8</strong>. 设<span class="math inline">\(\mathbf{X},\mathbf{Y}\)</span>分别是<span class="math inline">\(m,n\)</span>维随机向量，<span class="math inline">\(m+n\)</span>维随机向量<span class="math inline">\((\mathbf{X},\mathbf{Y})^{\top}\)</span>的均值向量<span class="math inline">\(\boldsymbol{\mu}=\mathbf{0}\)</span>，协方差矩阵<span class="math inline">\(\Sigma\)</span>是正定阵。对<span class="math inline">\(\mathbf{X},\mathbf{Y}\)</span>分别进行线性变换<span class="math inline">\(\mathcal{T}_1,\mathcal{T}_2\)</span>得到两个<span class="math inline">\(p\)</span>维随机向量<span class="math inline">\(\mathbf{U}=\mathbf{U}_1, \mathbf{U}_2, \dots, \mathbf{U}_{p},\;\mathbf{V}=\mathbf{V}_1, \mathbf{V}_2, \dots, \mathbf{V}_{p}\)</span>，<span class="math inline">\(\mathcal{T}_1\)</span>和<span class="math inline">\(\mathcal{T}_2\)</span>的矩阵分别为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlBPQoJCVxiZWdpbntwbWF0cml4fQoJCQlcYWxwaGFfMV57XHRvcH0gXFwKCQkJXGFscGhhXzJee1x0b3B9IFxcCgkJCVx2ZG90cyBcXAoJCQlcYWxwaGFfcF57XHRvcH0KCQlcZW5ke3BtYXRyaXh9LFxxdWFkCgkJQj0KCQlcYmVnaW57cG1hdHJpeH0KCQkJXGJldGFfMV57XHRvcH0gXFwKCQkJXGJldGFfMl57XHRvcH0gXFwKCQkJXHZkb3RzIFxcCgkJCVxiZXRhX3Bee1x0b3B9CgkJXGVuZHtwbWF0cml4fQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 A=
 \begin{pmatrix}
@@ -1475,8 +1545,8 @@ B=
 </ol>
 <p>则称<span class="math inline">\(\mathbf{U}_i,\mathbf{V}_i\)</span>是第<span class="math inline">\(i\)</span>对典型变量，<span class="math inline">\(\operatorname{Corr}(\mathbf{U}_i,\mathbf{V}_i)\)</span>为第<span class="math inline">\(i\)</span>典型相关系数，<span class="math inline">\(i=1,2,\dots,p\)</span>。</p>
 </div>
-<div id="theorem-15-4" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 15.4</strong>. 设<span class="math inline">\(\mathbf{X},\mathbf{Y}\)</span>分别是<span class="math inline">\(m,n\)</span>维随机向量，<span class="math inline">\(m+n\)</span>维随机向量<span class="math inline">\(\mathbf{Z}=(\mathbf{X},\mathbf{Y})^{\top}\)</span>的均值向量<span class="math inline">\(\boldsymbol{\mu}=\mathbf{0}\)</span>，协方差矩阵<span class="math inline">\(\Sigma\)</span>是正定阵，其中： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcU2lnbWE9CgkJXGJlZ2lue3BtYXRyaXh9CgkJCVxTaWdtYV97MTF9ICYgXFNpZ21hX3sxMn0gXFwKCQkJXFNpZ21hX3syMX0gJiBcU2lnbWFfezIyfQoJCVxlbmR7cG1hdHJpeH0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<div id="theorem-15-3" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 15.3</strong>. 设<span class="math inline">\(\mathbf{X},\mathbf{Y}\)</span>分别是<span class="math inline">\(m,n\)</span>维随机向量，<span class="math inline">\(m+n\)</span>维随机向量<span class="math inline">\(\mathbf{Z}=(\mathbf{X},\mathbf{Y})^{\top}\)</span>的均值向量<span class="math inline">\(\boldsymbol{\mu}=\mathbf{0}\)</span>，协方差矩阵<span class="math inline">\(\Sigma\)</span>是正定阵，其中： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcU2lnbWE9CgkJXGJlZ2lue3BtYXRyaXh9CgkJCVxTaWdtYV97MTF9ICYgXFNpZ21hX3sxMn0gXFwKCQkJXFNpZ21hX3syMX0gJiBcU2lnbWFfezIyfQoJCVxlbmR7cG1hdHJpeH0KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 \Sigma=
 \begin{pmatrix}
@@ -1579,8 +1649,8 @@ s^2\beta_1=\Sigma_{22}^{-1}\Sigma_{21}s\alpha_1=\Sigma_{22}^{-1}\Sigma_{21}\Sigm
 <p>判别分析的目的为判断样本最有可能属于哪一个总体，这属于一个分类问题。它利用已知分类的样本（称之为训练样本，训练样本的集合称为训练集）去估计<strong>判别函数</strong>（即一个以样本为自变量的函数，我们利用该函数的取值将样本进行分类）的具体形式。</p>
 <section id="id--c3dd177f" class="level3">
 <h3 class="anchored" data-anchor-id="id--c3dd177f"><span class="header-section-number">15.5.1</span> 距离判别</h3>
-<div id="definition-15-11" class="definition theorem-block env-definition">
-<p><strong>Definition 15.11</strong>. 设有<span class="math inline">\(n\)</span>个总体<span class="math inline">\(D_i\)</span>，它们的均值向量与协方差矩阵分别为<span class="math inline">\(\boldsymbol{\mu_i},\Sigma_i,\;i=1,2,\dots,n\)</span>。现存在一个从上述<span class="math inline">\(n\)</span>个总体中抽取出的样本<span class="math inline">\(x\)</span>，若将其判给满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlqPVxhcmdcbWluIGReMl9tKHgsRF9pKT0oeC1cYm9sZHN5bWJvbHtcbXV9KV57XHRvcH1cU2lnbWFeey0xfSh4LVxib2xkc3ltYm9se1xtdX0pClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="definition-15-9" class="definition theorem-block env-definition">
+<p><strong>Definition 15.9</strong>. 设有<span class="math inline">\(n\)</span>个总体<span class="math inline">\(D_i\)</span>，它们的均值向量与协方差矩阵分别为<span class="math inline">\(\boldsymbol{\mu_i},\Sigma_i,\;i=1,2,\dots,n\)</span>。现存在一个从上述<span class="math inline">\(n\)</span>个总体中抽取出的样本<span class="math inline">\(x\)</span>，若将其判给满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlqPVxhcmdcbWluIGReMl9tKHgsRF9pKT0oeC1cYm9sZHN5bWJvbHtcbXV9KV57XHRvcH1cU2lnbWFeey0xfSh4LVxib2xkc3ltYm9se1xtdX0pClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 j=\arg\min d^2_m(x,D_i)=(x-\boldsymbol{\mu})^{\top}\Sigma^{-1}(x-\boldsymbol{\mu})
 \end{equation*}\]</span></p>
@@ -1595,8 +1665,8 @@ j=\arg\min d^2_m(x,D_i)=(x-\boldsymbol{\mu})^{\top}\Sigma^{-1}(x-\boldsymbol{\mu
 </section>
 <section id="fisher-0739c7b5" class="level3">
 <h3 class="anchored" data-anchor-id="fisher-0739c7b5"><span class="header-section-number">15.5.3</span> Fisher判别</h3>
-<div id="definition-15-12" class="definition theorem-block env-definition">
-<p><strong>Definition 15.12</strong>. 设有<span class="math inline">\(n\)</span>个总体<span class="math inline">\(D_i\)</span>，它们的均值向量与协方差矩阵分别为<span class="math inline">\(\boldsymbol{\mu_i},\Sigma_i,\;i=1,2,\dots,n\)</span>。现存在一个从上述<span class="math inline">\(n\)</span>个总体中抽取出的未知分类的样本<span class="math inline">\(x\)</span>，记线性判别函数为<span class="math inline">\(u(y)=\alpha^{\top}y\)</span>，并且记： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl1X2k9XG9wZXJhdG9ybmFtZXtFfVt1KFxtYXRoYmZ7WH0pfFxtYXRoYmZ7WH1caW4gRF9pXSxccXVhZFxvdmVybGluZXt1fT1cZnJhY3sxfXtufVxzdW1fe2k9MX1ee259dV9pLFxxdWFkXHNpZ21hX2leMj1cb3BlcmF0b3JuYW1le1Zhcn1bdShcbWF0aGJme1h9KXxcbWF0aGJme1h9XGluIERfaV0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<div id="definition-15-10" class="definition theorem-block env-definition">
+<p><strong>Definition 15.10</strong>. 设有<span class="math inline">\(n\)</span>个总体<span class="math inline">\(D_i\)</span>，它们的均值向量与协方差矩阵分别为<span class="math inline">\(\boldsymbol{\mu_i},\Sigma_i,\;i=1,2,\dots,n\)</span>。现存在一个从上述<span class="math inline">\(n\)</span>个总体中抽取出的未知分类的样本<span class="math inline">\(x\)</span>，记线性判别函数为<span class="math inline">\(u(y)=\alpha^{\top}y\)</span>，并且记： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl1X2k9XG9wZXJhdG9ybmFtZXtFfVt1KFxtYXRoYmZ7WH0pfFxtYXRoYmZ7WH1caW4gRF9pXSxccXVhZFxvdmVybGluZXt1fT1cZnJhY3sxfXtufVxzdW1fe2k9MX1ee259dV9pLFxxdWFkXHNpZ21hX2leMj1cb3BlcmF0b3JuYW1le1Zhcn1bdShcbWF0aGJme1h9KXxcbWF0aGJme1h9XGluIERfaV0KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 u_i=\operatorname{E}[u(\mathbf{X})|\mathbf{X}\in D_i],\quad\overline{u}=\frac{1}{n}\sum_{i=1}^{n}u_i,\quad\sigma_i^2=\operatorname{Var}[u(\mathbf{X})|\mathbf{X}\in D_i]
 \end{equation*}\]</span></p>
@@ -1613,15 +1683,15 @@ j=\arg\min|u(x)-u_i|
 |\hat{u}(x)-\hat{u}_i|
 \end{equation*}\]</span></p>
 </div>
-<div id="note-15-3" class="note theorem-block env-note">
-<p><strong>note 15.3</strong>. 在实际分析中，我们会取： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYWxwaGE9XGFyZ1xtYXhcZnJhY3tcc3VtXGxpbWl0c197aT0xfV57bn1uX2kodV9pLVxvdmVybGluZXt1fSleMn17XHN1bVxsaW1pdHNfe2k9MX1ee259KG5faS0xKVxzaWdtYV9pXjJ9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="note-15-4" class="note theorem-block env-note">
+<p><strong>note 15.4</strong>. 在实际分析中，我们会取： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcYWxwaGE9XGFyZ1xtYXhcZnJhY3tcc3VtXGxpbWl0c197aT0xfV57bn1uX2kodV9pLVxvdmVybGluZXt1fSleMn17XHN1bVxsaW1pdHNfe2k9MX1ee259KG5faS0xKVxzaWdtYV9pXjJ9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \alpha=\arg\max\frac{\sum\limits_{i=1}^{n}n_i(u_i-\overline{u})^2}{\sum\limits_{i=1}^{n}(n_i-1)\sigma_i^2}
 \end{equation*}\]</span></p>
 <p>其中<span class="math inline">\(n_i\)</span>为训练集中属于总体<span class="math inline">\(D_i\)</span>的样本数。从接下来的分析可以看出这样作实际上有利于求解<span class="math inline">\(\alpha\)</span>。</p>
 </div>
-<div id="theorem-15-5" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 15.5</strong>. 设从总体<span class="math inline">\(D_i\)</span>中获取到了<span class="math inline">\(n_i\)</span>个样本<span class="math inline">\(x^{(i)}_j,\;i=1,2,\dots,n,\;j=1,2,\dots,n_i\)</span>。Fisher中的<span class="math inline">\(\alpha\)</span>为矩阵<span class="math inline">\(B\)</span>关于矩阵<span class="math inline">\(S\)</span>的最大特征值对应的特征向量，<span class="math inline">\(B\)</span>与<span class="math inline">\(S\)</span>的定义请见证明过程。</p>
+<div id="theorem-15-4" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 15.4</strong>. 设从总体<span class="math inline">\(D_i\)</span>中获取到了<span class="math inline">\(n_i\)</span>个样本<span class="math inline">\(x^{(i)}_j,\;i=1,2,\dots,n,\;j=1,2,\dots,n_i\)</span>。Fisher中的<span class="math inline">\(\alpha\)</span>为矩阵<span class="math inline">\(B\)</span>关于矩阵<span class="math inline">\(S\)</span>的最大特征值对应的特征向量，<span class="math inline">\(B\)</span>与<span class="math inline">\(S\)</span>的定义请见证明过程。</p>
 </div>
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>注意到此时有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2dhdGhlcip9CgkJXGhhdHt1fV9pPVxmcmFjezF9e25faX1cc3VtX3tqPTF9XntuX2l9XGFscGhhXntcdG9wfXheeyhpKX1faj1cYWxwaGFee1x0b3B9XG92ZXJsaW5le3heeyhpKX19LFw7aT0xLDIsXGRvdHMsbiBcXAoJCVxoYXR7XG92ZXJsaW5le3V9fT1cZnJhY3sxfXtufVxzdW1fe2k9MX1ee259XGhhdHt1fV9pPVxmcmFjezF9e259XHN1bV97aT0xfV57bn1cYWxwaGFee1x0b3B9XG92ZXJsaW5le3heeyhpKX19PVxhbHBoYV57XHRvcH1cb3ZlcmxpbmV7eH0gXFwKCQlcYmVnaW57YWxpZ25lZH0KCQkJXGhhdHtcc2lnbWF9X2leMgoJCQkmPVxmcmFjezF9e25faS0xfVxzdW1fe2o9MX1ee25faX1bdSh4XnsoaSl9X2opLVxoYXR7dX1faV1eMj1cZnJhY3sxfXtuX2ktMX1cc3VtX3tqPTF9XntuX2l9W1xhbHBoYV57XHRvcH14XnsoaSl9X2otXGFscGhhXntcdG9wfVxvdmVybGluZXt4XnsoaSl9fV1eMiBcXAoJCQkmPVxmcmFjezF9e25faS0xfVxzdW1fe2o9MX1ee25faX1bXGFscGhhXntcdG9wfSh4XnsoaSl9X2otXG92ZXJsaW5le3heeyhpKX19KV1eMj1cZnJhY3sxfXtuX2ktMX1cc3VtX3tqPTF9XntuX2l9XGFscGhhXntcdG9wfSh4XnsoaSl9X2otXG92ZXJsaW5le3heeyhpKX19KSh4XnsoaSl9X2otXG92ZXJsaW5le3heeyhpKX19KV57XHRvcH1cYWxwaGEgXFwKCQkJJj1cZnJhY3sxfXtuX2ktMX1cYWxwaGFee1x0b3B9XGxlZnRbXHN1bV97aj0xfV57bl9pfSh4XnsoaSl9X2otXG92ZXJsaW5le3heeyhpKX19KSh4XnsoaSl9X2otXG92ZXJsaW5le3heeyhpKX19KV57XHRvcH1ccmlnaHRdXGFscGhhXGNvbG9uZXFxXGZyYWN7MX17bl9pLTF9XGFscGhhXntcdG9wfVNfaVxhbHBoYQoJCVxlbmR7YWxpZ25lZH0KXGVuZHtnYXRoZXIqfQ=="></span></p>
@@ -1701,8 +1771,8 @@ B\alpha=\lambda S\alpha
 \end{equation*}\]</span></p>
 <section id="id--9e0ebc57" class="level4">
 <h4 class="anchored" data-anchor-id="id--9e0ebc57"><span class="header-section-number">15.6.1.1</span> 内部指标</h4>
-<div id="definition-15-13" class="definition theorem-block env-definition">
-<p><strong>Definition 15.13</strong>. 称<span class="math inline">\(\operatorname{WCSS}=\sum\limits_{k=1}^{K}\sum\limits_{i\in C_k}\|x_i-\mu_k\|^2\)</span>为<a href="../chapters/glossary-w.html#term-WCSS" class="term" title="within-cluster sum of squares, WCSS">簇内平方和<span class="term-english">（within-cluster sum of squares, WCSS）</span></a>。</p>
+<div id="definition-15-11" class="definition theorem-block env-definition">
+<p><strong>Definition 15.11</strong>. 称<span class="math inline">\(\operatorname{WCSS}=\sum\limits_{k=1}^{K}\sum\limits_{i\in C_k}\|x_i-\mu_k\|^2\)</span>为<a href="../chapters/glossary-w.html#term-WCSS" class="term" title="within-cluster sum of squares, WCSS">簇内平方和<span class="term-english">（within-cluster sum of squares, WCSS）</span></a>。</p>
 </div>
 <div id="prop-WCSSMonotonicity-b3cede6e" class="property theorem-block env-property">
 <p><strong>Property 15.6.1</strong>. <strong>（最优WCSS关于簇数的单调性）</strong></p>
@@ -1753,16 +1823,16 @@ C_1=A\cup B,\;A\ne\varnothing,\;B\ne\varnothing
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
-<div id="note-15-4" class="note theorem-block env-note">
-<p><strong>note 15.4</strong>. <span class="math inline">\(\operatorname{WCSS}\)</span>是以欧氏距离为基础的簇内紧凑性度量，其数值大小直接反映了样本在各自簇内围绕质心的离散程度。一般而言，<span class="math inline">\(\operatorname{WCSS}\)</span>越小，表示簇内样本越集中、聚类结果越紧凑，因而在同一簇数<span class="math inline">\(K\)</span>下聚类质量越好。需要注意的是：</p>
+<div id="note-15-5" class="note theorem-block env-note">
+<p><strong>note 15.5</strong>. <span class="math inline">\(\operatorname{WCSS}\)</span>是以欧氏距离为基础的簇内紧凑性度量，其数值大小直接反映了样本在各自簇内围绕质心的离散程度。一般而言，<span class="math inline">\(\operatorname{WCSS}\)</span>越小，表示簇内样本越集中、聚类结果越紧凑，因而在同一簇数<span class="math inline">\(K\)</span>下聚类质量越好。需要注意的是：</p>
 <ol type="1">
 <li><p>对固定观测样本集和以<span class="math inline">\(\operatorname{WCSS}\)</span>为目标函数的算法，由<a href="#prop-WCSSMonotonicity-b3cede6e" class="textbook-cross-reference" data-reference-key="prop:WCSSMonotonicity" data-reference-kind="ref+label" data-reference-title="性质 15.6.1">性质 15.6.1</a>可知<span class="math inline">\(\operatorname{WCSS}\)</span>随簇数<span class="math inline">\(K\)</span>的增大单调下降；极端情况下，当<span class="math inline">\(K=n\)</span>时，每个样本单独成簇，<span class="math inline">\(\operatorname{WCSS}=0\)</span>，因此<span class="math inline">\(\operatorname{WCSS}\)</span>本身不能直接用于比较不同<span class="math inline">\(K\)</span>下的聚类优劣。尽管<span class="math inline">\(\operatorname{WCSS}\)</span>随<span class="math inline">\(K\)</span>单调下降，但其下降幅度通常在某一<span class="math inline">\(K\)</span>值之后显著减缓。通过考察<span class="math inline">\(\operatorname{WCSS}\)</span>随<span class="math inline">\(K\)</span>变化的曲线，并选取曲线由”陡降”转为”平缓”的拐点，可以在模型复杂度与聚类紧凑性之间取得平衡，从而确定一个合理的簇数，这一方法被称之为<a href="../chapters/glossary-e.html#term-ElbowMethod" class="term" title="elbow method">肘部法则<span class="term-english">（elbow method）</span></a>；</p></li>
 <li><p>由于<span class="math inline">\(\operatorname{WCSS}\)</span>基于质心与距离定义，其隐含假设簇内样本呈近似球形或凸形分布，对非凸结构或密度差异较大的簇刻画能力有限；</p></li>
 <li><p><span class="math inline">\(\operatorname{WCSS}\)</span>对特征量纲高度敏感，不同尺度的特征会不均衡地影响距离计算，因此在实际应用中通常需要对特征进行标准化或归一化处理。</p></li>
 </ol>
 </div>
-<div id="definition-15-14" class="definition theorem-block env-definition">
-<p><strong>Definition 15.14</strong>. 称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0NIfT1cZnJhY3tcb3BlcmF0b3JuYW1le3RyfShCKS8oSy0xKX17XG9wZXJhdG9ybmFtZXt0cn0oVykvKG4tSyl9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<div id="definition-15-12" class="definition theorem-block env-definition">
+<p><strong>Definition 15.12</strong>. 称： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le0NIfT1cZnJhY3tcb3BlcmF0b3JuYW1le3RyfShCKS8oSy0xKX17XG9wZXJhdG9ybmFtZXt0cn0oVykvKG4tSyl9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{CH}=\frac{\operatorname{tr}(B)/(K-1)}{\operatorname{tr}(W)/(n-K)}
 \end{equation*}\]</span></p>
@@ -1772,11 +1842,11 @@ W=\sum_{k=1}^K\sum_{i\in C_k}(x_i-\mu_k)(x_i-\mu_k)^\top,\quad
 B=\sum_{k=1}^K n_k(\mu_k-\bar{x})(\mu_k-\bar{x})^\top
 \end{equation*}\]</span></p>
 </div>
-<div id="note-15-5" class="note theorem-block env-note">
-<p><strong>note 15.5</strong>. <span class="math inline">\(\operatorname{CH}\)</span>指数本质上与单因素方差分析中的<span class="math inline">\(F\)</span>统计量高度一致。在几何意义上，当簇中心彼此远离且簇内样本高度集中时，<span class="math inline">\(\operatorname{tr}(B)\)</span> 相对较大而 <span class="math inline">\(\operatorname{tr}(W)\)</span> 相对较小，从而<span class="math inline">\(\operatorname{CH}\)</span>取得较大值，表明聚类结构清晰。</p>
+<div id="note-15-6" class="note theorem-block env-note">
+<p><strong>note 15.6</strong>. <span class="math inline">\(\operatorname{CH}\)</span>指数本质上与单因素方差分析中的<span class="math inline">\(F\)</span>统计量高度一致。在几何意义上，当簇中心彼此远离且簇内样本高度集中时，<span class="math inline">\(\operatorname{tr}(B)\)</span> 相对较大而 <span class="math inline">\(\operatorname{tr}(W)\)</span> 相对较小，从而<span class="math inline">\(\operatorname{CH}\)</span>取得较大值，表明聚类结构清晰。</p>
 </div>
-<div id="definition-15-15" class="definition theorem-block env-definition">
-<p><strong>Definition 15.15</strong>. 对样本<span class="math inline">\(x_i\)</span>，定义： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2dhdGhlcip9CgkJYV9pXGNvbG9uZXFcZnJhY3sxfXt8Q197eV9pfXwtMX1cc3VtX3tcc3Vic3RhY2t7alxpbiBDX3t5X2l9XFwgalxuZXEgaX19IGQoeF9pLHhfaiksXHF1YWQgYl9pXGNvbG9uZXFcbWluX3tcZWxsXG5lcSB5X2l9XGZyYWN7MX17fENfe1xlbGx9fH1cc3VtX3tqXGluIENfe1xlbGx9fSBkKHhfaSx4X2opIFxcCgkJc19pXGNvbG9uZXEKCQlcYmVnaW57Y2FzZXN9CgkJCVxkZnJhY3tiX2ktYV9pfXtcbWF4XHthX2ksYl9pXH19LCZcbWF4XHthX2ksYl9pXH1cbmUwIFxcCgkJCTAsJlxtYXhce2FfaSxiX2lcfT0wCgkJXGVuZHtjYXNlc30sXHF1YWRcb3BlcmF0b3JuYW1le1NpbGhvdWV0dGV9XGNvbG9uZXFcZnJhY3sxfXtufVxzdW1fe2k9MX1ebnNfaQpcZW5ke2dhdGhlcip9"></span></p>
+<div id="definition-15-13" class="definition theorem-block env-definition">
+<p><strong>Definition 15.13</strong>. 对样本<span class="math inline">\(x_i\)</span>，定义： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2dhdGhlcip9CgkJYV9pXGNvbG9uZXFcZnJhY3sxfXt8Q197eV9pfXwtMX1cc3VtX3tcc3Vic3RhY2t7alxpbiBDX3t5X2l9XFwgalxuZXEgaX19IGQoeF9pLHhfaiksXHF1YWQgYl9pXGNvbG9uZXFcbWluX3tcZWxsXG5lcSB5X2l9XGZyYWN7MX17fENfe1xlbGx9fH1cc3VtX3tqXGluIENfe1xlbGx9fSBkKHhfaSx4X2opIFxcCgkJc19pXGNvbG9uZXEKCQlcYmVnaW57Y2FzZXN9CgkJCVxkZnJhY3tiX2ktYV9pfXtcbWF4XHthX2ksYl9pXH19LCZcbWF4XHthX2ksYl9pXH1cbmUwIFxcCgkJCTAsJlxtYXhce2FfaSxiX2lcfT0wCgkJXGVuZHtjYXNlc30sXHF1YWRcb3BlcmF0b3JuYW1le1NpbGhvdWV0dGV9XGNvbG9uZXFcZnJhY3sxfXtufVxzdW1fe2k9MX1ebnNfaQpcZW5ke2dhdGhlcip9"></span></p>
 <p><span class="math display">\[\begin{gather*}
 a_i\coloneq\frac{1}{|C_{y_i}|-1}\sum_{\substack{j\in C_{y_i}\\ j\neq i}} d(x_i,x_j),\quad b_i\coloneq\min_{\ell\neq y_i}\frac{1}{|C_{\ell}|}\sum_{j\in C_{\ell}} d(x_i,x_j) \\
 s_i\coloneq
@@ -1806,16 +1876,16 @@ s_i\coloneq
 </ol>
 <p>综上，<span class="math inline">\(s_i\in[-1,1]\)</span>，即<span class="math inline">\(\operatorname{Silhouette}\in[-1,1]\)</span>。&nbsp;◻</p>
 </div>
-<div id="note-15-6" class="note theorem-block env-note">
-<p><strong>note 15.6</strong>. <strong>（Silhouette 的几何解释）</strong></p>
+<div id="note-15-7" class="note theorem-block env-note">
+<p><strong>note 15.7</strong>. <strong>（Silhouette 的几何解释）</strong></p>
 <p>轮廓系数从几何角度刻画了单个样本在其所属簇中的相对位置。其中，<span class="math inline">\(a_i\)</span>衡量样本<span class="math inline">\(x_i\)</span>到其所在簇<span class="math inline">\(C_k\)</span>内部的平均距离，反映簇内的局部紧凑性；而<span class="math inline">\(b_i\)</span>刻画样本<span class="math inline">\(x_i\)</span>到最近其他簇的平均距离，反映其与邻近簇之间的分离程度。由定义可以看出，<span class="math inline">\(s_i\)</span>本质上是簇内距离与最近簇间距离之间的相对差异。当<span class="math inline">\(a_i\ll b_i\)</span>时，样本<span class="math inline">\(x_i\)</span>位于簇的内部区域，与其他簇之间存在明显间隔，此时<span class="math inline">\(s_i\)</span>接近<span class="math inline">\(1\)</span>；当<span class="math inline">\(a_i\approx b_i\)</span>时，样本<span class="math inline">\(x_i\)</span>位于簇的边界附近，对不同簇的归属不具有明显偏好，此时<span class="math inline">\(s_i\)</span>接近<span class="math inline">\(0\)</span>；当<span class="math inline">\(a_i&gt;b_i\)</span>时，样本<span class="math inline">\(x_i\)</span>在几何意义上更接近其他簇而非当前簇，通常意味着该样本可能被错误分配，此时<span class="math inline">\(s_i&lt;0\)</span>。</p>
 <p>因此，Silhouette 系数可被视为一种基于距离比值的局部几何判别准则，它同时综合了簇内紧凑性与簇间分离性，并能够在样本层面反映聚类结构的合理性。</p>
 </div>
 </section>
 <section id="id--f80b2a31" class="level4">
 <h4 class="anchored" data-anchor-id="id--f80b2a31"><span class="header-section-number">15.6.1.2</span> 外部指标</h4>
-<div id="definition-15-16" class="definition theorem-block env-definition">
-<p><strong>Definition 15.16</strong>. 考虑所有样本对<span class="math inline">\((i,j)\)</span>，定义：</p>
+<div id="definition-15-14" class="definition theorem-block env-definition">
+<p><strong>Definition 15.14</strong>. 考虑所有样本对<span class="math inline">\((i,j)\)</span>，定义：</p>
 <ul>
 <li><p><span class="math inline">\(a\)</span>：在真实标签同类，且聚类也同簇的样本对个数；</p></li>
 <li><p><span class="math inline">\(b\)</span>：在真实标签不同类，且聚类也不同簇的样本对个数；</p></li>
@@ -1830,8 +1900,8 @@ s_i\coloneq
 \end{equation*}\]</span></p>
 <p>为<a href="../chapters/glossary-a.html#term-ARI" class="term" title="adjusted Rand index, ARI">校正 Rand 指数<span class="term-english">（adjusted Rand index, ARI）</span></a>。</p>
 </div>
-<div id="theorem-15-6" class="theorem theorem-block env-theorem">
-<p><strong>Theorem 15.6</strong>. 在固定边际（列联表个数统计值）的情况下，设：</p>
+<div id="theorem-15-5" class="theorem theorem-block env-theorem">
+<p><strong>Theorem 15.5</strong>. 在固定边际（列联表个数统计值）的情况下，设：</p>
 <div class="textbook-table-scroll textbook-latex-table-scroll" role="region" tabindex="0">
 <table class="textbook-latex-table">
 <caption>
@@ -1986,7 +2056,7 @@ s_i\coloneq
 <p><span class="math display">\[\begin{equation*}
 N_{ij}\sim\operatorname{Hyper}(n_i,m_j,n),\quad\operatorname{E}(N_{ij})=\frac{n_im_j}{n},\quad\operatorname{Var}(N_{ij})=\frac{n_im_j(n-n_i)(n-m_j)}{n^2(n-1)}
 \end{equation*}\]</span></p>
-<p>由<a href="../chapters/probability-basics.html#prop-Variance-c0d6c124" class="textbook-cross-reference" data-reference-key="prop:Variance" data-reference-kind="ref+label" data-reference-title="性质 6.3.5" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 6.3.5(1)</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQkmXG9wZXJhdG9ybmFtZXtFfShOX3tpan1eMik9XG9wZXJhdG9ybmFtZXtWYXJ9KE5fe2lqfSkrW1xvcGVyYXRvcm5hbWV7RX0oTl97aWp9KV1eMj1cZnJhY3tuX2ltX2oobi1uX2kpKG4tbV9qKX17bl4yKG4tMSl9K1xmcmFje25faV4ybV9qXjJ9e25eMn0gXFwKCQk9JlxmcmFje25faW1faihuLW5faSkobi1tX2opK25faV4ybV9qXjIobi0xKX17bl4yKG4tMSl9PVxmcmFje25faW1falsobi1uX2kpKG4tbV9qKStuX2ltX2oobi0xKV19e25eMihuLTEpfSBcXAoJCT0mXGZyYWN7bl9pbV9qKG5eMi1tX2puLW5faW4rbl9pbV9qK25faW1fam4tbl9pbV9qKX17bl4yKG4tMSl9PVxmcmFje25faW1faihuXjItbV9qbi1uX2luK25faW1fam4pfXtuXjIobi0xKX0gXFwKCQk9JlxmcmFje25faW1faihuLW1fai1uX2krbl9pbV9qKX17bihuLTEpfQpcZW5ke2FsaWduKn0="></span></p>
+<p>由<a href="../chapters/probability-basics.html#prop-Variance-c0d6c124" class="textbook-cross-reference" data-reference-key="prop:Variance" data-reference-kind="ref+label" data-reference-title="性质 6.4.2" data-reference-items="1" data-reference-hint="请查看第 1 项">性质 6.4.2(1)</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQkmXG9wZXJhdG9ybmFtZXtFfShOX3tpan1eMik9XG9wZXJhdG9ybmFtZXtWYXJ9KE5fe2lqfSkrW1xvcGVyYXRvcm5hbWV7RX0oTl97aWp9KV1eMj1cZnJhY3tuX2ltX2oobi1uX2kpKG4tbV9qKX17bl4yKG4tMSl9K1xmcmFje25faV4ybV9qXjJ9e25eMn0gXFwKCQk9JlxmcmFje25faW1faihuLW5faSkobi1tX2opK25faV4ybV9qXjIobi0xKX17bl4yKG4tMSl9PVxmcmFje25faW1falsobi1uX2kpKG4tbV9qKStuX2ltX2oobi0xKV19e25eMihuLTEpfSBcXAoJCT0mXGZyYWN7bl9pbV9qKG5eMi1tX2puLW5faW4rbl9pbV9qK25faW1fam4tbl9pbV9qKX17bl4yKG4tMSl9PVxmcmFje25faW1faihuXjItbV9qbi1uX2luK25faW1fam4pfXtuXjIobi0xKX0gXFwKCQk9JlxmcmFje25faW1faihuLW1fai1uX2krbl9pbV9qKX17bihuLTEpfQpcZW5ke2FsaWduKn0="></span></p>
 <p><span class="math display">\[\begin{align*}
 &amp;\operatorname{E}(N_{ij}^2)=\operatorname{Var}(N_{ij})+[\operatorname{E}(N_{ij})]^2=\frac{n_im_j(n-n_i)(n-m_j)}{n^2(n-1)}+\frac{n_i^2m_j^2}{n^2} \\
 =&amp;\frac{n_im_j(n-n_i)(n-m_j)+n_i^2m_j^2(n-1)}{n^2(n-1)}=\frac{n_im_j[(n-n_i)(n-m_j)+n_im_j(n-1)]}{n^2(n-1)} \\
@@ -2039,14 +2109,14 @@ b=\binom{n}{2}-a-(B-a)-(A-a)=\binom{n}{2}-A-B+a
 \end{equation*}\]</span></p>
 <p>◻</p>
 </div>
-<div id="note-15-7" class="note theorem-block env-note">
-<p><strong>note 15.7</strong>. <span class="math inline">\(\operatorname{RI}\)</span>基于样本对一致性来评价聚类结果，<span class="math inline">\(\operatorname{RI}\)</span> 越大表示聚类划分与真实标签的一致性越强；若 <span class="math inline">\(\operatorname{RI}\)</span> 接近 <span class="math inline">\(1\)</span>，说明聚类结果与真实划分高度一致；若接近 <span class="math inline">\(0\)</span>，说明一致性极弱。</p>
+<div id="note-15-8" class="note theorem-block env-note">
+<p><strong>note 15.8</strong>. <span class="math inline">\(\operatorname{RI}\)</span>基于样本对一致性来评价聚类结果，<span class="math inline">\(\operatorname{RI}\)</span> 越大表示聚类划分与真实标签的一致性越强；若 <span class="math inline">\(\operatorname{RI}\)</span> 接近 <span class="math inline">\(1\)</span>，说明聚类结果与真实划分高度一致；若接近 <span class="math inline">\(0\)</span>，说明一致性极弱。</p>
 <p>为了理解<span class="math inline">\(\operatorname{RI}\)</span>的统计行为，需要引入<strong>随机聚类模型</strong>：在该模型中，真实类别个数与各簇规模均被视为固定，而聚类标签在所有满足给定簇规模约束的分配方式中等概率随机生成。该模型刻画了”聚类结果与真实标签在统计意义上相互独立”的基准情形。</p>
 <p>在这一随机模型下，<span class="math inline">\(\operatorname{RI}\)</span>往往具有非零且相对较大的期望值。其根本原因在于样本对中真实不同类的情形通常占据主导地位，而这类样本对在随机聚类中被分配到不同簇的概率本身较高。例如，设<span class="math inline">\(n=100\)</span>，真实标签包含<span class="math inline">\(10\)</span>个类别、每类<span class="math inline">\(10\)</span>个样本，则共有<span class="math inline">\(\binom{100}{2}=4950\)</span>个样本对，其中真实不同类的样本对数为<span class="math inline">\(4500\)</span>。即使聚类结果完全随机，只要簇规模与真实类别规模相近，大多数真实异类样本对仍会落入不同簇，从而使得 <span class="math inline">\(\operatorname{RI}\)</span>取得看似较好的数值。这表明<span class="math inline">\(\operatorname{RI}\)</span>对随机一致性并不敏感。</p>
 <p><span class="math inline">\(\operatorname{ARI}\)</span>正是基于上述随机模型对<span class="math inline">\(\operatorname{RI}\)</span>进行期望校正，该校正保证了随机聚类的期望<span class="math inline">\(\operatorname{ARI}\)</span>为<span class="math inline">\(0\)</span>，完美一致时取值为<span class="math inline">\(1\)</span>，并允许在一致性劣于随机时取负值。因此，<span class="math inline">\(\operatorname{ARI}\)</span>相较于<span class="math inline">\(\operatorname{RI}\)</span>提供了一个以随机一致性为基准的、更为稳健的外部聚类评价指标。</p>
 </div>
-<div id="definition-15-17" class="definition theorem-block env-definition">
-<p><strong>Definition 15.17</strong>. 考虑所有样本对<span class="math inline">\((i,j)\)</span>，定义：</p>
+<div id="definition-15-15" class="definition theorem-block env-definition">
+<p><strong>Definition 15.15</strong>. 考虑所有样本对<span class="math inline">\((i,j)\)</span>，定义：</p>
 <ul>
 <li><p><span class="math inline">\(TP\)</span>：真实标签同类，且聚类结果同簇的样本对数；</p></li>
 <li><p><span class="math inline">\(FP\)</span>：真实标签不同类，但聚类结果同簇的样本对数；</p></li>
@@ -2069,8 +2139,8 @@ b=\binom{n}{2}-a-(B-a)-(A-a)=\binom{n}{2}-A-B+a
 <div class="proof-block proof">
 <p><span class="proof-title"><em>证明</em>. </span>由定义立即可得。&nbsp;◻</p>
 </div>
-<div id="note-15-8" class="note theorem-block env-note">
-<p><strong>note 15.8</strong>. Fowlkes-Mallows指数从样本对一致性的角度同时兼顾了聚类结果的精确性与完整性。在真实标签给定的条件下，<span class="math inline">\(\operatorname{FMI}\)</span>越大表示聚类结果与真实划分在样本对层面上的一致性越强；当聚类结果与真实标签完全一致时，<span class="math inline">\(\operatorname{FMI}=1\)</span>；当不存在任何同类同簇的样本对时，<span class="math inline">\(\operatorname{FMI}=0\)</span>。与<span class="math inline">\(\operatorname{RI}\)</span>将异类异簇样本对也视为正确判断不同，<span class="math inline">\(\operatorname{FMI}\)</span>仅关注真实同类样本是否被成功聚合，从而在类别数量较多或类别规模不平衡的情形下，往往比 RI 更为保守。</p>
+<div id="note-15-9" class="note theorem-block env-note">
+<p><strong>note 15.9</strong>. Fowlkes-Mallows指数从样本对一致性的角度同时兼顾了聚类结果的精确性与完整性。在真实标签给定的条件下，<span class="math inline">\(\operatorname{FMI}\)</span>越大表示聚类结果与真实划分在样本对层面上的一致性越强；当聚类结果与真实标签完全一致时，<span class="math inline">\(\operatorname{FMI}=1\)</span>；当不存在任何同类同簇的样本对时，<span class="math inline">\(\operatorname{FMI}=0\)</span>。与<span class="math inline">\(\operatorname{RI}\)</span>将异类异簇样本对也视为正确判断不同，<span class="math inline">\(\operatorname{FMI}\)</span>仅关注真实同类样本是否被成功聚合，从而在类别数量较多或类别规模不平衡的情形下，往往比 RI 更为保守。</p>
 </div>
 </section>
 </section>
@@ -2078,7 +2148,7 @@ b=\binom{n}{2}-a-(B-a)-(A-a)=\binom{n}{2}-A-B+a
 <h3 class="anchored" data-anchor-id="k-means"><span class="header-section-number">15.6.2</span> K-means</h3>
 <div id="source-alg-Kmeans-cc5aa12b" class="algorithm-block">
 <div class="algorithm-caption">
-<p><span class="algorithm-number">Algorithm 15.3</span> <span class="algorithm-title">K-means Clustering (Lloyd’s Algorithm)</span></p>
+<p><span class="algorithm-number">Algorithm 15.2</span> <span class="algorithm-title">K-means Clustering (Lloyd’s Algorithm)</span></p>
 </div>
 <div class="algorithm-body">
 <div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
@@ -2150,16 +2220,16 @@ P(x_i) = \frac{D_i^2}{\sum\limits_{j=1}^n D_j^2}
 </div>
 </div>
 </div>
-<p><a href="#source-alg-Kmeans-cc5aa12b" class="textbook-cross-reference" data-reference-key="alg:Kmeans" data-reference-kind="ref+label" data-reference-title="算法 15.3">算法 15.3</a>给出了经典的K-means聚类算法（亦称Lloyd算法）的完整流程。该算法的目标是在给定样本集合的情况下，将样本划分为<span class="math inline">\(K\)</span>个互不相交的簇，使得簇内样本在欧氏距离意义下尽可能紧密。从优化角度看，K-means试图最小化如下的类内平方和目标函数： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxQaGkoXHtcbXVfa1x9LFx7Q19rXH0pPVxzdW1fe2s9MX1eS1xzdW1fe3hfaVxpbiBDX2t9XHx4X2ktXG11X2tcfF4yClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><a href="#source-alg-Kmeans-cc5aa12b" class="textbook-cross-reference" data-reference-key="alg:Kmeans" data-reference-kind="ref+label" data-reference-title="算法 15.2">算法 15.2</a>给出了经典的K-means聚类算法（亦称Lloyd算法）的完整流程。该算法的目标是在给定样本集合的情况下，将样本划分为<span class="math inline">\(K\)</span>个互不相交的簇，使得簇内样本在欧氏距离意义下尽可能紧密。从优化角度看，K-means试图最小化如下的类内平方和目标函数： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxQaGkoXHtcbXVfa1x9LFx7Q19rXH0pPVxzdW1fe2s9MX1eS1xzdW1fe3hfaVxpbiBDX2t9XHx4X2ktXG11X2tcfF4yClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 \Phi(\{\mu_k\},\{C_k\})=\sum_{k=1}^K\sum_{x_i\in C_k}\|x_i-\mu_k\|^2
 \end{equation*}\]</span></p>
-<p>由于每一次分配或更新步骤都会使目标函数<span class="math inline">\(\Phi\)</span>的值非增<span class="todo-note todo-info" role="note">平方分解均值最小，下面两个算法也需要链接</span>，且<span class="math inline">\(\Phi\)</span>在下界零处有界，根据<a href="../chapters/metric-space.html#prop-RSeq-69872747" class="textbook-cross-reference" data-reference-key="prop:RSeq" data-reference-kind="ref+label" data-reference-title="性质 3.2.9" data-reference-items="7" data-reference-hint="请查看第 7 项">性质 3.2.9(7)</a>可知K-means算法在有限步内必然收敛到某一局部最优解。然而，由于目标函数是非凸的<span class="todo-note todo-info" role="note">证明</span>，算法的最终结果依赖于初始中心的选取，这也是在实际应用中通常采用k-means++初始化（即<a href="#source-alg-Kmeans-cc5aa12b" class="textbook-cross-reference" data-reference-key="alg:Kmeans" data-reference-kind="ref+label" data-reference-title="算法 15.3">算法 15.3</a>中的1-7步）而非完全随机初始化的原因。</p>
+<p>由于每一次分配或更新步骤都会使目标函数<span class="math inline">\(\Phi\)</span>的值非增<span class="todo-note todo-info" role="note">平方分解均值最小，下面两个算法也需要链接</span>，且<span class="math inline">\(\Phi\)</span>在下界零处有界，根据<a href="../chapters/metric-space.html#prop-RSeq-69872747" class="textbook-cross-reference" data-reference-key="prop:RSeq" data-reference-kind="ref+label" data-reference-title="性质 3.2.9" data-reference-items="7" data-reference-hint="请查看第 7 项">性质 3.2.9(7)</a>可知K-means算法在有限步内必然收敛到某一局部最优解。然而，由于目标函数是非凸的<span class="todo-note todo-info" role="note">证明</span>，算法的最终结果依赖于初始中心的选取，这也是在实际应用中通常采用k-means++初始化（即<a href="#source-alg-Kmeans-cc5aa12b" class="textbook-cross-reference" data-reference-key="alg:Kmeans" data-reference-kind="ref+label" data-reference-title="算法 15.2">算法 15.2</a>中的1-7步）而非完全随机初始化的原因。</p>
 <section id="k-modes" class="level4">
 <h4 class="anchored" data-anchor-id="k-modes"><span class="header-section-number">15.6.2.1</span> K-modes</h4>
 <div id="source-alg-Kmodes-2f9b988b" class="algorithm-block">
 <div class="algorithm-caption">
-<p><span class="algorithm-number">Algorithm 15.4</span> <span class="algorithm-title">K-modes Clustering Algorithm with Cao Initialization</span></p>
+<p><span class="algorithm-number">Algorithm 15.3</span> <span class="algorithm-title">K-modes Clustering Algorithm with Cao Initialization</span></p>
 </div>
 <div class="algorithm-body">
 <div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
@@ -2241,19 +2311,19 @@ m_k \gets \underset{x_i\in\mathcal{D}}{\arg\max}
 </div>
 </div>
 </div>
-<p><a href="#source-alg-Kmodes-2f9b988b" class="textbook-cross-reference" data-reference-key="alg:Kmodes" data-reference-kind="ref+label" data-reference-title="算法 15.4">算法 15.4</a> 给出了K-modes聚类算法的标准形式。该算法专门用于处理分类型数据，其目标是在简单匹配不相似度下最小化类内不一致性。对应的优化目标函数为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxQc2koe21fa30se0Nfa30pPQoJXHN1bV97az0xfV5LXHN1bV97eF9pXGluIENfa31cc3VtX3tqPTF9XnAgSSh4X3tpan1cbmVxIG1fe2tqfSkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><a href="#source-alg-Kmodes-2f9b988b" class="textbook-cross-reference" data-reference-key="alg:Kmodes" data-reference-kind="ref+label" data-reference-title="算法 15.3">算法 15.3</a> 给出了K-modes聚类算法的标准形式。该算法专门用于处理分类型数据，其目标是在简单匹配不相似度下最小化类内不一致性。对应的优化目标函数为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxQc2koe21fa30se0Nfa30pPQoJXHN1bV97az0xfV5LXHN1bV97eF9pXGluIENfa31cc3VtX3tqPTF9XnAgSSh4X3tpan1cbmVxIG1fe2tqfSkKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 \Psi({m_k},{C_k})=
 \sum_{k=1}^K\sum_{x_i\in C_k}\sum_{j=1}^p I(x_{ij}\neq m_{kj})
 \end{equation*}\]</span></p>
-<p>该目标函数在簇分配或逐维众数更新时均单调不增，因此算法在有限步内收敛到某一局部最优解。与K-means类似，由于目标函数的非凸性，K-modes的结果依赖于初始化方式，实际应用中通常采用Cao初始化（即<a href="#source-alg-Kmodes-2f9b988b" class="textbook-cross-reference" data-reference-key="alg:Kmodes" data-reference-kind="ref+label" data-reference-title="算法 15.4">算法 15.4</a>中的1-6步）。</p>
+<p>该目标函数在簇分配或逐维众数更新时均单调不增，因此算法在有限步内收敛到某一局部最优解。与K-means类似，由于目标函数的非凸性，K-modes的结果依赖于初始化方式，实际应用中通常采用Cao初始化（即<a href="#source-alg-Kmodes-2f9b988b" class="textbook-cross-reference" data-reference-key="alg:Kmodes" data-reference-kind="ref+label" data-reference-title="算法 15.3">算法 15.3</a>中的1-6步）。</p>
 <p>Cao初始化的核心思想在于：初始聚类原型应当同时具备代表性和区分性。具体而言，算法首先通过各分类变量的经验频率刻画样本在全体数据中的密度，从而选取在每一维上均取高频类别的样本作为第一个初始中心，该样本可被视为总体经验分布下的一个典型点。随后，在选取其余初始中心时，Cao初始化在保证中心密度较高的同时，引入与已有中心之间的简单匹配不相似度，以避免多个初始原型集中于同一高频区域。</p>
 </section>
 <section id="k-prototypes" class="level4">
 <h4 class="anchored" data-anchor-id="k-prototypes"><span class="header-section-number">15.6.2.2</span> K-prototypes</h4>
 <div id="source-alg-Kprototypes-80ef9a55" class="algorithm-block">
 <div class="algorithm-caption">
-<p><span class="algorithm-number">Algorithm 15.5</span> <span class="algorithm-title">K-prototypes Clustering Algorithm</span></p>
+<p><span class="algorithm-number">Algorithm 15.4</span> <span class="algorithm-title">K-prototypes Clustering Algorithm</span></p>
 </div>
 <div class="algorithm-body">
 <div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
@@ -2319,7 +2389,7 @@ m_k \gets \underset{x_i\in\mathcal{D}}{\arg\max}
 </div>
 </div>
 </div>
-<p><a href="#source-alg-Kprototypes-80ef9a55" class="textbook-cross-reference" data-reference-key="alg:Kprototypes" data-reference-kind="ref+label" data-reference-title="算法 15.5">算法 15.5</a> 描述了K-prototypes聚类算法的完整流程。该算法同时处理数值型与分类型变量，其优化目标为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxPbWVnYSh7XG11X2ssbV9rfSx7Q19rfSk9Cglcc3VtX3trPTF9Xktcc3VtX3t4X2lcaW4gQ19rfQoJXEJpZyhcfHhfaV57KG4pfS1cbXVfa1x8XjIgKyBcZ2FtbWFcc3VtX3tqPTF9XntcZGltKHhfaV57KGMpfSl9IEkoeF97aWp9XnsoYyl9XG5lcSBtX3tran0pXEJpZykKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><a href="#source-alg-Kprototypes-80ef9a55" class="textbook-cross-reference" data-reference-key="alg:Kprototypes" data-reference-kind="ref+label" data-reference-title="算法 15.4">算法 15.4</a> 描述了K-prototypes聚类算法的完整流程。该算法同时处理数值型与分类型变量，其优化目标为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxPbWVnYSh7XG11X2ssbV9rfSx7Q19rfSk9Cglcc3VtX3trPTF9Xktcc3VtX3t4X2lcaW4gQ19rfQoJXEJpZyhcfHhfaV57KG4pfS1cbXVfa1x8XjIgKyBcZ2FtbWFcc3VtX3tqPTF9XntcZGltKHhfaV57KGMpfSl9IEkoeF97aWp9XnsoYyl9XG5lcSBtX3tran0pXEJpZykKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 \Omega({\mu_k,m_k},{C_k})=
 \sum_{k=1}^K\sum_{x_i\in C_k}
@@ -2332,7 +2402,7 @@ m_k \gets \underset{x_i\in\mathcal{D}}{\arg\max}
 <h3 class="anchored" data-anchor-id="id--c34b79e0"><span class="header-section-number">15.6.3</span> 凝聚型层次聚类</h3>
 <div id="source-alg-AgglomerativeHierarchicalClustering-bbd75add" class="algorithm-block">
 <div class="algorithm-caption">
-<p><span class="algorithm-number">Algorithm 15.6</span> <span class="algorithm-title">Agglomerative Hierarchical Clustering</span></p>
+<p><span class="algorithm-number">Algorithm 15.5</span> <span class="algorithm-title">Agglomerative Hierarchical Clustering</span></p>
 </div>
 <div class="algorithm-body">
 <div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
@@ -2351,7 +2421,7 @@ m_k \gets \underset{x_i\in\mathcal{D}}{\arg\max}
 <p><strong>while</strong> stopping criterion not satisfied <strong>do</strong></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="4">
-<p><span class="math inline">\((p,q)\gets \underset{p\neq q}{\arg\min}D_L(C_p,C_q)\)</span></p>
+<p><span class="math inline">\((p,q)\gets \underset{p\neq q}{\arg\min}\;D_L(C_p,C_q)\)</span></p>
 </div>
 <div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="5">
 <p><strong>if</strong> <span class="math inline">\(D_L(C_p,C_q) &gt; h_0\)</span> <strong>then</strong></p>
@@ -2388,7 +2458,7 @@ m_k \gets \underset{x_i\in\mathcal{D}}{\arg\max}
 </div>
 </div>
 </div>
-<p><a href="#source-alg-AgglomerativeHierarchicalClustering-bbd75add" class="textbook-cross-reference" data-reference-key="alg:AgglomerativeHierarchicalClustering" data-reference-kind="ref+label" data-reference-title="算法 15.6">算法 15.6</a>给出了<a href="../chapters/glossary-a.html#term-AgglomerativeHierarchicalClustering" class="term" title="agglomerative hierarchical clustering">凝聚型层次聚类<span class="term-english">（agglomerative hierarchical clustering）</span></a>的基本流程。算法从最细粒度的划分开始，将每一个样本视为一个单独的簇。随后，在当前簇集合中，根据预先选定的簇间距离准则（linkage criterion），反复选择距离最近的两个簇并将其合并。该合并过程持续进行，直到簇的数量减少至预先指定的目标簇数<span class="math inline">\(K\)</span>，或最小簇间距离大于给定值<span class="math inline">\(h_0\)</span>。</p>
+<p><a href="#source-alg-AgglomerativeHierarchicalClustering-bbd75add" class="textbook-cross-reference" data-reference-key="alg:AgglomerativeHierarchicalClustering" data-reference-kind="ref+label" data-reference-title="算法 15.5">算法 15.5</a>给出了<a href="../chapters/glossary-a.html#term-AgglomerativeHierarchicalClustering" class="term" title="agglomerative hierarchical clustering">凝聚型层次聚类<span class="term-english">（agglomerative hierarchical clustering）</span></a>的基本流程。算法从最细粒度的划分开始，将每一个样本视为一个单独的簇。随后，在当前簇集合中，根据预先选定的簇间距离准则（linkage criterion），反复选择距离最近的两个簇并将其合并。该合并过程持续进行，直到簇的数量减少至预先指定的目标簇数<span class="math inline">\(K\)</span>，或最小簇间距离大于给定值<span class="math inline">\(h_0\)</span>。</p>
 <p>层次聚类的核心在于如何定义两个簇之间的距离。设<span class="math inline">\(A,B\subseteq X\)</span>为两个簇，<span class="math inline">\(\rho\)</span> 为样本空间中的距离度量，则簇间距离<span class="math inline">\(D_L(A,B)\)</span>由 linkage 准则给出。不同的 linkage 定义对应着不同的几何偏好与聚类行为。</p>
 <p>常见的 linkage 定义如下：</p>
 <ol type="1">
@@ -2400,9 +2470,10 @@ m_k \gets \underset{x_i\in\mathcal{D}}{\arg\max}
 </section>
 <section id="dbscan" class="level3">
 <h3 class="anchored" data-anchor-id="dbscan"><span class="header-section-number">15.6.4</span> DBSCAN</h3>
+<p>前面介绍的K-means与凝聚型层次聚类都能够处理许多常见的聚类问题，但当簇具有复杂的几何结构时，它们可能无法得到符合直觉的划分。例如，对于两个同心圆形成的数据，内外两个圆环自然应当被视为两个不同的簇，但K-means默认不同簇具有不同的聚类中心，往往会将两个圆环沿某一方向切开；凝聚型层次聚类的结果则高度依赖于所采用的连接准则，也未必能够稳定地恢复这种结构。类似的问题还会出现在月牙形、环形等数据中。这说明，仅依靠簇中心或簇之间的距离并不足以描述所有可能的聚类结构，于是我们引入了下面两种基于密度的聚类方法。</p>
 <div id="source-alg-DBSCAN-a3a8a5e4" class="algorithm-block">
 <div class="algorithm-caption">
-<p><span class="algorithm-number">Algorithm 15.7</span> <span class="algorithm-title">DBSCAN (Density-Based Spatial Clustering of Applications with Noise)</span></p>
+<p><span class="algorithm-number">Algorithm 15.6</span> <span class="algorithm-title">DBSCAN (Density-Based Spatial Clustering of Applications with Noise)</span></p>
 </div>
 <div class="algorithm-body">
 <div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
@@ -2491,7 +2562,7 @@ m_k \gets \underset{x_i\in\mathcal{D}}{\arg\max}
 </div>
 </div>
 </div>
-<p><a href="#source-alg-DBSCAN-a3a8a5e4" class="textbook-cross-reference" data-reference-key="alg:DBSCAN" data-reference-kind="ref+label" data-reference-title="算法 15.7">算法 15.7</a>给出了DBSCAN算法的完整流程。与基于中心的K-means不同，DBSCAN不依赖簇中心或簇数量的预先设定，而是通过样本在空间中的密度分布来刻画簇结构。</p>
+<p><a href="#source-alg-DBSCAN-a3a8a5e4" class="textbook-cross-reference" data-reference-key="alg:DBSCAN" data-reference-kind="ref+label" data-reference-title="算法 15.6">算法 15.6</a>给出了DBSCAN算法的完整流程。与基于中心的K-means不同，DBSCAN不依赖簇中心或簇数量的预先设定，而是通过样本在空间中的密度分布来刻画簇结构。</p>
 <p>给定半径参数<span class="math inline">\(\varepsilon\)</span>与最小点数阈值<span class="math inline">\(\operatorname{MinPts}\)</span>，定义点<span class="math inline">\(x_i\)</span>的<span class="math inline">\(\varepsilon\)</span>-邻域为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVUoeF9pLFx2YXJlcHNpbG9uKT1ce3hfalxpbiBYOlx8eF9qLXhfaVx8XGxlcXNsYW50XHZhcmVwc2lsb25cfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
 U(x_i,\varepsilon)=\{x_j\in X:\|x_j-x_i\|\leqslant\varepsilon\}
@@ -2506,14 +2577,14 @@ U(x_i,\varepsilon)=\{x_j\in X:\|x_j-x_i\|\leqslant\varepsilon\}
 <p>DBSCAN首先将所有样本标记为未访问，并依次选择尚未访问的样本<span class="math inline">\(x_i\)</span>作为考察对象。算法访问<span class="math inline">\(x_i\)</span>后，首先判断<span class="math inline">\(x_i\)</span>是否为核心点，若<span class="math inline">\(x_i\)</span>非核心点，此时算法暂时将<span class="math inline">\(x_i\)</span>标记为噪声点。这里的噪声标记并不是最终结论：若后续从其他核心点扩张簇时发现<span class="math inline">\(x_i\)</span>位于该核心点的<span class="math inline">\(\varepsilon\)</span>-邻域内，则<span class="math inline">\(x_i\)</span>仍会被吸收到相应簇中，并作为边界点从噪声集合中移除。</p>
 <p>若<span class="math inline">\(x_i\)</span>是核心点，算法以<span class="math inline">\(x_i\)</span>为起点创建一个新簇，并将其邻域中的其他样本加入待处理集合<span class="math inline">\(S\)</span>。随后，算法不断从<span class="math inline">\(S\)</span>中取出一个样本<span class="math inline">\(x_p\)</span>进行检查。若<span class="math inline">\(x_p\)</span>尚未被访问，则先将其标记为已访问，并计算其邻域<span class="math inline">\(U(x_p,\varepsilon)\)</span>。当<span class="math inline">\(x_p\)</span>同样满足<span class="math inline">\(|U(x_p,\varepsilon)|\geqslant\operatorname{MinPts}\)</span>时，说明<span class="math inline">\(x_p\)</span>也是核心点，因此其邻域中的样本均可能通过<span class="math inline">\(x_p\)</span>与当前簇邻域可达，算法便将这些样本继续加入<span class="math inline">\(S\)</span>，从而使当前簇沿着相邻核心点逐步向外扩张。若<span class="math inline">\(x_p\)</span>不是核心点，则其邻域不会被继续展开，但只要<span class="math inline">\(x_p\)</span>尚未被分配给其他簇，它仍会作为边界点加入当前簇。</p>
 <p>上述过程持续进行，直到待处理集合<span class="math inline">\(S\)</span>为空。此时，所有能够由起始核心点通过有限条直接密度可达关系到达的核心点，以及附着在这些核心点邻域中的边界点，均已被纳入当前簇，因此该簇不能再继续扩张。算法随后返回外层循环，继续选择下一个尚未访问的样本，并以相同方式判断其是否能够形成新的簇。全部样本处理完毕后，仍未被任何簇吸收的点最终构成噪声集合。</p>
-<div id="note-15-9" class="note theorem-block env-note">
-<p><strong>note 15.9</strong>. 在实际应用中，通常先根据数据维数选择<span class="math inline">\(\operatorname{MinPts}\)</span>。若数据的有效维数为<span class="math inline">\(d_{\mathrm{eff}}\)</span>，一个常用的经验选择为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le01pblB0c31cYXBwcm94CgkJMmRfe1xtYXRocm17ZWZmfX0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<div id="note-15-10" class="note theorem-block env-note">
+<p><strong>note 15.10</strong>. 在实际应用中，通常先根据数据维数选择<span class="math inline">\(\operatorname{MinPts}\)</span>。若数据的有效维数为<span class="math inline">\(d_{\mathrm{eff}}\)</span>，一个常用的经验选择为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le01pblB0c31cYXBwcm94CgkJMmRfe1xtYXRocm17ZWZmfX0KXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 \operatorname{MinPts}\approx
 2d_{\mathrm{eff}}
 \end{equation*}\]</span></p>
 <p>在给定<span class="math inline">\(\operatorname{MinPts}\)</span>后，可以利用<span class="math inline">\(k\)</span>-distance图选择<span class="math inline">\(\varepsilon\)</span>。计算每个点到其第<span class="math inline">\(\operatorname{MinPts}\)</span>个最近邻的距离<span class="math inline">\(d_k(x_i)\)</span>，该距离表示使<span class="math inline">\(x_i\)</span>的邻域刚好包含足够多样本、从而满足核心点条件所需要的最小半径。将所有<span class="math inline">\(d_k(x_i)\)</span>从小到大排序后，簇内部的高密度点通常对应较小且变化平缓的距离，而边界点和噪声点通常对应快速增大的距离。因此，可以将排序曲线由平缓转为快速上升的拐点所对应的距离作为<span class="math inline">\(\varepsilon\)</span>的候选值。</p>
-<p>需要特别注意的是，DBSCAN在整个数据集上使用同一个<span class="math inline">\(\varepsilon\)</span>和同一个 <span class="math inline">\(\operatorname{MinPts}\)</span>，因而隐含地使用一个全局统一的密度阈值。若不同簇具有明显不同的密度水平，则通常不存在一个同时适合所有簇的<span class="math inline">\(\varepsilon\)</span>。较小的<span class="math inline">\(\varepsilon\)</span>能够识别高密度簇，但可能将低密度部分划为噪声；较大的 <span class="math inline">\(\varepsilon\)</span> 虽然能够保留低密度簇，却可能通过一系列邻域可达点将原本不同的高密度簇错误连接。因此，当数据包含密度水平显著不同的簇时，参数选择困难并不一定只是调参问题，而可能反映了标准 DBSCAN 的模型假设不适合该数据。 同时，边界点的归属可能依赖于簇的扩张顺序。若某个非核心点同时位于两个不同核心簇的核心点的<span class="math inline">\(\varepsilon\)</span>-邻域中，则它可以从两个簇中的核心点邻域可达，但自身不能继续扩张并连接这两个核心区域。按照<a href="#source-alg-DBSCAN-a3a8a5e4" class="textbook-cross-reference" data-reference-key="alg:DBSCAN" data-reference-kind="ref+label" data-reference-title="算法 15.7">算法 15.7</a>，该边界点被归入第一个扩张到它的簇。</p>
+<p>需要特别注意的是，DBSCAN在整个数据集上使用同一个<span class="math inline">\(\varepsilon\)</span>和同一个 <span class="math inline">\(\operatorname{MinPts}\)</span>，因而隐含地使用一个全局统一的密度阈值。若不同簇具有明显不同的密度水平，则通常不存在一个同时适合所有簇的<span class="math inline">\(\varepsilon\)</span>。较小的<span class="math inline">\(\varepsilon\)</span>能够识别高密度簇，但可能将低密度部分划为噪声；较大的 <span class="math inline">\(\varepsilon\)</span> 虽然能够保留低密度簇，却可能通过一系列邻域可达点将原本不同的高密度簇错误连接。因此，当数据包含密度水平显著不同的簇时，参数选择困难并不一定只是调参问题，而可能反映了标准 DBSCAN 的模型假设不适合该数据。 同时，边界点的归属可能依赖于簇的扩张顺序。若某个非核心点同时位于两个不同核心簇的核心点的<span class="math inline">\(\varepsilon\)</span>-邻域中，则它可以从两个簇中的核心点邻域可达，但自身不能继续扩张并连接这两个核心区域。按照<a href="#source-alg-DBSCAN-a3a8a5e4" class="textbook-cross-reference" data-reference-key="alg:DBSCAN" data-reference-kind="ref+label" data-reference-title="算法 15.6">算法 15.6</a>，该边界点被归入第一个扩张到它的簇。</p>
 </div>
 <p>由于DBSCAN能够识别任意形状的簇并显式区分噪声点，其在处理非凸簇结构时具有显著优势。然而，算法对参数<span class="math inline">\(\varepsilon\)</span>与<span class="math inline">\(\operatorname{MinPts}\)</span>较为敏感，且在高维空间中邻域查询的效率可能显著下降，这在一定程度上限制了其适用范围。</p>
 </section>
@@ -2521,7 +2592,7 @@ U(x_i,\varepsilon)=\{x_j\in X:\|x_j-x_i\|\leqslant\varepsilon\}
 <h3 class="anchored" data-anchor-id="optics"><span class="header-section-number">15.6.5</span> OPTICS</h3>
 <div id="source-alg-OPTICS-e2ed3953" class="algorithm-block">
 <div class="algorithm-caption">
-<p><span class="algorithm-number">Algorithm 15.8</span> <span class="algorithm-title">OPTICS (Ordering Points To Identify the Clustering Structure)</span></p>
+<p><span class="algorithm-number">Algorithm 15.7</span> <span class="algorithm-title">OPTICS (Ordering Points To Identify the Clustering Structure)</span></p>
 </div>
 <div class="algorithm-body">
 <div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
@@ -2581,7 +2652,7 @@ U(x_i,\varepsilon)=\{x_j\in X:\|x_j-x_i\|\leqslant\varepsilon\}
 <p><strong>while</strong> <span class="math inline">\(S\ne \varnothing\)</span> <strong>do</strong></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="17">
-<p>Extract <span class="math inline">\(x_p\)</span> with smallest <span class="math inline">\(d_{\text{reach}}(x_p)\)</span> from <span class="math inline">\(S\)</span></p>
+<p>Extract <span class="math inline">\(x_p\in\operatorname*{\arg\min}_{x\in S}\;d_{\text{reach}}(x_p)\)</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="18">
 <p>Compute neighborhood <span class="math inline">\(U(x_p,\varepsilon_{\max})\)</span></p>
@@ -2626,7 +2697,7 @@ U(x_i,\varepsilon)=\{x_j\in X:\|x_j-x_i\|\leqslant\varepsilon\}
 </div>
 </div>
 </div>
-<p><a href="#source-alg-OPTICS-e2ed3953" class="textbook-cross-reference" data-reference-key="alg:OPTICS" data-reference-kind="ref+label" data-reference-title="算法 15.8">算法 15.8</a> 给出了OPTICS的完整计算过程。OPTICS与DBSCAN使用相同的局部密度概念，但二者处理邻域半径的方式不同。DBSCAN预先固定半径<span class="math inline">\(\varepsilon\)</span>，并据此直接判断样本之间是否邻域可达；OPTICS则只给定一个足够大的搜索半径<span class="math inline">\(\varepsilon_{\max}\)</span>，在一次遍历中记录各样本能够以多大的距离尺度接入当前邻域区域，从而保留所有不超过<span class="math inline">\(\varepsilon_{\max}\)</span>的潜在聚类结构。</p>
+<p><a href="#source-alg-OPTICS-e2ed3953" class="textbook-cross-reference" data-reference-key="alg:OPTICS" data-reference-kind="ref+label" data-reference-title="算法 15.7">算法 15.7</a> 给出了OPTICS的完整计算过程。OPTICS与DBSCAN使用相同的局部密度概念，但二者处理邻域半径的方式不同。DBSCAN预先固定半径<span class="math inline">\(\varepsilon\)</span>，并据此直接判断样本之间是否邻域可达；OPTICS则只给定一个足够大的搜索半径<span class="math inline">\(\varepsilon_{\max}\)</span>，在一次遍历中记录各样本能够以多大的距离尺度接入当前邻域区域，从而保留所有不超过<span class="math inline">\(\varepsilon_{\max}\)</span>的潜在聚类结构。</p>
 <p>OPTICS首先判断点<span class="math inline">\(x_i\)</span>处的局部密度是否足够大（<span class="math inline">\(|U(x_i,\varepsilon_{\max})|\geqslant\operatorname{MinPts}\)</span>），当局部密度足够大时，视<span class="math inline">\(x_i\)</span>为核心点，可将<span class="math inline">\(x_i\)</span>作为密度扩张的起点，否则不可将其作为密度扩张的起点。</p>
 <p>当<span class="math inline">\(x_i\)</span>为核心点时，利用<a href="../chapters/glossary-c.html#term-CoreDistance" class="term" title="core distance">核心距离<span class="term-english">（core distance）</span></a>描述<span class="math inline">\(x_i\)</span>附近达到<span class="math inline">\(\operatorname{MinPts}\)</span>所要求的局部密度尺度。核心距离越小，说明在越小的邻域半径内便可以聚集至少<span class="math inline">\(\operatorname{MinPts}\)</span>个样本，即<span class="math inline">\(x_i\)</span>所处区域的局部密度越高。接着使用<a href="../chapters/glossary-r.html#term-ReachabilityDistance" class="term" title="reachability distance">可达距离<span class="term-english">（reachability distance）</span></a>衡量所有邻域样本<span class="math inline">\(x_j\)</span>接入以<span class="math inline">\(x_i\)</span>为中心的密度区域所需的距离尺度。一方面，邻域半径至少必须达到<span class="math inline">\(d_{\mathrm{core}}(x_i)\)</span>，否则<span class="math inline">\(x_i\)</span>本身尚未形成满足<span class="math inline">\(\operatorname{MinPts}\)</span>要求的稠密邻域；另一方面，邻域半径还必须覆盖<span class="math inline">\(x_i\)</span>与<span class="math inline">\(x_j\)</span>之间的实际距离。因此，<span class="math inline">\(d_{\mathrm{reach}}(x_j\mid x_i)\)</span>可以理解为：若以<span class="math inline">\(x_i\)</span>作为已经进入的核心点，至少需要将密度尺度扩大到多大，才能使<span class="math inline">\(x_j\)</span>被该密度区域吸收。</p>
 <p>完成对核心点<span class="math inline">\(x_i\)</span>邻域样本的可达距离计算后，OPTICS从所有已经获得有限可达距离但尚未处理的样本中选择当前可达距离最小的样本<span class="math inline">\(x_p\)</span>，将<span class="math inline">\(x_p\)</span>标记为已处理，并将其加入输出排序<span class="math inline">\(\mathcal{O}\)</span>。随后，算法判断<span class="math inline">\(x_p\)</span>是否为核心点。若<span class="math inline">\(x_p\)</span>不是核心点，则它不能继续向外扩张，算法重新从当前候选集合中选择可达距离最小的未处理样本。若<span class="math inline">\(x_p\)</span>是核心点，则利用<span class="math inline">\(x_p\)</span>重新计算其邻域内尚未处理样本的候选可达距离。因此，第一次由起始核心点<span class="math inline">\(x_i\)</span>展开邻域时，所有邻域样本都是首次获得有限可达距离；而在后续扩张过程中，同一样本可能被多个核心点触及，其可达距离会随着更紧密的密度连接被发现而不断减小。</p>
@@ -2641,8 +2712,8 @@ d_{\mathrm{reach}}(x_{(1)}),d_{\mathrm{reach}}(x_{(2)}),\dots,d_{\mathrm{reach}}
 \end{equation*}\]</span></p>
 <p>按照排序<span class="math inline">\(\mathcal{O}\)</span>绘制可达距离即可得到可达距离图。进入一个新的聚类区域时，最初的样本通常尚不能由先前区域到达，因此其可达距离较大或者为无穷大；当算法开始在该区域内部扩张后，后续样本可以在较小尺度下依次被吸收，于是形成连续的低可达距离区间。当算法从一个高密度区域跨越稀疏区域进入另一个聚类区域时，可达距离会显著升高。因此，可达距离图中的一个”谷地”通常对应一个潜在聚类：谷底越低，表示该区域的密度越高；谷地越宽，表示该密度区域包含的样本越多；谷地之间的高峰则反映不同密度区域之间的稀疏间隔。给定任意阈值<span class="math inline">\(\varepsilon'\leqslant\varepsilon_{\max}\)</span>，可以在可达距离图中将可达距离不超过<span class="math inline">\(\varepsilon'\)</span>的连续区间提取为聚类。在相同<span class="math inline">\(\operatorname{MinPts}\)</span>和邻域半径<span class="math inline">\(\varepsilon'\)</span>下，这一提取过程可以恢复相应的DBSCAN聚类结果。因此，更准确地说，OPTICS的输出是一种能够支持提取多个不同<span class="math inline">\(\varepsilon'\)</span>下DBSCAN聚类结果的密度排序表示。</p>
 <p>OPTICS的优势由此变得很明确：DBSCAN只能在预先选定的单一<span class="math inline">\(\varepsilon\)</span>下观察数据，而OPTICS通过记录样本的处理顺序和可达距离，将不同距离尺度下的密度连接关系压缩到同一个排序中。当不同簇的密度差异很大时，OPTICS可以根据可达距离图的局部谷地结构设置多个<span class="math inline">\(\varepsilon'\)</span>来识别不同密度水平下的聚类。</p>
-<div id="note-15-10" class="note theorem-block env-note">
-<p><strong>note 15.10</strong>. 为了达成上述目的，我们需要控制<span class="math inline">\(\varepsilon_{\max}\)</span>。若<span class="math inline">\(\varepsilon_{\max}\)</span>过小，某些样本的邻域中可能无法包含至少<span class="math inline">\(\operatorname{MinPts}\)</span>个样本，使其不能作为核心点继续扩张。即使样本本来属于同一个较低密度聚类，局部连接也可能由于超出<span class="math inline">\(\varepsilon_{\max}\)</span>而被截断。此时，当前扩张会较早结束，算法需要频繁从剩余的未处理样本中选择新的起点。因此，同一个潜在聚类可能在排序中被拆分成多个扩张片段，并在可达距离序列中产生额外的<span class="math inline">\(+\infty\)</span>或较大的跳跃。</p>
+<div id="note-15-11" class="note theorem-block env-note">
+<p><strong>note 15.11</strong>. 为了达成上述目的，我们需要控制<span class="math inline">\(\varepsilon_{\max}\)</span>。若<span class="math inline">\(\varepsilon_{\max}\)</span>过小，某些样本的邻域中可能无法包含至少<span class="math inline">\(\operatorname{MinPts}\)</span>个样本，使其不能作为核心点继续扩张。即使样本本来属于同一个较低密度聚类，局部连接也可能由于超出<span class="math inline">\(\varepsilon_{\max}\)</span>而被截断。此时，当前扩张会较早结束，算法需要频繁从剩余的未处理样本中选择新的起点。因此，同一个潜在聚类可能在排序中被拆分成多个扩张片段，并在可达距离序列中产生额外的<span class="math inline">\(+\infty\)</span>或较大的跳跃。</p>
 <p>若<span class="math inline">\(\varepsilon_{\max}\)</span>较大，一次扩张可以覆盖更完整的密度连接结构，算法通常不需要频繁重新选择起点。不同聚类中的样本虽然可能同时位于搜索范围内，但OPTICS始终优先处理当前可达距离较小的样本，因此高密度聚类内部的样本仍会倾向于连续出现，而跨越不同聚类时会产生较大的可达距离。也就是说，较大的<span class="math inline">\(\varepsilon_{\max}\)</span>一般不会像DBSCAN中过大的<span class="math inline">\(\varepsilon\)</span>那样直接将所有聚类合并，而是会将不同聚类之间的分隔表现为可达距离图中的高峰。但是，<span class="math inline">\(\varepsilon_{\max}\)</span>过大会显著增加计算开销，每次邻域搜索与可达距离更新都会涉及过多样本。</p>
 <p>因此，<span class="math inline">\(\varepsilon_{\max}\)</span>应当被设置为一个足够宽松但不过度扩张的上界：它应当大于所有感兴趣聚类内部维持密度连通所需的距离尺度，以避免聚类结构被人为截断；同时又不必大到使每个样本的邻域接近整个数据集。</p>
 </div>
@@ -2674,6 +2745,38 @@ r_k\leqslant(1-\xi)r_{k+1}
 \end{equation*}\]</span></p>
 <p>时聚类提取结果的稳定性。若较小的<span class="math inline">\(\xi\)</span>使结果被切分为大量规模很小的聚类，说明算法对可达距离图中的局部波动过于敏感，此时可以适当增大<span class="math inline">\(\xi\)</span>；若可达距离图中较为明显的浅谷未被提取，则可以适当减小<span class="math inline">\(\xi\)</span>。</p>
 </div>
+</section>
+<section id="id--3e3c7ae5" class="level3">
+<h3 class="anchored" data-anchor-id="id--3e3c7ae5"><span class="header-section-number">15.6.6</span> 高斯混合模型</h3>
+<p>考虑如下两个一维正态分布： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVhfMVxzaW0gTigwLDAuNV4yKSxccXF1YWQgWF8yXHNpbSBOKDAsMS41XjIpClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+X_1\sim N(0,0.5^2),\qquad X_2\sim N(0,1.5^2)
+\end{equation*}\]</span></p>
+<p>假设它们分别对应两个不同的潜在簇。虽然两个分布具有相同的均值<span class="math inline">\(0\)</span>，但方差不同：第一个分布的样本更加集中于均值附近，而第二个分布的样本分布得更加分散。它们的密度函数图像如下。</p>
+<figure id="fig-15-2" class="textbook-figure figure" data-latex-placement="H">
+<img src="../_tikz/tikz-4c3c20ac8e0100438cea.png" class="tikz-image figure-img" style="width:92.0%" width="1921" height="1049" alt="TikZ 数学图示" loading="lazy" decoding="async">
+<figcaption>
+<span class="figure-number">图 15.2</span> 两个均值相同但方差不同的正态分布
+</figcaption>
+</figure>
+<p>在这个例子中，如果只看距离中心<span class="math inline">\(0\)</span>的远近，那么两个类别并没有不同的中心可以用来区分。因此，类似K-means这类基于欧氏距离和类中心的聚类方法并不能自然地刻画这种结构。对于基于密度的聚类方法，情况同样并不理想。两个总体的取值区域高度重叠，并共同形成以<span class="math inline">\(0\)</span>附近为高密度区域的整体分布，因此仅根据样本之间的局部密度连通关系，也不存在一条自然的低密度边界将两个潜在类别分开。</p>
+<p>然而，从概率分布的角度看，这两个类别具有明确的差异。对于同一个观测值<span class="math inline">\(x\)</span>，可以分别考察它由两个正态分布产生的可能性。例如，当<span class="math inline">\(|x|\)</span>较小时，方差较小的<span class="math inline">\(N(0,0.5^2)\)</span>通常能够给出更高的密度；而当<span class="math inline">\(|x|\)</span>较大时，方差较大的<span class="math inline">\(N(0,1.5^2)\)</span>则相对更加可能产生这样的观测。也就是说，即使两个类别具有相同的中心，只要它们的概率分布不同，仍然可能根据各分布对样本的解释能力对潜在类别进行推断。</p>
+<p>这提示我们可以不再直接将一个簇理解为围绕某个中心形成的点集，或者某个密度连通区域，而是假设每个簇对应一个概率分布。样本首先从某个潜在类别中产生，再由该类别对应的概率分布生成。</p>
+<div id="definition-15-16" class="definition theorem-block env-definition">
+<p><strong>Definition 15.16</strong>. 设随机向量<span class="math inline">\(X\in\mathbb{R}^p\)</span>，隐变量<span class="math inline">\(Z\in\{1,2,\dots,K\}\)</span>满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlQKFo9ayk9XHBpX2ssXHF1YWRccGlfaz4wLFxxdWFkXHN1bV97az0xfV57S31ccGlfaz0xClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+P(Z=k)=\pi_k,\quad\pi_k&gt;0,\quad\sum_{k=1}^{K}\pi_k=1
+\end{equation*}\]</span></p>
+<p>并且在给定<span class="math inline">\(Z=k\)</span>时有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlYXG1pZCBaPWtcc2ltIE5fcChcbXVfayxcU2lnbWFfaykKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+X\mid Z=k\sim N_p(\mu_k,\Sigma_k)
+\end{equation*}\]</span></p>
+<p>其中<span class="math inline">\(\mu_k\in\mathbb{R}^p\)</span>，<span class="math inline">\(\Sigma_k\in M_p(\mathbb{R})\)</span>为正定矩阵。由<a href="../chapters/probability-basics.html#prop-ConditionalProbabilityDensity-2e35a7db" class="textbook-cross-reference" data-reference-key="prop:ConditionalProbabilityDensity" data-reference-kind="ref+label" data-reference-title="性质 6.3.5" data-reference-items="2" data-reference-hint="请查看第 2 项">性质 6.3.5(2)</a>可知<span class="math inline">\(X\)</span>的密度为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlwKHgpPVxzdW1fe2s9MX1ee0t9XHBpX2tccGhpX3AoeDtcbXVfayxcU2lnbWFfaykKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+p(x)=\sum_{k=1}^{K}\pi_k\phi_p(x;\mu_k,\Sigma_k)
+\end{equation*}\]</span></p>
+<p>其中<span class="math inline">\(\phi_p(x;\mu_k,\Sigma_k)\)</span>为<span class="math inline">\(p\)</span>维正态分布<span class="math inline">\(N_p(\mu_k,\Sigma_k)\)</span>的密度函数。称该模型为具有<span class="math inline">\(K\)</span>个成分的<span class="term-missing" data-key="GaussianMixtureModel">GaussianMixtureModel</span>，称<span class="math inline">\(\pi_k\)</span>为第<span class="math inline">\(k\)</span>个混合权重，称<span class="math inline">\(N_p(\mu_k,\Sigma_k)\)</span>为第<span class="math inline">\(k\)</span>个混合成分。</p>
+</div>
 
 
 </section>
@@ -2681,8 +2784,7 @@ r_k\leqslant(1-\xi)r_{k+1}
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr>
 <ol>
-<li id="fn1"><p>若特征多项式有重根，则标准正交化特征向量组不唯一，主成分也不唯一。<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>样本因子分析时需要注意使用协方差矩阵的无偏估计。<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>样本因子分析时需要注意使用协方差矩阵的无偏估计。<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 

@@ -39,6 +39,7 @@ try:
         load_chapter_progress,
         load_notation_catalog,
         load_site_metadata,
+        synchronize_notation_catalog,
     )
     from site_builder.models import ComputationGroup
     from site_builder.pandoc_transform import (
@@ -272,6 +273,8 @@ def cleanup_build_artifacts() -> None:
 
 
 def build(arguments: argparse.Namespace) -> int:
+    synchronize_notation_catalog(CONFIG.paths)
+    log("已从 skills/ 同步符号目录")
     ensure_tools()
     if not MAIN_TEX.exists() or not SETTINGS_TEX.exists():
         fail("必须从项目根目录运行，且项目根目录需要 main.tex/settings.tex")

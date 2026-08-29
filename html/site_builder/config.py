@@ -124,6 +124,16 @@ class BuildPaths:
         return self.html_dir / "data" / "chapter-progress.json"
 
     @property
+    def notation_catalog_source_file(self) -> Path:
+        return (
+            self.project_root
+            / "skills"
+            / "textbook-latex-style"
+            / "references"
+            / "notation-catalog.json"
+        )
+
+    @property
     def notation_catalog_file(self) -> Path:
         return self.html_dir / "data" / "notation-catalog.json"
 
