@@ -1,0 +1,586 @@
+\section{期望}
+
+\subsection{数学期望}
+\begin{definition}
+	设$f$是概率空间$(X,\mathscr{F},P)$上的随机变量。若$f$在$X$上的积分存在，则称$f$的\gls{MathematicalExpectation}（简称为期望）存在，并将：
+	\begin{equation*}
+		\operatorname{E}(f)\coloneq\int_{X}f(x)\dif P
+	\end{equation*}
+	称为$f$的期望。若$f$在$X$上可积，则称$f$的期望是有限的。根据\cref{theo:ProductMeasurable}，随机向量的期望即为各分量期望按原顺序排列成的向量，随机矩阵的期望即为各元素期望按原顺序排成的矩阵。
+\end{definition}
+\begin{property}\label{prop:Expectation}
+	设$f$是概率空间$(X,\mathscr{F},P)$上在$X$上积分存在的随机变量。期望有如下性质：
+	\begin{enumerate}
+		\item 对任何$(\mathbb{R},\mathcal{B}(\mathbb{R}))$上的可测函数$g$，$g\circ f$是$(X,\mathscr{F},P)$上的可测函数，只要：
+		\begin{equation*}
+			\operatorname{E}(g\circ f),\quad\int_{\mathbb{R}}g\dif Pf^{-1}
+		\end{equation*}
+		之一有意义，则二者一定相等。特别的，当$f$为连续型随机变量时，上式化作：
+		\begin{equation*}
+			\operatorname{E}(g\circ f),\quad\int_{\mathbb{R}}g(x)\frac{\dif Pf^{-1}}{\dif\lambda}(x)\dif\lambda
+		\end{equation*}
+		其中$\lambda$为L测度；当$f$为离散型随机变量时，令$D=\{x_n\}$，含义与随机变量分类时的含义相同，则上式化作：
+		\begin{equation*}
+			\operatorname{E}(g\circ f),\quad\sum_{n=1}^{+\infty}g(x_n)P(f=x_n)
+		\end{equation*}
+		\item 若$\seq{f}{n}$是$(X,\mathscr{F},P)$上相互独立的随机变量，$\seq{g}{n}$是$(\mathbb{R},\mathcal{B}(\mathbb{R}))$上的Borel函数，只要：
+		\begin{equation*}
+			\operatorname{E}\left[\prod_{i=1}^{n}g_i(f_i)\right],\quad\prod_{i=1}^{n}\operatorname{E}[g_i(f_i)]
+		\end{equation*}
+		之一有意义，二者一定相等。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由\cref{prop:MeasurableMapping}(2)可知$g\circ f$是$(X,\mathscr{F},P)$到$(\mathbb{R},\mathcal{B}(\mathbb{R}))$上的可测函数。注意到：
+	\begin{equation*}
+		\operatorname{E}(g\circ f)=\int_{X}g[f(x)]\dif P=\int_{f^{-1}(\mathbb{R})}g[f(x)]\dif P
+	\end{equation*}
+	由\cref{theo:IntBySubstitution}即可得出一般结论。根据\cref{lem:IntChangeOfMeasure}可得出连续型随机变量时的结论。对于离散型随机变量，由\cref{prop:MeasurableFunction}(2)、\cref{prop:SigmaField}(4)、\cref{theo:MeasurableCountableIntegral}、\cref{prop:MeasurableIntegral}(1)和积分的定义（$g(x)$限制在$x_n$上是简单函数，若$g(x_n)<0$还需用到\cref{prop:MeasurableIntegral}(6)）可得：
+	\begin{align*}
+		&\int_{\mathbb{R}}g(x)\dif Pf^{-1}=\int_{(\mathbb{R}\setminus D)\bigcup\left(\underset{n=1}{\overset{+\infty}{\cup}}\{x_n\}\right)}g(x)\dif Pf^{-1} \\
+		=&\int_{\mathbb{R}\setminus D}g(x)\dif Pf^{-1}+\sum_{n=1}^{+\infty}\int_{\{x_n\}}g(x)\dif Pf^{-1}=\sum_{n=1}^{+\infty}g(x_n)P(f=x_n)
+	\end{align*}\par
+	(2)由\cref{prop:MeasurableFunction}(11)（可以证明$g(\seq{x}{n})=x_1x_2\cdots x_n$在$\mathbb{R}^{n}$上连续）和\cref{prop:Independent}(5.d)即可得到。
+\end{proof}
+\begin{note}
+	很多教材在上述定理中写的并不是$g$对pushforward measure$Pf^{-1}$进行积分，而是对$f$的分布函数$F$进行积分。$F$是一个测度吗？$F$与$Pf^{-1}$等价吗？显然并不是。由L-S测度处的讨论可以看出$F$可唯一确定$Pf^{-1}$，所以可使用$F$来代表$Pf^{-1}$。
+\end{note}
+
+\subsection{条件期望}
+通常的期望$\operatorname{E}(f)$描述随机变量$f$在整个概率空间上的均值，但在实际问题中，我们还需要研究在某些条件成立时$f$的均值。例如，对于事件$A\in\mathscr{F}$，可以研究$f$在$A$发生条件下的平均值。然而，如果可能给出的条件有很多，我们并不希望对每一个条件分别定义一个彼此独立的数值，而希望构造一个新的随机变量，使得条件发生变化时，这个随机变量能够对应$f$在这一条件下的均值。当我们希望把给定条件后的均值组织成一个随机变量时，需要同时处理一整套的条件，这一整套条件自然应该构成一个$\sigma$域。
+\begin{lemma}\label{lem:ConditionalExpectation}
+	设$f$为概率空间$(X,\mathscr{F},P)$上在$X$上积分存在的随机变量。由\cref{prop:MeasurableIntegral}(3)，对任意的$A\in\mathscr{F}$，令：
+	\begin{equation*}
+		\varphi(A)=\int_{A}f(x)\dif P
+	\end{equation*}
+	则：
+	\begin{enumerate}
+		\item $\varphi$是$\mathscr{F}$上的符号测度；
+		\item $\varphi\ll P$。
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	(1)因为$P(\varnothing)=0$，由\cref{prop:MeasurableIntegral}(1)可得$\varphi(\varnothing)=0$。根据\cref{theo:MeasurableCountableIntegral}可知对互不相交的$\{A_n\}\subseteq\mathscr{F}$有：
+	\begin{equation*}
+		\varphi\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)=\int_{\underset{n=1}{\overset{+\infty}{\cup}}A_n}f(x)\dif P=\sum_{n=1}^{+\infty}\left[\int_{A_n}f(x)\dif P\right]=\sum_{n=1}^{+\infty}\varphi(A_n)
+	\end{equation*}
+	所以$\varphi$是$\mathscr{F}$上的符号测度。\par
+	(2)由\cref{prop:MeasurableIntegral}(1)直接可得。
+\end{proof}
+\begin{definition}
+	设$f$为概率空间$(X,\mathscr{F},P)$上在$X$上积分存在的随机变量，$\mathscr{A}$是$\mathscr{F}$的一个子$\sigma$域。对任意的$A\in\mathscr{F}$，令：
+	\begin{equation*}
+		\varphi(A)=\int_{A}f(x)\dif P
+	\end{equation*}
+	若存在$(X,\mathscr{A})$上的可测函数$g$满足对任意的$A\in\mathscr{A}$有：
+	\begin{equation*}
+		\int_{A}g(x)\dif P=\int_{A}f(x)\dif P
+	\end{equation*}
+	则称$g$为$f$关于$\mathscr{A}$的\gls{ConditionalExpectation}，记作$\operatorname{E}(f\mid\mathscr{A})$。当$\mathscr{A}=\sigma(h)$且$h$是$(X,\mathscr{F})$到可测空间 $(Y,\mathscr{B})$的可测映射时，称$\operatorname{E}(f\mid h)\coloneq\operatorname{E}[f|\sigma(h)]$为$f$关于$h$的条件期望（由\cref{lem:PreimageSigmaField}可知$\sigma(h)$为$\mathscr{F}$的子$\sigma$域）。当给定多个子$\sigma$域$\mathscr{A}_1,\mathscr{A}_2,\dots,\mathscr{A}_n\subseteq\mathscr{F}$时，约定：
+	\begin{equation*}
+		\operatorname{E}(f\mid\mathscr{A}_1,\mathscr{A}_2,\dots,\mathscr{A}_n)\coloneq\operatorname{E}\left[f\mid\sigma\left(\underset{i=1}{\overset{n}{\cup}}\mathscr{A}_i\right)\right]
+	\end{equation*}
+\end{definition}
+\begin{note}
+	因为概率是$\sigma$有限测度，由\cref{prop:Measure}(4)、\cref{lem:ConditionalExpectation}(1)、\cref{prop:SignedMeasure}(7)、\cref{lem:ConditionalExpectation}(2)和\cref{theo:RadonNikodym}可知存在$(X,\mathscr{A},P)$上a.e.于$(X,\mathscr{A},P)$的意义下唯一的在$X$上积分存在的可测函数$g$满足：
+	\begin{equation*}
+		\forall\;A\in\mathscr{A},\;\varphi(A)=\int_{A}g(x)\dif P
+	\end{equation*}
+	所以条件期望必然存在且在a.e.于$(X,\mathscr{A},P)$的意义下唯一。
+\end{note}
+作为一个随机变量，$\operatorname{E}(f\mid\mathscr{A})$在某一点$x\in X$处的取值究竟表示什么？因为$\operatorname{E}(f\mid\mathscr{A})$是几乎处处意义下的，所以我们也没必要关心它在零测集上的取值。进一步地，概率空间中任意一族两两不交且具有正概率的可测集合至多可数。若$\{A_i:i\in I\}\subseteq\mathscr{A}$两两不交且$P(A_i)>0$，对任意$n\in\mathbb{N}^{+}$令：
+\begin{equation*}
+	I_n=\left\{i\in I:P(A_i)\geqslant\frac{1}{n}\right\}
+\end{equation*}
+因为这些集合两两不交且$P(X)=1$，由\cref{prop:Measure}(1)(3)（单调性）可得$|I_n|\leqslant n$，从而每个$I_n$均为有限集。而：
+\begin{equation*}
+	I=\underset{n=1}{\overset{+\infty}{\cup}}I_n
+\end{equation*}
+由\cref{theo:CountableUnionCountable}可知$I$至多可数。
+\begin{theorem}\label{theo:PartitionMeasurableFunction}
+	设$\{A_i:i\in I\}$是$X$的至多可数划分，即：
+	\begin{equation*}
+		X=\underset{i\in I}{\cup}A_i,\quad A_i\cap A_j=\varnothing\;(i\neq j)
+	\end{equation*}
+	$\mathscr{A}=\sigma(\{A_i:i\in I\})$，则$f$是$(X,\mathscr{A})$上的可测函数当且仅当存在$\{a_i:i\in I\}\subseteq\mathbb{R}$使得：
+	\begin{equation*}
+		f=\sum_{i\in I}a_iI(x\in A_i)
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	\textbf{(1)必要性：}任取$i\in I$，若存在$x_1,x_2\in A_i$使得$f(x_1)=\alpha<\beta=f(x_2)$，取$c=\dfrac{\alpha+\beta}{2}$。因为$f$关于$\mathscr{A}$可测，所以$f^{-1}((-\infty,c))\in\mathscr{A}$。由$\{A_i:i\in I\}$的定义可知：
+	\begin{equation*}
+		\mathscr{A}=\left\{\underset{i\in J}{\cup}A_i:J\subseteq I\right\}
+	\end{equation*}
+	所以$\mathscr{A}$中的集合要么包含$A_i$要么与$A_i$不相交。因为：
+	\begin{equation*}
+		x_1\in f^{-1}((-\infty,c)),\quad x_2\notin f^{-1}((-\infty,c))
+	\end{equation*}
+	所以此时$f$不可测，矛盾，于是$f$在每个$A_i$上均为常数。\par
+	\textbf{(2)充分性：}由可测函数的定义即可证得。
+\end{proof}
+\begin{theorem}\label{theo:ConditionalExpectationPartition}
+	设$f$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量，$\{A_i:i\in I\}\subseteq\mathscr{F}$是$X$的至多可数划分，$\mathscr{A}=\sigma(\{A_i:i\in I\})$，
+	则：
+	\begin{equation*}
+		\operatorname{E}(f\mid\mathscr{A})(x)=\sum_{\substack{i\in I\\P(A_i)>0}}\frac{\int_{A_i}f\dif P}{P(A_i)}I(x\in A_i)\;\text{a.e.于$(X,\mathscr{A},P)$}
+	\end{equation*}
+	其中，在满足$P(A_i)=0$的集合$A_i$上可以任意定义$\operatorname{E}(f\mid\mathscr{A})$的取值。
+\end{theorem}
+\begin{proof}
+	记：
+	\begin{equation*}
+		g(x)=\sum_{\substack{i\in I\\P(A_i)>0}}\frac{\displaystyle\int_{A_i}f\dif P}{P(A_i)}I(x\in A_i)
+	\end{equation*}
+	并在满足$P(A_i)=0$的集合$A_i$上任意定义$g$的取值，由\cref{theo:PartitionMeasurableFunction}可知$g$关于$\mathscr{A}$可测。\par
+	任取$A\in\mathscr{A}$。由：
+	\begin{equation*}
+		\mathscr{A}=\left\{\underset{i\in J}{\cup}A_i:J\subseteq I\right\}
+	\end{equation*}
+	可知存在$J\subseteq I$使得：
+	\begin{equation*}
+		A=\underset{i\in J}{\cup}A_i
+	\end{equation*}
+	根据\cref{theo:MeasurableCountableIntegral}和\cref{prop:MeasurableIntegral}(1)可得：
+	\begin{align*}
+		\int_{A}g(x)\dif P=\sum_{\substack{i\in J\\P(A_i)>0}}\int_{A_i}g(x)\dif P=\sum_{i\in J}\int_{A_i}f(x)\dif P=\int_{A}f(x)\dif P
+	\end{align*}
+	由条件期望的定义可知结论成立。
+\end{proof}
+\cref{theo:ConditionalExpectationPartition}给出了一个较为一般且直观的情形，在这一情形下可以明确说明条件期望作为随机变量时每一点取值的含义。当$\mathscr{A}$由至多可数划分$\{A_i:i\in I\}$生成时，对于$P(A_i)>0$的$x\in A_i$，条件期望在$x$处的取值恰好为$f$在事件$A_i$发生条件下的均值：
+\begin{equation*}
+	\operatorname{E}(f\mid\mathscr{A})(x)=\frac{1}{P(A_i)}\int_{A_i}f\dif P
+\end{equation*}
+而对于满足$P(A_i)=0$的划分块，由$\{A_i:i\in I\}$至多可数以及\cref{prop:Measure}(3)（次可列可加性）可知它们的并集仍为零测集。因此，除去一个零测集以后，条件期望在每一点的取值都可以具体理解为该点所属条件下$f$的均值，前面所希望构造的“随着条件变化而给出相应条件均值的随机变量”在这里得到了具体实现。
+\begin{property}\label{prop:ConditionalExpectation}
+	设$f,g$是概率空间$(X,\mathscr{F},P)$上在$X$上积分存在的随机变量，$\mathscr{A},\mathscr{B}$是$\mathscr{F}$的子$\sigma$域，则：
+	\begin{enumerate}
+		\item $f$关于$\mathscr{A}$可测的充要条件为$\operatorname{E}(f\mid\mathscr{A})=f\;$a.e.于$(X,\mathscr{A},P)$；
+		\item 若$f$与$\mathscr{A}$独立，则$\operatorname{E}(f\mid\mathscr{A})=\operatorname{E}(f)\;$a.e.于$(X,\mathscr{A},P)$；
+		\item 若$\mathscr{A}\subseteq\mathscr{B}$，则$\operatorname{E}[\operatorname{E}(f\mid\mathscr{A})|\mathscr{B}]=\operatorname{E}(f\mid\mathscr{A})\;$a.e.于$(X,\mathscr{B},P)$，$\operatorname{E}[\operatorname{E}(f\mid\mathscr{B})|\mathscr{A}]=\operatorname{E}(f\mid\mathscr{A})\;$a.e.于$(X,\mathscr{A},P)$，$\operatorname{E}[\operatorname{E}(f\mid\mathscr{A})]=\operatorname{E}(f)$；
+		\item 若$f\leqslant g\;$a.e.于$(X,\mathscr{A},P)$，则$\operatorname{E}(f\mid\mathscr{A})\leqslant\operatorname{E}(g|\mathscr{A})\;$a.e.于$(X,\mathscr{A},P)$；
+		\item 对任意的$\alpha,\beta\in\mathbb{R}$，若$\alpha\operatorname{E}(f)+\beta\operatorname{E}(g)$有意义，则：
+		\begin{equation*}
+			\operatorname{E}(\alpha f+\beta g|\mathscr{A})=\alpha\operatorname{E}(f\mid\mathscr{A})+	\beta\operatorname{E}(g|\mathscr{A})
+		\end{equation*}
+		a.e.于$(X,\mathscr{A},P)$；
+		\item 若$0\leqslant f_n\uparrow f\;$a.e.于$(X,\mathscr{A},P)$，则$0\leqslant\operatorname{E}(f_n|\mathscr{A})\uparrow \operatorname{E}(f\mid\mathscr{A})\;$a.e.于$(X,\mathscr{A},P)$；
+		\item 若$f_n\geqslant0\;$a.e.于$(X,\mathscr{F},P)$，则$\operatorname{E}\left(\varliminf\limits_{n\to+\infty}f_n\Big|\mathscr{A}\right)\leqslant\varliminf\limits_{n\to+\infty}\operatorname{E}(f_n|\mathscr{A})\;$a.e.于$(X,\mathscr{A},P)$；
+		\item 若$|f_n|\leqslant g\in L_1(X,\mathscr{A},P)$且$f_n\overset{\text{a.e.}}{\longrightarrow}f$，则$\lim\limits_{n\to+\infty}\operatorname{E}(f_n|\mathscr{A})=\operatorname{E}(f\mid\mathscr{A})\;$a.e.于$(X,\mathscr{A},P)$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)必要性由条件期望的定义即可得到，充分性由条件期望的定义和\cref{prop:MeasurableFunction}(9)即可得到。\par
+	(2)因为$f$与$\mathscr{A}$独立，由\cref{prop:Independent}(3)可知对任意的$A\in\mathscr{A}$有$f$与$I_A$独立。对任意的$A\in\mathscr{A}$，根据\cref{prop:MeasurableIntegral}(3)、\cref{prop:SigmaField}(4)、\cref{theo:MeasurableCountableIntegral}、\cref{prop:Expectation}(2)和\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{align*}
+		&\int_{A}f(x)\dif P=\int_{A}f(x)\dif P+\int_{X\setminus A}0\dif P=\operatorname{E}(fI_A) \\
+		=&\operatorname{E}(f)\operatorname{E}(I_A)=\operatorname{E}(f)P(A)=\operatorname{E}(f)\int_{A}1\dif P=\int_{A}\operatorname{E}(f)\dif P
+	\end{align*}
+	于是结论成立。\par
+	(3)由$\operatorname{E}(f\mid\mathscr{A})$的定义可知$\operatorname{E}(f\mid\mathscr{A})$是$\mathscr{A}$可测的，因为$\mathscr{A}\subseteq\mathscr{B}$，所以$\operatorname{E}(f\mid\mathscr{A})$是$\mathscr{B}$可测的。由(1)可得$\operatorname{E}[\operatorname{E}(f\mid\mathscr{A})|\mathscr{B}]=\operatorname{E}(f\mid\mathscr{A})\;$a.e.于$(X,\mathscr{B},P)$。\par
+	由$\operatorname{E}[\operatorname{E}(f\mid\mathscr{B})|\mathscr{A}]$的定义可知它是$\mathscr{A}$可测的，于是对任意的$A\in\mathscr{A}$，根据条件期望的定义可得：
+	\begin{equation*}
+		\int_{A}\operatorname{E}[\operatorname{E}(f\mid\mathscr{B})|\mathscr{A}]\dif P=\int_{A}\operatorname{E}(f\mid\mathscr{B})\dif P=\int_{A}f(x)\dif P
+	\end{equation*}
+	即$\operatorname{E}(f\mid\mathscr{A})=\operatorname{E}[\operatorname{E}(f\mid\mathscr{B})|\mathscr{A}]\;$a.e.于$(X,\mathscr{A},P)$。\par
+	因为$X\in\mathscr{A}$，由条件期望的定义可得：
+	\begin{equation*}
+		\operatorname{E}[\operatorname{E}(f\mid\mathscr{A})]=\int_{X}\operatorname{E}(f\mid\mathscr{A})\dif P=\int_{X}f(x)\dif P=\operatorname{E}(f)
+	\end{equation*}\par
+	(4)对任意的$A\in\mathscr{A}$，由\cref{prop:MeasurableIntegral}(7)可得：
+	\begin{equation*}
+		\int_{A}\operatorname{E}(f\mid\mathscr{A})\dif P=\int_{A}f(x)\dif P\leqslant\int_{A}g(x)\dif P=\int_{A}\operatorname{E}(g|\mathscr{A})\dif P
+	\end{equation*}
+	由条件期望的定义可知$\operatorname{E}(f\mid\mathscr{A}),\operatorname{E}(g|\mathscr{A})$关于$\mathscr{A}$可测，根据\cref{prop:MeasurableFunction}(3)可得$E=\{\operatorname{E}(f\mid\mathscr{A})>\operatorname{E}(g|\mathscr{A})\}\in\mathscr{A}$，所以：
+	\begin{equation*}
+		\int_{E}\operatorname{E}(f\mid\mathscr{A})\dif P\leqslant\int_{E}\operatorname{E}(g|\mathscr{A})\dif P
+	\end{equation*}
+	由\cref{prop:MeasurableIntegral}(7)可得：
+	\begin{equation*}
+		\int_{E}\operatorname{E}(f\mid\mathscr{A})\dif P\geqslant\int_{E}\operatorname{E}(g|\mathscr{A})\dif P
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\int_{E}\operatorname{E}(f\mid\mathscr{A})\dif P=\int_{E}\operatorname{E}(g|\mathscr{A})\dif P
+	\end{equation*}
+	根据\cref{prop:MeasurableIntegral}(6)可知：
+	\begin{equation*}
+		\int_{E}[\operatorname{E}(f\mid\mathscr{A})-\operatorname{E}(g|\mathscr{A})]\dif P=0
+	\end{equation*}
+	由\cref{prop:NonnegativeMeasurableIntegral}(9)可得$P(E)=0$，即$\operatorname{E}(f\mid\mathscr{A})\leqslant\operatorname{E}(g|\mathscr{A})\;$a.e.于$(X,\mathscr{A},P)$。\par
+	(5)因为$\alpha\operatorname{E}(f)+\beta\operatorname{E}(g)$存在，由\cref{prop:MeasurableIntegral}(6)可知$\operatorname{E}(\alpha f+\beta g)$存在，于是$\operatorname{E}(\alpha f+\beta g|\mathscr{A})$存在。对任意的$A\in\mathscr{A}$，有：
+	\begin{equation*}
+		\int_{A}[\alpha f(x)+\beta g(x)]\dif P=\alpha\int_{A}f(x)\dif P+\beta\int_{A}g(x)\dif P
+	\end{equation*}
+	否则由\cref{prop:MeasurableIntegral}(6)可知右式不存在，即$\alpha\int_{A}f(x)\dif P$和$\beta\int_{A}g(x)\dif P$二者异号无穷大，分类讨论可知此时与$\alpha\operatorname{E}(f)+\beta\operatorname{E}(g)$存在矛盾（对$f^+,f^-,g^+,g^-$在$X$上和$A$上的积分进行分析）。\par
+	根据\cref{prop:MeasurableIntegral}(6)，对任意的$A\in\mathscr{A}$有：
+	\begin{align*}
+		\int_{A}\operatorname{E}(\alpha f+\beta g|\mathscr{A})\dif P&=\int_{A}[\alpha f(x)+\beta g(x)]\dif P=\alpha\int_{A}f(x)\dif P+\beta\int_{A}g(x)\dif P \\
+		&=\alpha\int_{A}\operatorname{E}(f\mid\mathscr{A})\dif P+\beta\int_{A}\operatorname{E}(g|\mathscr{A})\dif P \\
+		&=\int_{A}\alpha\operatorname{E}(f\mid\mathscr{A})\dif P+\int_{A}\beta\operatorname{E}(g|\mathscr{A})\dif P \\
+		&=\int_{A}[\alpha\operatorname{E}(f\mid\mathscr{A})+\beta\operatorname{E}(g|\mathscr{A})]\dif P
+	\end{align*}
+	由条件期望的定义可得$\operatorname{E}(\alpha f+\beta g|\mathscr{A})=\alpha\operatorname{E}(f\mid\mathscr{A})+\beta\operatorname{E}(g|\mathscr{A})\;$a.e.于$(X,\mathscr{A},P)$。\par
+	(6)由(4)可得$0\leqslant\operatorname{E}(f_n|\mathscr{A})\;$a.e.于$(X,\mathscr{A},P)$且$\operatorname{E}(f_n|\mathscr{A})\uparrow\;$a.e.于$(X,\mathscr{A},P)$，根据\cref{prop:RSeq}(7)可知$\lim\limits_{n\to+\infty}\operatorname{E}(f_n|\mathscr{A})$存在，由\cref{prop:MeasurableFunction}(6)可知$\lim\limits_{n\to+\infty}\operatorname{E}(f_n|\mathscr{A})$关于$\mathscr{A}$可测。根据\cref{theo:LeviTheorem}可知对任意的$A\in\mathscr{A}$有：
+	\begin{equation*}
+		\int_{A}\left[\lim_{n\to+\infty}\operatorname{E}(f_n|\mathscr{A})\right]\dif P=\lim_{n\to+\infty}\left[\int_{A}\operatorname{E}(f_n|\mathscr{A})\dif P\right]=\lim_{n\to+\infty}\left[\int_{A}f_n(x)\dif P\right]=\int_{A}f(x)\dif P
+	\end{equation*}
+	由条件期望的定义可得：
+	\begin{equation*}
+		\lim_{n\to+\infty}\operatorname{E}(f_n|\mathscr{A})=\operatorname{E}(f\mid\mathscr{A})
+	\end{equation*}
+	a.e.于$(X,\mathscr{A},P)$。根据\cref{theo:CountableUnionCountable}和\cref{prop:Measure}(3)（次可列可加性）即可得出结论。\par
+	(7)因为$f_n\geqslant0\;$a.e.于$(X,\mathscr{A},P)$，所以：
+	\begin{equation*}
+		0\leqslant\inf_{i\geqslant n}f_i\uparrow\lim_{n\to+\infty}\inf\limits_{i\geqslant n}f_i\;\text{a.e.于}(X,\mathscr{A},P)
+	\end{equation*}
+	由(4)和\cref{prop:Measure}(3)（次可列可加性）可得对任意的$n\in\mathbb{N}^+$有：
+	\begin{equation*}
+		\operatorname{E}\left(\inf_{i\geqslant n}f_i\Big|\mathscr{A}\right)\leqslant\inf_{i\geqslant n}\operatorname{E}(f_i|\mathscr{A})
+	\end{equation*}
+	a.e.于$(X,\mathscr{A},P)$。根据(6)、\cref{prop:RSeq}(6)、\cref{prop:SigmaField}(3)和\cref{prop:Measure}(3)（次有限可加性）可得：
+	\begin{align*}
+		&\operatorname{E}\left(\varliminf_{n\to+\infty}f_n\Big|\mathscr{A}\right)=\operatorname{E}\left(\lim_{n\to+\infty}\inf_{i\geqslant n}f_i\Big|\mathscr{A}\right)\leqslant\lim_{n\to+\infty}\operatorname{E}\left(\inf_{i\geqslant n}f_i\Big|\mathscr{A}\right) \\
+		\leqslant&\lim_{n\to+\infty}\inf_{i\geqslant n}\operatorname{E}(f_i|\mathscr{A})=\varliminf_{n\to+\infty}\operatorname{E}(f_n|\mathscr{A})
+	\end{align*}
+	a.e.于$(X,\mathscr{A},P)$。\par
+	(8)由(7)类似证明\cref{cor:FatouLemma}，然后类似\cref{theo:DominatedConvergenceTheorem}的证明即可得出结论。
+\end{proof}
+\begin{theorem}\label{theo:ConditionalExpectationPullOut}
+	设$f,g$是概率空间$(X,\mathscr{F},P)$上的随机变量，$f$和$fg$在$X$上积分存在，$g$关于$\mathscr{F}$的子$\sigma$域$\mathscr{A}$可测，则：
+	\begin{equation*}
+		\operatorname{E}(fg|\mathscr{A})=g\operatorname{E}(f\mid\mathscr{A})
+	\end{equation*}
+	a.e.于$(X,\mathscr{A},P)$。
+\end{theorem}
+\begin{proof}
+	当$f\geqslant0\;$a.e.于$(X,\mathscr{A},P)$上时，使用典型方法。\par
+	对任意的$A,B\in\mathscr{A}$，当$g(x)=I(x\in B)$时，由\cref{prop:SigmaField}(2)(4)、\cref{prop:MeasurableIntegral}(3)和\cref{theo:MeasurableCountableIntegral}可得：
+	\begin{align*}
+		&\int_{A}\operatorname{E}(fg|\mathscr{A})\dif P=\int_{A}f(x)g(x)\dif P=\int_{A}f(x)I(x\in B)\dif P \\
+		=&\int_{A\cap B}f(x)\dif P+\int_{A\setminus B}0\dif P=\int_{A\cap B}f(x)\dif P=\int_{A\cap B}\operatorname{E}(f\mid\mathscr{A})\dif P \\
+		=&\int_{A\cap B}\operatorname{E}(f\mid\mathscr{A})I(x\in B)\dif P+\int_{A\setminus B}\operatorname{E}(f\mid\mathscr{A})I(x\in B)\dif P=\int_{A}\operatorname{E}(f\mid\mathscr{A})I(x\in B)\dif P
+	\end{align*}
+	所以结论对指示函数成立。\par
+	当$g$是非负简单函数时，设$X$可表示为有限个互不相交的集合$\seq{E}{n}\in\mathscr{A}$的并，$\seq{a}{n}\geqslant0$，$g=\sum\limits_{i=1}^{n}a_iI(x\in E_i)$。对任意的$i=1,2,\dots,n$，由\cref{prop:MeasurableIntegral}(8)可知$\sum\limits_{i=1}^{n}\operatorname{E}[fa_iI(x\in E_i)]$存在，根据\cref{prop:ConditionalExpectation}(5)、\cref{prop:MeasurableFunction}(5.b)、\cref{prop:MeasurableIntegral}(8)、指示函数时的情况和\cref{prop:NonnegativeMeasurableIntegral}(10)可得：
+	\begin{align*}
+		&\operatorname{E}(fg|\mathscr{A})=\operatorname{E}\left[\sum_{i=1}^{n}fa_iI(x\in E_i)\Big|\mathscr{A}\right]=\sum_{i=1}^{n}\operatorname{E}[fa_iI(x\in E_i)|\mathscr{A}] \\
+		=&\sum_{i=1}^{n}I(x\in E_i)\operatorname{E}(fa_i|\mathscr{A})=\sum_{i=1}^{n}a_iI(x\in E_i)\operatorname{E}(f\mid\mathscr{A})=g\operatorname{E}(f\mid\mathscr{A})
+	\end{align*}
+	所以结论对非负简单函数成立。\par
+	当$g$是非负随机变量时，由\cref{prop:MeasurableFunction}(8)可知存在非负简单函数列$\{g_n\}$满足$g_n\uparrow g$，于是$fg_n\uparrow fg$且$fg_n\geqslant0\;$a.e.于$(X,\mathscr{A},P)$。根据\cref{prop:RSeq}(8.c)、\cref{prop:ConditionalExpectation}(6)和非负简单函数时的情况可得：
+	\begin{equation*}
+		\operatorname{E}(fg|\mathscr{A})=\operatorname{E}\left(\lim_{n\to+\infty}fg_n\Big|\mathscr{A}\right)=\lim_{n\to+\infty}\operatorname{E}(fg_n|\mathscr{A})=\lim_{n\to+\infty}g_n\operatorname{E}(f\mid\mathscr{A})=g\operatorname{E}(f\mid\mathscr{A})
+	\end{equation*}
+	所以结论对非负随机变量成立。\par
+	当$g$是一般随机变量时，$g=g^+-g^-$。由\cref{prop:MeasurableIntegral}(8)可得：
+	\begin{equation*}
+		\operatorname{E}(fg^+)-\operatorname{E}(fg^-)=\operatorname{E}(fg)
+	\end{equation*}
+	存在，根据\cref{prop:ConditionalExpectation}(5)和非负随机变量时的情况可得：
+	\begin{align*}
+		&\operatorname{E}(fg|\mathscr{A})=\operatorname{E}(fg^+-fg^-|\mathscr{A})=\operatorname{E}(fg^+|\mathscr{A})-\operatorname{E}(fg^-|\mathscr{A}) \\
+		=&g^+\operatorname{E}(f\mid\mathscr{A})-g^-\operatorname{E}(f\mid\mathscr{A})=g\operatorname{E}(f\mid\mathscr{A})
+	\end{align*}
+	所以结论对一般随机变量成立。\par
+	当$f$为一般随机变量时，$(fg)^+=f^+g^++f^-g^-,\;(fg)^-=f^+g^-+f^-g^+$。因为$\operatorname{E}(fg)$存在，所以$\operatorname{E}[(fg)^+]$和$\operatorname{E}[(fg)^-]$不同时为正无穷。假设$\operatorname{E}[(fg)^+]$不为正无穷，$\operatorname{E}[(f g)^-]$不为正无穷的情况可类似讨论。因为$f^+g^+,f^-g^-\leqslant(fg)^+$，由\cref{prop:NonnegativeMeasurableIntegral}(6)可得：
+	\begin{equation*}
+		\operatorname{E}(f^+g^+),\operatorname{E}(f^-g^-)\leqslant\operatorname{E}[(fg)^+]<+\infty
+	\end{equation*}
+	根据\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{align*}
+		&\operatorname{E}(f^+g)-\operatorname{E}(f^-g)=\operatorname{E}(f^+g^+-f^+g^-)-\operatorname{E}(f^-g^+-f^-g^-) \\
+		=&\operatorname{E}(f^+g^+)-\operatorname{E}(f^+g^-)-\operatorname{E}(f^-g^+)+\operatorname{E}(f^-g^-)=\operatorname{E}(f^+g^++f^-g^-)-\operatorname{E}(f^+g^-+f^-g^+)
+	\end{align*}
+	存在。由\cref{prop:ConditionalExpectation}(5)和$f\geqslant0\;$a.e.于$(X,\mathscr{A},P)$时的情况可得：
+	\begin{align*}
+		&\operatorname{E}(fg|\mathscr{A})=\operatorname{E}(f^+g-f^-g|\mathscr{A})=\operatorname{E}(f^+g|\mathscr{A})-\operatorname{E}(f^-g|\mathscr{A}) \\
+		=&g[\operatorname{E}(f^+|\mathscr{A})-\operatorname{E}(f^-|\mathscr{A})]=g\operatorname{E}(f\mid\mathscr{A})\qedhere
+	\end{align*}
+\end{proof}
+
+\subsection{条件概率}
+\begin{definition}
+	设$f$为概率空间$(X,\mathscr{F},P)$上的可测映射，$\mathscr{A}$是$\mathscr{F}$的一个子$\sigma$域。对任意的$A\in\mathscr{F}$，由\cref{prop:SimpleFunction}(1)可知$I_A$在$X$上积分存在，于是分别称：
+	\begin{equation*}
+		P(A|\mathscr{A})\coloneq\operatorname{E}(I_A|\mathscr{A}),\quad P(A|f)\coloneq P(A|\sigma(f))
+	\end{equation*}
+	为事件$A$关于$\mathscr{A}$的\gls{ConditionalProbability}和事件$A$关于$f$的条件概率。
+\end{definition}
+这一构造与前面对条件期望的解释完全一致。当$\mathscr{A}$由至多可数划分$\{A_i:i\in I\}$生成时，由\cref{theo:ConditionalExpectationPartition}、\cref{prop:SigmaField}(2)(4)和\cref{theo:MeasurableCountableIntegral}可知对于$P(A_i)>0$的$x\in A_i$有：
+\begin{equation*}
+	P(A|\mathscr{A})(x)=\frac{1}{P(A_i)}\int_{A_i}I_A\dif P=\frac{P(A\cap A_i)}{P(A_i)}
+\end{equation*}
+因此，关于$\sigma$域的条件概率作为随机变量在$x$处的取值正是当已知$x$所属的条件$A_i$发生时事件$A$发生的概率。换言之，关于$\sigma$域的条件概率并不是一个单独的数值，而是将随条件变化的一整套条件概率统一组织成了一个随机变量。
+\begin{definition}
+	设$(X,\mathscr{F},P)$为概率空间，$A,B\in\mathscr{F}$且$P(B)>0$。因为$P(A\mid\sigma(B))$为$\sigma(B)$可测函数，由\cref{theo:PartitionMeasurableFunction}可知存在$a_1,a_2\in\mathbb{R}$使得\footnote{这里的a.e.来源于条件期望的a.e.。}：
+	\begin{equation*}
+		P(A\mid\sigma(B))=a_1I_B+a_2I_{B^c}\;\text{a.e.于$(X,\sigma(B),P)$}
+	\end{equation*}
+	称$a_1$为事件$A$在事件$B$发生条件下的条件概率，记为$P(A\mid B)\coloneq a_1$。
+\end{definition}
+\begin{property}\label{prop:ConditionalProbability}
+	设$(X,\mathscr{F},P)$为概率空间，则条件概率具有如下性质：
+	\begin{enumerate}
+		\item(条件概率公式) 对任意$A,B\in\mathscr{F}$且$P(B)>0$，有：
+		\begin{equation*}
+			P(A\mid B)=\frac{P(A\cap B)}{P(B)}
+		\end{equation*}
+		\item(全概率公式) 对任意$A\in\mathscr{F}$以及$\mathscr{F}$的任意子$\sigma$域$\mathscr{A}$，有：
+		\begin{equation*}
+			P(A)=\operatorname{E}[P(A\mid\mathscr{A})]
+		\end{equation*}
+		\item(贝叶斯公式) 对任意$A,B\in\mathscr{F}$且$P(A)>0,\;P(B)>0$，有：
+		\begin{equation*}
+			P(B\mid A)=\frac{P(A\mid B)P(B)}{\operatorname{E}[P(A\mid\sigma(B))]}
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由$P(A\mid B)$的定义可知：
+	\begin{equation*}
+		P(A\mid\sigma(B))=P(A\mid B)I_B+a_2I_{B^c}\;\text{a.e.于$(X,\sigma(B),P)$}
+	\end{equation*}
+	其中$a_2\in\mathbb{R}$。由\cref{prop:MeasurableIntegral}(8)(6)、\cref{prop:SigmaField}(2)(4)和\cref{theo:MeasurableCountableIntegral}可得：
+	\begin{gather*}
+		\int_{B}P(A\mid\sigma(B))\dif P=\int_{B}[P(A\mid B)I_B(x)+a_2I_{B^c}(x)]\dif P=P(A\mid B)P(B) \\
+		\int_{B}I_A(x)\dif P=\int_{A\cap B}I_A(x)\dif P+\int_{B\backslash A}I_A(x)\dif P=P(A\cap B)
+	\end{gather*}
+	根据$P(A\mid\sigma(B))$的定义可得：
+	\begin{equation*}
+		P(A\mid B)P(B)=P(A\cap B)
+	\end{equation*}
+	由于$P(B)>0$，因此：
+	\begin{equation*}
+		P(A\mid B)=\frac{P(A\cap B)}{P(B)}
+	\end{equation*}\par
+	(2)对于$\mathscr{F}$任意的子$\sigma$域$\mathscr{A}$，因为$X\in\mathscr{A}$，根据条件期望的定义和\cref{theo:MeasurableCountableIntegral}可知：
+	\begin{equation*}
+		\int_{X}\operatorname{E}(I_A\mid\mathscr{A})\dif P=\int_{X}I_A(x)\dif P=P(A)
+	\end{equation*}
+	又因为：
+	\begin{equation*}
+		P(A\mid\mathscr{A})=\operatorname{E}(I_A\mid\mathscr{A})
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\operatorname{E}[P(A\mid\mathscr{A})]=P(A)
+	\end{equation*}\par
+	(3)由(1)可得：
+	\begin{equation*}
+		P(B\mid A)P(A)=P(A\cap B)=P(A\mid B)P(B)
+	\end{equation*}
+	因为$P(A)>0$，根据(2)可知：
+	\begin{equation*}
+		P(B\mid A)=\frac{P(A\mid B)P(B)}{P(A)}=\frac{P(A\mid B)P(B)}{\operatorname{E}[P(A\mid\sigma(B))]}\qedhere
+	\end{equation*}
+\end{proof}
+\subsubsection{条件概率密度}
+\begin{definition}
+	设$(X,\mathscr{F})$和$(Y,\mathscr{A})$是可测空间。若映射$K:X\times\mathscr{A}\to[0,1]$满足：
+	\begin{enumerate}
+		\item 对任意的$x\in X$，$K(x,\cdot)$是$(Y,\mathscr{A})$上的概率测度；
+		\item 对任意的$A\in\mathscr{A}$，$K(\cdot,A)$是$(X,\mathscr{F})$上的可测函数。
+	\end{enumerate}
+	则称$K$为从$(X,\mathscr{F})$到$(Y,\mathscr{A})$的\gls{ProbabilityKernel}。
+\end{definition}
+\begin{definition}
+	设$f,g$分别是从概率空间$(X,\mathscr{F},P)$到可测空间$(Y,\mathscr{A})$和$(Z,\mathscr{B})$的可测映射。若从$(Z,\mathscr{B})$到$(Y,\mathscr{A})$的概率核$K_{f\mid g}$满足对任意的$A\in\mathscr{A}$和$B\in\mathscr{B}$有：
+	\begin{equation*}
+		P(\{f\in A\}\cap\{g\in B\})=\int_{B}K_{f\mid g}(z,A)\dif Pg^{-1}
+	\end{equation*}
+	则称$K_{f\mid g}$为$f$关于$g$的\gls{ConditionalProbabilityKernel}。
+\end{definition}
+\begin{property}\label{prop:ConditionalProbabilityKernel}
+	设$f,g$分别是从概率空间$(X,\mathscr{F},P)$到可测空间$(Y,\mathscr{A})$和$(Z,\mathscr{B})$的可测映射。概率核$K_{f\mid g}$是$f$关于$g$的条件概率核当且仅当对任意的$A\in\mathscr{A}$有：
+	\begin{equation*}
+		K_{f\mid g}[g(\omega),A]=P(f\in A\mid g)(\omega)\;\text{a.e.于$(X,\sigma(g),P)$}
+	\end{equation*}
+\end{property}
+\begin{proof}
+	\textbf{(1)必要性：}设$K_{f\mid g}$是$f$关于$g$的条件概率核。任取$A\in\mathscr{A}$，由概率核的定义和\cref{prop:MeasurableMapping}(2)可知$K_{f\mid g}[g(\omega),A]$关于$\sigma(g)$可测。任取$B\in\mathscr{B}$，由\cref{theo:IntBySubstitution}、条件概率核的定义、\cref{prop:SigmaField}(2)和\cref{theo:MeasurableCountableIntegral}可得：
+	\begin{align*}
+		&\int_{g^{-1}(B)}K_{f\mid g}[g(\omega),A]\dif P=\int_{B}K_{f\mid g}(z,A)\dif Pg^{-1} \\
+		=&P(\{f\in A\}\cap\{g\in B\})=\int_{g^{-1}(B)}I(f\in A)\dif P
+	\end{align*}
+	由条件概率的定义即可得出结论。\par
+	\textbf{(2)充分性：}任取$A\in\mathscr{A}$和$B\in\mathscr{B}$，由\cref{theo:IntBySubstitution}、\cref{prop:MeasurableIntegral}(8)、条件概率的定义、\cref{prop:SigmaField}(2)和\cref{theo:MeasurableCountableIntegral}可得：
+	\begin{align*}
+		&\int_{B}K_{f\mid g}(z,A)\dif Pg^{-1}=\int_{g^{-1}(B)}K_{f\mid g}[g(\omega),A]\dif P \\
+		=&\int_{g^{-1}(B)}P(f\in A\mid g)(\omega)\dif P=\int_{g^{-1}(B)}I(f\in A)\dif P=P(\{f\in A\}\cap\{g\in B\})
+	\end{align*}
+	充分性得证。
+\end{proof}
+\begin{definition}
+	设$f,g$分别是从概率空间$(X,\mathscr{F},P)$到可测空间$(Y,\mathscr{A})$和$(Z,\mathscr{B})$的可测映射，$K_{f\mid g}$是$f$关于$g$的条件概率核，$\mu$是$(Y,\mathscr{A})$上的$\sigma$有限测度。若$(Y\times Z,\mathscr{A}\times\mathscr{B})$上的非负可测函数$p_{f\mid g}$满足：存在$N\in\mathscr{B}$使得$Pg^{-1}(N)=0$，并且对任意的$z\in Z\setminus N$和$A\in\mathscr{A}$有：
+	\begin{equation*}
+		K_{f\mid g}(z,A)=\int_{A}p_{f\mid g}(y\mid z)\dif\mu
+	\end{equation*}
+	则称$p_{f\mid g}(y\mid z)$为$f$关于$g$相对于$\mu$的\gls{ConditionalProbabilityDensityFunction}。
+\end{definition}
+\begin{property}\label{prop:ConditionalProbabilityDensityBasic}
+	设$f,g$分别是从概率空间$(X,\mathscr{F},P)$到可测空间$(Y,\mathscr{A})$和$(Z,\mathscr{B})$的可测映射，$\mu$是$(Y,\mathscr{A})$上的$\sigma$有限测度，则：
+	\begin{enumerate}
+		\item 若$p_{f\mid g}$为$f$关于$g$相对于$\mu$的条件概率密度函数，则对任意的$A\in\mathscr{A}$有：
+		\begin{equation*}
+			P(f\in A\mid g)(\omega)=K_{f\mid g}[g(\omega),A]=\int_{A}p_{f\mid g}(y\mid g(\omega))\dif\mu\;\text{a.e.于$(X,\sigma(g),P)$}
+		\end{equation*}
+		并且对任意的$B\in\mathscr{B}$有：
+		\begin{equation*}
+			P(\{f\in A\}\cap\{g\in B\})=\int_{B}\left[\int_{A}p_{f\mid g}(y\mid z)\dif\mu\right]\dif Pg^{-1}
+		\end{equation*}
+		\item $f$关于$g$相对于$\mu$的条件概率密度函数存在当且仅当$P(f,g)^{-1}\ll\mu\times Pg^{-1}$，此时：
+		\begin{equation*}
+			p_{f\mid g}(y\mid z)
+			=\dfrac{\dif P(f,g)^{-1}}{\dif(\mu\times Pg^{-1})}(y,z)\;\text{a.e.于$(Y\times Z,\mathscr{A}\times\mathscr{B},\mu\times Pg^{-1})$}
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)因为$Pg^{-1}(N)=0$，所以$P(g\in N)=0$。由\cref{prop:ConditionalProbabilityKernel}、\cref{prop:SigmaField}(3)和\cref{prop:Measure}(3)（次有限可加性）可得：
+	\begin{equation*}
+		P(f\in A\mid g)(\omega)=K_{f\mid g}[g(\omega),A]=\int_{A}p_{f\mid g}[y\mid g(\omega)]\dif\mu\;\text{a.e.于$(X,\sigma(g),P)$}
+	\end{equation*}
+	根据\cref{prop:MeasurableIntegral}(8)可得：
+	\begin{equation*}
+		P(\{f\in A\}\cap\{g\in B\})=\int_{B}K_{f\mid g}(z,A)\dif Pg^{-1}=\int_{B}\left[\int_{A}p_{f\mid g}(y\mid z)\dif\mu\right]\dif Pg^{-1}
+	\end{equation*}\par
+	(2)由\cref{theo:Fubini}(1)可知$\mu\times Pg^{-1}$是$(Y\times Z,\mathscr{A}\times\mathscr{B})$上的$\sigma$有限测度。\par
+	\textbf{必要性：}设$p_{f\mid g}$为$f$关于$g$相对于$\mu$的条件概率密度函数。对任意的$C\in\mathscr{A}\times\mathscr{B}$，定义：
+	\begin{equation*}
+		\varphi(C)\coloneq\int_{C}p_{f\mid g}(y\mid z)\dif(\mu\times Pg^{-1})
+	\end{equation*}
+	由\cref{theo:Fubini}(2)和\cref{prop:NonnegativeMeasurableIntegral}(2)可知对任意的$A\in\mathscr{A}$和$B\in\mathscr{B}$有：
+	\begin{align*}
+		\varphi(A\times B)&=\int_{A\times B}p_{f\mid g}(y\mid z)\dif(\mu\times Pg^{-1})=\int_{B}\left[\int_{A}p_{f\mid g}(y\mid z)\dif\mu\right]\dif Pg^{-1} \\
+		&=\int_{B}K_{f\mid g}(z,A)\dif Pg^{-1}\geqslant0
+	\end{align*}
+	同时：
+	\begin{equation*}
+		\varphi(Y\times Z)=\int_{Z}K_{f\mid g}(z,Y)\dif Pg^{-1}=\int_{Z}1\dif Pg^{-1}=Pg^{-1}(Z)=P(X)=1
+	\end{equation*}
+	再结合\cref{theo:MeasurableCountableIntegral}可知$\varphi$是$(Y\times Z,\mathscr{A}\times\mathscr{B})$上的概率测度。由(1)可知对任意的$A\in\mathscr{A},\;B\in\mathscr{B}$有：
+	\begin{equation*}
+		\varphi(A\times B)=P(\{f\in A\}\cap\{g\in B\})=P(f,g)^{-1}(A\times B)
+	\end{equation*}
+	根据\cref{prop:FiniteDimensionalCylinderSet}(1)、\cref{theo:SetNecessarilySet1}和\cref{lem:PiExtensionMeasure}可得$\varphi=P(f,g)^{-1}$。由\cref{prop:MeasurableIntegral}(1)和RN导数的定义可知：
+	\begin{equation*}
+		P(f,g)^{-1}\ll\mu\times Pg^{-1},\quad
+		p_{f\mid g}=\dfrac{\dif P(f,g)^{-1}}{\dif(\mu\times Pg^{-1})}\;\text{a.e.于$(Y\times Z,\mathscr{A}\times\mathscr{B},\mu\times Pg^{-1})$}
+	\end{equation*}\par
+	\textbf{充分性：}设$P(f,g)^{-1}\ll\mu\times Pg^{-1}$，由\cref{theo:RadonNikodym}，取非负可测函数：
+	\begin{equation*}
+		q(y,z)=\dfrac{\dif P(f,g)^{-1}}{\dif(\mu\times Pg^{-1})}(y,z),\quad r(z)=\int_{Y}q(y,z)\dif\mu
+	\end{equation*}
+	由\cref{theo:Fubini}(2)可知$r$关于$\mathscr{B}$可测。任取$B\in\mathscr{B}$，由\cref{theo:Fubini}(2)可得：
+	\begin{align*}
+		&\int_{B}r(z)\dif Pg^{-1}=\int_{Y\times B}q(y,z)\dif(\mu\times Pg^{-1}) \\
+		=&P(f,g)^{-1}(Y\times B)=Pg^{-1}(B)=\int_{B}1\dif Pg^{-1}
+	\end{align*}
+	由\cref{theo:RadonNikodym}的唯一性可知$r(z)=1\;$a.e.于$(Z,\mathscr{B},Pg^{-1})$。记：
+	\begin{equation*}
+		N=\{z\in Z:r(z)\ne1\}
+	\end{equation*}
+	则$Pg^{-1}(N)=0$，根据\cref{prop:MeasurableFunction}(3)可知$N\in\mathscr{B}$。因为$P(f,g)^{-1}$是概率测度且$P(f,g)^{-1}\ll\mu\times Pg^{-1}$，所以$\mu$不是零测度。又因为$\mu$是$\sigma$有限测度，所以存在$E\in\mathscr{A}$使得$0<\mu(E)<+\infty$。定义：
+	\begin{equation*}
+		\rho(y)\coloneq\frac{I(y\in E)}{\mu(E)},\quad
+		p_{f\mid g}(y\mid z)\coloneq
+		\begin{cases}
+			q(y,z),&z\in Z\setminus N \\
+			\rho(y),&z\in N
+		\end{cases}
+	\end{equation*}
+	由\cref{prop:MeasurableFunction}(1.a)可验证得到$p_{f\mid g}$关于$\mathscr{A}\times\mathscr{B}$可测，根据\cref{prop:SigmaField}(4)、\cref{theo:MeasurableCountableIntegral}和\cref{prop:MeasurableIntegral}(1)(6)可得对任意的$z\in Z$有：
+	\begin{equation*}
+		\int_{Y}p_{f\mid g}(y\mid z)\dif\mu=1
+	\end{equation*}
+	对任意的$z\in Z$和$A\in\mathscr{A}$，定义：
+	\begin{equation*}
+		K_{f\mid g}(z,A)\coloneq\int_{A}p_{f\mid g}(y\mid z)\dif\mu
+	\end{equation*}
+	对固定的$z$，由\cref{prop:NonnegativeMeasurableIntegral}(2)和\cref{theo:MeasurableCountableIntegral}可知$K_{f\mid g}(z,\cdot)$是$(Y,\mathscr{A})$上的概率测度；对固定的$A$，由\cref{theo:Fubini}(2)可知$K_{f\mid g}(\cdot,A)$关于$\mathscr{B}$可测。因此$K_{f\mid g}$是从$(Z,\mathscr{B})$到$(Y,\mathscr{A})$的概率核。又因为$p_{f\mid g}=q$ a.e.于$(Y\times Z,\mathscr{A}\times\mathscr{B},\mu\times Pg^{-1})$，由\cref{theo:Fubini}(2)和\cref{prop:MeasurableIntegral}(8)可知对任意的$A\in\mathscr{A},\;B\in\mathscr{B}$有：
+	\begin{align*}
+		&\int_{B}K_{f\mid g}(z,A)\dif Pg^{-1}=\int_{A\times B}p_{f\mid g}(y\mid z)\dif(\mu\times Pg^{-1}) \\
+		=&\int_{A\times B}q(y,z)\dif(\mu\times Pg^{-1})=P(f,g)^{-1}(A\times B)=P(\{f\in A\}\cap\{g\in B\})
+	\end{align*}
+	于是$K_{f\mid g}$是$f$关于$g$的条件概率核，$p_{f\mid g}$是$f$关于$g$相对于$\mu$的条件概率密度函数。
+\end{proof}
+\begin{property}\label{prop:ConditionalProbabilityDensity}
+	设$f,g$分别是从概率空间$(X,\mathscr{F},P)$到可测空间$(Y,\mathscr{A})$和$(Z,\mathscr{B})$的可测映射，$\mu,\nu$分别是$(Y,\mathscr{A})$和$(Z,\mathscr{B})$上的$\sigma$有限测度。若$P(f,g)^{-1}\ll\mu\times\nu$，记：
+	\begin{equation*}
+		p_{f,g}\coloneq\dfrac{\dif P(f,g)^{-1}}{\dif(\mu\times\nu)},\quad p_f\coloneq\dfrac{\dif Pf^{-1}}{\dif\mu},\quad p_g\coloneq\dfrac{\dif Pg^{-1}}{\dif\nu}
+	\end{equation*}
+	由\cref{theo:RadonNikodym}和\cref{theo:MarginalDensity}，可重新定义$p_{f,g},p_f,p_g$，使它们处处有限、非负且满足：
+	\begin{equation*}
+		p_f(y)=\int_{Z}p_{f,g}(y,z)\dif\nu\;\text{a.e.于$(Y,\mathscr{A},\mu)$},\quad
+		p_g(z)=\int_{Y}p_{f,g}(y,z)\dif\mu\;\text{a.e.于$(Z,\mathscr{B},\nu)$}
+	\end{equation*}
+	则：
+	\begin{enumerate}
+		\item(条件概率密度公式) 定义：
+		\begin{equation*}
+			p_{f\mid g}(y\mid z)\coloneq
+			\begin{cases}
+				\dfrac{p_{f,g}(y,z)}{p_g(z)},&p_g(z)>0 \\
+				0,&p_g(z)=0
+			\end{cases}
+		\end{equation*}
+		则$p_{f\mid g}$是$f$关于$g$相对于$\mu$的条件概率密度函数；
+		\item(全概率公式) 有：
+		\begin{equation*}
+			p_f(y)=\int_{Z}p_{f\mid g}(y\mid z)p_g(z)\dif\nu\;\text{a.e.于$(Y,\mathscr{A},\mu)$}
+		\end{equation*}
+		\item(贝叶斯公式) 存在$N\in\mathscr{A}$满足$\mu(N)=0$且对任意的$y\in\{p_f(y)>0\}\setminus N$有：
+		\begin{equation*}
+			p_{g\mid f}(z\mid y)=\frac{p_{f\mid g}(y\mid z)p_g(z)}{p_f(y)}\;\text{a.e.于$(Z,\mathscr{B},\nu)$}
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)记$N=\{z\in Z:p_g(z)=0\}$，由\cref{prop:MeasurableFunction}(1.b)(1.a)和\cref{prop:SigmaField}(4)可知$N\in\mathscr{B}$。根据\cref{theo:MarginalDensity}可得：
+	\begin{equation*}
+		Pg^{-1}(N)=\int_{N}p_g(z)\dif\nu=0,\quad\int_{Y\times N}p_{f,g}(y,z)\dif(\mu\times\nu)=\int_{N}p_g(z)\dif\nu=0
+	\end{equation*}
+	可以验证$p_{f\mid g}$是$(Y\times Z,\mathscr{A}\times\mathscr{B})$上的非负可测函数。任取$A\in\mathscr{A},\;B\in\mathscr{B}$，由\cref{lem:IntChangeOfMeasure}、\cref{prop:MeasurableIntegral}(6)、\cref{prop:SigmaField}(4)、\cref{theo:MeasurableCountableIntegral}和\cref{theo:Fubini}(2)可得：
+	\begin{align*}
+		&\int_{B}\left[\int_{A}p_{f\mid g}(y\mid z)\dif\mu\right]\dif Pg^{-1}=\int_{B}\left[\int_{A}p_{f\mid g}(y\mid z)\dif\mu\right]p_g(z)\dif\nu \\
+		=&\int_{B\setminus N}\left[\int_{A}p_{f,g}(y,z)\dif\mu\right]\dif\nu=\int_{A\times B}p_{f,g}(y,z)\dif(\mu\times\nu)=P(f,g)^{-1}(A\times B)
+	\end{align*}
+	第三式等于第四式用到了\cref{theo:MeasurableCountableIntegral}和\cref{prop:NonnegativeMeasurableIntegral}(2)：
+	\begin{equation*}
+		0=\int_{Y\times N}p_{f,g}(y,z)\dif(\mu\times\nu)\geqslant\int_{A\times(B\cap N)}p_{f,g}(y,z)\dif(\mu\times\nu)\geqslant0
+	\end{equation*}
+	对任意的$C\in\mathscr{A}\times\mathscr{B}$，定义：
+	\begin{equation*}
+		\varphi(C)\coloneq\int_{C}p_{f\mid g}(y\mid z)\dif(\mu\times Pg^{-1})
+	\end{equation*}
+	由$\varphi(Y\times Z)=1$、\cref{prop:NonnegativeMeasurableIntegral}(2)和\cref{theo:MeasurableCountableIntegral}可知$\varphi$是$(Y\times Z,\mathscr{A}\times\mathscr{B})$上的概率测度，根据\cref{theo:Fubini}可得$\varphi$与$P(f,g)^{-1}$在所有可测矩形上相等。由\cref{lem:PiExtensionMeasure}可得$\varphi=P(f,g)^{-1}$，从而$p_{f\mid g}$是$P(f,g)^{-1}$关于$\mu\times Pg^{-1}$的Radon-Nikodym导数。由\cref{prop:ConditionalProbabilityDensityBasic}(2)可知$p_{f\mid g}$是$f$关于$g$相对于$\mu$的条件概率密度函数。\par
+	(2)任取$A\in\mathscr{A}$。由\cref{prop:ConditionalProbabilityDensityBasic}(1)、$Pg^{-1}\ll\nu$、\cref{lem:IntChangeOfMeasure}和\cref{theo:Fubini}(2)可得：
+	\begin{align*}
+		&Pf^{-1}(A)=P(\{f\in A\}\cap\{g\in Z\})=\int_{Z}\left[\int_{A}p_{f\mid g}(y\mid z)\dif\mu\right]\dif Pg^{-1} \\
+		=&\int_{Z}\left[\int_{A}p_{f\mid g}(y\mid z)\dif\mu\right]p_g(z)\dif\nu=\int_{A}\left[\int_{Z}p_{f\mid g}(y\mid z)p_g(z)\dif\nu\right]\dif\mu
+	\end{align*}
+	由\cref{theo:RadonNikodym}即可得出结论。\par
+	(3)由(1)可知对$p_f(y)>0$的$y$有：
+	\begin{equation*}
+		p_{g\mid f}(z\mid y)=\frac{p_{f,g}(y,z)}{p_f(y)}
+	\end{equation*}
+	根据$p_{f\mid g}$的定义可知：
+	\begin{equation*}
+		p_{f,g}(y,z)=p_{f\mid g}(y\mid z)p_g(z)\;\text{a.e.于$(Y\times Z,\mathscr{A}\times\mathscr{B},\mu\times\nu)$}
+	\end{equation*}
+	令：
+	\begin{equation*}
+		E=\left\{(y,z)\in Y\times Z:p_{f,g}(y,z)\neq p_{f\mid g}(y\mid z)p_g(z)\right\}
+	\end{equation*}
+	则$(\mu\times\nu)(E)=0$。对任意$y\in Y$，记$E_y=\{z\in Z:(y,z)\in E\}$\info{$E_y$的可测性}，由\cref{theo:MeasurableCountableIntegral}和\cref{theo:Fubini}(2)可得：
+	\begin{align*}
+		0&=(\mu\times\nu)(E)=\int_{Y\times Z}I_E(y,z)\dif(\mu\times\nu)=\int_{Y}\left[\int_{Z}I_E(y,z)\dif\nu\right]\dif\mu \\
+		&=\int_{Y}\left[\int_{Z}I_{E_y}(z)\dif\nu\right]\dif\mu=\int_{Y}\nu(E_y)\dif\mu
+	\end{align*}
+	因为$\nu(E_y)\geqslant0$，根据\cref{prop:MeasurableIntegral}(9)可知$\nu(E_y)=0\;$a.e.于$(Y,\mathscr{A},\mu)$。记$N=\{\nu(E_y)\ne0\}$，则对任意的$y\in\{p_f(y)>0\}\setminus N$有：
+	\begin{equation*}
+		p_{f,g}(y,z)=p_{f\mid g}(y\mid z)p_g(z)\;\text{a.e.于$(Z,\mathscr{B},\nu)$}
+	\end{equation*}
+	代入即可知结论成立。
+\end{proof}
