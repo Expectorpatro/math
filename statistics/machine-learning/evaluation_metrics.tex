@@ -68,6 +68,15 @@ Accuracy 将正类和负类的正确预测汇总为一个整体比例，因而�
 \begin{note}
   调和平均的性质使$\operatorname{F1}$得分对低值敏感——当精确率或召回率其中之一很低时，$\operatorname{F1}$会显著下降，因此它常用作综合评价指标，适用于精确率和召回率同等重要的情形。
 \end{note}
+\begin{definition}
+	$\operatorname{F}_{\beta}$分数是$\operatorname{F1}$得分的推广，通过参数$\beta>0$调节精确率与召回率的重要性：
+	\begin{equation*}
+		\operatorname{F}_{\beta}=(1+\beta^2)\frac{\operatorname{Precision}\times\operatorname{Recall}}{\beta^2\operatorname{Precision}+\operatorname{Recall}}=\dfrac{1}{\dfrac{\beta^2}{1+\beta^2}\dfrac{1}{\operatorname{Recall}}+\dfrac{1}{1+\beta^2}\dfrac{1}{\operatorname{Precision}}}
+	\end{equation*}
+\end{definition}
+\begin{note}
+	当$|\beta|=1$时，$\operatorname{F}_{\beta}$退化为$\operatorname{F1}$；当$|\beta|>1$时，召回率具有更大的权重，适用于更关注漏检的任务；当$0<|\beta|<1$时，精确率具有更大的权重，适用于更关注误报的任务。因此，相比固定地给予精确率与召回率相同权重的$\operatorname{F1}$，$\operatorname{F}_{\beta}$能够根据具体任务中两类错误的重要程度进行调整。
+\end{note}
 许多分类器并不直接输出类别，而是为每个样本输出一个连续得分或属于正类的概率，并在给定阈值后将其转化为分类结果。然而，分类阈值并不存在适用于所有任务的固定选择，即使模型输出的是概率，也不能机械地将$0.5$作为阈值。阈值的选择取决于正类的基础发生率、假正类与假负类的相对代价以及模型所服务的具体决策目标。\par
 以罕见病筛查为例，假设某种疾病在人群中的患病率仅为$0.1\%$。若模型预测某位受检者的患病概率为$10\%$，那么其患病风险已经达到普通人群的$100$ 倍，显然应当被识别为高风险个体并接受进一步检查。然而，$10\%$仍然低于$50\%$；若机械地将$0.5$作为分类阈值，该受检者就会被判定为阴性。类似地，在身份认证或银行人脸识别中，系统可能更重视防止冒用身份，因此会采用更加严格的判定阈值，以降低错误接受非本人的概率。\par
 由此可见，同一个模型在不同应用场景中可能需要采用完全不同的阈值，而模型在某一个固定阈值下的表现不能完整反映其分类能力。为了减少评价结果对特定阈值选择的依赖，可以考察阈值连续变化时模型性能的变化，并将其表示为性能曲线。我们希望一个模型在较广的阈值范围内均能保持较好的正负类区分能力，因此可以进一步使用曲线下面积评价模型的综合表现。
@@ -123,6 +132,37 @@ Accuracy 将正类和负类的正确预测汇总为一个整体比例，因而�
   	\end{tikzpicture}
   	\caption{PR曲线示意}
   \end{figure}
+\end{note}
+对于能够输出预测概率的分类模型，模型性能至少涉及两个不同方面：一方面，模型应具有良好的排序能力，即正类样本通常获得高于负类样本的预测分数；另一方面，模型给出的预测概率还应具有可靠的概率解释。前者通常可以通过AUROC评价，但良好的排序能力并不意味着预测概率本身准确。例如，某模型可能始终给真正的正类样本赋予高于负类样本的预测概率，从而获得较高的AUROC，但对于所有预测概率约为$0.8$的样本，实际只有约$60\%$属于正类。此时模型虽然能够较好地区分样本的相对风险高低，却系统性高估了事件发生的绝对概率。因此，还需要进一步考察预测概率与实际事件发生频率之间的一致程度。
+\begin{definition}
+	设分类模型对样本$x_i$给出的正类预测概率为$\hat{p}_i$。将预测概率的取值范围划分为若干区间$\seq{B}{K}$，对于每个区间$B_k$，分别计算其中样本被预测为正类的概率的平均值以及真实正类比例：
+	\begin{equation*}
+		\operatorname{Pred}(B_k)=\frac{1}{|B_k|}\sum_{i:\hat{p}_i\in B_k}\hat{p}_i,\quad\operatorname{Obs}(B_k)=\frac{1}{|B_k|}\sum_{i:\hat{p}_i\in B_k}y_i
+	\end{equation*}
+	其中$|B_k|$表示落入第$k$个概率区间$B_k$中的样本数量。\gls{CalibrationCurve}为以$\operatorname{Pred}(B_k)$为横轴、$\operatorname{Obs}(B_k)$为纵轴作图得到的曲线。
+\end{definition}
+\begin{note}
+	理想情况下校准曲线应与直线$y=x$重合。若校准曲线位于$y=x$下方，则说明模型给出的预测概率整体偏高，反之模型给出的预测概率整体偏低。
+	\begin{figure}[H]
+		\centering
+		\begin{tikzpicture}[scale=3]
+			% 坐标轴
+			\draw[->] (0,0) -- (1.05,0) node[right] {\scriptsize Predicted Probability};
+			\draw[->] (0,0) -- (0,1.05) node[above] {\scriptsize Observed Frequency};
+			
+			% 完美校准线
+			\draw[dashed, gray] (0,0) -- (1,1);
+			
+			% 示意校准曲线
+			\draw[color=blue, thick]
+			(0.05,0.08)
+			.. controls (0.25,0.18) and (0.40,0.32) ..
+			(0.55,0.45)
+			.. controls (0.70,0.55) and (0.85,0.70) ..
+			(0.98,0.82);
+		\end{tikzpicture}
+		\caption{校准曲线示意}
+	\end{figure}
 \end{note}
 \subsubsection{多分类}
 与二分类问题不同，多分类问题中不存在唯一的正类与负类，因此通常需要先分别考察模型在每个类别上的表现，再通过适当的平均方式得到整体评价指标。\par

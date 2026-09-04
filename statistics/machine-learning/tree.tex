@@ -405,7 +405,7 @@
 		\Ensure Root node $T$ of the fitted decision tree
 		
 		\Function{CreateLeaf}{$\mathcal{D}$}
-		\If{criterion $\in\{\texttt{gini},\texttt{entropy}$}
+		\If{criterion $\in\{\texttt{gini},\texttt{entropy}\}$}
 		\State Let the class label set be $\{1,2,\dots,K\}$
 		\State $n_i\gets|\{(x,y)\in\mathcal{D}:y=i\}|$,
 		$p_i\gets n_i/|\mathcal{D}|$, $i=1,2,\dots,K$
@@ -494,7 +494,7 @@
 \subsection{随机森林}
 单棵决策树采用自上而下的贪心策略：在每个节点上，只根据当前到达该节点的样本选择局部最优的划分，而一旦划分确定，后续节点便只能在由该划分得到的子样本上继续生长。因此，靠近根节点的划分不仅决定样本最初被如何分组，还会改变之后各个节点所面对的数据，从而影响整棵子树的结构。\par
 当训练样本发生轻微变化时，原本表现接近的几个候选划分可能交换优劣次序，使算法选择不同的划分变量或划分点。若这种变化发生在靠近根节点的位置，大量样本会被重新分配到不同的分支，后续所有划分都可能随之改变，最终形成结构和预测结果差异显著的决策树。因此，单棵决策树对训练数据中的随机扰动较为敏感，通常具有较大的方差。\par
-为了减小这种不稳定性，可以利用不同的训练样本生成$B$棵决策树$T_1,T_2,\dots,T_B$，再将它们的预测结果聚合起来。对于回归任务，通常取各棵树预测的平均值：
+为了减小这种不稳定性，可以利用不同的训练样本生成$B$棵决策树$\seq{T}{B}$，再将它们的预测结果聚合起来。对于回归任务，通常取各棵树预测的平均值：
 \begin{equation*}
 	f_{\mathrm{bag}}(x)=\frac{1}{B}\sum_{b=1}^{B}T_b(x)
 \end{equation*}
@@ -503,9 +503,9 @@
 	f_{\mathrm{bag}}(x)=\underset{1\leqslant k\leqslant K}{\arg\max}\;
 	\sum_{b=1}^{B}I[T_b(x)=k]
 \end{equation*}
-这种聚合之所以能够改善单棵树的预测，可以由下面的性质说明。
+下面的性质说明了这种聚合能够有效地改善预测精度。
 \begin{property}\label{prop:TreeEnsemble}
-	在固定样本点$x$处，树的集成模型具有如下性质：
+	在固定样本点$x$处，树的集成模型具有如下性质\footnote{从证明可以看出下面两条性质没有用到任何有关树模型的知识，因此它们适用于所有类似的集成方法。}：
 	\begin{enumerate}
 		\item 若任意一棵树的预测均满足$\operatorname{Var}[T_b(x)]=\sigma^2$，且任意两棵不同的树均满足$\operatorname{Corr}[T_b(x),T_{b'}(x)]=\rho$，则平均预测的方差为：
 		\begin{equation*}
@@ -532,7 +532,7 @@
 		\leqslant\exp\left[-2B\left(\frac{1}{2}-p\right)^2\right]\qedhere
 	\end{equation*}
 \end{proof}
-第一条性质表明，增加树的数量可以逐渐消除各棵树中互不相关的波动，但无法消除它们共同的波动：即使$B$不断增大，集成预测的方差仍受到$\rho\sigma^2$的限制。第二条性质则说明，当每棵树的判断优于随机猜测，并且各棵树的错误不易同时发生时，多数投票可以指数级降低分类错误率。因此，有效的树集成既要求单棵树具有一定的预测能力，也要求不同树之间存在足够的差异。\par
+第一条性质表明，增加树的数量可以逐渐消除各棵树中互不相关的波动，从而降低预测的方差，但是无法消除它们共同的波动：即使$B$不断增大，集成预测的方差仍受到$\rho\sigma^2$的限制。第二条性质则说明，当每棵树的判断优于随机猜测，并且各棵树的错误不易同时发生时，多数投票可以指数级降低分类错误率。因此，有效的树集成既要求单棵树具有一定的预测能力，也要求不同树之间存在足够的差异。\par
 \gls{RF}正是依据上述条件构造的。它仍以决策树作为基本模型，以保留决策树拟合复杂关系的能力；同时通过样本与特征两个层面的随机化，降低不同树之间的相关性。设训练数据集为$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^{n}$，其中$x_i$具有$p$个特征。训练第$b$棵树时，先从$\mathcal{D}$中有放回地抽取$n$个样本，得到样本集$\mathcal{D}^{(b)}$。不同的树使用不同的样本集，因而会受到不同样本扰动的影响。
 \begin{note}
 	重复采样还可以为模型提供内部验证。对于某棵树，没有被其样本集选中的训练样本称为该树的\gls{OOB}。对每个训练样本，只聚合所有未使用该样本进行训练的树所给出的预测，便可得到相应的OOB预测；将OOB预测与真实响应比较，可以在不另外划分验证集的情况下估计模型的真实误差。
@@ -541,6 +541,16 @@
 \begin{note}
 	随机森林使用决策树作为基本模型，但这种“分别训练多个模型，再对预测进行平均或投票”的思想并不局限于决策树。只要单个模型具有一定的预测能力，并且能够通过训练样本或模型结构的随机化产生足够不同的预测，就可以采用类似的集成方法。
 \end{note}
+\begin{definition}
+	设集成模型由$B$个分别训练得到的预测模型$\seq{f}{B}$组成。称其中每个$f_b$为该集成模型的\gls{BaseLearner}。
+\end{definition}
+\begin{definition}
+	设训练数据集为$\mathcal{D}$。对$b=1,2,\dots,B$，分别从$\mathcal{D}$中进行有放回的随机抽样得到$\mathcal{D}^{(b)}$，并在$\mathcal{D}^{(b)}$上训练基模型$f_b$。将这些基模型的预测结果进行聚合所得的集成模型$f_{\mathrm{bag}}$称为\gls{BaggingEnsembleModel} ，即：
+	\begin{equation*}
+		f_{\mathrm{bag}}(x)\coloneq\operatorname{Agg}\left[f_1(x),f_2(x),\dots,f_B(x)\right]
+	\end{equation*}
+	其中$\operatorname{Agg}$表示聚合算子：回归任务中通常取平均，分类任务中通常采用多数投票。
+\end{definition}
 
 \subsection{GBDT}
 \subsubsection{逐步修正已有预测}
@@ -763,13 +773,13 @@ XGBoost继承了Boosting模型和GBDT逐步加法优化的基本思想，但进�
 		\State Compute first- and second-order statistics for all training samples:
 		\State $g_{ib}\gets \dfrac{\partial L(y_i,F)}{\partial F}\big|_{F=F_{b-1}(x_i)},\;h_{ib}\gets \dfrac{\partial^2L(y_i,F)}{\partial F^2}\big|_{F=F_{b-1}(x_i)},\;i=1,2,\dots,n$
 		
-		\State Fit a regression tree structure $T_b$
-		
-		\State Let the leaf regions of $T_b$ be $R_{1b},R_{2b},\dots,R_{J_b b}$
+		\State Fit a regression tree structure $T_b$. Let the leaf regions of $T_b$ be $R_{1b},R_{2b},\dots,R_{J_b b}$
 		
 		\For{$j=1,2,\dots,J_b$}
-		\State Compute aggregated statistics on region $R_{jb}$
-		\State $G_{jb}\gets\sum\limits_{x_i\in R_{jb}}g_{ib},\quad H_{jb}\gets\sum\limits_{x_i\in R_{jb}}h_{ib}$
+		\State Compute aggregated statistics on region $R_{jb}$:
+		\begin{equation*}
+			G_{jb}\gets\sum\limits_{x_i\in R_{jb}}g_{ib},\quad H_{jb}\gets\sum\limits_{x_i\in R_{jb}}h_{ib}
+		\end{equation*}
 		
 		\State Compute the optimal leaf output
 		\begin{equation*}

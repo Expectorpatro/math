@@ -227,15 +227,26 @@
       "sources": ["probability-theory/basis/numerical-characteristics.tex"]
     },
     {
+      "id": "conditional-probability-kernel",
+      "symbol": "K_{f\\mid g}(z,A)",
+      "name": "条件概率核",
+      "meaning": "在给定 g=z 时，f 的条件分布随 z 可测变化所组成的概率核。",
+      "category": "集合、测度与概率",
+      "scope": ["概率论", "统计学"],
+      "convention": "K_{f\\mid g} 是从 g 的值空间到 f 的值空间的概率核；对每个固定的 z，K_{f\\mid g}(z,\\cdot) 是概率测度，对每个固定的事件 A，K_{f\\mid g}(\\cdot,A) 是可测函数。它通过联合积分公式与 P(f,g)^{-1} 联系，并满足 K_{f\\mid g}(g(\\omega),A)=P(f\\in A\\mid g)(\\omega) a.e.于 (X,\\sigma(g),P)。一般可测空间上的条件概率核不必自动存在；若 P(f,g)^{-1}\\ll\\mu\\times Pg^{-1} 且 \\mu 为 \\sigma 有限测度，则条件概率密度基本性质(2)通过密度归一化和异常点补全同时构造条件概率核与条件概率密度。",
+      "avoid": ["把 K_{f\\mid g}(z,A) 当成乘积空间上的单个概率测度", "由逐个事件的条件期望版本直接断言条件概率核必然存在", "在 P(g=z)=0 时用事件概率商式定义核"],
+      "sources": ["probability-theory/basis/expectation.tex"]
+    },
+    {
       "id": "conditional-density",
       "symbol": "p_{f\\mid g}(x\\mid y),\\;p_{f,g}(x,y),\\;p_{\\theta;f\\mid g}(x\\mid y),\\;p_{\\theta;f,g}(x,y)",
       "name": "条件概率密度与联合密度",
-      "meaning": "随机向量 f 在给定 g 的条件下的概率密度，以及随机向量 (f,g) 的联合概率密度。",
+      "meaning": "条件概率核 K_{f\\mid g} 关于 f 的值空间上的控制测度的密度，以及可测映射 (f,g) 的联合概率密度。",
       "category": "集合、测度与概率",
       "scope": ["概率论", "统计学"],
-      "convention": "条件密度通过 P(f\\in A\\mid g) 的积分表示定义，并仅在相应的 a.e. 意义下唯一；联合密度存在时，在 p_g(y)>0 的区域可取 p_{f\\mid g}(x\\mid y)=p_{f,g}(x,y)/p_g(y)。参数模型中将参数写在分号前、随机对象写在分号后，如 p_{\\theta;f\\mid g}(x\\mid y)。",
-      "avoid": ["用 P(g=y)=0 时的事件条件概率商式定义条件密度", "忽略 p_g(y)=0 集合上的版本任意性", "仅由两个边际密度存在推断联合密度存在", "在参数化条件密度的下标中混淆参数与随机对象"],
-      "sources": ["probability-theory/basis/numerical-characteristics.tex", "statistics/statistical-computing/main.tex"]
+      "convention": "先确认条件概率核存在，再将 p_{f\\mid g}(x\\mid y) 定义为该核关于 f 的值空间上的控制测度的密度；它仅在 \\mu\\times Pg^{-1} 的 a.e.意义下唯一。联合分布关于 \\mu\\times\\nu 绝对连续时，可令 p_g(y)=\\int p_{f,g}(x,y)\\,\\dif\\mu，并在 0<p_g(y)<+\\infty 处取 p_{f\\mid g}(x\\mid y)=p_{f,g}(x,y)/p_g(y)，在其余点用一个固定的概率密度补全，从而同时得到处处定义的条件概率密度版本和条件概率核。参数模型中将参数写在分号前、随机对象写在分号后，如 p_{\\theta;f\\mid g}(x\\mid y)。",
+      "avoid": ["绕过条件概率核而把逐个事件的条件概率版本直接拼成密度", "用 P(g=y)=0 时的事件条件概率商式定义条件密度", "忽略 p_g(y)=0 集合上的版本任意性", "仅由两个边际密度存在推断联合密度存在", "在参数化条件密度的下标中混淆参数与随机对象"],
+      "sources": ["probability-theory/basis/expectation.tex", "statistics/statistical-computing/main.tex"]
     },
     {
       "id": "lp-spaces",
@@ -427,13 +438,13 @@
     },
     {
       "id": "em-objectives",
-      "symbol": "\\mathcal{L}_{\\theta}(q;x),\\;Q(\\theta\\mid\\theta^{(t)};x)",
-      "name": "EM 算法的证据下界与 Q 函数",
-      "meaning": "给定观测值 x 时，参数化证据下界以及以当前参数为条件的完全数据对数似然条件期望。",
+      "symbol": "\\mathcal{L}(q;x),\\;\\mathcal{L}_{\\theta}(q;x),\\;Q(\\theta\\mid\\theta^{(t)};x)",
+      "name": "变分推断与 EM 算法的目标函数",
+      "meaning": "在一般可测空间上给定观测值 x 时，变分证据下界、参数化证据下界以及以当前参数为条件的完全数据对数似然积分。",
       "category": "统计模型与应用",
       "scope": ["统计计算", "EM 算法"],
-      "convention": "\\mathcal{L}_{\\theta}(q;x) 的下标标明模型参数，分号后的 x 表示固定观测值；Q 的竖线分隔待优化参数与当前迭代参数。",
-      "avoid": ["写成含未定义变量 y 的 L(q,y)", "省略 ELBO 对模型参数的依赖", "把变分密度 q 与隐变量的边际密度混同"],
+      "convention": "q 是相对于推断对象或潜变量值空间上指定控制测度的概率密度；\\mathcal{L}_{\\theta}(q;x) 的下标标明模型参数，分号后的 x 表示固定观测值；Q 的竖线分隔待优化参数与当前迭代参数。相关定义只需要可测空间和 sigma 有限控制测度，不默认值空间是欧氏空间。",
+      "avoid": ["写成含未定义变量 y 的 L(q,y)", "省略 ELBO 对模型参数的依赖", "把变分密度 q 与隐变量的边际密度混同", "无必要地把变分推断或 EM 限制在欧氏空间和 Lebesgue 测度上"],
       "sources": ["statistics/statistical-computing/main.tex"]
     },
     {
