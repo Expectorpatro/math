@@ -26,9 +26,9 @@
 \end{enumerate}\par
 需要强调的是，外部评价指标的引入并不意味着聚类任务转化为监督学习问题。外部指标的核心作用在于：当研究者在特定观测样本集中事先掌握某种参考划分时，用以分析既有标签与数据内在结构之间的一致性关系。从而对聚类算法、距离度量或参数设置进行事后评估与比较。因此，外部指标并不参与聚类过程本身，也不作为聚类目标函数进行优化，而是作为一种方法学意义上的对照标准，为研究者理解聚类结果与现实语义之间的关系提供了一种量化参照，帮助研究者理解数据自身在多大程度上支持、修正或挑战已有的分类体系。\par
 当外部一致性较高时，说明在当前特征表示与距离度量下，数据的几何或统计结构能够较好地支持既定的类别划分；例如，在文本主题分析或基因表达数据中，若聚类结果与人工标注的主题类别或生物亚型高度一致，则可认为该标签在数据空间中具有较清晰的结构基础。相反，当外部一致性较低时，这并不必然意味着聚类算法失效，而可能揭示出标签本身的局限性：例如，在心理测量或社会科学调查中，理论上区分的若干类型可能在实际数据中呈现出连续分布或显著重叠；又如，在医学诊断中，同一疾病标签下的样本可能包含多个具有不同分子机制的亚群。此时，聚类结果与外部标签之间的不一致，反而为研究者提供了重新审视标签定义、发现潜在异质结构或子群划分的线索。\par
-设观测样本集$\mathcal{D}=\{x_i\}_{i=1}^n,\;x_i\in\mathbb{R}^m$，聚类输出标签$y_i\in\{1,\dots,K\}$（或包含噪声$-1$），第$k$簇为$C_k=\{i:y_i=k\}$，簇大小$n_k=|C_k|$，簇中心和总体均值定义为：
+设观测样本集$\mathcal{D}=\{x_i\}_{i=1}^n,\;x_i\in\mathbb{R}^m$，聚类输出标签$y_i\in\{1,2,\dots,K\}$（或包含噪声$-1$），第$k$簇为$C_k=\{i:y_i=k\}$，簇大小$n_k=|C_k|$，簇中心和总体均值定义为：
 \begin{equation*}
-	\mu_k=\frac{1}{n_k}\sum_{i\in C_k}x_i,\quad\bar{x}=\frac{1}{n}\sum_{i=1}^n x_i
+	\mu_k=\frac{1}{n_k}\sum_{i\in C_k}x_i,\quad\bar{x}=\frac{1}{n}\sum_{i=1}^nx_i
 \end{equation*}
 \subsubsection{内部指标}
 \begin{definition}
@@ -280,8 +280,8 @@
 		number of clusters $K$;
 		maximum number of iterations $T$;
 		tolerance $\varepsilon$
-		\Ensure Cluster assignments $\{C_1,\dots,C_K\}$;
-		centroids $\{\mu_1,\dots,\mu_K\}$
+		\Ensure Cluster assignments $\{\seq{C}{K}\}$;
+		centroids $\{\seq{\mu}{K}\}$
 		
 		\State Select the first centroid $\mu_1$ uniformly at random from $\mathcal{D}$ \Comment{Initialization step}
 		\For{$k=2$ \textbf{to} $K$}
@@ -308,7 +308,7 @@
 		\State \textbf{break}
 		\EndIf
 		
-		\State $\mu_k \gets \mu_k^{\text{new}},\;\forall\;k=1,\dots,K$
+		\State $\mu_k \gets \mu_k^{\text{new}},\;\forall\;k=1,2,\dots,K$
 		\EndFor
 	\end{algorithmic}
 \end{algorithm}
@@ -322,13 +322,13 @@
 	\caption{K-modes Clustering Algorithm with Cao Initialization}
 	\label{alg:Kmodes}
 	\begin{algorithmic}[1]
-		\Require Categorical data $\mathcal{D}=\{x_i\}_{i=1}^n$, where $x_i=(x_{i1},\dots,x_{ip})$;
+		\Require Categorical data $\mathcal{D}=\{x_i\}_{i=1}^n$, where $x_i=(x_{i1},x_{i2},\dots,x_{ip})$;
 		number of clusters $K$;
 		maximum number of iterations $T$
-		\Ensure Cluster assignments $\{C_1,\dots,C_K\}$;
-		modes $\{m_1,\dots,m_K\}$
+		\Ensure Cluster assignments $\{\seq{C}{K}\}$;
+		modes $\{\seq{m}{K}\}$
 		
-		\State For each categorical variable $j=1,\dots,p$, let $\mathcal C_j$ denote its set of possible categories.
+		\State For each categorical variable $j=1,2,\dots,p$, let $\mathcal C_j$ denote its set of possible categories.
 		For each $c\in\mathcal C_j$, compute
 		\[
 		f_j(c)
@@ -383,13 +383,13 @@ Cao初始化的核心思想在于：初始聚类原型应当同时具备代表�
 		number of clusters $K$;
 		trade-off parameter $\gamma>0$;
 		maximum number of iterations $T$
-		\Ensure Cluster assignments $\{C_1,\dots,C_K\}$;
+		\Ensure Cluster assignments $\{\seq{C}{K}\}$;
 		prototypes $\{(\mu_k,m_k)\}_{k=1}^K$
 		
-		\State Initialize numerical prototypes $\mu_1,\dots,\mu_K$ \Comment{Initialization step}
+		\State Initialize numerical prototypes $\seq{\mu}{K}$ \Comment{Initialization step}
 		by applying K-means++ initialization
 		
-		\State Initialize categorical prototypes $m_1,\dots,m_K$
+		\State Initialize categorical prototypes $\seq{m}{K}$
 		by applying Cao initialization
 		
 		\For{$t=1$ \textbf{to} $T$} \Comment{Assignment step}
@@ -436,10 +436,10 @@ Cao初始化的核心思想在于：初始聚类原型应当同时具备代表�
 		linkage criterion $L$;
 		distance metric $\rho(\cdot,\cdot)$;
 		target number of clusters $K$ \textbf{or} distance threshold $h_0$
-		\Ensure Cluster assignments $\{C_1,\dots,C_{K}\}$;
+		\Ensure Cluster assignments $\{\seq{C}{K}\}$;
 		merge history (dendrogram)
 		
-		\State Initialize clusters $C_i \gets \{x_i\}$ for $i=1,\dots,n$
+		\State Initialize clusters $C_i \gets \{x_i\}$ for $i=1,2,\dots,n$
 		\State Compute initial pairwise dissimilarities $D_L(C_p,C_q)$
 		
 		\While{stopping criterion not satisfied}
@@ -477,7 +477,7 @@ Cao初始化的核心思想在于：初始聚类原型应当同时具备代表�
 		\Require Data points $\mathcal{D}=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m$;
 		neighborhood radius $\varepsilon$;
 		minimum number of points $\operatorname{MinPts}$
-		\Ensure Cluster assignments $\{C_1,\dots,C_K\}$;
+		\Ensure Cluster assignments $\{\seq{C}{K}\}$;
 		noise set $\mathcal{N}$
 		
 		\State Mark all points as \textbf{unvisited}
@@ -666,7 +666,7 @@ OPTICS的优势由此变得很明确：DBSCAN只能在预先选定的单一$\var
 	\end{equation*}
 	并记对应的可达距离序列为：
 	\begin{equation*}
-		r_k=d_{\mathrm{reach}}\left(x_{(k)}\right),\quad k=1,\ldots,n
+		r_k=d_{\mathrm{reach}}\left(x_{(k)}\right),\quad k=1,2,\dots,n
 	\end{equation*}
 	给定参数$\xi\in(0,1)$，若：
 	\begin{equation*}
@@ -721,20 +721,22 @@ OPTICS的优势由此变得很明确：DBSCAN只能在预先选定的单一$\var
 	\caption{两个均值相同但方差不同的正态分布}
 \end{figure}
 在这个例子中，如果只看距离中心$0$的远近，那么两个类别并没有不同的中心可以用来区分。因此，类似K-means这类基于欧氏距离和类中心的聚类方法并不能自然地刻画这种结构。对于基于密度的聚类方法，情况同样并不理想。两个总体的取值区域高度重叠，并共同形成以$0$附近为高密度区域的整体分布，因此仅根据样本之间的局部密度连通关系，也不存在一条自然的低密度边界将两个潜在类别分开。\par
-然而，从概率分布的角度看，这两个类别具有明确的差异。对于同一个观测值$x$，可以分别考察它由两个正态分布产生的可能性。例如，当$|x|$较小时，方差较小的$N(0,0.5^2)$通常能够给出更高的密度；而当$|x|$较大时，方差较大的$N(0,1.5^2)$则相对更加可能产生这样的观测。也就是说，即使两个类别具有相同的中心，只要它们的概率分布不同，仍然可能根据各分布对样本的解释能力对潜在类别进行推断。\par
+然而，从概率分布的角度看，这两个类别具有明确的差异。当$|x|$较小时，方差较小的$N(0,0.5^2)$通常能够给出更高的密度；而当$|x|$较大时，方差较大的$N(0,1.5^2)$则相对更加可能产生这样的观测。也就是说，即使两个类别具有相同的中心，只要它们的概率分布不同，仍然可能根据各分布对样本的解释能力对潜在类别进行推断。\par
 这提示我们可以不再直接将一个簇理解为围绕某个中心形成的点集，或者某个密度连通区域，而是假设每个簇对应一个概率分布。样本首先从某个潜在类别中产生，再由该类别对应的概率分布生成。
 \begin{definition}
-	设随机向量$X\in\mathbb{R}^p$，隐变量$Z\in\{1,2,\dots,K\}$满足：
+	设$\mathbf{X}$为$p$维随机向量，随机变量$Z\in\{1,2,\dots,K\}$满足：
 	\begin{equation*}
 		P(Z=k)=\pi_k,\quad\pi_k>0,\quad\sum_{k=1}^{K}\pi_k=1
 	\end{equation*}
 	并且在给定$Z=k$时有：
 	\begin{equation*}
-		X\mid Z=k\sim N_p(\mu_k,\Sigma_k)
+		\mathbf{X}\mid Z=k\sim N_p(\mu_k,\Sigma_k)
 	\end{equation*}
-	其中$\mu_k\in\mathbb{R}^p$，$\Sigma_k\in M_p(\mathbb{R})$为正定矩阵。由\cref{prop:ConditionalProbabilityDensity}(2)可知$X$的密度为：
+	其中$\mu_k\in\mathbb{R}^p$，$\Sigma_k\in M_p(\mathbb{R})$为正定矩阵。由\cref{prop:ConditionalProbabilityDensity}(2)可知：
 	\begin{equation*}
 		p(x)=\sum_{k=1}^{K}\pi_k\phi_p(x;\mu_k,\Sigma_k)
 	\end{equation*}
-	其中$\phi_p(x;\mu_k,\Sigma_k)$为$p$维正态分布$N_p(\mu_k,\Sigma_k)$的密度函数。称该模型为具有$K$个成分的\gls{GaussianMixtureModel}，称$\pi_k$为第$k$个混合权重，称$N_p(\mu_k,\Sigma_k)$为第$k$个混合成分。
+	其中$\phi_p(x;\mu_k,\Sigma_k)$为$p$维正态分布$N_p(\mu_k,\Sigma_k)$的密度函数。称该模型为具有$K$个成分的\gls{GMM}，称$\pi_k$为第$k$个混合权重，称$N_p(\mu_k,\Sigma_k)$为第$k$个混合成分。
 \end{definition}
+对每个观测$x_i$引入表示其所属混合成分的隐变量$Z_i\in\{1,2,\dots,K\}$，使用EM算法即可估计得到$Z_i$的条件分布与各混合成分的参数。$Z_i$的条件分布可作为$x_i$对各类别的软分类结果。若进一步将$x_i$归入后验概率最大的混合成分，则得到相应的硬分类结果。
+

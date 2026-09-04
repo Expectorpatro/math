@@ -438,112 +438,123 @@
 
 \section{变分法}
 \begin{definition}
-	设$\varphi,\mu$是可测空间$(X,\mathscr{F})$上的概率测度，$\varphi\ll\mu$，根据\cref{theo:RadonNikodym}，称：
+	设$\varphi,\psi$是可测空间$(X,\mathscr{F})$上的概率测度，且$\varphi\ll\psi$。由\cref{theo:RadonNikodym}，取$\varphi$关于$\psi$的非负Radon-Nikodym导数：
 	\begin{equation*}
-		\int_{X}\ln\frac{\dif\varphi}{\dif\mu}(x)\dif\varphi
+		r(x)\coloneq\dfrac{\dif\varphi}{\dif\psi}(x)
 	\end{equation*}
-	为$\varphi$关于$\mu$的\gls{KullbackLeiblerDivergence} ，记为$\operatorname{KL}(\varphi\|\mu)$。
+	在集合$\{r=0\}$上将$\ln r$定义为$0$，并约定$0\ln0=0$。根据\cref{lem:IntChangeOfMeasure}，称：
+	\begin{equation*}
+		\operatorname{KL}(\varphi\|\psi)\coloneq\int_{X}\ln r(x)\dif\varphi=\int_{X}r(x)\ln r(x)\dif\psi
+	\end{equation*}
+	为$\varphi$关于$\psi$的\gls{KullbackLeiblerDivergence}。
 \end{definition}
 \begin{note}
-	设$\mu$是可测空间$(X,\mathscr{F})$上的概率测度，我们希望求解$\mu$但是它很难求解，\gls{VariationalMethod}的思想就是取一族形式简单、便于计算的概率函数，并在这一族分布中找到一个最接近$p$的。由\cref{ineq:Gibbs}可以看出KL散度可以被用来衡量分布之间的差异性。
+	设$\mu$是可测空间$(X,\mathscr{F})$上的概率测度，我们希望求解$\mu$但是它很难求解，\gls{VariationalMethod}的思想就是取一族形式简单、便于计算的概率函数，并在这一族分布中找到一个最接近$\mu$的。由\cref{ineq:Gibbs}可以看出KL散度可以被用来衡量分布之间的差异性。
 \end{note}
-\begin{note}
-	在贝叶斯统计中，我们需要求解后验分布$p(y\mid x)$，变分法提供了一个视角。\par
-	设$y\mid x$的概率分布为$\varphi$，其近似概率分布为$\psi$，$\varphi,\psi\ll\mu$，$\varphi,\psi,\mu$是可测空间$(X,\mathscr{F})$上的概率测度，根据\cref{theo:RadonNikodym}，记：
-	\begin{equation*}
-		q(y)=\frac{\dif\psi}{\dif\mu},\quad p(y\mid x)=\frac{\dif\varphi}{\dif\mu}
-	\end{equation*}
-	由\cref{prop:RadonNikodym}(5)和\cref{lem:IntChangeOfMeasure}可知：
-	\begin{equation*}
-		\operatorname{KL}(\psi\|\varphi)=\int_{X}\ln\frac{\dif\psi}{\dif\varphi}\dif\psi=\int_{X}\ln\left(\frac{\dif\psi}{\dif\mu}\Big/\frac{\dif\varphi}{\dif\mu}\right)\dif\psi=\int_{X}\ln\frac{q(y)}{p(y\mid x)}q(y)\dif\mu
-	\end{equation*}
-	由于KL散度公式中存在未知的$p(y\mid x)$，于是需要将其转变为易于求解的形式。由\cref{prop:ConditionalProbability}(1)和\cref{prop:MeasurableIntegral}(6)可得：
-	\begin{align*}
-		&\operatorname{KL}(\psi\|\varphi)=\int_{X}q(y)\ln\frac{q(y)}{p(y\mid x)}\dif\mu=\int_{X}q(y)[\ln q(y)-\ln p(y\mid x)]\dif\mu \\
-		=&\int_{X}q(y)[\ln q(y)-\ln p(y,x)+\ln p(x)]\dif\mu \\
-		=&\int_{X}q(y)[\ln q(y)-\ln p(y,x)]\dif\mu+\int_{X}q(y)\ln p(x)\dif\mu \\
-		=&\int_{X}q(y)[\ln q(y)-\ln p(y,x)]\dif\mu+\ln p(x)\int_{X}q(y)\dif\mu \\
-		=&\int_{X}q(y)[\ln q(y)-\ln p(y,x)]\dif\mu+\ln p(x)
-	\end{align*}
-	于是根据\cref{prop:MeasurableIntegral}(6)可得：
-	\begin{equation*}
-		\ln p(x)=\int_{X}q(y)[\ln p(y,x)-\ln q(y)]\dif\mu+\operatorname{KL}(\psi\|\varphi)
-	\end{equation*}
-	因为$\ln p(x)$与$y$无关，所以最小化$\operatorname{KL}(q\| p)$等价于最大化$\int_{X}q(y)[\ln p(y,x)-\ln q(y)]\dif\mu$。
-\end{note}
+在贝叶斯统计中，设$f,g$分别是从概率空间$(X,\mathscr{F},P)$到可测空间$(Y,\mathscr{A})$和$(Z,\mathscr{B})$的可测映射，其中$f$表示需要推断的对象，$g$表示观测数据。设$\mu,\nu$分别是$(Y,\mathscr{A})$和$(Z,\mathscr{B})$上的$\sigma$有限测度，并假设：
+\begin{equation*}
+	P(f,g)^{-1}\ll\mu\times\nu
+\end{equation*}
+根据\cref{theo:RadonNikodym}和\cref{theo:MarginalDensity}，取：
+\begin{equation*}
+	p_{f,g}=\dfrac{\dif P(f,g)^{-1}}{\dif(\mu\times\nu)},\quad p_g(z)=\dfrac{\dif Pg^{-1}}{\dif\nu}=\int_{Y}p_{f,g}(y,z)\dif\mu
+\end{equation*}
+由\cref{prop:ConditionalProbabilityDensity}(1)和\cref{prop:ConditionalProbabilityDensityBasic}(2)可知$f$关于$g$相对于$\mu$的条件概率密度函数$p_{f\mid g}$存在并且：
+\begin{equation*}
+	\forall\;z\in Z,\;A\in\mathscr{A},\;K_{f\mid g}(z,A)=\int_Ap_{f\mid g}(y\mid z)\dif\mu
+\end{equation*}
+给出了$f$关于$g$的条件概率核。当实际观测到$g=z_0$时，我们希望确定$f$在该观测下的条件概率分布$K_{f\mid g}(z_0,\cdot)$。\par
+固定满足$0<p_g(z_0)<+\infty$的观测值$z_0\in Z$（由\cref{prop:NonnegativeMeasurableIntegral}(8)和\cref{prop:Measure}(3)中的次有限可加性可知这一假设并不构成实质上的限制，只是排除了一些异常情况），记后验概率测度为：
+\begin{equation*}
+	\forall\;A\in\mathscr{A},\;\varphi_{z_0}(A)=K_{f\mid g}(z_0,A)
+	=\int_{A}p_{f\mid g}(y\mid z_0)\dif\mu
+\end{equation*}
+由\cref{prop:MeasurableIntegral}(1)可知$\varphi_{z_0}\ll\mu$，此时有：
+\begin{equation*}
+	p_{f\mid g}(y\mid z_0)=\frac{p_{f,g}(y,z_0)}{p_g(z_0)}
+\end{equation*}
+设$\psi_q$是$(Y,\mathscr{A})$上的概率测度，满足$\psi_q\ll\mu$，根据\cref{theo:RadonNikodym}，记：
+\begin{equation*}
+	q(y)=\dfrac{\dif\psi_q}{\dif\mu}(y)
+\end{equation*}
+若$\psi_q\ll\varphi_{z_0}$且$\operatorname{KL}(\psi_q\|\varphi_{z_0})<+\infty$，则由\cref{prop:RadonNikodym}(5)、\cref{lem:IntChangeOfMeasure}和\cref{prop:MeasurableIntegral}(6)可得：
+\begin{align*}
+	&\operatorname{KL}(\psi_q\|\varphi_{z_0})=\int_{Y}\ln\frac{\dif\psi_q}{\dif\varphi_{z_0}}(y)\dif\psi_q=\int_{Y}\ln\frac{q(y)}{p_{f\mid g}(y\mid z_0)}\dif\psi_q=\int_{Y}q(y)\ln\frac{q(y)}{p_{f\mid g}(y\mid z_0)}\dif\mu \\
+	=&\int_{Y}q(y)\ln\frac{q(y)p_g(z_0)}{p_{f,g}(y,z_0)}\dif\mu=\ln p_g(z_0)-\int_{Y}q(y)\ln\frac{p_{f,g}(y,z_0)}{q(y)}\dif\mu
+\end{align*}
 \begin{definition}
-	在前述框架下，称：
+	在上述条件下，称：
 	\begin{equation*}
-		\int_{X}q(y)[\ln p(y,x)-\ln q(y)]\dif\mu
+		\mathcal{L}(q;z_0)\coloneq\int_{Y}q(y)\ln\frac{p_{f,g}(y,z_0)}{q(y)}\dif\mu
 	\end{equation*}
-	为\gls{ELBO}，记做$L(q,x)$。
+	为给定观测$z_0$时关于$q$的\gls{ELBO}。
 \end{definition}
+由上述推导可知：
+\begin{equation*}
+	\ln p_g(z_0)=\mathcal{L}(q;z_0)+\operatorname{KL}(\psi_q\|\varphi_{z_0})
+\end{equation*}
+实际计算中，\gls{VariationalMethod}预先选定一族便于计算的概率密度函数$\mathscr{Q}$，并求解：
+\begin{equation*}
+	q^{*}\in\underset{q\in\mathscr{Q}}{\arg\max}\;\mathcal{L}(q;z_0)
+\end{equation*}
+因为$\ln p_g(z_0)$与$q$无关，所以最大化$\mathcal{L}(q;z_0)$等价于在$\{\psi_q:q\in\mathscr{Q}\}$中最小化$\operatorname{KL}(\psi_q\|\varphi_{z_0})$。因此$q^{*}$所对应的概率测度是后验概率测度$\varphi_{z_0}$在$\{\psi_q:q\in\mathscr{Q}\}$中的最优近似。
 
 \subsection{EM算法}
-在极大似然估计中，若观测变量$f$为从可控参数结构$(X,\mathscr{A},\mathscr{P})$到可测空间$(Y,\mathscr{B})$上的可测映射，参数空间为$\Theta$，控制测度为$\mu$，根据\cref{theo:RadonNikodym}，记$\dfrac{\dif P_{\theta}}{\dif\mu}(f)=p_{\theta}(f)$，那么目标函数可以写成：
+设$(X,\mathscr{F},\mathscr{P})$是参数统计结构，其中$\mathscr{P}=\{P_{\theta}:\theta\in\Theta\}$。设$f$是从$(X,\mathscr{F})$到可测空间$(Y,\mathscr{A})$的可测映射，表示能够观测到的数据，$\mu$是$(Y,\mathscr{A})$上的$\sigma$有限测度，对任意的$\theta\in\Theta$有$P_{\theta}f^{-1}\ll\mu$。根据\cref{theo:RadonNikodym}，取非负的：
 \begin{equation*}
-	\hat{\theta}=\underset{\theta}{\arg\max}\ln p_{\theta}(f)
+	p_{\theta;f}=\dfrac{\dif P_{\theta}f^{-1}}{\dif\mu}
 \end{equation*}
-然而，在许多含有潜在结构的统计模型中，观测变量$f$本身的概率分布并不容易直接写出。真正容易描述的，往往是它在某些无法观测的隐变量$g$给定条件下的条件分布。有时，隐变量$g$本身的分布也不是单纯的辅助工具，而是我们希望估计和理解的对象。\par
-但是在引入隐变量之后，我们需要通过对隐变量积分，才能得到观测变量的边际似然。设$g$为概率空间$(X,\mathscr{A},P)$到可测空间$(Z,\mathscr{C})$上的可测映射，$Pg^{-1}\ll\nu$，根据\cref{theo:RadonNikodym}，记$\dfrac{\dif Pg^{-1}}{\dif\nu}=q(g)$，由\cref{prop:ConditionalProbability}(2)和\cref{lem:IntChangeOfMeasure}可得：
+当观测到$f=y$时，极大似然估计需要求解：
 \begin{equation*}
-	p_{\theta}(f)=\int_{Z}p_{\theta}(f\mid g)\dif Pg^{-1}=\int_{Z}q(g)p_{\theta}(f\mid g)\dif\nu
+	\hat{\theta}\in\underset{\theta\in\Theta}{\arg\max}\;\ln p_{\theta;f}(y)
 \end{equation*}
-原本我们只是想最大化一个对数似然函数，但由于隐变量无法观测，观测数据的概率必须通过积分得到，这使得目标函数通常难以直接优化。EM算法(Expectation-Maximization Algorithm)正是为了解决这类问题而提出的。\par
-由\cref{ineq:Jensen}、\cref{prop:ConditionalProbability}(1)和\cref{prop:MeasurableIntegral}(6)可得：
-\begin{align*}
-	&\ln p_{\theta}(f)=\ln\int_{Z}q(g)p_{\theta}(f\mid g)\dif\nu=\ln\operatorname{E}[p_{\theta}(f\mid g)]\geqslant\operatorname{E}[\ln p_{\theta}(f\mid g)] \\
-	=&\int_{Z}q(g)[\ln p_{\theta}(f\mid g)]\dif\nu=\int_{Z}q(g)[\ln p_{\theta}(f,g)-\ln q(g)]\dif\nu \\
-	=&\int_{Z}q(g)\ln p_{\theta}(f,g)\dif\nu-\int_{Z}q(g)\ln q(g)\dif\nu
-\end{align*}
-记：
+如果$p_{\theta;f}(y)$能够直接写出，并且容易关于$\theta$进行优化，那么可以直接采用通常的极大似然估计方法。然而在许多模型中，实际观测到的$f$并不足以直接给出完整模型，因而$p_{\theta;f}(y)$往往难以直接写出\footnote{具体例子可以参考机器学习部分的高斯混合模型。}。\par
+为了补全产生观测数据的模型结构，我们寻找一个从$(X,\mathscr{F})$到另一可测空间$(Z,\mathscr{B})$的可测映射$g$，使得$(f,g)$能够给出完整模型，而实际观测中仅能获得其中的$f$。这样的$g$称为\gls{LatentVariable}，$(f,g)$称为完整数据。\par
+设$\nu$是$(Z,\mathscr{B})$上的$\sigma$有限测度，并假设对任意的$\theta\in\Theta$有$P_{\theta}(f,g)^{-1}\ll\mu\times\nu$。由\cref{theo:RadonNikodym}，取非负的：
 \begin{equation*}
-	L(q,y)=\int_{Z}q(g)\ln p_{\theta}(f,g)\dif\nu-\int_{Z}q(g)\ln q(g)\dif\nu
+	p_{\theta;f,g}(y,z)=\frac{\dif P_{\theta}(f,g)^{-1}}{\dif(\mu\times\nu)}(y,z)
 \end{equation*}
-则有:
+根据\cref{theo:MarginalDensity}可知：
 \begin{equation*}
-	L(q,y)\leqslant\ln p_{\theta}(f)
+	p_{\theta;f}(y)=\frac{\dif P_{\theta}f^{-1}}{\dif\mu}(y)=\int_{Z}p_{\theta;f,g}(y,z)\dif\nu
 \end{equation*}
-这个$L(q,y)$就是边际对数似然$\ln p_{\theta}(f)$的一个下界。\par
-EM算法的基本思想就是：既然直接最大化$\ln p_{\theta}(f)$比较困难，那么可以转而反复提高这个下界。若一组$\hat{q},\hat{\theta}$使得$L(q,y)$达到最大，则$\hat{\theta}$也应该是$\theta$的极大似然估计。\par
-进一步地，由\cref{prop:RadonNikodym}(5)、\cref{lem:IntChangeOfMeasure}和\cref{prop:ConditionalProbability}(1)可知这个下界与真实边际对数似然之间的差距可以精确写成一个KL散度：
-\begin{align*}
-	&\operatorname{KL}[q(g)\|p_{\theta}(g\mid f)]=\int_{Z}q(g)\ln\frac{q(g)}{p_{\theta}(g\mid f)}\dif\nu \\
-	=&\int_{Z}q(g)\ln q(g)\dif\nu-
-	\int_{Z}q(g)\ln p_{\theta}(g\mid f)\dif\nu \\
-	=&\int_{Z}q(g)\ln q(g)\dif\nu-\int_{Z}q(g)\ln p_{\theta}(f,g)\dif\nu+\ln p_{\theta}(f)
-\end{align*}
-于是：
+于是极大似然估计所面对的困难具体表现为对数内含有一个关于隐变量的积分：
 \begin{equation*}
-	\ln p_{\theta}(f)=L(q,y)+\operatorname{KL}[q(g)\|p_{\theta}(g\mid f)]
+	\ln p_{\theta;f}(y)=\ln\int_{Z}p_{\theta;f,g}(y,z)\dif\nu
 \end{equation*}\par
-\begin{method}[Expectation-Maximization Algorithm]
-	EM算法可以理解为对$L(q,y)$进行坐标上升。具体地说，在第$t$轮迭代中，假设当前参数为$\theta^{(t)}$。EM算法交替更新$q$和$\theta$。\par
-	首先固定$\theta=\theta^{(t)}$，求解$q^{(t+1)}$使得最大化$L(q^{(t+1)},y)$。由于：
+固定满足$0<p_{\theta;f}(y)<+\infty$的参数$\theta$，这一条件保证对数似然$\ln p_{\theta;f}(y)$是良定义的有限实数。由\cref{prop:ConditionalProbabilityDensity}(1)和\cref{prop:ConditionalProbabilityDensityBasic}(2)可知$g$关于$f$相对于$\nu$的条件概率密度函数$p_{\theta;g\mid f}$和$g$关于$f$的条件概率核$K_{\theta;g\mid f}$都存在。取$(Z,\mathscr{B})$上关于$\nu$绝对连续的辅助概率测度$\psi_q$，根据变分法部分的讨论可知：
+\begin{equation*}
+	\ln p_{\theta;f}(y)=\mathcal{L}(q,\theta;y)+\operatorname{KL}[\psi_q\mid K_{\theta;g\mid f}(y,\cdot)]
+\end{equation*}
+其中：
+\begin{equation*}
+	q(z)=\frac{\dif\psi_q}{\dif\nu}(z)
+\end{equation*}
+由\cref{ineq:Gibbs}可知$\operatorname{KL}[\psi_q\mid K_{\theta;g\mid f}(y,\cdot)]\geqslant0$，所以：
+\begin{equation*}
+	\ln p_{\theta;f}(y)\geqslant\mathcal{L}(q,\theta;y)
+\end{equation*}
+等号成立当且仅当$\psi_q=K_{\theta;g\mid f}(y,\cdot)$。\par
+由于证据下界$\mathcal{L}(q,\theta;y)$关于参数$\theta$通常比原始对数似然$\ln p_{\theta;f}(y)$更容易优化，因此可以利用辅助概率测度$\psi_q$，将原本直接作用于边缘对数似然的参数优化问题转化为关于辅助分布与模型参数的交替优化问题。在给定当前参数时，将$\psi_q$取为$K_{\theta;g\mid f}(y,\cdot)$，使证据下界与当前对数似然相等；随后固定$\psi_q$，仅关于$\theta$优化证据下界。通过交替执行这两个步骤，可以构造一个使$\ln p_{\theta;f}(y)$单调不减的参数迭代过程。
+\begin{method}
+	给定观测值$y$和初始参数$\theta^{(0)}$，并假设在迭代过程中涉及的参数均有：
 	\begin{equation*}
-		\ln p_{\theta^{(t)}}(f)=L(q^{(t+1)},y)+\operatorname{KL}[q^{(t+1)}(g)\|p_{\theta^{(t)}}(g\mid f)]
+		0<p_{\theta;f}(y)<+\infty
 	\end{equation*}
-	而左边与$q$无关，是一个定值，所以最大化$L(q^{(t+1)},y)$等价于最小化$\operatorname{KL}[q^{(t+1)}(g)\|p_{\theta^{(t)}}(g\mid f)]$。当$q^{(t+1)}(g)=p_{\theta^{(t)}}(g\mid f)$时，KL散度达到最小值$0$。因此，EM算法的E步就是在当前参数$\theta^{(t)}$下计算隐变量的后验分布。\par
-	接着固定$q=q^{(t+1)}$，最大化$L(q^{(t+1)},y)$。因为：
+	令$t=0$，\gls{ExpectationMaximizationAlgorithm}重复以下步骤：\par
+	\textbf{E步：}固定当前参数$\theta^{(t)}$，将辅助概率测度取为当前参数下隐变量关于观测变量的条件分布：
 	\begin{equation*}
-		L[q^{(t+1)},y]=\int_{Z}q^{(t+1)}(g)\ln p_{\theta}(f,g)\dif\nu-\int_{Z}q^{(t+1)}(g)\ln q^{(t+1)}(g)\dif\nu
-	\end{equation*}
-	其中第二项不含$\theta$，所以关于$\theta$的优化等价于：
+		\psi_{q^{(t)}}=K_{\theta^{(t)};g\mid f}(y,\cdot)
+	\end{equation*}\par
+	\textbf{M步：}固定E步得到的辅助概率测度$\psi_{q^{(t)}}$，关于参数$\theta$最大化证据下界。由\cref{prop:MeasurableIntegral}(6)可得：
+	\begin{align*}
+		\theta^{(t+1)}&\in\underset{\theta\in\Theta}{\arg\max}\;\mathcal{L}(q^{(t)},\theta;y)=\underset{\theta\in\Theta}{\arg\max}\;\int_{Z}q^{(t)}(z)\ln\frac{p_{\theta;f,g}(y,z)}{q^{(t)}(z)}\dif\nu \\
+		&=\underset{\theta\in\Theta}{\arg\max}\;\left[\int_{Z}q^{(t)}(z)\ln p_{\theta;f,g}(y,z)\dif\nu-\int_{Z}q^{(t)}(z)\ln q^{(t)}(z)\dif\nu\right] \\
+		&=\underset{\theta\in\Theta}{\arg\max}\;\int_{Z}q^{(t)}(z)\ln p_{\theta;f,g}(y,z)\dif\nu
+	\end{align*}
+	称：
 	\begin{equation*}
-		\theta^{(t+1)}=\underset{\theta}{\arg\max}\int_{Z}q^{(t+1)}(g)\ln p_{\theta}(f,g)\dif\nu
+		Q(\theta\mid\theta^{(t)})=\int_{Z}q^{(t)}(z)\ln p_{\theta;f,g}(y,z)\dif\nu
 	\end{equation*}
-	代入：
-	\begin{equation*}
-		q^{(t+1)}(g)=p_{\theta^{(t)}}(g\mid f)
-	\end{equation*}
-	得到：
-	\begin{equation*}
-		\theta^{(t+1)}=\underset{\theta}{\arg\max}\int_{Z}p_{\theta^{(t)}}(g\mid f)\ln p_{\theta}(f,g)\dif\nu
-	\end{equation*}
-	对于这个优化问题，我们就可以使用一般的极大似然估计去做了。\par
-	上述第一步被称之为$E$步，第二步被称之为$M$步，称：
-	\begin{equation*}
-		\int_{Z}q^{(t+1)}(g)\ln p_{\theta}(f,g)\dif\nu
-	\end{equation*}
-	为Q函数。
+	为$Q$函数。令$t\leftarrow t+1$，继续执行E步和M步，直至参数序列或对数似然满足给定的收敛条件。
 \end{method}

@@ -375,7 +375,8 @@
 		P(B\mid A)=\frac{P(A\mid B)P(B)}{P(A)}=\frac{P(A\mid B)P(B)}{\operatorname{E}[P(A\mid\sigma(B))]}\qedhere
 	\end{equation*}
 \end{proof}
-\subsubsection{条件概率密度}
+\subsubsection{条件概率分布}
+为了描述给定随机变量$g$的取值后随机变量$f$的概率分布，自然需要一个同时依赖于$g$的取值与$f$的可测集合的映射：固定$g$的取值时，该映射关于$f$的可测集合应构成一个概率测度；而固定$f$的可测集合时，对应的概率应当是$g$取值的可测函数，从而使得该概率仍构成一个可测随机变量。
 \begin{definition}
 	设$(X,\mathscr{F})$和$(Y,\mathscr{A})$是可测空间。若映射$K:X\times\mathscr{A}\to[0,1]$满足：
 	\begin{enumerate}
@@ -391,6 +392,7 @@
 	\end{equation*}
 	则称$K_{f\mid g}$为$f$关于$g$的\gls{ConditionalProbabilityKernel}。
 \end{definition}
+对固定的$z\in Z$，$K_{f\mid g}(z,\cdot)$是$(Y,\mathscr{A})$上的概率测度，因此可以将其理解为当$g$的取值为$z$时$f$的一个候选分布。条件概率核的定义进一步要求，对任意$A\in\mathscr{A}$和$B\in\mathscr{B}$，事件$\{f\in A\}\cap\{g\in B\}$的概率能够通过在$g\in B$的各个可能取值上，对$K_{f\mid g}(z,A)$按照$g$的分布$Pg^{-1}$进行积分得到。这个积分关系说明$K_{f\mid g}(z,A)$具有给定$g=z$时$f\in A$的概率的含义，而下面的性质进一步表明它与条件概率$P(f\in A\mid g)$实际上是一致的。
 \begin{property}\label{prop:ConditionalProbabilityKernel}
 	设$f,g$分别是从概率空间$(X,\mathscr{F},P)$到可测空间$(Y,\mathscr{A})$和$(Z,\mathscr{B})$的可测映射。概率核$K_{f\mid g}$是$f$关于$g$的条件概率核当且仅当对任意的$A\in\mathscr{A}$有：
 	\begin{equation*}
@@ -398,19 +400,22 @@
 	\end{equation*}
 \end{property}
 \begin{proof}
-	\textbf{(1)必要性：}设$K_{f\mid g}$是$f$关于$g$的条件概率核。任取$A\in\mathscr{A}$，由概率核的定义和\cref{prop:MeasurableMapping}(2)可知$K_{f\mid g}[g(\omega),A]$关于$\sigma(g)$可测。任取$B\in\mathscr{B}$，由\cref{theo:IntBySubstitution}、条件概率核的定义、\cref{prop:SigmaField}(2)和\cref{theo:MeasurableCountableIntegral}可得：
+	设$K_{f\mid g}$是$f$关于$g$的条件概率核。任取$A\in\mathscr{A}$，由概率核的定义和\cref{prop:MeasurableMapping}(2)可知$K_{f\mid g}[g(\omega),A]$关于$\sigma(g)$可测。\par
+	\textbf{(1)必要性：}任取$B\in\mathscr{B}$，由\cref{theo:IntBySubstitution}、\cref{prop:SigmaField}(2)和\cref{theo:MeasurableCountableIntegral}可得：
 	\begin{align*}
 		&\int_{g^{-1}(B)}K_{f\mid g}[g(\omega),A]\dif P=\int_{B}K_{f\mid g}(z,A)\dif Pg^{-1} \\
 		=&P(\{f\in A\}\cap\{g\in B\})=\int_{g^{-1}(B)}I(f\in A)\dif P
 	\end{align*}
 	由条件概率的定义即可得出结论。\par
-	\textbf{(2)充分性：}任取$A\in\mathscr{A}$和$B\in\mathscr{B}$，由\cref{theo:IntBySubstitution}、\cref{prop:MeasurableIntegral}(8)、条件概率的定义、\cref{prop:SigmaField}(2)和\cref{theo:MeasurableCountableIntegral}可得：
+	\textbf{(2)充分性：}任取$A\in\mathscr{A}$和$B\in\mathscr{B}$，由\cref{theo:IntBySubstitution}、\cref{prop:MeasurableIntegral}(8)、\cref{prop:SigmaField}(2)和\cref{theo:MeasurableCountableIntegral}可得：
 	\begin{align*}
 		&\int_{B}K_{f\mid g}(z,A)\dif Pg^{-1}=\int_{g^{-1}(B)}K_{f\mid g}[g(\omega),A]\dif P \\
-		=&\int_{g^{-1}(B)}P(f\in A\mid g)(\omega)\dif P=\int_{g^{-1}(B)}I(f\in A)\dif P=P(\{f\in A\}\cap\{g\in B\})
+		=&\int_{g^{-1}(B)}P(f\in A\mid g)(\omega)\dif P=\int_{g^{-1}(B)}\operatorname{E}(\{f\in A\}\mid g)\dif P \\
+		=&\int_{g^{-1}(B)}I(f\in A)\dif P=P(\{f\in A\}\cap\{g\in B\})
 	\end{align*}
 	充分性得证。
 \end{proof}
+\subsubsection{条件概率密度}
 \begin{definition}
 	设$f,g$分别是从概率空间$(X,\mathscr{F},P)$到可测空间$(Y,\mathscr{A})$和$(Z,\mathscr{B})$的可测映射，$K_{f\mid g}$是$f$关于$g$的条件概率核，$\mu$是$(Y,\mathscr{A})$上的$\sigma$有限测度。若$(Y\times Z,\mathscr{A}\times\mathscr{B})$上的非负可测函数$p_{f\mid g}$满足：存在$N\in\mathscr{B}$使得$Pg^{-1}(N)=0$，并且对任意的$z\in Z\setminus N$和$A\in\mathscr{A}$有：
 	\begin{equation*}
@@ -418,22 +423,24 @@
 	\end{equation*}
 	则称$p_{f\mid g}(y\mid z)$为$f$关于$g$相对于$\mu$的\gls{ConditionalProbabilityDensityFunction}。
 \end{definition}
+这里允许排除一个满足$Pg^{-1}(N)=0$的集合$N$，是因为条件概率核本身只在$g$的分布意义下几乎处处确定（\cref{prop:MeasurableIntegral}(8)），因此其对应的条件概率密度也只需要对$Pg^{-1}$几乎处处的$z$定义一致。
 \begin{property}\label{prop:ConditionalProbabilityDensityBasic}
 	设$f,g$分别是从概率空间$(X,\mathscr{F},P)$到可测空间$(Y,\mathscr{A})$和$(Z,\mathscr{B})$的可测映射，$\mu$是$(Y,\mathscr{A})$上的$\sigma$有限测度，则：
 	\begin{enumerate}
 		\item 若$p_{f\mid g}$为$f$关于$g$相对于$\mu$的条件概率密度函数，则对任意的$A\in\mathscr{A}$有：
 		\begin{equation*}
-			P(f\in A\mid g)(\omega)=K_{f\mid g}[g(\omega),A]=\int_{A}p_{f\mid g}(y\mid g(\omega))\dif\mu\;\text{a.e.于$(X,\sigma(g),P)$}
+			P(f\in A\mid g)(\omega)=K_{f\mid g}[g(\omega),A]=\int_{A}p_{f\mid g}[y\mid g(\omega)]\dif\mu\;\text{a.e.于$(X,\sigma(g),P)$}
 		\end{equation*}
 		并且对任意的$B\in\mathscr{B}$有：
 		\begin{equation*}
 			P(\{f\in A\}\cap\{g\in B\})=\int_{B}\left[\int_{A}p_{f\mid g}(y\mid z)\dif\mu\right]\dif Pg^{-1}
 		\end{equation*}
-		\item $f$关于$g$相对于$\mu$的条件概率密度函数存在当且仅当$P(f,g)^{-1}\ll\mu\times Pg^{-1}$，此时：
-		\begin{equation*}
+		\item $f$关于$g$相对于$\mu$的条件概率密度函数存在当且仅当$P(f,g)^{-1}\ll\mu\times Pg^{-1}$。当该绝对连续条件成立时，$f$关于$g$的条件概率核也存在，并且：
+		\begin{gather*}
+			\forall\;z\in Z,\;A\in\mathscr{A},\;K_{f\mid g}(z,A)=\int_Ap_{f\mid g}(y\mid z)\dif\mu \\
 			p_{f\mid g}(y\mid z)
 			=\dfrac{\dif P(f,g)^{-1}}{\dif(\mu\times Pg^{-1})}(y,z)\;\text{a.e.于$(Y\times Z,\mathscr{A}\times\mathscr{B},\mu\times Pg^{-1})$}
-		\end{equation*}
+		\end{gather*}
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -463,7 +470,7 @@
 	\begin{equation*}
 		\varphi(A\times B)=P(\{f\in A\}\cap\{g\in B\})=P(f,g)^{-1}(A\times B)
 	\end{equation*}
-	根据\cref{prop:FiniteDimensionalCylinderSet}(1)、\cref{theo:SetNecessarilySet1}和\cref{lem:PiExtensionMeasure}可得$\varphi=P(f,g)^{-1}$。由\cref{prop:MeasurableIntegral}(1)和RN导数的定义可知：
+	根据\cref{prop:FiniteDimensionalCylinderSet}(1)、\cref{theo:SetNecessarilySet1}和\cref{lem:PiExtensionMeasure}可得$\varphi=P(f,g)^{-1}$。由\cref{prop:MeasurableIntegral}(1)和Radon-Nikodym导数的定义可知：
 	\begin{equation*}
 		P(f,g)^{-1}\ll\mu\times Pg^{-1},\quad
 		p_{f\mid g}=\dfrac{\dif P(f,g)^{-1}}{\dif(\mu\times Pg^{-1})}\;\text{a.e.于$(Y\times Z,\mathscr{A}\times\mathscr{B},\mu\times Pg^{-1})$}
@@ -477,7 +484,7 @@
 		&\int_{B}r(z)\dif Pg^{-1}=\int_{Y\times B}q(y,z)\dif(\mu\times Pg^{-1}) \\
 		=&P(f,g)^{-1}(Y\times B)=Pg^{-1}(B)=\int_{B}1\dif Pg^{-1}
 	\end{align*}
-	由\cref{theo:RadonNikodym}的唯一性可知$r(z)=1\;$a.e.于$(Z,\mathscr{B},Pg^{-1})$。记：
+	由\cref{theo:RadonNikodym}的唯一性可知$r(z)=1\;$a.e.于$(Z,\mathscr{B},Pg^{-1})$（$Pg^{-1}$关于$Pg^{-1}$的Radon-Nikodym导数）。记：
 	\begin{equation*}
 		N=\{z\in Z:r(z)\ne1\}
 	\end{equation*}
@@ -506,11 +513,11 @@
 	于是$K_{f\mid g}$是$f$关于$g$的条件概率核，$p_{f\mid g}$是$f$关于$g$相对于$\mu$的条件概率密度函数。
 \end{proof}
 \begin{property}\label{prop:ConditionalProbabilityDensity}
-	设$f,g$分别是从概率空间$(X,\mathscr{F},P)$到可测空间$(Y,\mathscr{A})$和$(Z,\mathscr{B})$的可测映射，$\mu,\nu$分别是$(Y,\mathscr{A})$和$(Z,\mathscr{B})$上的$\sigma$有限测度。若$P(f,g)^{-1}\ll\mu\times\nu$，记：
+	设$f,g$分别是从概率空间$(X,\mathscr{F},P)$到可测空间$(Y,\mathscr{A})$和$(Z,\mathscr{B})$的可测映射，$\mu,\nu$分别是$(Y,\mathscr{A})$和$(Z,\mathscr{B})$上的$\sigma$有限测度。若$P(f,g)^{-1}\ll\mu\times\nu$，由\cref{theo:RadonNikodym}和\cref{theo:MarginalDensity}，取处处有限、非负的：
 	\begin{equation*}
 		p_{f,g}\coloneq\dfrac{\dif P(f,g)^{-1}}{\dif(\mu\times\nu)},\quad p_f\coloneq\dfrac{\dif Pf^{-1}}{\dif\mu},\quad p_g\coloneq\dfrac{\dif Pg^{-1}}{\dif\nu}
 	\end{equation*}
-	由\cref{theo:RadonNikodym}和\cref{theo:MarginalDensity}，可重新定义$p_{f,g},p_f,p_g$，使它们处处有限、非负且满足：
+	并且它们满足：
 	\begin{equation*}
 		p_f(y)=\int_{Z}p_{f,g}(y,z)\dif\nu\;\text{a.e.于$(Y,\mathscr{A},\mu)$},\quad
 		p_g(z)=\int_{Y}p_{f,g}(y,z)\dif\mu\;\text{a.e.于$(Z,\mathscr{B},\nu)$}
@@ -565,7 +572,7 @@
 	\begin{equation*}
 		p_{g\mid f}(z\mid y)=\frac{p_{f,g}(y,z)}{p_f(y)}
 	\end{equation*}
-	根据$p_{f\mid g}$的定义可知：
+	并且：
 	\begin{equation*}
 		p_{f,g}(y,z)=p_{f\mid g}(y\mid z)p_g(z)\;\text{a.e.于$(Y\times Z,\mathscr{A}\times\mathscr{B},\mu\times\nu)$}
 	\end{equation*}
@@ -573,14 +580,13 @@
 	\begin{equation*}
 		E=\left\{(y,z)\in Y\times Z:p_{f,g}(y,z)\neq p_{f\mid g}(y\mid z)p_g(z)\right\}
 	\end{equation*}
-	则$(\mu\times\nu)(E)=0$。对任意$y\in Y$，记$E_y=\{z\in Z:(y,z)\in E\}$\info{$E_y$的可测性}，由\cref{theo:MeasurableCountableIntegral}和\cref{theo:Fubini}(2)可得：
+	则$(\mu\times\nu)(E)=0$。对任意$y\in Y$，记$E_y=\{z\in Z:(y,z)\in E\}$\info{$E$和$E_y$的可测性与相关函数的可测性}，由\cref{theo:MeasurableCountableIntegral}和\cref{theo:Fubini}(2)可得：
 	\begin{align*}
 		0&=(\mu\times\nu)(E)=\int_{Y\times Z}I_E(y,z)\dif(\mu\times\nu)=\int_{Y}\left[\int_{Z}I_E(y,z)\dif\nu\right]\dif\mu \\
 		&=\int_{Y}\left[\int_{Z}I_{E_y}(z)\dif\nu\right]\dif\mu=\int_{Y}\nu(E_y)\dif\mu
 	\end{align*}
-	因为$\nu(E_y)\geqslant0$，根据\cref{prop:MeasurableIntegral}(9)可知$\nu(E_y)=0\;$a.e.于$(Y,\mathscr{A},\mu)$。记$N=\{\nu(E_y)\ne0\}$，则对任意的$y\in\{p_f(y)>0\}\setminus N$有：
+	因为$\nu(E_y)\geqslant0$，根据\cref{prop:MeasurableIntegral}(9)可知$\nu(E_y)=0\;$a.e.于$(Y,\mathscr{A},\mu)$。记$N=\{\nu(E_y)\ne0\}$，则$\mu(N)=0$，对于给定的$y\notin N$，$\nu(\{z:p_{f,g}(y,z)\neq p_{f\mid g}(y\mid z)p_g(z)\})=0$，于是对任意的$y\in\{p_f(y)>0\}\setminus N$有：
 	\begin{equation*}
-		p_{f,g}(y,z)=p_{f\mid g}(y\mid z)p_g(z)\;\text{a.e.于$(Z,\mathscr{B},\nu)$}
+		p_{g\mid f}(z\mid y)=\frac{p_{f\mid g}(y\mid z)p_g(z)}{p_f(y)}\;\text{a.e.于$(Z,\mathscr{B},\nu)$}\qedhere
 	\end{equation*}
-	代入即可知结论成立。
 \end{proof}

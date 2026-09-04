@@ -1764,9 +1764,9 @@ B\alpha=\lambda S\alpha
 </ol>
 <p>需要强调的是，外部评价指标的引入并不意味着聚类任务转化为监督学习问题。外部指标的核心作用在于：当研究者在特定观测样本集中事先掌握某种参考划分时，用以分析既有标签与数据内在结构之间的一致性关系。从而对聚类算法、距离度量或参数设置进行事后评估与比较。因此，外部指标并不参与聚类过程本身，也不作为聚类目标函数进行优化，而是作为一种方法学意义上的对照标准，为研究者理解聚类结果与现实语义之间的关系提供了一种量化参照，帮助研究者理解数据自身在多大程度上支持、修正或挑战已有的分类体系。</p>
 <p>当外部一致性较高时，说明在当前特征表示与距离度量下，数据的几何或统计结构能够较好地支持既定的类别划分；例如，在文本主题分析或基因表达数据中，若聚类结果与人工标注的主题类别或生物亚型高度一致，则可认为该标签在数据空间中具有较清晰的结构基础。相反，当外部一致性较低时，这并不必然意味着聚类算法失效，而可能揭示出标签本身的局限性：例如，在心理测量或社会科学调查中，理论上区分的若干类型可能在实际数据中呈现出连续分布或显著重叠；又如，在医学诊断中，同一疾病标签下的样本可能包含多个具有不同分子机制的亚群。此时，聚类结果与外部标签之间的不一致，反而为研究者提供了重新审视标签定义、发现潜在异质结构或子群划分的线索。</p>
-<p>设观测样本集<span class="math inline">\(\mathcal{D}=\{x_i\}_{i=1}^n,\;x_i\in\mathbb{R}^m\)</span>，聚类输出标签<span class="math inline">\(y_i\in\{1,\dots,K\}\)</span>（或包含噪声<span class="math inline">\(-1\)</span>），第<span class="math inline">\(k\)</span>簇为<span class="math inline">\(C_k=\{i:y_i=k\}\)</span>，簇大小<span class="math inline">\(n_k=|C_k|\)</span>，簇中心和总体均值定义为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxtdV9rPVxmcmFjezF9e25fa31cc3VtX3tpXGluIENfa314X2ksXHF1YWRcYmFye3h9PVxmcmFjezF9e259XHN1bV97aT0xfV5uIHhfaQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p>设观测样本集<span class="math inline">\(\mathcal{D}=\{x_i\}_{i=1}^n,\;x_i\in\mathbb{R}^m\)</span>，聚类输出标签<span class="math inline">\(y_i\in\{1,2,\dots,K\}\)</span>（或包含噪声<span class="math inline">\(-1\)</span>），第<span class="math inline">\(k\)</span>簇为<span class="math inline">\(C_k=\{i:y_i=k\}\)</span>，簇大小<span class="math inline">\(n_k=|C_k|\)</span>，簇中心和总体均值定义为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxtdV9rPVxmcmFjezF9e25fa31cc3VtX3tpXGluIENfa314X2ksXHF1YWRcYmFye3h9PVxmcmFjezF9e259XHN1bV97aT0xfV5ueF9pClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
-\mu_k=\frac{1}{n_k}\sum_{i\in C_k}x_i,\quad\bar{x}=\frac{1}{n}\sum_{i=1}^n x_i
+\mu_k=\frac{1}{n_k}\sum_{i\in C_k}x_i,\quad\bar{x}=\frac{1}{n}\sum_{i=1}^nx_i
 \end{equation*}\]</span></p>
 <section id="id--9e0ebc57" class="level4">
 <h4 class="anchored" data-anchor-id="id--9e0ebc57"><span class="header-section-number">15.6.1.1</span> 内部指标</h4>
@@ -2147,7 +2147,7 @@ b=\binom{n}{2}-a-(B-a)-(A-a)=\binom{n}{2}-A-B+a
 <p><strong>Input:</strong> Data points <span class="math inline">\(\mathcal{D}=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m\)</span>; number of clusters <span class="math inline">\(K\)</span>; maximum number of iterations <span class="math inline">\(T\)</span>; tolerance <span class="math inline">\(\varepsilon\)</span></p>
 </div>
 <div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
-<p><strong>Output:</strong> Cluster assignments <span class="math inline">\(\{C_1,\dots,C_K\}\)</span>; centroids <span class="math inline">\(\{\mu_1,\dots,\mu_K\}\)</span></p>
+<p><strong>Output:</strong> Cluster assignments <span class="math inline">\(\{C_1, C_2, \dots, C_{K}\}\)</span>; centroids <span class="math inline">\(\{\mu_1, \mu_2, \dots, \mu_{K}\}\)</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
 <p>Select the first centroid <span class="math inline">\(\mu_1\)</span> uniformly at random from <span class="math inline">\(\mathcal{D}\)</span> <em>（Initialization step）</em></p>
@@ -2205,7 +2205,7 @@ P(x_i) = \frac{D_i^2}{\sum\limits_{j=1}^n D_j^2}
 <p><strong>end if</strong></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="18">
-<p><span class="math inline">\(\mu_k \gets \mu_k^{\text{new}},\;\forall\;k=1,\dots,K\)</span></p>
+<p><span class="math inline">\(\mu_k \gets \mu_k^{\text{new}},\;\forall\;k=1,2,\dots,K\)</span></p>
 </div>
 <div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="19">
 <p><strong>end for</strong></p>
@@ -2225,13 +2225,13 @@ P(x_i) = \frac{D_i^2}{\sum\limits_{j=1}^n D_j^2}
 </div>
 <div class="algorithm-body">
 <div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
-<p><strong>Input:</strong> Categorical data <span class="math inline">\(\mathcal{D}=\{x_i\}_{i=1}^n\)</span>, where <span class="math inline">\(x_i=(x_{i1},\dots,x_{ip})\)</span>; number of clusters <span class="math inline">\(K\)</span>; maximum number of iterations <span class="math inline">\(T\)</span></p>
+<p><strong>Input:</strong> Categorical data <span class="math inline">\(\mathcal{D}=\{x_i\}_{i=1}^n\)</span>, where <span class="math inline">\(x_i=(x_{i1},x_{i2},\dots,x_{ip})\)</span>; number of clusters <span class="math inline">\(K\)</span>; maximum number of iterations <span class="math inline">\(T\)</span></p>
 </div>
 <div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
-<p><strong>Output:</strong> Cluster assignments <span class="math inline">\(\{C_1,\dots,C_K\}\)</span>; modes <span class="math inline">\(\{m_1,\dots,m_K\}\)</span></p>
+<p><strong>Output:</strong> Cluster assignments <span class="math inline">\(\{C_1, C_2, \dots, C_{K}\}\)</span>; modes <span class="math inline">\(\{m_1, m_2, \dots, m_{K}\}\)</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
-<p>For each categorical variable <span class="math inline">\(j=1,\dots,p\)</span>, let <span class="math inline">\(\mathcal C_j\)</span> denote its set of possible categories. For each <span class="math inline">\(c\in\mathcal C_j\)</span>, compute <span class="display-math-copy-marker" data-source-tex="Zl9qKGMpCgkJPQoJCVxmcmFjezF9e259CgkJXHN1bV97aT0xfV5uIEkoeF97aWp9PWMp"></span></p>
+<p>For each categorical variable <span class="math inline">\(j=1,2,\dots,p\)</span>, let <span class="math inline">\(\mathcal C_j\)</span> denote its set of possible categories. For each <span class="math inline">\(c\in\mathcal C_j\)</span>, compute <span class="display-math-copy-marker" data-source-tex="Zl9qKGMpCgkJPQoJCVxmcmFjezF9e259CgkJXHN1bV97aT0xfV5uIEkoeF97aWp9PWMp"></span></p>
 <p><span class="math display">\[
 f_j(c)
 =
@@ -2322,13 +2322,13 @@ m_k \gets \underset{x_i\in\mathcal{D}}{\arg\max}
 <p><strong>Input:</strong> Mixed-type data <span class="math inline">\(\mathcal{D}=\{x_i=(x_i^{(n)},x_i^{(c)})\}_{i=1}^n\)</span>; number of clusters <span class="math inline">\(K\)</span>; trade-off parameter <span class="math inline">\(\gamma&gt;0\)</span>; maximum number of iterations <span class="math inline">\(T\)</span></p>
 </div>
 <div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
-<p><strong>Output:</strong> Cluster assignments <span class="math inline">\(\{C_1,\dots,C_K\}\)</span>; prototypes <span class="math inline">\(\{(\mu_k,m_k)\}_{k=1}^K\)</span></p>
+<p><strong>Output:</strong> Cluster assignments <span class="math inline">\(\{C_1, C_2, \dots, C_{K}\}\)</span>; prototypes <span class="math inline">\(\{(\mu_k,m_k)\}_{k=1}^K\)</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
-<p>Initialize numerical prototypes <span class="math inline">\(\mu_1,\dots,\mu_K\)</span> <em>（Initialization step）</em> by applying K-means++ initialization</p>
+<p>Initialize numerical prototypes <span class="math inline">\(\mu_1, \mu_2, \dots, \mu_{K}\)</span> <em>（Initialization step）</em> by applying K-means++ initialization</p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
-<p>Initialize categorical prototypes <span class="math inline">\(m_1,\dots,m_K\)</span> by applying Cao initialization</p>
+<p>Initialize categorical prototypes <span class="math inline">\(m_1, m_2, \dots, m_{K}\)</span> by applying Cao initialization</p>
 </div>
 <div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="3">
 <p><strong>for</strong> <span class="math inline">\(t=1\)</span> <strong>to</strong> <span class="math inline">\(T\)</span> <strong>do</strong> <em>（Assignment step）</em></p>
@@ -2401,10 +2401,10 @@ m_k \gets \underset{x_i\in\mathcal{D}}{\arg\max}
 <p><strong>Input:</strong> Data points <span class="math inline">\(\mathcal{D}=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m\)</span>; linkage criterion <span class="math inline">\(L\)</span>; distance metric <span class="math inline">\(\rho(\cdot,\cdot)\)</span>; target number of clusters <span class="math inline">\(K\)</span> <strong>or</strong> distance threshold <span class="math inline">\(h_0\)</span></p>
 </div>
 <div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
-<p><strong>Output:</strong> Cluster assignments <span class="math inline">\(\{C_1,\dots,C_{K}\}\)</span>; merge history (dendrogram)</p>
+<p><strong>Output:</strong> Cluster assignments <span class="math inline">\(\{C_1, C_2, \dots, C_{K}\}\)</span>; merge history (dendrogram)</p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
-<p>Initialize clusters <span class="math inline">\(C_i \gets \{x_i\}\)</span> for <span class="math inline">\(i=1,\dots,n\)</span></p>
+<p>Initialize clusters <span class="math inline">\(C_i \gets \{x_i\}\)</span> for <span class="math inline">\(i=1,2,\dots,n\)</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
 <p>Compute initial pairwise dissimilarities <span class="math inline">\(D_L(C_p,C_q)\)</span></p>
@@ -2472,7 +2472,7 @@ m_k \gets \underset{x_i\in\mathcal{D}}{\arg\max}
 <p><strong>Input:</strong> Data points <span class="math inline">\(\mathcal{D}=\{x_i\}_{i=1}^{n}\subseteq\mathbb{R}^m\)</span>; neighborhood radius <span class="math inline">\(\varepsilon\)</span>; minimum number of points <span class="math inline">\(\operatorname{MinPts}\)</span></p>
 </div>
 <div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
-<p><strong>Output:</strong> Cluster assignments <span class="math inline">\(\{C_1,\dots,C_K\}\)</span>; noise set <span class="math inline">\(\mathcal{N}\)</span></p>
+<p><strong>Output:</strong> Cluster assignments <span class="math inline">\(\{C_1, C_2, \dots, C_{K}\}\)</span>; noise set <span class="math inline">\(\mathcal{N}\)</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
 <p>Mark all points as <strong>unvisited</strong></p>
@@ -2715,9 +2715,9 @@ d_{\mathrm{reach}}(x_{(1)}),d_{\mathrm{reach}}(x_{(2)}),\dots,d_{\mathrm{reach}}
 <p><span class="math display">\[\begin{equation*}
 \mathcal{O}=\left(x_{(1)},x_{(2)},\ldots,x_{(n)}\right)
 \end{equation*}\]</span></p>
-<p>并记对应的可达距离序列为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlyX2s9ZF97XG1hdGhybXtyZWFjaH19XGxlZnQoeF97KGspfVxyaWdodCksXHF1YWQgaz0xLFxsZG90cyxuClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p>并记对应的可达距离序列为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlyX2s9ZF97XG1hdGhybXtyZWFjaH19XGxlZnQoeF97KGspfVxyaWdodCksXHF1YWQgaz0xLDIsXGRvdHMsbgpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
-r_k=d_{\mathrm{reach}}\left(x_{(k)}\right),\quad k=1,\ldots,n
+r_k=d_{\mathrm{reach}}\left(x_{(k)}\right),\quad k=1,2,\dots,n
 \end{equation*}\]</span></p>
 <p>给定参数<span class="math inline">\(\xi\in(0,1)\)</span>，若： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlyX3trKzF9XGxlcXNsYW50KDEtXHhpKXJfawpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
@@ -2752,23 +2752,24 @@ X_1\sim N(0,0.5^2),\qquad X_2\sim N(0,1.5^2)
 </figcaption>
 </figure>
 <p>在这个例子中，如果只看距离中心<span class="math inline">\(0\)</span>的远近，那么两个类别并没有不同的中心可以用来区分。因此，类似K-means这类基于欧氏距离和类中心的聚类方法并不能自然地刻画这种结构。对于基于密度的聚类方法，情况同样并不理想。两个总体的取值区域高度重叠，并共同形成以<span class="math inline">\(0\)</span>附近为高密度区域的整体分布，因此仅根据样本之间的局部密度连通关系，也不存在一条自然的低密度边界将两个潜在类别分开。</p>
-<p>然而，从概率分布的角度看，这两个类别具有明确的差异。对于同一个观测值<span class="math inline">\(x\)</span>，可以分别考察它由两个正态分布产生的可能性。例如，当<span class="math inline">\(|x|\)</span>较小时，方差较小的<span class="math inline">\(N(0,0.5^2)\)</span>通常能够给出更高的密度；而当<span class="math inline">\(|x|\)</span>较大时，方差较大的<span class="math inline">\(N(0,1.5^2)\)</span>则相对更加可能产生这样的观测。也就是说，即使两个类别具有相同的中心，只要它们的概率分布不同，仍然可能根据各分布对样本的解释能力对潜在类别进行推断。</p>
+<p>然而，从概率分布的角度看，这两个类别具有明确的差异。当<span class="math inline">\(|x|\)</span>较小时，方差较小的<span class="math inline">\(N(0,0.5^2)\)</span>通常能够给出更高的密度；而当<span class="math inline">\(|x|\)</span>较大时，方差较大的<span class="math inline">\(N(0,1.5^2)\)</span>则相对更加可能产生这样的观测。也就是说，即使两个类别具有相同的中心，只要它们的概率分布不同，仍然可能根据各分布对样本的解释能力对潜在类别进行推断。</p>
 <p>这提示我们可以不再直接将一个簇理解为围绕某个中心形成的点集，或者某个密度连通区域，而是假设每个簇对应一个概率分布。样本首先从某个潜在类别中产生，再由该类别对应的概率分布生成。</p>
 <div id="definition-15-16" class="definition theorem-block env-definition">
-<p><strong>Definition 15.16</strong>. 设随机向量<span class="math inline">\(X\in\mathbb{R}^p\)</span>，隐变量<span class="math inline">\(Z\in\{1,2,\dots,K\}\)</span>满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlQKFo9ayk9XHBpX2ssXHF1YWRccGlfaz4wLFxxdWFkXHN1bV97az0xfV57S31ccGlfaz0xClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><strong>Definition 15.16</strong>. 设<span class="math inline">\(\mathbf{X}\)</span>为<span class="math inline">\(p\)</span>维随机向量，随机变量<span class="math inline">\(Z\in\{1,2,\dots,K\}\)</span>满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlQKFo9ayk9XHBpX2ssXHF1YWRccGlfaz4wLFxxdWFkXHN1bV97az0xfV57S31ccGlfaz0xClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
 <p><span class="math display">\[\begin{equation*}
 P(Z=k)=\pi_k,\quad\pi_k&gt;0,\quad\sum_{k=1}^{K}\pi_k=1
 \end{equation*}\]</span></p>
-<p>并且在给定<span class="math inline">\(Z=k\)</span>时有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlYXG1pZCBaPWtcc2ltIE5fcChcbXVfayxcU2lnbWFfaykKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p>并且在给定<span class="math inline">\(Z=k\)</span>时有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbWF0aGJme1h9XG1pZCBaPWtcc2ltIE5fcChcbXVfayxcU2lnbWFfaykKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
-X\mid Z=k\sim N_p(\mu_k,\Sigma_k)
+\mathbf{X}\mid Z=k\sim N_p(\mu_k,\Sigma_k)
 \end{equation*}\]</span></p>
-<p>其中<span class="math inline">\(\mu_k\in\mathbb{R}^p\)</span>，<span class="math inline">\(\Sigma_k\in M_p(\mathbb{R})\)</span>为正定矩阵。由<a href="../chapters/probability-basics.html#prop-ConditionalProbabilityDensity-2e35a7db" class="textbook-cross-reference" data-reference-key="prop:ConditionalProbabilityDensity" data-reference-kind="ref+label" data-reference-title="性质 6.3.6" data-reference-items="2" data-reference-hint="请查看第 2 项">性质 6.3.6(2)</a>可知<span class="math inline">\(X\)</span>的密度为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlwKHgpPVxzdW1fe2s9MX1ee0t9XHBpX2tccGhpX3AoeDtcbXVfayxcU2lnbWFfaykKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p>其中<span class="math inline">\(\mu_k\in\mathbb{R}^p\)</span>，<span class="math inline">\(\Sigma_k\in M_p(\mathbb{R})\)</span>为正定矩阵。由<a href="../chapters/probability-basics.html#prop-ConditionalProbabilityDensity-2e35a7db" class="textbook-cross-reference" data-reference-key="prop:ConditionalProbabilityDensity" data-reference-kind="ref+label" data-reference-title="性质 6.3.6" data-reference-items="2" data-reference-hint="请查看第 2 项">性质 6.3.6(2)</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlwKHgpPVxzdW1fe2s9MX1ee0t9XHBpX2tccGhpX3AoeDtcbXVfayxcU2lnbWFfaykKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 p(x)=\sum_{k=1}^{K}\pi_k\phi_p(x;\mu_k,\Sigma_k)
 \end{equation*}\]</span></p>
-<p>其中<span class="math inline">\(\phi_p(x;\mu_k,\Sigma_k)\)</span>为<span class="math inline">\(p\)</span>维正态分布<span class="math inline">\(N_p(\mu_k,\Sigma_k)\)</span>的密度函数。称该模型为具有<span class="math inline">\(K\)</span>个成分的<span class="term-missing" data-key="GaussianMixtureModel">GaussianMixtureModel</span>，称<span class="math inline">\(\pi_k\)</span>为第<span class="math inline">\(k\)</span>个混合权重，称<span class="math inline">\(N_p(\mu_k,\Sigma_k)\)</span>为第<span class="math inline">\(k\)</span>个混合成分。</p>
+<p>其中<span class="math inline">\(\phi_p(x;\mu_k,\Sigma_k)\)</span>为<span class="math inline">\(p\)</span>维正态分布<span class="math inline">\(N_p(\mu_k,\Sigma_k)\)</span>的密度函数。称该模型为具有<span class="math inline">\(K\)</span>个成分的<a href="../chapters/glossary-g.html#term-GMM" class="term" title="Gaussian mixture model, GMM">高斯混合模型<span class="term-english">（Gaussian mixture model, GMM）</span></a>，称<span class="math inline">\(\pi_k\)</span>为第<span class="math inline">\(k\)</span>个混合权重，称<span class="math inline">\(N_p(\mu_k,\Sigma_k)\)</span>为第<span class="math inline">\(k\)</span>个混合成分。</p>
 </div>
+<p>对每个观测<span class="math inline">\(x_i\)</span>引入表示其所属混合成分的隐变量<span class="math inline">\(Z_i\in\{1,2,\dots,K\}\)</span>，使用EM算法即可估计得到<span class="math inline">\(Z_i\)</span>的条件分布与各混合成分的参数。<span class="math inline">\(Z_i\)</span>的条件分布可作为<span class="math inline">\(x_i\)</span>对各类别的软分类结果。若进一步将<span class="math inline">\(x_i\)</span>归入后验概率最大的混合成分，则得到相应的硬分类结果。</p>
 
 
 </section>
