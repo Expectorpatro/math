@@ -26,10 +26,9 @@
 \end{enumerate}\par
 需要强调的是，外部评价指标的引入并不意味着聚类任务转化为监督学习问题。外部指标的核心作用在于：当研究者在特定观测样本集中事先掌握某种参考划分时，用以分析既有标签与数据内在结构之间的一致性关系。从而对聚类算法、距离度量或参数设置进行事后评估与比较。因此，外部指标并不参与聚类过程本身，也不作为聚类目标函数进行优化，而是作为一种方法学意义上的对照标准，为研究者理解聚类结果与现实语义之间的关系提供了一种量化参照，帮助研究者理解数据自身在多大程度上支持、修正或挑战已有的分类体系。\par
 当外部一致性较高时，说明在当前特征表示与距离度量下，数据的几何或统计结构能够较好地支持既定的类别划分；例如，在文本主题分析或基因表达数据中，若聚类结果与人工标注的主题类别或生物亚型高度一致，则可认为该标签在数据空间中具有较清晰的结构基础。相反，当外部一致性较低时，这并不必然意味着聚类算法失效，而可能揭示出标签本身的局限性：例如，在心理测量或社会科学调查中，理论上区分的若干类型可能在实际数据中呈现出连续分布或显著重叠；又如，在医学诊断中，同一疾病标签下的样本可能包含多个具有不同分子机制的亚群。此时，聚类结果与外部标签之间的不一致，反而为研究者提供了重新审视标签定义、发现潜在异质结构或子群划分的线索。\par
-设观测样本集$\mathcal{D}=\{x_i\}_{i=1}^n,\ x_i\in\mathbb{R}^m$，聚类输出标签$y_i\in\{1,\dots,K\}$（或包含噪声$-1$），第$k$簇为$C_k=\{i:y_i=k\}$，簇大小$n_k=|C_k|$，簇中心和总体均值定义为：
+设观测样本集$\mathcal{D}=\{x_i\}_{i=1}^n,\;x_i\in\mathbb{R}^m$，聚类输出标签$y_i\in\{1,\dots,K\}$（或包含噪声$-1$），第$k$簇为$C_k=\{i:y_i=k\}$，簇大小$n_k=|C_k|$，簇中心和总体均值定义为：
 \begin{equation*}
-	\mu_k=\frac{1}{n_k}\sum_{i\in C_k}x_i,\quad
-	\bar{x}=\frac{1}{n}\sum_{i=1}^n x_i
+	\mu_k=\frac{1}{n_k}\sum_{i\in C_k}x_i,\quad\bar{x}=\frac{1}{n}\sum_{i=1}^n x_i
 \end{equation*}
 \subsubsection{内部指标}
 \begin{definition}
@@ -38,9 +37,7 @@
 \begin{property}[最优WCSS关于簇数的单调性]\label{prop:WCSSMonotonicity}
 	定义：
 	\begin{equation*}
-		\operatorname{WCSS}^\star(K)
-		\coloneq\min_{\{C_1,\dots,C_K\}}
-		\;\sum_{k=1}^K \min_{\mu_k\in\mathbb{R}^m}\sum_{i\in C_k}\|x_i-\mu_k\|^2
+		\operatorname{WCSS}^\star(K)\coloneq\min_{\{C_1,\dots,C_K\}}\;\sum_{k=1}^K \min_{\mu_k\in\mathbb{R}^m}\sum_{i\in C_k}\|x_i-\mu_k\|^2
 	\end{equation*}
 	则对任意$K\geqslant1$有$\operatorname{WCSS}^\star(K+1)\leqslant \operatorname{WCSS}^\star(K)$。
 \end{property}
@@ -105,9 +102,9 @@
 	$\operatorname{CH}$指数本质上与单因素方差分析中的$F$统计量高度一致。在几何意义上，当簇中心彼此远离且簇内样本高度集中时，$\operatorname{tr}(B)$ 相对较大而 $\operatorname{tr}(W)$ 相对较小，从而$\operatorname{CH}$取得较大值，表明聚类结构清晰。
 \end{note}
 \begin{definition}
-	对样本$x_i$，定义：
+	设距离度量为$\rho$。对样本$x_i$，定义：
 	\begin{gather*}
-		a_i\coloneq\frac{1}{|C_{y_i}|-1}\sum_{\substack{j\in C_{y_i}\\ j\neq i}} d(x_i,x_j),\quad b_i\coloneq\min_{\ell\neq y_i}\frac{1}{|C_{\ell}|}\sum_{j\in C_{\ell}} d(x_i,x_j) \\
+		a_i\coloneq\frac{1}{|C_{y_i}|-1}\sum_{\substack{j\in C_{y_i}\\ j\neq i}}\rho(x_i,x_j),\quad b_i\coloneq\min_{\ell\neq y_i}\frac{1}{|C_{\ell}|}\sum_{j\in C_{\ell}}\rho(x_i,x_j) \\
 		s_i\coloneq
 		\begin{cases}
 			\dfrac{b_i-a_i}{\max\{a_i,b_i\}},&\max\{a_i,b_i\}\ne0 \\
@@ -254,18 +251,13 @@
 \begin{definition}
 	考虑所有样本对$(i,j)$，定义：
 	\begin{itemize}
-		\item $TP$：真实标签同类，且聚类结果同簇的样本对数；
-		\item $FP$：真实标签不同类，但聚类结果同簇的样本对数；
-		\item $FN$：真实标签同类，但聚类结果不同簇的样本对数。
+		\item $\operatorname{TP}$：真实标签同类，且聚类结果同簇的样本对数；
+		\item $\operatorname{FP}$：真实标签不同类，但聚类结果同簇的样本对数；
+		\item $\operatorname{FN}$：真实标签同类，但聚类结果不同簇的样本对数。
 	\end{itemize}
 	称：
 	\begin{equation*}
-		\operatorname{FMI}
-		=\sqrt{
-			\frac{TP}{TP+FP}
-			\cdot
-			\frac{TP}{TP+FN}
-		}
+		\operatorname{FMI}=\sqrt{\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FP}}\cdot\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FN}}}
 	\end{equation*}
 	为\gls{FMI}。
 \end{definition}
@@ -294,7 +286,7 @@
 		\State Select the first centroid $\mu_1$ uniformly at random from $\mathcal{D}$ \Comment{Initialization step}
 		\For{$k=2$ \textbf{to} $K$}
 		\For{each data point $x_i \in\mathcal{D}$}
-		\State $D_i^2 \gets \min\limits_{1\leqslant j < k} \|x_i - \mu_j\|^2$
+		\State $D_i^2 \gets \min\limits_{1\leqslant j < k}\;||x_i - \mu_j||^2$
 		\EndFor
 		\State Select $\mu_k$ from $\mathcal{D}$ with probability
 		\[
@@ -304,7 +296,7 @@
 		
 		\For{$t=1$ \textbf{to} $T$} \Comment{Assignment step}
 		\For{each data point $x_i\in\mathcal{D}$}
-		\State $y_i \gets \underset{k=1,2,\dots,K}{\arg\min}\|x_i-\mu_k\|^2$, assign $x_i$ to cluster $C_{y_i}$
+		\State $y_i \gets \underset{k=1,2,\dots,K}{\arg\min}\;\|x_i-\mu_k\|^2$, assign $x_i$ to cluster $C_{y_i}$
 		\EndFor
 		
 		\For{$k=1$ \textbf{to} $K$} \Comment{Update step}
@@ -451,7 +443,7 @@ Cao初始化的核心思想在于：初始聚类原型应当同时具备代表�
 		\State Compute initial pairwise dissimilarities $D_L(C_p,C_q)$
 		
 		\While{stopping criterion not satisfied}
-		\State $(p,q)\gets \underset{p\neq q}{\arg\min}D_L(C_p,C_q)$
+		\State $(p,q)\gets \underset{p\neq q}{\arg\min}\;D_L(C_p,C_q)$
 		\If{$D_L(C_p,C_q) > h_0$}
 		\State \textbf{break}
 		\EndIf
@@ -477,6 +469,7 @@ Cao初始化的核心思想在于：初始聚类原型应当同时具备代表�
 \end{enumerate}
 
 \subsection{DBSCAN}
+前面介绍的K-means与凝聚型层次聚类都能够处理许多常见的聚类问题，但当簇具有复杂的几何结构时，它们可能无法得到符合直觉的划分。例如，对于两个同心圆形成的数据，内外两个圆环自然应当被视为两个不同的簇，但K-means默认不同簇具有不同的聚类中心，往往会将两个圆环沿某一方向切开；凝聚型层次聚类的结果则高度依赖于所采用的连接准则，也未必能够稳定地恢复这种结构。类似的问题还会出现在月牙形、环形等数据中。这说明，仅依靠簇中心或簇之间的距离并不足以描述所有可能的聚类结构，于是我们引入了下面两种基于密度的聚类方法。
 \begin{algorithm}[H]
 	\caption{DBSCAN (Density-Based Spatial Clustering of Applications with Noise)}
 	\label{alg:DBSCAN}
@@ -627,7 +620,7 @@ DBSCAN首先将所有样本标记为未访问，并依次选择尚未访问的�
 		\EndFor
 		
 		\While{$S\ne \varnothing$}
-		\State Extract $x_p$ with smallest $d_{\text{reach}}(x_p)$ from $S$
+		\State Extract $x_p\in\operatorname{\arg\min}\limits_{x\in S}\;d_{\text{reach}}(x_p)$
 		\State Compute neighborhood $U(x_p,\varepsilon_{\max})$
 		\State Mark $x_p$ as processed; Append $x_p$ to $\mathcal{O}$
 		
@@ -693,3 +686,55 @@ OPTICS的优势由此变得很明确：DBSCAN只能在预先选定的单一$\var
 	\end{equation*}
 	时聚类提取结果的稳定性。若较小的$\xi$使结果被切分为大量规模很小的聚类，说明算法对可达距离图中的局部波动过于敏感，此时可以适当增大$\xi$；若可达距离图中较为明显的浅谷未被提取，则可以适当减小$\xi$。
 \end{method}
+
+\subsection{高斯混合模型}
+考虑如下两个一维正态分布：
+\begin{equation*}
+	X_1\sim N(0,0.5^2),\qquad X_2\sim N(0,1.5^2)
+\end{equation*}
+假设它们分别对应两个不同的潜在簇。虽然两个分布具有相同的均值$0$，但方差不同：第一个分布的样本更加集中于均值附近，而第二个分布的样本分布得更加分散。它们的密度函数图像如下。
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			width=0.78\textwidth,
+			height=0.42\textwidth,
+			axis lines=middle,
+			xlabel={$x$},
+			ylabel={$f(x)$},
+			xmin=-5, xmax=5,
+			ymin=0, ymax=0.9,
+			samples=300,
+			domain=-5:5,
+			legend style={draw=none, at={(0.98,0.98)}, anchor=north east},
+			grid=both,
+			major grid style={line width=.2pt, draw=gray!40},
+			minor grid style={line width=.1pt, draw=gray!20}
+			]
+			\addplot[thick] {1/(0.5*sqrt(2*pi))*exp(-x^2/(2*0.5^2))};
+			\addlegendentry{$N(0,0.5^2)$}
+			
+			\addplot[thick, dashed] {1/(1.5*sqrt(2*pi))*exp(-x^2/(2*1.5^2))};
+			\addlegendentry{$N(0,1.5^2)$}
+		\end{axis}
+	\end{tikzpicture}
+	\caption{两个均值相同但方差不同的正态分布}
+\end{figure}
+在这个例子中，如果只看距离中心$0$的远近，那么两个类别并没有不同的中心可以用来区分。因此，类似K-means这类基于欧氏距离和类中心的聚类方法并不能自然地刻画这种结构。对于基于密度的聚类方法，情况同样并不理想。两个总体的取值区域高度重叠，并共同形成以$0$附近为高密度区域的整体分布，因此仅根据样本之间的局部密度连通关系，也不存在一条自然的低密度边界将两个潜在类别分开。\par
+然而，从概率分布的角度看，这两个类别具有明确的差异。对于同一个观测值$x$，可以分别考察它由两个正态分布产生的可能性。例如，当$|x|$较小时，方差较小的$N(0,0.5^2)$通常能够给出更高的密度；而当$|x|$较大时，方差较大的$N(0,1.5^2)$则相对更加可能产生这样的观测。也就是说，即使两个类别具有相同的中心，只要它们的概率分布不同，仍然可能根据各分布对样本的解释能力对潜在类别进行推断。\par
+这提示我们可以不再直接将一个簇理解为围绕某个中心形成的点集，或者某个密度连通区域，而是假设每个簇对应一个概率分布。样本首先从某个潜在类别中产生，再由该类别对应的概率分布生成。
+\begin{definition}
+	设随机向量$X\in\mathbb{R}^p$，隐变量$Z\in\{1,2,\dots,K\}$满足：
+	\begin{equation*}
+		P(Z=k)=\pi_k,\quad\pi_k>0,\quad\sum_{k=1}^{K}\pi_k=1
+	\end{equation*}
+	并且在给定$Z=k$时有：
+	\begin{equation*}
+		X\mid Z=k\sim N_p(\mu_k,\Sigma_k)
+	\end{equation*}
+	其中$\mu_k\in\mathbb{R}^p$，$\Sigma_k\in M_p(\mathbb{R})$为正定矩阵。由\cref{prop:ConditionalProbabilityDensity}(2)可知$X$的密度为：
+	\begin{equation*}
+		p(x)=\sum_{k=1}^{K}\pi_k\phi_p(x;\mu_k,\Sigma_k)
+	\end{equation*}
+	其中$\phi_p(x;\mu_k,\Sigma_k)$为$p$维正态分布$N_p(\mu_k,\Sigma_k)$的密度函数。称该模型为具有$K$个成分的\gls{GaussianMixtureModel}，称$\pi_k$为第$k$个混合权重，称$N_p(\mu_k,\Sigma_k)$为第$k$个混合成分。
+\end{definition}
