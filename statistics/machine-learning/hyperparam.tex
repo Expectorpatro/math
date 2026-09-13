@@ -1,0 +1,133 @@
+\section{超参数优化}
+在一次具体的模型训练开始之前，往往需要预先确定一组控制模型结构或训练过程的参数，例如决策树的最大深度、$k$近邻算法中的近邻个数以及神经网络的学习率。在这些参数固定后，训练算法才利用训练数据估计模型中的可学习参数$\theta$。这样的需要预先设定的参数被称之为\gls{Hyperparameter}。\par
+因为不同的超参数取值对应不同的候选模型结构或训练方案，所以超参数的选择本身也是模型选择的一部分。实际建模时一般会预先规定允许考察的超参数配置集合，并在其中寻找使模型表现最优的配置。记一组超参数配置为$u\in\mathcal{U}$，其中$\mathcal{U}$被称为\textbf{超参数搜索空间}。对于每个$u\in\mathcal{U}$，记在该配置下通过训练得到相应的模型$f_{\hat{\theta}(u)}$，因此整个候选模型集合可以表示为：
+\begin{equation*}
+	\mathcal{F}(\mathcal{U})=\{f_{\hat{\theta}(u)}:u\in\mathcal{U}\}
+\end{equation*}
+超参数优化就是依据独立于参数拟合过程的评价结果，从这一候选集合中选择表现最优的模型。\par
+固定训练集$\mathcal{D}_{\mathrm{train}}$、验证集$\mathcal{D}_{\mathrm{val}}$与训练过程中的随机数种子。若以验证集上的经验风险作为评价指标，则超参数优化的目标函数可以写为：
+\begin{equation*}
+	F(u)=\frac{1}{|\mathcal{D}_{\mathrm{val}}|}\sum_{(x,y)\in\mathcal{D}_{\mathrm{val}}}L[y,f_{\hat{\theta}(u)}(x)]
+\end{equation*}
+相应地，超参数优化问题为：
+\begin{equation*}
+	u^*\in\underset{u\in\mathcal{U}}{\arg\min}\;F(u)
+\end{equation*}\par
+最直接的优化方式包括\gls{GridSearch}与\gls{RandomSearch}：前者在预先离散化的超参数网格上逐一评价所有候选配置，直至整个网格被遍历；后者则按照给定的采样分布从搜索空间中随机抽取配置，并在达到预先设定的搜索预算后停止，例如完成固定次数的目标函数评价，或达到规定的时间与计算资源上限。\par
+因为每次计算$F(u)$通常都需要重新完成一次模型训练与验证，所以随着超参数维数和候选取值数量的增加，可考察的超参数配置数会迅速增长，使穷举式搜索的计算成本变得难以接受。因此，超参数优化的核心问题不仅是找到性能较好的配置，还在于如何以尽可能少的目标函数评价次数高效地探索搜索空间，这就是后续各种超参数搜索方法的主要出发点。
+
+\subsection{树结构Parzen估计}
+设$f,g$分别是从概率空间$(X,\mathscr{F},P)$到$(\mathbb{R},\mathcal{B}(\mathbb{R}))$和$(\mathcal{U},\mathscr{A})$上的可测映射，其中$f$用于刻画每次试验所对应的目标函数取值，$g$用于刻画该试验所采用的超参数配置。\par
+设$\nu$是$(\mathbb{R},\mathcal{B}(\mathbb{R}))$上的$\sigma$有限测度，$\mu$是$(\mathcal{U},\mathscr{A})$上的$\sigma$有限测度，$P(f,g)^{-1}\ll\nu\times\mu$。根据\cref{theo:RadonNikodym}和\cref{theo:MarginalDensity}，记有限且非负的：
+\begin{gather*}
+	p_{f,g}=\frac{\dif P(f,g)^{-1}}{\dif(\nu\times\mu)},\quad p_f=\frac{\dif Pf^{-1}}{\dif\nu},\quad p_g=\frac{\dif Pg^{-1}}{\dif\mu} \\
+	p_f(y)=\int_{\mathcal{U}}p_{f,g}(y,u)\dif\mu\;\text{a.e.于$(\mathbb{R},\mathcal{B}(\mathbb{R}),\nu)$} \\
+	p_g(u)=\int_{\mathbb{R}}p_{f,g}(y,u)\dif\nu\;\text{a.e.于$(\mathcal{U},\mathscr{A},\mu)$}
+\end{gather*}
+由\cref{prop:ConditionalProbabilityDensity}(1)及\cref{prop:ConditionalProbabilityDensityBasic}(2)，$g$关于$f$的条件概率核$K_{g\mid f}$和相对于$\mu$的条件概率密度$p_{g\mid f}$存在，且：
+\begin{gather*}
+	p_{g\mid f}(u\mid y)=\frac{p_{f,g}(y,u)}{p_f(y)},\quad 0<p_f(y)<+\infty \\
+	K_{g\mid f}(y,A)=\int_Ap_{g\mid f}(u\mid y)\dif\mu,\quad\int_{\mathcal{U}}p_{g\mid f}(u\mid y)\dif\mu=1
+\end{gather*}\par
+由于目标函数取值越小表示模型表现越好，我们选取阈值$y^*\in\mathbb{R}$，记：
+\begin{equation*}
+	\gamma=P(f<y^*)=\int_{(-\infty,y^*)}p_f(y)\dif\nu(y),\quad 0<\gamma<1
+\end{equation*}
+其中积分表示来自\cref{lem:IntChangeOfMeasure}。由\cref{prop:Measure}(2)可得$P(f\geqslant y^*)=1-\gamma$。\par
+TPE进一步对条件概率核作如下简化：假设存在$(\mathcal{U},\mathscr{A})$上的两个概率测度$Q_l,Q_h$，使得在同一组内，配置的条件分布不再随具体评价值变化，即在一个共同的$Pf^{-1}$零测集之外，对任意$A\in\mathscr{A}$有：
+\begin{equation*}
+	K_{g\mid f}(y,A)=
+	\begin{cases}
+		Q_l(A),&y<y^* \\
+		Q_h(A),&y\geqslant y^*
+	\end{cases}
+\end{equation*}
+这是TPE对代理模型施加的分段条件分布假设。仅仅按照阈值将试验划分为两组，并不能推出同一组内所有评价值对应的条件分布都相同。\par
+下面说明$Q_l,Q_h$具有关于$\mu$的概率密度。由于两组都具有正的$Pf^{-1}$概率，可以分别在两组中选取不属于上述例外集的$y_l,y_h$。于是对任意$A\in\mathscr{A}$有：
+\begin{equation*}
+	Q_l(A)=\int_Ap_{g\mid f}(u\mid y_l)\dif\mu(u),\quad
+	Q_h(A)=\int_Ap_{g\mid f}(u\mid y_h)\dif\mu(u)
+\end{equation*}
+若$\mu(A)=0$，由\cref{prop:NonnegativeMeasurableIntegral}(3)可得$Q_l(A)=Q_h(A)=0$，所以$Q_l\ll\mu$且$Q_h\ll\mu$。由\cref{theo:RadonNikodym}，记：
+\begin{equation*}
+	l=\frac{\dif Q_l}{\dif\mu},\quad h=\frac{\dif Q_h}{\dif\mu}
+\end{equation*}
+其中$l$取自lower，$h$取自higher。由于$Q_l,Q_h$是有限测度，可以取$l,h$为有限的非负可测版本；在可测零测集上修改版本不改变积分，依据为\cref{prop:MeasurableIntegral}(8)。取$A=\mathcal{U}$可得：
+\begin{equation*}
+	\int_{\mathcal{U}}l(u)\dif\mu(u)=Q_l(\mathcal{U})=1,\quad
+	\int_{\mathcal{U}}h(u)\dif\mu(u)=Q_h(\mathcal{U})=1
+\end{equation*}
+由Radon-Nikodym导数的唯一性，在每个满足分段假设的$y$处，$p_{g\mid f}(\cdot\mid y)$分别与$l$或者$h$在$\mu$几乎处处的意义下相等。因此，可以将条件密度及其对应的核统一选为如下版本：
+\begin{gather*}
+	p_{g\mid f}(u\mid y)=
+	\begin{cases}
+		l(u),&y<y^* \\
+		h(u),&y\geqslant y^*
+	\end{cases} \\
+	K_{g\mid f}(y,A)=
+	\begin{cases}
+		\displaystyle\int_A l(u)\dif\mu(u),&y<y^* \\
+		\displaystyle\int_A h(u)\dif\mu(u),&y\geqslant y^*
+	\end{cases}
+\end{gather*}
+这里的核对每个$y$都是概率测度；对每个$A$，它是关于两个Borel集合$(-\infty,y^*)$和$[y^*,+\infty)$的非负简单函数，因而可测。新版本只在一个$Pf^{-1}$零测集上改变原核，根据\cref{prop:MeasurableIntegral}(8)，条件概率核定义中的积分等式保持不变，所以它仍然是$g$关于$f$的条件概率核。\par
+为了与两组试验的含义联系起来，任取$A\in\mathscr{A}$。由\cref{prop:ConditionalProbability}(1)、条件概率核的定义以及\cref{prop:MeasurableIntegral}(6)，有：
+\begin{align*}
+	P(g\in A\mid f<y^*)
+	&=\frac{1}{\gamma}\int_{(-\infty,y^*)}K_{g\mid f}(y,A)\dif Pf^{-1}(y) \\
+	&=\frac{Q_l(A)}{\gamma}Pf^{-1}((-\infty,y^*))
+	=Q_l(A)=\int_A l(u)\dif\mu(u) \\
+	P(g\in A\mid f\geqslant y^*)
+	&=\frac{1}{1-\gamma}\int_{[y^*,+\infty)}K_{g\mid f}(y,A)\dif Pf^{-1}(y) \\
+	&=\frac{Q_h(A)}{1-\gamma}Pf^{-1}([y^*,+\infty))
+	=Q_h(A)=\int_A h(u)\dif\mu(u)
+\end{align*}
+因此，分段条件分布模型下的$l,h$也分别是两组试验中的配置密度，但现在还明确规定了给定每个评价值时配置的条件分布。\par
+由\cref{prop:ConditionalProbabilityDensity}(2)，再利用\cref{prop:MeasurableIntegral}(6)和\cref{theo:MeasurableCountableIntegral}，配置的边际密度满足：
+\begin{align*}
+	p_g(u)&=\int_{\mathbb{R}}p_{g\mid f}(u\mid y)p_f(y)\dif\nu(y) \\
+	&=l(u)\int_{(-\infty,y^*)}p_f(y)\dif\nu(y)
+	+h(u)\int_{[y^*,+\infty)}p_f(y)\dif\nu(y) \\
+	&=\gamma l(u)+(1-\gamma)h(u)
+	\;\text{a.e.于$(\mathcal{U},\mathscr{A},\mu)$}
+\end{align*}
+以下取右端作为$p_g$的版本。由\cref{prop:ConditionalProbabilityDensity}(1)，联合密度可以相应地取为：
+\begin{equation*}
+	p_{f,g}(y,u)=p_{g\mid f}(u\mid y)p_f(y)
+\end{equation*}
+现在可以反过来得到给定配置时评价值的条件分布。由\cref{prop:ConditionalProbabilityDensity}(3)，在$p_g(u)>0$处选取：
+\begin{equation*}
+	p_{f\mid g}(y\mid u)=\frac{p_{g\mid f}(u\mid y)p_f(y)}{p_g(u)}
+	=\begin{cases}
+		\displaystyle\frac{l(u)p_f(y)}{\gamma l(u)+(1-\gamma)h(u)},&y<y^* \\
+		\displaystyle\frac{h(u)p_f(y)}{\gamma l(u)+(1-\gamma)h(u)},&y\geqslant y^*
+	\end{cases}
+\end{equation*}
+其归一化由下式保证：
+\begin{equation*}
+	\int_{\mathbb{R}}p_{f\mid g}(y\mid u)\dif\nu(y)
+	=\frac{\gamma l(u)+(1-\gamma)h(u)}{p_g(u)}=1
+\end{equation*}
+在$p_g(u)=0$处，令$p_{f\mid g}(y\mid u)=p_f(y)$以补全概率密度。根据\cref{prop:ConditionalProbabilityDensityBasic}(2)，相应条件概率核为：
+\begin{equation*}
+	K_{f\mid g}(u,C)=\int_Cp_{f\mid g}(y\mid u)\dif\nu(y),\quad C\in\mathcal{B}(\mathbb{R})
+\end{equation*}
+这里$p_g(u)=0$的集合是$Pg^{-1}$零测集；并且因为$0<\gamma<1$且$l,h$非负，在该集合上有$l(u)=h(u)=0$。由\cref{theo:Fubini}(2)、\cref{prop:NonnegativeMeasurableIntegral}(2)和\cref{theo:MeasurableCountableIntegral}，上述$K_{f\mid g}$对固定的$u$是概率测度，对固定的$C$是可测函数。对任意$A\in\mathscr{A}$和$C\in\mathcal{B}(\mathbb{R})$，由\cref{lem:IntChangeOfMeasure}和\cref{theo:Fubini}(2)可得：
+\begin{align*}
+	\int_AK_{f\mid g}(u,C)\dif Pg^{-1}(u)
+	&=\int_A\left[\int_Cp_{f\mid g}(y\mid u)\dif\nu(y)\right]p_g(u)\dif\mu(u) \\
+	&=\int_{C\times A}p_{f,g}(y,u)\dif(\nu\times\mu)(y,u) \\
+	&=P(\{f\in C\}\cap\{g\in A\})
+\end{align*}
+因此，该核满足条件概率核定义中的联合积分等式。由\cref{prop:ConditionalProbabilityKernel}还有：
+\begin{equation*}
+	K_{f\mid g}[g(\omega),C]=P(f\in C\mid g)(\omega)
+	\;\text{a.e.于$(X,\sigma(g),P)$}
+\end{equation*}
+在$p_g(u)>0$处，利用这一条件概率核可得：
+\begin{equation*}
+	K_{f\mid g}(u,(-\infty,y^*))
+	=\frac{l(u)}{\gamma l(u)+(1-\gamma)h(u)}\int_{(-\infty,y^*)}p_f(y)\dif\nu(y)
+	=\frac{\gamma l(u)}{\gamma l(u)+(1-\gamma)h(u)}
+\end{equation*}
+它描述代理模型中给定配置$u$后，评价值低于阈值的条件概率；$K_{f\mid g}(u,\cdot)$则给出了整个评价值的条件分布，可用于后续计算给定配置时的期望改进。

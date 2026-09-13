@@ -1,0 +1,550 @@
+\section{Markov链}
+
+\begin{definition}
+	设$\{f_n\}_{n=0}^{+\infty}$是概率空间$(X,\mathscr{F},P)$上取值于可测空间$(Y,\mathscr{A})$的离散时间随机过程。若对任意的$n=0,1,2,\dots$和$A\in\mathscr{A}$都有：
+	\begin{equation*}
+		P(f_{n+1}\in A\mid f_0,f_1,\dots,f_n)=P(f_{n+1}\in A\mid f_n)
+	\end{equation*}
+	 a.e.于$(X,\sigma(f_0,f_1,\dots,f_n),P)$，则称该过程具有\gls{MarkovProperty}，称$\{f_n\}_{n=0}^{+\infty}$为取值于$(Y,\mathscr{A})$的\gls{DiscreteTimeMarkovChain}，称$f_0$的概率分布$Pf_0^{-1}$为该链的\gls{InitialDistribution}。
+\end{definition}
+Markov性表示的是：给定当前状态后，更早的历史不再为下一步提供额外信息。
+
+\subsection{分布的演化}
+\begin{definition}
+	设$\{f_n\}_{n=0}^{+\infty}$是概率空间$(X,\mathscr{F},P)$上取值于可测空间$(Y,\mathscr{A})$的离散时间Markov链。对固定的$n=0,1,2,\dots$，若存在$f_{n+1}$关于$f_n$的条件概率核$K_n$，则称$K_n$为该链从时刻$n$到时刻$n+1$的\gls{TransitionProbabilityKernel}。
+\end{definition}
+根据\cref{prop:ConditionalProbabilityKernel}可知转移概率核刻画了在给定当前时刻状态$f_n$的条件下，下一时刻状态$f_{n+1}$的条件概率分布，即描述了Markov链如何从当前状态随机转移到下一状态。为了进一步研究Markov链的状态分布随时间的演化，下面统一引入相应的记号。\par
+设$\{f_n\}_{n=0}^{+\infty}$是从概率空间$(X,\mathscr{F},P)$到可测空间$(Y,\mathscr{A})$上的离散时间Markov链，每个时刻均存在转移概率核$K_n$。记：
+\begin{equation*}
+	\mu_n=Pf_n^{-1},\quad\mathscr{F}_n=\sigma(f_0,f_1,\dots,f_n),\quad n=0,1,2,\dots
+\end{equation*}
+\begin{lemma}\label{lem:ProbabilityKernelIntegration}
+	设$Q,R$是从$(Y,\mathscr{A})$到自身的概率核，$h$是$(Y,\mathscr{A})$上的非负可测函数，则：
+	\begin{enumerate}
+		\item 函数$f:y\to\int_{Y}h(z)\dif Q(y,\cdot)$关于$\mathscr{A}$可测\footnote{关于概率核的积分为关于该概率核所对应的概率测度的积分。}；
+		\item 映射：
+		\begin{equation*}
+			(QR)(y,A)=\int_{Y}R(z,A)\dif Q(y,\cdot),\quad y\in Y,\;A\in\mathscr{A}
+		\end{equation*}
+		是从$(Y,\mathscr{A})$到自身的概率核，且：
+		\begin{equation*}
+			\int_{Y}h(w)\dif(QR)(y,\cdot)=\int_{Y}\left[\int_{Y}h(w)\dif R(z,\cdot)\right]\dif Q(y,\cdot)
+		\end{equation*}
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	(1)对任意的$y\in Y$，当$h=I(z\in A)$且$A\in\mathscr{A}$时，由\cref{prop:NonnegativeSimpleIntegral}(4)可知：
+	\begin{equation*}
+		\int_{Y}h(z)\dif Q(y,\cdot)=\int_{A}1\dif Q(y,\cdot)=Q(y,A)
+	\end{equation*}
+	$f$的可测性由概率核的定义得到。\par
+	当$h$为非负简单函数时，由\cref{prop:NonnegativeSimpleIntegral}(5)、指示函数时的结论和\cref{prop:MeasurableFunction}(5.a)可知结论成立。\par
+	当$h$为非负可测函数时，根据\cref{prop:MeasurableFunction}(8)，取非负简单函数列$\{h_n\}$使$h_n\uparrow h$，由\cref{theo:LeviTheorem}可得：
+	\begin{equation*}
+		\int_{Y}h(z)\dif Q(y,\cdot)=\lim_{n\to+\infty}\int_{Y}h_n(z)\dif Q(y,\cdot)
+	\end{equation*}
+	根据非负简单函数时的结论和\cref{prop:MeasurableFunction}(6)可知结论成立。\par
+	(2)固定$A\in\mathscr{A}$时，由(1)可知$(QR)(\cdot,A)$可测。\par
+	固定$y\in Y$时，有$(QR)(y,\varnothing)=0$、$(QR)(y,Y)=1$。对于两两不交的$\{A_n\}\subseteq\mathscr{A}$，由\cref{theo:MeasurableCountableIntegral}可得：
+	\begin{align*}
+		(QR)\left(y,\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)&=\int_{Y}R\left[z,\underset{n=1}{\overset{+\infty}{\cup}}A_n\right]\dif Q(y,\cdot)=\int_{Y}\sum_{n=1}^{+\infty}R(z,A_n)\dif Q(y,\cdot) \\
+		&=\sum_{n=1}^{+\infty}\int_{Y}R(z,A_n)\dif Q(y,\cdot)=\sum_{n=1}^{+\infty}(QR)(y,A_n)
+	\end{align*}
+	所以$(QR)(y,\cdot)$是$(Y,\mathscr{A})$上的概率测度。\par
+	综上，$QR$是从$(Y,\mathscr{A})$到自身的概率核。\par
+	当$h=I(w\in A)$且$A\in\mathscr{A}$时，由\cref{prop:NonnegativeSimpleIntegral}(4)和$QR$的定义可得：
+	\begin{align*}
+		&\int_{Y}h(w)\dif(QR)(y,\cdot)=\int_{A}1\dif(QR)(y,\cdot)=(QR)(y,A) \\
+		=&\int_{Y}R(z,A)\dif Q(y,\cdot)=\int_{Y}\left[\int_{Y}h(w)\dif R(z,\cdot)\right]\dif Q(y,\cdot)
+	\end{align*}\par
+	当$h$为非负简单函数时，由\cref{prop:NonnegativeMeasurableIntegral}(10)、指示函数时的结论、\cref{prop:NonnegativeSimpleIntegral}(2)和(1)可知结论成立。\par
+	当$h$为非负可测函数时，根据\cref{prop:MeasurableFunction}(8)，取非负简单函数列$\{h_n\}$使$h_n\uparrow h$。对任意的$z\in Y$，由\cref{theo:LeviTheorem}可知：
+	\begin{equation*}
+		\int_{Y}h_n(w)\dif R(z,\cdot)\uparrow\int_{Y}h(w)\dif R(z,\cdot)
+	\end{equation*}
+	由(1)和\cref{prop:NonnegativeMeasurableIntegral}(2)可知上式两侧作为$z$的函数均为$(Y,\mathscr{A})$上的非负可测函数。根据\cref{theo:LeviTheorem}和非负简单函数时的结论可得：
+	\begin{align*}
+		&\int_{Y}h(w)\dif(QR)(y,\cdot)=\lim_{n\to+\infty}\int_{Y}h_n(w)\dif(QR)(y,\cdot) \\
+		=&\lim_{n\to+\infty}\int_{Y}\left[\int_{Y}h_n(w)\dif R(z,\cdot)\right]\dif Q(y,\cdot)=\int_{Y}\left[\int_{Y}h(w)\dif R(z,\cdot)\right]\dif Q(y,\cdot)\qedhere
+	\end{align*}
+\end{proof}
+\begin{definition}
+	设$\mu$是$(Y,\mathscr{A})$上的概率测度，$Q$是从$(Y,\mathscr{A})$到自身的概率核。对任意的$A\in\mathscr{A}$，定义：
+	\begin{equation*}
+		(\mu Q)(A)\coloneq\int_{Y}Q(y,A)\dif\mu
+	\end{equation*}
+	与\cref{lem:ProbabilityKernelIntegration}(2)中验证测度的过程相同可知$\mu Q$是$(Y,\mathscr{A})$上的概率测度。
+\end{definition}
+在研究Markov链的演化时，我们不仅关心相邻两个时刻之间的一步转移，也希望直接刻画系统从时刻$m$出发经过若干步后到达时刻$n$的转移规律。当$n=m$时系统尚未发生任何转移，因此从状态$y$出发仍落在集合$A$中的概率自然应为$I(y\in A)$；当$n>m$时，为了得到从时刻$m$到时刻$n$的转移规律，可以对中间时刻可能出现的状态进行积分。由此自然得到如下递归定义。
+\begin{definition}
+	对任意满足$m\leqslant n$的非负整数$m,n$，递归定义：
+	\begin{equation*}
+		K_{m,m}(y,A)\coloneq I(y\in A),\quad K_{m,n+1}(y,A)\coloneq\int_{Y}K_n(z,A)\dif K_{m,n}(y,\cdot)
+	\end{equation*}
+	其中$y\in Y$、$A\in\mathscr{A}$。根据\cref{lem:ProbabilityKernelIntegration}(2)，称$K_{m,n}$为该链从时刻$m$到时刻$n$的\gls{MultiStepTransitionProbabilityKernel}。
+\end{definition}
+\begin{property}\label{prop:MarkovMultiStepEvolution}
+	对任意满足$m\leqslant n$的非负整数$m,n$，有：
+	\begin{enumerate}
+		\item 对任意$(Y,\mathscr{A})$上的非负可测函数$h$，有：
+		\begin{equation*}
+			\operatorname{E}(h\circ f_n\mid\mathscr{F}_m)(x)=\int_{Y}h(z)\dif K_{m,n}[f_m(x),\cdot]\;\text{a.e.于$(X,\mathscr{F}_m,P)$}
+		\end{equation*}
+		特别地，对任意的$A\in\mathscr{A}$有：
+		\begin{equation*}
+			P(f_n\in A\mid\mathscr{F}_m)(x)=K_{m,n}[f_m(x),A]\;\text{a.e.于$(X,\mathscr{F}_m,P)$}
+		\end{equation*}
+		且$K_{m,n}$是$f_n$关于$f_m$的条件概率核；
+		\item $\mu_n=\mu_mK_{m,n}$，即对任意的$A\in\mathscr{A}$有：
+		\begin{equation*}
+			\mu_n(A)=\int_{Y}K_{m,n}(y,A)\dif\mu_m
+		\end{equation*}
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由\cref{prop:MeasurableMapping}(2)可得下面涉及到的所有复合函数的可测性。\par
+	当$n=m$时，$I(f_m\in A)$关于$\mathscr{F}_m$可测，由\cref{prop:ConditionalExpectation}(1)可知：
+	\begin{equation*}
+		P(f_m\in A\mid\mathscr{F}_m)(x)=I[f_m(x)\in A]=K_{m,m}[f_m(x),A]\;\text{a.e.于$(X,\mathscr{F}_m,P)$}
+	\end{equation*}
+	假设对于某个$n\geqslant m$，对任意的$A\in\mathscr{A}$有：
+	\begin{equation*}
+		P(f_n\in A\mid\mathscr{F}_m)(x)=K_{m,n}[f_m(x),A]\;\text{a.e.于$(X,\mathscr{F}_m,P)$}
+	\end{equation*}\par
+	当$h(y)=\sum\limits_{i=1}^{l}a_iI(y\in A_i)$是非负简单函数时，其中$a_i\geqslant0$、$A_i\in\mathscr{A}$。由\cref{prop:ConditionalExpectation}(5)、\cref{prop:SigmaField}(3)、和\cref{prop:Measure}(3)（次有限可加性）可得：
+	\begin{align*}
+		&\operatorname{E}(h\circ f_n\mid\mathscr{F}_m)(x)=\sum_{i=1}^{l}a_iP(f_n\in A_i\mid\mathscr{F}_m)(x) \\
+		=&\sum_{i=1}^{l}a_iK_{m,n}[f_m(x),A_i]=\int_{Y}h(z)\dif K_{m,n}[f_m(x),\cdot]
+	\end{align*}
+	a.e.于$(X,\mathscr{F}_m,P)$。\par
+	当$h$是非负可测函数时，根据\cref{prop:MeasurableFunction}(8)，取非负简单函数列$\{h_j\}$使$h_j\uparrow h$，于是$h_j\circ f_n\uparrow h\circ f_n$。由\cref{prop:ConditionalExpectation}(6)、非负简单函数时的结论和\cref{theo:LeviTheorem}可得：
+	\begin{align*}
+		&\operatorname{E}(h\circ f_n\mid\mathscr{F}_m)(x)=\lim_{j\to+\infty}\operatorname{E}(h_j\circ f_n\mid\mathscr{F}_m)(x) \\
+		=&\lim_{j\to+\infty}\int_{Y}h_j(z)\dif K_{m,n}[f_m(x),\cdot]=\int_{Y}h(z)\dif K_{m,n}[f_m(x),\cdot]
+	\end{align*}
+	a.e.于$(X,\mathscr{F}_m,P)$。\par
+	根据Markov性、\cref{prop:ConditionalProbabilityKernel}、\cref{prop:SigmaField}(3)和\cref{prop:Measure}(3)（次有限可加性）可知：
+	\begin{equation*}
+		P(f_{n+1}\in A\mid\mathscr{F}_n)(x)=P(f_{n+1}\in A\mid f_n)(x)=K_n[f_n(x),A]\;\text{a.e.于$(X,\mathscr{F}_n,P)$}
+	\end{equation*}
+	因为$\mathscr{F}_m\subseteq\mathscr{F}_n$，由\cref{prop:ConditionalExpectation}(3)、\cref{prop:MeasurableIntegral}(8)和条件期望的定义，取$h=K_n$并根据\cref{prop:SigmaField}(3)和\cref{prop:Measure}(3)（次有限可加性）可得：
+	\begin{align*}
+		&P(f_{n+1}\in A\mid\mathscr{F}_m)(x)=\operatorname{E}[P(f_{n+1}\in A\mid\mathscr{F}_n)\mid\mathscr{F}_m](x)=\operatorname{E}[K_n(f_n,A)\mid\mathscr{F}_m](x) \\
+		=&\int_{Y}K_n(z,A)\dif K_{m,n}[f_m(x),\cdot]=K_{m,n+1}[f_m(x),A]\;\text{a.e.于$(X,\mathscr{F}_m,P)$}
+	\end{align*}
+	根据数学归纳法可知对任意的$n\geqslant m$和任意的$A\in\mathscr{A}$有：
+	\begin{equation*}
+		P(f_n\in A\mid\mathscr{F}_m)(x)=K_{m,n}[f_m(x),A]\;\text{a.e.于$(X,\mathscr{F}_m,P)$}
+	\end{equation*}
+	于是对任意的$n\geqslant m$有：
+	\begin{equation*}
+		\operatorname{E}(h\circ f_n\mid\mathscr{F}_m)(x)=\int_{Y}h(z)\dif K_{m,n}[f_m(x),\cdot]\;\text{a.e.于$(X,\mathscr{F}_m,P)$}
+	\end{equation*}\par
+	固定$A\in\mathscr{A}$，由\cref{lem:ProbabilityKernelIntegration}(2)和\cref{prop:MeasurableMapping}(2)可知$K_{m,n}[f_m(x),A]$关于$\sigma(f_m)$可测。由于$\sigma(f_m)\subseteq\mathscr{F}_m$，由\cref{prop:ConditionalExpectation}(3)、\cref{prop:MeasurableIntegral}(8)、条件期望的定义、\cref{prop:ConditionalExpectation}(1)、\cref{prop:SigmaField}(3)和\cref{prop:Measure}(3)（次有限可加性）可得：
+	\begin{align*}
+		&P(f_n\in A\mid f_m)=\operatorname{E}[P(f_n\in A\mid\mathscr{F}_m)\mid f_m] \\
+		=&\operatorname{E}\{K_{m,n}[f_m(x),A]\mid f_m\}=K_{m,n}[f_m(x),A]
+	\end{align*}
+	 a.e.于$(X,\sigma(f_m),P)$。根据\cref{lem:ProbabilityKernelIntegration}(2)和\cref{prop:ConditionalProbabilityKernel}可知$K_{m,n}$是$f_n$关于$f_m$的条件概率核。\par
+	(2)任取$A\in\mathscr{A}$，由\cref{prop:NonnegativeSimpleIntegral}(4)、\cref{prop:ConditionalExpectation}(3)、\cref{prop:MeasurableIntegral}(8)和\cref{theo:IntBySubstitution}可得：
+	\begin{align*}
+		&\mu_n(A)=P(f_n\in A)=\operatorname{E}[I(f_n\in A)]=\operatorname{E}\{\operatorname{E}[I(f_n\in A)\mid\mathscr{F}_m]\}=\operatorname{E}[P(f_n\in A\mid\mathscr{F}_m)] \\
+		=&\int_{X}K_{m,n}[f_m(x),A]\dif P=\int_{Y}K_{m,n}(y,A)\dif Pf_m^{-1}=\int_{Y}K_{m,n}(y,A)\dif\mu_m=(\mu_mK_{m,n})(A)
+	\end{align*}
+	根据$A$的任意性可得$\mu_n=\mu_mK_{m,n}$。
+\end{proof}
+\begin{note}
+	上述两条性质说明了多步转移概率核$K_{m,n}$确实完整描述了Markov链从时刻$m$到时刻$n$状态分布的演化。第一条表明，在已知时刻$m$的信息后，时刻$n$的条件分布由$K_{m,n}[f_m(x),\cdot]$给出。第二条则进一步说明，若时刻$m$的状态分布为$\mu_m$，那么经过$K_{m,n}$作用后就得到时刻$n$的状态分布$\mu_n$。
+\end{note}
+\begin{theorem}[Chapman--Kolmogorov Equation]\label{theo:ChapmanKolmogorov}
+	对任意满足$m\leqslant r\leqslant n$的非负整数$m,r,n$以及任意的$y\in Y$和$A\in\mathscr{A}$，有：
+	\begin{equation*}
+		K_{m,n}(y,A)=\int_{Y}K_{r,n}(z,A)\dif K_{m,r}(y,\cdot)
+	\end{equation*}
+	即$K_{m,n}=K_{m,r}K_{r,n}$。该方程被称为\gls{ChapmanKolmogorovEquation}，简称为CK方程。
+\end{theorem}
+\begin{proof}
+	固定$m,r$，对$n\geqslant r$作数学归纳。由\cref{prop:NonnegativeSimpleIntegral}(4)可得：
+	\begin{equation*}
+		\int_{Y}K_{r,r}(z,A)\dif K_{m,r}(y,\cdot)=\int_{Y}I(z\in A)\dif K_{m,r}(y,\cdot)=\int_{A}1\dif K_{m,r}(y,\cdot)=K_{m,r}(y,A)
+	\end{equation*}
+	于是当$n=r$时结论成立。\par
+	假设结论对$n$成立，则由递归定义、归纳假设和\cref{lem:ProbabilityKernelIntegration}(2)可得：
+	\begin{align*}
+		&K_{m,n+1}(y,A)=\int_{Y}K_n(w,A)\dif K_{m,n}(y,\cdot) \\
+		=&\int_{Y}\left[\int_{Y}K_n(w,A)\dif K_{r,n}(z,\cdot)\right]\dif K_{m,r}(y,\cdot) \\
+		=&\int_{Y}K_{r,n+1}(z,A)\dif K_{m,r}(y,\cdot)
+	\end{align*}
+	所以结论对$n+1$成立。由数学归纳法可知结论成立。
+\end{proof}
+Chapman--Kolmogorov方程说明多步转移具有自然的复合一致性：从时刻$m$到时刻$n$的转移，可以在任意中间时刻$r$处将演化过程分成两段，先由$K_{m,r}$描述从$m$到$r$的转移，再由$K_{r,n}$描述从$r$到$n$的转移，并对时刻$r$所有可能的中间状态进行积分。无论选择哪个中间时刻$r$进行分解，最终得到的从$m$到$n$的转移规律都是相同的。
+
+\subsection{齐次链的分布演化}
+\begin{definition}
+	设$\{f_n\}_{n=0}^{+\infty}$是概率空间$(X,\mathscr{F},P)$上取值于可测空间$(Y,\mathscr{A})$的离散时间Markov链。若存在从$(Y,\mathscr{A})$到自身的概率核$K$，使得对任意的$n=0,1,2,\dots$，均可选取$K_n=K$作为该链从时刻$n$到时刻$n+1$的转移概率核，则称该链为\gls{TimeHomogeneousDiscreteTimeMarkovChain}，称$K$为该链的转移概率核。
+\end{definition}
+\begin{definition}
+	设$\{f_n\}_{n=0}^{+\infty}$为以$K$为转移概率核的齐次离散时间Markov链，递归定义：
+	\begin{gather*}
+		K^0(y,A)\coloneq I(y\in A),\quad K^{m+1}(y,A)\coloneq\int_{Y}K(z,A)\dif K^m(y,\cdot)
+	\end{gather*}
+	称$K^m$为该链的$m$步转移概率核。
+\end{definition}
+\begin{property}\label{prop:HomogeneousMarkovEvolution}
+	对于以$K$为转移概率核的齐次离散时间Markov链，有：
+	\begin{enumerate}
+		\item $K_{m,n}=K^{n-m}$，其中$0\leqslant m\leqslant n$；
+		\item 对任意的非负整数$m,k$、$y\in Y$和$A\in\mathscr{A}$，有：
+		\begin{equation*}
+			K^{m+k}(y,A)=\int_{Y}K^k(z,A)\dif K^m(y,\cdot)
+		\end{equation*}
+		即$K^{m+k}=K^mK^k$；
+		\item $\mu_n=\mu_0K^n$，其中$n=0,1,2,\dots$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	上述结论都可由之前的结论直接推得，不再叙述。
+\end{proof}
+\subsubsection{不变分布}
+对于齐次Markov链而言，转移概率核$K$决定了状态分布随时间的演化：由\cref{prop:MarkovMultiStepEvolution}(2)可知若时刻$n$的状态分布为$\mu_n$，则下一时刻的状态分布为$\mu_{n+1}=\mu_nK$。因此，一个自然的问题是：是否存在某个概率分布，在经过一次转移后保持不变？这样的分布可以看作Markov链概率演化的平衡状态，一旦链的分布达到这一状态，之后继续按照相同的转移规律演化，其状态分布将不再随时间改变。
+\begin{definition}
+	设$\pi$是可测空间$(Y,\mathscr{A})$上的概率测度，$K$是从$(Y,\mathscr{A})$到自身的概率核。若$\pi K=\pi$，即对任意的$A\in\mathscr{A}$有：
+	\begin{equation*}
+		\pi(A)=\int_{Y}K(y,A)\dif\pi
+	\end{equation*}
+	则称$\pi$为$K$的\gls{InvariantDistribution}，也称为\gls{StationaryDistribution}。当$K$是齐次离散时间Markov链的转移概率核时，称$\pi$为该链的不变分布。
+\end{definition}
+\begin{theorem}\label{theo:InvariantDistributionIntegral}
+	设$K$是从可测空间$(Y,\mathscr{A})$到自身的概率核，$\pi$是$(Y,\mathscr{A})$上的概率测度，则$\pi$是$K$的不变分布的充要条件为对任意$(Y,\mathscr{A})$上的非负可测函数$h$有：
+	\begin{equation*}
+		\int_{Y}\left[\int_{Y}h(z)\dif K(y,\cdot)\right]\dif\pi=\int_{Y}h(y)\dif\pi
+	\end{equation*}
+\end{theorem}
+\begin{proof}
+	\textbf{(1)必要性：}当$h(z)=I(z\in A)$且$A\in\mathscr{A}$时，由\cref{prop:NonnegativeSimpleIntegral}(4)可知：
+	\begin{align*}
+		&\int_{Y}\left[\int_{Y}h(z)\dif K(y,\cdot)\right]\dif\pi=\int_{Y}\left[\int_{Y}I(z\in A)\dif K(y,\cdot)\right]\dif\pi \\
+		=&\int_{Y}\left[\int_{A}1\dif K(y,\cdot)\right]\dif\pi=\int_{Y}K(y,A)\dif\pi=\pi(A)=\int_{Y}h(y)\dif\pi
+	\end{align*}\par
+	当$h$为非负简单函数时，由\cref{prop:NonnegativeSimpleIntegral}(5)(2)、\cref{lem:ProbabilityKernelIntegration}(1)、\cref{prop:NonnegativeMeasurableIntegral}(10)和指示函数时的结论即可知结论成立。\par
+	当$h$为非负可测函数时，根据\cref{prop:MeasurableFunction}(8)，取非负简单函数列$h_n\uparrow h$。由\cref{theo:LeviTheorem}、\cref{lem:ProbabilityKernelIntegration}(1)和非负简单函数时的结论可得：
+	\begin{align*}
+		&\int_{Y}\left[\int_{Y}h(z)\dif K(y,\cdot)\right]\dif\pi=\int_{Y}\left\{\int_{Y}\left[\lim_{n\to+\infty}h_n(z)\right]\dif K(y,\cdot)\right\}\dif\pi \\
+		=&\int_{Y}\left\{\lim_{n\to+\infty}\left[\int_{Y}h_n(z)\dif K(y,\cdot)\right]\right\}\dif\pi=\lim_{n\to+\infty}\int_{Y}\left[\int_{Y}h_n(z)\dif K(y,\cdot)\right]\dif\pi \\
+		=&\lim_{n\to+\infty}\int_{Y}h_n(y)\dif\pi=\int_{Y}h(y)\dif\pi
+	\end{align*}\par
+	\textbf{(2)充分性：}对任意的$A\in\mathscr{A}$，在积分等式中取$h(z)=I(z\in A)$，由\cref{prop:NonnegativeSimpleIntegral}(4)即可得到$(\pi K)(A)=\pi(A)$。由$A$的任意性可知$\pi K=\pi$。
+\end{proof}
+\begin{property}\label{prop:InvariantDistribution}
+	设$K$是从可测空间$(Y,\mathscr{A})$到自身的概率核，则：
+	\begin{enumerate}
+		\item 若$\pi K=\pi$，则对任意的非负整数$n$有$\pi K^n=\pi$；
+		\item 若$\pi_1,\pi_2$都是$K$的不变分布，$a\in[0,1]$，则$a\pi_1+(1-a)\pi_2$也是$K$的不变分布；
+		\item 若概率核$Q,R$都以$\pi$为不变分布，则复合核$QR$也以$\pi$为不变分布。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)当$n=0$时，由$K^0(y,A)$的定义和\cref{prop:NonnegativeSimpleIntegral}(4)可知结论成立。设$\pi K^n=\pi$，由\cref{theo:InvariantDistributionIntegral}可知对任意的$A\in\mathscr{A}$有：
+	\begin{align*}
+		(\pi K^{n+1})(A)&=\int_{Y}K^{n+1}(y,A)\dif\pi=\int_{Y}\left[\int_{Y}K(z,A)\dif K^n(y,\cdot)\right]\dif\pi \\
+		&=\int_{Y}K(z,A)\dif\pi=\pi(A)
+	\end{align*}
+	即$\pi K^{n+1}=\pi$。根据数学归纳法可知结论成立。\par
+	(2)令$\pi=a\pi_1+(1-a)\pi_2$，则$\pi$为概率测度。对任意的$A\in\mathscr{A}$，由关于测度的积分线性性质（可由典型方法证明得到）可知：
+	\begin{equation*}
+		(\pi K)(A)=a\int_{Y}K(y,A)\dif\pi_1+(1-a)\int_{Y}K(y,A)\dif\pi_2=a\pi_1(A)+(1-a)\pi_2(A)=\pi(A)
+	\end{equation*}
+	所以$\pi$是不变分布。\par
+	(3)对任意的$A\in\mathscr{A}$，由\cref{theo:InvariantDistributionIntegral}可得：
+	\begin{align*}
+		[\pi(QR)](A)=\int_{Y}\left[\int_{Y}R(z,A)\dif Q(y,\cdot)\right]\dif\pi=\int_{Y}R(z,A)\dif\pi=\pi(A)
+	\end{align*}
+	即$\pi(QR)=\pi$。
+\end{proof}
+\subsubsection{细致平衡}
+\begin{definition}
+	设$K$是从可测空间$(Y,\mathscr{A})$到自身的概率核，$\pi$是$(Y,\mathscr{A})$上的概率测度。若对任意的$A,B\in\mathscr{A}$都有：
+	\begin{equation*}
+		\int_{A}K(y,B)\dif\pi=\int_{B}K(y,A)\dif\pi
+	\end{equation*}
+	则称$K$与$\pi$满足\gls{DetailedBalanceCondition}。
+\end{definition}
+\begin{note}
+	当前状态服从$\pi$时，上式左侧表示当前状态在$A$中且下一状态在$B$中的概率，右侧表示当前状态在$B$中且下一状态在$A$中的概率。细致平衡要求这两个方向的概率相同。
+\end{note}
+\begin{property}\label{prop:DetailedBalance}
+	设$K$是从可测空间$(Y,\mathscr{A})$到自身的概率核，$\pi$是$(Y,\mathscr{A})$上的概率测度，则：
+	\begin{enumerate}
+		\item 若$K$与$\pi$满足细致平衡条件，则$\pi$是$K$的不变分布；
+		\item $K$与$\pi$满足细致平衡条件的充分必要条件为对任意$(Y,\mathscr{A})$上的非负有界可测函数$u,v$都有：
+		\begin{equation*}
+			\int_{Y}u(y)\left[\int_{Y}v(z)\dif K(y,\cdot)\right]\dif\pi
+			=\int_{Y}v(y)\left[\int_{Y}u(z)\dif K(y,\cdot)\right]\dif\pi
+		\end{equation*}
+		\item 若$K$与$\pi$满足细致平衡条件，则对任意非负整数$n$，$K^n$与$\pi$也满足细致平衡条件；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)任取$B\in\mathscr{B}$，在细致平衡条件中取$A=Y$可得：
+	\begin{equation*}
+		(\pi K)(B)=\int_{Y}K(y,B)\dif\pi=\int_{B}K(z,Y)\dif\pi=\pi(B)
+	\end{equation*}
+	由$B$的任意性可知$\pi K=\pi$。\par
+	(2)\textbf{充分性：}任取$A,B\in\mathscr{A}$，令$u(y)=I(y\in A)$、$v(y)=I(y\in B)$。由\cref{prop:NonnegativeSimpleIntegral}(4)可知已知条件等式左侧为：
+	\begin{equation*}
+		\int_{Y}I(y\in A)\left[\int_{Y}I(z\in B)\dif K(y,\cdot)\right]\dif\pi=\int_{Y}I(y\in A)K(y,B)\dif\pi=\int_{A}K(y,B)\dif\pi
+	\end{equation*}
+	同理可知等式右侧为$\int_{B}K(y,A)\dif\pi$。因此对任意$A,B\in\mathscr{A}$有：
+	\begin{equation*}
+		\int_{A}K(y,B)\dif\pi=\int_{B}K(y,A)\dif\pi
+	\end{equation*}
+	即$K$与$\pi$满足细致平衡条件。\par
+	\textbf{必要性：}当$u,v$都是非负简单函数时，设：
+	\begin{equation*}
+		u(y)=\sum_{i=1}^{r}a_iI(y\in A_i),\quad v(y)=\sum_{j=1}^{s}b_jI(y\in B_j)
+	\end{equation*}
+	其中$r,s\in\mathbb{N}^+$，$a_i,b_j\geqslant0$，$A_i,B_j\in\mathscr{A}$。由\cref{prop:NonnegativeSimpleIntegral}(5)(4)可知：
+	\begin{align*}
+		&\int_{Y}v(z)\dif K(y,\cdot)=\int_{Y}\left[\sum_{j=1}^{s}b_jI(y\in B_j)\right]\dif K(y,\cdot) \\
+		=&\sum_{j=1}^{s}b_j\int_{Y}I(z\in B_j)\dif K(y,\cdot)=\sum_{j=1}^{s}b_jK(y,B_j)
+	\end{align*}
+	同理可得：
+	\begin{equation*}
+		\int_{Y}u(z)\dif K(y,\cdot)=\sum_{i=1}^{r}a_iK(y,A_i)
+	\end{equation*}
+	根据\cref{prop:NonnegativeMeasurableIntegral}(10)(5)可知：
+	\begin{align*}
+		&\int_{Y}u(y)\left[\int_{Y}v(z)\dif K(y,\cdot)\right]\dif\pi=\int_{Y}\left[\sum_{i=1}^{r}a_iI(y\in A_i)\right]\left[\sum_{j=1}^{s}b_jK(y,B_j)\right]\dif\pi \\
+		=&\sum_{i=1}^{r}\sum_{j=1}^{s}a_ib_j\int_{A_i}K(y,B_j)\dif\pi=\sum_{i=1}^{r}\sum_{j=1}^{s}a_ib_j\int_{B_j}K(y,A_i)\dif\pi \\
+		=&\int_{Y}\left[\sum_{j=1}^{s}b_jI(y\in B_j)\right]\left[\sum_{i=1}^{r}a_iK(y,A_i)\right]\dif\pi=\int_{Y}v(y)\left[\int_{Y}u(z)\dif K(y,\cdot)\right]\dif\pi
+	\end{align*}\par
+	当$u,v$是非负有界可测函数时，取有限常数$M,N\geqslant0$使$0\leqslant u\leqslant M,\;0\leqslant v\leqslant N$。根据\cref{prop:MeasurableFunction}(8)，取非负简单函数列$\{u_n\}$和$\{v_n\}$使$u_n\uparrow u$、$v_n\uparrow v$。记：
+	\begin{gather*}
+		U_n(y)=\int_{Y}u_n(z)\dif K(y,\cdot),\quad U(y)=\int_{Y}u(z)\dif K(y,\cdot) \\
+		V_n(y)=\int_{Y}v_n(z)\dif K(y,\cdot),\quad V(y)=\int_{Y}v(z)\dif K(y,\cdot)
+	\end{gather*}
+	由\cref{lem:ProbabilityKernelIntegration}(1)可知这些函数均关于$\mathscr{A}$可测。因为$K(y,\cdot)$是概率测度，根据\cref{prop:NonnegativeMeasurableIntegral}(6)可知$0\leqslant U_n(y)\leqslant U(y)\leqslant M$、$0\leqslant V_n(y)\leqslant V(y)\leqslant N$。对每个固定的$y$，由\cref{theo:LeviTheorem}可得$U_n(y)\uparrow U(y)$、$V_n(y)\uparrow V(y)$。\par
+	因为所有因子非负，且各自随$n$递增，所以：
+	\begin{equation*}
+		0\leqslant u_n(y)V_n(y)\leqslant u_{n+1}(y)V_n(y)\leqslant u_{n+1}(y)V_{n+1}(y)
+	\end{equation*}
+	由\cref{prop:RMap}(5.c)可知$u_n(y)V_n(y)\uparrow u(y)V(y)$且$u(y)V(y)$有限。同理可得$v_n(y)U_n(y)\uparrow v(y)U(y)$且$v(y)U(y)$有限。根据\cref{prop:MeasurableFunction}(5.b)、\cref{theo:LeviTheorem}和非负简单函数时的结论可得：
+	\begin{equation*}
+		\int_{Y}u(y)V(y)\dif\pi=\lim_{n\to+\infty}\int_{Y}u_n(y)V_n(y)\dif\pi=\lim_{n\to+\infty}\int_{Y}v_n(y)U_n(y)\dif\pi=\int_{Y}v(y)U(y)\dif\pi
+	\end{equation*}
+	于是结论成立。\par
+	(3)对任意的非负可测函数$h$，记：
+	\begin{equation*}
+		T^0h=h,\quad (Th)(y)=\int_{Y}h(z)\dif K(y,\cdot),\quad T^{n+1}h=T(T^nh)
+	\end{equation*}
+	由\cref{lem:ProbabilityKernelIntegration}(2)可知：
+	\begin{equation*}
+		(T^nh)(y)=\int_{Y}h(z)\dif K^n(y,\cdot)
+	\end{equation*}
+	当$n>0$时，根据(2)可知对任意非负有界可测函数$u,v$有：
+	\begin{align*}
+		&\int_{Y}u(z)[T^nv(z)]\dif\pi=\int_{Y}u(z)T\{[T^{n-1}v(z)]\}\dif\pi \\
+		=&\int_{Y}u(z)\left\{\int_{Y}\left[\int_{Y}v(z)\dif K^{n-1}(y,\cdot)\right]\dif K(y,\cdot)\right\}\dif\pi \\
+		=&\int_{Y}\left[\int_{Y}v(z)\dif K^{n-1}(y,\cdot)\right]\left[\int_{Y}u(z)\dif K(y,\cdot)\right]\dif\pi \\
+		=&\int_{Y}[T^{n-1}v(z)][Tu(z)]\dif\pi=\cdots=\int_{Y}v(z)[T^nu(z)]\dif\pi
+	\end{align*}
+	当$n=0$时，上式也成立。于是对任意的非负整数$n$和任意的$A,B\in\mathscr{A}$，取$u=I(y\in A),v=I(y\in B)$，由\cref{prop:NonnegativeSimpleIntegral}(4)和\cref{prop:NonnegativeMeasurableIntegral}(5)可得：
+	\begin{align*}
+		&\int_{Y}I(z\in A)[T^nI(z\in B)]\dif\pi=\int_{Y}I(z\in A)\left[\int_{Y}I(z\in B)\dif K^n(y,\cdot)\right]\dif\pi \\
+		=&\int_{Y}I(z\in A)K^n(y,B)\dif\pi=\int_{A}K^n(y,B)\dif\pi
+	\end{align*}
+	同理可得：
+	\begin{equation*}
+		\int_{Y}I(z\in B)[T^nI(z\in A)]\dif\pi=\int_{B}K^n(y,A)\dif\pi
+	\end{equation*}
+	于是：
+	\begin{align*}
+		&\int_{A}K^n(y,B)\dif\pi=\int_{Y}I(z\in A)[T^nI(z\in B)]\dif\pi \\
+		=&\int_{Y}I(z\in B)[T^nI(z\in A)]\dif\pi=\int_{B}K^n(y,A)\dif\pi
+	\end{align*}
+	由$A,B$的任意性可知$K^n$与$\pi$满足细致平衡条件。
+\end{proof}
+\begin{note}
+	\cref{prop:DetailedBalance}(1)给出了一个验证$\pi$是$K$的不变分布的在实际情况下更容易验证的充分条件，这也是我们研究细致平衡的原因。
+\end{note}
+\subsubsection{不可约性}
+不变分布描述一种在转移下保持不变的分布，但从某个状态出发，链能够到达哪些区域仍然是一个需要研究的问题。如果状态空间中存在彼此无法到达的部分，那么不同初始状态对应的路径就可能始终留在不同区域，链的长期行为也可能随初始状态所在的区域而不同。因此，在研究整个状态空间上的演化时我们自然希望知道：从任意初始状态出发，是否都有机会进入那些具有正测度的区域？
+\begin{definition}
+	设$\varphi$是$(Y,\mathscr{A})$上的非零$\sigma$有限测度。若对任意的$y\in Y$和任意满足$\varphi(A)>0$的$A\in\mathscr{A}$，存在$n\in\mathbb{N}^+$使得：
+	\begin{equation*}
+		K^n(y,A)>0
+	\end{equation*}
+	则称$K$是$\varphi$不可约的，称$\varphi$为$K$的\gls{IrreducibilityMeasure}。若存在这样的$\varphi$，则称$K$为\gls{IrreducibleMarkovKernel}，也称以$K$为转移概率核的齐次Markov链不可约。
+\end{definition}
+\begin{note}
+	不可约性表示从任意状态出发都有正概率在某个有限的正时刻进入所考察的集合。
+\end{note}
+\begin{property}\label{prop:IrreducibilityMeasure}
+	设$K$是$\varphi$不可约的，则：
+	\begin{enumerate}
+		\item 若$\psi$是非零$\sigma$有限测度且$\psi\ll\varphi$，则$K$也是$\psi$不可约的；
+		\item 若$\nu$是$K$的任意不变分布，则$\varphi\ll\nu$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)任取$y\in Y$及满足$\psi(A)>0$的$A\in\mathscr{A}$，由$\psi\ll\varphi$可知$\varphi(A)>0$，于是存在$n\in\mathbb{N}^+$使得$K^n(y,A)>0$，即$K$是$\psi$不可约的。\par
+	(2)任取满足$\nu(A)=0$的$A\in\mathscr{A}$。由\cref{prop:InvariantDistribution}(1)可知对任意的$n\in\mathbb{N}^+$有：
+	\begin{equation*}
+		0=\nu(A)=\int_{Y}K^n(y,A)\dif\nu
+	\end{equation*}
+	根据\cref{prop:HomogeneousMarkovEvolution}(1)、\cref{prop:MarkovMultiStepEvolution}(2)可知$K^n(y,A)$是非负可测函数，由\cref{prop:MeasurableIntegral}(9)可得$K^n(y,A)=0\;$a.e.于$(Y,\mathscr{A},\nu)$。令：
+	\begin{equation*}
+		N=\underset{n=1}{\overset{+\infty}{\cup}}\{y\in Y:K^n(y,A)>0\}
+	\end{equation*}
+	由\cref{prop:MeasurableFunction}(1.c)和\cref{prop:Measure}(3)（次可列可加性）可得$N\in\mathscr{A}$且$\nu(N)=0$。因为$\nu(Y)=1$，所以$N^c\ne\varnothing$，可取$y\in N^c$，此时对所有的$n\in\mathbb{N}^+$都有$K^n(y,A)=0$。若$\varphi(A)>0$，这与$\varphi$不可约性矛盾，因此$\varphi(A)=0$。由$A$的任意性可知$\varphi\ll\nu$。
+\end{proof}
+下述定理给出了一个验证关于$\pi$不可约性的容易验证的充分条件。
+\begin{theorem}\label{theo:IrreducibilityDensity}
+	设$K$是可测空间$(Y,\mathscr{A})$上的概率核，$\pi$是该空间上的概率测度。若存在固定的$m\in\mathbb{N}^+$，使得对每个$y\in Y$，$K^m(y,\cdot)$都具有关于$\pi$的Radon--Nikodym导数$k_m(y,\cdot)$，即对任意的$y\in Y$和$A\in\mathscr{A}$有：
+	\begin{equation*}
+		K^m(y,A)=\int_{A}k_m(y,z)\dif\pi
+	\end{equation*}
+	并且对每个$y\in Y$都有$k_m(y,z)>0\;$a.e.于$(Y,\mathscr{A},\pi)$，则$K$是$\pi$不可约的。
+\end{theorem}
+\begin{proof}
+	任取$y\in Y$及满足$\pi(A)>0$的$A\in\mathscr{A}$。由\cref{theo:RadonNikodym}可知$k_m(y,\cdot)$非负且关于$\mathscr{A}$可测。对每个$n\in\mathbb{N}^+$，记：
+	\begin{equation*}
+		A_n=\{z\in A:k_m(y,z)\geqslant1/n\}
+	\end{equation*}
+	则：
+	\begin{equation*}
+		\underset{n=1}{\overset{+\infty}{\cup}}A_n=\{z\in A:k_m(y,z)>0\}
+	\end{equation*}
+	由\cref{prop:MeasurableFunction}(1.d)和\cref{prop:SigmaField}(2)可知$A_n,\underset{n=1}{\overset{+\infty}{\cup}}A_n\in\mathscr{A}$。根据$k_m(y,z)>0\;$a.e.于$(Y,\mathscr{A},\pi)$可得：
+	\begin{equation*}
+		\pi\left(A\setminus\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)=0
+	\end{equation*}
+	若对任意的$n\in\mathbb{N}^+$都有$\pi(A_n)=0$，由\cref{prop:Measure}(1)(3)（次可列可加性）可得：
+	\begin{equation*}
+		\pi(A)=\pi\left(A\setminus\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)+\pi\left(\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)\leqslant\pi\left(A\setminus\underset{n=1}{\overset{+\infty}{\cup}}A_n\right)+\sum_{n=1}^{+\infty}\pi(A_n)=0
+	\end{equation*}
+	这与$\pi(A)>0$矛盾，因此存在$n\in\mathbb{N}^+$使$\pi(A_n)>0$。根据\cref{prop:NonnegativeMeasurableIntegral}(5)(2)(6)：
+	\begin{equation*}
+		\int_{A}k_m(y,z)\dif\pi\geqslant\int_{A_n}k_m(y,z)\dif\pi\geqslant\int_{A_n}\frac{1}{n}\dif\pi=\frac{1}{n}\pi(A_n)>0
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		K^m(y,A)=\int_{A}k_m(y,z)\dif\pi>0
+	\end{equation*}
+	由$y$及$A$的任意性可知$K$是$\pi$不可约的。
+\end{proof}
+\begin{theorem}\label{theo:IrreducibleInvariantUniqueness}
+	设$\pi$是$K$的不变分布。若$K$是$\pi$不可约的，则$\pi$是$K$唯一的不变分布。
+\end{theorem}
+\begin{proof}
+	太长，略去。
+\end{proof}
+\subsubsection{常返性}
+不可约性排除了状态空间中存在彼此无法到达的正测度区域的可能，因此链在可达性的意义下能够遍历整个状态空间。进一步需要研究的问题是链是否会远离已经访问过的区域而不再返回。	\par
+以下设$\{f_n\}_{n=0}^{+\infty}$是概率空间$(X,\mathscr{F},P)$上取值于$(Y,\mathscr{A})$、转移概率核为$K$的齐次Markov链，$\varphi$是$(Y,\mathscr{A})$上的非零$\sigma$有限测度。由于需要描述的是链从某个给定状态出发之后的返回行为，因此需要考察不同初始状态下链的演化。对任意$y\in Y$，考虑一条满足$f_0\equiv y$的Markov链，此时对任意$A\in\mathscr{A}$有：
+\begin{equation*}
+	Pf_0^{-1}(A)=I(y\in A)
+\end{equation*}
+由\cref{prop:HomogeneousMarkovEvolution}(3)和\cref{prop:NonnegativeSimpleIntegral}(4)可知对任意的$n\in\mathbb{N}^+$有：
+\begin{equation*}
+	Pf_n^{-1}(A)=K^n(y,A)
+\end{equation*}
+\begin{definition}
+	对任意的$A\in\mathscr{A}$和$x\in X$，定义：
+	\begin{equation*}
+		\tau_A(x)=\inf\{n\in\mathbb{N}^+:f_n(x)\in A\},\quad N_A(x)=\sum_{n=1}^{+\infty}I[f_n(x)\in A]
+	\end{equation*}
+	约定$\inf\varnothing=+\infty$。称$\tau_A$为从时刻$1$起首次进入$A$的时间，$N_A$为从时刻$1$起对$A$的总访问次数。
+\end{definition}
+由\cref{prop:MeasurableFunction}(1.b)、\cref{prop:MeasurableMapping}(2)、\cref{prop:SimpleFunction}(1)和\cref{prop:MeasurableFunction}(5.a)(6)可知$\tau_A$和$N_A$都是$(X,\mathscr{F},P)$上的可测函数。
+\begin{property}\label{prop:MarkovOccupationExpectation}
+	设$\{f_n\}_{n=0}^{+\infty}$满足$f_0\equiv y\in Y$，则对任意$A\in\mathscr{A}$有：
+	\begin{equation*}
+		\operatorname{E}(N_A)=\sum_{n=1}^{+\infty}K^n(y,A)
+	\end{equation*}
+\end{property}
+\begin{proof}
+	由\cref{theo:LeviTheorem}和\cref{prop:HomogeneousMarkovEvolution}(3)可知：
+	\begin{equation*}
+		\operatorname{E}(N_A)=\lim_{r\to+\infty}\operatorname{E}\left[\sum_{n=1}^rI(f_n\in A)\right]=\lim_{r\to+\infty}\sum_{n=1}^rP(f_n\in A)=\sum_{n=1}^{+\infty}K^n(y,A)\qedhere
+	\end{equation*}
+\end{proof}
+\begin{definition}
+	设$K$是$\varphi$不可约的。若对任意$y\in Y$和任意满足$\varphi(A)>0$的$A\in\mathscr{A}$都有：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}K^n(y,A)=+\infty
+	\end{equation*}
+	则称$K$是\gls{RecurrentMarkovKernel}。
+\end{definition}
+上述常返性的定义刻画了Markov链对具有正$\varphi$测度集合的长期访问强度。由性质\ref{prop:MarkovOccupationExpectation}可知常返性保证了$\operatorname{E}(N_A)=+\infty$。然而，期望访问次数为无穷并不能保证链以概率$1$访问集合$A$：仍可能存在一部分具有正概率的样本路径始终不进入$A$，而另一些样本路径在进入$A$后产生足够多的访问，使得总体期望为无穷。因此，常返性本质上描述的是一种期望意义下的长期访问性质，而不能完全刻画每一条典型样本路径的行为。为了获得更强的路径性质，我们进一步要求从任意初始状态出发，对任意满足$\varphi(A)>0$的集合$A$，链都以概率$1$在有限时间内进入$A$。
+\begin{definition}
+	若对任意的$y\in Y$，任取一条满足$f_0\equiv y$且转移概率核为$K$的Markov链，对任意满足$\varphi(A)>0$的$A\in\mathscr{A}$都有：
+	\begin{equation*}
+		P(\tau_A<+\infty)=1
+	\end{equation*}
+	则称$K$是关于$\varphi$的\gls{HarrisRecurrentMarkovKernel}。
+\end{definition}
+\begin{theorem}\label{theo:HarrisRecurrenceVisits}
+	$K$是关于$\varphi$的Harris常返核的充分必要条件为对任意的$y\in Y$，任取一条满足$f_0\equiv y$且转移概率核为$K$的Markov链，对任意满足$\varphi(A)>0$的$A\in\mathscr{A}$都有$P(N_A=+\infty)=1$。此时$K$是$\varphi$不可约的，且是常返核。
+\end{theorem}
+\begin{proof}
+	\textbf{(1)必要性：}任取一条满足$f_0\equiv y$且转移概率核为$K$的Markov链，固定$\varphi(A)>0$的$A\in\mathscr{A}$。因为：
+	\begin{equation*}
+		\{N_A<+\infty\}=\underset{l=0}{\overset{+\infty}{\cup}}\underset{n=l+1}{\overset{+\infty}{\cap}}\{f_n\notin A\}
+	\end{equation*}
+	由\cref{prop:Measure}(2)(3)（次可列可加性）可知：
+	\begin{equation*}
+		P(N_A=+\infty)=1-P(N_A<+\infty)\geqslant1-\sum_{l=0}^{+\infty}P\left(\underset{n=l+1}{\overset{+\infty}{\cap}}\{f_n\notin A\}\right)
+	\end{equation*}
+	只需证明：
+	\begin{equation*}
+		\forall\;l\in\mathbb{N},\;P\left(\underset{n=l+1}{\overset{+\infty}{\cap}}\{f_n\notin A\}\right)=0
+	\end{equation*}\par
+	递归定义：
+	\begin{equation*}
+		a_1(z)\coloneq K(z,A^c),\quad a_{r+1}(z)\coloneq\int_{A^c}a_r(w)\dif K(z,\cdot),\quad r\in\mathbb{N}^+
+	\end{equation*}
+	由\cref{lem:ProbabilityKernelIntegration}(1)、\cref{prop:NonnegativeMeasurableIntegral}(5)(3)和\cref{prop:MeasurableFunction}(5.a)可知$a_r$可测且$0\leqslant a_r\leqslant1$。对任意一条转移概率核为$K$的Markov链，下证对所有非负整数$l$及$r\in\mathbb{N}^+$有：
+	\begin{equation*}
+		\operatorname{E}\left[\prod_{i=1}^r I(f_{l+i}\notin A)\mid\mathscr{F}_l\right]=a_r(f_l)\;\text{a.e.于}(X,\mathscr{F}_l,P)
+	\end{equation*}
+	$r=1$时，由\cref{prop:SimpleFunction}(1)、\cref{prop:MarkovMultiStepEvolution}(1)、\cref{prop:HomogeneousMarkovEvolution}(1)和\cref{prop:NonnegativeSimpleIntegral}(4)可知结论成立。假设结论对$r$和所有非负整数$l$成立。根据\cref{prop:SimpleFunction}(1)可知$I(f_{l+1}\notin A)$关于$\mathscr{F}_{l+1}$可测，由\cref{prop:ConditionalExpectation}(3)、\cref{theo:ConditionalExpectationPullOut}、归纳假设、\cref{prop:MeasurableFunction}(5.b)、\cref{prop:MarkovMultiStepEvolution}(1)、\cref{prop:NonnegativeMeasurableIntegral}(5)、\cref{prop:SigmaField}(3)和\cref{prop:Measure}(3)（次有限可加性）可得：
+	\begin{align*}
+		&\operatorname{E}\left[\prod_{i=1}^{r+1}I(f_{l+i}\notin A)\mid\mathscr{F}_l\right]=\operatorname{E}\left\{\operatorname{E}\left[\prod_{i=1}^{r+1}I(f_{l+i}\notin A)\mid\mathscr{F}_{l+1}\right]\mid\mathscr{F}_l\right\} \\
+		=&\operatorname{E}\left\{I(f_{l+1}\notin A)\operatorname{E}\left[\prod_{i=2}^{r+1}I(f_{l+i}\notin A)\mid\mathscr{F}_{l+1}\right]\mid\mathscr{F}_l\right\} \\
+		=&\operatorname{E}[I(f_{l+1}\notin A)a_r(f_{l+1})\mid\mathscr{F}_l]=\int_{Y}I(f_{l+1}\notin A)a_r(f_{l+1})\dif K(f_l,\cdot) \\
+		=&\int_{A^c}a_r(w)\dif K(f_l,\cdot)=a_{r+1}(f_l)
+	\end{align*}
+	a.e.于$(X,\mathscr{F}_{l+1},P)$，根据条件期望的定义和\cref{prop:MeasurableMapping}(2)的证明过程可知上式左右两侧都关于$(X,\mathscr{F}_l,P)$可测，由\cref{prop:MeasurableFunction}(3)可知上式成立a.e.于$(X,\mathscr{F}_l,P)$。根据数学归纳法即得所需结论。\par
+	由上述结论、\cref{prop:ConditionalExpectation}(3)、\cref{prop:SigmaField}(2)和\cref{prop:NonnegativeSimpleIntegral}(4)可知：
+	\begin{equation*}
+		\operatorname{E}[a_r(f_l)]=P\left(\underset{i=1}{\overset{r}{\cap}}\{f_{l+i}\notin A\}\right)
+	\end{equation*}
+	任取$z\in Y$，对一条满足$f_0'\equiv z$且转移概率核为$K$的Markov链$\{f_n'\}_{n=0}^{+\infty}$取$l=0$可得：
+	\begin{equation*}
+		a_r(z)=\operatorname{E}[a_r(f_0')]=P\left(\underset{i=1}{\overset{r}{\cap}}\{f_i'\notin A\}\right)
+	\end{equation*}
+	因此根据\cref{prop:Measure}(3)（单调性）、\cref{prop:SetLimit}(3)、\cref{prop:Measure}(3)（上连续性）、\cref{prop:Measure}(2)和Harris常返性可得：
+	\begin{equation*}
+		a_r(z)\downarrow P(\tau_A=+\infty)=1-P(\tau_A<+\infty)=0
+	\end{equation*}
+	对任意的非负整数$l$，由\cref{prop:SetLimit}(3)、\cref{prop:Measure}(3)（上连续性）和\cref{theo:DominatedConvergenceTheorem}可得：
+	\begin{align*}
+		&P\left(\underset{i=l+1}{\overset{+\infty}{\cap}}\{f_i\notin A\}\right)=\lim_{r\to+\infty}P\left(\underset{i=l+1}{\overset{r}{\cap}}\{f_i\notin A\}\right)=\lim_{r\to+\infty}P\left(\underset{i=1}{\overset{r-l}{\cap}}\{f_{l+i}\notin A\}\right) \\
+		=&P\left(\underset{i=1}{\overset{+\infty}{\cap}}\{f_{l+i}\notin A\}\right)=\lim_{r\to+\infty}P\left(\underset{i=1}{\overset{r}{\cap}}\{f_{l+i}\notin A\}\right)=\lim_{r\to+\infty}\operatorname{E}[a_r(f_l)]=0
+	\end{align*}\par
+	\textbf{(2)充分性：}因为$\{N_A=+\infty\}\subseteq\{\tau_A<+\infty\}$，由\cref{prop:Measure}(3)（单调性）即可得出结论。\par
+	由充分性可知对任意满足$\varphi(A)>0$的$A\in\mathscr{A}$都有$P(\tau_A<+\infty)=1$，根据\cref{prop:Measure}(3)次有限可加性可得：
+	\begin{equation*}
+		P\left(\underset{n=1}{\overset{+\infty}{\cup}}\{f_n\in A\}\right)=1\leqslant\sum_{n=1}^{+\infty}P(f_n\in A)=\sum_{n=1}^{+\infty}K^n(y,A)
+	\end{equation*}
+	不可能对所有的$n$都有$K^n(y,A)=0$，所以$K$是$\varphi$不可约的。\par
+	由\cref{prop:MarkovOccupationExpectation}、必要性、\cref{prop:MeasurableFunction}(2)和\cref{prop:NonnegativeMeasurableIntegral}(5)(2)可知：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}K^n(y,A)=\operatorname{E}(N_A)=+\infty
+	\end{equation*}
+	所以$K$是常返核。
+\end{proof}
+\begin{definition}
+	若$K$是关于$\varphi$的Harris常返核，并且存在不变分布，则称$K$是\gls{PositiveHarrisRecurrentMarkovKernel}。
+\end{definition}

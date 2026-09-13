@@ -1,0 +1,91 @@
+\section{随机过程}
+
+前面用可测映射描述一次随机观测，并用其概率分布刻画这一观测的不确定性。然而，在许多随机现象中，我们关心的并不是某一次孤立的观测，而是同一对象随时间变化所形成的一系列随机观测。例如，连续记录某项生理指标、追踪金融资产价格的变化或者观察系统在不同时间点所处的状态。此时分别考察各个时间点上的随机变量并不足以完整描述整个随机现象，于是我们引入下述概念。
+\begin{definition}
+	设$(X,\mathscr{F},P)$是概率空间，$T$是非空指标集，$(Y,\mathscr{A})$是可测空间。若对每个$t\in T$，映射$f_t$都是从$(X,\mathscr{F})$到$(Y,\mathscr{A})$上的可测映射，则称可测映射族$\{f_t\}_{t\in T}$为取值于$(Y,\mathscr{A})$的\gls{StochasticProcess}，称$T$为其指标集，$(Y,\mathscr{A})$为其\gls{StateSpace}。
+\end{definition}
+随机过程有两个不同的观察方向：固定$t$，让$x$在$X$中变化，可得到可测映射$f_t(x)$，这一方向研究的是时刻$t$的随机状态；固定$x$，让$t$在$T$中变化，则得到在同一次随机实现中各个时间点的观测结果。
+\begin{definition}
+	对随机过程$\{f_t\}_{t\in T}$及固定的$x\in X$，称映射：
+	\begin{equation*}
+		t\to f_t(x),\quad t\in T
+	\end{equation*}
+	为该过程在样本点$x$处的\gls{SamplePath}或轨道。
+\end{definition}
+\begin{definition}
+	若$\{f_n\}_{n=0}^{+\infty}$是概率空间$(X,\mathscr{F},P)$上取值于$(Y,\mathscr{A})$的随机过程，则称$\{f_n\}_{n=0}^{+\infty}$为\gls{DiscreteTimeStochasticProcess}，
+\end{definition}
+\begin{definition}
+	若$\{f_t\}_{t\in T}$是概率空间$(X,\mathscr{F},P)$上取值于$(Y,\mathscr{A})$的随机过程，非空指标集$T\subseteq\mathbb{R}$是一个区间，则称$\{f_t\}_{t\in T}$为\gls{ContinuousTimeStochasticProcess}。
+\end{definition}
+\begin{definition}
+	设$\{f_t\}_{t\in T}$是概率空间$(X,\mathscr{F},P)$上取值于$(Y,\mathscr{A})$的随机过程。若$Y$为有限集或可数集，并且$\mathscr{A}=2^Y$，则称$\{f_t\}_{t\in T}$为具有离散状态空间的随机过程。
+\end{definition}
+\begin{definition}
+	设$\{f_t\}_{t\in T}$是概率空间$(X,\mathscr{F},P)$上取值于$(Y,\mathscr{A})$的随机过程。对任意的$n\in\mathbb{N}^+$和$\seq{t}{n}\in T$，记：
+	\begin{equation*}
+		g_{\seq{t}{n}}(x)=(f_{t_1},f_{t_2},\dots,f_{t_n})
+	\end{equation*}
+	由\cref{theo:ProductMeasurable}可知它是从$(X,\mathscr{F})$到$(Y^n,\mathscr{A}^n)$的可测映射，称其概率分布：
+	\begin{equation*}
+		\mu_{\seq{t}{n}}=Pg_{\seq{t}{n}}^{-1}
+	\end{equation*}
+	为该过程在$\seq{t}{n}$处的\gls{FiniteDimensionalDistribution}。
+\end{definition}
+随机过程包含无限多个随机变量，直接描述其整体联合分布并不方便。有限维分布通过考察任意有限个指标位置上的联合分布，既保留了不同位置之间的依赖结构，又能够以有限维随机向量的方式处理随机过程的概率规律。
+
+\subsection{信息流与适应性}
+以下设$T\subseteq\mathbb{R}$。
+\begin{definition}
+	设$(X,\mathscr{F},P)$是概率空间。若$\{\mathscr{F}_t\}_{t\in T}$是一族$\mathscr{F}$的子$\sigma$域，且：
+	\begin{equation*}
+		s,t\in T,\;s\leqslant t\quad\Longrightarrow\quad\mathscr{F}_s\subseteq\mathscr{F}_t
+	\end{equation*}
+	则称$\{\mathscr{F}_t\}_{t\in T}$为该概率空间上的\gls{Filtration}或信息流。
+\end{definition}
+\begin{definition}
+	设$\{f_t\}_{t\in T}$是概率空间$(X,\mathscr{F},P)$上取值于$(Y,\mathscr{A})$的随机过程，$\{\mathscr{F}_t\}_{t\in T}$是其所在概率空间上的滤过。若对每个$t\in T$，$f_t$都是从$(X,\mathscr{F}_t)$到$(Y,\mathscr{A})$的可测映射，则称该过程\textbf{适应}于此滤过。
+\end{definition}
+\begin{definition}
+	设$\{f_t\}_{t\in T}$是概率空间$(X,\mathscr{F},P)$上取值于$(Y,\mathscr{A})$的随机过程。定义：
+	\begin{equation*}
+		\mathscr{F}_t^f\coloneq\sigma(f_s:s\in T,\;s\leqslant t)
+	\end{equation*}
+	称$\{\mathscr{F}_t^f\}_{t\in T}$为该过程的\gls{NaturalFiltration}。
+\end{definition}
+
+\subsection{平稳性}
+\begin{definition}
+	设$\{f_t\}_{t\in T}$是概率空间$(X,\mathscr{F},P)$上取值于$(Y,\mathscr{A})$的随机过程。若对任意$n\in\mathbb{N}^+$、$t_1,\dots,t_n\in T$和满足$t_1+h,\dots,t_n+h\in T$的$h\in\mathbb{R}$都有：
+	\begin{equation*}
+		(f_{t_1},\dots,f_{t_n})\overset{d}{=}(f_{t_1+h},\dots,f_{t_n+h})
+	\end{equation*}
+	则称$\{f_t\}_{t\in T}$为\gls{StrictlyStationaryProcess}。
+\end{definition}
+\begin{definition}
+	设$\{f_t\}_{t\in T}$是实值随机过程，且对每个$t\in T$有$\operatorname{E}(f_t^2)<+\infty$。若存在常数$\mu\in\mathbb{R}^{}$和函数$\gamma:T-T\to\mathbb{R}^{}$，其中$T-T=\{t-s:s,t\in T\}$，使得：
+	\begin{equation*}
+		m(t)=\mu,\quad C(s,t)=\gamma(t-s),\quad s,t\in T
+	\end{equation*}
+	则称该过程为\gls{WeaklyStationaryProcess}或二阶平稳过程。
+\end{definition}
+
+\subsection{时间平均与遍历思想}
+前面的期望是在概率空间上对不同可能实现取平均。然而实际数据常常只有一条长时间记录，无法在每个时刻重新进行大量独立试验。于是需要问：沿着同一条路径积累观测，能否恢复总体的平均水平？
+
+对离散时间实值过程，观测$f_1(x),\dots,f_n(x)$后可以计算：
+\begin{equation*}
+	\overline{f}_n(x)\coloneq\frac{1}{n}\sum_{t=1}^{n}f_t(x)
+\end{equation*}
+它是这条路径上的时间平均，而$\operatorname{E}(f_t)$是不同可能实现的总体平均。若各时刻可积且均值都为$\mu$，由期望的线性性质有$\operatorname{E}(\overline{f}_n)=\mu$；但平均意义上正确，并不保证单条长记录提供的平均值就能准确反映$\mu$。
+
+对连续时间过程，用$b>0$表示观测时长，以免与指标集$T$混淆。在$[0,b]\subseteq T$且路径可积时，相应的时间平均为：
+\begin{equation*}
+	\overline{f}_b(x)\coloneq\frac{1}{b}\int_0^b f_t(x)\dif t
+\end{equation*}
+这里沿时间积分，和定义期望时关于$P$积分不同。若将它作为随机变量使用，还需相应的可测性；例如过程的$(t,x)\mapsto f_t(x)$联合可测，且$\int_0^b\operatorname{E}(|f_t|)\dif t<+\infty$时，前面的Fubini定理保证路径积分及其期望可以按通常方式处理。
+
+\gls{Ergodicity}所关心的正是单条长路径与总体统计规律之间的联系。对均值估计而言，希望随着观测时间延长，路径平均能够反映总体均值；对其他统计特征，可以考察可积函数$h(f_t)$的时间平均，或有限段观测构成的统计量。本节仅说明这一问题的统计含义，不把某一个均值的可恢复性当成一般遍历性的完整定义。
+
+平稳性本身还不够。例如，设$U$以相同概率取$-1$和$1$，每次试验的整条记录都保持为所抽到的$U$，即$f_t=U$。任意有限组观测都是同一个$U$的重复，因此时间平移不会改变联合分布；但每条记录的时间平均始终是$U$，而总体均值是$0$。无论记录多长，都不能从这种时间平均恢复总体均值。\par
+平稳性保证时间平移前后的概率规律一致，遍历性则进一步涉及能否利用一条长路径恢复总体统计特征。只有弄清这两层问题，才能判断哪些时间段的信息可以共同利用，以及增加观测时长究竟能否带来更多关于总体的有效信息。

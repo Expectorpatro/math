@@ -34,39 +34,39 @@
 	\end{tabular}
 \end{table}
 \begin{definition}
-  \gls{Accuracy}度量模型预测正确的比例：
-  \begin{equation*}
-    \operatorname{Accuracy}=\frac{\operatorname{TP}+\operatorname{TN}}{\operatorname{TP}+\operatorname{TN}+\operatorname{FP}+\operatorname{FN}}
-  \end{equation*}
+	\gls{Accuracy}度量模型预测正确的比例：
+	\begin{equation*}
+		\operatorname{Accuracy}=\frac{\operatorname{TP}+\operatorname{TN}}{\operatorname{TP}+\operatorname{TN}+\operatorname{FP}+\operatorname{FN}}
+	\end{equation*}
 \end{definition}
 Accuracy 将正类和负类的正确预测汇总为一个整体比例，因而默认两类样本具有相同的重要性，并且不同类型的分类错误具有相同的代价。然而在许多实际问题中，假正类和假负类造成的损失并不相同，我们也可能更关注模型在某一特定类别上的预测表现。\par
 例如，在贷款违约预测中，若将违约客户定义为正类，则将实际违约的客户预测为不违约会使银行承担贷款损失，而将实际不违约的客户预测为违约主要意味着失去一次潜在的放贷机会。这两类错误的经济代价并不相同。因此，即使两个模型具有相同的 Accuracy，它们识别违约客户的能力也可能存在显著差异。为了考察模型针对特定类别的表现，需要进一步引入别的指标。
 \begin{definition}
-  \gls{Precision}度量被预测为正类的样本中有多少是真正的正类：
-  \begin{equation*}
-    \operatorname{Precision}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FP}}
-  \end{equation*}
+	\gls{Precision}度量被预测为正类的样本中有多少是真正的正类：
+	\begin{equation*}
+		\operatorname{Precision}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FP}}
+	\end{equation*}
 \end{definition}
 \begin{note}
-  精确率关心正类预测结果的准确性，在系统对错误正类具有高成本的任务（如垃圾邮件过滤）中尤为重要。较高的精确率意味着模型产生的误报较少。
+ 	精确率关心正类预测结果的准确性，在系统对错误正类具有高成本的任务（如垃圾邮件过滤）中尤为重要。较高的精确率意味着模型产生的误报较少。没有任何样本被预测为正样本时我们一般约定精确率为$0$。
 \end{note}
 \begin{definition}
-  \gls{Recall}又称\gls{Sensitivity}，衡量真实正类中有多少被模型成功识别，定义为：
-  \begin{equation*}
-    \operatorname{Recall}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FN}}
-  \end{equation*}
+	\gls{Recall}又称\gls{Sensitivity}，衡量真实正类中有多少被模型成功识别，定义为：
+	\begin{equation*}
+		\operatorname{Recall}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FN}}
+	\end{equation*}
 \end{definition}
 \begin{note}
-  召回率关注对正类的漏判率，适用于需要尽可能检出正类的场景（如疾病筛查或欺诈检测）。高召回率意味着漏报较少，但可能伴随较多假阳性，需要结合精确率来进行分析。
+	召回率关注对正类的漏判率，适用于需要尽可能检出正类的场景（如疾病筛查或欺诈检测）。高召回率意味着漏报较少，但可能伴随较多假阳性，需要结合精确率来进行分析。
 \end{note}
 \begin{definition}
-  \gls{F1Score}是精确率与召回率的调和平均，用于在二者之间取得平衡：
-  \begin{equation*}
-    \operatorname{F1}=2\times\frac{\operatorname{Precision}\times\operatorname{Recall}}{\operatorname{Precision}+\operatorname{Recall}}
-  \end{equation*}
+	\gls{F1Score}是精确率与召回率的调和平均，用于在二者之间取得平衡：
+	\begin{equation*}
+		\operatorname{F1}=2\times\frac{\operatorname{Precision}\times\operatorname{Recall}}{\operatorname{Precision}+\operatorname{Recall}}
+	\end{equation*}
 \end{definition}
 \begin{note}
-  调和平均的性质使$\operatorname{F1}$得分对低值敏感——当精确率或召回率其中之一很低时，$\operatorname{F1}$会显著下降，因此它常用作综合评价指标，适用于精确率和召回率同等重要的情形。
+	调和平均的性质使$\operatorname{F1}$得分对低值敏感——当精确率或召回率其中之一很低时，$\operatorname{F1}$会显著下降，因此它常用作综合评价指标，适用于精确率和召回率同等重要的情形。
 \end{note}
 \begin{definition}
 	$\operatorname{F}_{\beta}$分数是$\operatorname{F1}$得分的推广，通过参数$\beta>0$调节精确率与召回率的重要性：
@@ -75,7 +75,7 @@ Accuracy 将正类和负类的正确预测汇总为一个整体比例，因而�
 	\end{equation*}
 \end{definition}
 \begin{note}
-	当$|\beta|=1$时，$\operatorname{F}_{\beta}$退化为$\operatorname{F1}$；当$|\beta|>1$时，召回率具有更大的权重，适用于更关注漏检的任务；当$0<|\beta|<1$时，精确率具有更大的权重，适用于更关注误报的任务。因此，相比固定地给予精确率与召回率相同权重的$\operatorname{F1}$，$\operatorname{F}_{\beta}$能够根据具体任务中两类错误的重要程度进行调整。
+	当$\beta=1$时，$\operatorname{F}_{\beta}$退化为$\operatorname{F1}$；当$\beta>1$时，召回率具有更大的权重，适用于更关注漏检的任务；当$0<\beta<1$时，精确率具有更大的权重，适用于更关注误报的任务。因此，相比固定地给予精确率与召回率相同权重的$\operatorname{F1}$，$\operatorname{F}_{\beta}$能够根据具体任务中两类错误的重要程度进行调整。
 \end{note}
 许多分类器并不直接输出类别，而是为每个样本输出一个连续得分或属于正类的概率，并在给定阈值后将其转化为分类结果。然而，分类阈值并不存在适用于所有任务的固定选择，即使模型输出的是概率，也不能机械地将$0.5$作为阈值。阈值的选择取决于正类的基础发生率、假正类与假负类的相对代价以及模型所服务的具体决策目标。\par
 以罕见病筛查为例，假设某种疾病在人群中的患病率仅为$0.1\%$。若模型预测某位受检者的患病概率为$10\%$，那么其患病风险已经达到普通人群的$100$ 倍，显然应当被识别为高风险个体并接受进一步检查。然而，$10\%$仍然低于$50\%$；若机械地将$0.5$作为分类阈值，该受检者就会被判定为阴性。类似地，在身份认证或银行人脸识别中，系统可能更重视防止冒用身份，因此会采用更加严格的判定阈值，以降低错误接受非本人的概率。\par
@@ -83,57 +83,51 @@ Accuracy 将正类和负类的正确预测汇总为一个整体比例，因而�
 \begin{definition}
 	称：
 	 \begin{equation*}
-		\operatorname{TPR}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FN}},\quad
-		\operatorname{FPR}=\frac{\operatorname{FP}}{\operatorname{FP}+\operatorname{TN}}
+		\operatorname{TPR}=\frac{\operatorname{TP}}{\operatorname{TP}+\operatorname{FN}},\quad\operatorname{FPR}=\frac{\operatorname{FP}}{\operatorname{FP}+\operatorname{TN}}
 	\end{equation*}
 	分别为\gls{TPR}与\gls{FPR}。
 \end{definition}
 \begin{definition}
-  设分类器将得分不低于阈值$t$的样本预测为正类。\gls{ROC}为在阈值取值范围内连续变化$t$，对每个$t$计算对应的：
+	设分类器将得分不低于阈值$t$的样本预测为正类。\gls{ROC}为在阈值取值范围内连续变化$t$，对每个$t$计算对应的：
 	\begin{equation*}
-		\operatorname{TPR}(t)=\frac{\operatorname{TP}(t)}{\operatorname{TP}(t)+\operatorname{FN}(t)},\quad
-		\operatorname{FPR}(t)=	\frac{\operatorname{FP}(t)}{\operatorname{FP}(t)+\operatorname{TN}(t)}
+		\operatorname{TPR}(t)=\frac{\operatorname{TP}(t)}{\operatorname{TP}(t)+\operatorname{FN}(t)},\quad\operatorname{FPR}(t)=\frac{\operatorname{FP}(t)}{\operatorname{FP}(t)+\operatorname{TN}(t)}
 	\end{equation*}
 	然后以$\mathrm{FPR}$为横轴、$\mathrm{TPR}$为纵轴作图得到的曲线。\gls{AUROC}定义为ROC曲线与$\mathrm{FPR}$轴和$\mathrm{FPR}=1$围成区域的面积。
 \end{definition}
 \begin{note}
-  ROC曲线反映了阈值变化对$\operatorname{TPR}$与$\operatorname{FPR}$的权衡。$\operatorname{AUROC}$独立于具体阈值，是比较不同模型总体区分能力的常用指标，取值范围通常在$[0.5,1]$，$0.5$表示随机猜测（对任意的$t\in[0,1]$有$\operatorname{FPR}(t)=\operatorname{TPR}(t)$，模型判断正类为正类的概率和模型判断负类为正类的概率一致），$1$表示完美分类。
-  \begin{figure}[H]
-  	\centering
-  	\begin{tikzpicture}[scale=3]
-  		% 坐标轴
-  		\draw[->] (0,0) -- (1.05,0) node[right] {\scriptsize FPR};
-  		\draw[->] (0,0) -- (0,1.05) node[above] {\scriptsize TPR};
-  		% 随机分类器的对角线
-  		\draw[color=gray, dashed] (0,0) -- (1,1);
-  		% 绘制示意 ROC 曲线
-  		\draw[color=blue, thick] (0,0) .. controls (0.15,0.5) and (0.3,0.75) .. (1,1);
-  		% 填充面积
-  		\path[blue!20] (0,0) -- (0.15,0.5) .. controls (0.15,0.5) and (0.3,0.75) .. (1,1) -- (1,0) -- cycle;
-  	\end{tikzpicture}
-  	\caption{ROC曲线示意}
-  \end{figure}
+	ROC曲线反映了阈值变化对$\operatorname{TPR}$与$\operatorname{FPR}$的权衡。\par
+	$\operatorname{AUROC}$独立于具体阈值，是比较模型总体区分能力的常用指标，取值通常在$[0.5,1]$。当阈值取到最低时，所有样本均被判定为正类，此时$\operatorname{TPR}=\operatorname{FPR}=1$；随着阈值逐渐升高，被判定为正类的样本不断减少，$\operatorname{TPR}$与$\operatorname{FPR}$均逐渐下降；当阈值高于所有样本的预测得分时，所有样本均被判定为负类，此时$\operatorname{TPR}=\operatorname{FPR}=0$。因此ROC曲线总是连接$(0,0)$与$(1,1)$。\par
+	当模型没有区分正负样本的能力时，对任意阈值$t$都有$\operatorname{TPR}(t)=\operatorname{FPR}(t)$，此时ROC曲线为连接$(0,0)$与$(1,1)$的对角线，其下方面积为$0.5$，对应随机猜测。若模型能够完美区分正负样本，则存在阈值使所有正样本都被判为正类，而所有负样本仍被判为负类，此时ROC曲线经过$(0,1)$。继续降低阈值时，$\operatorname{TPR}$自然保持为$1$，而$\operatorname{FPR}$会逐渐由$0$增加至$1$，因此曲线沿$\operatorname{TPR}=1$从$(0,1)$移动至$(1,1)$，曲线下面积达到最大值$1$。
+	\begin{figure}[H]
+	 	\centering
+	 	\begin{tikzpicture}[scale=3]
+	 		\draw[->] (0,0) -- (1.05,0) node[right] {\scriptsize FPR};
+	 		\draw[->] (0,0) -- (0,1.05) node[above] {\scriptsize TPR};
+	 		\draw[color=gray, dashed] (0,0) -- (1,1);
+	 		\draw[color=blue, thick] (0,0) .. controls (0.15,0.5) and (0.3,0.75) .. (1,1);
+	 		\path[blue!20] (0,0) -- (0.15,0.5) .. controls (0.15,0.5) and (0.3,0.75) .. (1,1) -- (1,0) -- cycle;
+	 	\end{tikzpicture}
+	 	\caption{ROC曲线示意}
+	\end{figure}
 \end{note}
 \begin{definition}
  	设模型将得分不低于阈值 $t$ 的样本预测为正类。\gls{PRC}为在阈值取值范围内内连续变化$t$，对每个$t$计算对应的$\operatorname{Precision}(t)$和$\operatorname{Recall}(t)$，然后以$\mathrm{Recall}$为横轴、$\mathrm{Precision}$为纵轴作图得到的曲线。\gls{AUPRC}定义为PRC曲线与$\operatorname{Recall}$轴之间区域的面积。
 \end{definition}
 \begin{note}
-  相比$\operatorname{AUROC}$，$\operatorname{AUPRC}$更关注正类的表现。较高的$\operatorname{AUPRC}$表明模型性能较好。
-  \begin{figure}[H]
-  	\centering
-  	\begin{tikzpicture}[scale=3]
-  		% 坐标轴
-  		\draw[->] (0,0) -- (1.05,0) node[right] {\scriptsize Recall};
-  		\draw[->] (0,0) -- (0,1.05) node[above] {\scriptsize Precision};
-  		% 绘制示意 PR 曲线
-  		\draw[color=blue, thick] (0,1) .. controls (0.3,0.9) and (0.6,0.6) .. (1,0.2);
-  		% 填充面积
-  		\path[blue!20] (0,1) .. controls (0.3,0.9) and (0.6,0.6) .. (1,0.2) -- (1,0) -- (0,0) -- cycle;
-  	\end{tikzpicture}
-  	\caption{PR曲线示意}
-  \end{figure}
+	PR曲线描述分类阈值变化时$\operatorname{Recall}$与$\operatorname{Precision}$之间的权衡，因此相比于$\operatorname{AUROC}$，$\operatorname{AUPRC}$更关注正类的识别表现。当阈值取到最高时，所有样本都被判定为负类，此时$\operatorname{Recall}=0$，$\operatorname{Precision}$在严格意义下未定义，作图时通常将该点记为$(0,1)$。随着阈值逐渐降低，被判为正类的样本不断增多，$\operatorname{Recall}$单调上升，$\operatorname{Precision}$因为新纳入的预测正类中混入了负样本通常会逐渐下降或发生波动。当阈值取到最低时，所有样本均被判为正类，此时$\operatorname{Recall}=1$，而$\operatorname{Precision}$等于数据中正类所占的比例。因此，PR曲线通常由左上方向右下方延伸。\par
+	当模型没有区分能力时，对任意阈值$t$，预测为正类的样本中真正类所占的比例都应大致等于总体中的正类比例，PR曲线近似为一条水平直线，其纵坐标等于数据集中正样本所占的比例，$\operatorname{AUPRC}$也接近正类比例。若模型能够完美区分正负样本，则随着阈值逐渐降低、召回率由$0$增加到$1$的整个过程中，被判为正类的样本始终都是真正类，即$\operatorname{Precision}$始终保持为$1$，于是理想的PR曲线就是$\operatorname{Precision}=1$这条水平直线，此时$\operatorname{AUPRC}=1$。
+	\begin{figure}[H]
+	 	\centering
+	 	\begin{tikzpicture}[scale=3]
+	 		\draw[->] (0,0) -- (1.05,0) node[right] {\scriptsize Recall};
+	 		\draw[->] (0,0) -- (0,1.05) node[above] {\scriptsize Precision};
+	 		\draw[color=blue, thick] (0,1) .. controls (0.3,0.9) and (0.6,0.6) .. (1,0.2);
+	 		\path[blue!20] (0,1) .. controls (0.3,0.9) and (0.6,0.6) .. (1,0.2) -- (1,0) -- (0,0) -- cycle;
+	 	\end{tikzpicture}
+	 	\caption{PR曲线示意}
+	\end{figure}
 \end{note}
-对于能够输出预测概率的分类模型，模型性能至少涉及两个不同方面：一方面，模型应具有良好的排序能力，即正类样本通常获得高于负类样本的预测分数；另一方面，模型给出的预测概率还应具有可靠的概率解释。前者通常可以通过AUROC评价，但良好的排序能力并不意味着预测概率本身准确。例如，某模型可能始终给真正的正类样本赋予高于负类样本的预测概率，从而获得较高的AUROC，但对于所有预测概率约为$0.8$的样本，实际只有约$60\%$属于正类。此时模型虽然能够较好地区分样本的相对风险高低，却系统性高估了事件发生的绝对概率。因此，还需要进一步考察预测概率与实际事件发生频率之间的一致程度。
+对于能够输出预测概率的分类模型，模型性能至少涉及两个不同方面：一方面，模型应具有良好的排序能力，即正类样本通常获得高于负类样本的预测分数；另一方面，模型给出的预测概率还应具有可靠的概率解释。良好的排序能力并不意味着预测概率本身准确。例如，假设某模型的预测概率已经具有良好的概率解释：对于预测概率约为$0.2$、$0.5$和$0.8$的样本，其中实际属于正类的比例也分别约为$20\%$、$50\%$和$80\%$。现在对所有预测概率作平方变换，则上述预测概率分别变为$0.04$、$0.25$和$0.64$。由于该变换不会改变任意两个样本预测分数的大小关系，模型对样本的排序完全不变，因此在合适的阈值选择下模型的预测能力不会改变，但是预测概率已经失去了正确的概率解释。因此，还需要进一步考察预测概率与实际事件发生频率之间的一致程度。
 \begin{definition}
 	设分类模型对样本$x_i$给出的正类预测概率为$\hat{p}_i$。将预测概率的取值范围划分为若干区间$\seq{B}{K}$，对于每个区间$B_k$，分别计算其中样本被预测为正类的概率的平均值以及真实正类比例：
 	\begin{equation*}
@@ -146,14 +140,9 @@ Accuracy 将正类和负类的正确预测汇总为一个整体比例，因而�
 	\begin{figure}[H]
 		\centering
 		\begin{tikzpicture}[scale=3]
-			% 坐标轴
 			\draw[->] (0,0) -- (1.05,0) node[right] {\scriptsize Predicted Probability};
 			\draw[->] (0,0) -- (0,1.05) node[above] {\scriptsize Observed Frequency};
-			
-			% 完美校准线
 			\draw[dashed, gray] (0,0) -- (1,1);
-			
-			% 示意校准曲线
 			\draw[color=blue, thick]
 			(0.05,0.08)
 			.. controls (0.25,0.18) and (0.40,0.32) ..
@@ -204,22 +193,22 @@ Accuracy 将正类和负类的正确预测汇总为一个整体比例，因而�
 \subsection{回归任务}
 设真实值为$\{y_i\}_{i=1}^{n}$，模型预测值为$\{\hat{y}_i\}_{i=1}^{n}$。
 \begin{definition}
-  称：
-  \begin{equation*}
-    \operatorname{MAE}=\frac{1}{n}\sum_{i=1}^n|y_i-\hat{y}_i|
-  \end{equation*}
-  为\gls{MAE}。
+	称：
+	\begin{equation*}
+		\operatorname{MAE}=\frac{1}{n}\sum_{i=1}^n|y_i-\hat{y}_i|
+	\end{equation*}
+	为\gls{MAE}。
 \end{definition}
 \begin{note}
-  MAE计算预测误差的绝对值并取平均，因而对所有误差赋予相同的线性权重。它具有易于解释、与原数据同量纲等优点，并对单个异常值不敏感。
+	MAE计算预测误差的绝对值并取平均，因而对所有误差赋予相同的线性权重。它具有易于解释、与原数据同量纲等优点，并对单个异常值不敏感。
 \end{note}
 \begin{definition}
-  称：
-  \begin{equation*}
-    \operatorname{MAPE}=\frac{1}{n}\sum_{i=1}^n\left|\frac{y_i-\hat{y}_i}{y_i}\right|
-  \end{equation*}
-  为\gls{MAPE}。
+	称：
+	\begin{equation*}
+		\operatorname{MAPE}=\frac{1}{n}\sum_{i=1}^n\left|\frac{y_i-\hat{y}_i}{y_i}\right|
+	\end{equation*}
+	为\gls{MAPE}。
 \end{definition}
 \begin{note}
-  MAPE 将误差按照真实值比例归一化，适合对预测误差的相对大小进行衡量。
+	MAPE 将误差按照真实值比例归一化，适合对预测误差的相对大小进行衡量。
 \end{note}
