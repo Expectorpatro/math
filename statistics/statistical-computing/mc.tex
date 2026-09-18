@@ -1,0 +1,237 @@
+\section{Monte Carlo算法}
+
+设$f$是概率空间$(X,\mathscr{F},P)$上可积的随机变量，在许多统计计算问题中，我们关心的目标都可以归结为计算$\operatorname{E}(f)$。然而在实际问题中，这一积分往往难以直接求得，因此需要借助数值方法对其进行近似。\par
+Monte Carlo算法的基本思想是利用随机抽样将积分计算转化为样本平均。设$\{f_n\}$是$f$的一列独立同分布副本，由\cref{theo:SLLN}可知：
+\begin{equation*}
+	\frac{1}{n}\sum_{i=1}^{n}f_i\overset{\text{a.s.}}{\longrightarrow}\operatorname{E}(f)
+\end{equation*}
+于是只要能够获得$\seq{f}{n}$的一组实现值$f(x_1),f(x_2),\dots,f(x_n)$，就可以利用$\dfrac{1}{n}\sum\limits_{i=1}^{n}f(x_i)$逼近$\operatorname{E}(f)$。
+
+\subsection{重要性抽样}
+在上述Monte Carlo框架中，一个直接的思路是利用逆变换法或接受--拒绝法生成服从$Pf^{-1}$的样本。这两个方法的目标都是精确地从$Pf^{-1}$中抽样，但当我们的最终目标仅仅是计算$\operatorname{E}(f)$时，并不一定需要真正生成服从$Pf^{-1}$的样本。从一个更容易抽样的分布中抽样并对样本赋予相应的权重，可以在保持期望不变的同时绕开直接从$Pf^{-1}$抽样所带来的困难（分布函数左连续逆难以计算或接受拒绝法接受概率低），这正是下述抽样方法的基本思想。
+\begin{method}[Importance Sampling]
+	设$(Y,\mathscr{A},\mu)$是$\sigma$有限测度空间，$\tilde{\pi}:Y\to[0,+\infty)$是$(Y,\mathscr{A})$上目标概率分布$\pi$的未归一化概率密度，即：
+	\begin{equation*}
+		Z=\int_Y\tilde{\pi}(y)\dif\mu\in(0,+\infty),\qquad\forall\;A\in\mathscr{A},\;\pi(A)=\frac{1}{Z}\int_{A}\tilde{\pi}(y)\dif\mu
+	\end{equation*}
+	设$Q$是$(Y,\mathscr{A})$上的概率测度，满足$\pi\ll Q\ll\mu$。根据\cref{theo:RadonNikodym}，取$q=\dfrac{\dif Q}{\dif\mu}$的一个非负版本。定义重要性权重：
+	\begin{equation*}
+		w(y)=
+		\begin{cases}
+			\dfrac{\tilde{\pi}(y)}{q(y)}, &q(y)>0 \\
+			0, &q(y)=0
+		\end{cases}
+	\end{equation*}
+	则对于任意关于$\pi$可积的$(Y,\mathscr{A})$上的可测函数$f$，有：
+	\begin{equation*}
+		Z=\int_{Y}w(y)\dif Q,\quad\int_{Y}f(y)\dif\pi=\frac{1}{Z}\int_{Y}f(y)w(y)\dif Q
+	\end{equation*}
+	即：
+	\begin{equation*}
+		\int_{Y}f(y)\dif\pi=\frac{\int_{Y}f(y)w(y)\dif Q}{\int_{Y}w(y)\dif Q}
+	\end{equation*}
+	设$g$为从概率空间$(X,\mathscr{F},P)$到$(Y,\mathscr{A})$上的可测映射，且$Pg^{-1}=Q$。取$g$的一列独立同分布副本$\seq{g}{n}$，并生成相应的观测值$\seq{y}{n}$。重要性采样按如下步骤估计$\int_{Y}f(y)\dif\pi$：
+	\begin{enumerate}
+		\item 生成$g_i$的观测值$y_i$，$i=1,2,\dots,n$；
+		\item 对每个样本计算$w(y_i)$；
+		\item 计算（由下面的证明可知当$n\to+\infty$时分母几乎必然不为$0$）：
+		\begin{equation*}
+			\frac{\sum\limits_{i=1}^{n}w(y_i)f(y_i)}{\sum\limits_{i=1}^{n}w(y_i)}
+		\end{equation*}
+	\end{enumerate}
+	对于该方法有：
+	\begin{equation*}
+		\hat{I}_n=\frac{\sum\limits_{i=1}^{n}[(wf)\circ g_i](x)}{\sum\limits_{i=1}^{n}(w\circ g_i)(x)}\overset{\text{a.s.}}{\longrightarrow}\int_{Y}f(y)\dif\pi
+	\end{equation*}
+\end{method}
+\begin{proof}
+	由\cref{prop:MeasurableFunction}(2)可知$A=\{q(y)=0\}\in\mathscr{A}$，根据\cref{prop:MeasurableIntegral}(9)和$\pi\ll Q$可知：
+	\begin{equation*}
+		Q(A)=\int_{\{q(y)=0\}}q(y)\dif\mu=0=\pi(A)
+	\end{equation*}
+	根据\cref{prop:MeasurableIntegral}(9)可知$\tilde{\pi}(y)=0\;$a.e.于$(A,A\cap\mathscr{A},\mu)$，由\cref{prop:SigmaField}(2)可知$w(y)q(y)=\tilde{\pi}(y)\;$a.e.于$(Y,\mathscr{A},\mu)$。可以验证$w(y)$是$(Y,\mathscr{A})$上的可测函数，根据\cref{lem:IntChangeOfMeasure}和\cref{prop:MeasurableIntegral}(8)可得：
+	\begin{equation*}
+		\int_{Y}w(y)\dif Q=\int_{Y}w(y)q(y)\dif\mu=\int_{Y}\tilde{\pi}(y)\dif\mu=Z
+	\end{equation*}
+	由\cref{prop:MeasurableFunction}(5.b)、\cref{lem:IntChangeOfMeasure}、\cref{prop:MeasurableIntegral}(8)和\cref{prop:MeasurableIntegral}(6)可知对于任意关于$\pi$可积的$(Y,\mathscr{A})$上的可测函数$f$有：
+	\begin{equation*}
+		\int_{Y}w(y)f(y)\dif Q=\int_{Y}w(y)q(y)f(y)\dif\mu=\int_{Y}\tilde{\pi}(y)f(y)\dif\mu=Z\int_{Y}f(y)\dif\pi
+	\end{equation*}
+	所以：
+	\begin{equation*}
+		\int_{Y}f(y)\dif\pi=\frac{\int_{Y}w(y)f(y)\dif Q}{\int_{Y}w(y)\dif Q}
+	\end{equation*}
+	因为$f$关于$\pi$可积，类似于上上式的推导，由\cref{prop:MeasurableFunction}(5.d)和\cref{theo:IntBySubstitution}可知：
+	\begin{align*}
+		\int_{Y}|w(y)f(y)|\dif Q=\int_{X}(|wf|)\circ g(x)\dif P<+\infty
+	\end{align*}
+	同时：
+	\begin{equation*}
+		\int_{Y}w(y)\dif Q=\int_{X}w\circ g(x)\dif P=Z<+\infty
+	\end{equation*}
+	所以$(wf)\circ g$和$w\circ g$均关于$P$可积。记$(wf)_i=(wf)\circ g_i,\;w_i=w\circ g_i$，则$(wf)_i$和$w_i$均关于$P$可积，同时可以验证$(wf)_i$之间同分布且$w_i$之间同分布。由\cref{prop:MeasurableFunction}(5.b)和\cref{prop:Independent}(4)可知$(wf)_i$之间独立且$w_i$之间独立，于是$(wf)_i$之间独立同分布且$w_i$之间独立同分布。根据\cref{theo:SLLN}可得：
+	\begin{equation*}
+		\frac{1}{n}\sum_{i=1}^{n}(wf)_i\overset{\text{a.s.}}{\longrightarrow}Z\int_{Y}f(y)\dif\pi,\quad\frac{1}{n}\sum_{i=1}^{n}w_i\overset{\text{a.s.}}{\longrightarrow}Z
+	\end{equation*}
+	根据\cref{prop:a.s.}和\cref{theo:ContinuousMappingTheorem}(1)即可得出结论。
+\end{proof}
+上述重要性采样方法通常被称为\textbf{自加权重要性采样}。与接受拒绝法类似，即使 $Z$未知或无法计算，该方法仍然有效。当$Z$已知时，则可以采用非自加权的重要性采样估计量，并获得更为简洁的理论性质。
+\begin{property}\label{prop:ImportanceSampling}
+	对于重要性采样，若$Z$已知且$wf\in L_2(Y,\mathscr{A},Q)$，则：
+	\begin{gather*}
+		\hat{I}_n=\frac{1}{nZ}\sum_{i=1}^{n}[(wf)\circ g_i](x)\overset{\text{a.s.}}{\longrightarrow}\int_{Y}f(y)\dif\pi \\
+		\forall\;n\in\mathbb{N}^+,\;\operatorname{E}(\hat{I}_n)=\int_{Y}f(y)\dif\pi,\;\operatorname{Var}(\hat{I}_n)=\frac{1}{n}\left\{\frac{1}{Z^2}\int_{Y}\frac{[\tilde{\pi}(y)f(y)]^2}{q(y)}\dif\mu-\left[\int_{Y}f(y)\dif\pi\right]^2\right\}
+	\end{gather*}
+	当$q(y)\propto\tilde{\pi}(y)|f(y)|$时$\operatorname{Var}(\hat{I}_n)$取得最小值。
+\end{property}
+\begin{proof}
+	此时$\hat{I}_n$的渐进性由自加权重要性采样的结论可以立即得出，下证明其期望与方差。\par
+	对任意的$n\in\mathbb{N}^+$，由\cref{prop:MeasurableIntegral}(6)、\cref{theo:IntBySubstitution}和自加权重要性采样中已证明的结论可得：
+	\begin{align*}
+		&\operatorname{E}(\hat{I}_n)=\int_{X}\frac{1}{nZ}\sum_{i=1}^{n}[(wf)\circ g_i](x)\dif P=\frac{1}{nZ}\sum_{i=1}^{n}\int_{X}(wf)\circ g_i(x)\dif P \\
+		=&\frac{1}{nZ}\sum_{i=1}^{n}\int_{Y}w(y)f(y)\dif Q=\frac{1}{nZ}\sum_{i=1}^{n}Z\int_{Y}f(y)\dif\pi=\int_{Y}f(y)\dif\pi
+	\end{align*}\par
+	根据\cref{prop:Variance}(3)、\cref{prop:CovMat}(7)和\cref{prop:MeasurableIntegral}(6)可知：
+	\begin{equation*}
+		\operatorname{Var}(\hat{I}_n)=\sum_{i=1}^{n}\operatorname{Var}\left[\frac{1}{nZ}(wf)\circ g_i\right]=n\operatorname{Var}\left[\frac{1}{nZ}(wf)\circ g\right]=\frac{1}{nZ^2}\operatorname{Var}[(wf)\circ g]
+	\end{equation*}
+	由\cref{prop:Variance}(1)、\cref{prop:MeasurableFunction}(5.b)、\cref{theo:IntBySubstitution}、自加权重要性采样中已证明的结论、\cref{prop:MeasurableIntegral}(8)和\cref{lem:IntChangeOfMeasure}可得：
+	\begin{align*}
+		&\operatorname{Var}[(wf)\circ g]=\operatorname{E}\{[(wf)\circ g]^2\}-\{\operatorname{E}[(wf)\circ g]\}^2 \\
+		=&\int_{X}(wf)^2\circ g(x)\dif P-\left[Z\int_{Y}f(y)\dif\pi\right]^2=\int_{Y}[w(y)f(y)]^2\dif Q-\left[Z\int_{Y}f(y)\dif\pi\right]^2 \\
+		=&\int_{Y}\left[\frac{\tilde{\pi}(y)}{q(y)}f(y)\right]^2\dif Q-\left[Z\int_{Y}f(y)\dif\pi\right]^2=\int_{Y}\left[\frac{\tilde{\pi}(y)}{q(y)}f(y)\right]^2q(y)\dif\mu-\left[Z\int_{Y}f(y)\dif\pi\right]^2 \\
+		=&\int_{Y}\frac{[\tilde{\pi}(y)f(y)]^2}{q(y)}\dif\mu-\left[Z\int_{Y}f(y)\dif\pi\right]^2
+	\end{align*}
+	所以：
+	\begin{align*}
+		\operatorname{Var}(\hat{I}_n)&=\frac{1}{nZ^2}\left\{\int_{Y}\frac{[\tilde{\pi}(y)f(y)]^2}{q(y)}\dif\mu-\left[Z\int_{Y}f(y)\dif\pi\right]^2\right\} \\
+		&=\frac{1}{n}\left\{\frac{1}{Z^2}\int_{Y}\frac{[\tilde{\pi}(y)f(y)]^2}{q(y)}\dif\mu-\left[\int_{Y}f(y)\dif\pi\right]^2\right\}
+	\end{align*}\par
+	最小化$\operatorname{Var}(\hat{I}_n)$等价于：
+	\begin{equation*}
+		\min_{q}\int_{Y}\frac{[\tilde{\pi}(y)f(y)]^2}{q(y)}\dif\mu
+	\end{equation*}
+	由\cref{ineq:CauchySchiwarz}可知：
+	\begin{align*}
+		&\left[\int_{Y}\tilde{\pi}(y)|f(y)|\dif\mu\right]^2=\left[\int_{Y}\frac{\tilde{\pi}(y)|f(y)|}{\sqrt{q(y)}}\sqrt{q(y)}\dif\mu\right]^2 \\
+		\leqslant&\left[\int_{Y}\frac{[\tilde{\pi}(y)f(y)]^2}{q(y)}\dif\mu\right]\cdot\left\{\int_{Y}\left[\sqrt{q(y)}\right]^2\dif\mu\right\}=\int_{Y}\frac{[\tilde{\pi}(y)f(y)]^2}{q(y)}\dif\mu
+	\end{align*}
+	上式取等当且仅当$q(y)\propto\tilde{\pi}(y)|f(y)|$。
+\end{proof}
+\begin{note}
+	对于一般随机抽样的Monte Carlo算法而言，根据\cref{prop:MeasurableIntegral}(6)、\cref{prop:Variance}(1)和\cref{prop:Expectation}(2)可知：
+	\begin{align*}
+		&\operatorname{Var}\left(\dfrac{1}{n}\sum_{i=1}^{n}f_i\right)=\frac{1}{n^2}\operatorname{Var}\left(\sum_{i=1}^{n}f_i\right)=\frac{1}{n^2}\left\{\operatorname{E}\left[\left(\sum_{i=1}^{n}f_i\right)^2\right]-\left[\operatorname{E}\left(\sum_{i=1}^{n}f_i\right)\right]^2\right\} \\
+		=&\frac{1}{n^2}\{n\operatorname{E}(f^2)+n(n-1)[\operatorname{E}(f)]^2-[n\operatorname{E}(f)]^2\}=\frac{1}{n^2}\{n\operatorname{E}(f^2)-n[\operatorname{E}(f)]^2\} \\
+		=&\frac{1}{n}\{\operatorname{E}(f^2)-[\operatorname{E}(f)]^2\}\qedhere
+	\end{align*}
+	将该方差与\cref{prop:ImportanceSampling}中的方差进行比较可知，只要：
+	\begin{equation*}
+		\frac{1}{Z^2}\int_{Y}\frac{[\tilde{\pi}(y)f(y)]^2}{q(y)}\dif\mu<\operatorname{E}(f^2)
+	\end{equation*}
+	重要性采样的方差便小于一般的Monte Carlo估计量。进一步可以发现，一般的Monte Carlo实际上是重要性采样的一个特例，只需取$q$为$\pi$关于$\mu$的概率密度函数即可。
+\end{note}
+综上，重要性采样不仅可以降低抽样难度，在合理设计下还可以在保持抽样次数不变的情况下降低估计量的方差。
+
+\subsection{方差缩减技术}
+本节介绍一些Monte Carlo算法中在保持抽样次数不变的情况下降低估计量方差的方法。
+\subsubsection{对偶变量法}
+\begin{method}
+	设$f,g\in L_2(X,\mathscr{F},P)$且二者同分布，$\{(f_i,g_i)\}_{i=1}^n$是$(f,g)$的一列独立同分布副本。称$g$为$f$的对偶变量，定义对偶变量估计量：
+	\begin{equation*}
+		\hat{I}_{n,\mathrm{AV}}\coloneq\frac{1}{n}\sum_{i=1}^{n}\frac{f_i+g_i}{2}
+	\end{equation*}
+	则：
+	\begin{gather*}
+		\hat{I}_{n,\mathrm{AV}}\overset{\text{a.s.}}{\longrightarrow}\operatorname{E}(f) \\
+		\operatorname{E}(\hat{I}_{n,\mathrm{AV}})=\operatorname{E}(f),\quad\operatorname{Var}(\hat{I}_{n,\mathrm{AV}})=\frac{\operatorname{Var}(f)+\operatorname{Cov}(f,g)}{2n}
+	\end{gather*}
+	当$\operatorname{Cov}(f,g)<0$且抽样次数为$2n$时，$\operatorname{Var}(\hat{I}_{n,\mathrm{AV}})$小于一般Monte Carlo估计量的方差。
+\end{method}
+\begin{proof}
+	由\cref{prop:MeasurableIntegral}(6)可得$\operatorname{E}(\hat{I}_{n,\mathrm{AV}})=\operatorname{E}(f)$。根据\cref{theo:ProductMeasurable}和\cref{prop:Independent}(4)可知$\left\{\dfrac{f_i+g_i}{2}\right\}_{i=1}^n$独立同分布，由\cref{prop:MeasurableIntegral}(6)、\cref{prop:Variance}(3)和\cref{prop:CovMat}(7)可得：
+	\begin{align*}
+		\operatorname{Var}(\hat{I}_{n,\mathrm{AV}})
+		&=\frac{1}{n}\operatorname{Var}\left(\frac{f+g}{2}\right)
+		=\frac{\operatorname{Var}(f)+2\operatorname{Cov}(f,g)+\operatorname{Var}(g)}{4n}\\
+		&=\frac{\operatorname{Var}(f)+\operatorname{Cov}(f,g)}{2n}
+	\end{align*}
+	根据\cref{prop:MeasurableIntegral}(7)(6)可知：
+	\begin{equation*}
+		\operatorname{E}\left(\left|\frac{f_i+g_i}{2}\right|\right)\leqslant\operatorname{E}\left(\frac{|f_i|+|g_i|}{2}\right)=\frac{1}{2}[\operatorname{E}(|f_i|)+\operatorname{E}(|g_i|)]<+\infty
+	\end{equation*}
+	由\cref{theo:SLLN}可得$\hat{I}_{n,\mathrm{AV}}\overset{\text{a.s.}}{\longrightarrow}\operatorname{E}(f)$。
+\end{proof}
+\subsubsection{控制变量法}
+\begin{method}
+	设$f,g\in L_2(X,\mathscr{F},P)$，$\eta=\operatorname{E}(g)$已知且$\operatorname{Var}(g)>0$，$\{(f_i,g_i)\}_{i=1}^n$是$(f,g)$的一列独立同分布副本。称$g$为$f$的控制变量，对固定的$b\in\mathbb{R}^{}$定义控制变量估计量：
+	\begin{equation*}
+		\hat{I}_{n,\mathrm{CV}}(b)=\frac{1}{n}\sum_{i=1}^{n}[f_i-b(g_i-\eta)]
+	\end{equation*}
+	则：
+	\begin{gather*}
+		\hat{I}_{n,\mathrm{CV}}(b)\overset{\text{a.s.}}{\longrightarrow}\operatorname{E}(f) \\
+		\operatorname{E}[\hat{I}_{n,\mathrm{CV}}(b)]=\operatorname{E}(f),\quad\operatorname{Var}[\hat{I}_{n,\mathrm{CV}}(b)]=\frac{\operatorname{Var}(f)-2b\operatorname{Cov}(f,g)+b^2\operatorname{Var}(g)}{n}
+	\end{gather*}
+	$\operatorname{Var}[\hat{I}_{n,\mathrm{CV}}(b)]$在$b^*=\operatorname{Cov}(f,g)/\operatorname{Var}(g)$处取到最小值：
+	\begin{equation*}
+		\operatorname{Var}[\hat{I}_{n,\mathrm{CV}}(b^*)]=\frac{1}{n}\left[\operatorname{Var}(f)-\frac{\operatorname{Cov}(f,g)^2}{\operatorname{Var}(g)}\right]=\frac{1-\rho^2}{n}\operatorname{Var}(f)
+	\end{equation*}
+	其中$\rho=\operatorname{Corr}(f,g)$。
+\end{method}
+\begin{proof}
+	由\cref{prop:MeasurableIntegral}(6)可得$\operatorname{E}[\hat{I}_{n,\mathrm{CV}}(b)]=\operatorname{E}(f)$。根据\cref{theo:ProductMeasurable}和\cref{prop:Independent}(4)可知$\{f_i-b(g_i-\eta)\}_{i=1}^n$独立同分布，由\cref{prop:MeasurableIntegral}(6)、\cref{prop:Variance}(3)和\cref{prop:CovMat}(7)(5)(4)(3)可得：
+	\begin{align*}
+		&\operatorname{Var}[\hat{I}_{n,\mathrm{CV}}(b)]=\frac{1}{n^2}\operatorname{Var}\left\{\sum_{i=1}^{n}[f_i-b(g_i-\eta)]\right\}=\frac{1}{n}\sum_{i=1}^{n}\operatorname{Var}[f_i-b(g_i-\eta)] \\
+		=&\frac{\operatorname{Var}[f_i-b(g_i-\eta)]}{n}=\frac{\operatorname{Var}[f-b(g-\eta)]}{n}=\frac{\operatorname{Var}(f)+\operatorname{Var}[b(g-\eta)]-2\operatorname{Cov}[f,b(g-\eta)]}{n} \\
+		=&\frac{\operatorname{Var}(f)+b^2\operatorname{Var}(g)-2b\operatorname{Cov}(f,g)}{n}
+	\end{align*}
+	这是一个关于$b$的二次函数，最小值点为$b^*\operatorname{Cov}(f,g)/\operatorname{Var}(g)$，对应的最小值为：
+	\begin{align*}
+		&\frac{1}{n}\left\{\operatorname{Var}(f)+\frac{[\operatorname{Cov}(f,g)]^2}{[\operatorname{Var}(g)]^2}\operatorname{Var}(g)-2\frac{\operatorname{Cov}(f,g)}{\operatorname{Var}(g)}\operatorname{Cov}(f,g)\right\} \\
+		=&\frac{1}{n}\left\{\operatorname{Var}(f)-\frac{[\operatorname{Cov}(f,g)]^2}{\operatorname{Var}(g)}\right\}=\frac{\operatorname{Var}(f)-\rho^2\operatorname{Var}(f)}{n}=\frac{1-\rho^2}{n}\operatorname{Var}(f)
+	\end{align*}
+	根据\cref{prop:MeasurableIntegral}(7)(6)可知：
+	\begin{align*}
+		&\operatorname{E}[|f_i-b(g_i-\eta)|]\leqslant\operatorname{E}[|f_i|+|b(g_i-\eta)|]=\operatorname{E}(|f_i|)+|b|\operatorname{E}(|g_i-\eta|) \\
+		\leqslant&\operatorname{E}(|f_i|)+|b|\operatorname{E}(|g_i|+|\eta|)=\operatorname{E}(|f_i|)+|b|\operatorname{E}(|g_i|)+|b\eta|<+\infty
+	\end{align*}
+	由\cref{theo:SLLN}可得$\hat{I}_{n,\mathrm{CV}}(b)\overset{\text{a.s.}}{\longrightarrow}\operatorname{E}(f)$。
+\end{proof}
+$\rho^2$越接近$1$，控制变量法的效果越好。实际中$b^*$通常未知，可先用独立的预模拟样本估计$b^*$，再固定该系数进行正式的Monte Carlo。
+\subsubsection{条件期望法}
+\begin{method}
+	设$f\in L_2(X,\mathscr{F},P)$，$\mathscr{A}$是$\mathscr{F}$的子$\sigma$域，$g=\operatorname{E}(f\mid\mathscr{A})$，$\{g_i\}_{i=1}^n$是$g$的一列独立同分布副本，定义条件期望估计量：
+	\begin{equation*}
+		\hat{I}_{n,\mathrm{CE}}\coloneq\frac{1}{n}\sum_{i=1}^{n}g_i
+	\end{equation*}
+	则：
+	\begin{gather*}
+		\hat{I}_{n,\mathrm{CE}}\overset{\text{a.s.}}{\longrightarrow}\operatorname{E}(f) \\
+		\operatorname{E}(\hat{I}_{n,\mathrm{CE}})=\operatorname{E}(f),\quad\operatorname{Var}(\hat{I}_{n,\mathrm{CE}})=\frac{1}{n}\operatorname{Var}[\operatorname{E}(f\mid\mathscr{A})]
+	\end{gather*}
+	且$\operatorname{Var}(\hat{I}_{n,\mathrm{CE}})$不大于一般Monte Carlo估计量的方差。
+\end{method}
+\begin{proof}
+	由\cref{prop:MeasurableIntegral}(6)和\cref{prop:ConditionalExpectation}(3)可得$\operatorname{E}(\hat{I}_{n,\mathrm{CE}})=\operatorname{E}(g)=\operatorname{E}(f)$。因为$\{g_i\}_{i=1}^n$独立同分布，根据\cref{prop:MeasurableIntegral}(6)、\cref{prop:Variance}(3)和\cref{prop:CovMat}(7)可知：
+	\begin{equation*}
+		\operatorname{Var}(\hat{I}_{n,\mathrm{CE}})=\frac{1}{n^2}\operatorname{Var}\left(\sum_{i=1}^{n}h_i\right)=\frac{1}{n^2}\sum_{i=1}^{n}\operatorname{Var}(h_i)=\frac{1}{n}\operatorname{Var}(h)=\frac{1}{n}\operatorname{Var}[\operatorname{E}(f\mid\mathscr{A})]
+	\end{equation*}
+	由\cref{prop:Variance}(2)可得：
+	\begin{equation*}
+		\operatorname{Var}(f)=\operatorname{E}[\operatorname{Var}(f\mid\mathscr{A})]+\operatorname{Var}[\operatorname{E}(f\mid\mathscr{A})]
+	\end{equation*}
+	根据\cref{prop:NonnegativeMeasurableIntegral}(2)可知：
+	\begin{equation*}
+		\operatorname{Var}(\hat{I}_{n,\mathrm{CE}})=\frac{1}{n}\{\operatorname{Var}(f)-\operatorname{E}[\operatorname{Var}(f\mid\mathscr{A})]\}\leqslant\frac{\operatorname{Var}(f)}{n}
+	\end{equation*}
+	由\cref{ineq:Jensen}可得：
+	\begin{equation*}
+		g^2=[\operatorname{E}(f\mid\mathscr{A})]^2\leqslant\operatorname{E}(f^2\mid\mathscr{A})
+	\end{equation*}
+	根据\cref{prop:MeasurableIntegral}(7)和\cref{prop:ConditionalExpectation}(3)可知：
+	\begin{equation*}
+		\operatorname{E}(g^2)\leqslant\operatorname{E}(f^2)<+\infty
+	\end{equation*}
+	由\cref{prop:Lp}(2)可得$g\in L_2(X,\mathscr{A},P)\subseteq L_1(X,\mathscr{A},P)$。根据\cref{theo:SLLN}可知$\hat{I}_{n,\mathrm{CE}}(b)\overset{\text{a.s.}}{\longrightarrow}\operatorname{E}(f)$。
+\end{proof}

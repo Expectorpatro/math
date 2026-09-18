@@ -548,3 +548,82 @@ Chapman--Kolmogorov方程说明多步转移具有自然的复合一致性：从�
 \begin{definition}
 	若$K$是关于$\varphi$的Harris常返核，并且存在不变分布，则称$K$是\gls{PositiveHarrisRecurrentMarkovKernel}。
 \end{definition}
+\subsubsection{周期性}
+以下讨论具有不变分布$\pi$且$\pi$不可约的转移概率核$K$。
+\begin{definition}
+	设$d\in\mathbb{N}^+$。若存在两两不交的$D_0,D_1,\dots,D_{d-1}\in\mathscr{A}$使得：
+	\begin{gather*}
+		\pi\left(\underset{i=0}{\overset{d-1}{\cup}}D_i\right)=1 \\
+		\pi(D_i)>0,\quad K(y,D_{i+1})=1,\quad\forall\;y\in D_i,\quad i=0,1,\dots,d-1
+	\end{gather*}
+	其中约定$D_d=D_0$，则称$D_0,\dots,D_{d-1}$为$K$的一个长度为$d$的循环分解。若存在长度$d\geqslant2$的循环分解，则称$K$是\gls{PeriodicMarkovKernel}，否则称$K$是\gls{AperiodicMarkovKernel}。
+\end{definition}
+以下记$D_{i+d}=D_i$。
+\begin{property}\label{prop:MarkovCyclicEvolution}
+	设$D_0,\dots,D_{d-1}$为上述循环分解，则：
+	\begin{enumerate}
+		\item 对任意非负整数$n$及$y\in D_i$，有$K^n(y,D_{i+n})=1$；特别地，若$n$不是$d$的倍数，则$K^n(y,D_i)=0$；
+		\item 对每个$i=0,\dots,d-1$，有$\pi(D_i)=1/d$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)$n=0$时由$K^0(y,D_i)=I(y\in D_i)$可知结论成立。假设$K^n(y,D_{i+n})=1$，由\cref{prop:HomogeneousMarkovEvolution}(2)和循环分解的定义，有：
+	\begin{align*}
+		K^{n+1}(y,D_{i+n+1})
+		&=\int_YK(w,D_{i+n+1})\dif K^n(y,\cdot) \\
+		&=\int_{D_{i+n}}1\dif K^n(y,\cdot)=1
+	\end{align*}
+	其中积分可以限制在$D_{i+n}$上，是因为$K^n(y,D_{i+n})=1$。由归纳法得第一式。若$n$不是$d$的倍数，则$D_i$与$D_{i+n}$不交，故$K^n(y,D_i)=0$。\par
+	(2)由不变性、各集合两两不交以及它们的并集具有$\pi$概率$1$，可得：
+	\begin{align*}
+		\pi(D_{i+1})&=\int_YK(y,D_{i+1})\dif\pi \\
+		&=\sum_{j=0}^{d-1}\int_{D_j}K(y,D_{i+1})\dif\pi=\pi(D_i)
+	\end{align*}
+	因为在$D_i$上被积函数为$1$，在其余$D_j$上为$0$。因此所有$\pi(D_i)$相等，再由$\sum_{i=0}^{d-1}\pi(D_i)=1$得到$\pi(D_i)=1/d$。
+\end{proof}
+若$d\geqslant2$，从$y\in D_0$出发，由上述性质有：
+\begin{equation*}
+	K^{nd}(y,D_0)=1,\qquad K^{nd+1}(y,D_0)=0,\quad n=0,1,2,\dots
+\end{equation*}
+因此$K^n(y,D_0)$不可能趋于$\pi(D_0)=1/d$。这说明，即使已经有不变分布与不可约性，周期性仍会妨碍从某些初始状态出发的状态分布趋于不变分布。若初始分布本来就是$\pi$，各时刻分布仍然保持为$\pi$，这与上述结论并不矛盾。
+
+下面给出两个可以直接利用转移核验证非周期性的条件。
+\begin{property}\label{prop:MarkovAperiodicityCriteria}
+	设$\pi K=\pi$且$K$是$\pi$不可约的。以下任一条件均可保证$K$非周期：
+	\begin{enumerate}
+		\item 存在固定的$m\in\mathbb{N}^+$，使对每个$y\in Y$和每个满足$\pi(A)>0$的$A\in\mathscr{A}$都有$K^m(y,A)>0$；
+		\item 存在$\varepsilon\in(0,1)$，使对任意$y\in Y$和$A\in\mathscr{A}$都有$K(y,A)\geqslant\varepsilon I(y\in A)$。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	反设存在长度$d\geqslant2$的循环分解。\par
+	(1)取$y\in D_0$。由\cref{prop:MarkovCyclicEvolution}(1)，$K^m(y,D_m)=1$。选取一个与$D_m$不同的循环集合$D_j$，则$\pi(D_j)>0$而$K^m(y,D_j)=0$，与条件矛盾。\par
+	(2)取$y\in D_0$，由循环转移至$D_1$且$D_0\cap D_1=\varnothing$可知$K(y,D_0)=0$。但条件给出$K(y,D_0)\geqslant\varepsilon$，矛盾。
+\end{proof}
+第一条可以直接结合\cref{theo:IrreducibilityDensity}使用：如果某个固定步数的转移密度对每个初始状态都关于$\pi$几乎处处为正，则它同时排除了非平凡的循环分解。第二条则表示每次转移都保留至少$\varepsilon$的概率停留在当前状态，从而打破必须按固定次序移动的要求。
+
+这种停留机制可以直接通过概率核的混合得到。
+\begin{property}\label{prop:MarkovLazyKernel}
+	设$\pi K=\pi$且$K$是$\pi$不可约的，取$\varepsilon\in(0,1)$，定义：
+	\begin{equation*}
+		\widetilde K(y,A)=\varepsilon I(y\in A)+(1-\varepsilon)K(y,A)
+	\end{equation*}
+	则$\widetilde K$是以$\pi$为不变分布的概率核，且$\pi$不可约、非周期。
+\end{property}
+\begin{proof}
+	对固定$y$，$\widetilde K(y,\cdot)$是两个概率测度的凸组合；对固定$A$，$\widetilde K(\cdot,A)$可测，所以$\widetilde K$为概率核。由$\pi K=\pi$，对任意$A\in\mathscr{A}$有：
+	\begin{equation*}
+		(\pi\widetilde K)(A)=\varepsilon\pi(A)+(1-\varepsilon)(\pi K)(A)=\pi(A)
+	\end{equation*}
+	再证明$\widetilde K^n(y,A)\geqslant(1-\varepsilon)^nK^n(y,A)$。$n=1$时由定义成立；若对$n$成立，则由核复合公式有：
+	\begin{align*}
+		\widetilde K^{n+1}(y,A)
+		&=\varepsilon\widetilde K^n(y,A)+(1-\varepsilon)\int_Y\widetilde K^n(w,A)\dif K(y,\cdot) \\
+		&\geqslant(1-\varepsilon)^{n+1}\int_YK^n(w,A)\dif K(y,\cdot) \\
+		&=(1-\varepsilon)^{n+1}K^{n+1}(y,A)
+	\end{align*}
+	由归纳法得所需不等式。因为$1-\varepsilon>0$，$K$的$\pi$不可约性遂推出$\widetilde K$的$\pi$不可约性。最后，由$\widetilde K(y,A)\geqslant\varepsilon I(y\in A)$及\cref{prop:MarkovAperiodicityCriteria}(2)可知$\widetilde K$非周期。
+\end{proof}
+\begin{note}
+	周期性限制访问发生的时刻，常返性关心是否持续返回，两者描述不同的性质。周期性也不意味着时间平均必然失去规律：对于长度$d$的循环分解，从$D_0$出发的链在每$d$个连续时刻中恰有一次处于$D_0$，因而对$D_0$的访问频率趋于$1/d$，尽管每个时刻位于$D_0$的概率仍在振荡。后续讨论时间平均与状态分布的长期行为时，应分别给出所需条件。
+\end{note}

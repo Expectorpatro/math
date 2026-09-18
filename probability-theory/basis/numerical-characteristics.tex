@@ -53,7 +53,7 @@
 	设$f,g$是概率空间$(X,\mathscr{F},P)$上积分存在的随机变量。方差具有如下性质：
 	\begin{enumerate}
 		\item 若$f\in L_2(X)$，则$\operatorname{Var}(f)=\operatorname{E}(f^2)-[\operatorname{E}(f)]^2<+\infty$。若$\mathscr{A}$是$\mathscr{F}$的子$\sigma$域，则$\operatorname{Var}(f\mid\mathscr{A})=\operatorname{E}(f^2\mid\mathscr{A})-[\operatorname{E}(f\mid\mathscr{A})]^2<+\infty$；
-		\item 若$f\in L_2(X)$，则$\operatorname{Var}(f)=\operatorname{E}[\operatorname{Var}(f|g)]+\operatorname{Var}[\operatorname{E}(f\mid g)]$；
+		\item 若$f\in L_2(X)$，$\mathscr{A}$是$\mathscr{F}$的子$\sigma$域，则$\operatorname{Var}(f)=\operatorname{E}[\operatorname{Var}(f|\mathscr{A})]+\operatorname{Var}[\operatorname{E}(f\mid\mathscr{A})]$；
 		\item 若$f,g\in L_2(X)$，则$\operatorname{Var}(f\pm g)=\operatorname{Var}(f)\pm2\operatorname{Cov}(f,g)+\operatorname{Var}(g)$；
 	\end{enumerate}
 \end{property}
@@ -65,17 +65,17 @@
 	条件方差的结论类似可得，只需再使用\cref{theo:ConditionalExpectationPullOut}和\cref{prop:ConditionalExpectation}(3)。\par
 	(2)由\cref{prop:Moment}(1)(3)可知$\operatorname{E}(f)=\mu\in\mathbb{R}$。根据(1)和\cref{prop:ConditionalExpectation}(3)可得：
 	\begin{align*}
-		\operatorname{E}[\operatorname{Var}(f|g)]
-		&=\operatorname{E}\{\operatorname{E}(f^2|g)-[\operatorname{E}(f\mid g)]^2\} \\
-		&=\operatorname{E}[\operatorname{E}(f^2|g)]-\operatorname{E}\{[\operatorname{E}(f\mid g)]^2\} \\
-		&=\operatorname{E}(f^2)-\operatorname{E}\{[\operatorname{E}(f\mid g)]^2\} \\
-		\operatorname{Var}[\operatorname{E}(f\mid g)]
-		&=\operatorname{E}\{[\operatorname{E}(f\mid g)]^2\}-\{\operatorname{E}[\operatorname{E}(f\mid g)]\}^2 \\
-		&=\operatorname{E}\{[\operatorname{E}(f\mid g)]^2\}-[\operatorname{E}(f)]^2
+		\operatorname{E}[\operatorname{Var}(f|\mathscr{A})]
+		&=\operatorname{E}\{\operatorname{E}(f^2|\mathscr{A})-[\operatorname{E}(f\mid\mathscr{A})]^2\} \\
+		&=\operatorname{E}[\operatorname{E}(f^2|\mathscr{A})]-\operatorname{E}\{[\operatorname{E}(f\mid\mathscr{A})]^2\} \\
+		&=\operatorname{E}(f^2)-\operatorname{E}\{[\operatorname{E}(f\mid\mathscr{A})]^2\} \\
+		\operatorname{Var}[\operatorname{E}(f\mid\mathscr{A})]
+		&=\operatorname{E}\{[\operatorname{E}(f\mid\mathscr{A})]^2\}-\{\operatorname{E}[\operatorname{E}(f\mid\mathscr{A})]\}^2 \\
+		&=\operatorname{E}\{[\operatorname{E}(f\mid\mathscr{A})]^2\}-[\operatorname{E}(f)]^2
 	\end{align*}
 	于是：
 	\begin{equation*}
-		\operatorname{E}[\operatorname{Var}(f|g)]+\operatorname{Var}[\operatorname{E}(f\mid g)]=\operatorname{E}(f^2)-[\operatorname{E}(f)]^2=\operatorname{Var}(f)
+		\operatorname{E}[\operatorname{Var}(f|\mathscr{A})]+\operatorname{Var}[\operatorname{E}(f\mid \mathscr{A})]=\operatorname{E}(f^2)-[\operatorname{E}(f)]^2=\operatorname{Var}(f)
 	\end{equation*}\par
 	(3)由\cref{prop:Moment}(1)(3)可知$\operatorname{E}(f)=\mu\in\mathbb{R}$。同理可得$\operatorname{E}(g)\in\mathbb{R}$。由方差的定义、(1)和\cref{prop:MeasurableIntegral}(6)可得：
 	\begin{align*}
@@ -445,90 +445,6 @@
 	\end{align*}
 \end{proof}
 
-\subsection{矩母函数}
-\begin{definition}
-	设$f$是概率空间$(X,\mathscr{F},P)$上的随机变量。称:
-	\begin{equation*}
-		M_f(t)\coloneq\operatorname{E}(e^{tf})
-	\end{equation*}
-	为$f$的\gls{m.g.f.}，其中$t\in\mathbb{R}$。
-\end{definition}
-\begin{property}\label{prop:m.g.f.}
-	设$\mathbf{X}$是一个$n$维随机向量，则其矩母函数$M_\mathbf{X}(t)$具有如下性质：
-	\begin{enumerate}
-		\item $M_\mathbf{X}(\mathbf{0})=1$；
-		\item $M_\mathbf{X}(t)\geqslant e^{t^{\top}\mu}$，其中$\mu$是$\mathbf{X}$的均值向量；
-		\item 矩母函数与概率分布之间存在一个双射，即$M_\mathbf{X}(t)=M_\mathbf{Y}(t)$当且仅当$\mathbf{X}$与$\mathbf{Y}$具有相同的概率分布；
-		\item 设$m$维随机向量$\seq{\mathbf{X}}{n}$彼此独立，$\alpha_i$为常数，$\beta_i$为$m$维常数向量，则$\mathbf{Y}=\sum\limits_{i=1}^{n}(\alpha_i\mathbf{X}_i+\beta_i)$的矩母函数为：
-		\begin{equation*}
-			M_\mathbf{Y}(t)=\prod_{i=1}^ne^{t^{\top}\beta_i}M_{\mathbf{X}_i}(\alpha_it)
-		\end{equation*}
-		\item $M_X^{(n)}(0)=\mu_n$，其中$X$是一个随机变量，$\mu_n$是$X$的$n$阶原点矩；
-		\item $M_\mathbf{X}(t)$有如下幂级数展开：
-		\begin{equation*}
-			M_\mathbf{X}(t)=\sum_{(\seq{m}{n})\in\mathbb{N}^n}\mu_{\seq{m}{n}}\prod_{i=1}^{n}\frac{t_i^{m_i}}{m_i!}
-		\end{equation*}
-	\end{enumerate}
-\end{property}
-\begin{proof}
-	(1)$M_\mathbf{X}(\mathbf{0})=\operatorname{E}(e^0)=1$。\par
-	(2)由\cref{ineq:Jensen}直接可得。\par
-	(3)\par
-	(4)由矩母函数定义可得：
-	\begin{equation*}
-		M_\mathbf{Y}(t)=\operatorname{E}(e^{t^{\top}\mathbf{Y}})
-		=\operatorname{E}\left(\exp\left\{t^{\top}\sum_{i=1}^{n}(\alpha_i\mathbf{X}_i+\beta_i)\right\}\right)=\operatorname{E}\left(\prod_{i=1}^{n}e^{\alpha_it^{\top}\mathbf{X}_i}\right)\prod_{i=1}^ne^{t^{\top}\beta_i}
-	\end{equation*}
-	因为$\mathbf{X}_i$互相独立，所以$\alpha_i\mathbf{X}_i$也相互独立，于是有：
-	\begin{equation*}
-		M_\mathbf{Y}(t)=\operatorname{E}\left(\prod_{i=1}^{n}e^{\alpha_it^{\top}\mathbf{X}_i}\right)\prod_{i=1}^ne^{t^{\top}\beta_i}=\prod_{i=1}^{n}\operatorname{E}\left(e^{\alpha_it^{\top}\mathbf{X}_i}\right)\prod_{i=1}^ne^{t^{\top}\beta_i}=\prod_{i=1}^ne^{t^{\top}\beta_i}M_{\mathbf{X}_i}(\alpha_it)
-	\end{equation*}\par
-	(5)将$e^{tX}$展开为幂级数：
-	\begin{equation*}
-		M_X(t)=\operatorname{E}(e^{tX})=\operatorname{E}\left(\sum_{n=0}^{+\infty}\frac{t^nX^n}{n!}\right)
-	\end{equation*}
-	于是：
-	\begin{equation*}
-		M_X^{(n)}(t)=\operatorname{E}\left(X^n+\sum_{m=n+1}^{+\infty}\frac{t^mX^m}{m!}\right)=\mu_n+\sum_{m=1}^{+\infty}\frac{t^m}{m!}\mu_m
-	\end{equation*}
-	所以：
-	\begin{equation*}
-		M_X^{(n)}(0)=\operatorname{E}(X^n)=\mu_n
-	\end{equation*}\par
-	(6)由\info{期望的线性性质，Lebesgue积分}可得：
-	\begin{align*}
-		M_\mathbf{X}(t)&=\operatorname{E}(e^{t^{\top}\mathbf{X}})
-		=\operatorname{E}\left(\exp\left\{\sum_{i=1}^{n}t_i\mathbf{X}_i\right\}\right)
-		=\operatorname{E}\left[\sum_{m=0}^{+\infty}\frac{1}{m!}\left(\sum_{i=1}^{n}t_i\mathbf{X}_i\right)^m\right] \\
-		&=\sum_{m=0}^{+\infty}\frac{1}{m!}\operatorname{E}\left[\left(\sum_{i=1}^{n}t_i\mathbf{X}_i\right)^m\right]
-		=\sum_{m=0}^{+\infty}\frac{1}{m!}\operatorname{E}\left(\sum_{\sum\limits_{i=1}^{n}m_i=m}\frac{m!}{m_1!m_2!\cdots m_n!}\prod_{i=1}^{n}(t_i\mathbf{X}_i)^{m_i}\right) \\
-		&=\sum_{m=0}^{+\infty}\frac{1}{m!}\sum_{\sum\limits_{i=1}^{n}m_i=m}\frac{m!}{m_1!m_2!\cdots m_n!}\operatorname{E}\left[\prod_{i=1}^{n}(t_i\mathbf{X}_i)^{m_i}\right] \\
-		&=\sum_{m=0}^{+\infty}\sum_{\sum\limits_{i=1}^{n}m_i=m}\frac{1}{m_1!m_2!\cdots m_n!}\operatorname{E}\left(\prod_{i=1}^{n}\mathbf{X}_i^{m_i}\right)\prod_{i=1}^{n}t_i^{m_i} \\
-		&=\sum_{(\seq{m}{n})\in\mathbb{N}^n}\mu_{\seq{m}{n}}\prod_{i=1}^{n}\frac{t_i^{m_i}}{m_i!}\qedhere
-	\end{align*}
-\end{proof}
-
-\subsection{累积量生成函数}
-\begin{definition}
-	设$X$是一个随机变量。称$K_X(t)=\log M_X(t)$为$X$的\gls{c.g.f.}，其中$t\in\mathbb{R}$。
-\end{definition}
-\begin{definition}
-	设$\mathbf{X}$是一个$n$维随机向量。称$K_\mathbf{X}(t)=\log M_\mathbf{X}(t)$为$\mathbf{X}$的累积量生成函数，其中$t\in\mathbb{R}^{n}$。
-\end{definition}
-\begin{definition}
-	设$\mathbf{X}$是一个$n$维随机向量。因为：
-	\begin{align*}
-		M_X(t)&=\sum_{(\seq{m}{n})\in\mathbb{N}^n}\frac{1}{m_1!m_2!\cdots m_n!}\prod_{i=1}^{n}t_i^{m_i}\mu_{\seq{m}{n}} \\
-		&=1+\sum_{\substack{(\seq{m}{n})\in\mathbb{N}^n \\ (\seq{m}{n}\ne\mathbf{0})}}\frac{1}{m_1!m_2!\cdots m_n!}\prod_{i=1}^{n}t_i^{m_i}\mu_{\seq{m}{n}}
-	\end{align*}
-	由对数函数的幂级数展开可得：
-	\begin{align*}
-		K_\mathbf{X}(t)
-		&=\log\left(1+\sum_{\substack{(\seq{m}{n})\in\mathbb{N}^n \\ (\seq{m}{n}\ne\mathbf{0})}}\frac{1}{m_1!m_2!\cdots m_n!}\prod_{i=1}^{n}t_i^{m_i}\mu_{\seq{m}{n}}\right) \\
-		&=\sum_{j=1}^{+\infty}(-1)^{j+1}\frac{1}{j}\left(\sum_{\substack{(\seq{m}{n})\in\mathbb{N}^n \\ (\seq{m}{n}\ne\mathbf{0})}}\frac{1}{m_1!m_2!\cdots m_n!}\prod_{i=1}^{n}t_i^{m_i}\mu_{\seq{m}{n}}\right)^j
-	\end{align*}
-\end{definition}
-
 \subsection{特征函数}
 \begin{definition}
 	设$f$是从概率空间$(X,\mathscr{F},P)$到$\mathbb{C}$上的随机变量，记$f$的实部和复部分别为$\operatorname{Re}(f)$和$\operatorname{Im}(f)$。若$\operatorname{Re}(f)$和$\operatorname{Im}(f)$可积，则称$f$的期望$\operatorname{E}(f)$存在，并记：
@@ -624,7 +540,7 @@
 	为$x$与$y$之间的Mahalanobis距离。
 \end{definition}
 \begin{method}
-	由$\Sigma$可逆和\info{可逆半正定为正定}可知$\Sigma$为正定矩阵，根据\cref{theo:Cholesky}可知$\Sigma$有分解式$\Sigma=LL^{\top}$且$L$可逆。由\cref{prop:InvertibleMatrix}(11)(12)和\cref{prop:Transpose}(4)可知：
+	由$\Sigma$可逆、\cref{prop:CovMat}(2)和\cref{theo:PositiveSemidefinite}(6)可知$\Sigma$为正定矩阵，根据\cref{theo:Cholesky}可知$\Sigma$有分解式$\Sigma=LL^{\top}$且$L$可逆。由\cref{prop:InvertibleMatrix}(11)(12)和\cref{prop:Transpose}(4)可知：
 	\begin{align*}
 		d^2_m(x,y)&=(x-y)^{\top}(LL^{\top})^{-1}(x-y)=(x-y)^{\top}(L^{\top})^{-1}L^{-1}(x-y) \\
 		&=(x-y)^{\top}(L^{-1})^{\top}L^{-1}(x-y)=||L^{-1}(x-y)||_2^2

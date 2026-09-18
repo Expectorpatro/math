@@ -2,16 +2,30 @@
 
 \section{基于测度论的统计简介}
 \begin{definition}
-	设$(X,\mathscr{A},P)$为概率空间，$f$是从可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$上的随机变量。称概率测度$Pf^{-1}$为\gls{Population}，$f$的观测和$f$都被称为\gls{Sample}，称$f$的观测的数目为\gls{SampleSize}，总体的数字特征即为$f$的数字特征。
+	设$(X,\mathscr{A},P)$为概率空间，$f$是从可测空间$(X,\mathscr{A})$到可测空间$(Y,\mathscr{B})$上的可测映射。称概率测度$Pf^{-1}$为\gls{Population}，$f$的观测和$f$都被称为\gls{Sample}，称$f$的观测的数目为\gls{SampleSize}，总体的数字特征即为$f$的数字特征。
 \end{definition}
 \begin{note}
 	由定义可以看出，样本具有两重性，若将随机变量的观测看作样本，则样本是固定的，没有随机性，但在理论分析中我们往往研究的是具有随机性的样本，也即随机变量本身。换句话讲，抽样实施以前，样本被看作随机变量，抽样实施以后，样本是具体的。
 \end{note}
 \begin{definition}
-	设$(X,\mathscr{A},P)$为概率空间，$(Y,\mathscr{B})$为可测空间，总体为$Q$。若随机变量$\seq{X}{n}:(X,\mathscr{A})\longrightarrow(Y,\mathscr{B})$相互独立，并且具有相同的分布$Q$，则称$\mathbf{X}=(\seq{X}{n})$为来自$Q$的容量为$n$的\gls{SRS}。
+	设$(X,\mathscr{A},P)$为概率空间，$(Y,\mathscr{B})$为可测空间，总体为$Q$。若相互独立的$\seq{f}{n}$都是从$(X,\mathscr{A},P)$到$(Y,\mathscr{B})$上的可测映射，并且具有相同的分布$Q$，则称$(\seq{f}{n})$为来自$Q$的容量为$n$的\gls{SRS}。
 \end{definition}
 \begin{note}
-	简单随机抽样包含“同分布”和“相互独立”这两个抽样的基本要求。同分布保证每次抽样都来自同一总体$Q$，从而样本能够反映总体的概率规律；相互独立则保证样本间的相关性不会干扰抽样误差的度量，使样本量能够正确反映样本所包含的信息量。
+	SRS包含“同分布”和“相互独立”这两个抽样的基本要求。同分布保证每次抽样都来自同一总体$Q$，从而样本能够反映总体的概率规律；相互独立则保证样本间的相关性不会干扰抽样误差的度量，使样本量能够正确反映样本所包含的信息量。\par
+	乘积空间为SRS提供了一种自然的概率空间构造。考虑乘积概率空间$(X^n,\mathscr{A}^n,P^n)$，对$i=1,2,\dots,n$，定义：
+	\begin{equation*}
+		\pi_i:X^n\to X,\quad\pi_i(\seq{x}{n})=x_i
+	\end{equation*}
+	由\cref{prop:ProductSpaceProjectionMapping}可知$\pi_i$为从$(X^n,\mathscr{A}^n,P^n)$到$(X,\mathscr{A},P)$上的随机变量。对任意的$A\in\mathscr{A}$，由\cref{theo:Fubini}(1)可知：
+	\begin{equation*}
+		P^n\Big(\pi_i^{-1}(A)\Big)=P(A)
+	\end{equation*}
+	所以$\pi_i$具有相同的概率分布$P$。对任意的$\seq{A}{n}\in\mathscr{A}$，根据\cref{theo:Fubini}(1)可知：
+	\begin{align*}
+		P^n\left(\underset{i=1}{\overset{n}{\cap}}\pi_i^{-1}(A_i)\right)=P^n\left(\prod_{i=1}^{n}A_i\right)=\prod_{i=1}^{n}P(A_i)=\prod_{i=1}^{n}P^n\Big(\pi_i^{-1}(A)\Big)
+	\end{align*}
+	因此$(\seq{\pi}{n})$相互独立。设$f$是从$(X,\mathscr{A},P)$到可测空间$(Y,\mathscr{B})$上的可测映射，由\cref{prop:Independent}(4)可知$f_i\coloneq f\circ\pi_i$相互独立，可以验证$f_i$具有相同的概率分布$Pf^{-1}$。称$\seq{f}{n}$为$f$的独立同分布副本。\par
+	在初等概率论与初等统计学中，经常使用的“$\seq{x}{n}$是相互独立的样本”实际上是一种简化表述，独立性是事件族、$\sigma$域族或随机变量族的性质，我们从未给出样本点独立的定义。当我们说$\seq{x}{n}$相互独立时，实际的含义是$\seq{x}{n}$分别对应于相互独立的$\seq{\pi}{n}$在一次共同实现下的取值。真正构成$f$的SRS的是$\seq{f}{n}$。
 \end{note}
 \begin{definition}
 	设$\mathscr{P}$为可测空间$(X,\mathscr{A})$上的一个概率测度族，则称$(X,\mathscr{A},\mathscr{P})$为\gls{StatisticalStructure}或\gls{StatisticalModel}。若$\mathscr{P}$仅依赖于参数$\theta$，即：

@@ -893,116 +893,6 @@
 	时，$\mathbf{X}^{\top}A\mathbf{X}$与$\mathbf{X}^{\top}B\mathbf{X}$相互独立，上式等式两边同时左乘$\Sigma^{-\frac{1}{2}}$再右乘$\Sigma^{-\frac{1}{2}}$即可得到其等价于$B\Sigma A=\mathbf{0}$。
 \end{proof}
 
-\subsubsection{矩阵正态分布}
-\begin{definition}\label{def:MatNormal1}
-	若$m\times n$随机矩阵$\mathbf{X}$满足以下概率密度函数：
-	\begin{equation*}
-		p(\mathbf{X})=\frac{1}{(2\pi)^{\frac{mn}{2}}(\det U)^{\frac{n}{2}}(\det V)^{\frac{m}{2}}}e^{-\frac{1}{2}\operatorname{tr}[V^{-1}(X-M)^{\top}U^{-1}(X-M)]}
-	\end{equation*}
-	其中，$M\in M_{m\times n}(\mathbb{R}),\;U\in M_{m}(\mathbb{R}),\;V\in M_{n}(\mathbb{R})$，$U,V>0$。此时称$\mathbf{X}$服从矩阵正态分布，记作$\mathbf{X}\sim MN(M,U,V)$。
-\end{definition}
-\begin{definition}\label{def:MatNormal2}
-	若随机矩阵$\mathbf{X}$满足$\operatorname{vec}(\mathbf{X})\sim N(\operatorname{vec}(M),V\otimes U)$，其中，$M\in M_{m\times n}(\mathbb{R}),\;U\in M_{m}(\mathbb{R}),\;V\in M_{n}(\mathbb{R})$，$U,V\geqslant0$。此时称$\mathbf{X}$服从矩阵正态分布，记作$\mathbf{X}\sim MN(M,U,V)$。
-\end{definition}
-\begin{theorem}
-	设$\mathbf{X}$是一个$m\times n$随机矩阵，其行协方差矩阵$U$和列协方差矩阵$V$都是正定矩阵，则$\mathbf{X}$满足\cref{def:MatNormal1}的充分必要条件为满足\cref{def:MatNormal2}。
-\end{theorem}
-\begin{proof}
-	由\cref{prop:Trace}(3)、\cref{prop:VecOperator}(1)(2)、\cref{prop:Kronecker}(2)(3)可得：
-	\begin{align*}
-		\operatorname{tr}[V^{-1}(\mathbf{X}-M)^{\top}U^{-1}(\mathbf{X}-M)]
-		&=\operatorname{tr}[(\mathbf{X}-M)^{\top}U^{-1}(\mathbf{X}-M)V^{-1}] \\
-		&=\operatorname{vec}(\mathbf{X}-M)^{\top}\operatorname{vec}[U^{-1}(\mathbf{X}-M)V^{-1}] \\
-		&=\operatorname{vec}(\mathbf{X}-M)^{\top}[(V^{-1})^{\top}\otimes U^{-1}]\operatorname{vec}(\mathbf{X}-M) \\
-		&=\operatorname{vec}(\mathbf{X}-M)^{\top}[(V^{\top})^{-1}\otimes U^{-1}]\operatorname{vec}(\mathbf{X}-M) \\
-		&=\operatorname{vec}(\mathbf{X}-M)^{\top}(V^{-1}\otimes U^{-1})\operatorname{vec}(\mathbf{X}-M) \\
-		&=[\operatorname{vec}(\mathbf{X})-\operatorname{vec}(M)]^{\top}(V\otimes U)^{-1}[\operatorname{vec}(\mathbf{X})-\operatorname{vec}(M)]
-	\end{align*}
-	因为$\det(V\otimes U)=(\det V)^m(\det U)^n$，所以$(\det U)^{\frac{n}{2}}(\det V)^{\frac{m}{2}}$可化作$[\det(V\otimes U)]^{\frac{1}{2}}$。\info{需要补充证明，但这里涉及到了Jordan标准形，学完再来补。}
-\end{proof}
-\begin{corollary}
-	如果正态随机矩阵$\mathbf{X}\sim MN(M,U,V)$中的每个元素都服从标准正态分布，则$M=\mathbf{0},\;V\otimes U=I_{mn}$。
-\end{corollary}
-由此我们看到，$M$就是正态随机矩阵$X$的均值矩阵，仍然不明确的是$U,V$到底是什么，只能说$V\otimes U$对应着$X$被向量化后的协方差矩阵，那就先来研究一下$\operatorname{Cov}(\mathbf{X}_{ij},\mathbf{X}_{kl})$到底对应着$V\otimes U$中的哪个元素。联想正态随机向量中两个元素的协方差在协方差矩阵中的位置，我们需要找到$\mathbf{X}_{ij}$和$\mathbf{X}_{kl}$在$\operatorname{vec}(\mathbf{X})$中的索引，注意到向量化算子$\operatorname{vec}$是按列拉直，那么$\mathbf{X}_{ij}$和$\mathbf{X}_{kl}$分别在$\operatorname{vec}(\mathbf{X})$的第$(j-1)m+i$位和第$(l-1)m+k$位，于是有：
-\begin{equation*}
-	\operatorname{Cov}(\mathbf{X}_{ij},\mathbf{X}_{kl})=(V\otimes U)_{(j-1)s+i,(l-1)s+k}=V_{jl}U_{ik}
-\end{equation*}\par
-如果$U$是一个对角阵，那么$i\ne k$时有$U_{ik}=0$，就会导致：
-\begin{equation*}
-	\operatorname{Cov}(\mathbf{X}_{ij},\mathbf{X}_{kl})=V_{jl}U_{ik}=0,\;i\ne k
-\end{equation*}
-这表明此时只要$X$中的元素处于不同行，它们就不相关。\par
-如果$V$是一个对角阵，那么$j\ne l$时有$V_{jl}=0$，就会导致：
-\begin{equation*}
-	\operatorname{Cov}(\mathbf{X}_{ij},\mathbf{X}_{kl})=V_{jl}U_{ik}=0,\;j\ne l
-\end{equation*}
-这表明此时只要$X$中的元素处于不同列，它们就不相关。\par
-对于元素$\mathbf{X}_{ij}$，有：
-\begin{equation*}
-	\operatorname{Var}(\mathbf{X}_{ij})=\operatorname{Cov}(\mathbf{X}_{ij},\mathbf{X}_{ij})=V_{jj}U_{ii}
-\end{equation*}
-这表明此时协方差由$V_{jj}U_{ii}$控制。\par
-对于同一行的元素，有：
-\begin{equation*}
-	\operatorname{Cov}(\mathbf{X}_{ij},\mathbf{X}_{il})=V_{jl}U_{ii}
-\end{equation*}
-这表明此时协方差由$V_{jl}$控制。\par
-对于同一列的元素，有：
-\begin{equation*}
-	\operatorname{Cov}(\mathbf{X}_{ij},\mathbf{X}_{kj})=V_{jj}U_{ik}
-\end{equation*}
-这表明此时协方差由$U_{ik}$控制。
-\begin{definition}\label{def:MatNormal3}
-	$\mathbf{X}$为$m\times n$随机矩阵。若存在矩阵$A\in M_{q\times n}(\mathbb{R}),\;B\in M_{m\times p}(K)$使得$\mathbf{X}=B\mathbf{Y}A^{\top}+M$，其中$\mathbf{Y}$是一个$p\times q$随机矩阵，$\mathbf{Y}_{ij}\sim N(0,1)$且互相独立，$i=1,2,\dots,p,\;j=1,2,\dots,q$，$M\in M_{p\times q}(\mathbb{R})$，则称$\mathbf{X}$服从矩阵正态分布，记作$X\sim MN(M,U,V)$。其中，$U=BB^{\top},\;V=AA^{\top}$。
-\end{definition}
-\begin{theorem}
-	$\mathbf{X}$是一个$m\times n$随机矩阵，则$\mathbf{X}$满足\cref{def:MatNormal2}的充分必要条件是满足\cref{def:MatNormal3}。
-\end{theorem}
-\begin{proof}
-	\textbf{(1)必要性：}设$\mathbf{X}$满足\cref{def:MatNormal3}，由$\mathbf{Y}$的定义可知：
-	\begin{equation*}
-		\operatorname{vec}(\mathbf{Y})\sim N_{pq}(\mathbf{0},I_{pq})
-	\end{equation*}
-	由\cref{prop:VecOperator}(1)(3)可得：
-	\begin{equation*}
-		\operatorname{vec}(\mathbf{X})=\operatorname{vec}(B\mathbf{Y}A^{\top}+M)=\operatorname{vec}(B\mathbf{Y}A^{\top})+\operatorname{vec}(M)=(A\otimes B)\operatorname{vec}(\mathbf{Y})+\operatorname{M}
-	\end{equation*}
-	由\cref{prop:CovMat}(3)和\cref{prop:Kronecker}(4)(2)可得：
-	\begin{gather*}
-		\operatorname{E}[\operatorname{vec}(\mathbf{X})] 
-		= \operatorname{E}[(A \otimes B)\operatorname{vec}(\mathbf{Y}) + \operatorname{M}] 
-		= (A \otimes B)\operatorname{E}[\operatorname{vec}(\mathbf{Y})] + \operatorname{M} 
-		= \operatorname{M}, \\[1ex]
-		\begin{aligned}
-			\operatorname{Cov}[\operatorname{vec}(\mathbf{X})] 
-			&= \operatorname{Cov}[(A \otimes B)\operatorname{vec}(\mathbf{Y})] \\
-			&= (A \otimes B)\operatorname{Cov}[\operatorname{vec}(\mathbf{Y})](A \otimes B)^{\top} \\
-			&= (A \otimes B)I_{pq}(A^{\top} \otimes B^{\top}) \\
-			&= AA^{\top} \otimes BB^{\top}.
-		\end{aligned}
-	\end{gather*}
-	因为$\operatorname{vec}(\mathbf{X})=(A\otimes B)\operatorname{vec}(\mathbf{Y})+\operatorname{M}$，而$\operatorname{vec}(\mathbf{Y})\sim N_{pq}(\mathbf{0},I_{pq})$，由\cref{prop:MultiNormal}(2)可知：
-	\begin{equation*}
-		\operatorname{vec}(\mathbf{X})\sim N(\operatorname{vec}(M),AA^{\top}\otimes BB^{\top})
-	\end{equation*}
-	令$V=AA^{\top},\;U=BB^{\top}$，则有$\operatorname{vec}(\mathbf{X})\sim N(\operatorname{vec}(M),V\otimes U)$，即$\mathbf{X}$满足\cref{def:MatNormal2}。\par
-	\textbf{(2)充分性：}设$\mathbf{X}$满足\cref{def:MatNormal2}，因为$U,V\geqslant0$，所以存在$U^{\frac{1}{2}}$和$V^{\frac{1}{2}}$，令$B=U^{\frac{1}{2}},A=V^{\frac{1}{2}}$，于是$\operatorname{vec}(\mathbf{X})\sim N(\operatorname{vec}(M),V\otimes U)$可写作$\operatorname{vec}(\mathbf{X})\sim N(\operatorname{vec}(M),AA^{\top}\otimes BB^{\top})$。设$\mathbf{Y}$是一个随机矩阵，其中的每一个元素都服从标准正态分布且互相独立，则$\operatorname{vec}(\mathbf{X})=(A\otimes B)\operatorname{vec}(\mathbf{Y})+\operatorname{M}$。由\cref{prop:VecOperator}(1)(3)可知：
-	\begin{gather*}
-		\operatorname{vec}(\mathbf{X})=\operatorname{vec}(B\mathbf{Y}A^{\top}+M)
-	\end{gather*}
-	于是$\mathbf{X}=B\mathbf{Y}A^{\top}+M$，即$\mathbf{X}$满足\cref{def:MatNormal3}。
-\end{proof}
-\begin{theorem}\label{theo:MatNormalLinearTransform}
-	设$\mathbf{X}$为$m\times n$随机矩阵且服从矩阵正态分布$MN(M,U,V)$，$P\in M_{s\times m}(R),\;Q\in M_{n\times t}(R)$，则$P\mathbf{X}Q^{\top}\sim$
-\end{theorem}
-\begin{proof}
-	由\cref{def:MatNormal3}可知$\mathbf{X}=B\mathbf{Y}A^{\top}+M$，于是：
-	\begin{equation*}
-		P\mathbf{X}Q^{\top}=PB\mathbf{Y}A^{\top}Q^{\top}+PMQ^{\top}
-	\end{equation*}
-	此时$PBB^{\top}P^{\top}=PUP^{\top},\;QAA^{\top}Q^{\top}=QVQ^{\top}$，由\cref{def:MatNormal3}即可得到结论。
-\end{proof}
-
 \subsection{正态分布的衍生分布}
 \subsubsection{$\chi^2$分布}
 \begin{definition}
@@ -1286,13 +1176,9 @@
 \subsubsection{接受拒绝法}
 另一种生成服从给定分布$\pi$的随机数的思想为：可以选取一个容易抽样的概率分布$Q$作为候选分布，先从$Q$中生成候选观测值，再按照适当的概率接受或拒绝该观测值。若接受概率选择得适当，则最终被接受的样本虽然最初来自$Q$，其条件分布却可以恰好等于目标分布$\pi$。这一思想对应的实现就是接受拒绝抽样法。
 \begin{method}
-	设$(Y,\mathscr{A},\mu)$是$\sigma$有限测度空间，$\tilde{\pi}:Y\to[0,+\infty)$是其上的可测函数，且：
+	设$(Y,\mathscr{A},\mu)$是$\sigma$有限测度空间，$\tilde{\pi}:Y\to[0,+\infty)$是$(Y,\mathscr{A})$上目标概率分布$\pi$关于$\mu$的未归一化概率密度，即：
 	\begin{equation*}
-		Z=\int_{Y}\tilde{\pi}(y)\dif\mu\in(0,+\infty)
-	\end{equation*}
-	在$(Y,\mathscr{A})$上定义目标概率测度$\pi$：
-	\begin{equation*}
-		\pi(B)=\frac{1}{Z}\int_{B}\tilde{\pi}(y)\dif\mu,\quad\forall\;B\in\mathscr{A}
+		Z=\int_{Y}\tilde{\pi}(y)\dif\mu\in(0,+\infty),\qquad\forall\;A\in\mathscr{A},\;\pi(A)=\frac{1}{Z}\int_{A}\tilde{\pi}(y)\dif\mu
 	\end{equation*}
 	设$Q$是$(Y,\mathscr{A})$上的概率测度，$Q\ll\mu$。根据\cref{theo:RadonNikodym}，取$q=\dfrac{\dif Q}{\dif\mu}$的一个非负版本。若存在$M\in(0,+\infty)$使得：
 	\begin{equation*}
@@ -1308,7 +1194,7 @@
 	\end{equation*}
 	在$\mu$零测集上适当修改$\alpha$，可使$0\leqslant\alpha(y)\leqslant1$对任意的$y\in Y$成立。设$f$为概率空间$(X,\mathscr{F},P)$到$(Y,\mathscr{A})$上的可测映射且$Pf^{-1}=Q$，$U\sim\operatorname{U}(0,1)$且$U$与$f$独立。接受拒绝法按如下步骤生成一个观测值：
 	\begin{enumerate}
-		\item 从$Q$中抽取候选值，即生成$f$的一个观测值$y\in Y$；
+		\item 独立生成$f$的一个观测值$y\in Y$；
 		\item 独立生成$U$的一个观测值$u\in(0,1)$；
 		\item 若$u\leqslant\alpha(y)$，则接受并输出$y$；否则拒绝$y$，并与此前试验独立地返回第(1)步。
 	\end{enumerate}
@@ -1353,8 +1239,8 @@
 	\end{equation*}\par
 	任取$B\in\mathscr{A}$。根据\cref{prop:ConditionalProbability}(2)、指示函数的乘积性质、\cref{theo:ConditionalExpectationPullOut}、\cref{prop:MeasurableIntegral}(8)、\cref{theo:MeasurableCountableIntegral}、\cref{lem:IntChangeOfMeasure}和\cref{prop:MeasurableIntegral}(6)可得：
 	\begin{align*}
-		&P(\{f\in B\}\cap C)=\operatorname{E}[P(\{f\in B\}\cap C\mid f)]=\operatorname{E}\{\operatorname{E}[I_{\{f\in B\}\cap C}\mid f]\} \\
-		=&\operatorname{E}\{\operatorname{E}[I_{\{f\in B\}}I_C\mid f]\}=\operatorname{E}\{I_{\{f\in B\}}\operatorname{E}[I_C\mid f]\}=\operatorname{E}[I(f\in B)P(C\mid f)] \\
+		&P(\{f\in B\}\cap C)=\operatorname{E}[P(\{f\in B\}\cap C\mid f)]=\operatorname{E}\{\operatorname{E}[I(\{f\in B\}\cap C)\mid f]\} \\
+		=&\operatorname{E}\{\operatorname{E}[I(\{f\in B\})I(C)\mid f]\}=\operatorname{E}\{I(\{f\in B\})\operatorname{E}[I(C)\mid f]\}=\operatorname{E}[I(f\in B)P(C\mid f)] \\
 		=&\operatorname{E}[I(f\in B)\alpha(f)]=\int_{B}\alpha(f)\dif Q=\int_{B}\alpha(f)q(f)\dif\mu=\frac{1}{M}\int_{B}\tilde{\pi}(f)\dif\mu
 	\end{align*}
 	取$B=Y$可得单次试验的接受概率为：
@@ -1381,6 +1267,9 @@
 	\end{equation*}
 	即算法以概率$1$在有限步内输出一个值$y$。
 \end{proof}
+\begin{note}
+	只需要知道目标概率分布的未归一化概率密度是接受拒绝法的一个重要的优势，很多问题中目标分布只能够写成正比于某个函数的形式，归一化常数$Z$可能很难甚至无法显式计算。接受拒绝法并不要求已知$Z$。
+\end{note}
 
 %\subsection{多元分布}
 %\subsubsection{Wishart分布}

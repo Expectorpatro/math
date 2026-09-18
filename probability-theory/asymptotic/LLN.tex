@@ -1,0 +1,258 @@
+\section{大数定律}
+
+\begin{definition}
+	设$\{f_n\}$是概率空间$(X,\mathscr{F},P)$上的随机变量序列。记$\mathscr{A}_n=\sigma(\{f_k:k\geqslant n\})$，由\cref{prop:SigmaField}(5)可知：
+	\begin{equation*}
+		\mathscr{A}=\underset{n=1}{\overset{+\infty}{\cap}}\mathscr{A}_n
+	\end{equation*}
+	也是一个$\sigma$域，称$\mathscr{A}$为$\{f_n\}$的\textbf{尾$\sigma$域}，$\mathscr{A}$中的事件被称为\textbf{尾事件}，称关于$\mathscr{A}$可测的随机变量为\textbf{尾随机变量}。
+\end{definition}
+\begin{note}
+	从尾事件和尾随机变量的定义可以看出：一个事件如果是否发生只取决于“从某一项以后一直怎么样”，而不取决于前面有限项具体取什么值，那它就是尾事件。同理，一个随机变量如果它的取值只由“无穷远处的尾部”决定，而前面有限项怎么改都不影响它，那它就是尾随机变量。
+\end{note}
+\begin{property}\label{prop:TailConvergence}
+	设$\{f_n\}$是概率空间$(X,\mathscr{F},P)$上的随机变量序列，$\mathscr{A}$为$\{f_n\}$的尾$\sigma$域，则：
+	\begin{enumerate}
+		\item $\sum\limits_{n=1}^{+\infty}f_n$收敛是尾事件；
+		\item 若$\lim\limits_{n\to+\infty}\dfrac{1}{n}\sum\limits_{i=1}^{n}f_i$处处存在且有限，则该极限是尾随机变量。
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)记$C=\left\{x\in X:\sum\limits_{n=1}^{+\infty}f_n(x)\text{收敛}\right\}$。任取$m\in\mathbb{N}^+$，因为去掉有限项不改变级数的收敛性，由级数收敛的Cauchy判别法可得：
+	\begin{equation*}
+		C=\bigcap_{r=1}^{+\infty}\bigcup_{N=m}^{+\infty}\bigcap_{p=N}^{+\infty}\bigcap_{q=p}^{+\infty}\left\{\left|\sum_{i=p}^{q}f_i\right|<\frac{1}{r}\right\}
+	\end{equation*}
+	因为$p\geqslant N\geqslant m$，根据\cref{prop:MeasurableFunction}(5.a)可知$\sum\limits_{i=p}^{q}f_i$关于$\mathscr{A}_m=\sigma(\{f_k:k\geqslant m\})$可测。由\cref{prop:MeasurableFunction}(5.d)(1.a)和\cref{prop:SigmaField}(2)可知$C\in\mathscr{A}_m$。根据$m$的任意性可得$C\in\bigcap\limits_{m=1}^{+\infty}\mathscr{A}_m=\mathscr{A}$，即$C$是尾事件。\par
+	(2)记$S_n=\dfrac{1}{n}\sum\limits_{i=1}^{n}f_i$。任取$m\in\mathbb{N}^+$，对$n\geqslant m$记$S_n^{(m)}=\dfrac{1}{n}\sum\limits_{i=m}^{n}f_i$，由\cref{prop:MeasurableFunction}(5.a)可知$S_n^{(m)}$关于$\mathscr{A}_m$可测。对任意的$x\in X$，根据\cref{prop:RSeq}(8.b)可得：
+	\begin{equation*}
+		\lim_{n\to+\infty}S_n(x)=\lim_{n\to+\infty}\left[S_n^{(m)}(x)+\frac{1}{n}\sum_{i=1}^{m-1}f_i(x)\right]=\lim_{n\to+\infty}S_n^{(m)}(x)
+	\end{equation*}
+	其中$m=1$时空和取$0$。由\cref{prop:MeasurableFunction}(6)即可得出结论。
+\end{proof}
+\begin{theorem}[Kolmogorov 0-1 Law]\label{theo:01Law}
+	设$\{f_n\}$是概率空间$(X,\mathscr{F},P)$上相互独立的随机变量序列，则：
+	\begin{enumerate}
+		\item 关于$\{f_n\}$的任一尾事件$A$，$P(A)$只能是$0$或者$1$；
+		\item 关于$\{f_n\}$的任一尾随机变量为常数a.s.于$(X,\mathscr{A},P)$。
+	\end{enumerate}
+\end{theorem}
+\begin{proof}
+	(1)对任意的$n\in\mathbb{N}^+$，令$\mathscr{B}_n=\sigma(\{f_1,f_2,\dots,f_n\})$，由\cref{prop:Independent}(6)可知$\mathscr{B}_n$和$\mathscr{A}_{n+1}$独立，而$\mathscr{A}\subseteq\mathscr{A}_{n+1}$，所以$\mathscr{B}_n$和$\mathscr{A}$独立，$\underset{n=1}{\overset{+\infty}{\cup}}\mathscr{B}_n$与$\mathscr{A}$独立。令$\mathscr{B}=\sigma\left(\underset{n=1}{\overset{+\infty}{\bigcup}}\mathscr{B}_n\right)$，由$\mathscr{B}_n$的递增性和\cref{prop:SigmaField}(2)可知$\underset{n=1}{\overset{+\infty}{\cup}}\mathscr{B}_n$是$\pi$系，根据\cref{prop:Independent}(2)可得$\mathscr{B}$和$\mathscr{A}$独立。因为$f_n$关于$\mathscr{B}_n$可测，所以$\sigma(\{f_n\})\subseteq\mathscr{B}$；因为$\mathscr{B}_n\subseteq\sigma(\{f_n\})$，所以$\mathscr{B}\subseteq\sigma(\{f_n\})$，即$\mathscr{B}=\sigma(\{f_n\})$。任取$A\in\mathscr{A}$，则$A\in\mathscr{A}_1=\sigma(\{f_n\})$，即$A\in\mathscr{B}$。将$A$表示为$A\cap A$，由$\mathscr{A}$和$\mathscr{B}$的独立性可得：
+	\begin{equation*}
+		P(A)=P(A\cap A)=[P(A)]^2
+	\end{equation*}
+	所以$P(A)$为$0$或$1$。\par
+	(2)任取关于$\{f_n\}$的尾随机变量$f$，由\cref{prop:MeasurableFunction}(1.b)可知对任意的$a\in\mathbb{R}$，$\{f\leqslant a\}$是尾事件，根据(1)可知$P(f\leqslant a)$为$0$或$1$。取：
+	\begin{equation*}
+		a_0=\inf\{a\in\mathbb{R}:P(f\leqslant a)=1\}
+	\end{equation*}
+	由分布函数的右连续性可得$P(f\leqslant a_0)=1$。根据\cref{prop:Measure}(3)（下连续性）和\cref{prop:RSeq}(5)可得：
+	\begin{equation*}
+		P(f<a_0)=\lim_{n\to+\infty}P\left(f\leqslant a_0-\frac{1}{n}\right)=0
+	\end{equation*}
+	由\cref{prop:Measure}(2)可得$P(f=a_0)=1$。
+\end{proof}
+\begin{note}
+	由\cref{prop:TailConvergence}(1)(2)和\cref{theo:01Law}(1)(2)可知如果$\{f_n\}$是独立的随机变量序列，则：
+	\begin{enumerate}
+		\item $\sum\limits_{n=1}^{+\infty}f_n$要么收敛a.s.于$(X,\mathscr{A},P)$要么发散a.s.于$(X,\mathscr{A},P)$；
+		\item 若$\lim\limits_{n\to+\infty}\dfrac{1}{n}\sum\limits_{i=1}^{n}f_i$存在，则只能是一个常数a.s.于$(X,\mathscr{A},P)$。
+	\end{enumerate}
+\end{note}
+\begin{lemma}[Borel-Cantelli Lemma]\label{lem:BorelCantelli}
+	设$(X,\mathscr{F},P)$是概率空间，$\{A_n\}\subseteq\mathscr{F}$。
+	\begin{enumerate}
+		\item 若$\sum\limits_{n=1}^{+\infty}P(A_n)<+\infty$，则：
+		\begin{equation*}
+			P\left(\varlimsup_{n\to+\infty}A_n\right)=0
+		\end{equation*}
+		\item 若$\{A_n\}$相互独立且$\sum\limits_{n=1}^{+\infty}P(A_n)=+\infty$，则：
+		\begin{equation*}
+			P\left(\varlimsup_{n\to+\infty}A_n\right)=1
+		\end{equation*}
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	(1)由\cref{prop:SetLimit}(3)、\cref{prop:Measure}(3)（上连续性，次可列可加性）和\cref{prop:RSeq}(6)可得：
+	\begin{equation*}
+		P\left(\varlimsup_{n\to+\infty}A_n\right)=P\left(\underset{n=1}{\overset{+\infty}{\cap}}\underset{k=n}{\overset{+\infty}{\cup}}A_k\right)=\lim_{n\to+\infty}P\left(\underset{k=n}{\overset{+\infty}{\cup}}A_k\right)\leqslant\lim_{n\to+\infty}\sum_{k=n}^{+\infty}P(A_k)=0
+	\end{equation*}\par
+	(2)由\cref{prop:SetOperation}(7)、\cref{prop:SetLimit}(3)、\cref{prop:Measure}(3)（下连续性，上连续性）、\cref{prop:RSeq}(6)和\cref{theo:ElementaryContinuity}可得：
+	\begin{align*}
+		&P\left[\left(\varlimsup_{n\to+\infty}A_n\right)^c\right]=P\left(\underset{n=1}{\overset{+\infty}{\cup}}\underset{k=n}{\overset{+\infty}{\cap}}A_k^c\right)=\lim_{n\to+\infty}P\left(\underset{k=n}{\overset{+\infty}{\cap}}A_k^c\right)=\lim_{n\to+\infty}\lim_{m\to+\infty}P\left(\underset{k=n}{\overset{m}{\cap}}A_k^c\right) \\
+		=&\lim_{n\to+\infty}\lim_{m\to+\infty}\prod_{k=n}^{m}[1-P(A_k)]=\lim_{n\to+\infty}\lim_{m\to+\infty}\exp\left\{\sum_{k=n}^{m}\ln[1-P(A_k)]\right\} \\
+		\leqslant&\lim_{n\to+\infty}\lim_{m\to+\infty}\exp\left\{-\sum_{k=n}^{m}P(A_k)\right\}=\lim_{n\to+\infty}\exp\left\{-\sum_{k=n}^{+\infty}P(A_k)\right\}=0
+	\end{align*}
+	由\cref{prop:Measure}(2)即可得出结论。
+\end{proof}
+
+\subsection{强大数定律}
+\begin{lemma}[Cesàro平均]\label{lem:CesaroMean}
+	设$\{a_n\}\to a\in\mathbb{R}$，则$\left\{\dfrac{1}{n}\sum\limits_{i=1}^{n}a_i\right\}\to a$。
+\end{lemma}
+\begin{proof}
+	任取$\varepsilon>0$，因为$\{a_n\}\to a$，所以存在$N\in\mathbb{N}^+$，使得$i\geqslant N$时$|a_i-a|<\varepsilon$，于是对$n\geqslant N$有：
+	\begin{align*}
+		&\left|\frac{1}{n}\sum_{i=1}^{n}a_i-a\right|=\frac{1}{n}\left|\sum_{i=1}^{n}(a_i-a)\right|=\frac{1}{n}\left|\sum_{i=1}^{N-1}(a_i-a)+\sum_{i=N}^{n}(a_i-a)\right| \\
+		\leqslant&\frac{1}{n}\sum_{i=1}^{N-1}|a_i-a|+\frac{1}{n}\sum_{i=N}^{n}|a_i-a|<\frac{1}{n}\sum_{i=1}^{N-1}|a_i-a|+\frac{n-N}{n}\varepsilon
+	\end{align*}
+	由\cref{prop:RSeq}(8.b)(4.a)和$\varepsilon$的任意性即可得出结论。
+\end{proof}
+\begin{lemma}[Kronecker Lemma]\label{lem:KroneckerMean}
+	设$\{a_n\}$为实数列，若$\sum\limits_{n=1}^{+\infty}\dfrac{a_n}{n}$收敛，则$\dfrac{1}{n}\sum\limits_{i=1}^{n}a_i\to0$。
+\end{lemma}
+\begin{proof}
+	记$s_0=0,\;s_n=\sum\limits_{i=1}^{n}\dfrac{a_i}{i}$，由条件可知存在$s\in\mathbb{R}^{}$使得$s_n\to s$。因为$a_i=i(s_i-s_{i-1})$，所以：
+	\begin{equation*}
+		\frac{1}{n}\sum_{i=1}^{n}a_i=\frac{1}{n}\sum_{i=1}^{n}i(s_i-s_{i-1})=s_n-\frac{1}{n}\sum_{i=1}^{n-1}s_i
+	\end{equation*}
+	由\cref{lem:CesaroMean}和\cref{prop:RSeq}(8.c)可得$\dfrac{1}{n}\sum\limits_{i=1}^{n-1}s_i=\dfrac{n-1}{n}\dfrac{1}{n-1}\sum\limits_{i=1}^{n-1}s_i\to s$，根据\cref{prop:RSeq}(8.b)即可得出结论。
+\end{proof}
+\begin{lemma}[Kolmogorov最大不等式]\label{lem:KolmogorovMaximal}
+	设$\seq{f}{n}$是概率空间$(X,\mathscr{F},P)$上相互独立的随机变量，且$\operatorname{E}(f_k)=0,\;\operatorname{E}(f_k^2)<+\infty,\;k=1,2,\dots,n$。记$S_k=\sum\limits_{i=1}^{k}f_i$，则对任意的$\varepsilon>0$有：
+	\begin{equation*}
+		P\left(\max_{1\leqslant k\leqslant n}|S_k(x)|\geqslant\varepsilon\right)\leqslant\frac{1}{\varepsilon^2}\sum_{k=1}^{n}\operatorname{Var}(f_k)
+	\end{equation*}
+\end{lemma}
+\begin{proof}
+	记：
+	\begin{equation*}
+		A_k=\{x:|S_1(x)|<\varepsilon,|S_2(x)|<\varepsilon,\dots,|S_{k-1}(x)|<\varepsilon,\;|S_k(x)|\geqslant\varepsilon\},\quad k=1,2,\dots,n
+	\end{equation*}
+	其中$A_1=\{x:|S_1(x)|\geqslant\varepsilon\}$。可以发现$\{A_k\}$两两不交，且其并为$\left\{x:\max\limits_{1\leqslant k\leqslant n}|S_k(x)|\geqslant\varepsilon\right\}$。对$k<n$，由\cref{prop:MeasurableFunction}(5.a)(5.d)(1.a)(1.d)、\cref{prop:SigmaField}(2)、\cref{prop:SimpleFunction}(1)和\cref{prop:MeasurableFunction}(5.b)可知$I_{A_k}S_k$关于$\sigma(\seq{f}{k})$可测，根据\cref{prop:MeasurableFunction}(5)可知$S_n-S_k$关于$\sigma(f_{k+1},\dots,f_n)$可测，由\cref{prop:Independent}(6)(3)可知二者独立。根据\cref{prop:MeasurableIntegral}(6)可得$\operatorname{E}(S_n-S_k)=0$，由\cref{prop:Expectation}(2)可得$\operatorname{E}[I_{A_k}S_k(S_n-S_k)]=0$；$k=n$时也有$\operatorname{E}[I_{A_k}S_k(S_n-S_k)]=0$。由\cref{prop:MeasurableIntegral}(6)、\cref{prop:NonnegativeMeasurableIntegral}(2)和\cref{prop:NonnegativeMeasurableIntegral}(5)(6)可得：
+	\begin{align*}
+		\operatorname{E}(I_{A_k}S_n^2)&=\operatorname{E}[I_{A_k}(S_k+S_n-S_k)^2]=\operatorname{E}(I_{A_k}S_k^2)+2\operatorname{E}[I_{A_k}S_k(S_n-S_k)]+\operatorname{E}[I_{A_k}(S_n-S_k)^2] \\
+		&=\operatorname{E}(I_{A_k}S_k^2)+\operatorname{E}[I_{A_k}(S_n-S_k)^2]\geqslant\operatorname{E}(I_{A_k}S_k^2)\geqslant\varepsilon^2P(A_k)
+	\end{align*}
+	根据\cref{prop:Variance}(3)、\cref{prop:CovMat}(7)、\cref{prop:MeasurableIntegral}(6)(7)和\cref{prop:Measure}(1)可得：
+	\begin{align*}
+		&\sum_{k=1}^{n}\operatorname{Var}(f_k)=\operatorname{E}(S_n^2)\geqslant\operatorname{E}\left(I_{\underset{k=1}{\overset{n}{\cup}}A_k}S_n^2\right)=\operatorname{E}\left(\sum_{k=1}^{n}I_{A_k}S_n^2\right) \\
+		\geqslant&\sum_{k=1}^{n}\operatorname{E}(I_{A_k}S_n^2)\geqslant\varepsilon^2\sum_{k=1}^{n}P(A_k)=\varepsilon^2P\left(\left\{x:\max_{1\leqslant k\leqslant n}|S_k(x)|\geqslant\varepsilon\right\}\right)\qedhere
+	\end{align*}
+\end{proof}
+\begin{lemma}\label{lem:KolmogorovSeries}
+	设$\{f_n\}$是概率空间$(X,\mathscr{F},P)$上相互独立的随机变量序列，对任意的$n\in\mathbb{N}^+$有$\operatorname{E}(f_n)=0,\;\operatorname{E}(f_n^2)<+\infty$。若$\sum\limits_{n=1}^{+\infty}\operatorname{Var}(f_n)<+\infty$，则$\sum\limits_{n=1}^{+\infty}f_n$收敛a.s.于$(X,\mathscr{F},P)$。
+\end{lemma}
+\begin{proof}
+	由条件和\cref{prop:RSeq}(8.b)可知：
+	\begin{equation*}
+		\lim_{N\to+\infty}\left[\sum_{n=N}^{+\infty}\operatorname{Var}(f_n)\right]=\lim_{N\to+\infty}\left[\sum_{n=1}^{+\infty}\operatorname{Var}(f_n)-\sum_{n=1}^{N}\operatorname{Var}(f_n)\right]=0
+	\end{equation*}
+	于是存在严格递增的正整数列$\{N_r\}$使得：
+	\begin{equation*}
+		\sum_{n=N_r}^{+\infty}\operatorname{Var}(f_n)\leqslant2^{-3r},\quad r\in\mathbb{N}^+
+	\end{equation*}
+	对任意的$M\geqslant N_r$，由\cref{lem:KolmogorovMaximal}可得：
+	\begin{equation*}
+		P\left(\max_{N_r\leqslant k\leqslant M}\left|\sum_{n=N_r}^{k}f_n\right|\geqslant2^{-r}\right)\leqslant2^{2r}\sum_{n=N_r}^{M}\operatorname{Var}(f_n)\leqslant2^{-r}
+	\end{equation*}
+	记：
+	\begin{equation*}
+		B_r=\left\{\max_{N_r\leqslant k}\left|\sum_{n=N_r}^{k}f_n\right|\geqslant2^{-r}\right\}
+	\end{equation*}
+	由\cref{prop:Measure}(3)（下连续性）和\cref{prop:RSeq}(6)可得$P(B_r)\leqslant2^{-r}$，于是$\sum\limits_{r=1}^{+\infty}P(B_r)<+\infty$，根据\cref{lem:BorelCantelli}(1)可知$P\left(\varlimsup\limits_{r\to+\infty}B_r\right)=0$。\par
+	任取$x\notin\varlimsup\limits_{r\to+\infty}B_r$，由\cref{prop:SetOperation}(7)可知当$r$充分大时，对所有$k\geqslant N_r$都有$\left|\sum\limits_{n=N_r}^{k}f_n(x)\right|<2^{-r}$。因此对任意$q\geqslant p\geqslant N_r$有：
+	\begin{equation*}
+		\left|\sum_{n=p}^{q}f_n(x)\right|=\left|\sum_{n=N_r}^{q}f_n(x)-\sum_{n=N_r}^{p-1}f_n(x)\right|\leqslant\left|\sum_{n=N_r}^{q}f_n(x)\right|+\left|\sum_{n=N_r}^{p-1}f_n(x)\right|<2^{1-r}
+	\end{equation*}
+	其中$p=N_r$时第二个和取$0$。由函数项级数收敛的Cauchy判别法可知$\sum\limits_{n=1}^{+\infty}f_n(x)$在$\left(\varlimsup\limits_{r\to+\infty}B_r\right)^c$上成立，于是结论成立。
+\end{proof}
+\begin{lemma}\label{lem:IntegrableTruncation}
+	设$f$是概率空间$(X,\mathscr{F},P)$上满足$\operatorname{E}(|f|)<+\infty$的随机变量，则：
+	\begin{enumerate}
+		\item $\sum\limits_{n=1}^{+\infty}P(|f|>n)\leqslant\operatorname{E}(|f|)<+\infty$；
+		\item $\sum\limits_{n=1}^{+\infty}\dfrac{\operatorname{E}[f^2I(|f|\leqslant n)]}{n^2}\leqslant2\operatorname{E}(|f|)<+\infty$。
+	\end{enumerate}
+\end{lemma}
+\begin{proof}
+	(1)对任意的$t\geqslant0$，有$\sum\limits_{n=1}^{+\infty}I(t>n)\leqslant t$。由\cref{prop:NonnegativeSimpleIntegral}(4)、\cref{theo:LeviTheorem}和\cref{prop:NonnegativeMeasurableIntegral}(6)可得：
+	\begin{align*}
+		&\sum_{n=1}^{+\infty}P(|f|>n)=\sum_{n=1}^{+\infty}\operatorname{E}[I(|f|>n)]=\lim_{N\to+\infty}\left\{\sum_{n=1}^{N}\operatorname{E}[I(|f|>n)]\right\} \\
+		=&\lim_{N\to+\infty}\operatorname{E}\left[\sum_{n=1}^{N}I(|f|>n)\right]=\operatorname{E}\left[\sum_{n=1}^{+\infty}I(|f|>n)\right]\leqslant\operatorname{E}(|f|)
+	\end{align*}\par
+	(2)对任意的$t>0$，取不小于$t$的最小正整数$k$。注意到：
+	\begin{equation*}
+		\sum_{n=k}^{+\infty}\frac{1}{n^2}\leqslant\frac{1}{k^2}+\sum_{n=k+1}^{+\infty}\frac{1}{n(n-1)}=\frac{1}{k^2}+\frac{1}{k}\leqslant\frac{2}{k}
+	\end{equation*}
+	于是：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}\frac{t^2I(t\leqslant n)}{n^2}=t^2\sum_{n=k}^{+\infty}\frac{1}{n^2}\leqslant\frac{2t^2}{k}\leqslant2t
+	\end{equation*}
+	当$t=0$时该不等式也成立。由\cref{prop:NonnegativeMeasurableIntegral}(10)和\cref{theo:LeviTheorem}可得：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}\frac{\operatorname{E}[f^2I(|f|\leqslant n)]}{n^2}=\operatorname{E}\left[\sum_{n=1}^{+\infty}\frac{|f|^2I(|f|\leqslant n)}{n^2}\right]\leqslant2\operatorname{E}(|f|)\qedhere
+	\end{equation*}
+\end{proof}
+\begin{theorem}[Strong Law of Large Numbers]
+	\label{theo:SLLN}
+	设$\{f_n\}$为概率空间$(X,\mathscr{F},P)$上一列$m$维独立同分布的随机向量，若$\operatorname{E}(|f_1|)\in\mathbb{R}^{m}$，则:
+	\begin{equation*}
+		P\left(\left\{\lim_{n\to+\infty}\frac{1}{n}\sum_{i=1}^{n}f_i\ne\operatorname{E}(f_1)\right\}\right)=0
+	\end{equation*}
+	即$\dfrac{1}{n}\sum\limits_{i=1}^{n}f_i\overset{\text{a.s.}}{\longrightarrow}\operatorname{E}(f_1)$。
+\end{theorem}
+\begin{proof}
+	当$m=1$时$\{f_n\}$是独立同分布的随机变量序列且$\operatorname{E}(|f_1|)<+\infty$。记：
+	\begin{equation*}
+		g_n=f_nI(|f_n|\leqslant n),\quad h_n=\frac{g_n-\operatorname{E}(g_n)}{n},\quad n\in\mathbb{N}^+
+	\end{equation*}
+	由\cref{prop:MeasurableFunction}(1.a)和\cref{prop:Independent}(4)可知$\{g_n\}$与$\{h_n\}$分别是相互独立的随机变量序列。因为$|g_n|\leqslant n$，所以$g_n$有有限的二阶矩。由\cref{prop:MeasurableIntegral}(6)可知$\operatorname{E}(h_n)=0$。根据\cref{prop:MeasurableIntegral}(6)、\cref{prop:Variance}(1)和\cref{lem:IntegrableTruncation}(2)可得：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}\operatorname{Var}(h_n)=\sum_{n=1}^{+\infty}\frac{\operatorname{Var}(g_n)}{n^2}\leqslant\sum_{n=1}^{+\infty}\frac{\operatorname{E}(g_n^2)}{n^2}=\sum_{n=1}^{+\infty}\frac{\operatorname{E}[f_1^2I(|f_1|\leqslant n)]}{n^2}\leqslant2\operatorname{E}(|f_1|)<+\infty
+	\end{equation*}
+	因此由\cref{lem:KolmogorovSeries}可知$\sum\limits_{n=1}^{+\infty}h_n$收敛a.s.于$(X,\mathscr{F},P)$。根据\cref{lem:KroneckerMean}可得：
+	\begin{equation*}
+		\frac{1}{n}\sum_{k=1}^{n}[g_k-\operatorname{E}(g_k)]\overset{\text{a.s.}}{\longrightarrow}0
+	\end{equation*}
+	由\cref{lem:IntegrableTruncation}(1)可得：
+	\begin{equation*}
+		\sum_{n=1}^{+\infty}P(f_n\ne g_n)=\sum_{n=1}^{+\infty}P(|f_n|>n)=\sum_{n=1}^{+\infty}P(|f_1|>n)<+\infty
+	\end{equation*}
+	根据\cref{lem:BorelCantelli}(1)可知：
+	\begin{equation*}
+		P\left(\varlimsup_{n\to+\infty}\{f_n\ne g_n\}\right)=0
+	\end{equation*}
+	由\cref{prop:SetLimit}(1)可知$f_n\ne g_n$只在有限个$n$上成立a.s.于$(X,\mathscr{F},P)$。在使得$f_n\ne g_n$只在有限个$n$上成立的样本点处，$\sum\limits_{k=1}^{n}(f_k-g_k)$最终为一个有限的常数，所以：
+	\begin{equation*}
+		\frac{1}{n}\sum_{k=1}^{n}(f_k-g_k)\overset{\text{a.s.}}{\longrightarrow}0
+	\end{equation*}
+	因为：
+	\begin{equation*}
+		\operatorname{E}(g_n)=\operatorname{E}[f_1I(|f_1|\leqslant n)],\quad\lim_{n\to+\infty}f_1I(|f_1|\leqslant n)=f_1,\quad|f_1I(|f_1|\leqslant n)|\leqslant|f_1|
+	\end{equation*}
+	由\cref{theo:DominatedConvergenceTheorem}可知$\operatorname{E}(g_n)\to\operatorname{E}(f_1)$，根据\cref{lem:CesaroMean}可得：
+	\begin{equation*}
+		\frac{1}{n}\sum_{k=1}^{n}\operatorname{E}(g_k)\to\operatorname{E}(f_1)
+	\end{equation*}
+	于是由\cref{prop:SigmaField}(3)和\cref{prop:Measure}(3)（次有限可加性）可知：
+	\begin{equation*}
+		\frac{1}{n}\sum_{k=1}^{n}f_k=\frac{1}{n}\sum_{k=1}^{n}(f_k-g_k)+\frac{1}{n}\sum_{k=1}^{n}[g_k-\operatorname{E}(g_k)]+\frac{1}{n}\sum_{k=1}^{n}\operatorname{E}(g_k)\overset{\text{a.s.}}{\longrightarrow}\operatorname{E}(f_1)
+	\end{equation*}\par
+	当$m\ne1$时，固定$j\in\{1,2,\dots,m\}$，由\cref{prop:Independent}(4)、\cref{prop:ProductSpaceProjectionMapping}和\cref{prop:IdenticallyDistributedCoordinates}可知$\{f_{nj}\}$是$(X,\mathscr{F},P)$上一列独立同分布的随机变量。因为$\operatorname{E}(|f_{1j}|)<+\infty$，由一维的结论可得：
+	\begin{equation*}
+		\frac{1}{n}\sum_{i=1}^{n}f_{ij}\overset{\text{a.s.}}{\longrightarrow}\operatorname{E}(f_{1j})
+	\end{equation*}
+	根据\cref{prop:a.s.}即可得出结论。
+\end{proof}
+
+\subsection{弱大数定律}
+\begin{definition}
+	设$\{f_n\}$是概率空间$(X,\mathscr{F},P)$上的随机变量序列，若：
+	\begin{equation*}
+		\frac{1}{n}\sum_{i=1}^{n}f_i\overset{P}{\longrightarrow}\frac{1}{n}\sum_{i=1}^{n}\operatorname{E}(f_i)
+	\end{equation*}
+	则称$\{f_n\}$服从\gls{WeakLawOfLargeNumbers}。
+\end{definition}
+\begin{theorem}[Markov's Weak Law of Large Numbers]
+	设$\{f_n\}$是概率空间$(X,\mathscr{F},P)$上的随机变量序列，若：
+	\begin{equation*}
+		\lim_{n\to+\infty}\left[\frac{1}{n^2}\operatorname{Var}\left(\sum_{i=1}^{n}f_i\right)\right]=0
+	\end{equation*}
+	则$\{f_n\}$服从弱大数定律。
+\end{theorem}
+\begin{proof}
+	由\cref{prop:MeasurableIntegral}(6)和\cref{cor:ChebyshevInequality}可知对任意的$\varepsilon>0$有：
+	\begin{equation*} 
+		P\left(\left|\frac{1}{n}\sum_{i=1}^{n}X_i-\frac{1}{n}\sum_{i=1}^{n}\operatorname{E}(X_i)\right|\geqslant\varepsilon\right)\leqslant\frac{\operatorname{Var}\left(\dfrac{1}{n}\sum\limits_{i=1}^{n}X_i\right)}{\varepsilon^2}=\frac{1}{n^2\varepsilon^2}\operatorname{Var}\left(\sum_{i=1}^{n}X_i\right)\to0\qedhere
+	\end{equation*}
+\end{proof}
