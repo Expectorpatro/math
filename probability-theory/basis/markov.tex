@@ -77,14 +77,14 @@ Markov性表示的是：给定当前状态后，更早的历史不再为下一�
 \end{definition}
 在研究Markov链的演化时，我们不仅关心相邻两个时刻之间的一步转移，也希望直接刻画系统从时刻$m$出发经过若干步后到达时刻$n$的转移规律。当$n=m$时系统尚未发生任何转移，因此从状态$y$出发仍落在集合$A$中的概率自然应为$I(y\in A)$；当$n>m$时，为了得到从时刻$m$到时刻$n$的转移规律，可以对中间时刻可能出现的状态进行积分。由此自然得到如下递归定义。
 \begin{definition}
-	对任意满足$m\leqslant n$的非负整数$m,n$，递归定义：
+	对任意满足$m\leqslant n$的$m,n\in\mathbb{N}$，递归定义：
 	\begin{equation*}
 		K_{m,m}(y,A)\coloneq I(y\in A),\quad K_{m,n+1}(y,A)\coloneq\int_{Y}K_n(z,A)\dif K_{m,n}(y,\cdot)
 	\end{equation*}
-	其中$y\in Y$、$A\in\mathscr{A}$。根据\cref{lem:ProbabilityKernelIntegration}(2)，称$K_{m,n}$为该链从时刻$m$到时刻$n$的\gls{MultiStepTransitionProbabilityKernel}。
+	其中$y\in Y,\;A\in\mathscr{A}$。可以验证指示函数也是概率核，根据\cref{lem:ProbabilityKernelIntegration}(2)，称$K_{m,n}$为该链从时刻$m$到时刻$n$的\gls{MultiStepTransitionProbabilityKernel}。
 \end{definition}
 \begin{property}\label{prop:MarkovMultiStepEvolution}
-	对任意满足$m\leqslant n$的非负整数$m,n$，有：
+	对任意满足$m\leqslant n$的$m,n\in\mathbb{N}$，有：
 	\begin{enumerate}
 		\item 对任意$(Y,\mathscr{A})$上的非负可测函数$h$，有：
 		\begin{equation*}
@@ -157,7 +157,7 @@ Markov性表示的是：给定当前状态后，更早的历史不再为下一�
 	上述两条性质说明了多步转移概率核$K_{m,n}$确实完整描述了Markov链从时刻$m$到时刻$n$状态分布的演化。第一条表明，在已知时刻$m$的信息后，时刻$n$的条件分布由$K_{m,n}[f_m(x),\cdot]$给出。第二条则进一步说明，若时刻$m$的状态分布为$\mu_m$，那么经过$K_{m,n}$作用后就得到时刻$n$的状态分布$\mu_n$。
 \end{note}
 \begin{theorem}[Chapman--Kolmogorov Equation]\label{theo:ChapmanKolmogorov}
-	对任意满足$m\leqslant r\leqslant n$的非负整数$m,r,n$以及任意的$y\in Y$和$A\in\mathscr{A}$，有：
+	对任意满足$m\leqslant r\leqslant n$的$m,r,n\in\mathbb{N}$以及任意的$y\in Y$和$A\in\mathscr{A}$，有：
 	\begin{equation*}
 		K_{m,n}(y,A)=\int_{Y}K_{r,n}(z,A)\dif K_{m,r}(y,\cdot)
 	\end{equation*}
@@ -194,7 +194,7 @@ Chapman--Kolmogorov方程说明多步转移具有自然的复合一致性：从�
 	对于以$K$为转移概率核的齐次离散时间Markov链，有：
 	\begin{enumerate}
 		\item $K_{m,n}=K^{n-m}$，其中$0\leqslant m\leqslant n$；
-		\item 对任意的非负整数$m,k$、$y\in Y$和$A\in\mathscr{A}$，有：
+		\item 对任意的$m,k\in\mathbb{N}$、$y\in Y$和$A\in\mathscr{A}$，有：
 		\begin{equation*}
 			K^{m+k}(y,A)=\int_{Y}K^k(z,A)\dif K^m(y,\cdot)
 		\end{equation*}
@@ -238,7 +238,7 @@ Chapman--Kolmogorov方程说明多步转移具有自然的复合一致性：从�
 \begin{property}\label{prop:InvariantDistribution}
 	设$K$是从可测空间$(Y,\mathscr{A})$到自身的概率核，则：
 	\begin{enumerate}
-		\item 若$\pi K=\pi$，则对任意的非负整数$n$有$\pi K^n=\pi$；
+		\item 若$\pi K=\pi$，则对任意的$n\in\mathbb{N}$有$\pi K^n=\pi$；
 		\item 若$\pi_1,\pi_2$都是$K$的不变分布，$a\in[0,1]$，则$a\pi_1+(1-a)\pi_2$也是$K$的不变分布；
 		\item 若概率核$Q,R$都以$\pi$为不变分布，则复合核$QR$也以$\pi$为不变分布。
 	\end{enumerate}
@@ -281,7 +281,7 @@ Chapman--Kolmogorov方程说明多步转移具有自然的复合一致性：从�
 			\int_{Y}u(y)\left[\int_{Y}v(z)\dif K(y,\cdot)\right]\dif\pi
 			=\int_{Y}v(y)\left[\int_{Y}u(z)\dif K(y,\cdot)\right]\dif\pi
 		\end{equation*}
-		\item 若$K$与$\pi$满足细致平衡条件，则对任意非负整数$n$，$K^n$与$\pi$也满足细致平衡条件；
+		\item 若$K$与$\pi$满足细致平衡条件，则对任意的$n\in\mathbb{N}$，$K^n$与$\pi$也满足细致平衡条件；
 	\end{enumerate}
 \end{property}
 \begin{proof}
@@ -348,7 +348,7 @@ Chapman--Kolmogorov方程说明多步转移具有自然的复合一致性：从�
 		=&\int_{Y}\left[\int_{Y}v(z)\dif K^{n-1}(y,\cdot)\right]\left[\int_{Y}u(z)\dif K(y,\cdot)\right]\dif\pi \\
 		=&\int_{Y}[T^{n-1}v(z)][Tu(z)]\dif\pi=\cdots=\int_{Y}v(z)[T^nu(z)]\dif\pi
 	\end{align*}
-	当$n=0$时，上式也成立。于是对任意的非负整数$n$和任意的$A,B\in\mathscr{A}$，取$u=I(y\in A),v=I(y\in B)$，由\cref{prop:NonnegativeSimpleIntegral}(4)和\cref{prop:NonnegativeMeasurableIntegral}(5)可得：
+	当$n=0$时，上式也成立。于是对任意的$n\in\mathbb{N}$和任意的$A,B\in\mathscr{A}$，取$u=I(y\in A),v=I(y\in B)$，由\cref{prop:NonnegativeSimpleIntegral}(4)和\cref{prop:NonnegativeMeasurableIntegral}(5)可得：
 	\begin{align*}
 		&\int_{Y}I(z\in A)[T^nI(z\in B)]\dif\pi=\int_{Y}I(z\in A)\left[\int_{Y}I(z\in B)\dif K^n(y,\cdot)\right]\dif\pi \\
 		=&\int_{Y}I(z\in A)K^n(y,B)\dif\pi=\int_{A}K^n(y,B)\dif\pi
@@ -504,11 +504,11 @@ Chapman--Kolmogorov方程说明多步转移具有自然的复合一致性：从�
 	\begin{equation*}
 		a_1(z)\coloneq K(z,A^c),\quad a_{r+1}(z)\coloneq\int_{A^c}a_r(w)\dif K(z,\cdot),\quad r\in\mathbb{N}^+
 	\end{equation*}
-	由\cref{lem:ProbabilityKernelIntegration}(1)、\cref{prop:NonnegativeMeasurableIntegral}(5)(3)和\cref{prop:MeasurableFunction}(5.a)可知$a_r$可测且$0\leqslant a_r\leqslant1$。对任意一条转移概率核为$K$的Markov链，下证对所有非负整数$l$及$r\in\mathbb{N}^+$有：
+	由\cref{lem:ProbabilityKernelIntegration}(1)、\cref{prop:NonnegativeMeasurableIntegral}(5)(3)和\cref{prop:MeasurableFunction}(5.a)可知$a_r$可测且$0\leqslant a_r\leqslant1$。对任意一条转移概率核为$K$的Markov链，下证对所有$l\in\mathbb{N}$及$r\in\mathbb{N}^+$有：
 	\begin{equation*}
 		\operatorname{E}\left[\prod_{i=1}^r I(f_{l+i}\notin A)\mid\mathscr{F}_l\right]=a_r(f_l)\;\text{a.e.于}(X,\mathscr{F}_l,P)
 	\end{equation*}
-	$r=1$时，由\cref{prop:SimpleFunction}(1)、\cref{prop:MarkovMultiStepEvolution}(1)、\cref{prop:HomogeneousMarkovEvolution}(1)和\cref{prop:NonnegativeSimpleIntegral}(4)可知结论成立。假设结论对$r$和所有非负整数$l$成立。根据\cref{prop:SimpleFunction}(1)可知$I(f_{l+1}\notin A)$关于$\mathscr{F}_{l+1}$可测，由\cref{prop:ConditionalExpectation}(3)、\cref{theo:ConditionalExpectationPullOut}、归纳假设、\cref{prop:MeasurableFunction}(5.b)、\cref{prop:MarkovMultiStepEvolution}(1)、\cref{prop:NonnegativeMeasurableIntegral}(5)、\cref{prop:SigmaField}(3)和\cref{prop:Measure}(3)（次有限可加性）可得：
+	$r=1$时，由\cref{prop:SimpleFunction}(1)、\cref{prop:MarkovMultiStepEvolution}(1)、\cref{prop:HomogeneousMarkovEvolution}(1)和\cref{prop:NonnegativeSimpleIntegral}(4)可知结论成立。假设结论对$r$和所有的$l\in\mathbb{N}$成立。根据\cref{prop:SimpleFunction}(1)可知$I(f_{l+1}\notin A)$关于$\mathscr{F}_{l+1}$可测，由\cref{prop:ConditionalExpectation}(3)、\cref{theo:ConditionalExpectationPullOut}、归纳假设、\cref{prop:MeasurableFunction}(5.b)、\cref{prop:MarkovMultiStepEvolution}(1)、\cref{prop:NonnegativeMeasurableIntegral}(5)、\cref{prop:SigmaField}(3)和\cref{prop:Measure}(3)（次有限可加性）可得：
 	\begin{align*}
 		&\operatorname{E}\left[\prod_{i=1}^{r+1}I(f_{l+i}\notin A)\mid\mathscr{F}_l\right]=\operatorname{E}\left\{\operatorname{E}\left[\prod_{i=1}^{r+1}I(f_{l+i}\notin A)\mid\mathscr{F}_{l+1}\right]\mid\mathscr{F}_l\right\} \\
 		=&\operatorname{E}\left\{I(f_{l+1}\notin A)\operatorname{E}\left[\prod_{i=2}^{r+1}I(f_{l+i}\notin A)\mid\mathscr{F}_{l+1}\right]\mid\mathscr{F}_l\right\} \\
@@ -528,7 +528,7 @@ Chapman--Kolmogorov方程说明多步转移具有自然的复合一致性：从�
 	\begin{equation*}
 		a_r(z)\downarrow P(\tau_A=+\infty)=1-P(\tau_A<+\infty)=0
 	\end{equation*}
-	对任意的非负整数$l$，由\cref{prop:SetLimit}(3)、\cref{prop:Measure}(3)（上连续性）和\cref{theo:DominatedConvergenceTheorem}可得：
+	对任意的$l\in\mathbb{N}$，由\cref{prop:SetLimit}(3)、\cref{prop:Measure}(3)（上连续性）和\cref{theo:DominatedConvergenceTheorem}可得：
 	\begin{align*}
 		&P\left(\underset{i=l+1}{\overset{+\infty}{\cap}}\{f_i\notin A\}\right)=\lim_{r\to+\infty}P\left(\underset{i=l+1}{\overset{r}{\cap}}\{f_i\notin A\}\right)=\lim_{r\to+\infty}P\left(\underset{i=1}{\overset{r-l}{\cap}}\{f_{l+i}\notin A\}\right) \\
 		=&P\left(\underset{i=1}{\overset{+\infty}{\cap}}\{f_{l+i}\notin A\}\right)=\lim_{r\to+\infty}P\left(\underset{i=1}{\overset{r}{\cap}}\{f_{l+i}\notin A\}\right)=\lim_{r\to+\infty}\operatorname{E}[a_r(f_l)]=0
@@ -551,79 +551,64 @@ Chapman--Kolmogorov方程说明多步转移具有自然的复合一致性：从�
 \subsubsection{周期性}
 以下讨论具有不变分布$\pi$且$\pi$不可约的转移概率核$K$。
 \begin{definition}
-	设$d\in\mathbb{N}^+$。若存在两两不交的$D_0,D_1,\dots,D_{d-1}\in\mathscr{A}$使得：
+	设$p\in\mathbb{N}^+$。若存在两两不交的$\seq{D}{p}\in\mathscr{A}$使得：
 	\begin{gather*}
-		\pi\left(\underset{i=0}{\overset{d-1}{\cup}}D_i\right)=1 \\
-		\pi(D_i)>0,\quad K(y,D_{i+1})=1,\quad\forall\;y\in D_i,\quad i=0,1,\dots,d-1
+		\pi\left(\underset{i=1}{\overset{p}{\cup}}D_i\right)=1 \\
+		\pi(D_i)>0,\quad\forall\;y\in D_i,K(y,D_{i+1})=1,\quad i=1,2,\dots,p
 	\end{gather*}
-	其中约定$D_d=D_0$，则称$D_0,\dots,D_{d-1}$为$K$的一个长度为$d$的循环分解。若存在长度$d\geqslant2$的循环分解，则称$K$是\gls{PeriodicMarkovKernel}，否则称$K$是\gls{AperiodicMarkovKernel}。
+	其中约定$D_{i+p}=D_i$，则称$\seq{D}{p}$为$K$的一个长度为$p$的循环分解。若存在长度$p\geqslant2$的循环分解，则称$K$是\gls{PeriodicMarkovKernel}，否则称$K$是\gls{AperiodicMarkovKernel}。
 \end{definition}
-以下记$D_{i+d}=D_i$。
 \begin{property}\label{prop:MarkovCyclicEvolution}
-	设$D_0,\dots,D_{d-1}$为上述循环分解，则：
+	设$\seq{D}{p}$为上述循环分解，则：
 	\begin{enumerate}
-		\item 对任意非负整数$n$及$y\in D_i$，有$K^n(y,D_{i+n})=1$；特别地，若$n$不是$d$的倍数，则$K^n(y,D_i)=0$；
-		\item 对每个$i=0,\dots,d-1$，有$\pi(D_i)=1/d$。
+		\item 对任意的$n\in\mathbb{N}$和$y\in D_i$有$K^n(y,D_{i+n})=1$；若$n$不是$p$的倍数，则对于$y\in D_i$有$K^n(y,D_i)=0$；
+		\item $\pi(D_i)=1/p,\;i=1,2,\dots,p$。
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	(1)$n=0$时由$K^0(y,D_i)=I(y\in D_i)$可知结论成立。假设$K^n(y,D_{i+n})=1$，由\cref{prop:HomogeneousMarkovEvolution}(2)和循环分解的定义，有：
+	(1)当$n=0$时，由$K^0(y,D_i)=I(y\in D_i)$可知结论成立。设$K^n(y,D_{i+n})=1$，由\cref{prop:HomogeneousMarkovEvolution}(2)、\cref{prop:NonnegativeMeasurableIntegral}(5)、\cref{prop:Measure}(2)和\cref{prop:NonnegativeMeasurableIntegral}(3)可知：
+	\begin{equation*}
+		K^{n+1}(y,D_{i+n+1})=\int_{Y}K(z,D_{i+n+1})\dif K^n(y,\cdot)=\int_{D_{i+n}}1\dif K^n(y,\cdot)=K^n(y,D_{i+n})=1
+	\end{equation*}
+	根据数学归纳法可得对任意的$n\in\mathbb{N}$和$y\in D_i$有$K^n(y,D_{i+n})=1$。若$n$不是$d$的倍数，则$D_i$与$D_{i+n}$不交，由\cref{prop:Measure}(2)(3)（单调性）可知$K^n(y,D_i)=0$。\par
+	(2)由不变性、\cref{prop:SigmaField}(3)、\cref{theo:MeasurableCountableIntegral}、\cref{prop:Measure}(2)、\cref{prop:MeasurableIntegral}(1)和(1)可得：
 	\begin{align*}
-		K^{n+1}(y,D_{i+n+1})
-		&=\int_YK(w,D_{i+n+1})\dif K^n(y,\cdot) \\
-		&=\int_{D_{i+n}}1\dif K^n(y,\cdot)=1
+		\pi(D_{i+1})&=\int_{Y}K(y,D_{i+1})\dif\pi=\sum_{j=1}^{p}\int_{D_j}K(y,D_{i+1})\dif\pi+\int_{\left(\underset{j=1}{\overset{p}{\cup}}D_j\right)^c}K(y,D_{i+1})\dif\pi \\
+		&=\sum_{j=1}^{p}\int_{D_j}K(y,D_{i+1})\dif\pi=\int_{D_i}K(y,D_{i+1})\dif\pi=\pi(D_i)
 	\end{align*}
-	其中积分可以限制在$D_{i+n}$上，是因为$K^n(y,D_{i+n})=1$。由归纳法得第一式。若$n$不是$d$的倍数，则$D_i$与$D_{i+n}$不交，故$K^n(y,D_i)=0$。\par
-	(2)由不变性、各集合两两不交以及它们的并集具有$\pi$概率$1$，可得：
-	\begin{align*}
-		\pi(D_{i+1})&=\int_YK(y,D_{i+1})\dif\pi \\
-		&=\sum_{j=0}^{d-1}\int_{D_j}K(y,D_{i+1})\dif\pi=\pi(D_i)
-	\end{align*}
-	因为在$D_i$上被积函数为$1$，在其余$D_j$上为$0$。因此所有$\pi(D_i)$相等，再由$\sum_{i=0}^{d-1}\pi(D_i)=1$得到$\pi(D_i)=1/d$。
+	根据\cref{prop:Measure}(1)即可得出结论。
 \end{proof}
-若$d\geqslant2$，从$y\in D_0$出发，由上述性质有：
+从$y\in D_1$出发，由\cref{prop:MarkovCyclicEvolution}(1)可知：
 \begin{equation*}
-	K^{nd}(y,D_0)=1,\qquad K^{nd+1}(y,D_0)=0,\quad n=0,1,2,\dots
+	K^{nd}(y,D_1)=1,\;K^{nd+1}(y,D_1)=0,\quad\forall\;n\in\mathbb{N}
 \end{equation*}
-因此$K^n(y,D_0)$不可能趋于$\pi(D_0)=1/d$。这说明，即使已经有不变分布与不可约性，周期性仍会妨碍从某些初始状态出发的状态分布趋于不变分布。若初始分布本来就是$\pi$，各时刻分布仍然保持为$\pi$，这与上述结论并不矛盾。
-
-下面给出两个可以直接利用转移核验证非周期性的条件。
+因此$K^n(y,D_1)$不可能趋于$\pi(D_1)=1/p$。这说明即使已经有不变分布与不可约性，周期性仍会妨碍从某些初始状态出发的状态分布趋于不变分布。
 \begin{property}\label{prop:MarkovAperiodicityCriteria}
 	设$\pi K=\pi$且$K$是$\pi$不可约的。以下任一条件均可保证$K$非周期：
 	\begin{enumerate}
-		\item 存在固定的$m\in\mathbb{N}^+$，使对每个$y\in Y$和每个满足$\pi(A)>0$的$A\in\mathscr{A}$都有$K^m(y,A)>0$；
-		\item 存在$\varepsilon\in(0,1)$，使对任意$y\in Y$和$A\in\mathscr{A}$都有$K(y,A)\geqslant\varepsilon I(y\in A)$。
+		\item 存在$m\in\mathbb{N}^+$使得对任意的$y\in Y$和满足$\pi(A)>0$的$A\in\mathscr{A}$都有$K^m(y,A)>0$；
+		\item 存在$\varepsilon\in(0,1)$使得对任意的$y\in Y$和$A\in\mathscr{A}$都有$K(y,A)\geqslant\varepsilon I(y\in A)$。
 	\end{enumerate}
 \end{property}
 \begin{proof}
-	反设存在长度$d\geqslant2$的循环分解。\par
-	(1)取$y\in D_0$。由\cref{prop:MarkovCyclicEvolution}(1)，$K^m(y,D_m)=1$。选取一个与$D_m$不同的循环集合$D_j$，则$\pi(D_j)>0$而$K^m(y,D_j)=0$，与条件矛盾。\par
-	(2)取$y\in D_0$，由循环转移至$D_1$且$D_0\cap D_1=\varnothing$可知$K(y,D_0)=0$。但条件给出$K(y,D_0)\geqslant\varepsilon$，矛盾。
+	使用反证法。\par
+	(1)取$y\in D_1$，由\cref{prop:MarkovCyclicEvolution}(1)可知$K^m(y,D_{m+1})=1$。根据\cref{prop:Measure}(2)(3)（单调性）可得$K^m(y,D_{m+2})=0$，由\cref{prop:MarkovCyclicEvolution}(2)可知矛盾。\par
+	(2)取$y\in D_1$，由\cref{prop:MarkovCyclicEvolution}(1)可知$K(y,D_2)=1$。根据\cref{prop:Measure}(2)(3)（单调性）可得$K(y,D_1)=0$，矛盾。
 \end{proof}
-第一条可以直接结合\cref{theo:IrreducibilityDensity}使用：如果某个固定步数的转移密度对每个初始状态都关于$\pi$几乎处处为正，则它同时排除了非平凡的循环分解。第二条则表示每次转移都保留至少$\varepsilon$的概率停留在当前状态，从而打破必须按固定次序移动的要求。
-
-这种停留机制可以直接通过概率核的混合得到。
-\begin{property}\label{prop:MarkovLazyKernel}
-	设$\pi K=\pi$且$K$是$\pi$不可约的，取$\varepsilon\in(0,1)$，定义：
+\begin{theorem}\label{theo:MarkovLazyKernel}
+	取$\varepsilon\in(0,1)$，对任意的$y\in Y$和$A\in\mathscr{A}$定义：
 	\begin{equation*}
-		\widetilde K(y,A)=\varepsilon I(y\in A)+(1-\varepsilon)K(y,A)
+		\tilde{K}(y,A)\coloneq\varepsilon I(y\in A)+(1-\varepsilon)K(y,A)
 	\end{equation*}
-	则$\widetilde K$是以$\pi$为不变分布的概率核，且$\pi$不可约、非周期。
-\end{property}
+	则$\tilde{K}$是$\pi$不可约、非周期、以$\pi$为不变分布的$(Y,\mathscr{A})$上的概率核。
+\end{theorem}
 \begin{proof}
-	对固定$y$，$\widetilde K(y,\cdot)$是两个概率测度的凸组合；对固定$A$，$\widetilde K(\cdot,A)$可测，所以$\widetilde K$为概率核。由$\pi K=\pi$，对任意$A\in\mathscr{A}$有：
+	固定$y$，由定义可以验证得到$\tilde{K}(y,\cdot)$是$(Y,\mathscr{A})$上的概率测度。固定$A$，根据\cref{prop:SimpleFunction}(1)和\cref{prop:MeasurableFunction}(5.a)可知$\tilde{K}(\cdot,A)$是$(Y,\mathscr{A})$上的可测函数，所以$\tilde{K}$为$(Y,\mathscr{A})$上的概率核。\par
+	对任意的$A\in\mathscr{A}$，由\cref{prop:NonnegativeMeasurableIntegral}(10)(5)可得：
 	\begin{equation*}
-		(\pi\widetilde K)(A)=\varepsilon\pi(A)+(1-\varepsilon)(\pi K)(A)=\pi(A)
+		(\pi\tilde{K})(A)=\int_{Y}[\varepsilon I(y\in A)+(1-\varepsilon)K(y,A)]\dif\pi=\varepsilon\pi(A)+(1-\varepsilon)(\pi K)(A)=\pi(A)
 	\end{equation*}
-	再证明$\widetilde K^n(y,A)\geqslant(1-\varepsilon)^nK^n(y,A)$。$n=1$时由定义成立；若对$n$成立，则由核复合公式有：
-	\begin{align*}
-		\widetilde K^{n+1}(y,A)
-		&=\varepsilon\widetilde K^n(y,A)+(1-\varepsilon)\int_Y\widetilde K^n(w,A)\dif K(y,\cdot) \\
-		&\geqslant(1-\varepsilon)^{n+1}\int_YK^n(w,A)\dif K(y,\cdot) \\
-		&=(1-\varepsilon)^{n+1}K^{n+1}(y,A)
-	\end{align*}
-	由归纳法得所需不等式。因为$1-\varepsilon>0$，$K$的$\pi$不可约性遂推出$\widetilde K$的$\pi$不可约性。最后，由$\widetilde K(y,A)\geqslant\varepsilon I(y\in A)$及\cref{prop:MarkovAperiodicityCriteria}(2)可知$\widetilde K$非周期。
+	于是$\pi$是$\tilde{K}$的不变分布。\par
+	将$\tilde{K}$理解为以概率$\varepsilon$保持点不移动，以概率$1-\varepsilon$按照$K$移动，于是直观上对任意的$n\in\mathbb{N}^+$有$\tilde{K}^n(y,A)\geqslant(1-\varepsilon)^nK^n(y,A)$。由$K$的$\pi$不可约性可从定义得出$\tilde{K}$的$\pi$不可约性。\par
+	根据$\tilde{K}(y,A)\geqslant\varepsilon I(y\in A)$和\cref{prop:MarkovAperiodicityCriteria}(2)可知$\tilde{K}$非周期。
 \end{proof}
-\begin{note}
-	周期性限制访问发生的时刻，常返性关心是否持续返回，两者描述不同的性质。周期性也不意味着时间平均必然失去规律：对于长度$d$的循环分解，从$D_0$出发的链在每$d$个连续时刻中恰有一次处于$D_0$，因而对$D_0$的访问频率趋于$1/d$，尽管每个时刻位于$D_0$的概率仍在振荡。后续讨论时间平均与状态分布的长期行为时，应分别给出所需条件。
-\end{note}
