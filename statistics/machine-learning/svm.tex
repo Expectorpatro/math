@@ -1,0 +1,82 @@
+\section{支持向量机}
+
+考虑二分类问题。给定训练数据：
+\begin{equation*}
+	\mathcal{D}=\{(x_i,y_i)\}_{i=1}^{n},\quad x_i\in\mathbb{R}^{p},\quad y_i\in\{-1,+1\}
+\end{equation*}
+一个直观的分类思路是将每个样本$x_i$看作特征空间$\mathbb{R}^{p}$中的一个点，并尝试寻找一个超平面，使得属于不同类别的样本点尽可能分布在超平面的两侧。于是我们可以利用训练数据来确定这一超平面，并据此判断新的样本位于超平面的哪一侧，从而完成对新数据的分类。\par
+根据解析几何中的知识我们知道一个超平面可以表示为：
+\begin{equation*}
+	\{x\in\mathbb{R}^{p}:w^{\top}x+b=0\}
+\end{equation*}
+其中$w\in\mathbb{R}^{p}$为超平面的法向量，$b\in\mathbb{R}$为截距。该超平面将特征空间划分为两个半空间：
+\begin{equation*}
+	\{x:w^{\top}x+b>0\}\quad\{x:w^{\top}x+b<0\}
+\end{equation*}
+因此，可以根据样本位于超平面的哪一侧来定义分类规则：
+\begin{equation*}
+	f(x)=\operatorname{sign}(w^{\top}x+b)
+\end{equation*}
+若希望训练样本能够被该超平面正确分类，则对于每个$(x_i,y_i)$都应满足：
+\begin{equation*}
+	y_i(w^{\top}x_i+b)>0
+\end{equation*}
+当存在某组$(w,b)$使上述条件对所有训练样本同时成立时，称该训练集是\textbf{线性可分}的。
+\begin{figure}[htbp]
+	\centering
+	\begin{tikzpicture}[scale=1.1]
+		
+		% axes
+		\draw[->] (-0.2,0) -- (6.2,0) node[right] {$x_1$};
+		\draw[->] (0,-0.2) -- (0,5.2) node[above] {$x_2$};
+		
+		% separating hyperplane
+		% approximately: 0.15x_1+x_2-2.6=0
+		\draw[very thick]
+		(0.3,2.555) -- (5.8,1.73)
+		node[right] {$w^{\top} x+b=0$};
+		
+		% positive class points
+		\filldraw (1.0,4.2) circle (2.2pt);
+		\filldraw (1.6,3.8) circle (2.2pt);
+		\filldraw (2.0,4.4) circle (2.2pt);
+		\filldraw (2.5,3.6) circle (2.2pt);
+		\filldraw (3.0,3.9) circle (2.2pt);
+		
+		% negative class points
+		\node at (2.7,1.1) {$\times$};
+		\node at (3.4,1.4) {$\times$};
+		\node at (4.0,0.9) {$\times$};
+		\node at (4.6,1.7) {$\times$};
+		\node at (5.0,1.0) {$\times$};
+		
+		% class labels
+		\node at (1.0,4.75) {$y=+1$};
+		\node at (5.1,0.45) {$y=-1$};
+		
+	\end{tikzpicture}
+	\caption{二维情形下的线性分类示意图。}
+\end{figure}
+当训练数据线性可分时，通常存在不止一个能够正确分类所有训练样本的超平面，于此同时仅仅要求训练样本被正确分类，并不足以说明某个分类超平面是合适的：如果某些样本距离分类边界非常近，那么样本发生轻微扰动时，其分类结果便可能发生改变。因此，我们希望分类超平面在正确分离训练数据的同时尽可能远离所有训练样本，这样的超平面具有最优的抗扰动性。这便是\gls{SVM}的思想。\par
+对于任意被正确分类的样本$x_i$，其到分类超平面$w^{\top}x+b=0$的欧氏距离为：
+\begin{equation*}
+	\frac{|w^{\top}x_i+b|}{||w||}=\frac{y_i(w^{\top}x_i+b)}{||w||}
+\end{equation*}
+因此，SVM的优化问题为：
+\begin{equation*}
+	\begin{aligned}
+		\max_{w\in\mathbb{R}^{p},b\in\mathbb{R}}\min_{i=1,\dots,n}\quad &\frac{y_i(w^{\top}x_i+b)}{||w||} \\
+		\operatorname{s.t.}\quad&y_i(w^{\top}x_i+b)\geqslant1,\quad i=1,\dots,n
+	\end{aligned}
+\end{equation*}
+对于任意的$c>0$，$(w,b)$与$(cw,cb)$定义了完全相同的分类超平面，于是可以进行规范化：
+\begin{equation*}
+	\min_{i=1,\dots,n}y_i(w^{\top}x_i+b)=1
+\end{equation*}
+所以SVM的优化问题等价于：
+\begin{equation*}
+	\begin{aligned}
+		\min_{w,b}\quad&\frac{1}{2}||w||^2\\
+		\operatorname{s.t.}\quad&y_i(w^{\top}x_i+b)\geqslant1,\quad i=1,\dots,n
+	\end{aligned}
+\end{equation*}
