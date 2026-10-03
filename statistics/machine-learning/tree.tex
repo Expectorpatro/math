@@ -105,7 +105,7 @@
 
 \subsection{决策树}
 \subsubsection{从判断规则到决策树}
-人们在进行判断时，往往不会同时综合所有信息后直接给出结论，而是依次提出若干问题，并根据每个问题的答案决定接下来应当考虑什么。例如，医生在进行初步问诊时，可能根据患者的体温、全身肌肉酸痛以及近期接触史，判断患者是否需要进一步接受流感检测。为了说明决策树的基本思想，考虑如下简化的判断规则：
+人们在进行分类或者回归时，往往不会同时综合所有信息后直接给出结论，而是依次提出若干问题，并根据每个问题的答案决定接下来应当考虑什么。例如，医生在进行初步问诊时，可能根据患者的体温、全身肌肉酸痛以及近期接触史，判断患者是否需要进一步接受流感检测。为了说明决策树的基本思想，考虑如下简化的判断规则：
 \begin{quote}
 	首先判断患者的体温是否高于$38\,^\circ\mathrm{C}$。若体温高于$38\,^\circ\mathrm{C}$，则继续判断患者是否存在明显的全身肌肉酸痛：若存在，则建议进行流感检测；若不存在，则暂不建议进行流感检测。\par
 	若患者的体温不高于$38\,^\circ\mathrm{C}$，则继续询问其近期是否与流感患者有过密切接触：若有密切接触，则建议进行流感检测；若没有密切接触，则暂不建议进行流感检测。
@@ -208,7 +208,7 @@
 由此可见，一个判断规则是否合理，关键在于它是否将具有相似响应结果的样本分到一起。对于分类树，我们希望同一节点中的样本尽可能属于相同类别；对于回归树，我们希望同一节点中的响应值尽可能接近。换言之，决策树需要寻找能够使子节点中的响应变量更加同质的判断规则。\par
 为了比较不同判断规则的优劣，首先需要度量一个节点中的响应变量究竟有多混杂。这个量称为\gls{NodeImpurity}。
 \subsubsection{节点不纯度}
-设$\mathcal{D}$是某个节点中的数据集。在该节点不再继续划分时，所有样本将共享同一个局部预测。对于给定损失函数$L$，可以将节点不纯度统一定义为节点内最优常数预测所达到的最小平均经验损失：
+设$\mathcal{D}$是某个节点中的数据集。在该节点不再继续划分时，所有样本将共享同一个局部预测。对于给定损失函数$L$，可以将节点不纯度统一定义为节点内最优常数预测所达到的最小经验风险：
 \begin{equation*}
 	I_{L}(\mathcal{D})=\underset{a\in\mathcal{A}}{\min}\;\frac{1}{|\mathcal{D}|}\sum_{(x,y)\in\mathcal{D}}L(y,a)
 \end{equation*}
@@ -220,11 +220,11 @@
 \end{equation*}
 则最优节点预测为样本均值：
 \begin{equation*}
-	\hat{c}=\bar{y}=\frac{1}{n}\sum_{(x,y)\in\mathcal{D}}y
+	\hat{c}=\bar{y}=\frac{1}{|\mathcal{D}|}\sum_{(x,y)\in\mathcal{D}}y
 \end{equation*}
 对应的节点不纯度为：
 \begin{equation*}
-	I_{\mathrm{SE}}(\mathcal{D})=\frac{1}{n}\sum_{(x,y)\in\mathcal{D}}(y-\hat{c})^2
+	I_{\mathrm{SE}}(\mathcal{D})=\frac{1}{|\mathcal{D}|}\sum_{(x,y)\in\mathcal{D}}(y-\hat{c})^2
 \end{equation*}\par
 若使用绝对误差损失：
 \begin{equation*}
@@ -236,7 +236,7 @@
 \end{equation*}
 对应的节点不纯度为：
 \begin{equation*}
-	I_{\mathrm{AE}}(\mathcal{D})=\frac{1}{n}\sum_{(x,y)\in\mathcal{D}}|y-\hat{c}|
+	I_{\mathrm{AE}}(\mathcal{D})=\frac{1}{|\mathcal{D}|}\sum_{(x,y)\in\mathcal{D}}|y-\hat{c}|
 \end{equation*}\par
 在给定数据集和准则后，节点不纯度的计算过程可总结为\cref{alg:NodeImpurity}。
 \begin{algorithm}[H]
@@ -247,14 +247,14 @@
 		\Ensure Node impurity $I(\mathcal{D})$
 		
 		\If{criterion $\in
-			\{\texttt{gini},\texttt{entropy}\}$}
-		\State Let the class label set be $\{1,\dots,m\}$
+			\{\texttt{entropy},\texttt{gini}\}$}
+		\State Let the class label set be $\{1,2,\dots,K\}$
 		\State $n_i\gets|\{(x,y)\in\mathcal{D}:y=i\}|$,
-		$p_i\gets n_i/|\mathcal{D}|$, $i=1,\dots,m$
+		$p_i\gets n_i/|\mathcal{D}|$, $i=1,2,\dots,K$
 		
 		\If{criterion $=\texttt{gini}$}
 		\State $I(\mathcal{D})\gets
-		1-\sum\limits_{i=1}^mp_i^2$
+		1-\sum\limits_{i=1}^Kp_i^2$
 		\ElsIf{criterion $=\texttt{entropy}$}
 		\State $I(\mathcal{D})\gets
 		-\sum\limits_{\{i:p_i>0\}}p_i\log p_i$
@@ -294,11 +294,11 @@
 \end{equation*}\par
 因此，最优划分可以等价地定义为使划分后不纯度最小的规则：
 \begin{equation*}
-	s^{\ast}=\underset{s\in\mathcal{S}(\mathcal{D})}{\arg\min}\;I_{\mathrm{split}}(s;\mathcal{D})
+	s^{\ast}\in\underset{s\in\mathcal{S}(\mathcal{D})}{\arg\min}\;I_{\mathrm{split}}(s;\mathcal{D})
 \end{equation*}
 或者使不纯度下降最大的规则：
 \begin{equation*}
-	s^{\ast}=\underset{s\in\mathcal{S}(\mathcal{D})}{\arg\max}\;\Delta I(s;\mathcal{D})
+	s^{\ast}\in\underset{s\in\mathcal{S}(\mathcal{D})}{\arg\max}\;\Delta I(s;\mathcal{D})
 \end{equation*}
 其中$\mathcal{S}(\mathcal{D})$表示当前节点中允许使用的候选划分集合。\par
 对于数值型特征，通常将相邻不同观测值的中点作为候选阈值。若特征$j$在当前节点中的不同取值为：
@@ -309,7 +309,7 @@
 \begin{equation*}
 	\left\{\frac{v_r+v_{r+1}}{2}:r=1,2,\dots,q-1\right\}
 \end{equation*}
-为了避免产生仅包含极少量样本的子节点，还可以要求
+为了避免产生仅包含极少量样本的子节点，还可以要求\footnote{这其实是树模型的一个正则化手段，在下一小节我们会提到，此处可以暂时跳过回头再看。}：
 \begin{equation*}
 	|\mathcal{D}_L(s)|\geqslant N_{\mathrm{leaf}},\quad|\mathcal{D}_R(s)|\geqslant N_{\mathrm{leaf}}
 \end{equation*}
@@ -328,7 +328,7 @@
 		\State $I_{\mathrm{split}}^\ast\gets+\infty$, $(F^\ast,\tau^\ast)\gets\texttt{None}$
 		
 		\For{each feature $F\in\mathcal{F}$}
-		\State Let $v_1<\cdots<v_q$ be the distinct observed values
+		\State Let $v_1<v_2<\cdots<v_q$ be the distinct observed values
 		of feature $F$ in $\mathcal{D}$
 		
 		\If{$q=1$}
@@ -337,7 +337,7 @@
 		\EndIf
 		
 		\State $\mathcal{T}_F\gets
-		\{(v_j+v_{j+1})/2:j=1,\dots,q-1\}$
+		\{(v_j+v_{j+1})/2:j=1,2,\dots,q-1\}$
 		
 		\For{each candidate threshold $\tau\in\mathcal{T}_F$}
 		\State $\mathcal{D}_L\gets
@@ -464,9 +464,9 @@
 		\State \Return \Call{BuildTree}{$\mathcal{D},0$}
 	\end{algorithmic}
 \end{algorithm}
-前述算法框不仅规定了如何选择最优划分，还通过若干停止条件限制决策树的继续生长。这些条件属于决策树的\gls{PrePruning}机制，其目的在于避免模型为追求训练集上的局部改进而形成过于复杂的树，从而降低过拟合的风险。\par
-如果不限制树的生长，决策树可以不断划分特征空间，甚至为少数异常样本或者错误标记的样本建立单独的叶节点。此时训练误差可能非常小，但模型学习到的往往是训练样本中的随机波动，而不是总体中稳定的规律。在本文给出的CART生长算法中，$D_{\max}$直接限制树的深度，即样本从根节点到叶节点所经过的路径长度；$N_{\mathrm{split}}$阻止样本量过小的节点继续划分；$N_{\mathrm{leaf}}$防止划分产生仅包含少数样本的叶节点；$\Delta_{\min}$则要求一次划分必须带来足够明显的不纯度下降。上述参数从树的深度、节点样本量和划分收益等不同方面限制树的生长，共同控制决策树的复杂度。\par
-因此，决策树算法的完整逻辑可以概括为：节点不纯度规定什么叫作响应同质；最优划分寻找能够最大程度提高同质性的局部规则；递归生长将这些局部规则组合为完整的预测路径；复杂度约束则防止树为了降低训练误差而不断拟合样本噪声。\par
+前述算法框不仅规定了如何选择最优划分，还通过若干停止条件限制决策树的继续生长。这些条件属于决策树的\gls{PrePruning}机制，其目的在于降低过拟合的风险。\par
+如果不限制树的生长，决策树可以不断划分特征空间，甚至为每一个样本建立单独的叶节点。此时训练误差为$0$，但模型并没有学习到总体中稳定的规律。于是决策树模型的复杂度函数可以定义为叶节点数。在本文给出的CART生长算法中，$D_{\max}$直接限制树的深度，单条决策路径深度每增加$1$就会使得叶节点数增加$1$；$N_{\mathrm{split}}$阻止样本量过小的节点继续划分；$N_{\mathrm{leaf}}$防止划分产生仅包含少数样本的叶节点；$\Delta_{\min}$则要求一次划分必须带来足够明显的不纯度下降。上述参数从树的深度、节点样本量和划分收益等不同方面限制树的生长，共同控制决策树的复杂度。\par
+因此，决策树算法的完整逻辑可以概括为：节点不纯度规定什么叫作响应同质；最优划分寻找能够最大程度提高同质性的局部规则；递归生长将这些局部规则组合为完整的预测路径；复杂度约束则防止树为了降低训练误差而不断拟合样本噪声。
 \subsubsection{特征重要性}
 决策树模型可以根据各特征在所有分裂节点上带来的纯度改进衡量该特征的重要性，某一特征若多次被用于关键节点划分，并且能够带来更明显的纯度提升，则说明该特征对样本区分和结果预测具有更重要的作用。由于不同节点包含的样本数可能相差很大，发生在树根附近的划分通常影响较多样本，而发生在树的深层节点中的划分只影响少量样本。因此，还需要根据当前节点所包含的样本比例对不纯度下降进行加权。设根节点中的完整训练数据集为$\mathcal{D}_0$，节点$t$中的数据集为$\mathcal{D}_t$，该节点采用的划分规则为$s_t^{\ast}=(j_t,\tau_t)$，则特征$j$的未归一化重要性定义为：
 \begin{equation*}
@@ -520,7 +520,8 @@
 	\end{equation*}
 \end{proof}
 第一条性质表明，增加树的数量可以逐渐消除各棵树中互不相关的波动，从而降低预测的方差，但是无法消除它们共同的波动：即使$B$不断增大，集成预测的方差仍受到$\rho\sigma^2$的限制。第二条性质则说明，当每棵树的判断优于随机猜测，并且各棵树的错误不易同时发生时，多数投票可以指数级降低分类错误率。因此，有效的树集成既要求单棵树具有一定的预测能力，也要求不同树之间存在足够的差异。\par
-\gls{RF}正是依据上述条件构造的。它仍以决策树作为基本模型，以保留决策树拟合复杂关系的能力；同时通过样本与特征两个层面的随机化，降低不同树之间的相关性。设训练数据集为$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^{n}$，其中$x_i$具有$p$个特征。训练第$b$棵树时，先从$\mathcal{D}$中有放回地抽取$n$个样本，得到样本集$\mathcal{D}^{(b)}$。不同的树使用不同的样本集，因而会受到不同样本扰动的影响。
+\gls{RF}正是依据上述条件构造的。它仍以决策树作为基本模型，以保留决策树拟合复杂关系的能力；同时通过样本与特征两个层面的随机化，降低不同树之间的相关性。\par
+设训练数据集为$\mathcal{D}=\{(x_i,y_i)\}_{i=1}^{n}$，其中$x_i$具有$p$个特征。训练第$b$棵树时，先从$\mathcal{D}$中有放回地抽取$n$个样本，得到样本集$\mathcal{D}^{(b)}$。不同的树使用不同的样本集，因而会受到不同样本扰动的影响。
 \begin{note}
 	重复采样还可以为模型提供内部验证。对于某棵树，没有被其样本集选中的训练样本称为该树的\gls{OOB}。对每个训练样本，只聚合所有未使用该样本进行训练的树所给出的预测，便可得到相应的OOB预测；将OOB预测与真实响应比较，可以在不另外划分验证集的情况下估计模型的真实误差。
 \end{note}

@@ -24,6 +24,7 @@ PAGE_SLUGS = {
     "概率初步": "probability-basics",
     "渐进理论初步": "asymptotic-theory",
     "凸集": "convex-sets",
+    "凸优化": "convex",
     "不等式": "inequalities",
     "统计初步": "statistics-basics",
     "点估计理论": "point-estimation",
