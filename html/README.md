@@ -82,7 +82,7 @@ python3 html/build.py --strict
     ├── main.tex
     ├── computations.order
     └── computations/
-        └── 01-linear-regression/
+        └── linear-regression/
             └── r/
                 ├── analysis.qmd
                 └── analysis.html # 执行并渲染后生成，需要提交
@@ -97,15 +97,15 @@ python3 html/build.py --strict
 
 ## 线性回归
 
-- computations/01-linear-regression/r/analysis.html
+- computations/linear-regression/r/analysis.html
 
 ## 复共线性与岭回归
 
-- computations/02-multicollinearity-ridge/r/analysis.html
+- computations/multicollinearity-ridge/r/analysis.html
 
 ```
 
-每个二级标题表示一个计算实验，标题出现的顺序决定网页编号。
+每个二级标题表示一个计算实验，标题出现的顺序决定网页编号。实验目录使用不带数字编号的名称；实验顺序仅由 `computations.order` 确定。
 
 ### R/Python 的执行与 HTML 生成
 
@@ -126,15 +126,15 @@ Python 计算实验分两步处理：UV 锁定的 Jupyter 只负责执行 Notebo
 ```bash
 PYTHONPATH="$PWD" uv run --project environment/python --locked jupyter nbconvert \
   --to notebook --execute --inplace \
-statistics/multivariate/computations/02-kmeans/python/analysis.ipynb
+statistics/machine-learning/computations/kmeans/python/analysis.ipynb
 ```
 
 再使用 Pandoc 生成最终 `analysis.html`：
 
 ```bash
-pandoc statistics/multivariate/computations/02-kmeans/python/analysis.ipynb \
+pandoc statistics/machine-learning/computations/kmeans/python/analysis.ipynb \
   --from ipynb --to html --standalone --embed-resources \
-  --output statistics/multivariate/computations/02-kmeans/python/analysis.html
+  --output statistics/machine-learning/computations/kmeans/python/analysis.html
 ```
 
 将两条命令中的路径同时替换为实际实验路径。`--embed-resources` 会将 Notebook 输出的图片等资源嵌入 HTML；若 Notebook 还会读取数据文件，该数据文件仍需按项目约定提交。

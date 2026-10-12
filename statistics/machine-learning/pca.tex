@@ -240,32 +240,3 @@ PCA中维数$r$决定了保留的信息量与降维程度之间的权衡。可�
 \end{equation*}
 \subsubsection{标准化}
 上述主成分维数$r$的选择依赖于各个主成分所解释的样本方差，因此也会受到原始特征尺度的影响。若不同特征的数值尺度存在较大差异，则尺度较大的特征通常具有更大的样本方差，从而在总方差中占据较大的比例，此时累计方差解释比例也会相应地受到其主导。于是，根据$R_r$选择得到的$r$可能主要反映少数大尺度特征的变化，而不能公平地衡量不同特征所包含的信息。为了消除这种由尺度差异造成的影响，可以在执行PCA之前对各个特征进行标准化。
-
-\subsection{应用：主成分回归}
-我们将介绍PCA在解决线性模型复共线性问题上的应用，接下来将延续在岭估计处提到的线性回归模型的典则形式，并将$\operatorname{diag}\{\seq{\lambda}{p-1}\}$设置为$\lambda_1>\lambda_2>\cdots>\lambda_{p-1}$的形式。由\info{矩阵多项式的特征向量}可知$Y$实际上是经过PCA处理后的数据，当$X^{\top}X$存在很小的特征值时，不妨设它们为$\lambda_{r+1},\lambda_{r+2},\dots,\lambda_{p-1}$，由\cref{theo:PCA}可知$Y_{r+1},Y_{r+2},\dots,Y_{p-1}$的方差很小，于是我们可以舍弃它们，从而得到如下模型：
-\begin{equation*}
-	y=\alpha_0\mathbf{1}_n+\mathbf{Y}_1\delta_1+\varepsilon,\quad\operatorname{E}(\varepsilon)=\mathbf{0},\quad\operatorname{Cov}(\varepsilon)=\sigma^2I_n
-\end{equation*}
-其中$\mathbf{Y}_1$是$Y$的前$r$列，$\delta_1$是$\delta_I$的前$r$行。称如上模型给出的估计$\hat{\delta}_I=(\hat{\delta}_1,\mathbf{0})^{\top}$为$\hat{\delta}$的\gls{PrincipalComponentEstimate}。
-\begin{property}
-	中心化模型的主成分回归具有如下性质：
-	\begin{enumerate}
-		\item $\hat{\alpha}_0=\overline{y},\;\hat{\delta}_1=(\mathbf{Y}_1^{\top}\mathbf{Y}_1)^{-1}\mathbf{Y}_1^{\top}y=\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}\mathbf{Y}_1^{\top}y=\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}Q_1\tilde{X}_c^{\top}y,\hat{\alpha}_I=Q_1^{\top}\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}\mathbf{Y}_1^{\top}y=Q_1^{\top}\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}Q\tilde{X}_c^{\top}y$，其中$Q_1$是$Q$的前$r$行；
-		\item 主成分估计一般是有偏估计；
-		\item 当原中心化设计阵存在复共线性关系时，适当选择保留的主成分个数可以使得主成分估计比LSE具有更小的$\operatorname{MSE}$。
-	\end{enumerate}
-\end{property}
-\begin{proof}
-	(1)显然$\mathbf{Y}_1$也是中心化的，所以第一式成立。由\cref{prop:OrthogonalUnitaryMatrix}(1)和\cref{prop:InvertibleMatrix}(16)可知$Y$是列满秩的，所以由\cref{prop:LinearlyDependent}(1)可得$\mathbf{Y}_1$是列满秩的，根据\cref{theo:LinearRegressionModel}(1)可得$(\mathbf{Y}_1^{\top}\mathbf{Y}_1)^{-1}$存在。由正则方程即可得$\hat{\delta}_1=(\mathbf{Y}_1^{\top}\mathbf{Y}_1)^{-1}\mathbf{Y}_1^{\top}y$。根据\cref{prop:Transpose}(4)可知：
-	\begin{equation*}
-		\mathbf{Y}_1^{\top}\mathbf{Y}_1=Q_1\tilde{X}_c^{\top}\tilde{X}_cQ_1^{\top}=\operatorname{diag}\{\seq{\lambda}{r}\}
-	\end{equation*}
-	其中$Q_1$是$Q$的前$r$行，于是有：
-	\begin{equation*}
-		\hat{\delta}_1=(\mathbf{Y}_1^{\top}\mathbf{Y}_1)^{-1}\mathbf{Y}_1^{\top}y=\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}\mathbf{Y}_1^{\top}y=\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{r}}\right\}Q_1\tilde{X}_c^{\top}y
-	\end{equation*}
-	由\cref{prop:Transpose}(4)、\cref{prop:InvertibleMatrix}(11)和\cref{theo:LinearRegressionModel}(3)可得：
-	\begin{equation*}
-		\hat{\alpha}_I=(\tilde{X}_c^{\top}\tilde{X}_c)^{-1}\tilde{X}_c^{\top}y=Q^{\top}\operatorname{diag}\left\{\dfrac{1}{\lambda_{1}},\dfrac{1}{\lambda_{2}},\dots,\dfrac{1}{\lambda_{p-1}}\right\}Q\tilde{X}_c^{\top}y
-	\end{equation*}
-\end{proof}
