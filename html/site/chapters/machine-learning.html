@@ -789,6 +789,7 @@ window.Quarto = {
   <li><a href="#id--95a001e8" id="toc-id--95a001e8" class="nav-link" data-scroll-target="#id--95a001e8"><span class="header-section-number">16.11</span> 超参数优化</a>
   <ul class="collapse">
   <li><a href="#parzen-8e028c1c" id="toc-parzen-8e028c1c" class="nav-link" data-scroll-target="#parzen-8e028c1c"><span class="header-section-number">16.11.1</span> 树结构Parzen估计</a></li>
+  <li><a href="#id--1a5ba8ef" id="toc-id--1a5ba8ef" class="nav-link" data-scroll-target="#id--1a5ba8ef"><span class="header-section-number">16.11.2</span> 逐次减半算法</a></li>
   </ul></li>
   <li><a href="#id--d5a1dd9f" id="toc-id--d5a1dd9f" class="nav-link" data-scroll-target="#id--d5a1dd9f"><span class="header-section-number">16.12</span> 表示学习</a></li>
   <li><a href="#id--e7cabc5e" id="toc-id--e7cabc5e" class="nav-link" data-scroll-target="#id--e7cabc5e"><span class="header-section-number">16.13</span> 强化学习</a></li>
@@ -1313,7 +1314,7 @@ L[y_i,q_\theta(x_i)]\coloneq-\ln q_{\theta y_i}(x_i)
 <h3 class="anchored" data-anchor-id="id--0b1a12a1"><span class="header-section-number">16.2.2</span> 过拟合</h3>
 <p>经验风险<span class="math inline">\(\hat{R}(\theta)\)</span>只度量模型在观测数据集上的平均损失，总体风险<span class="math inline">\(R(\theta)\)</span>则度量模型对同一分布中新样本的平均损失，二者通常并不相等。</p>
 <p>有时持续降低<span class="math inline">\(\hat{R}(\theta)\)</span>未必会同时降低<span class="math inline">\(R(\theta)\)</span>：模型可能不是在提取能够推广到新样本的稳定规律，而是利用观测数据中的偶然噪声、异常点甚至样本的细微特征，对有限训练集作近似记忆。此时训练损失较低，而新样本上的损失较高，这种现象称为<a href="../chapters/glossary-o.html#term-Overfitting" class="term" title="overfitting">过拟合<span class="term-english">（overfitting）</span></a>。</p>
-<figure id="fig-overfitting-three-points-350c89ce" class="textbook-figure figure" data-latex-placement="htbp">
+<figure id="fig-overfitting-three-points-350c89ce" class="textbook-figure figure" data-latex-placement="H">
 <img src="../_tikz/tikz-011548b1a192c3cd2876.png" class="tikz-image figure-img" style="width:92.0%" width="1921" height="808" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
 <span class="figure-number">图 16.4</span> 取自<span class="math inline"><em>y</em> = <em>x</em></span>的三个样本可由不同的模型进行解释。
@@ -1379,6 +1380,7 @@ y=k_1x+b_1,\quad y=k_2x^2+b_2,\quad y=k_3x^3+b_3
 <p>其中，<span class="math inline">\(\hat{R}_{\mathrm{train}}(f)+\lambda\Omega(f)\)</span>称为正则化目标函数，预先给定的常数<span class="math inline">\(\lambda\)</span>称为<a href="../chapters/glossary-r.html#term-RegularizationStrength" class="term" title="regularization strength">正则化强度<span class="term-english">（regularization strength）</span></a>。当<span class="math inline">\(\lambda=0\)</span>时，该问题退化为原来的经验风险最小化；<span class="math inline">\(\lambda\)</span>越大，模型复杂度在目标函数中付出的代价越大，训练过程便越倾向于选择简单模型。</p>
 <div id="note-16-11" class="note theorem-block env-note">
 <p><strong>note 16.11</strong>. 限制模型空间的本质是在拟合训练数据与控制模型复杂度避免过拟合之间取得平衡：模型空间过小会导致模型无法很好的拟合训练数据，也即<a href="../chapters/glossary-u.html#term-Underfitting" class="term" title="underfitting">欠拟合<span class="term-english">（underfitting）</span></a>，模型空间过大会导致过拟合。</p>
+<p>当多个模型都能达到同样好的性能表现时，应优先选择假设更少、模型复杂度最低的那一个，这一原则被称之为<a href="../chapters/glossary-o.html#term-OccamRazor" class="term" title="Occam's razor">奥卡姆剃刀原则<span class="term-english">（Occam's razor）</span></a>。</p>
 </div>
 </section>
 </section>
@@ -2852,7 +2854,7 @@ f(x)=\operatorname{sign}(w^{\top}x+b)
 y_i(w^{\top}x_i+b)&gt;0
 \end{equation*}\]</span></p>
 <p>当存在某组<span class="math inline">\((w,b)\)</span>使上述条件对所有训练样本同时成立时，称该训练集是<strong>线性可分</strong>的。</p>
-<figure id="fig-16-10" class="textbook-figure figure" data-latex-placement="htbp">
+<figure id="fig-16-10" class="textbook-figure figure" data-latex-placement="H">
 <img src="../_tikz/tikz-24416db207a24fbcc0c2.png" class="tikz-image figure-img" style="width:92.0%" width="1923" height="1401" alt="TikZ 数学图示" loading="lazy" decoding="async">
 <figcaption>
 <span class="figure-number">图 16.10</span> 二维情形下的线性分类示意图。
@@ -5208,6 +5210,252 @@ K_{f\mid g}(u,(-\infty,y^*))
 =\frac{\gamma l(u)}{\gamma l(u)+(1-\gamma)h(u)}
 \end{equation*}\]</span></p>
 <p>它描述代理模型中给定配置<span class="math inline">\(u\)</span>后，评价值低于阈值的条件概率；<span class="math inline">\(K_{f\mid g}(u,\cdot)\)</span>则给出了整个评价值的条件分布，可用于后续计算给定配置时的期望改进。</p>
+</section>
+<section id="id--1a5ba8ef" class="level3">
+<h3 class="anchored" data-anchor-id="id--1a5ba8ef"><span class="header-section-number">16.11.2</span> 逐次减半算法</h3>
+<p>前面介绍的超参数优化方法主要关注如何利用已有实验结果，选择下一组更有希望的超参数，从而更有效地探索超参数空间。然而这些方法通常需要对每组候选超参数完整地优化一次模型，才能获得相应的评价指标。实际上，不同超参数组合的表现可能在训练早期就呈现出明显差异，此时对所有候选参数都进行完整训练可能造成大量计算资源的浪费。这便引出了超参数优化中的另一个重要问题：如何利用训练过程中的中间评价结果，合理分配计算资源，提前终止表现不佳的参数组合？解决这一问题的方法通常依赖于一个共同的基本假设：候选超参数在训练早期的表现能够在一定程度上预测其充分训练后的最终表现。</p>
+<section id="sha" class="level4">
+<h4 class="anchored" data-anchor-id="sha"><span class="header-section-number">16.11.2.1</span> SHA</h4>
+<p><a href="../chapters/glossary-s.html#term-SHA" class="term" title="successive halving algorithm, SHA">逐次减半算法<span class="term-english">（successive halving algorithm, SHA）</span></a>主要考虑如何在给定候选超参数集合的情况下，将有限的计算资源集中于更有希望的参数组合。其核心思想是交替进行候选参数筛选与计算资源增加，具体流程如算法<a href="#source-alg-sha-f4df4598" class="textbook-cross-reference" data-reference-key="alg:sha" data-reference-kind="ref" data-reference-title="算法 16.18">16.18</a>所示。</p>
+<div id="source-alg-sha-f4df4598" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">Algorithm 16.18</span> <span class="algorithm-title">Successive Halving Algorithm (SHA)</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>Input:</strong> Initial configurations <span class="math inline">\(S_0\)</span>, base budget <span class="math inline">\(r\)</span>, maximum budget <span class="math inline">\(R\)</span>, reduction factor <span class="math inline">\(\eta&gt;1\)</span>, minimum early-stopping rate <span class="math inline">\(s\geqslant0\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>Output:</strong> Selected configuration <span class="math inline">\(\hat{\theta}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p><span class="math inline">\(S\gets S_0\)</span>, <span class="math inline">\(b\gets r\eta^s\)</span> <em>（Skip pruning in the first <span class="math inline">\(s\)</span> resource levels）</em></p>
+</div>
+<div class="algorithm-line algorithm-while algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>while</strong> True <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="3">
+<p>Fit the model with configuration <span class="math inline">\(\theta\)</span> using budget <span class="math inline">\(b\)</span> and compute <span class="math inline">\(\hat{R}(\theta;b)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="4">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-0" data-depth="0" data-line="5">
+<p><strong>if</strong> <span class="math inline">\(b=R\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="6">
+<p><strong>return</strong> <span class="math inline">\(\hat{\theta}\gets\underset{\theta\in S}{\arg\min}\;\hat{R}(\theta;R)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-0" data-depth="0" data-line="7">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="8">
+<p><span class="math inline">\(k\gets\max\{1,\lfloor|S|/\eta\rfloor\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="9">
+<p><span class="math inline">\(S\gets\operatorname{TopK}\!\left(S,\hat{R}(\cdot;b),k\right)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="10">
+<p><span class="math inline">\(b\gets\min\{\eta b,R\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-while-end algorithm-depth-0" data-depth="0" data-line="11">
+<p><strong>end while</strong></p>
+</div>
+</div>
+</div>
+</section>
+<section id="asha" class="level4">
+<h4 class="anchored" data-anchor-id="asha"><span class="header-section-number">16.11.2.2</span> ASHA</h4>
+<p>尽管SHA能够通过逐步淘汰表现较差的候选参数来减少计算开销，但每一轮必须等待所有候选参数完成当前阶段的模型训练，才能决定哪些参数进入下一轮。当不同参数组合的训练时间存在差异时，较早完成训练的计算任务需要等待其他任务，从而造成计算资源的闲置，降低并行计算效率。针对这一问题，<a href="../chapters/glossary-a.html#term-ASHA" class="term" title="asynchronous successive halving algorithm, ASHA">异步逐次减半算法<span class="term-english">（asynchronous successive halving algorithm, ASHA）</span></a>不再要求所有候选参数在同一阶段完成训练后统一筛选。</p>
+<div id="source-alg-asha-15046a31" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">Algorithm 16.19</span> <span class="algorithm-title">Asynchronous Successive Halving Algorithm (ASHA)</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>Input:</strong> Minimum budget <span class="math inline">\(r\)</span>, maximum budget <span class="math inline">\(R\)</span>, reduction factor <span class="math inline">\(\eta&gt;1\)</span>, minimum early-stopping rate <span class="math inline">\(s\geqslant0\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>Output:</strong> Selected configuration <span class="math inline">\(\hat{\theta}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p><span class="math inline">\(K\gets\lceil\log_\eta(R/r)\rceil-s\)</span> <em>（The highest rung index after skipping the first <span class="math inline">\(s\)</span> resource levels）</em></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="2">
+<p>Initialize rung records <span class="math inline">\(H_1, H_2, \dots, H_{K}\gets\varnothing\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="3">
+<p>Initialize promoted sets <span class="math inline">\(P_1, P_2, \dots, P_{K-1}\gets\varnothing\)</span></p>
+</div>
+<div class="algorithm-line algorithm-while algorithm-depth-0" data-depth="0" data-line="4">
+<p><strong>while</strong> stopping criterion is not met <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="5">
+<p><span class="math inline">\((\theta,k)\gets\operatorname{GetJob}\!\left(\right)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="6">
+<p>Asynchronously fit the model with configuration <span class="math inline">\(\theta\)</span> using budget <span class="math inline">\(b_k=\min\{r\eta^{s+k},R\}\)</span> and compute <span class="math inline">\(\hat{R}(\theta;b_k)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="7">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="8">
+<p><span class="math inline">\(H_k\gets H_k\cup\{(\theta,\hat{R}(\theta;b_k))\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="9">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-while-end algorithm-depth-0" data-depth="0" data-line="10">
+<p><strong>end while</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="11">
+<p><strong>return</strong> <span class="math inline">\(\hat{\theta}\gets\underset{\theta\in H_K}{\arg\min}\;\hat{R}(\theta;R)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-function algorithm-depth-0" data-depth="0" data-line="12">
+<p><strong>function</strong> <span class="smallcaps">GetJob</span>()</p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="13">
+<p><strong>for</strong> <span class="math inline">\(k=K-1,K-2,\dots,0\)</span> <strong>do</strong> <em>（Check higher rungs first for eligible promotions）</em></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="14">
+<p><span class="math inline">\(m\gets\lfloor|H_k|/\eta\rfloor\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="15">
+<p><span class="math inline">\(Q\gets\operatorname{TopK}\!\left(H_k,m\right)\setminus P_k\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-2" data-depth="2" data-line="16">
+<p><strong>if</strong> <span class="math inline">\(Q\neq\varnothing\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="17">
+<p>Select <span class="math inline">\(\theta\in Q\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="18">
+<p><span class="math inline">\(P_k\gets P_k\cup\{\theta\}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-3" data-depth="3" data-line="19">
+<p><strong>return</strong> <span class="math inline">\((\theta,k+1)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-2" data-depth="2" data-line="20">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="21">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="22">
+<p><strong>return</strong> <span class="math inline">\((\operatorname{Sample}\!\left(\right),0)\)</span> <em>（Sample a new configuration if no promotion is available）</em></p>
+</div>
+<div class="algorithm-line algorithm-function-end algorithm-depth-0" data-depth="0" data-line="23">
+<p><strong>end function</strong></p>
+</div>
+</div>
+</div>
+</section>
+<section id="hyperband" class="level4">
+<h4 class="anchored" data-anchor-id="hyperband"><span class="header-section-number">16.11.2.3</span> Hyperband</h4>
+<p>SHA在给定初始候选集合与起始预算后，按照固定的比例淘汰候选配置，但初始候选数与起始预算之间仍然需要权衡：起始预算较小时，可以考察更多配置，却可能过早淘汰训练初期表现不佳的配置；起始预算较大时，早期评价更充分，却会减少能够考察的配置数。<strong>Hyperband</strong>通过运行多组具有不同初始候选数与起始预算的SHA，同时考察这两种资源分配策略之间的多种折中。每一组这样的SHA被称为一个<a href="../chapters/glossary-b.html#term-Bracket" class="term" title="bracket">分支<span class="term-english">（bracket）</span></a>。</p>
+<p>候选模型数最多可以向下缩减的次数为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXFfe1xtYXh9PVxsZWZ0XGxmbG9vclxsb2dfXGV0YVxmcmFje1J9e3J9XHJpZ2h0XHJmbG9vcgpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+q_{\max}=\left\lfloor\log_\eta\frac{R}{r}\right\rfloor
+\end{equation*}\]</span></p>
+<p>Hyperband据此构建<span class="math inline">\(q_{\max}+1\)</span>个Bracket，分别记为<span class="math inline">\(q=0,1,\dots,q_{\max}\)</span>，<span class="math inline">\(q\)</span>也约定为对应Bracket中预算递增的次数。我们希望每个Bracket最终都能够将保留下来的配置训练至最大预算<span class="math inline">\(R\)</span>，因此其起始预算应为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXJfcT1SXGV0YV57LXF9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+r_q=R\eta^{-q}
+\end{equation*}\]</span></p>
+<p><span class="math inline">\(q\)</span>越大，起始预算就越小，能够进行的筛选轮数也越多。</p>
+<p>接下来需要确定每个Bracket的初始候选配置数量<span class="math inline">\(n_q\)</span>，我们希望不同Bracket的总资源消耗大致相同，为此Hyperband引入资源预算<span class="math inline">\(B\)</span>，通常取为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCUI9KHFfe1xtYXh9KzEpUgpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+B=(q_{\max}+1)R
+\end{equation*}\]</span></p>
+<p>现在考虑第<span class="math inline">\(q\)</span>个Bracket。假设初始有<span class="math inline">\(n_q\)</span>个候选配置，由于候选数量减少的比例与预算增加的比例相同，各轮的资源消耗近似相等。因为第<span class="math inline">\(q\)</span>个Bracket一共有<span class="math inline">\(q+1\)</span>轮，其总资源消耗约为<span class="math inline">\((q+1)n_qr_q\)</span>。我们希望满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCShxKzEpbl9xcl9xXGFwcHJveCBCClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+(q+1)n_qr_q\approx B
+\end{equation*}\]</span></p>
+<p>将<span class="math inline">\(r_q=R\eta^{-q}\)</span>代入，便可以解出所需的初始候选数量： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCW5fcVxhcHByb3hcZnJhY3tCfXsocSsxKVJcZXRhXnstcX19PVxmcmFje0J9e1J9XGZyYWN7XGV0YV5xfXtxKzF9ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+n_q\approx\frac{B}{(q+1)R\eta^{-q}}=\frac{B}{R}\frac{\eta^q}{q+1}
+\end{equation*}\]</span></p>
+<p>最终取： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCW5fcT1cbGVmdFxsY2VpbFxmcmFje0J9e1J9XGZyYWN7XGV0YV5xfXtxKzF9XHJpZ2h0XHJjZWlsClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+n_q=\left\lceil\frac{B}{R}\frac{\eta^q}{q+1}\right\rceil
+\end{equation*}\]</span></p>
+<p>在确定<span class="math inline">\(r_q\)</span>与<span class="math inline">\(n_q\)</span>后，每个Bracket内部执行SHA。对于第<span class="math inline">\(q\)</span>个Bracket，第<span class="math inline">\(i\)</span>轮的候选数量与单个配置的累计训练预算分别为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxiZWdpbnthbGlnbmVkfQoJCW5fe3EsaX0mPVxsZWZ0XGxmbG9vciBuX3FcZXRhXnstaX1ccmlnaHRccmZsb29yXFwKCQliX3txLGl9Jj1yX3FcZXRhXmk9UlxldGFee2ktcX0KCVxlbmR7YWxpZ25lZH0KCVxxcXVhZCBpPTAsMSxcZG90cyxxClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\begin{aligned}
+n_{q,i}&amp;=\left\lfloor n_q\eta^{-i}\right\rfloor\\
+b_{q,i}&amp;=r_q\eta^i=R\eta^{i-q}
+\end{aligned}
+\qquad i=0,1,\dots,q
+\end{equation*}\]</span></p>
+<p>每轮根据相同训练预算下的验证集经验风险<span class="math inline">\(\hat{R}(\theta;b_{q,i})\)</span>，保留表现较好的配置进入下一轮，直至最后一轮达到最大预算<span class="math inline">\(R\)</span>。完成所有Bracket训练的资源消耗约为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCShxX3tcbWF4fSsxKUI9KHFfe1xtYXh9KzEpXjJSClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+(q_{\max}+1)B=(q_{\max}+1)^2R
+\end{equation*}\]</span></p>
+<div id="source-alg-hyperband-6032ea98" class="algorithm-block">
+<div class="algorithm-caption">
+<p><span class="algorithm-number">Algorithm 16.20</span> <span class="algorithm-title">Hyperband</span></p>
+</div>
+<div class="algorithm-body">
+<div class="algorithm-line algorithm-require algorithm-depth-0" data-depth="0">
+<p><strong>Input:</strong> Minimum budget <span class="math inline">\(r&gt;0\)</span>, maximum budget <span class="math inline">\(R\)</span>, reduction factor <span class="math inline">\(\eta&gt;1\)</span></p>
+</div>
+<div class="algorithm-line algorithm-ensure algorithm-depth-0" data-depth="0">
+<p><strong>Output:</strong> Selected configuration <span class="math inline">\(\hat{\theta}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="1">
+<p><span class="math inline">\(q_{\max}\gets\lfloor\log_\eta(R/r)\rfloor\)</span>, <span class="math inline">\(B\gets(q_{\max}+1)R\)</span>, <span class="math inline">\(C\gets\varnothing\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-0" data-depth="0" data-line="2">
+<p><strong>for</strong> <span class="math inline">\(q=q_{\max},q_{\max}-1,\dots,0\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="3">
+<p><span class="math inline">\(n_q\gets\lceil(B/R)\eta^q/(q+1)\rceil\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-1" data-depth="1" data-line="4">
+<p><span class="math inline">\(S\gets\operatorname{Sample}\!\left(n_q\right)\)</span> <em>（Sample a fresh configuration set for this bracket）</em></p>
+</div>
+<div class="algorithm-line algorithm-for algorithm-depth-1" data-depth="1" data-line="5">
+<p><strong>for</strong> <span class="math inline">\(i=0,1,\dots,q\)</span> <strong>do</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="6">
+<p><span class="math inline">\(b\gets R\eta^{i-q}\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="7">
+<p>Fit the model with configuration <span class="math inline">\(\theta\)</span> up to budget <span class="math inline">\(b\)</span> and compute <span class="math inline">\(\hat{R}(\theta;b)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="8">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-if algorithm-depth-1" data-depth="1" data-line="9">
+<p><strong>if</strong> <span class="math inline">\(i&lt;q\)</span> <strong>then</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="10">
+<p><span class="math inline">\(k\gets\lfloor n_q\eta^{-(i+1)}\rfloor\)</span></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="11">
+<p><span class="math inline">\(S\gets\operatorname{TopK}\!\left(S,\hat{R}(\cdot;b),k\right)\)</span></p>
+</div>
+<div class="algorithm-line algorithm-else algorithm-depth-1" data-depth="1" data-line="12">
+<p><strong>else</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="13">
+<p><span class="math inline">\(C\gets C\cup S\)</span> <em>（Record full-budget configurations）</em></p>
+</div>
+<div class="algorithm-line algorithm-if-end algorithm-depth-1" data-depth="1" data-line="14">
+<p><strong>end if</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="15">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-for-end algorithm-depth-0" data-depth="0" data-line="16">
+<p><strong>end for</strong></p>
+</div>
+<div class="algorithm-line algorithm-state algorithm-depth-0" data-depth="0" data-line="17">
+<p><strong>return</strong> <span class="math inline">\(\hat{\theta}\gets\underset{\theta\in C}{\arg\min}\;\hat{R}(\theta;R)\)</span></p>
+</div>
+</div>
+</div>
+<p>Hyperband与ASHA可以结合：以ASHA替换各Bracket内部的SHA可以减少并行任务之间的等待。</p>
+</section>
 </section>
 </section>
 <section id="id--d5a1dd9f" class="level2">

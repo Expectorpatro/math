@@ -131,3 +131,131 @@ TPE进一步对条件概率核作如下简化：假设存在$(\mathcal{U},\maths
 	=\frac{\gamma l(u)}{\gamma l(u)+(1-\gamma)h(u)}
 \end{equation*}
 它描述代理模型中给定配置$u$后，评价值低于阈值的条件概率；$K_{f\mid g}(u,\cdot)$则给出了整个评价值的条件分布，可用于后续计算给定配置时的期望改进。
+
+\subsection{逐次减半算法}
+前面介绍的超参数优化方法主要关注如何利用已有实验结果，选择下一组更有希望的超参数，从而更有效地探索超参数空间。然而这些方法通常需要对每组候选超参数完整地优化一次模型，才能获得相应的评价指标。实际上，不同超参数组合的表现可能在训练早期就呈现出明显差异，此时对所有候选参数都进行完整训练可能造成大量计算资源的浪费。这便引出了超参数优化中的另一个重要问题：如何利用训练过程中的中间评价结果，合理分配计算资源，提前终止表现不佳的参数组合？解决这一问题的方法通常依赖于一个共同的基本假设：候选超参数在训练早期的表现能够在一定程度上预测其充分训练后的最终表现。
+\subsubsection{SHA}
+\gls{SHA}主要考虑如何在给定候选超参数集合的情况下，将有限的计算资源集中于更有希望的参数组合。其核心思想是交替进行候选参数筛选与计算资源增加，具体流程如算法\ref{alg:sha}所示。
+\begin{algorithm}[H]
+	\caption{Successive Halving Algorithm (SHA)}
+	\label{alg:sha}
+	\begin{algorithmic}[1]
+		\Require Initial configurations $S_0$, base budget $r$, maximum budget $R$, reduction factor $\eta>1$, minimum early-stopping rate $s\geqslant0$
+		\Ensure Selected configuration $\hat{\theta}$
+		\State $S\gets S_0$, $b\gets r\eta^s$ \Comment{Skip pruning in the first $s$ resource levels}
+		\While{True}
+		\ForAll{$\theta\in S$}
+		\State Fit the model with configuration $\theta$ using budget $b$ and compute $\hat{R}(\theta;b)$
+		\EndFor
+		\If{$b=R$}
+		\State \Return $\hat{\theta}\gets\underset{\theta\in S}{\arg\min}\;\hat{R}(\theta;R)$
+		\EndIf
+		\State $k\gets\max\{1,\lfloor|S|/\eta\rfloor\}$
+		\State $S\gets\Call{TopK}{S,\hat{R}(\cdot;b),k}$
+		\State $b\gets\min\{\eta b,R\}$
+		\EndWhile
+	\end{algorithmic}
+\end{algorithm}
+\subsubsection{ASHA}
+尽管SHA能够通过逐步淘汰表现较差的候选参数来减少计算开销，但每一轮必须等待所有候选参数完成当前阶段的模型训练，才能决定哪些参数进入下一轮。当不同参数组合的训练时间存在差异时，较早完成训练的计算任务需要等待其他任务，从而造成计算资源的闲置，降低并行计算效率。针对这一问题，\gls{ASHA}不再要求所有候选参数在同一阶段完成训练后统一筛选。
+\begin{algorithm}[H]
+	\caption{Asynchronous Successive Halving Algorithm (ASHA)}
+	\label{alg:asha}
+	\begin{algorithmic}[1]
+		\Require Minimum budget $r$, maximum budget $R$, reduction factor $\eta>1$, minimum early-stopping rate $s\geqslant0$
+		\Ensure Selected configuration $\hat{\theta}$
+		\State $K\gets\lceil\log_\eta(R/r)\rceil-s$ \Comment{The highest rung index after skipping the first $s$ resource levels}
+		\State Initialize rung records $\seq{H}{K}\gets\varnothing$
+		\State Initialize promoted sets $\seq{P}{K-1}\gets\varnothing$
+		
+		\While{stopping criterion is not met}
+		\ForAll{available workers}
+		\State $(\theta,k)\gets\Call{GetJob}{}$
+		\State Asynchronously fit the model with configuration $\theta$ using budget $b_k=\min\{r\eta^{s+k},R\}$ and compute $\hat{R}(\theta;b_k)$
+		\EndFor
+		\ForAll{completed jobs $(\theta,k)$}
+		\State $H_k\gets H_k\cup\{(\theta,\hat{R}(\theta;b_k))\}$
+		\EndFor
+		\EndWhile
+		\State \Return $\hat{\theta}\gets\underset{\theta\in H_K}{\arg\min}\;\hat{R}(\theta;R)$
+		
+		\Function{GetJob}{}
+		\For{$k=K-1,K-2,\dots,0$} \Comment{Check higher rungs first for eligible promotions}
+		\State $m\gets\lfloor|H_k|/\eta\rfloor$
+		\State $Q\gets\Call{TopK}{H_k,m}\setminus P_k$
+		\If{$Q\neq\varnothing$}
+		\State Select $\theta\in Q$
+		\State $P_k\gets P_k\cup\{\theta\}$
+		\State \Return $(\theta,k+1)$
+		\EndIf
+		\EndFor
+		\State \Return $(\Call{Sample}{},0)$ \Comment{Sample a new configuration if no promotion is available}
+		\EndFunction
+	\end{algorithmic}
+\end{algorithm}
+\subsubsection{Hyperband}
+SHA在给定初始候选集合与起始预算后，按照固定的比例淘汰候选配置，但初始候选数与起始预算之间仍然需要权衡：起始预算较小时，可以考察更多配置，却可能过早淘汰训练初期表现不佳的配置；起始预算较大时，早期评价更充分，却会减少能够考察的配置数。\textbf{Hyperband}通过运行多组具有不同初始候选数与起始预算的SHA，同时考察这两种资源分配策略之间的多种折中。每一组这样的SHA被称为一个\gls{Bracket}。\par
+候选模型数最多可以向下缩减的次数为：
+\begin{equation*}
+	q_{\max}=\left\lfloor\log_\eta\frac{R}{r}\right\rfloor
+\end{equation*}
+Hyperband据此构建$q_{\max}+1$个Bracket，分别记为$q=0,1,\dots,q_{\max}$，$q$也约定为对应Bracket中预算递增的次数。我们希望每个Bracket最终都能够将保留下来的配置训练至最大预算$R$，因此其起始预算应为：
+\begin{equation*}
+	r_q=R\eta^{-q}
+\end{equation*}
+$q$越大，起始预算就越小，能够进行的筛选轮数也越多。\par
+接下来需要确定每个Bracket的初始候选配置数量$n_q$，我们希望不同Bracket的总资源消耗大致相同，为此Hyperband引入资源预算$B$，通常取为：
+\begin{equation*}
+	B=(q_{\max}+1)R
+\end{equation*}
+现在考虑第$q$个Bracket。假设初始有$n_q$个候选配置，由于候选数量减少的比例与预算增加的比例相同，各轮的资源消耗近似相等。因为第$q$个Bracket一共有$q+1$轮，其总资源消耗约为$(q+1)n_qr_q$。我们希望满足：
+\begin{equation*}
+	(q+1)n_qr_q\approx B
+\end{equation*}
+将$r_q=R\eta^{-q}$代入，便可以解出所需的初始候选数量：
+\begin{equation*}
+	n_q\approx\frac{B}{(q+1)R\eta^{-q}}=\frac{B}{R}\frac{\eta^q}{q+1}
+\end{equation*}
+最终取：
+\begin{equation*}
+	n_q=\left\lceil\frac{B}{R}\frac{\eta^q}{q+1}\right\rceil
+\end{equation*}\par
+在确定$r_q$与$n_q$后，每个Bracket内部执行SHA。对于第$q$个Bracket，第$i$轮的候选数量与单个配置的累计训练预算分别为：
+\begin{equation*}
+	\begin{aligned}
+		n_{q,i}&=\left\lfloor n_q\eta^{-i}\right\rfloor\\
+		b_{q,i}&=r_q\eta^i=R\eta^{i-q}
+	\end{aligned}
+	\qquad i=0,1,\dots,q
+\end{equation*}
+每轮根据相同训练预算下的验证集经验风险$\hat{R}(\theta;b_{q,i})$，保留表现较好的配置进入下一轮，直至最后一轮达到最大预算$R$。完成所有Bracket训练的资源消耗约为：
+\begin{equation*}
+	(q_{\max}+1)B=(q_{\max}+1)^2R
+\end{equation*}
+\begin{algorithm}[H]
+	\caption{Hyperband}
+	\label{alg:hyperband}
+	\begin{algorithmic}[1]
+		\Require Minimum budget $r>0$, maximum budget $R$, reduction factor $\eta>1$
+		\Ensure Selected configuration $\hat{\theta}$
+		\State $q_{\max}\gets\lfloor\log_\eta(R/r)\rfloor$, $B\gets(q_{\max}+1)R$, $C\gets\varnothing$
+		\For{$q=q_{\max},q_{\max}-1,\dots,0$}
+		\State $n_q\gets\lceil(B/R)\eta^q/(q+1)\rceil$
+		\State $S\gets\Call{Sample}{n_q}$ \Comment{Sample a fresh configuration set for this bracket}
+		\For{$i=0,1,\dots,q$}
+		\State $b\gets R\eta^{i-q}$
+		\ForAll{$\theta\in S$}
+		\State Fit the model with configuration $\theta$ up to budget $b$ and compute $\hat{R}(\theta;b)$
+		\EndFor
+		\If{$i<q$}
+		\State $k\gets\lfloor n_q\eta^{-(i+1)}\rfloor$
+		\State $S\gets\Call{TopK}{S,\hat{R}(\cdot;b),k}$
+		\Else
+		\State $C\gets C\cup S$ \Comment{Record full-budget configurations}
+		\EndIf
+		\EndFor
+		\EndFor
+		\State \Return $\hat{\theta}\gets\underset{\theta\in C}{\arg\min}\;\hat{R}(\theta;R)$
+	\end{algorithmic}
+\end{algorithm}
+Hyperband与ASHA可以结合：以ASHA替换各Bracket内部的SHA可以减少并行任务之间的等待。
