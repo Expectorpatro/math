@@ -27,3 +27,78 @@
 	\end{enumerate}
 	则称$\{f_t\}_{t\in T}$关于$\{\mathscr{F}_t\}_{t\in T}$为\gls{Martingale}。
 \end{definition}
+\begin{property}\label{prop:Martingale}
+	设$(X,\mathscr{F},P)$是概率空间。
+	\begin{enumerate}
+		\item 若$\{\mathscr{F}_t\}_{t\in T}$为$(X,\mathscr{F},P)$上的滤过，$\{f_t\}_{t\in T}$关于$\{\mathscr{F}_t\}_{t\in T}$为鞅，则对任意的$s,t\in T$有$\operatorname{E}(f_t)=\operatorname{E}(f_s)$；
+		\item 若$f$是$(X,\mathscr{F},P)$上可积的随机变量，$\{\mathscr{F}_t\}_{t\in T}$为$(X,\mathscr{F},P)$上的滤过，则$\{\operatorname{E}(f\mid\mathscr{F}_t)\}_{t\in T}$关于$\{\mathscr{F}_t\}_{t\in T}$为鞅；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)设$s\leqslant t$，由\cref{prop:ConditionalExpectation}(3)和\cref{prop:MeasurableIntegral}(8)可知：
+	\begin{equation*}
+		\operatorname{E}(f_t)=\operatorname{E}[\operatorname{E}(f_t\mid\mathscr{F}_s)]=\operatorname{E}(f_s)
+	\end{equation*}\par
+	(2)由\cref{ineq:Jensen}可知$|\operatorname{E}(f\mid\mathscr{F}_t)|\leqslant\operatorname{E}(|f|\mid\mathscr{F}_t)\;$a.s.于$(X,\mathscr{F}_t,P)$，根据\cref{prop:MeasurableIntegral}(7)和\cref{prop:ConditionalExpectation}(3)可得：
+	\begin{equation*}
+		\operatorname{E}[|\operatorname{E}(f\mid\mathscr{F}_t)|]\leqslant\operatorname{E}[\operatorname{E}(|f|\mid\mathscr{F}_t)]=\operatorname{E}(|f|)<+\infty
+	\end{equation*}
+	由\cref{prop:MeasurableIntegral}(4)可知$\operatorname{E}(f\mid\mathscr{F}_t)$可积，根据\cref{prop:ConditionalExpectation}(3)即可得出结论。
+\end{proof}
+
+\subsection{鞅差序列}
+\begin{definition}
+	设$(X,\mathscr{F},P)$是概率空间，$\{\mathscr{F}_t\}_{t\in\mathbb{N}}$是该概率空间上的滤过，$\{f_t\}_{t\in\mathbb{N}^+}$是适应于$\{\mathscr{F}_t\}_{t\in\mathbb{N}^+}$的可积随机变量序列且对任意的$t\in\mathbb{N}^+$满足$\operatorname{E}(f_t\mid\mathscr{F}_{t-1})=0\;$a.s.于$(X,\mathscr{F}_{t-1},P)$，则称$\{f_t\}_{t\in\mathbb{N}^+}$是关于$\{\mathscr{F}_t\}_{t\in\mathbb{N}}$的\gls{MDS}。
+\end{definition}
+\begin{property}
+	设$\{f_t\}_{t\in\mathbb{N}^+}$为概率空间$(X,\mathscr{F},P)$上关于滤过$\{\mathscr{F}_t\}_{t\in\mathbb{N}}$的鞅差序列，则：
+	\begin{enumerate}
+		\item $\left\{M_t=\sum\limits_{i=1}^{t}f_i\right\}_{t\in\mathbb{N}^+}$关于$\{\mathscr{F}_t\}_{t\in\mathbb{N}^+}$为鞅；
+		\item 对任意的$t\in\mathbb{N}^+$有$\operatorname{E}(f_t)=0$，对任意小于$t$的$s\in\mathbb{N}^+$有$\operatorname{E}(f_t\mid\mathscr{F}_s)=0\;$a.s.于$(X,\mathscr{F}_s,P)$；
+		\item 对任意满足$s<t$的$s,t\in\mathbb{N}^+$，若$g$是$\mathscr{F}_s$可测的，则$\operatorname{E}(gf_t)=0$。特别的，若$\{f_t\}_{t\in\mathbb{N}^+}$是平方可积的随机变量序列，则对任意满足$s<t$的$s,t\in\mathbb{N}^+$有$\operatorname{Cov}(f_s,f_t)=\operatorname{E}(f_sf_t)=0$；
+		\item 若$\{f_t\}_{t\in\mathbb{N}^+}$是平方可积的随机变量序列，则$\operatorname{Var}(M_t)=\sum\limits_{i=1}^{t}\operatorname{Var}(f_i)$；
+		\item 若随机变量序列$\{H_t\}_{t\in\mathbb{N}^+}$适应于$\{\mathscr{F}_t\}_{t\in\mathbb{N}}$，对任意的$t\in\mathbb{N}^+$，$H_t$是$\mathscr{F}_{t-1}$可测的，且$H_tf_t$在$(X,\mathscr{F}_t,P)$上可积（\cref{prop:MeasurableFunction}(5.b)），则$\{H_tf_t\}_{t\in\mathbb{N}^+}$是关于$\{\mathscr{F}_t\}_{t\in\mathbb{N}}$的鞅差序列；
+		\item 若可积随机变量序列$\{g_t\}_{t\in\mathbb{N}^+}$适应于$\{\mathscr{F}_t\}_{t\in\mathbb{N}^+}$，则$\{h_t=g_t-\operatorname{E}(g_t\mid\mathscr{F}_{t-1})\}_{t\in\mathbb{N}^+}$是关于$\{\mathscr{F}_t\}_{t\in\mathbb{N}}$的鞅差序列；
+	\end{enumerate}
+\end{property}
+\begin{proof}
+	(1)由\cref{prop:MeasurableFunction}(5.a)可知$\{M_t\}_{t\in\mathbb{N}^+}$适应于$\{\mathscr{F}_t\}_{t\in\mathbb{N}^+}$。对任意的$t\in\mathbb{N}^+$，根据\cref{prop:ConditionalExpectation}(3)(4)(5)和\cref{prop:MeasurableIntegral}(8)(6)可知：
+	\begin{align*}
+		&\operatorname{E}(|M_t|)=\operatorname{E}[\operatorname{E}(|M_t|\mid\mathscr{F}_{t-1})]\leqslant\operatorname{E}\left[\operatorname{E}\left(\sum_{i=1}^{t}|f_i|\middle|\mathscr{F}_{t-1}\right)\right] \\
+		=&\operatorname{E}\left[\sum_{i=1}^{t}\operatorname{E}\left(|f_i|\middle|\mathscr{F}_{t-1}\right)\right]=\sum_{i=1}^{t}\operatorname{E}\left[\operatorname{E}\left(|f_i|\middle|\mathscr{F}_{t-1}\right)\right]=\sum_{i=1}^{t}\operatorname{E}(|f_i|)<+\infty
+	\end{align*}
+	对任意的$s,t\in\mathbb{N}^+$且$s\leqslant t$，由\cref{prop:ConditionalExpectation}(5)(1)、\cref{prop:SigmaField}(3)、\cref{prop:Measure}(3)（次有限可加性）、\cref{prop:ConditionalExpectation}(3)、\cref{prop:SimpleFunction}(1)和\cref{prop:ConditionalExpectation}(1)可知：
+	\begin{align*}
+		&\operatorname{E}(M_t\mid\mathscr{F}_s)=\operatorname{E}\left(M_s+\sum_{i=s+1}^{t}f_i\middle|\mathscr{F}_s\right)=\operatorname{E}(M_s\mid\mathscr{F}_s)+\sum_{i=s+1}^{t}\operatorname{E}(f_i\mid\mathscr{F}_s) \\
+		=&M_s+\sum_{i=s+1}^{t}\operatorname{E}(f_i\mid\mathscr{F}_s)=M_s+\sum_{i=s+1}^{t}\operatorname{E}[\operatorname{E}(f_i\mid\mathscr{F}_{i-1})\mid\mathscr{F}_s] \\
+		=&M_s+\sum_{i=s+1}^{t}\operatorname{E}(0\mid\mathscr{F}_s)=M_s
+	\end{align*}
+	a.s.于$(X,\mathscr{F}_s,P)$。	\par
+	综上，$\{M_t\}_{t\in\mathbb{N}^+}$关于$\{\mathscr{F}_t\}_{t\in\mathbb{N}^+}$为鞅。\par
+	(2)由\cref{prop:ConditionalExpectation}(3)和\cref{prop:MeasurableIntegral}(8)立即可得$\operatorname{E}(f_t)=0$。根据\cref{prop:ConditionalExpectation}(3)、\cref{prop:SimpleFunction}(1)和\cref{prop:ConditionalExpectation}(1)可知：
+	\begin{equation*}
+		\operatorname{E}(f_t\mid\mathscr{F}_s)=\operatorname{E}[\operatorname{E}(f_t\mid\mathscr{F}_{t-1})\mid\mathscr{F}_s]=\operatorname{E}(0\mid\mathscr{F}_s)=0
+	\end{equation*}
+	a.s.于$(X,\mathscr{F}_s,P)$。\par
+	(3)由\cref{prop:ConditionalExpectation}(3)、\cref{theo:ConditionalExpectationPullOut}和\cref{prop:MeasurableIntegral}(8)可知：
+	\begin{equation*}
+		\operatorname{E}(gf_t)=\operatorname{E}[\operatorname{E}(gf_t\mid\mathscr{F}_{t-1})]=\operatorname{E}[g\operatorname{E}(f_t\mid\mathscr{F}_{t-1})]=0
+	\end{equation*}
+	根据\cref{prop:CovMat}(6)和(2)可得：
+	\begin{equation*}
+		\operatorname{Cov}(f_s,f_t)=\operatorname{E}(f_sf_t)-\operatorname{E}(f_s)\operatorname{E}(f_t)=\operatorname{E}(f_sf_t)=0
+	\end{equation*}\par
+	(4)由\cref{prop:Variance}(3)和(3)立即可得。\par
+	(5)由\cref{theo:ConditionalExpectationPullOut}、\cref{prop:SigmaField}(3)和\cref{prop:Measure}(3)（次有限可加性）可知：
+	\begin{equation*}
+		\operatorname{E}(H_tf_t\mid\mathscr{F}_{t-1})=H_t\operatorname{E}(f_t\mid\mathscr{F}_{t-1})=0
+	\end{equation*}
+	a.s.于$(X,\mathscr{F}_{t-1},P)$。\par
+	(6)对任意的$t\in\mathbb{N}^+$，由\cref{prop:MeasurableFunction}(5.a)可知$h_t$是$\mathscr{F}_t$可测的。根据\cref{prop:MeasurableIntegral}(7)(6)、\cref{ineq:Jensen}和\cref{prop:ConditionalExpectation}(3)可得：
+	\begin{align*}
+		&\operatorname{E}(|h_t|)=\operatorname{E}[|g_t-\operatorname{E}(g_t\mid\mathscr{F}_{t-1})|]\leqslant\operatorname{E}(|g_t|)+\operatorname{E}[|\operatorname{E}(g_t\mid\mathscr{F}_{t-1})|] \\
+		\leqslant&\operatorname{E}(|g_t|)+\operatorname{E}[\operatorname{E}(|g_t|\mid\mathscr{F}_{t-1})]=2\operatorname{E}(|g_t|)<+\infty
+	\end{align*}
+	由\cref{prop:MeasurableIntegral}(4)可知$h_t$可积。根据\cref{prop:ConditionalExpectation}(5)(1)、\cref{prop:SigmaField}(3)和\cref{prop:Measure}(3)（次有限可加性）可知$\operatorname{E}(h_t\mid\mathscr{F}_{t-1})=0\;$a.s.于$(X,\mathscr{F}_{t-1},P)$。\par
+	综上，$\{h_t\}_{t\in\mathbb{N}^+}$是关于$\{\mathscr{F}_t\}_{t\in\mathbb{N}}$的鞅差序列。
+\end{proof}

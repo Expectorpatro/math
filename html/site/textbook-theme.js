@@ -108,6 +108,10 @@
       const useToc = Boolean(
         tocTitle && win.matchMedia("(min-width: 992px)").matches
       );
+      const mobileHeader = win.matchMedia("(max-width: 991.98px)").matches
+        ? doc.querySelector("#quarto-header .container-fluid")
+        : null;
+      button.classList.toggle("textbook-theme-toggle-in-header", Boolean(mobileHeader));
       doc.querySelectorAll(".textbook-toc-title-with-toggle").forEach((element) => {
         element.classList.remove("textbook-toc-title-with-toggle");
       });
@@ -116,6 +120,9 @@
         tocTitle.appendChild(button);
         button.classList.add("textbook-theme-toggle-in-toc");
         button.classList.remove("textbook-theme-toggle-floating");
+      } else if (mobileHeader) {
+        mobileHeader.insertBefore(button, mobileHeader.querySelector(".quarto-search-button"));
+        button.classList.remove("textbook-theme-toggle-in-toc", "textbook-theme-toggle-floating");
       } else {
         doc.body.appendChild(button);
         button.classList.add("textbook-theme-toggle-floating");
