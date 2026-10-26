@@ -255,6 +255,35 @@
 	\end{equation*}
 	因此，$\sigma(x)_i$可以解释为样本属于第$i$个类别的预测概率，从而可用于多分类任务。
 \end{note}
+\begin{note}
+	在实际计算中，直接按照Softmax函数的定义进行计算可能会遇到数值稳定性问题。当输入分量较大时，指数函数$e^{x_i}$的计算结果可能超过浮点数能够表示的最大值，从而发生上溢。当所有输入分量均为绝对值较大的负数时，各指数项$e^{x_i}$又可能因过于接近零而发生下溢，被舍入为零，使得分母$\sum\limits_{j=1}^ne^{x_j}$变为零，最终出现除零的情况。\par
+	为了解决这一问题，可以利用Softmax函数的平移不变性。对于任意的常数$c\in\mathbb{R}$有：
+	\begin{equation*}
+		\sigma(x+c\mathbf{1})_i=\frac{\exp^{x_i+c}}{\sum\limits_{j=1}^n\exp^{x_j+c}}=\frac{e^ce^{x_i}}{e^c\sum\limits_{j=1}^ne^{x_j}}=\sigma(x)_i
+	\end{equation*}
+	即对输入向量的所有分量加上相同的常数，并不会改变Softmax函数的输出。利用这一性质，可以得到数值稳定的计算形式：
+	\begin{equation*}
+		\sigma(x)_i=\frac{\exp(x_i-m)}{\sum\limits_{j=1}^n\exp(x_j-m)},\quad m=\max_{1\leqslant j\leqslant n}x_j
+	\end{equation*}
+	经过上述变换，所有指数函数的输入均不大于零，因此其输出位于$(0,1]$之间，避免了指数运算的上溢。同时，由于至少存在一个分量满足$x_j-m=0$，因此分母满足：
+	\begin{equation*}
+		1\leqslant\sum_{j=1}^n\exp(x_j-m)\leqslant n
+	\end{equation*}
+	从而避免了所有指数项同时下溢为零而导致的除零问题。\par
+	此外，在分类任务中，Softmax函数通常需要与对数运算结合使用（交叉熵损失），此时即使使用前面介绍的数值稳定形式计算Softmax，直接对其输出取对数仍然可能产生数值问题。这是因为当某个类别的预测概率极小时，相应的指数运算可能发生下溢，使得计算得到的概率被舍入为零，而对零取对数将产生负无穷。\par
+	为了解决这一问题，可以不显式计算Softmax的输出，而是直接计算其对数形式。根据对数运算法则可知：
+	\begin{equation*}
+		\log\sigma(x)_i=\log\left(\frac{e^{x_i}}{\sum\limits_{j=1}^ne^{x_j}}\right)=x_i-\log\left(\sum\limits_{j=1}^ne^{x_j}\right)
+	\end{equation*}
+	这便解决了分子指数运算造成数值下溢的问题。然而分母中的指数求和仍然可能发生上溢或下溢，因此还需要结合前面介绍的平移不变性。令$m=\max\limits_{1\leqslant j\leqslant n}x_j$，则：
+	\begin{equation*}
+		\log\left(\sum_{j=1}^ne^{x_j}\right)=\log\left(e^m\sum_{j=1}^ne^{x_j-m}\right)=m+\log\left(\sum_{j=1}^ne^{x_j-m}\right)
+	\end{equation*}
+	将其代入即可得到数值稳定的Log-Softmax计算公式：
+	\begin{equation*}
+		\log\sigma(x)_i=x_i-m-\log\left(\sum_{j=1}^ne^{x_j-m}\right)
+	\end{equation*}
+\end{note}
 
 \subsection{模型学习}
 神经网络通常以经验风险$\hat{R}(\theta)$为训练目标，并利用\cref{method:GradientDescent}反复更新参数。
@@ -960,6 +989,124 @@ Sigmoid函数逐分量将结果映射到$(0,1)$。$f_t$的某一分量越接近$
 	\end{algorithmic}
 \end{algorithm}
 GRU得到最终输出值的方法与RNN和LSTM一样。
+\subsubsection{注意力机制}
+在前述序列网络中，模型通过隐藏状态沿时间步递推，逐步整合序列中的历史信息。在这一过程中，序列中不同时间步的信息对最终输出可能具有不同的重要性，而这种重要性并非仅由时间步本身决定，还与模型当前需要提取的信息有关。例如，在阅读一段较长的文本后，如果需要回答主人公的姓名，模型可能需要重点关注文本开头的人物介绍；而如果需要回答主人公最终去了哪里，则可能需要更多地关注文本结尾的情节。面对同一段文本，模型所需的信息不同，需要重点关注的时间步也可能随之改变。\par
+对于序列到单个输出的任务，前述序列网络通常取最终隐藏状态$h_T$或对所有隐藏状态求均值来构造序列表示$z$。这些方法虽然能够通过学习模型参数，使不同时间步的信息对最终表示产生不同的影响，但其汇总方式本身并不具备根据当前信息需求对各个时间步的隐藏状态显式分配不同权重的机制。我们希望在已有隐藏状态的基础上，引入一种更加灵活的信息提取方式，使模型能够根据当前需要的信息，有选择地关注序列中的不同时间步，并据此构造相应的序列表示。这便引出了\gls{AttentionMechanism}。\par
+注意力机制通过隐藏状态的加权求和来构造序列表示：
+\begin{equation*}
+	z=\sum_{t=1}^{T}\alpha_th_t
+\end{equation*}
+其中$\alpha_t$表示第$t$个时间步的隐藏状态$h_t$在序列表示中的相对权重，满足$\alpha_t\geqslant0$且$\sum\limits_{t=1}^{T}\alpha_t=1$。当某个时间步包含与当前输出需求高度相关的信息时，模型可以为其分配较大的权重；反之则可以降低其贡献。接下来的核心问题在于：如何使模型根据当前的信息需求自动计算各个时间步的权重$\alpha_t$。\par
+一种自然的建模方式是引入查询向量$q\in\mathbb{R}^{d_k}$来表示模型当前的信息需求，并通过可学习的评分函数$a_\theta$衡量查询向量与各个隐藏状态的相关程度：
+\begin{equation*}
+	e_t=a_\theta(q,h_t)
+\end{equation*}
+称$e_t\in\mathbb{R}$为\textbf{注意力分数}。接着使用Softmax函数将注意力分数转化为满足非负性与归一化条件的权重：
+\begin{equation*}
+	\alpha_t=\frac{\exp(e_t)}{\sum\limits_{i=1}^{T}\exp(e_i)}
+\end{equation*}
+$q$与$a_{\theta}$一般的具体形式为：
+\begin{equation*}
+	q=W_Qh_T,\quad a_\theta(q,h_t)=\frac{(W_Qh_T)^\top(W_Kh_t)}{\sqrt{d_k}}
+\end{equation*}
+其中$W_Q,W_K\in M_{d_k\times d}(\mathbb{R})$为权重矩阵。称$k_t=W_Kh_t$为\textbf{键向量}。这里使用最后一个隐藏状态$h_T$构造查询向量，是因为查询向量$q$表示模型当前的信息需求，其构造应当基于当前可获得的全部信息，而$h_T$恰好整合了整个输入序列的信息。评分函数$a_\theta$采用内积形式，是因为向量内积可以用于衡量向量之间的相似程度。由于内积运算要求两个向量具有相同的维度，于是引入键向量$k_t$。
+\begin{note}
+	评分函数中的缩放因子$\sqrt{d_k}$用于控制内积随向量维度增大而产生的数值波动。\par
+	假设查询向量$q$与键向量$k_t$的各分量是$L_2(X,\mathscr{F},P)$上相互独立的随机变量且均具有零均值和单位方差，$(q_i,k_{ti})$相互独立。由\cref{prop:Independent}(4)、\cref{prop:CovMat}(7)、\cref{prop:Variance}(3)(1)和\cref{prop:Expectation}(2)可知：
+	\begin{align*}
+		&\operatorname{Var}(q^\top k_t)=\operatorname{Var}\left(\sum_{i=1}^{d_k}q_ik_{ti}\right)=\sum_{i=1}^{d_k}\operatorname{Var}(q_ik_{ti})=\sum_{i=1}^{d_k}\{\operatorname{E}[(q_ik_{ti})^2]-[\operatorname{E}(q_ik_{ti})]^2\} \\
+		=&\sum_{i=1}^{d_k}\{\operatorname{E}(q_i^2)\operatorname{E}(k_{ti}^2)-[\operatorname{E}(q_i)\operatorname{E}(k_{ti})]^2\}=\sum_{i=1}^{d_k}\{\operatorname{Var}(q_i)+[\operatorname{E}(q_i)]^2\}\{\operatorname{Var}(k_{ti})+[\operatorname{E}(k_{ti})]^2\}=d_k
+	\end{align*}
+	因此随着向量维度$d_k$的增加，注意力分数的数值尺度也会增大。当不同时间步的内积分数并非高度相关时，这种尺度增长也会使它们之间的绝对差异倾向于增大。\par
+	这一现象之所以需要关注，是因为Softmax对注意力分数之间的绝对差异十分敏感。由定义可知两个时间步的注意力权重之比满足：
+	\begin{equation*}
+		\frac{\alpha_i}{\alpha_j}=\exp(e_i-e_j)
+	\end{equation*}
+	这意味着，即使不同时间步之间的相对大小关系没有发生变化，仅仅放大注意力分数的数值尺度，也会显著改变最终的权重分布。例如，考虑两个时间步的注意力分数分别为$10$和$11$，则较高分数对应的权重为：
+	\begin{equation*}
+		\frac{\exp(11)}{\exp(10)+\exp(11)}=\frac{1}{1+\exp(-1)}\approx0.731
+	\end{equation*}
+	如果仅将两个分数同时放大$100$倍，变为$1000$和$1100$，则相应的权重变为：
+	\begin{equation*}
+		\frac{\exp(1100)}{\exp(1000)+\exp(1100)}
+		=\frac{1}{1+\exp(-100)}\approx1
+	\end{equation*}
+	这说明Softmax不仅取决于不同时间步的相对分数差异，还依赖于分数差异的数值尺度。\par
+	因此，当向量维度较大时，未经缩放的内积可能仅仅因为维度带来的数值尺度增长，就使Softmax产生过度集中的注意力分配。更严重的是，如果在模型训练初期就产生这种权重过于集中的现象，它还会影响梯度传播，使模型难以在后续训练中纠正错误的注意力分配。Softmax函数的偏导数为：
+	\begin{equation*}
+		\frac{\partial\alpha_i}{\partial e_j}=\alpha_i[I(i=j)-\alpha_j]
+	\end{equation*}
+	当时间步$i$的注意力分数显著高于其他时间步时，$\alpha_i$趋近于$1$，其余时间步的权重则趋近于$0$。此时，无论$i=j$还是$i\neq j$，上述偏导数都将趋近于$0$。这意味着即使当前的注意力分配并不合理，模型的预测误差仍然较大，损失函数也可能难以通过注意力分数向评分函数的参数传播有效梯度。\par
+	由\cref{prop:MeasurableIntegral}(6)可知：
+	\begin{equation*}
+		\operatorname{Var}\left(\frac{q^\top k_t}{\sqrt{d_k}}\right)=1
+	\end{equation*}
+	所以缩放后的注意力分数具有不随维度增长的方差，从而可以使得注意力权重的分配更多地由模型学习到的相关性决定，而非单纯受到向量维度的影响。
+\end{note}
+\subsubsection{自注意力}
+前面介绍的注意力机制虽然能够根据不同时间步的重要程度对隐藏状态进行加权求和，但仍然依赖于隐藏状态的递归生成。由于每个时间步的计算都依赖于前一个时间步的结果，因此无法在序列维度上实现完全并行计算。当序列较长时，这种递归依赖会限制模型的计算效率。另一方面，序列中某个时间步的信息往往需要结合整个序列的上下文才能得到充分理解。然而，在传统的单向递归结构中，第$t$个时间步的隐藏状态$h_t$只能整合当前时间步及其之前的信息，无法利用后续时间步的信息。因此，我们希望摆脱隐藏状态逐步传递的限制，使序列中每个时间步都能够直接与其他时间步建立联系，从而获得融合全局上下文信息的表示。\par
+\gls{SelfAttention}解决了上述问题。设输入序列中第$i$个时间步的初始表示为$x_i\in\mathbb{R}^d$。对于每个时间步，计算：
+\begin{equation*}
+	q_i=W_Qx_i,\quad k_i=W_Kx_i,\quad v_i=W_Vx_i
+\end{equation*}
+其中$W_Q,W_K\in M_{d_k\times d}(\mathbb{R}),\;W_V\in M_{d_v\times d}(\mathbb{R})$为权重矩阵，$q_i$和$k_i$是前述的查询向量与键向量，称$v_i$为\textbf{值向量}。通过计算$q_i$与所有键向量的内积，可以得到第$i$个时间步对其他时间步的注意力权重：
+\begin{equation*}
+	\alpha_{ij}=\frac{\exp(q_i^\top k_j/\sqrt{d_k})}{\sum\limits_{l=1}^{T}\exp(q_i^\top k_l/\sqrt{d_k})}
+\end{equation*}
+随后根据这些权重对所有时间步的值向量进行加权求和得到第$i$个时间步的新表示：
+\begin{equation*}
+	z_i=\sum_{j=1}^{T}\alpha_{ij}v_j
+\end{equation*}
+于是每个时间步的新表示$z_i$都能够综合整个序列的信息，而且不同时间步可以根据各自的查询向量选择性地关注序列中的不同部分。与此同时，各个时间步之间不存在递归计算依赖，因此可以将全部时间步的注意力计算统一表示为矩阵运算。设输入序列的表示矩阵为$X\in\mathbb{R}^{T\times d}$，其中第$i$行为$x_i^\top$。将所有时间步的查询向量、键向量和值向量分别按行排列，得到：
+\begin{equation*}
+	Q=XW_Q^\top,\quad K=XW_K^\top,\quad V=XW_V^\top
+\end{equation*}
+其中$Q,K\in\mathbb{R}^{T\times d_k}$，$V\in\mathbb{R}^{T\times d_v}$。注意到矩阵$QK^\top\in\mathbb{R}^{T\times T}$的第$(i,j)$个元素恰好为$q_i^\top k_j$，因此可以通过一次矩阵乘法计算所有时间步之间的注意力分数。对该矩阵的每一行应用Softmax函数，即可得到所有时间步的注意力权重。进一步将上述结果与值矩阵$V$相乘，便得到整个序列的新表示：
+\begin{equation*}
+	Z=\operatorname{Softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right)V
+\end{equation*}
+其中$Z\in\mathbb{R}^{T\times d_v}$，其第$i$行对应第$i$个时间步的输出向量$z_i^\top$。\par
+对于需要预测整个序列属性的任务，可以将各个时间步的表示进一步汇总为一个序列表示。例如，可以直接对所有时间步的表示取平均，也可以通过可学习的权重衡量不同时间步对最终预测的重要程度，并进行加权求和，随后将得到的序列表示输入一般的网络，即可完成分类或回归任务。而对于需要逐时间步预测的任务，则无需将所有表示汇总为一个向量，而是分别将每个时间步的表示输入一般的网络，从而得到对应时间步的预测结果。
+\begin{note}
+	并非所有任务都允许每个时间步访问整个序列的信息。例如，在需要根据当前及历史信息预测后续结果的任务中，第$i$个时间步不能利用之后的信息，否则便会造成信息泄漏。为此，可以引入\gls{CausalAttentionMask}，在Softmax计算之前对注意力分数进行限制：
+	\begin{equation*}
+		Z=\operatorname{Softmax}\left(\frac{QK^\top}{\sqrt{d_k}}+B\right)V
+	\end{equation*}
+	其中掩码矩阵$B\in\mathbb{R}^{T\times T}$定义为：
+	\begin{equation*}
+		B_{ij}=
+		\begin{cases}
+			0,&j\leq i\\
+			-\infty,&j>i
+		\end{cases}
+	\end{equation*}
+	由于$\exp(-\infty)=0$，经过Softmax后，第$i$个时间步对所有后续时间步$j>i$的注意力权重均为$0$，从而保证当前时间步只能利用自身及此前的信息。\par
+	因果注意力掩码仅限制不同时间步之间的信息传递，不会引入时间步之间的递归计算依赖。因此，在已知完整训练序列的情况下，模型仍然可以通过矩阵运算并行计算所有时间步的表示与预测结果，从而在避免未来信息泄漏的同时保留自注意力机制的并行计算优势。
+\end{note}
+\begin{note}
+	除了因果注意力掩码之外，另一种常见的掩码是\gls{PaddingAttentionMask}。由于不同序列的长度往往并不相同，为了按批进行模型训练，我们会在较短序列的末尾添加填充时间步，使同一批次中的所有序列具有相同的长度。由于这些填充时间步并不包含实际信息，如果直接参与注意力计算，就可能影响有效位置的注意力权重及其最终表示。\par
+	为此，可以通过填充注意力掩码排除这些无效位置。设$\mathcal{I}_{\mathrm{valid}}$表示序列中有效位置的索引集合，定义掩码矩阵$P\in\mathbb{R}^{T\times T}$为：
+	\begin{equation*}
+		P_{ij}=
+		\begin{cases}
+			0,&j\in\mathcal{I}_{\mathrm{valid}}\\
+			-\infty,&j\notin\mathcal{I}_{\mathrm{valid}}
+		\end{cases}
+	\end{equation*}
+	与因果注意力掩码类似，将$P$加到注意力分数矩阵后，填充位置对应的注意力权重便为$0$，从而保证有效位置的表示仅由真实的序列信息构成。\par
+	对于填充时间步对应的$z_t$，通常还需要在后续损失计算中予以忽略。
+\end{note}
+\subsubsection{多头注意力}
+在自注意力机制中，每个时间步虽然能够根据自身的信息需求从整个序列中提取相关信息，但对于固定的时间步$i$，模型只能生成一组注意力权重，然而序列中不同时间步之间可能同时存在多种关联关系，单一的注意力权重未必能够充分刻画这些关系。因此，可以考虑同时构造多个独立的注意力机制，学习序列中各个时间步之间的多种关联，最后将这些信息综合起来。这种方法称为\gls{MultiHeadAttention}。\par
+假设使用$M$个\gls{AttentionHead}，对于第$m$个注意力头，引入与其它注意力头独立的权重矩阵$W_Q^{(m)},W_K^{(m)}\in M_{d_k\times d}(\mathbb{R})$和$W_V^{(m)}\in M_{d_v\times d}(\mathbb{R})$，构造：
+\begin{gather*}
+	Q^{(m)}=X(W_Q^{(m)})^\top,\quad K^{(m)}=X(W_K^{(m)})^\top,\quad V^{(m)}=X(W_V^{(m)})^\top \\ Z^{(m)}=\operatorname{Softmax}\left(\frac{Q^{(m)}(K^{(m)})^\top}{\sqrt{d_k}}\right)V^{(m)}
+\end{gather*}
+在得到所有注意力头的输出后，将它们进行拼接并通过一个可学习的线性映射进行融合，得到最终输出：
+\begin{equation*}
+	Z=\operatorname{Concat}\left(Z^{(1)},Z^{(2)},\dots,Z^{(M)}\right)W_O^\top
+\end{equation*}
+其中$W_O\in M_{d\times Md_v}(\mathbb{R})$。
 
 \subsection{图像网络}
 先说明计算机如何表示图像，再讨论如何利用图像自身的结构设计网络。\par

@@ -4303,6 +4303,35 @@ x, &amp; x&gt;0 \\
 \end{equation*}\]</span></p>
 <p>因此，<span class="math inline">\(\sigma(x)_i\)</span>可以解释为样本属于第<span class="math inline">\(i\)</span>个类别的预测概率，从而可用于多分类任务。</p>
 </div>
+<div id="note-16-31" class="note theorem-block env-note">
+<p><strong>note 16.31</strong>. 在实际计算中，直接按照Softmax函数的定义进行计算可能会遇到数值稳定性问题。当输入分量较大时，指数函数<span class="math inline">\(e^{x_i}\)</span>的计算结果可能超过浮点数能够表示的最大值，从而发生上溢。当所有输入分量均为绝对值较大的负数时，各指数项<span class="math inline">\(e^{x_i}\)</span>又可能因过于接近零而发生下溢，被舍入为零，使得分母<span class="math inline">\(\sum\limits_{j=1}^ne^{x_j}\)</span>变为零，最终出现除零的情况。</p>
+<p>为了解决这一问题，可以利用Softmax函数的平移不变性。对于任意的常数<span class="math inline">\(c\in\mathbb{R}\)</span>有： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc2lnbWEoeCtjXG1hdGhiZnsxfSlfaT1cZnJhY3tcZXhwXnt4X2krY319e1xzdW1cbGltaXRzX3tqPTF9Xm5cZXhwXnt4X2orY319PVxmcmFje2VeY2Vee3hfaX19e2VeY1xzdW1cbGltaXRzX3tqPTF9Xm5lXnt4X2p9fT1cc2lnbWEoeClfaQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\sigma(x+c\mathbf{1})_i=\frac{\exp^{x_i+c}}{\sum\limits_{j=1}^n\exp^{x_j+c}}=\frac{e^ce^{x_i}}{e^c\sum\limits_{j=1}^ne^{x_j}}=\sigma(x)_i
+\end{equation*}\]</span></p>
+<p>即对输入向量的所有分量加上相同的常数，并不会改变Softmax函数的输出。利用这一性质，可以得到数值稳定的计算形式： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcc2lnbWEoeClfaT1cZnJhY3tcZXhwKHhfaS1tKX17XHN1bVxsaW1pdHNfe2o9MX1eblxleHAoeF9qLW0pfSxccXVhZCBtPVxtYXhfezFcbGVxc2xhbnQgalxsZXFzbGFudCBufXhfagpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\sigma(x)_i=\frac{\exp(x_i-m)}{\sum\limits_{j=1}^n\exp(x_j-m)},\quad m=\max_{1\leqslant j\leqslant n}x_j
+\end{equation*}\]</span></p>
+<p>经过上述变换，所有指数函数的输入均不大于零，因此其输出位于<span class="math inline">\((0,1]\)</span>之间，避免了指数运算的上溢。同时，由于至少存在一个分量满足<span class="math inline">\(x_j-m=0\)</span>，因此分母满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkxXGxlcXNsYW50XHN1bV97aj0xfV5uXGV4cCh4X2otbSlcbGVxc2xhbnQgbgpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+1\leqslant\sum_{j=1}^n\exp(x_j-m)\leqslant n
+\end{equation*}\]</span></p>
+<p>从而避免了所有指数项同时下溢为零而导致的除零问题。</p>
+<p>此外，在分类任务中，Softmax函数通常需要与对数运算结合使用（交叉熵损失），此时即使使用前面介绍的数值稳定形式计算Softmax，直接对其输出取对数仍然可能产生数值问题。这是因为当某个类别的预测概率极小时，相应的指数运算可能发生下溢，使得计算得到的概率被舍入为零，而对零取对数将产生负无穷。</p>
+<p>为了解决这一问题，可以不显式计算Softmax的输出，而是直接计算其对数形式。根据对数运算法则可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbG9nXHNpZ21hKHgpX2k9XGxvZ1xsZWZ0KFxmcmFje2Vee3hfaX19e1xzdW1cbGltaXRzX3tqPTF9Xm5lXnt4X2p9fVxyaWdodCk9eF9pLVxsb2dcbGVmdChcc3VtXGxpbWl0c197aj0xfV5uZV57eF9qfVxyaWdodCkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\log\sigma(x)_i=\log\left(\frac{e^{x_i}}{\sum\limits_{j=1}^ne^{x_j}}\right)=x_i-\log\left(\sum\limits_{j=1}^ne^{x_j}\right)
+\end{equation*}\]</span></p>
+<p>这便解决了分子指数运算造成数值下溢的问题。然而分母中的指数求和仍然可能发生上溢或下溢，因此还需要结合前面介绍的平移不变性。令<span class="math inline">\(m=\max\limits_{1\leqslant j\leqslant n}x_j\)</span>，则： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbG9nXGxlZnQoXHN1bV97aj0xfV5uZV57eF9qfVxyaWdodCk9XGxvZ1xsZWZ0KGVebVxzdW1fe2o9MX1ebmVee3hfai1tfVxyaWdodCk9bStcbG9nXGxlZnQoXHN1bV97aj0xfV5uZV57eF9qLW19XHJpZ2h0KQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\log\left(\sum_{j=1}^ne^{x_j}\right)=\log\left(e^m\sum_{j=1}^ne^{x_j-m}\right)=m+\log\left(\sum_{j=1}^ne^{x_j-m}\right)
+\end{equation*}\]</span></p>
+<p>将其代入即可得到数值稳定的Log-Softmax计算公式： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcbG9nXHNpZ21hKHgpX2k9eF9pLW0tXGxvZ1xsZWZ0KFxzdW1fe2o9MX1ebmVee3hfai1tfVxyaWdodCkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\log\sigma(x)_i=x_i-m-\log\left(\sum_{j=1}^ne^{x_j-m}\right)
+\end{equation*}\]</span></p>
+</div>
 <section id="id--f33eee8e" class="level3">
 <h3 class="anchored" data-anchor-id="id--f33eee8e"><span class="header-section-number">16.9.1</span> 模型学习</h3>
 <p>神经网络通常以经验风险<span class="math inline">\(\hat{R}(\theta)\)</span>为训练目标，并利用<a href="../chapters/convex.html#method-GradientDescent-94d8e324" class="textbook-cross-reference" data-reference-key="method:GradientDescent" data-reference-kind="ref+label" data-reference-title="Method 8.1">Method 8.1</a>反复更新参数。</p>
@@ -4380,8 +4409,8 @@ h_t=f_\theta(x_t,h_{t-1}),\quad t=1,2,\dots,T
 </div>
 <p>隐藏状态<span class="math inline">\(h_t\)</span>可以看作模型在处理完<span class="math inline">\(x_1,x_2,\dots,x_t\)</span>后形成的内部表示。它并不是对全部历史输入的逐项存储，而是通过递推映射<span class="math inline">\(f_\theta\)</span>对历史信息进行压缩和整合，从中保留对当前任务有用的信息。因此，在处理完整个输入序列后，可以将最终隐藏状态<span class="math inline">\(h_T\)</span>视为模型对整个序列所提取的信息表示，并在此基础上进行预测。例如将<span class="math inline">\(h_T\)</span>输入到一个一般的神经网络<span class="math inline">\(g\)</span>中去得到<span class="math inline">\(\hat{y}=g(h_T)\)</span>。</p>
 <p>初始状态<span class="math inline">\(h_0\)</span>通常取为<span class="math inline">\(\mathbf{0}\)</span>，也可以作为模型参数进行学习。由于在所有时间步中使用的是同一个映射<span class="math inline">\(f_\theta\)</span>，模型的参数数量不会随序列长度<span class="math inline">\(T\)</span>增加，并且同一模型可以递推处理不同长度的输入序列。</p>
-<div id="note-16-31" class="note theorem-block env-note">
-<p><strong>note 16.31</strong>. 在这一统一表示下，序列网络的核心在于如何构造状态更新映射<span class="math inline">\(f_\theta\)</span>。不同的序列网络本质上对应于<span class="math inline">\(f_\theta\)</span>的不同参数化方式。</p>
+<div id="note-16-32" class="note theorem-block env-note">
+<p><strong>note 16.32</strong>. 在这一统一表示下，序列网络的核心在于如何构造状态更新映射<span class="math inline">\(f_\theta\)</span>。不同的序列网络本质上对应于<span class="math inline">\(f_\theta\)</span>的不同参数化方式。</p>
 </div>
 <section id="id--f147dfc6" class="level4">
 <h4 class="anchored" data-anchor-id="id--f147dfc6"><span class="header-section-number">16.9.2.1</span> 循环神经网络</h4>
@@ -4449,8 +4478,8 @@ h_t=\phi(W_xx_t+W_hh_{t-1}+b),\quad t=1,2,\dots,T
 z=h_T^{(L)}\quad\text{或}\quad z=\frac{1}{T}\sum_{t=1}^Th_t^{(L)}
 \end{equation*}\]</span></p>
 <p>得到序列表示<span class="math inline">\(z\)</span>后，可将其输入一个一般的神经网络<span class="math inline">\(g\)</span>从而得到输出值。</p>
-<div id="note-16-32" class="note theorem-block env-note">
-<p><strong>note 16.32</strong>. RNN在每个时间步都用当前输入和上一隐藏状态共同生成新的隐藏状态，但没有单独的机制判断哪些历史信息应当保留、哪些信息应当遗忘。随着时间步不断推进，较早的信息可能在反复更新中逐渐被后来的输入覆盖，导致模型难以区分当前状态中的短期信息和需要长期保留的信息。</p>
+<div id="note-16-33" class="note theorem-block env-note">
+<p><strong>note 16.33</strong>. RNN在每个时间步都用当前输入和上一隐藏状态共同生成新的隐藏状态，但没有单独的机制判断哪些历史信息应当保留、哪些信息应当遗忘。随着时间步不断推进，较早的信息可能在反复更新中逐渐被后来的输入覆盖，导致模型难以区分当前状态中的短期信息和需要长期保留的信息。</p>
 <p>RNN的另一个重要问题出现在长序列训练过程中。梯度沿时间方向反向传播时，需要连续经过许多次状态更新；链式法则中的导数连乘可能使早期时间步的梯度迅速缩小，形成梯度消失，也可能使梯度迅速增大，形成梯度爆炸。</p>
 </div>
 </section>
@@ -4657,9 +4686,9 @@ r_t^{(l)} \gets \sigma\!\left(W_r^{(l)}[h_{t-1}^{(l)},x_t^{(l)}]+b_r^{(l)}\right
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-state algorithm-depth-2" data-depth="2" data-line="10">
-<p>Hidden state update: interpolate between old and new <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkJaF90XnsobCl9IFxnZXRzICgxLXpfdF57KGwpfSlcb2RvdCBoX3t0LTF9XnsobCl9ICsgel90XnsobCl9XG9kb3QgXHRpbGRlIGhfdF57KGwpfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p>Hidden state update: interpolate between old and new <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkJaF90XnsobCl9IFxnZXRzIHpfdF57KGwpfVxvZG90IGhfe3QtMX1eeyhsKX0gKyAoMS16X3ReeyhsKX0pXG9kb3QgXHRpbGRlIGhfdF57KGwpfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
 <p><span class="math display">\[\begin{equation*}
-h_t^{(l)} \gets (1-z_t^{(l)})\odot h_{t-1}^{(l)} + z_t^{(l)}\odot \tilde h_t^{(l)}
+h_t^{(l)} \gets z_t^{(l)}\odot h_{t-1}^{(l)} + (1-z_t^{(l)})\odot \tilde h_t^{(l)}
 \end{equation*}\]</span></p>
 </div>
 <div class="algorithm-line algorithm-for-end algorithm-depth-1" data-depth="1" data-line="11">
@@ -4671,6 +4700,130 @@ h_t^{(l)} \gets (1-z_t^{(l)})\odot h_{t-1}^{(l)} + z_t^{(l)}\odot \tilde h_t^{(l
 </div>
 </div>
 <p>GRU得到最终输出值的方法与RNN和LSTM一样。</p>
+</section>
+<section id="id--30bee42a" class="level4">
+<h4 class="anchored" data-anchor-id="id--30bee42a"><span class="header-section-number">16.9.2.4</span> 注意力机制</h4>
+<p>在前述序列网络中，模型通过隐藏状态沿时间步递推，逐步整合序列中的历史信息。在这一过程中，序列中不同时间步的信息对最终输出可能具有不同的重要性，而这种重要性并非仅由时间步本身决定，还与模型当前需要提取的信息有关。例如，在阅读一段较长的文本后，如果需要回答主人公的姓名，模型可能需要重点关注文本开头的人物介绍；而如果需要回答主人公最终去了哪里，则可能需要更多地关注文本结尾的情节。面对同一段文本，模型所需的信息不同，需要重点关注的时间步也可能随之改变。</p>
+<p>对于序列到单个输出的任务，前述序列网络通常取最终隐藏状态<span class="math inline">\(h_T\)</span>或对所有隐藏状态求均值来构造序列表示<span class="math inline">\(z\)</span>。这些方法虽然能够通过学习模型参数，使不同时间步的信息对最终表示产生不同的影响，但其汇总方式本身并不具备根据当前信息需求对各个时间步的隐藏状态显式分配不同权重的机制。我们希望在已有隐藏状态的基础上，引入一种更加灵活的信息提取方式，使模型能够根据当前需要的信息，有选择地关注序列中的不同时间步，并据此构造相应的序列表示。这便引出了<a href="../chapters/glossary-a.html#term-AttentionMechanism" class="term" title="attention mechanism">注意力机制<span class="term-english">（attention mechanism）</span></a>。</p>
+<p>注意力机制通过隐藏状态的加权求和来构造序列表示： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXo9XHN1bV97dD0xfV57VH1cYWxwaGFfdGhfdApcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+z=\sum_{t=1}^{T}\alpha_th_t
+\end{equation*}\]</span></p>
+<p>其中<span class="math inline">\(\alpha_t\)</span>表示第<span class="math inline">\(t\)</span>个时间步的隐藏状态<span class="math inline">\(h_t\)</span>在序列表示中的相对权重，满足<span class="math inline">\(\alpha_t\geqslant0\)</span>且<span class="math inline">\(\sum\limits_{t=1}^{T}\alpha_t=1\)</span>。当某个时间步包含与当前输出需求高度相关的信息时，模型可以为其分配较大的权重；反之则可以降低其贡献。接下来的核心问题在于：如何使模型根据当前的信息需求自动计算各个时间步的权重<span class="math inline">\(\alpha_t\)</span>。</p>
+<p>一种自然的建模方式是引入查询向量<span class="math inline">\(q\in\mathbb{R}^{d_k}\)</span>来表示模型当前的信息需求，并通过可学习的评分函数<span class="math inline">\(a_\theta\)</span>衡量查询向量与各个隐藏状态的相关程度： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCWVfdD1hX1x0aGV0YShxLGhfdCkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+e_t=a_\theta(q,h_t)
+\end{equation*}\]</span></p>
+<p>称<span class="math inline">\(e_t\in\mathbb{R}\)</span>为<strong>注意力分数</strong>。接着使用Softmax函数将注意力分数转化为满足非负性与归一化条件的权重： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxhbHBoYV90PVxmcmFje1xleHAoZV90KX17XHN1bVxsaW1pdHNfe2k9MX1ee1R9XGV4cChlX2kpfQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\alpha_t=\frac{\exp(e_t)}{\sum\limits_{i=1}^{T}\exp(e_i)}
+\end{equation*}\]</span></p>
+<p><span class="math inline">\(q\)</span>与<span class="math inline">\(a_{\theta}\)</span>一般的具体形式为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXE9V19RaF9ULFxxdWFkIGFfXHRoZXRhKHEsaF90KT1cZnJhY3soV19RaF9UKV5cdG9wKFdfS2hfdCl9e1xzcXJ0e2Rfa319ClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+q=W_Qh_T,\quad a_\theta(q,h_t)=\frac{(W_Qh_T)^\top(W_Kh_t)}{\sqrt{d_k}}
+\end{equation*}\]</span></p>
+<p>其中<span class="math inline">\(W_Q,W_K\in M_{d_k\times d}(\mathbb{R})\)</span>为权重矩阵。称<span class="math inline">\(k_t=W_Kh_t\)</span>为<strong>键向量</strong>。这里使用最后一个隐藏状态<span class="math inline">\(h_T\)</span>构造查询向量，是因为查询向量<span class="math inline">\(q\)</span>表示模型当前的信息需求，其构造应当基于当前可获得的全部信息，而<span class="math inline">\(h_T\)</span>恰好整合了整个输入序列的信息。评分函数<span class="math inline">\(a_\theta\)</span>采用内积形式，是因为向量内积可以用于衡量向量之间的相似程度。由于内积运算要求两个向量具有相同的维度，于是引入键向量<span class="math inline">\(k_t\)</span>。</p>
+<div id="note-16-34" class="note theorem-block env-note">
+<p><strong>note 16.34</strong>. 评分函数中的缩放因子<span class="math inline">\(\sqrt{d_k}\)</span>用于控制内积随向量维度增大而产生的数值波动。</p>
+<p>假设查询向量<span class="math inline">\(q\)</span>与键向量<span class="math inline">\(k_t\)</span>的各分量是<span class="math inline">\(L_2(X,\mathscr{F},P)\)</span>上相互独立的随机变量且均具有零均值和单位方差，<span class="math inline">\((q_i,k_{ti})\)</span>相互独立。由<a href="../chapters/probability-basics.html#prop-Independent-c50d54ba" class="textbook-cross-reference" data-reference-key="prop:Independent" data-reference-kind="ref+label" data-reference-title="性质 6.2.1" data-reference-items="4" data-reference-hint="请查看第 4 项">性质 6.2.1(4)</a>、<a href="../chapters/probability-basics.html#prop-CovMat-3a62d09d" class="textbook-cross-reference" data-reference-key="prop:CovMat" data-reference-kind="ref+label" data-reference-title="性质 6.4.3" data-reference-items="7" data-reference-hint="请查看第 7 项">性质 6.4.3(7)</a>、<a href="../chapters/probability-basics.html#prop-Variance-c0d6c124" class="textbook-cross-reference" data-reference-key="prop:Variance" data-reference-kind="ref+label" data-reference-title="性质 6.4.2" data-reference-items="3|1" data-reference-hint="请查看第 3、1 项">性质 6.4.2(3)(1)</a>和<a href="../chapters/probability-basics.html#prop-Expectation-c89ff5d4" class="textbook-cross-reference" data-reference-key="prop:Expectation" data-reference-kind="ref+label" data-reference-title="性质 6.3.1" data-reference-items="2" data-reference-hint="请查看第 2 项">性质 6.3.1(2)</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2FsaWduKn0KCQkmXG9wZXJhdG9ybmFtZXtWYXJ9KHFeXHRvcCBrX3QpPVxvcGVyYXRvcm5hbWV7VmFyfVxsZWZ0KFxzdW1fe2k9MX1ee2Rfa31xX2lrX3t0aX1ccmlnaHQpPVxzdW1fe2k9MX1ee2Rfa31cb3BlcmF0b3JuYW1le1Zhcn0ocV9pa197dGl9KT1cc3VtX3tpPTF9XntkX2t9XHtcb3BlcmF0b3JuYW1le0V9WyhxX2lrX3t0aX0pXjJdLVtcb3BlcmF0b3JuYW1le0V9KHFfaWtfe3RpfSldXjJcfSBcXAoJCT0mXHN1bV97aT0xfV57ZF9rfVx7XG9wZXJhdG9ybmFtZXtFfShxX2leMilcb3BlcmF0b3JuYW1le0V9KGtfe3RpfV4yKS1bXG9wZXJhdG9ybmFtZXtFfShxX2kpXG9wZXJhdG9ybmFtZXtFfShrX3t0aX0pXV4yXH09XHN1bV97aT0xfV57ZF9rfVx7XG9wZXJhdG9ybmFtZXtWYXJ9KHFfaSkrW1xvcGVyYXRvcm5hbWV7RX0ocV9pKV1eMlx9XHtcb3BlcmF0b3JuYW1le1Zhcn0oa197dGl9KStbXG9wZXJhdG9ybmFtZXtFfShrX3t0aX0pXV4yXH09ZF9rClxlbmR7YWxpZ24qfQ=="></span></p>
+<p><span class="math display">\[\begin{align*}
+&amp;\operatorname{Var}(q^\top k_t)=\operatorname{Var}\left(\sum_{i=1}^{d_k}q_ik_{ti}\right)=\sum_{i=1}^{d_k}\operatorname{Var}(q_ik_{ti})=\sum_{i=1}^{d_k}\{\operatorname{E}[(q_ik_{ti})^2]-[\operatorname{E}(q_ik_{ti})]^2\} \\
+=&amp;\sum_{i=1}^{d_k}\{\operatorname{E}(q_i^2)\operatorname{E}(k_{ti}^2)-[\operatorname{E}(q_i)\operatorname{E}(k_{ti})]^2\}=\sum_{i=1}^{d_k}\{\operatorname{Var}(q_i)+[\operatorname{E}(q_i)]^2\}\{\operatorname{Var}(k_{ti})+[\operatorname{E}(k_{ti})]^2\}=d_k
+\end{align*}\]</span></p>
+<p>因此随着向量维度<span class="math inline">\(d_k\)</span>的增加，注意力分数的数值尺度也会增大。当不同时间步的内积分数并非高度相关时，这种尺度增长也会使它们之间的绝对差异倾向于增大。</p>
+<p>这一现象之所以需要关注，是因为Softmax对注意力分数之间的绝对差异十分敏感。由定义可知两个时间步的注意力权重之比满足： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcZnJhY3tcYWxwaGFfaX17XGFscGhhX2p9PVxleHAoZV9pLWVfaikKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\frac{\alpha_i}{\alpha_j}=\exp(e_i-e_j)
+\end{equation*}\]</span></p>
+<p>这意味着，即使不同时间步之间的相对大小关系没有发生变化，仅仅放大注意力分数的数值尺度，也会显著改变最终的权重分布。例如，考虑两个时间步的注意力分数分别为<span class="math inline">\(10\)</span>和<span class="math inline">\(11\)</span>，则较高分数对应的权重为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcZnJhY3tcZXhwKDExKX17XGV4cCgxMCkrXGV4cCgxMSl9PVxmcmFjezF9ezErXGV4cCgtMSl9XGFwcHJveDAuNzMxClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\frac{\exp(11)}{\exp(10)+\exp(11)}=\frac{1}{1+\exp(-1)}\approx0.731
+\end{equation*}\]</span></p>
+<p>如果仅将两个分数同时放大<span class="math inline">\(100\)</span>倍，变为<span class="math inline">\(1000\)</span>和<span class="math inline">\(1100\)</span>，则相应的权重变为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcZnJhY3tcZXhwKDExMDApfXtcZXhwKDEwMDApK1xleHAoMTEwMCl9CgkJPVxmcmFjezF9ezErXGV4cCgtMTAwKX1cYXBwcm94MQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\frac{\exp(1100)}{\exp(1000)+\exp(1100)}
+=\frac{1}{1+\exp(-100)}\approx1
+\end{equation*}\]</span></p>
+<p>这说明Softmax不仅取决于不同时间步的相对分数差异，还依赖于分数差异的数值尺度。</p>
+<p>因此，当向量维度较大时，未经缩放的内积可能仅仅因为维度带来的数值尺度增长，就使Softmax产生过度集中的注意力分配。更严重的是，如果在模型训练初期就产生这种权重过于集中的现象，它还会影响梯度传播，使模型难以在后续训练中纠正错误的注意力分配。Softmax函数的偏导数为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcZnJhY3tccGFydGlhbFxhbHBoYV9pfXtccGFydGlhbCBlX2p9PVxhbHBoYV9pW0koaT1qKS1cYWxwaGFfal0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\frac{\partial\alpha_i}{\partial e_j}=\alpha_i[I(i=j)-\alpha_j]
+\end{equation*}\]</span></p>
+<p>当时间步<span class="math inline">\(i\)</span>的注意力分数显著高于其他时间步时，<span class="math inline">\(\alpha_i\)</span>趋近于<span class="math inline">\(1\)</span>，其余时间步的权重则趋近于<span class="math inline">\(0\)</span>。此时，无论<span class="math inline">\(i=j\)</span>还是<span class="math inline">\(i\neq j\)</span>，上述偏导数都将趋近于<span class="math inline">\(0\)</span>。这意味着即使当前的注意力分配并不合理，模型的预测误差仍然较大，损失函数也可能难以通过注意力分数向评分函数的参数传播有效梯度。</p>
+<p>由<a href="../chapters/probability-measure.html#prop-MeasurableIntegral-c2153bd8" class="textbook-cross-reference" data-reference-key="prop:MeasurableIntegral" data-reference-kind="ref+label" data-reference-title="性质 5.4.3" data-reference-items="6" data-reference-hint="请查看第 6 项">性质 5.4.3(6)</a>可知： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlcb3BlcmF0b3JuYW1le1Zhcn1cbGVmdChcZnJhY3txXlx0b3Aga190fXtcc3FydHtkX2t9fVxyaWdodCk9MQpcZW5ke2VxdWF0aW9uKn0="></span></p>
+<p><span class="math display">\[\begin{equation*}
+\operatorname{Var}\left(\frac{q^\top k_t}{\sqrt{d_k}}\right)=1
+\end{equation*}\]</span></p>
+<p>所以缩放后的注意力分数具有不随维度增长的方差，从而可以使得注意力权重的分配更多地由模型学习到的相关性决定，而非单纯受到向量维度的影响。</p>
+</div>
+</section>
+<section id="id--2a9d80ad" class="level4">
+<h4 class="anchored" data-anchor-id="id--2a9d80ad"><span class="header-section-number">16.9.2.5</span> 自注意力</h4>
+<p>前面介绍的注意力机制虽然能够根据不同时间步的重要程度对隐藏状态进行加权求和，但仍然依赖于隐藏状态的递归生成。由于每个时间步的计算都依赖于前一个时间步的结果，因此无法在序列维度上实现完全并行计算。当序列较长时，这种递归依赖会限制模型的计算效率。另一方面，序列中某个时间步的信息往往需要结合整个序列的上下文才能得到充分理解。然而，在传统的单向递归结构中，第<span class="math inline">\(t\)</span>个时间步的隐藏状态<span class="math inline">\(h_t\)</span>只能整合当前时间步及其之前的信息，无法利用后续时间步的信息。因此，我们希望摆脱隐藏状态逐步传递的限制，使序列中每个时间步都能够直接与其他时间步建立联系，从而获得融合全局上下文信息的表示。</p>
+<p><a href="../chapters/glossary-s.html#term-SelfAttention" class="term" title="self-attention">自注意力<span class="term-english">（self-attention）</span></a>解决了上述问题。设输入序列中第<span class="math inline">\(i\)</span>个时间步的初始表示为<span class="math inline">\(x_i\in\mathbb{R}^d\)</span>。对于每个时间步，计算： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXFfaT1XX1F4X2ksXHF1YWQga19pPVdfS3hfaSxccXVhZCB2X2k9V19WeF9pClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+q_i=W_Qx_i,\quad k_i=W_Kx_i,\quad v_i=W_Vx_i
+\end{equation*}\]</span></p>
+<p>其中<span class="math inline">\(W_Q,W_K\in M_{d_k\times d}(\mathbb{R}),\;W_V\in M_{d_v\times d}(\mathbb{R})\)</span>为权重矩阵，<span class="math inline">\(q_i\)</span>和<span class="math inline">\(k_i\)</span>是前述的查询向量与键向量，称<span class="math inline">\(v_i\)</span>为<strong>值向量</strong>。通过计算<span class="math inline">\(q_i\)</span>与所有键向量的内积，可以得到第<span class="math inline">\(i\)</span>个时间步对其他时间步的注意力权重： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVxhbHBoYV97aWp9PVxmcmFje1xleHAocV9pXlx0b3Aga19qL1xzcXJ0e2Rfa30pfXtcc3VtXGxpbWl0c197bD0xfV57VH1cZXhwKHFfaV5cdG9wIGtfbC9cc3FydHtkX2t9KX0KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+\alpha_{ij}=\frac{\exp(q_i^\top k_j/\sqrt{d_k})}{\sum\limits_{l=1}^{T}\exp(q_i^\top k_l/\sqrt{d_k})}
+\end{equation*}\]</span></p>
+<p>随后根据这些权重对所有时间步的值向量进行加权求和得到第<span class="math inline">\(i\)</span>个时间步的新表示： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCXpfaT1cc3VtX3tqPTF9XntUfVxhbHBoYV97aWp9dl9qClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+z_i=\sum_{j=1}^{T}\alpha_{ij}v_j
+\end{equation*}\]</span></p>
+<p>于是每个时间步的新表示<span class="math inline">\(z_i\)</span>都能够综合整个序列的信息，而且不同时间步可以根据各自的查询向量选择性地关注序列中的不同部分。与此同时，各个时间步之间不存在递归计算依赖，因此可以将全部时间步的注意力计算统一表示为矩阵运算。设输入序列的表示矩阵为<span class="math inline">\(X\in\mathbb{R}^{T\times d}\)</span>，其中第<span class="math inline">\(i\)</span>行为<span class="math inline">\(x_i^\top\)</span>。将所有时间步的查询向量、键向量和值向量分别按行排列，得到： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVE9WFdfUV5cdG9wLFxxdWFkIEs9WFdfS15cdG9wLFxxdWFkIFY9WFdfVl5cdG9wClxlbmR7ZXF1YXRpb24qfQ=="></span></p>
+<p><span class="math display">\[\begin{equation*}
+Q=XW_Q^\top,\quad K=XW_K^\top,\quad V=XW_V^\top
+\end{equation*}\]</span></p>
+<p>其中<span class="math inline">\(Q,K\in\mathbb{R}^{T\times d_k}\)</span>，<span class="math inline">\(V\in\mathbb{R}^{T\times d_v}\)</span>。注意到矩阵<span class="math inline">\(QK^\top\in\mathbb{R}^{T\times T}\)</span>的第<span class="math inline">\((i,j)\)</span>个元素恰好为<span class="math inline">\(q_i^\top k_j\)</span>，因此可以通过一次矩阵乘法计算所有时间步之间的注意力分数。对该矩阵的每一行应用Softmax函数，即可得到所有时间步的注意力权重。进一步将上述结果与值矩阵<span class="math inline">\(V\)</span>相乘，便得到整个序列的新表示： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVo9XG9wZXJhdG9ybmFtZXtTb2Z0bWF4fVxsZWZ0KFxmcmFje1FLXlx0b3B9e1xzcXJ0e2Rfa319XHJpZ2h0KVYKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+Z=\operatorname{Softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right)V
+\end{equation*}\]</span></p>
+<p>其中<span class="math inline">\(Z\in\mathbb{R}^{T\times d_v}\)</span>，其第<span class="math inline">\(i\)</span>行对应第<span class="math inline">\(i\)</span>个时间步的输出向量<span class="math inline">\(z_i^\top\)</span>。</p>
+<p>对于需要预测整个序列属性的任务，可以将各个时间步的表示进一步汇总为一个序列表示。例如，可以直接对所有时间步的表示取平均，也可以通过可学习的权重衡量不同时间步对最终预测的重要程度，并进行加权求和，随后将得到的序列表示输入一般的网络，即可完成分类或回归任务。而对于需要逐时间步预测的任务，则无需将所有表示汇总为一个向量，而是分别将每个时间步的表示输入一般的网络，从而得到对应时间步的预测结果。</p>
+<div id="note-16-35" class="note theorem-block env-note">
+<p><strong>note 16.35</strong>. 并非所有任务都允许每个时间步访问整个序列的信息。例如，在需要根据当前及历史信息预测后续结果的任务中，第<span class="math inline">\(i\)</span>个时间步不能利用之后的信息，否则便会造成信息泄漏。为此，可以引入<a href="../chapters/glossary-c.html#term-CausalAttentionMask" class="term" title="causal attention mask">因果注意力掩码<span class="term-english">（causal attention mask）</span></a>，在Softmax计算之前对注意力分数进行限制： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlaPVxvcGVyYXRvcm5hbWV7U29mdG1heH1cbGVmdChcZnJhY3tRS15cdG9wfXtcc3FydHtkX2t9fStCXHJpZ2h0KVYKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+Z=\operatorname{Softmax}\left(\frac{QK^\top}{\sqrt{d_k}}+B\right)V
+\end{equation*}\]</span></p>
+<p>其中掩码矩阵<span class="math inline">\(B\in\mathbb{R}^{T\times T}\)</span>定义为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlCX3tpan09CgkJXGJlZ2lue2Nhc2VzfQoJCQkwLCZqXGxlcSBpXFwKCQkJLVxpbmZ0eSwmaj5pCgkJXGVuZHtjYXNlc30KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+B_{ij}=
+\begin{cases}
+0,&amp;j\leq i\\
+-\infty,&amp;j&gt;i
+\end{cases}
+\end{equation*}\]</span></p>
+<p>由于<span class="math inline">\(\exp(-\infty)=0\)</span>，经过Softmax后，第<span class="math inline">\(i\)</span>个时间步对所有后续时间步<span class="math inline">\(j&gt;i\)</span>的注意力权重均为<span class="math inline">\(0\)</span>，从而保证当前时间步只能利用自身及此前的信息。</p>
+<p>因果注意力掩码仅限制不同时间步之间的信息传递，不会引入时间步之间的递归计算依赖。因此，在已知完整训练序列的情况下，模型仍然可以通过矩阵运算并行计算所有时间步的表示与预测结果，从而在避免未来信息泄漏的同时保留自注意力机制的并行计算优势。</p>
+</div>
+<div id="note-16-36" class="note theorem-block env-note">
+<p><strong>note 16.36</strong>. 除了因果注意力掩码之外，另一种常见的掩码是<a href="../chapters/glossary-p.html#term-PaddingAttentionMask" class="term" title="padding attention mask">填充注意力掩码<span class="term-english">（padding attention mask）</span></a>。由于不同序列的长度往往并不相同，为了按批进行模型训练，我们会在较短序列的末尾添加填充时间步，使同一批次中的所有序列具有相同的长度。由于这些填充时间步并不包含实际信息，如果直接参与注意力计算，就可能影响有效位置的注意力权重及其最终表示。</p>
+<p>为此，可以通过填充注意力掩码排除这些无效位置。设<span class="math inline">\(\mathcal{I}_{\mathrm{valid}}\)</span>表示序列中有效位置的索引集合，定义掩码矩阵<span class="math inline">\(P\in\mathbb{R}^{T\times T}\)</span>为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQlQX3tpan09CgkJXGJlZ2lue2Nhc2VzfQoJCQkwLCZqXGluXG1hdGhjYWx7SX1fe1xtYXRocm17dmFsaWR9fVxcCgkJCS1caW5mdHksJmpcbm90aW5cbWF0aGNhbHtJfV97XG1hdGhybXt2YWxpZH19CgkJXGVuZHtjYXNlc30KXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+P_{ij}=
+\begin{cases}
+0,&amp;j\in\mathcal{I}_{\mathrm{valid}}\\
+-\infty,&amp;j\notin\mathcal{I}_{\mathrm{valid}}
+\end{cases}
+\end{equation*}\]</span></p>
+<p>与因果注意力掩码类似，将<span class="math inline">\(P\)</span>加到注意力分数矩阵后，填充位置对应的注意力权重便为<span class="math inline">\(0\)</span>，从而保证有效位置的表示仅由真实的序列信息构成。</p>
+<p>对于填充时间步对应的<span class="math inline">\(z_t\)</span>，通常还需要在后续损失计算中予以忽略。</p>
+</div>
+</section>
+<section id="id--3639ae12" class="level4">
+<h4 class="anchored" data-anchor-id="id--3639ae12"><span class="header-section-number">16.9.2.6</span> 多头注意力</h4>
+<p>在自注意力机制中，每个时间步虽然能够根据自身的信息需求从整个序列中提取相关信息，但对于固定的时间步<span class="math inline">\(i\)</span>，模型只能生成一组注意力权重，然而序列中不同时间步之间可能同时存在多种关联关系，单一的注意力权重未必能够充分刻画这些关系。因此，可以考虑同时构造多个独立的注意力机制，学习序列中各个时间步之间的多种关联，最后将这些信息综合起来。这种方法称为<a href="../chapters/glossary-m.html#term-MultiHeadAttention" class="term" title="multi-head attention">多头注意力<span class="term-english">（multi-head attention）</span></a>。</p>
+<p>假设使用<span class="math inline">\(M\)</span>个<a href="../chapters/glossary-a.html#term-AttentionHead" class="term" title="attention head">注意力头<span class="term-english">（attention head）</span></a>，对于第<span class="math inline">\(m\)</span>个注意力头，引入与其它注意力头独立的权重矩阵<span class="math inline">\(W_Q^{(m)},W_K^{(m)}\in M_{d_k\times d}(\mathbb{R})\)</span>和<span class="math inline">\(W_V^{(m)}\in M_{d_v\times d}(\mathbb{R})\)</span>，构造： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2dhdGhlcip9CglRXnsobSl9PVgoV19RXnsobSl9KV5cdG9wLFxxdWFkIEteeyhtKX09WChXX0teeyhtKX0pXlx0b3AsXHF1YWQgVl57KG0pfT1YKFdfVl57KG0pfSleXHRvcCBcXCBaXnsobSl9PVxvcGVyYXRvcm5hbWV7U29mdG1heH1cbGVmdChcZnJhY3tRXnsobSl9KEteeyhtKX0pXlx0b3B9e1xzcXJ0e2Rfa319XHJpZ2h0KVZeeyhtKX0KXGVuZHtnYXRoZXIqfQ=="></span></p>
+<p><span class="math display">\[\begin{gather*}
+Q^{(m)}=X(W_Q^{(m)})^\top,\quad K^{(m)}=X(W_K^{(m)})^\top,\quad V^{(m)}=X(W_V^{(m)})^\top \\ Z^{(m)}=\operatorname{Softmax}\left(\frac{Q^{(m)}(K^{(m)})^\top}{\sqrt{d_k}}\right)V^{(m)}
+\end{gather*}\]</span></p>
+<p>在得到所有注意力头的输出后，将它们进行拼接并通过一个可学习的线性映射进行融合，得到最终输出： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCVo9XG9wZXJhdG9ybmFtZXtDb25jYXR9XGxlZnQoWl57KDEpfSxaXnsoMil9LFxkb3RzLFpeeyhNKX1ccmlnaHQpV19PXlx0b3AKXGVuZHtlcXVhdGlvbip9"></span></p>
+<p><span class="math display">\[\begin{equation*}
+Z=\operatorname{Concat}\left(Z^{(1)},Z^{(2)},\dots,Z^{(M)}\right)W_O^\top
+\end{equation*}\]</span></p>
+<p>其中<span class="math inline">\(W_O\in M_{d\times Md_v}(\mathbb{R})\)</span>。</p>
 </section>
 </section>
 <section id="id--37a3cc83" class="level3">
@@ -4714,8 +4867,8 @@ s_{ij}=\sum_{u=1}^h\sum_{v=1}^wK_{uv}X(i+u-1;j+v-1)
 <div id="definition-16-52" class="definition theorem-block env-definition">
 <p><strong>Definition 16.52</strong>. 称矩阵<span class="math inline">\(K=(K_{uv})\in M_{h\times w}(\mathbb{R})\)</span>为<a href="../chapters/glossary-c.html#term-ConvolutionKernel" class="term" title="convolution kernel">卷积核<span class="term-english">（convolution kernel）</span></a>。</p>
 </div>
-<div id="note-16-33" class="note theorem-block env-note">
-<p><strong>note 16.33</strong>. 卷积是针对空间网格设计的局部算子。它包含以下几方面的建模假设。</p>
+<div id="note-16-37" class="note theorem-block env-note">
+<p><strong>note 16.37</strong>. 卷积是针对空间网格设计的局部算子。它包含以下几方面的建模假设。</p>
 <ol type="1">
 <li><p><strong>局部连接：</strong>输出位置<span class="math inline">\((i,j)\)</span>只使用输入位置<span class="math inline">\((i,j)\)</span>附近的窗口，而不直接连接整幅图像。这个假设利用了图像的局部相关性：相邻像素往往共同构成边缘、纹理等局部结构。</p></li>
 <li><p><strong>权值共享：</strong>同一个卷积核<span class="math inline">\(K\)</span>被用于所有空间位置，因此模型学习的是某种局部模式，而不是某个固定位置上的特定像素组合。这样既显著减少了参数数量，也使同一种模式出现在不同位置时能够被同一组参数检测出来。</p></li>
@@ -4744,8 +4897,8 @@ W_{ij}=\bigl\{\,(\,(i-1)s_h+u,\;(j-1)s_w+v\,):u=1,2,\dots,h,\;v=1,2,\dots,w\,\bi
 <span class="figure-number">图 16.23</span> 窗口尺寸为<span class="math inline">(2, 2)</span>、步幅为<span class="math inline">(2, 2)</span>的池化计算示意图
 </figcaption>
 </figure>
-<div id="note-16-34" class="note theorem-block env-note">
-<p><strong>note 16.34</strong>. 卷积得到的特征图在相邻空间位置上通常具有较强的冗余性，因此没有必要在网络的所有层中始终保留同样精细的空间分辨率。为了降低后续计算量，可以对特征图进行降采样。</p>
+<div id="note-16-38" class="note theorem-block env-note">
+<p><strong>note 16.38</strong>. 卷积得到的特征图在相邻空间位置上通常具有较强的冗余性，因此没有必要在网络的所有层中始终保留同样精细的空间分辨率。为了降低后续计算量，可以对特征图进行降采样。</p>
 <p>但是，若直接从相邻位置中间隔取值，得到的结果会较强地依赖于具体的采样位置：输入发生很小的平移，就可能使被保留的响应发生明显变化。因此，可以对一个局部邻域内的响应进行聚合，再用聚合结果代表这一邻域。池化正是基于这一思想：它在舍弃部分空间分辨率进行空间降采样的同时，使表示对局部范围内的位置变化不那么敏感。</p>
 <p>常见池化函数有：</p>
 <ol type="1">
@@ -4757,8 +4910,8 @@ W_{ij}=\bigl\{\,(\,(i-1)s_h+u,\;(j-1)s_w+v\,):u=1,2,\dots,h,\;v=1,2,\dots,w\,\bi
 <section id="id--e2e93aca" class="level4">
 <h4 class="anchored" data-anchor-id="id--e2e93aca"><span class="header-section-number">16.9.3.3</span> 填充</h4>
 <p>在上述卷积与池化定义中，邻域窗口<span class="math inline">\(W_{ij}\)</span>在靠近边界时可能超出输入特征图<span class="math inline">\(X\)</span>的定义域。为使边界位置仍能使用同样的局部算子，通常在输入特征图四周引入<a href="../chapters/glossary-p.html#term-Padding" class="term" title="padding">填充<span class="term-english">（padding）</span></a>，即补充一圈预先规定的数值，得到扩展特征图<span class="math inline">\(\tilde{X}\)</span>，然后对<span class="math inline">\(\tilde{X}\)</span>进行卷积或池化操作。</p>
-<div id="note-16-35" class="note theorem-block env-note">
-<p><strong>note 16.35</strong>. 卷积中的padding除了规定边界之外的取值方式外，还可以控制卷积后特征图的空间尺寸。若卷积核大小为<span class="math inline">\(h\times w\)</span>，步长为<span class="math inline">\(1\)</span>，并分别在上下和左右各补充<span class="math inline">\(p_h\)</span>行与<span class="math inline">\(p_w\)</span>列，则卷积后的空间尺寸为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkoSCsycF9oLWgrMSlcdGltZXMoVysycF93LXcrMSkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<div id="note-16-39" class="note theorem-block env-note">
+<p><strong>note 16.39</strong>. 卷积中的padding除了规定边界之外的取值方式外，还可以控制卷积后特征图的空间尺寸。若卷积核大小为<span class="math inline">\(h\times w\)</span>，步长为<span class="math inline">\(1\)</span>，并分别在上下和左右各补充<span class="math inline">\(p_h\)</span>行与<span class="math inline">\(p_w\)</span>列，则卷积后的空间尺寸为： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQkoSCsycF9oLWgrMSlcdGltZXMoVysycF93LXcrMSkKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 (H+2p_h-h+1)\times(W+2p_w-w+1)
 \end{equation*}\]</span></p>
@@ -4778,8 +4931,8 @@ p_h=\frac{h-1}{2},\quad p_w=\frac{w-1}{2}
 <span class="figure-number">图 16.24</span> 卷积神经网络结构示意图
 </figcaption>
 </figure>
-<div id="note-16-36" class="note theorem-block env-note">
-<p><strong>note 16.36</strong>. CNN是将图像的空间性质写入模型结构的神经网络。它适用于像素排列在规则网格上、邻近位置通常相关、同一种局部模式可能出现在不同位置的数据，例如自然图像和部分医学影像。对于行列只表示变量编号的矩阵，或者局部邻域没有稳定含义的表格数据，卷积所加入的空间假设未必成立，直接使用CNN反而可能限制模型的表达能力。</p>
+<div id="note-16-40" class="note theorem-block env-note">
+<p><strong>note 16.40</strong>. CNN是将图像的空间性质写入模型结构的神经网络。它适用于像素排列在规则网格上、邻近位置通常相关、同一种局部模式可能出现在不同位置的数据，例如自然图像和部分医学影像。对于行列只表示变量编号的矩阵，或者局部邻域没有稳定含义的表格数据，卷积所加入的空间假设未必成立，直接使用CNN反而可能限制模型的表达能力。</p>
 </div>
 </section>
 </section>
@@ -4819,8 +4972,8 @@ W^{(l)}\leftarrow W^{(l)}-\eta\nabla_{W^{(l)}}L
 </div>
 <p>定义中的<span class="math inline">\(\varepsilon\)</span>用于避免分母为<span class="math inline">\(0\)</span>。</p>
 <p>归一化使同一批次中各个特征的取值具有较为一致的数值尺度，从而减弱参数更新对参数初始值和学习率选择的敏感性，使网络的优化过程更加稳定。与此同时，引入可学习的伸缩参数<span class="math inline">\(\gamma_j\)</span>和平移参数<span class="math inline">\(\beta_j\)</span>，使网络能够根据任务需要重新调整标准化后特征的尺度和位置。因此，BN在提供稳定数值尺度的基础上，保留网络学习适当特征分布的能力。</p>
-<div id="note-16-37" class="note theorem-block env-note">
-<p><strong>note 16.37</strong>. 上述给出的BN的计算过程是在训练阶段时进行的操作，每个样本的归一化结果会受到同一批中其他样本的影响，而在推断的阶段，我们希望训练好的神经网络表示一个确定的函数，即给定同一个输入<span class="math inline">\(x\)</span>，网络应该给出确定的输出，而不应该取决于这个样本恰好和哪些其他样本一起送进网络。为了在推断阶段获得不依赖于当前批次的统计量，通常在训练过程中为每一个特征维护均值和方差的滑动估计。</p>
+<div id="note-16-41" class="note theorem-block env-note">
+<p><strong>note 16.41</strong>. 上述给出的BN的计算过程是在训练阶段时进行的操作，每个样本的归一化结果会受到同一批中其他样本的影响，而在推断的阶段，我们希望训练好的神经网络表示一个确定的函数，即给定同一个输入<span class="math inline">\(x\)</span>，网络应该给出确定的输出，而不应该取决于这个样本恰好和哪些其他样本一起送进网络。为了在推断阶段获得不依赖于当前批次的统计量，通常在训练过程中为每一个特征维护均值和方差的滑动估计。</p>
 <p>不同深度学习框架对均值与方差估计值的具体实现略有不同，但训练阶段使用当前批次统计量、推断阶段使用训练期间维护的固定统计量这一原则是一致的。</p>
 </div>
 </section>
@@ -4882,8 +5035,8 @@ y=x+F_\theta(x)\approx x
 \end{equation*}\]</span></p>
 <p>因此，恒等映射已经直接包含在残差结构中，而不需要再由若干带参数的网络层通过训练近似得到。</p>
 <p>这一性质降低了增加网络深度所带来的风险。若新增的残差模块不能进一步改善已有表示，它可以通过使残差映射接近于零而近似退化为恒等映射，从而保留原有网络已经学习到的表示。换言之，加深后的残差网络能够较容易地包含较浅网络所实现的映射作为一种特殊情形，因此增加网络层数不再必然破坏已有表示，这有助于缓解深层网络中的退化问题。</p>
-<div id="note-16-38" class="note theorem-block env-note">
-<p><strong>note 16.38</strong>. 残差相加要求两条路径的输出具有相同的形状。若残差映射将输入从<span class="math inline">\(\mathbb{R}^d\)</span>变换到<span class="math inline">\(\mathbb{R}^m\)</span>，就需要先利用映射<span class="math inline">\(P:\mathbb{R}^d\to\mathbb{R}^m\)</span>调整输入路径，随后再进行相加： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl5PVAoeCkrRl9cdGhldGEoeCkKXGVuZHtlcXVhdGlvbip9"></span></p>
+<div id="note-16-42" class="note theorem-block env-note">
+<p><strong>note 16.42</strong>. 残差相加要求两条路径的输出具有相同的形状。若残差映射将输入从<span class="math inline">\(\mathbb{R}^d\)</span>变换到<span class="math inline">\(\mathbb{R}^m\)</span>，就需要先利用映射<span class="math inline">\(P:\mathbb{R}^d\to\mathbb{R}^m\)</span>调整输入路径，随后再进行相加： <span class="display-math-copy-marker" data-source-tex="XGJlZ2lue2VxdWF0aW9uKn0KCQl5PVAoeCkrRl9cdGhldGEoeCkKXGVuZHtlcXVhdGlvbip9"></span></p>
 <p><span class="math display">\[\begin{equation*}
 y=P(x)+F_\theta(x)
 \end{equation*}\]</span></p>
@@ -4932,8 +5085,8 @@ m_j\sim\operatorname{Bernoulli}(q),\quad j=1,2,\dots,d
 <p>因此，<span class="math inline">\(q\)</span>越小，随机失活向该神经元输出中引入的随机波动通常越大。</p>
 <p>随机失活使网络在每次训练时只能使用部分中间特征。若模型的预测过度依赖某几个神经元构成的固定组合，一旦其中某个神经元被屏蔽，预测误差就会增大。为了在不同随机屏蔽结果下都能给出较好的预测，模型需要把有用信息分散到更多特征中，并学习在部分特征暂时缺失时仍然有效的表示。随机失活由此向训练过程引入扰动，限制模型对训练数据中特定特征组合的精细拟合，从而起到正则化作用。它并没有删除网络参数，预测阶段模型可以表示的函数形式也没有改变，而是通过改变训练时使用这些参数的方式来降低过拟合风险。</p>
 <p>保留概率<span class="math inline">\(q\)</span>控制随机失活的强度。当<span class="math inline">\(q\)</span>接近<span class="math inline">\(1\)</span>时，大部分神经元始终参与训练，正则化作用较弱；当<span class="math inline">\(q\)</span>过小时，模型在每次训练中能够使用的信息过少，梯度的随机波动也会增大，从而导致训练速度下降甚至产生欠拟合。随机失活通常用于容易产生过拟合的隐藏层；若模型本身已经欠拟合，继续增加失活概率只会进一步削弱模型的学习能力。</p>
-<div id="note-16-39" class="note theorem-block env-note">
-<p><strong>note 16.39</strong>. 随机失活在训练阶段和预测阶段采用不同的计算方式。训练阶段需要反复生成新的随机变量<span class="math inline">\(m_j\)</span>并使用<span class="math inline">\(\tilde{h}_j\)</span>；预测阶段则关闭随机屏蔽，直接使用原输出<span class="math inline">\(h_j\)</span>。由于训练阶段已经使用因子<span class="math inline">\(1/q\)</span>保持输出的条件期望，预测阶段无需再对<span class="math inline">\(h_j\)</span>进行额外缩放。</p>
+<div id="note-16-43" class="note theorem-block env-note">
+<p><strong>note 16.43</strong>. 随机失活在训练阶段和预测阶段采用不同的计算方式。训练阶段需要反复生成新的随机变量<span class="math inline">\(m_j\)</span>并使用<span class="math inline">\(\tilde{h}_j\)</span>；预测阶段则关闭随机屏蔽，直接使用原输出<span class="math inline">\(h_j\)</span>。由于训练阶段已经使用因子<span class="math inline">\(1/q\)</span>保持输出的条件期望，预测阶段无需再对<span class="math inline">\(h_j\)</span>进行额外缩放。</p>
 </div>
 </section>
 </section>
